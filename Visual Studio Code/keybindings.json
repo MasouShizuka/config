@@ -1,0 +1,513 @@
+// 将键绑定放在此文件中以覆盖默认值auto[]
+[
+    // Neovim
+    {
+        "key": "enter",
+        "command": "-list.select",
+        "when": "listFocus && !inputFocus"
+    },
+    {
+        "key": "enter",
+        "command": "list.select",
+        "when": "listFocus && !inputFocus && !notebookCellListFocused"
+    },
+
+    {
+        "key": "escape",
+        "command": "-list.toggleKeyboardNavigation",
+        "when": "inputFocus && listFocus && listSupportsKeyboardNavigation"
+    },
+    {
+        "key": "escape",
+        "command": "list.toggleKeyboardNavigation",
+        "when": "inputFocus && listFocus && listSupportsKeyboardNavigation && !notebookCellListFocused"
+    },
+    {
+        "key": "escape",
+        "command": "-vscode-neovim.escape",
+        "when": "editorTextFocus && neovim.init && !markersNavigationVisible && !parameterHintsVisible && !referenceSearchVisible"
+    },
+    {
+        "key": "escape",
+        "command": "vscode-neovim.escape",
+        "when": "editorTextFocus && neovim.init"
+    },
+
+    {
+        "key": "ctrl+j",
+        "command": "-editor.action.insertLineAfter",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && !neovim.recording && neovim.mode == 'insert'"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && neovim.mode == insert"
+    },
+    {
+        "key": "ctrl+l",
+        "command": "cursorRight",
+        "when": "editorTextFocus && neovim.mode == insert"
+    },
+    {
+        "key": "ctrl+k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && neovim.mode == insert"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "cursorUp",
+        "when": "editorTextFocus && neovim.mode == insert"
+    },
+
+    {
+        "key": "ctrl+s",
+        "command": "vscode-neovim.send",
+        "when": "editorTextFocus && neovim.mode != insert",
+        "args": "<c-s>"
+    },
+
+    {
+        "key": "ctrl+c",
+        "command": "-vscode-neovim.escape",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode == 'insert'"
+    },
+    {
+        "key": "ctrl+c",
+        "command": "-vscode-neovim.escape",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "-vscode-neovim.ctrl-f",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+r",
+        "command": "-vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+w",
+        "command": "-vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+
+    // Keyboard Quickfix
+    // {
+    //     "key": "alt+enter",
+    //     "command": "-editor.action.quickFix",
+    //     "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+    // },
+    {
+        "key": "ctrl+.",
+        "command": "-editor.action.quickFix",
+        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+;",
+        "command": "keyboard-quickfix.openQuickFix",
+        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+    },
+
+    // Notebook
+    {
+        "key": "i",
+        "command": "notebook.cell.edit",
+        "when": "notebookCellListFocused && notebookEditable && !inputFocus"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "notebook.cell.quitEdit",
+        "when": "editorTextFocus && notebookEditorFocused && neovim.mode == normal"
+    },
+
+    {
+        "key": "ctrl+alt+j",
+        "command": "notebook.cell.moveDown",
+        "when": "notebookEditorFocused"
+    },
+    {
+        "key": "ctrl+alt+k",
+        "command": "notebook.cell.moveUp",
+        "when": "notebookEditorFocused"
+    },
+
+    {
+        "key": "ctrl+enter",
+        "command": "-notebook.cell.insertCodeCellBelow",
+        "when": "notebookCellListFocused && !inputFocus"
+    },
+    {
+        "key": "ctrl+enter",
+        "command": "notebook.cell.insertCodeCellBelow",
+        "when": "notebookCellListFocused"
+    },
+
+    {
+        "key": "ctrl+shift+enter",
+        "command": "-notebook.cell.insertCodeCellAbove",
+        "when": "notebookCellListFocused && !inputFocus"
+    },
+    {
+        "key": "ctrl+shift+enter",
+        "command": "notebook.cell.insertCodeCellAbove",
+        "when": "notebookCellListFocused"
+    },
+
+    {
+        "key": "shift+enter",
+        "command": "-notebook.cell.executeAndSelectBelow",
+        "when": "notebookCellListFocused && notebookCellType == 'markup' || notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
+    },
+    {
+        "key": "shift+enter",
+        "command": "notebook.cell.executeAndSelectBelow",
+        "when": "inputFocus && notebookEditorFocused || notebookCellListFocused && notebookCellType == 'markup' || notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
+    },
+
+    {
+        "key": "ctrl+alt+enter",
+        "command": "-notebook.cell.execute",
+        "when": "notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
+    },
+    {
+        "key": "ctrl+alt+enter",
+        "command": "notebook.cell.execute",
+        "when": "inputFocus && notebookEditorFocused || notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
+    },
+
+    // VS Code
+    {
+        "key": "ctrl+1",
+        "command": "-workbench.action.focusFirstEditorGroup"
+    },
+    // 侧边栏未打开时，则打开侧边栏并聚焦
+    {
+        "key": "ctrl+1",
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "workbench.action.toggleSidebarVisibility",
+                "workbench.action.focusSideBar"
+            ]
+        },
+        "when": "!sideBarVisible"
+    },
+    // 侧边栏已打开未聚焦时，则聚焦侧边栏
+    {
+        "key": "ctrl+1",
+        "command": "workbench.action.focusSideBar",
+        "when": "sideBarVisible && !sideBarFocus"
+    },
+    // 侧边栏已聚焦时，则关闭侧边栏
+    {
+        "key": "ctrl+1",
+        "command": "workbench.action.toggleSidebarVisibility",
+        "when": "sideBarFocus"
+    },
+    // 侧边栏已聚焦时，则切换下一个侧边栏视图
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.nextSideBarView",
+        "when": "sideBarFocus"
+    },
+    // 侧边栏已聚焦时，则切换上一个侧边栏视图
+    {
+        "key": "ctrl+k",
+        "command": "workbench.action.previousSideBarView",
+        "when": "sideBarFocus"
+    },
+
+    {
+        "key": "ctrl+2",
+        "command": "-workbench.action.focusSecondEditorGroup"
+    },
+    // 聚焦编辑器
+    {
+        "key": "ctrl+2",
+        "command": "workbench.action.focusActiveEditorGroup"
+    },
+
+    {
+        "key": "ctrl+3",
+        "command": "-workbench.action.focusThirdEditorGroup"
+    },
+    // 面板不可见时，则打开面板
+    {
+        "key": "ctrl+3",
+        "command": "workbench.action.togglePanel",
+        "when": "!panelVisible"
+    },
+    // 面板可见时，则关闭面板
+    {
+        "key": "ctrl+3",
+        "command": "workbench.action.closePanel",
+        "when": "panelVisible"
+    },
+    // 面板终端页面时，则关闭面板
+    {
+        "key": "ctrl+3",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active && terminalFocus"
+    },
+    // 面板可见时，则切换上一个面板视图
+    {
+        "key": "ctrl+h",
+        "command": "workbench.action.previousPanelView",
+        "when": "panelVisible"
+    },
+    // 面板可见时，则切换下一个面板视图
+    {
+        "key": "ctrl+l",
+        "command": "workbench.action.nextPanelView",
+        "when": "panelVisible"
+    },
+
+    {
+        "key": "ctrl+r",
+        "command": "-workbench.action.openRecent"
+    },
+    // 替换
+    {
+        "key": "ctrl+r",
+        "command": "editor.action.startFindReplaceAction",
+        "when": "editorFocus || editorIsOpen"
+    },
+    {
+        "key": "ctrl+shift+h",
+        "command": "-workbench.action.replaceInFiles"
+    },
+    // 在文件中替换
+    {
+        "key": "ctrl+shift+r",
+        "command": "workbench.action.replaceInFiles"
+    },
+
+    {
+        "key": "ctrl+h",
+        "command": "-editor.action.startFindReplaceAction",
+        "when": "editorFocus || editorIsOpen"
+    },
+    // 面板不可见且 neovim.mode != insert 时，则切换上一个编辑器
+    {
+        "key": "ctrl+h",
+        "command": "workbench.action.previousEditor",
+        "when": "!panelVisible && neovim.mode != insert"
+    },
+    // 面板不可见且 neovim.mode != insert 时，则切换下一个编辑器
+    {
+        "key": "ctrl+l",
+        "command": "workbench.action.nextEditor",
+        "when": "!panelVisible && neovim.mode != insert"
+    },
+
+    // 移动编辑器到左边
+    {
+        "key": "ctrl+,",
+        "command": "workbench.action.moveEditorLeftInGroup"
+    },
+    // 移动编辑器到右边
+    {
+        "key": "ctrl+.",
+        "command": "workbench.action.moveEditorRightInGroup"
+    },
+
+    {
+        "key": "ctrl+j",
+        "command": "-workbench.action.togglePanel"
+    },
+    // 侧边栏未聚焦且 neovim.mode != insert 时，则切换编辑器组
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.navigateEditorGroups",
+        "when": "!sideBarFocus && neovim.mode != insert"
+    },
+    // 侧边栏未聚焦且 neovim.mode != insert 时，则切换到上一个编辑器组
+    {
+        "key": "ctrl+k",
+        "command": "workbench.action.focusPreviousGroup",
+        "when": "!sideBarFocus && neovim.mode != insert"
+    },
+
+    // 差异编辑器中，切换另一边
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.compareEditor.focusOtherSide",
+        "when": "inDiffEditor"
+    },
+    // 差异编辑器中，交换两边
+    {
+        "key": "ctrl+e",
+        "command": "swapdiff.swapdiff",
+        "when": "inDiffEditor"
+    },
+
+    // 设置 ctrl+j 向下移动条目
+    {
+        "key": "ctrl+j",
+        "command": "selectNextSuggestion",
+        "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "showNextParameterHint",
+        "when": "editorTextFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.quickOpenSelectNext",
+        "when": "inQuickOpen"
+    },
+    // 设置 ctrl+k 向上移动条目
+    {
+        "key": "ctrl+k",
+        "command": "selectPrevSuggestion",
+        "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+    },
+    {
+        "key": "ctrl+k",
+        "command": "showPrevParameterHint",
+        "when": "editorTextFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
+    },
+    {
+        "key": "ctrl+k",
+        "command": "workbench.action.quickOpenSelectPrevious",
+        "when": "inQuickOpen"
+    },
+
+    // 移动到上一个编辑器组
+    {
+        "key": "ctrl+s ctrl+h",
+        "command": "workbench.action.moveEditorToPreviousGroup"
+    },
+    // 移动到下一个编辑器组
+    {
+        "key": "ctrl+s ctrl+l",
+        "command": "workbench.action.moveEditorToNextGroup"
+    },
+    // 分屏到左边
+    {
+        "key": "ctrl+shift+s ctrl+shift+h",
+        "command": "workbench.action.splitEditorLeft"
+    },
+    // 分屏到右边
+    {
+        "key": "ctrl+shift+s ctrl+shift+l",
+        "command": "workbench.action.splitEditorRight"
+    },
+    // 分屏到下边
+    {
+        "key": "ctrl+s ctrl+j",
+        "command": "workbench.action.splitEditorDown"
+    },
+    // 分屏到上边
+    {
+        "key": "ctrl+s ctrl+k",
+        "command": "workbench.action.splitEditorUp"
+    },
+    // 增加当前编辑器组宽度
+    {
+        "key": "ctrl+right",
+        "command": "workbench.action.increaseViewWidth"
+    },
+    // 减小当前编辑器组宽度
+    {
+        "key": "ctrl+left",
+        "command": "workbench.action.decreaseViewWidth"
+    },
+    // 增加当前编辑器组高度
+    {
+        "key": "ctrl+up",
+        "command": "workbench.action.increaseViewHeight"
+    },
+    // 减小当前编辑器组高度
+    {
+        "key": "ctrl+down",
+        "command": "workbench.action.decreaseViewHeight"
+    },
+
+    // {
+    //     "key": "escape",
+    //     "command": "-closeFindWidget",
+    //     "when": "editorFocus && findWidgetVisible && !isComposing"
+    // },
+    // {
+    //     "key": "escape",
+    //     "command": "closeFindWidget",
+    //     "when": "editorFocus && findWidgetVisible && !isComposing"
+    // },
+
+    // {
+    //     "key": "ctrl+=",
+    //     "command": "-editor.unfold",
+    //     "when": "editorFocus && foldingEnabled"
+    // },
+    // {
+    //     "key": "ctrl+-",
+    //     "command": "-editor.fold",
+    //     "when": "editorFocus && foldingEnabled"
+    // },
+    {
+        "key": "ctrl+0",
+        "command": "-workbench.action.focusSideBar"
+    },
+    // 重置缩放
+    {
+        "key": "ctrl+0",
+        "command": "workbench.action.zoomReset"
+    },
+
+    // 搜索视图聚焦时，则切换到搜索列表
+    {
+        "key": "escape",
+        "command": "search.action.focusSearchList",
+        "when": "searchViewletFocus"
+    },
+    // 搜索列表聚焦且聚焦匹配时，则替换
+    {
+        "key": "r",
+        "command": "search.action.replace",
+        "when": "matchFocus && replaceActive && searchViewletVisible"
+    },
+    // 搜索列表聚焦且聚焦文件时，则替换
+    {
+        "key": "r",
+        "command": "search.action.replaceAllInFile",
+        "when": "fileMatchFocus && replaceActive && searchViewletVisible"
+    },
+    // 搜索列表聚焦且聚焦文件夹时，则替换
+    {
+        "key": "r",
+        "command": "search.action.replaceAllInFolder",
+        "when": "folderMatchFocus && replaceActive && searchViewletVisible"
+    },
+
+    // 聚焦资源管理试图时，则选择以进行比较
+    {
+        "key": "c",
+        "command": "selectForCompare",
+        "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+    },
+    // 聚焦资源管理试图时，则与已选项目进行比较
+    {
+        "key": "shift+c",
+        "command": "compareFiles",
+        "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+    },
+
+    {
+        "key": "ctrl+d",
+        "command": "-editor.action.addSelectionToNextFindMatch",
+        "when": "editorFocus"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "editor.action.addSelectionToNextFindMatch"
+    },
+    {
+        "key": "ctrl+shift+n",
+        "command": "editor.action.moveSelectionToNextFindMatch",
+        "when": "editorFocus"
+    }
+
+]

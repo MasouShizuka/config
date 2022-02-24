@@ -1,0 +1,163 @@
+{
+    "[bat]": {
+        "editor.detectIndentation": true,
+        "editor.rulers": [
+            120
+        ],
+        "editor.tabSize": 4,
+        "editor.trimAutoWhitespace": true,
+        "editor.useTabStops": false,
+        "files.encoding": "gbk"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    },
+    "[plaintext]": {
+        // "files.autoGuessEncoding": false,
+        "files.encoding": "gbk"
+    },
+    "auto-close-tag.activationOnLanguage": [
+        "xml",
+        "php",
+        "blade",
+        "ejs",
+        "jinja",
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "plaintext",
+        "markdown",
+        "vue",
+        "liquid",
+        "erb",
+        "lang-cfml",
+        "cfml",
+        "HTML (EEx)",
+        "HTML (Eex)",
+        "plist"
+    ],
+    "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
+    "backgroundCover.opacity": 0.2,
+    "code-runner.executorMap": {
+        "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
+        "cpp": "cd $dir && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
+        "java": "cd $dir && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
+        "shellscript": "cd $dir && bash $fileName"
+    },
+    "code-runner.runInTerminal": true,
+    "debug.console.fontSize": 16,
+    "debug.toolBarLocation": "docked",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.cursorSmoothCaretAnimation": true,
+    "editor.cursorSurroundingLines": 5,
+    "editor.detectIndentation": false,
+    "editor.find.autoFindInSelection": "multiline",
+    "editor.find.seedSearchStringFromSelection": "selection",
+    "editor.fontFamily": "'Iosevka'",
+    "editor.fontLigatures": true,
+    "editor.fontSize": 16,
+    "editor.guides.bracketPairs": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.lineNumbers": "relative",
+    "editor.minimap.renderCharacters": false,
+    "editor.minimap.showSlider": "always",
+    "editor.mouseWheelZoom": true,
+    "editor.renderLineHighlight": "all",
+    "editor.renderWhitespace": "trailing",
+    "editor.suggest.preview": true,
+    "editor.suggest.showStatusBar": true,
+    "editor.suggestSelection": "first",
+    "editor.wordWrap": "on",
+    "explorer.confirmDragAndDrop": false,
+    "files.associations": {
+        "*.txt": "plaintext"
+    },
+    "files.autoGuessEncoding": true,
+    "files.autoSave": "afterDelay",
+    "github.copilot.enable": {
+        "*": true,
+        "markdown": false,
+        "plaintext": true,
+        "yaml": false
+    },
+    "hediet.vscode-drawio.codeLinkActivated": true,
+    "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWw7Zmxvd2NoYXJ0O3VtbFwiLFwiY3VzdG9tTGlicmFyaWVzXCI6W1wiTC5zY3JhdGNocGFkXCJdLFwicGx1Z2luc1wiOltdLFwicmVjZW50Q29sb3JzXCI6W1wiMDAwMDAwXCJdLFwiZm9ybWF0V2lkdGhcIjoyNDAsXCJjcmVhdGVUYXJnZXRcIjpmYWxzZSxcInBhZ2VGb3JtYXRcIjp7XCJ4XCI6MCxcInlcIjowLFwid2lkdGhcIjoxMTY5LFwiaGVpZ2h0XCI6ODI3fSxcInNlYXJjaFwiOnRydWUsXCJzaG93U3RhcnRTY3JlZW5cIjp0cnVlLFwiZ3JpZENvbG9yXCI6XCIjZDBkMGQwXCIsXCJkYXJrR3JpZENvbG9yXCI6XCIjNmU2ZTZlXCIsXCJhdXRvc2F2ZVwiOnRydWUsXCJyZXNpemVJbWFnZXNcIjpudWxsLFwib3BlbkNvdW50ZXJcIjowLFwidmVyc2lvblwiOjE4LFwidW5pdFwiOjEsXCJpc1J1bGVyT25cIjpmYWxzZSxcInVpXCI6XCJcIn0ifQ==",
+    "jupyter.askForKernelRestart": false,
+    "markdown-preview-enhanced.chromePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "markdown-preview-enhanced.mathRenderingOption": "MathJax",
+    "markdown-preview-enhanced.previewTheme": "github-light.css",
+    "markdown.extension.list.indentationSize": "inherit",
+    "markdownlint.config": {
+        "MD007": false,
+        "MD009": false,
+        "MD024": false,
+        "MD025": false,
+        "MD032": false,
+        "MD033": false,
+        "MD037": false,
+        "MD040": false
+    },
+    "markdownShortcuts.icons.citations": true,
+    "markdownShortcuts.icons.image": true,
+    "markdownShortcuts.icons.link": true,
+    "notebook.cellToolbarLocation": {
+        "default": "left",
+        "jupyter-notebook": "left"
+    },
+    "pasteImage.path": "${currentFileDir}\\_images",
+    "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
+    "python.formatting.blackArgs": [
+        "--skip-string-normalization"
+    ],
+    "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
+    "python.terminal.activateEnvironment": false,
+    "search.showLineNumbers": true,
+    "search.smartCase": true,
+    "security.workspace.trust.enabled": false,
+    "shellcheck.exclude": [
+        "2148"
+    ],
+    "sqltools.connections": [
+        {
+            "database": "Shizuka",
+            "driver": "MySQL",
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "name": "Shizuka",
+            "password": "root",
+            "port": 3306,
+            "previewLimit": 50,
+            "server": "localhost",
+            "username": "root"
+        }
+    ],
+    "sqltools.useNodeRuntime": true,
+    "sshfs.configs": [],
+    "swapdiff.ClosePreviousDiff": true,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.cursorStyle": "line",
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.fontSize": 16,
+    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.tabs.location": "left",
+    "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
+    "window.dialogStyle": "custom",
+    "workbench.colorCustomizations": {
+        "editor.lineHighlightBackground": "#1073cf2d",
+        "editor.lineHighlightBorder": "#9fced11f"
+    },
+    "workbench.colorTheme": "Community Material Theme Palenight High Contrast",
+    "workbench.editor.wrapTabs": true,
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook",
+        "*.md": "default"
+    },
+    "workbench.experimental.layoutControl.enabled": true,
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.list.automaticKeyboardNavigation": false,
+    "workbench.startupEditor": "none"
+}
