@@ -40,10 +40,10 @@
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.2,
     "code-runner.executorMap": {
-        "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
-        "cpp": "cd $dir && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
-        "java": "cd $dir && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
-        "shellscript": "cd $dir && bash $fileName"
+        "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
+        "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
+        "java": "cd $dirWithoutTrailingSlash && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
+        "shellscript": "cd $dirWithoutTrailingSlash && bash $fileName"
     },
     "code-runner.runInTerminal": true,
     "debug.console.fontSize": 16,
@@ -140,8 +140,14 @@
     "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.cursorBlinking": true,
     "terminal.integrated.cursorStyle": "line",
-    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.defaultProfile.windows": "Git Zsh",
     "terminal.integrated.fontSize": 16,
+    "terminal.integrated.profiles.windows": {
+        "Git Zsh": {
+            "args": [],
+            "path": "C:\\Program Files\\Git\\usr\\bin\\zsh.exe"
+        }
+    },
     "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.tabs.location": "left",
     "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
