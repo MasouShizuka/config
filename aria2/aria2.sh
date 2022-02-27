@@ -1,4 +1,4 @@
-aria2_dir="D:/Tools/Aria2"
+aria2_dir="/d/Tools/Aria2"
 config="$aria2_dir/aria2.conf"
 config_backup="$aria2_dir/aria2_backup.conf"
 exe="$aria2_dir/aria2c.exe"

@@ -19,20 +19,35 @@ using workspacer.Gap;
 using workspacer.ActionMenu;
 using workspacer.FocusIndicator;
 
+// Electron的程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
+// 需要进行一定的操作才能恢复
 [DllImport("user32.dll", EntryPoint = "keybd_event")]
 public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
-
-static void refresh_workspace() {
-    // 发送 Alt+Enter+Enter
+static string[] electron_process_name_list = {
+    "Code",
+};
+static void refresh() {
     Thread.Sleep(200);
+    // 发送 Alt+P+P，激活并取消其他程序的快捷键弹出窗口，刷新 Electron 程序状态
     keybd_event(18, 0, 0, 0);
-    keybd_event(13, 0, 0, 0);
-    keybd_event(13, 0, 2, 0);
-    keybd_event(13, 0, 0, 0);
-    keybd_event(13, 0, 2, 0);
+    keybd_event(80, 0, 0, 0);
+    keybd_event(80, 0, 2, 0);
+    keybd_event(80, 0, 0, 0);
+    keybd_event(80, 0, 2, 0);
     keybd_event(18, 0, 2, 0);
 }
+static void refresh_electron(IWindow focused_window) {
+    if (focused_window != null) {
+        foreach (string electron_process_name in electron_process_name_list) {
+            if (focused_window.ProcessName == electron_process_name) {
+                refresh();
+                break;
+            }
+        }
+    }
+}
 
+// workspacer 启用状态的 widget
 public class Workspacer_Status_Widget : BarWidgetBase {
     public Color status_on { get; set; } = Color.Green;
     public Color status_off { get; set; } = Color.Red;
@@ -66,6 +81,7 @@ public class Workspacer_Status_Widget : BarWidgetBase {
     }
 }
 
+// 输入法状态的 widget
 public class Input_Method_Widget : BarWidgetBase {
     public int Interval { get; set; } = 1000;
 
@@ -98,99 +114,7 @@ public class Input_Method_Widget : BarWidgetBase {
     }
 }
 
-public class Workspace_Widget_With_Refresh : BarWidgetBase {
-    public Color WorkspaceHasFocusColor { get; set; } = Color.Red;
-    public Color WorkspaceEmptyColor { get; set; } = Color.Gray;
-    public Color WorkspaceIndicatingBackColor { get; set; } = Color.Teal;
-    public int BlinkPeriod { get; set; } = 1000;
-
-    private System.Timers.Timer _blinkTimer;
-    private ConcurrentDictionary<IWorkspace, bool> _blinkingWorkspaces;
-
-    public override void Initialize() {
-        Context.Workspaces.WorkspaceUpdated += () => UpdateWorkspaces();
-        Context.Workspaces.WindowMoved += (w, o, n) => UpdateWorkspaces();
-
-        _blinkingWorkspaces = new ConcurrentDictionary<IWorkspace, bool>();
-
-        _blinkTimer = new System.Timers.Timer(BlinkPeriod);
-        _blinkTimer.Elapsed += (s, e) => BlinkIndicatingWorkspaces();
-        _blinkTimer.Enabled = true;
-    }
-
-    public override IBarWidgetPart[] GetParts() {
-        var parts = new List<IBarWidgetPart>();
-        var workspaces = Context.WorkspaceContainer.GetWorkspaces(Context.Monitor);
-        int index = 0;
-        foreach (var workspace in workspaces) {
-            parts.Add(CreatePart(workspace, index));
-            index++;
-        }
-        return parts.ToArray();
-    }
-
-    private bool WorkspaceIsIndicating(IWorkspace workspace) {
-        if (workspace.IsIndicating) {
-            if (_blinkingWorkspaces.ContainsKey(workspace)) {
-                _blinkingWorkspaces.TryGetValue(workspace, out bool value);
-                return value;
-            } else {
-                _blinkingWorkspaces.TryAdd(workspace, true);
-                return true;
-            }
-        } else if (_blinkingWorkspaces.ContainsKey(workspace)) {
-            _blinkingWorkspaces.TryRemove(workspace, out bool _);
-        }
-        return false;
-    }
-
-    private IBarWidgetPart CreatePart(IWorkspace workspace, int index) {
-        var backColor = WorkspaceIsIndicating(workspace) ? WorkspaceIndicatingBackColor : null;
-
-        return Part(GetDisplayName(workspace, index), GetDisplayColor(workspace, index), backColor, () => {
-            Context.Workspaces.SwitchMonitorToWorkspace(Context.Monitor.Index, index);
-            refresh_workspace();
-        }, FontName);
-    }
-
-    private void UpdateWorkspaces() {
-        MarkDirty();
-    }
-
-    protected virtual string GetDisplayName(IWorkspace workspace, int index) {
-        var monitor = Context.WorkspaceContainer.GetCurrentMonitorForWorkspace(workspace);
-        var visible = Context.Monitor == monitor;
-
-        return visible ? LeftPadding + workspace.Name + RightPadding : workspace.Name;
-    }
-
-    protected virtual Color GetDisplayColor(IWorkspace workspace, int index) {
-        var monitor = Context.WorkspaceContainer.GetCurrentMonitorForWorkspace(workspace);
-        if (Context.Monitor == monitor) {
-            return WorkspaceHasFocusColor;
-        }
-
-        var hasWindows = workspace.ManagedWindows.Count != 0;
-        return hasWindows ? null : WorkspaceEmptyColor;
-    }
-
-    private void BlinkIndicatingWorkspaces() {
-        var workspaces = _blinkingWorkspaces.Keys;
-
-        var didFlip = false;
-        foreach (var workspace in workspaces) {
-            if (_blinkingWorkspaces.TryGetValue(workspace, out bool value)) {
-                _blinkingWorkspaces.TryUpdate(workspace, !value, value);
-                didFlip = true;
-            }
-        }
-
-        if (didFlip) {
-            MarkDirty();
-        }
-    }
-}
-
+// 多标题的 widget
 public class Multi_Titles_Widget : BarWidgetBase {
     #region Properties
     public Color WindowHasFocusColor { get; set; } = Color.Yellow;
@@ -334,6 +258,7 @@ Action<IConfigContext> doConfig = (context) => {
     var font_name = "Iosevka NF";
     var gap = 8;
 
+    // 顶栏
     context.AddBar(new BarPluginConfig() {
         BarHeight = bar_height,
         DefaultWidgetBackground = background,
@@ -341,7 +266,7 @@ Action<IConfigContext> doConfig = (context) => {
         FontSize = font_size,
 
         LeftWidgets = () => new IBarWidget[] {
-            new Workspace_Widget_With_Refresh() {
+            new WorkspaceWidget() {
                 WorkspaceIndicatingBackColor = background,
             },
             new ActiveLayoutWidget() {
@@ -362,7 +287,9 @@ Action<IConfigContext> doConfig = (context) => {
                 RightPadding = "]",
             },
             new TextWidget("⌨"),
-            new Input_Method_Widget(),
+            new Input_Method_Widget() {
+                Interval = 500,
+            },
             new TextWidget(""),
             new BatteryWidget(),
             new TextWidget(""),
@@ -370,16 +297,20 @@ Action<IConfigContext> doConfig = (context) => {
         },
     });
 
+    // 聚焦窗口时的外框
     context.AddFocusIndicator();
 
+    // 窗口间的间距
     context.AddGap(new GapPluginConfig() {
         InnerGap = gap,
         OuterGap = gap / 2,
         Delta = gap / 2,
     });
 
+    // 能最小化窗口
     context.CanMinimizeWindows = true;
 
+    // 布局类型
     Func<ILayoutEngine[]> defaultLayouts = () => new ILayoutEngine[] {
         new TallLayoutEngine(),
         new VertLayoutEngine(),
@@ -390,6 +321,7 @@ Action<IConfigContext> doConfig = (context) => {
     };
     context.DefaultLayouts = defaultLayouts;
 
+    // workspace
     string[] icons = {
         "  ",
         "  ",
@@ -412,10 +344,12 @@ Action<IConfigContext> doConfig = (context) => {
         context.WorkspaceContainer.CreateWorkspace(name, layouts);
     }
 
+    // 忽略的程序
     context.WindowRouter.IgnoreProcessName("copyq");
     context.WindowRouter.IgnoreProcessName("Snipaste");
 
-    context.WindowRouter.RouteProcessName("msedge", icons[1]);
+    // 导航至指定 workspace 的程序
+    context.WindowRouter.RouteProcessName("vivaldi", icons[1]);
     context.WindowRouter.RouteProcessName("QQ", icons[2]);
     context.WindowRouter.RouteProcessName("WeChat", icons[2]);
     context.WindowRouter.RouteProcessName("mpv", icons[3]);
@@ -423,6 +357,7 @@ Action<IConfigContext> doConfig = (context) => {
     context.WindowRouter.RouteProcessName("foobar2000", icons[4]);
     context.WindowRouter.RouteProcessName("Thunder", icons[5]);
 
+    // 菜单
     var actionMenu = context.AddActionMenu(new ActionMenuPluginConfig() {
         Background = background,
         MenuHeight = bar_height,
@@ -483,28 +418,30 @@ Action<IConfigContext> doConfig = (context) => {
     };
     var actionMenuBuilder = createActionMenuBuilder();
 
+    // 快捷键
     Action setKeybindings = () => {
         KeyModifiers mod = KeyModifiers.Alt;
         KeyModifiers mod_shift = mod | KeyModifiers.Shift;
         KeyModifiers mod_ctrl = mod | KeyModifiers.Control;
         Action<int> switch_to_workspace_with_refresh = (index) => {
             context.Workspaces.SwitchToWorkspace(index);
-            refresh_workspace();
+            refresh_electron(context.Workspaces.FocusedWorkspace.FocusedWindow);
         };
 
+        // 解除所有的原生快捷键
         context.Keybinds.UnsubscribeAll();
 
         context.Keybinds.Subscribe(MouseEvent.LButtonDown, () => context.Workspaces.SwitchFocusedMonitorToMouseLocation());
 
-        context.Keybinds.Subscribe(mod, Keys.Escape, () => context.Enabled = !context.Enabled, "toggle enable/disable");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.Escape, () => context.Enabled = !context.Enabled, "toggle enable/disable");
 
-        context.Keybinds.Subscribe(mod, Keys.Q, () => context.Workspaces.FocusedWorkspace.CloseFocusedWindow(), "close focused window");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.Q, () => context.Workspaces.FocusedWorkspace.CloseFocusedWindow(), "close focused window");
 
-        context.Keybinds.Subscribe(mod, Keys.W, () => context.Workspaces.FocusedWorkspace.NextLayoutEngine(), "next layout");
-        context.Keybinds.Subscribe(mod_shift, Keys.W, () => context.Workspaces.FocusedWorkspace.PreviousLayoutEngine(), "previous layout");
-        context.Keybinds.Subscribe(mod, Keys.N, () => context.Workspaces.FocusedWorkspace.ResetLayout(), "reset layout");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.W, () => context.Workspaces.FocusedWorkspace.NextLayoutEngine(), "next layout");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.W, () => context.Workspaces.FocusedWorkspace.PreviousLayoutEngine(), "previous layout");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.N, () => context.Workspaces.FocusedWorkspace.ResetLayout(), "reset layout");
 
-        context.Keybinds.Subscribe(mod, Keys.J, () => {
+        context.Keybinds.Subscribe(mod, workspacer.Keys.J, () => {
             var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
             var _lastFocused = context.Workspaces.FocusedWorkspace.LastFocusedWindow;
             var didFocus = false;
@@ -519,7 +456,7 @@ Action<IConfigContext> doConfig = (context) => {
                     didFocus = true;
                     if (context.Workspaces.FocusedWorkspace.LayoutName == "full") {
                         windows[index].ShowNormal();
-                        refresh_workspace();
+                        refresh_electron(windows[index]);
                     }
                     break;
                 }
@@ -532,7 +469,7 @@ Action<IConfigContext> doConfig = (context) => {
                 }
             }
         }, "focus next window");
-        context.Keybinds.Subscribe(mod, Keys.K, () => {
+        context.Keybinds.Subscribe(mod, workspacer.Keys.K, () => {
             var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
             var _lastFocused = context.Workspaces.FocusedWorkspace.LastFocusedWindow;
             var didFocus = false;
@@ -547,7 +484,7 @@ Action<IConfigContext> doConfig = (context) => {
                     didFocus = true;
                     if (context.Workspaces.FocusedWorkspace.LayoutName == "full") {
                         windows[index].ShowNormal();
-                        refresh_workspace();
+                        refresh_electron(windows[index]);
                     }
                     break;
                 }
@@ -561,63 +498,63 @@ Action<IConfigContext> doConfig = (context) => {
             }
         }, "focus previous window");
 
-        context.Keybinds.Subscribe(mod, Keys.E, () => context.Workspaces.FocusedWorkspace.SwapFocusAndPrimaryWindow(), "swap focus and primary window");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.E, () => context.Workspaces.FocusedWorkspace.SwapFocusAndPrimaryWindow(), "swap focus and primary window");
 
-        context.Keybinds.Subscribe(mod_shift, Keys.J, () => context.Workspaces.FocusedWorkspace.SwapFocusAndNextWindow(), "swap focus and next window");
-        context.Keybinds.Subscribe(mod_shift, Keys.K, () => context.Workspaces.FocusedWorkspace.SwapFocusAndPreviousWindow(), "swap focus and previous window");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.J, () => context.Workspaces.FocusedWorkspace.SwapFocusAndNextWindow(), "swap focus and next window");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.K, () => context.Workspaces.FocusedWorkspace.SwapFocusAndPreviousWindow(), "swap focus and previous window");
 
-        context.Keybinds.Subscribe(mod, Keys.H, () => context.Workspaces.FocusedWorkspace.ShrinkPrimaryArea(), "shrink primary area");
-        context.Keybinds.Subscribe(mod, Keys.L, () => context.Workspaces.FocusedWorkspace.ExpandPrimaryArea(), "expand primary area");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.H, () => context.Workspaces.FocusedWorkspace.ShrinkPrimaryArea(), "shrink primary area");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.L, () => context.Workspaces.FocusedWorkspace.ExpandPrimaryArea(), "expand primary area");
 
-        context.Keybinds.Subscribe(mod, Keys.A, () => context.Workspaces.FocusedWorkspace.IncrementNumberOfPrimaryWindows(), "increment # primary windows");
-        context.Keybinds.Subscribe(mod, Keys.X, () => context.Workspaces.FocusedWorkspace.DecrementNumberOfPrimaryWindows(), "decrement # primary windows");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.A, () => context.Workspaces.FocusedWorkspace.IncrementNumberOfPrimaryWindows(), "increment # primary windows");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.X, () => context.Workspaces.FocusedWorkspace.DecrementNumberOfPrimaryWindows(), "decrement # primary windows");
 
-        context.Keybinds.Subscribe(mod, Keys.T, () => context.Windows.ToggleFocusedWindowTiling(), "toggle tiling for focused window");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.T, () => context.Windows.ToggleFocusedWindowTiling(), "toggle tiling for focused window");
 
-        context.Keybinds.Subscribe(mod_shift, Keys.Q, context.Quit, "quit workspacer");
-        context.Keybinds.Subscribe(mod, Keys.R, context.Restart, "restart workspacer");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.Q, context.Quit, "quit workspacer");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.R, context.Restart, "restart workspacer");
 
-        context.Keybinds.Subscribe(mod, Keys.D1, () => switch_to_workspace_with_refresh(0), "switch to workspace 1");
-        context.Keybinds.Subscribe(mod, Keys.D2, () => switch_to_workspace_with_refresh(1), "switch to workspace 2");
-        context.Keybinds.Subscribe(mod, Keys.D3, () => switch_to_workspace_with_refresh(2), "switch to workspace 3");
-        context.Keybinds.Subscribe(mod, Keys.D4, () => switch_to_workspace_with_refresh(3), "switch to workspace 4");
-        context.Keybinds.Subscribe(mod, Keys.D5, () => switch_to_workspace_with_refresh(4), "switch to workspace 5");
-        context.Keybinds.Subscribe(mod, Keys.D6, () => switch_to_workspace_with_refresh(5), "switch to workspace 6");
-        context.Keybinds.Subscribe(mod, Keys.D7, () => switch_to_workspace_with_refresh(6), "switch to workspace 7");
-        context.Keybinds.Subscribe(mod, Keys.D8, () => switch_to_workspace_with_refresh(7), "switch to workspace 8");
-        context.Keybinds.Subscribe(mod, Keys.D9, () => switch_to_workspace_with_refresh(8), "switch to workspace 9");
-        context.Keybinds.Subscribe(mod, Keys.S, () => switch_to_workspace_with_refresh(workspaces.Length - 1), "switch to workspace Others");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D1, () => switch_to_workspace_with_refresh(0), "switch to workspace 1");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D2, () => switch_to_workspace_with_refresh(1), "switch to workspace 2");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D3, () => switch_to_workspace_with_refresh(2), "switch to workspace 3");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D4, () => switch_to_workspace_with_refresh(3), "switch to workspace 4");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D5, () => switch_to_workspace_with_refresh(4), "switch to workspace 5");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D6, () => switch_to_workspace_with_refresh(5), "switch to workspace 6");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D7, () => switch_to_workspace_with_refresh(6), "switch to workspace 7");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D8, () => switch_to_workspace_with_refresh(7), "switch to workspace 8");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D9, () => switch_to_workspace_with_refresh(8), "switch to workspace 9");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.S, () => switch_to_workspace_with_refresh(workspaces.Length - 1), "switch to workspace Others");
 
-        // Subscribe(mod, Keys.Left, () => _context.Workspaces.SwitchToPreviousWorkspace(), "switch to previous workspace");
-        // Subscribe(mod, Keys.Right, () => _context.Workspaces.SwitchToNextWorkspace(), "switch to next workspace");
-        // Subscribe(mod | KeyModifiers.Control, Keys.Left, () => _context.Workspaces.MoveFocusedWindowAndSwitchToPreviousWorkspace(), "move window to previous workspace and switch to it");
-        // Subscribe(mod | KeyModifiers.Control, Keys.Right, () => _context.Workspaces.MoveFocusedWindowAndSwitchToNextWorkspace(), "move window to next workspace and switch to it");
-        context.Keybinds.Subscribe(mod, Keys.Oemtilde, () => context.Workspaces.SwitchToLastFocusedWorkspace(), "switch to last focused workspace");
+        // Subscribe(mod, workspacer.Keys.Left, () => _context.Workspaces.SwitchToPreviousWorkspace(), "switch to previous workspace");
+        // Subscribe(mod, workspacer.Keys.Right, () => _context.Workspaces.SwitchToNextWorkspace(), "switch to next workspace");
+        // Subscribe(mod | KeyModifiers.Control, workspacer.Keys.Left, () => _context.Workspaces.MoveFocusedWindowAndSwitchToPreviousWorkspace(), "move window to previous workspace and switch to it");
+        // Subscribe(mod | KeyModifiers.Control, workspacer.Keys.Right, () => _context.Workspaces.MoveFocusedWindowAndSwitchToNextWorkspace(), "move window to next workspace and switch to it");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.Oemtilde, () => context.Workspaces.SwitchToLastFocusedWorkspace(), "switch to last focused workspace");
 
-        context.Keybinds.Subscribe(mod, Keys.U, () => context.Workspaces.SwitchFocusedMonitor(0), "focus monitor 1");
-        context.Keybinds.Subscribe(mod, Keys.I, () => context.Workspaces.SwitchFocusedMonitor(1), "focus monitor 2");
-        context.Keybinds.Subscribe(mod, Keys.O, () => context.Workspaces.SwitchFocusedMonitor(2), "focus monitor 3");
-        context.Keybinds.Subscribe(mod_shift, Keys.U, () => context.Workspaces.MoveFocusedWindowToMonitor(0), "move focused window to monitor 1");
-        context.Keybinds.Subscribe(mod_shift, Keys.I, () => context.Workspaces.MoveFocusedWindowToMonitor(1), "move focused window to monitor 2");
-        context.Keybinds.Subscribe(mod_shift, Keys.O, () => context.Workspaces.MoveFocusedWindowToMonitor(2), "move focused window to monitor 3");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.U, () => context.Workspaces.SwitchFocusedMonitor(0), "focus monitor 1");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.I, () => context.Workspaces.SwitchFocusedMonitor(1), "focus monitor 2");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.O, () => context.Workspaces.SwitchFocusedMonitor(2), "focus monitor 3");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.U, () => context.Workspaces.MoveFocusedWindowToMonitor(0), "move focused window to monitor 1");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.I, () => context.Workspaces.MoveFocusedWindowToMonitor(1), "move focused window to monitor 2");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.O, () => context.Workspaces.MoveFocusedWindowToMonitor(2), "move focused window to monitor 3");
 
-        context.Keybinds.Subscribe(mod_shift, Keys.D1, () => context.Workspaces.MoveFocusedWindowToWorkspace(0), "switch focused window to workspace 1");
-        context.Keybinds.Subscribe(mod_shift, Keys.D2, () => context.Workspaces.MoveFocusedWindowToWorkspace(1), "switch focused window to workspace 2");
-        context.Keybinds.Subscribe(mod_shift, Keys.D3, () => context.Workspaces.MoveFocusedWindowToWorkspace(2), "switch focused window to workspace 3");
-        context.Keybinds.Subscribe(mod_shift, Keys.D4, () => context.Workspaces.MoveFocusedWindowToWorkspace(3), "switch focused window to workspace 4");
-        context.Keybinds.Subscribe(mod_shift, Keys.D5, () => context.Workspaces.MoveFocusedWindowToWorkspace(4), "switch focused window to workspace 5");
-        context.Keybinds.Subscribe(mod_shift, Keys.D6, () => context.Workspaces.MoveFocusedWindowToWorkspace(5), "switch focused window to workspace 6");
-        context.Keybinds.Subscribe(mod_shift, Keys.D7, () => context.Workspaces.MoveFocusedWindowToWorkspace(6), "switch focused window to workspace 7");
-        context.Keybinds.Subscribe(mod_shift, Keys.D8, () => context.Workspaces.MoveFocusedWindowToWorkspace(7), "switch focused window to workspace 8");
-        context.Keybinds.Subscribe(mod_shift, Keys.D9, () => context.Workspaces.MoveFocusedWindowToWorkspace(8), "switch focused window to workspace 9");
-        context.Keybinds.Subscribe(mod_shift, Keys.S, () => context.Workspaces.MoveFocusedWindowToWorkspace(workspaces.Length - 1), "switch focused window to workspace Others");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D1, () => context.Workspaces.MoveFocusedWindowToWorkspace(0), "switch focused window to workspace 1");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D2, () => context.Workspaces.MoveFocusedWindowToWorkspace(1), "switch focused window to workspace 2");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D3, () => context.Workspaces.MoveFocusedWindowToWorkspace(2), "switch focused window to workspace 3");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D4, () => context.Workspaces.MoveFocusedWindowToWorkspace(3), "switch focused window to workspace 4");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D5, () => context.Workspaces.MoveFocusedWindowToWorkspace(4), "switch focused window to workspace 5");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D6, () => context.Workspaces.MoveFocusedWindowToWorkspace(5), "switch focused window to workspace 6");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D7, () => context.Workspaces.MoveFocusedWindowToWorkspace(6), "switch focused window to workspace 7");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D8, () => context.Workspaces.MoveFocusedWindowToWorkspace(7), "switch focused window to workspace 8");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D9, () => context.Workspaces.MoveFocusedWindowToWorkspace(8), "switch focused window to workspace 9");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.S, () => context.Workspaces.MoveFocusedWindowToWorkspace(workspaces.Length - 1), "switch focused window to workspace Others");
 
-        // Subscribe(mod, Keys.O, () => _context.Windows.DumpWindowDebugOutput(), "dump debug info to console for all windows");
-        // Subscribe(mod | KeyModifiers.LShift, Keys.O, () => _context.Windows.DumpWindowUnderCursorDebugOutput(), "dump debug info to console for window under cursor");
-        // Subscribe(mod | KeyModifiers.LShift, Keys.I, () => _context.ToggleConsoleWindow(), "toggle debug console");
-        // Subscribe(mod | KeyModifiers.LShift, Keys.Oem2, () => ShowKeybindDialog(), "toggle keybind window");
+        // Subscribe(mod, workspacer.Keys.O, () => _context.Windows.DumpWindowDebugOutput(), "dump debug info to console for all windows");
+        // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.O, () => _context.Windows.DumpWindowUnderCursorDebugOutput(), "dump debug info to console for window under cursor");
+        // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.I, () => _context.ToggleConsoleWindow(), "toggle debug console");
+        // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.Oem2, () => ShowKeybindDialog(), "toggle keybind window");
 
-        context.Keybinds.Subscribe(mod, Keys.F, () => {
+        context.Keybinds.Subscribe(mod, workspacer.Keys.F, () => {
             var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
             if (window != null) {
                 if (window.IsMaximized) {
@@ -629,19 +566,19 @@ Action<IConfigContext> doConfig = (context) => {
                 }
             }
         }, "maximize focused window");
-        context.Keybinds.Subscribe(mod, Keys.D, () => {
-            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
-            if (window != null) {
-                if (window.IsMinimized) {
-                    refresh_workspace();
-                    window.ShowNormal();
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D, () => {
+            var focused_window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (focused_window != null) {
+                if (focused_window.IsMinimized) {
+                    focused_window.ShowNormal();
+                    refresh_electron(focused_window);
                 } else {
-                    window.ShowMinimized();
+                    focused_window.ShowMinimized();
                 }
             }
         }, "minimize focused window");
 
-        context.Keybinds.Subscribe(mod, Keys.P, () => actionMenu.ShowMenu(actionMenuBuilder), "open action menu");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.M, () => actionMenu.ShowMenu(actionMenuBuilder), "open action menu");
     };
     setKeybindings();
 };

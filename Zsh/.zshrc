@@ -6,6 +6,10 @@ alias ll='ls -al --color -h --time-style=long-iso'
 # 命令补全
 autoload -U compinit && compinit
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.utf8
+export LC_CTYPE=en_US.utf8
+
 # 命令行别名的自动补全
 setopt completealiases
 # 历史文件相关设置
@@ -28,3 +32,4 @@ zstyle ':completion:*' rehash true
 
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
