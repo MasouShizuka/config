@@ -38,6 +38,7 @@
         "command": "-editor.action.insertLineAfter",
         "when": "editorTextFocus && neovim.ctrlKeysInsert && !neovim.recording && neovim.mode == 'insert'"
     },
+    // 插入模式下的光标移动
     {
         "key": "ctrl+j",
         "command": "cursorLeft",
@@ -60,6 +61,27 @@
     },
 
     {
+        "key": "alt+right",
+        "command": "-workbench.action.navigateForward"
+    },
+    // 历史前进
+    {
+        "key": "ctrl+i",
+        "command": "workbench.action.navigateForward",
+        "when": "!editorTextFocus || neovim.mode != insert"
+    },
+    {
+        "key": "alt+left",
+        "command": "-workbench.action.navigateBack"
+    },
+    // 历史后退
+    {
+        "key": "ctrl+o",
+        "command": "workbench.action.navigateBack",
+        "when": "!editorTextFocus || neovim.mode != insert"
+    },
+
+    {
         "key": "ctrl+s",
         "command": "vscode-neovim.send",
         "when": "editorTextFocus && neovim.mode != insert",
@@ -79,6 +101,16 @@
     {
         "key": "ctrl+f",
         "command": "-vscode-neovim.ctrl-f",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "-vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+o",
+        "command": "-vscode-neovim.send",
         "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
     },
     {
@@ -106,7 +138,7 @@
         "when": "notebookCellListFocused && notebookEditable && !inputFocus"
     },
     {
-        "key": "ctrl+i",
+        "key": "ctrl+q",
         "command": "notebook.cell.quitEdit",
         "when": "editorTextFocus && notebookEditorFocused && neovim.mode == normal"
     },
@@ -253,23 +285,23 @@
         "command": "workbench.action.terminal.toggleTerminal",
         "when": "terminal.active && terminalFocus"
     },
-    // 面板 Docs View 页面时，则关闭面板
+    // 面板 Docs View 或 Jupyter:Variables 页面时，则关闭面板
     {
         "key": "ctrl+3",
         "command": "workbench.action.closePanel",
-        "when": "view.docsView.documentation.visible"
+        "when": "view.docsView.documentation.visible || view.jupyterViewVariables.visible"
     },
     // 面板聚焦时，则切换上一个面板视图
     {
         "key": "ctrl+h",
         "command": "workbench.action.previousPanelView",
-        "when": "panelFocus || view.docsView.documentation.visible"
+        "when": "panelFocus || view.docsView.documentation.visible || view.jupyterViewVariables.visible"
     },
     // 面板聚焦时，则切换下一个面板视图
     {
         "key": "ctrl+l",
         "command": "workbench.action.nextPanelView",
-        "when": "panelFocus || view.docsView.documentation.visible"
+        "when": "panelFocus || view.docsView.documentation.visible || view.jupyterViewVariables.visible"
     },
 
     {

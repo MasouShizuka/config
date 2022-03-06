@@ -287,3 +287,4 @@ vec4 hook() {
 	#endif
 	return pix;
 }
+

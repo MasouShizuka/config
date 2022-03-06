@@ -7,11 +7,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Timers;
 using System.Runtime.InteropServices;
-using System.Globalization;
+using System.Windows.Forms;
 using workspacer;
 using workspacer.Bar;
 using workspacer.Bar.Widgets;
@@ -21,20 +22,25 @@ using workspacer.FocusIndicator;
 
 // Electron的程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
 // 需要进行一定的操作才能恢复
-[DllImport("user32.dll", EntryPoint = "keybd_event")]
-public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+// Electron 程序的进程名称列表
 static string[] electron_process_name_list = {
     "Code",
+    "vivaldi",
+    "WindowsTerminal",
 };
+// 初始化一个看不见的 Form，并将其置顶
+static Form form = new Form();
+form.Width = 0;
+form.Height = 0;
+form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+form.TopLevel = true;
+form.TopMost = true;
 static void refresh() {
     Thread.Sleep(200);
-    // 发送 Alt+P+P，激活并取消其他程序的快捷键弹出窗口，刷新 Electron 程序状态
-    keybd_event(18, 0, 0, 0);
-    keybd_event(80, 0, 0, 0);
-    keybd_event(80, 0, 2, 0);
-    keybd_event(80, 0, 0, 0);
-    keybd_event(80, 0, 2, 0);
-    keybd_event(18, 0, 2, 0);
+    // 激活 Form 并隐藏，以恢复 Electron 程序的状态
+    form.Show();
+    form.Activate();
+    form.Hide();
 }
 static void refresh_electron(IWindow focused_window) {
     if (focused_window != null) {
@@ -316,6 +322,7 @@ Action<IConfigContext> doConfig = (context) => {
         new VertLayoutEngine(),
         new HorzLayoutEngine(),
         new GridLayoutEngine(),
+        new DwindleLayoutEngine(),
         new FocusLayoutEngine(),
         new FullLayoutEngine(),
     };

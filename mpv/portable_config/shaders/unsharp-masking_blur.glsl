@@ -1,3 +1,4 @@
+
 //!DESC unsharp-masking_blur
 //!HOOK MAIN
 //!BIND HOOKED
@@ -20,3 +21,4 @@ vec4 hook()
     vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;
     return p + t * BLUR;
 }
+

@@ -15,6 +15,7 @@ formulahendry.code-runner
 foxundermoon.shell-format
 frhtylcn.pythonsnippets
 GitHub.copilot
+gitkraken.gitkraken-authentication
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
 ionutvmi.path-autocomplete

@@ -148,6 +148,7 @@
             "path": "C:\\Program Files\\Git\\usr\\bin\\zsh.exe"
         }
     },
+    "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.tabs.location": "left",
     "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
@@ -157,6 +158,7 @@
         "editor.lineHighlightBorder": "#9fced11f"
     },
     "workbench.colorTheme": "Community Material Theme Palenight High Contrast",
+    "workbench.editor.historyBasedLanguageDetection": true,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
         "*.ipynb": "jupyter-notebook",
