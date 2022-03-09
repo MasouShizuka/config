@@ -33,9 +33,7 @@
         "erb",
         "lang-cfml",
         "cfml",
-        "HTML (EEx)",
-        "HTML (Eex)",
-        "plist"
+        "HTML (Eex)"
     ],
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.2,

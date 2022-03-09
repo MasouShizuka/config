@@ -122,11 +122,15 @@ set incsearch
 set ignorecase
 set smartcase
 
-if exists('g:vscode')
+if WINDOWS()
     set fileformat=dos
-else
+elseif LINUX()
     set fileformat=unix
+endif
 
+
+
+if !exists('g:vscode')
     colorscheme gruvbox8
 endif
 
@@ -156,7 +160,7 @@ nmap s <leader><leader>s
 xmap s <leader><leader>s
 
 if exists('g:vscode')
-    nnoremap % <Cmd>call VSCodeNotify('editor.action.jumpToBracket')<CR>
+    " nnoremap % <Cmd>call VSCodeNotify('editor.action.jumpToBracket')<CR>
 
     nnoremap zc <Cmd>call VSCodeNotify('editor.fold')<CR>
     nnoremap zC <Cmd>call VSCodeNotify('editor.foldRecursively')<CR>
@@ -177,7 +181,9 @@ if exists('g:vscode')
     nnoremap <Leader>p <Cmd>call VSCodeNotify('extension.pasteImage')<CR>
     nnoremap <Leader>r <Cmd>call CompileRun()<CR>
     func! CompileRun()
-        if &filetype == 'markdown'
+        if &filetype == 'xhtml'
+            call VSCodeNotify('office.html.preview')
+        elseif &filetype == 'markdown'
             call VSCodeNotify('markdown-preview-enhanced.openPreviewToTheSide')
         else
             call VSCodeNotify('code-runner.run')
@@ -281,5 +287,4 @@ else
         autocmd InsertLeave * call Fcitx2en()
         autocmd InsertEnter * call Fcitx2zh()
     endif
-
 endif
