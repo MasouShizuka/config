@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/xianyukang/MyKeymap](https://github.com/xianyukang/MyKeymap)
+- [https://github.com/xianyukang/MyKeymap](https://github.com/xianyukang/MyKeymap)
 
 ## 配置文件
 

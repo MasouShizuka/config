@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/tablacus/TablacusExplorer](https://github.com/tablacus/TablacusExplorer)
+- [https://github.com/tablacus/TablacusExplorer](https://github.com/tablacus/TablacusExplorer)
 
 ## 配置文件
 

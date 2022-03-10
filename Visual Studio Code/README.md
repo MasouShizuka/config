@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/microsoft/vscode](https://github.com/microsoft/vscode)
+- [https://github.com/microsoft/vscode](https://github.com/microsoft/vscode)
 
 ## 配置文件
 

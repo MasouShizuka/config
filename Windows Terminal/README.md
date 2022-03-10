@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/microsoft/terminal](https://github.com/microsoft/terminal)
+- [https://github.com/microsoft/terminal](https://github.com/microsoft/terminal)
 
 ## 配置文件
 

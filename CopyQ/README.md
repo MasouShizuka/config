@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/hluk/CopyQ](https://github.com/hluk/CopyQ)
+- [https://github.com/hluk/CopyQ](https://github.com/hluk/CopyQ)
 
 ## 配置文件
 

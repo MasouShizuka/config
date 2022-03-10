@@ -2,8 +2,8 @@
 
 ## 仓库
 
-[https://github.com/PowerShell/PowerShell](https://github.com/PowerShell/PowerShell)
-[https://github.com/JanDeDobbeleer/oh-my-posh](https://github.com/JanDeDobbeleer/oh-my-posh)
+- [https://github.com/PowerShell/PowerShell](https://github.com/PowerShell/PowerShell)
+- [https://github.com/JanDeDobbeleer/oh-my-posh](https://github.com/JanDeDobbeleer/oh-my-posh)
 
 ## 配置文件
 

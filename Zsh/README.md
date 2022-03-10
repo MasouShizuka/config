@@ -2,9 +2,9 @@
 
 ## 仓库
 
-[https://github.com/zsh-users/zsh](https://github.com/zsh-users/zsh)
-[https://github.com/zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
-[https://github.com/zsh-users/zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
+- [https://github.com/zsh-users/zsh](https://github.com/zsh-users/zsh)
+- [https://github.com/zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
+- [https://github.com/zsh-users/zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
 
 ## 配置文件
 

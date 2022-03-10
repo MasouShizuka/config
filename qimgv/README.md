@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/easymodo/qimgv](https://github.com/easymodo/qimgv)
+- [https://github.com/easymodo/qimgv](https://github.com/easymodo/qimgv)
 
 ## 配置文件
 

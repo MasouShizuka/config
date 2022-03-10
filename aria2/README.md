@@ -2,9 +2,9 @@
 
 ## 仓库
 
-[https://github.com/aria2/aria2](https://github.com/aria2/aria2)
-[https://github.com/P3TERX/aria2.conf](https://github.com/P3TERX/aria2.conf)
-[https://github.com/XIU2/TrackersListCollection](https://github.com/XIU2/TrackersListCollection)
+- [https://github.com/aria2/aria2](https://github.com/aria2/aria2)
+- [https://github.com/P3TERX/aria2.conf](https://github.com/P3TERX/aria2.conf)
+- [https://github.com/XIU2/TrackersListCollection](https://github.com/XIU2/TrackersListCollection)
 
 ## 配置文件
 

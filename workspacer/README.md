@@ -2,7 +2,7 @@
 
 ## 仓库
 
-[https://github.com/workspacer/workspacer](https://github.com/workspacer/workspacer)
+- [https://github.com/workspacer/workspacer](https://github.com/workspacer/workspacer)
 
 ## 配置文件
 

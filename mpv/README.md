@@ -2,8 +2,8 @@
 
 ## 仓库
 
-[https://github.com/mpv-player/mpv](https://github.com/mpv-player/mpv)
-[https://github.com/hooke007/MPV_lazy](https://github.com/hooke007/MPV_lazy)
+- [https://github.com/mpv-player/mpv](https://github.com/mpv-player/mpv)
+- [https://github.com/hooke007/MPV_lazy](https://github.com/hooke007/MPV_lazy)
 
 ## 配置文件
 
