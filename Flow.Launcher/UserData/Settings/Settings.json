@@ -95,10 +95,10 @@
   "ShouldUsePinyin": true,
   "QuerySearchPrecision": "Regular",
   "AutoUpdates": false,
-  "WindowLeft": 563,
-  "WindowTop": 256,
+  "WindowLeft": 853,
+  "WindowTop": 266.5,
   "MaxResultsToShow": 10,
-  "ActivateTimes": 604,
+  "ActivateTimes": 708,
   "CustomPluginHotkeys": [],
   "DontPromptUpdateMsg": false,
   "EnableUpdateLog": false,
@@ -128,7 +128,7 @@
           "b"
         ],
         "Priority": 0,
-        "Disabled": true
+        "Disabled": false
       },
       "CEA0FDFC6D3B4085823D60DC76F28855": {
         "ID": "CEA0FDFC6D3B4085823D60DC76F28855",

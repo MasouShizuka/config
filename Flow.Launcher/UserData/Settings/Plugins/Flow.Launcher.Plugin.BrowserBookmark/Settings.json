@@ -1,5 +1,10 @@
 {
   "OpenInNewBrowserWindow": true,
   "BrowserPath": null,
-  "CustomChromiumBrowsers": []
+  "CustomChromiumBrowsers": [
+    {
+      "Name": "Vivaldi",
+      "DataDirectoryPath": "C:\\Users\\MasouShizuka\\AppData\\Local\\Vivaldi\\User Data"
+    }
+  ]
 }
