@@ -3046,7 +3046,7 @@
         "I": {
             "2": {
                 "type": "鼠标操作",
-                "value": "verySlowMoveMouse(\"I\", 0, -1)",
+                "value": "very_slow_move_mouse(\"I\", 0, -1)",
                 "label": "鼠标上移",
                 "prefix": "*"
             }
@@ -3102,7 +3102,7 @@
         "J": {
             "2": {
                 "type": "鼠标操作",
-                "value": "verySlowMoveMouse(\"J\", -1, 0)",
+                "value": "very_slow_move_mouse(\"J\", -1, 0)",
                 "label": "鼠标左移",
                 "prefix": "*"
             }
@@ -3110,7 +3110,7 @@
         "K": {
             "2": {
                 "type": "鼠标操作",
-                "value": "verySlowMoveMouse(\"K\", 0, 1)",
+                "value": "very_slow_move_mouse(\"K\", 0, 1)",
                 "label": "鼠标下移",
                 "prefix": "*"
             }
@@ -3118,7 +3118,7 @@
         "L": {
             "2": {
                 "type": "鼠标操作",
-                "value": "verySlowMoveMouse(\"L\", 1, 0)",
+                "value": "very_slow_move_mouse(\"L\", 1, 0)",
                 "label": "鼠标右移",
                 "prefix": "*"
             }

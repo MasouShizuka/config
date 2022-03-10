@@ -95,10 +95,10 @@ tip(message, time:=-1500) {
 text(str)
 {
     charList:=StrSplit(str)
-	SetFormat, integer, hex
+    SetFormat, integer, hex
     for key,val in charList
     out.="{U+ " . ord(val) . "}"
-	return out
+    return out
 }
 
 
@@ -133,12 +133,12 @@ ProcessExist(name)
 
 HasVal(haystack, needle)
 {
-	if !(IsObject(haystack)) || (haystack.Length() = 0)
-		return 0
-	for index, value in haystack
-		if (value = needle)
-			return index
-	return 0
+    if !(IsObject(haystack)) || (haystack.Length() = 0)
+        return 0
+    for index, value in haystack
+        if (value = needle)
+            return index
+    return 0
 }
 
 
@@ -253,24 +253,24 @@ WhereIs(FileName)
     ; https://autohotkey.com/board/topic/20807-fileexist-in-path-environment/
 
 
-	; Working Folder
-	PathName := A_WorkingDir "\"
-	IfExist, % PathName FileName, Return PathName FileName
+    ; Working Folder
+    PathName := A_WorkingDir "\"
+    IfExist, % PathName FileName, Return PathName FileName
 
     ; absolute path
-	IfExist, % FileName, Return FileName
+    IfExist, % FileName, Return FileName
 
-	; Parsing DOS Path variable
-	EnvGet, DosPath, Path
-	Loop, Parse, DosPath, `;
-	{
-		IfEqual, A_LoopField,, Continue
-		IfExist, % A_LoopField "\" FileName, Return A_LoopField "\" FileName
-	}
+    ; Parsing DOS Path variable
+    EnvGet, DosPath, Path
+    Loop, Parse, DosPath, `;
+    {
+        IfEqual, A_LoopField,, Continue
+        IfExist, % A_LoopField "\" FileName, Return A_LoopField "\" FileName
+    }
 
-	; Looking up Registry
-	RegRead, PathName, HKLM, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\%FileName%
-	IfExist, % PathName, Return PathName
+    ; Looking up Registry
+    RegRead, PathName, HKLM, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\%FileName%
+    IfExist, % PathName, Return PathName
 
 }
 
@@ -527,7 +527,7 @@ fastMoveMouse(key, direction_x, direction_y) {
 }
 
 ; modified
-verySlowMoveMouse(key, direction_x, direction_y) {
+very_slow_move_mouse(key, direction_x, direction_y) {
     global moveDelay1, moveDelay2 
     one_x := direction_x
     one_y := direction_y
@@ -676,6 +676,11 @@ leftClick()
     send,  {blind}{LButton}
     SLOWMODE := false
 }
+; modified
+leftClickWithoutFalse() 
+{
+    send,  {blind}{LButton}
+}
 
 rightClick(tempDisableRButton := false) 
 {
@@ -689,6 +694,18 @@ rightClick(tempDisableRButton := false)
         setHotkeyStatus("RButton", true)
     }
     SLOWMODE := false
+}
+; modified
+rightClickWithoutFalse(tempDisableRButton := false) 
+{
+    if (!tempDisableRButton)
+        send,  {blind}{RButton}
+    else {
+        setHotkeyStatus("RButton", false)
+        send,  {blind}{RButton}
+        sleep, 70
+        setHotkeyStatus("RButton", true)
+    }
 }
 
 ShowCommandBar()
@@ -925,30 +942,30 @@ addHtmlStyle(text, style )
 ; modified from jackieku's code (http://www.autohotkey.com/forum/post-310959.html#310959)
 UriEncode(Uri, Enc = "UTF-8")
 {
-	StrPutVar(Uri, Var, Enc)
-	f := A_FormatInteger
-	SetFormat, IntegerFast, H
-	Loop
-	{
-		Code := NumGet(Var, A_Index - 1, "UChar")
-		If (!Code)
-			Break
-		If (Code >= 0x30 && Code <= 0x39 ; 0-9
-			|| Code >= 0x41 && Code <= 0x5A ; A-Z
-			|| Code >= 0x61 && Code <= 0x7A) ; a-z
-			Res .= Chr(Code)
-		Else
-			Res .= "%" . SubStr(Code + 0x100, -1)
-	}
-	SetFormat, IntegerFast, %f%
-	Return, Res
+    StrPutVar(Uri, Var, Enc)
+    f := A_FormatInteger
+    SetFormat, IntegerFast, H
+    Loop
+    {
+        Code := NumGet(Var, A_Index - 1, "UChar")
+        If (!Code)
+            Break
+        If (Code >= 0x30 && Code <= 0x39 ; 0-9
+            || Code >= 0x41 && Code <= 0x5A ; A-Z
+            || Code >= 0x61 && Code <= 0x7A) ; a-z
+            Res .= Chr(Code)
+        Else
+            Res .= "%" . SubStr(Code + 0x100, -1)
+    }
+    SetFormat, IntegerFast, %f%
+    Return, Res
 }
 
 StrPutVar(Str, ByRef Var, Enc = "")
 {
-	Len := StrPut(Str, Enc) * (Enc = "UTF-16" || Enc = "CP1200" ? 2 : 1)
-	VarSetCapacity(Var, Len, 0)
-	Return, StrPut(Str, &Var, Enc)
+    Len := StrPut(Str, Enc) * (Enc = "UTF-16" || Enc = "CP1200" ? 2 : 1)
+    VarSetCapacity(Var, Len, 0)
+    Return, StrPut(Str, &Var, Enc)
 }
 
 ToggleTopMost()
@@ -1246,4 +1263,29 @@ enterJModeL()
     JModeL := true
     keywait l
     JModeL := false
+}
+
+; modified
+close_or_run_script(name)
+{
+    DetectHiddenWindows On
+    SetTitleMatchMode RegEx
+    IfWinExist, i)%name%.* ahk_class AutoHotkey
+    {
+        WinClose
+        WinWaitClose, i)%name%.* ahk_class AutoHotkey, , 2
+        If ErrorLevel
+            return "Unable to close " . name
+        else
+            return "Closed " . name
+    }
+    else
+        path := "bin\" name
+        run, bin\ahk.exe %path%
+        return name . " run"
+}
+restore_cursor()
+{
+	SPI_SETCURSORS := 0x57
+	DllCall( "SystemParametersInfo", UInt,SPI_SETCURSORS, UInt,0, UInt,0, UInt,0 )
 }

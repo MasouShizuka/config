@@ -456,9 +456,13 @@ WheelDown::send {blind}^#{right}
 *K::slowMoveMouse("K", 0, 1)
 *L::slowMoveMouse("L", 1, 0)
 *,::lbuttonDown()
-*N::leftClick()
+; modified
+; *N::leftClick()
+*N::leftClickWithoutFalse()
 *.::moveCurrentWindow()
-*M::rightClick(true)
+; modified
+; *M::rightClick(true)
+*M::rightClickWithoutFalse(true)
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -466,7 +470,24 @@ WheelDown::send {blind}^#{right}
 
 
 Esc::exitMouseMode()
-*Space::exitMouseMode()
+; modified
+; *Space::exitMouseMode()
+*Space::
+    name := "hide_mouse_cursor_when_idle.ahk"
+    close_or_run_script(name)
+    restore_cursor()
+    exitMouseMode()
+*capslock up::
+    thisHotkey := A_ThisHotkey
+    disableOtherHotkey(thisHotkey)
+    CapslockMode := true
+    keywait capslock
+    CapslockMode := false
+    if (A_ThisHotkey == "*capslock up" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
+        exitMouseMode()
+    }
+    enableOtherHotkey(thisHotkey)
+    return
 
 
 #if FMode

@@ -140,6 +140,7 @@
     "terminal.integrated.cursorStyle": "line",
     "terminal.integrated.defaultProfile.windows": "Git Zsh",
     "terminal.integrated.fontSize": 16,
+    "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.profiles.windows": {
         "Git Zsh": {
             "args": [],
