@@ -467,6 +467,8 @@ WheelDown::send {blind}^#{right}
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
 *U::scrollWheel("U", 1)
+; modified
+*P::exitMouseMode()
 
 
 Esc::exitMouseMode()
@@ -475,7 +477,6 @@ Esc::exitMouseMode()
 *Space::
     name := "hide_mouse_cursor_when_idle.ahk"
     close_or_run_script(name)
-    restore_cursor()
     exitMouseMode()
 *capslock up::
     thisHotkey := A_ThisHotkey
