@@ -1,22 +1,25 @@
 Interval := 3000
-Last_Move := A_TickCount - Interval
 MouseGetPos, Last_X, Last_Y
+Last_Move := A_TickCount - Interval
+Show_Cursor := True
 
 #Persistent
-OnExit("RestoreCursors")
+OnExit("RestoreCursor")
 
 Loop
 {
     MouseGetPos, Mouse_X, Mouse_Y
     if (Mouse_X != Last_X || Mouse_Y != Last_Y)
     {
-        RestoreCursors()
-        Last_Move := A_TickCount
+        RestoreCursor()
+        Show_Cursor := True
         Last_X := Mouse_X, Last_Y := Mouse_Y
+        Last_Move := A_TickCount
     }
-    else if (A_TickCount >= Last_Move + Interval)
+    else if (A_TickCount >= Last_Move + Interval && Show_Cursor == True)
     {
         SetCursorBlank()
+        Show_Cursor := False
     }
 }
 
@@ -39,7 +42,7 @@ SetCursorBlank()
     }
 }
 
-RestoreCursors()
+RestoreCursor()
 {
     SPI_SETCURSORS := 0x57
     DllCall( "SystemParametersInfo", UInt,SPI_SETCURSORS, UInt,0, UInt,0, UInt,0 )

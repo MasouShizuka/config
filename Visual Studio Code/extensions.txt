@@ -2,7 +2,6 @@ alefragnani.Bookmarks
 asvetliakov.vscode-neovim
 bierner.docs-view
 CodeInChinese.ChineseInputAssistant
-ctf0.clear-storage
 cweijan.vscode-office
 DavidAnson.vscode-markdownlint
 DotJoshJohnson.xml
@@ -15,7 +14,6 @@ formulahendry.code-runner
 foxundermoon.shell-format
 frhtylcn.pythonsnippets
 GitHub.copilot
-gitkraken.gitkraken-authentication
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
 ionutvmi.path-autocomplete
