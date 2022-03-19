@@ -20,11 +20,12 @@ using workspacer.Gap;
 using workspacer.ActionMenu;
 using workspacer.FocusIndicator;
 
-// Electron的程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
+// 某些程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
 // 需要进行一定的操作才能恢复
-// Electron 程序的进程名称列表
-static string[] electron_process_name_list = {
+// 程序的进程名称列表
+static string[] process_name_list = {
     "Code",
+    "TE64",
     "vivaldi",
     "WindowsTerminal",
 };
@@ -44,12 +45,39 @@ static void refresh() {
 }
 static void refresh_electron(IWindow focused_window) {
     if (focused_window != null) {
-        foreach (string electron_process_name in electron_process_name_list) {
-            if (focused_window.ProcessName == electron_process_name) {
+        foreach (string process_name in process_name_list) {
+            if (focused_window.ProcessName == process_name) {
                 refresh();
                 break;
             }
         }
+    }
+}
+
+// 移动鼠标到当前窗口的中心
+[StructLayout(LayoutKind.Sequential)]
+public struct RECT
+{
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
+}
+[DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+[DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+[DllImport("User32.dll")] static extern bool SetCursorPos(int X, int Y);
+static void move_cursor_to_current_window_center() {
+    try {
+        Thread.Sleep(100);
+        RECT r = new RECT();
+        IntPtr foregroundWindow = GetForegroundWindow();
+        GetWindowRect(foregroundWindow, out r);
+        int width = r.Right - r.Left;
+        int height = r.Bottom - r.Top;
+        int x = r.Left + width / 2;
+        int y = r.Top + height / 2;
+        SetCursorPos(x, y);
+    } catch (Exception _) {
     }
 }
 
@@ -466,6 +494,9 @@ Action<IConfigContext> doConfig = (context) => {
                         windows[index].ShowNormal();
                         refresh_electron(windows[index]);
                     }
+                    if (!windows[index].IsMinimized) {
+                        move_cursor_to_current_window_center();
+                    }
                     break;
                 }
             }
@@ -493,6 +524,9 @@ Action<IConfigContext> doConfig = (context) => {
                     if (context.Workspaces.FocusedWorkspace.LayoutName == "full") {
                         windows[index].ShowNormal();
                         refresh_electron(windows[index]);
+                    }
+                    if (!windows[index].IsMinimized) {
+                        move_cursor_to_current_window_center();
                     }
                     break;
                 }
@@ -579,6 +613,7 @@ Action<IConfigContext> doConfig = (context) => {
             if (focused_window != null) {
                 if (focused_window.IsMinimized) {
                     focused_window.ShowNormal();
+                    move_cursor_to_current_window_center();
                     refresh_electron(focused_window);
                 } else {
                     focused_window.ShowMinimized();

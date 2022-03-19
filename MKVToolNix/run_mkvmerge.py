@@ -4,8 +4,7 @@ from subprocess import Popen
 
 """
 用于批量压制相同格式的视频
-对于视频、音频、字幕等部分，各部分需要位于相同目录下
-以文件的序号为依据压制，相同序号的各个文件视作同一视频的各个部分，默认格式为：file 01.xxx
+对于视频、音频、字幕等部分，各部分需要位于不同的目录下，且文件名除后缀名必须相同
 cmd 为一个文件按照格式放入 MKVToolNix 设置好压制文件与参数后的命令行（Linux/Unix shell 格式）
 """
 
@@ -44,34 +43,28 @@ def read_from_cmd(cmd):
 
 
 def create_format_dict(files_dir):
-    # 格式：'01': [file1_path, file2_path, ...]
+    # 格式：'test 01': [file1_path, file2_path, ...]
     format_dict = {}
     for i in files_dir:
         for k in os.listdir(i):
             path = os.path.join(i, k).replace('\\', '/')
             if os.path.isfile(path):
-                result = rule_file_format.match(k)
-                if result:
-                    num = result.group(1)
-                else:
-                    continue
-
-                if not format_dict.__contains__(num):
-                    format_dict[num] = []
-                format_dict[num].append(path)
+                file_name_without_ext = os.path.splitext(k)[0]
+                if not format_dict.__contains__(file_name_without_ext):
+                    format_dict[file_name_without_ext] = []
+                format_dict[file_name_without_ext].append(path)
 
     return format_dict
 
 
 def run_mkvmerge(cmd_format, format_dict, files_dir):
-    for num, format_list in format_dict.items():
+    for file_name_without_ext, format_list in format_dict.items():
         video_path = format_list[0]
         directory, file_name = os.path.split(video_path)
 
         # 若 format_list 中的文件个数与 cmd 中的不同，则跳过
         if len(format_list) != len(files_dir):
-            file_name = os.path.splitext(file_name)[0]
-            print(f'{file_name} 相关文件缺失')
+            print(f'{file_name_without_ext} 相关文件缺失')
             continue
 
         # 输出目录若留空或与视频目录相同，则默认为视频目录下的 output 文件夹

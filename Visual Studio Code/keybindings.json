@@ -485,11 +485,11 @@
         "key": "ctrl+j",
         "command": "-workbench.action.togglePanel"
     },
-    // 侧边栏未聚焦且 neovim.mode != insert 时，则切换编辑器组
+    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换编辑器组
     {
         "key": "ctrl+j",
         "command": "workbench.action.navigateEditorGroups",
-        "when": "!sideBarFocus && neovim.mode != insert"
+        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert"
     },
     // 侧边栏未聚焦且 neovim.mode != insert 时，则切换到上一个编辑器组
     {
@@ -614,13 +614,7 @@
     {
         "key": "ctrl+3",
         "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active && terminalFocus"
-    },
-    // 面板终端页面且聚焦时，则终止终端
-    {
-        "key": "ctrl+w",
-        "command": "workbench.action.terminal.kill",
-        "when": "terminal.active && terminalFocus",
+        "when": "terminal.active"
     },
     // 面板 Docs View 或 Jupyter:Variables 页面时，则关闭面板
     {
@@ -640,6 +634,24 @@
         "key": "ctrl+l",
         "command": "workbench.action.nextPanelView",
         "when": "panelFocus || view.docsView.documentation.visible || view.jupyterViewVariables.visible"
+    },
+
+    // 面板终端页面且聚焦时，则切换终端
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.terminal.focusNext",
+        "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+    },
+    {
+        "key": "ctrl+k",
+        "command": "workbench.action.terminal.focusPrevious",
+        "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+    },
+    // 面板终端页面且聚焦时，则终止终端
+    {
+        "key": "ctrl+w",
+        "command": "workbench.action.terminal.kill",
+        "when": "terminal.active && terminalFocus"
     },
 
 

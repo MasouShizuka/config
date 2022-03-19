@@ -48,6 +48,7 @@
     "debug.toolBarLocation": "docked",
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.bracketPairColorization.enabled": true,
+    "editor.cursorBlinking": "solid",
     "editor.cursorSmoothCaretAnimation": true,
     "editor.cursorSurroundingLines": 5,
     "editor.detectIndentation": false,
