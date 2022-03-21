@@ -38,12 +38,12 @@ form.TopLevel = true;
 form.TopMost = true;
 static void refresh() {
     Thread.Sleep(200);
-    // 激活 Form 并隐藏，以恢复 Electron 程序的状态
+    // 激活 Form 并隐藏，以恢复程序的状态
     form.Show();
     form.Activate();
     form.Hide();
 }
-static void refresh_electron(IWindow focused_window) {
+static void refresh_window(IWindow focused_window) {
     if (focused_window != null) {
         foreach (string process_name in process_name_list) {
             if (focused_window.ProcessName == process_name) {
@@ -56,7 +56,7 @@ static void refresh_electron(IWindow focused_window) {
 
 // 移动鼠标到当前窗口的中心
 [StructLayout(LayoutKind.Sequential)]
-public struct RECT
+struct RECT
 {
     public int Left;
     public int Top;
@@ -461,7 +461,7 @@ Action<IConfigContext> doConfig = (context) => {
         KeyModifiers mod_ctrl = mod | KeyModifiers.Control;
         Action<int> switch_to_workspace_with_refresh = (index) => {
             context.Workspaces.SwitchToWorkspace(index);
-            refresh_electron(context.Workspaces.FocusedWorkspace.FocusedWindow);
+            refresh_window(context.Workspaces.FocusedWorkspace.FocusedWindow);
         };
 
         // 解除所有的原生快捷键
@@ -492,7 +492,7 @@ Action<IConfigContext> doConfig = (context) => {
                     didFocus = true;
                     if (context.Workspaces.FocusedWorkspace.LayoutName == "full") {
                         windows[index].ShowNormal();
-                        refresh_electron(windows[index]);
+                        refresh_window(windows[index]);
                     }
                     if (!windows[index].IsMinimized) {
                         move_cursor_to_current_window_center();
@@ -523,7 +523,7 @@ Action<IConfigContext> doConfig = (context) => {
                     didFocus = true;
                     if (context.Workspaces.FocusedWorkspace.LayoutName == "full") {
                         windows[index].ShowNormal();
-                        refresh_electron(windows[index]);
+                        refresh_window(windows[index]);
                     }
                     if (!windows[index].IsMinimized) {
                         move_cursor_to_current_window_center();
@@ -596,6 +596,23 @@ Action<IConfigContext> doConfig = (context) => {
         // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.I, () => _context.ToggleConsoleWindow(), "toggle debug console");
         // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.Oem2, () => ShowKeybindDialog(), "toggle keybind window");
 
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.A, () => {
+            var windows = context.Workspaces.FocusedWorkspace.ManagedWindows.Where(w => w.CanLayout).ToList();
+            if (windows.Count > 1) {
+                for (var i = 0; i < windows.Count - 1; i++) {
+                    context.Workspaces.FocusedWorkspace.SwapFocusAndPreviousWindow();
+                }
+            }
+        }, "rotate stack clockwise");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.X, () => {
+            var windows = context.Workspaces.FocusedWorkspace.ManagedWindows.Where(w => w.CanLayout).ToList();
+            if (windows.Count > 1) {
+                for (var i = 0; i < windows.Count - 1; i++) {
+                    context.Workspaces.FocusedWorkspace.SwapFocusAndNextWindow();
+                }
+            }
+        }, "rotate stack counterclockwise");
+
         context.Keybinds.Subscribe(mod, workspacer.Keys.F, () => {
             var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
             if (window != null) {
@@ -614,7 +631,7 @@ Action<IConfigContext> doConfig = (context) => {
                 if (focused_window.IsMinimized) {
                     focused_window.ShowNormal();
                     move_cursor_to_current_window_center();
-                    refresh_electron(focused_window);
+                    refresh_window(focused_window);
                 } else {
                     focused_window.ShowMinimized();
                 }
