@@ -105,6 +105,10 @@
         "default": "left",
         "jupyter-notebook": "left"
     },
+    "notebook.displayOrder": [
+        "image/png",
+        "text/plain"
+    ],
     "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.formatting.blackArgs": [
