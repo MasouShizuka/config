@@ -224,7 +224,7 @@ DELETE_EMPTY_DIR() {
         if [[ "${DOWNLOAD_DIR}" =~ "${ARIA2_DOWNLOAD_DIR}" ]]; then
             find "${ARIA2_DOWNLOAD_DIR}" -depth -maxdepth 1 ! -path "${ARIA2_DOWNLOAD_DIR}" -type d -empty -exec rm -vrf {} \;
         else
-            find "${DOWNLOAD_DIR}" -depth -type d -empty -exec rm -vrf {} \;
+            find "${DOWNLOAD_DIR}" -depth -maxdepth 1 -type d -empty -exec rm -vrf {} \;
         fi
     fi
 }
