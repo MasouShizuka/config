@@ -1,7 +1,7 @@
 {
   "EditorPath": "",
   "MaxSearchCount": 50,
-  "UseLocationAsWorkingDir": false,
+  "UseLocationAsWorkingDir": true,
   "LaunchHidden": false,
   "ShowWindowsContextMenu": true,
   "EverythingInstalledPath": "D:\\Tools\\Flow.Launcher\\UserData\\Plugins\\Everything-1.7.2\\EverythingSDK\\Everything.exe",

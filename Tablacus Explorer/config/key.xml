@@ -151,8 +151,9 @@ if (Item) {
 	clipboardData.setData("text", Item.Name);
 }</List><List Key="Shift+Y" Type="JScript">var Item = FV.FocusedItem;
 if (Item) {
-	clipboardData.setData("text", Item.Path);
-}</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Shift+1" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
+	var path = Item.Path;
+	clipboardData.setData("text", path);
+}</List><List Key="Shift+1" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
 	Addons.Split.Exec(1, 1);
 } else {
 	Addons.Split.Exec(2, 2);

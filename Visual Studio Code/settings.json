@@ -86,7 +86,7 @@
     "jupyter.askForKernelRestart": false,
     "markdown-preview-enhanced.chromePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
     "markdown-preview-enhanced.mathRenderingOption": "MathJax",
-    "markdown-preview-enhanced.previewTheme": "github-light.css",
+    "markdown-preview-enhanced.previewTheme": "one-dark.css",
     "markdown.extension.list.indentationSize": "inherit",
     "markdownlint.config": {
         "MD007": false,
@@ -143,15 +143,9 @@
     "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.cursorBlinking": true,
     "terminal.integrated.cursorStyle": "line",
-    "terminal.integrated.defaultProfile.windows": "Git Zsh",
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "terminal.integrated.fontSize": 16,
     "terminal.integrated.persistentSessionReviveProcess": "never",
-    "terminal.integrated.profiles.windows": {
-        "Git Zsh": {
-            "args": [],
-            "path": "C:\\Program Files\\Git\\usr\\bin\\zsh.exe"
-        }
-    },
     "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.tabs.location": "left",
