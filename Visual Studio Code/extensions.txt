@@ -12,16 +12,13 @@ formulahendry.auto-complete-tag
 formulahendry.auto-rename-tag
 formulahendry.code-runner
 foxundermoon.shell-format
-frhtylcn.pythonsnippets
 GitHub.copilot
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
 ionutvmi.path-autocomplete
-k--kato.intellij-idea-keybindings
 Kelvin.vscode-sshfs
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
-lehni.vscode-fix-checksums
 manasxx.background-cover
 mark-wiemer.vscode-autohotkey-plus-plus
 mdickin.markdown-shortcuts
@@ -48,7 +45,6 @@ richie5um2.vscode-sort-json
 ryuta46.multi-command
 shalimski.swapdiff
 shd101wyy.markdown-preview-enhanced
-techer.open-in-browser
 timonwong.shellcheck
 w88975.code-translate
 XadillaX.viml

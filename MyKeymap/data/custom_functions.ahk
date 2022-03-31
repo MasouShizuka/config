@@ -78,7 +78,9 @@ rightClickWithoutFalse(tempDisableRButton := false)
 
 very_slow_move_mouse(key, direction_x, direction_y)
 {
-    global moveDelay1, moveDelay2 
+    ; global moveDelay1, moveDelay2 
+    global moveDelay1, moveDelay2, VERYSLOWMODE
+    VERYSLOWMODE := true
     one_x := direction_x
     one_y := direction_y
     repeat_x := direction_x
@@ -90,4 +92,11 @@ very_slow_move_mouse(key, direction_x, direction_y)
         mousemove, %repeat_x%, %repeat_y%, 0, R
         keywait,  %key%,  %moveDelay2%
     }
+}
+
+exit_very_slow_mode() 
+{
+    global VERYSLOWMODE
+    VERYSLOWMODE := false
+    send {blind}{Lbutton up}
 }

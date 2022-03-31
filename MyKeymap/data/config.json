@@ -2914,7 +2914,7 @@
         "CapslockMode": true,
         "SemicolonMode": true,
         "RButtonMode": false,
-        "mapRAltToCtrl": false,
+        "mapRAltToCtrl": true,
         "runOnStartup": true,
         "scrollOnceLineCount": "1",
         "scrollDelay1": "0.2",

@@ -433,7 +433,13 @@
     // 替换
     {
         "key": "ctrl+f",
-        "command": "editor.action.startFindReplaceAction",
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "editor.action.startFindReplaceAction",
+                "actions.find"
+            ]
+        },
         "when": "editorFocus || editorIsOpen"
     },
 

@@ -469,8 +469,6 @@ WheelDown::send {blind}^#{right}
 *U::scrollWheel("U", 1)
 ; modified
 *P::exitMouseMode()
-
-
 Esc::exitMouseMode()
 ; modified
 ; *Space::exitMouseMode()
@@ -490,6 +488,39 @@ Esc::exitMouseMode()
     enableOtherHotkey(thisHotkey)
     return
 
+; modified
+#if VERYSLOWMODE
+
+*/::centerMouse()
+*I::very_slow_move_mouse("I", 0, -1)
+*J::very_slow_move_mouse("J", -1, 0)
+*K::very_slow_move_mouse("K", 0, 1)
+*L::very_slow_move_mouse("L", 1, 0)
+*,::lbuttonDown()
+*N::leftClickWithoutFalse()
+*.::moveCurrentWindow()
+*M::rightClickWithoutFalse(true)
+*`;::scrollWheel(";", 4)
+*H::scrollWheel("H", 3)
+*O::scrollWheel("O", 2)
+*U::scrollWheel("U", 1)
+*P::exit_very_slow_mode()
+Esc::exit_very_slow_mode()
+*Space::
+    name := "hide_mouse_cursor_when_idle.ahk"
+    close_or_run_script(name)
+    exitMouseMode()
+*capslock up::
+    thisHotkey := A_ThisHotkey
+    disableOtherHotkey(thisHotkey)
+    CapslockMode := true
+    keywait capslock
+    CapslockMode := false
+    if (A_ThisHotkey == "*capslock up" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
+        exit_very_slow_mode()
+    }
+    enableOtherHotkey(thisHotkey)
+    return
 
 #if FMode
 f::return

@@ -1,0 +1,11 @@
+patch:
+  # 特定App默认中/英文输入
+  app_options:
+    code.exe:
+      ascii_mode: true
+
+  style:
+    color_scheme: steam
+    horizontal: true
+
+  show_notifications_when: appropriate # 状态通知，可设为全开（always）全关（never）

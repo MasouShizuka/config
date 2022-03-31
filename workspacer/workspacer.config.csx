@@ -25,7 +25,6 @@ using workspacer.FocusIndicator;
 // 程序的进程名称列表
 static string[] process_name_list = {
     "Code",
-    "TE64",
     "vivaldi",
     "WindowsTerminal",
 };

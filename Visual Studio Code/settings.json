@@ -159,6 +159,7 @@
     "workbench.editor.historyBasedLanguageDetection": true,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
+        "*.gif": "cweijan.officeViewer",
         "*.ipynb": "jupyter-notebook",
         "*.md": "default"
     },
