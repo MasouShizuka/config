@@ -36,7 +36,7 @@
         "HTML (Eex)"
     ],
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
-    "backgroundCover.opacity": 0.2,
+    "backgroundCover.opacity": 0.1,
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
         "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
@@ -74,7 +74,6 @@
         "*.txt": "plaintext"
     },
     "files.autoGuessEncoding": true,
-    "files.autoSave": "afterDelay",
     "github.copilot.enable": {
         "*": true,
         "markdown": false,
@@ -84,9 +83,10 @@
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWw7Zmxvd2NoYXJ0O3VtbFwiLFwiY3VzdG9tTGlicmFyaWVzXCI6W1wiTC5zY3JhdGNocGFkXCJdLFwicGx1Z2luc1wiOltdLFwicmVjZW50Q29sb3JzXCI6W1wiMDAwMDAwXCJdLFwiZm9ybWF0V2lkdGhcIjoyNDAsXCJjcmVhdGVUYXJnZXRcIjpmYWxzZSxcInBhZ2VGb3JtYXRcIjp7XCJ4XCI6MCxcInlcIjowLFwid2lkdGhcIjoxMTY5LFwiaGVpZ2h0XCI6ODI3fSxcInNlYXJjaFwiOnRydWUsXCJzaG93U3RhcnRTY3JlZW5cIjp0cnVlLFwiZ3JpZENvbG9yXCI6XCIjZDBkMGQwXCIsXCJkYXJrR3JpZENvbG9yXCI6XCIjNmU2ZTZlXCIsXCJhdXRvc2F2ZVwiOnRydWUsXCJyZXNpemVJbWFnZXNcIjpudWxsLFwib3BlbkNvdW50ZXJcIjowLFwidmVyc2lvblwiOjE4LFwidW5pdFwiOjEsXCJpc1J1bGVyT25cIjpmYWxzZSxcInVpXCI6XCJcIn0ifQ==",
     "jupyter.askForKernelRestart": false,
-    "markdown-preview-enhanced.chromePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "markdown-preview-enhanced.chromePath": "C:\\Users\\MasouShizuka\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
     "markdown-preview-enhanced.mathRenderingOption": "MathJax",
     "markdown-preview-enhanced.previewTheme": "one-dark.css",
+    "markdown-preview-enhanced.printBackground": true,
     "markdown.extension.list.indentationSize": "inherit",
     "markdownlint.config": {
         "MD007": false,
@@ -109,6 +109,7 @@
         "image/png",
         "text/plain"
     ],
+    "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.formatting.blackArgs": [
@@ -153,18 +154,20 @@
     "window.dialogStyle": "custom",
     "workbench.colorCustomizations": {
         "editor.lineHighlightBackground": "#1073cf2d",
-        "editor.lineHighlightBorder": "#9fced11f"
+        "editor.lineHighlightBorder": "#9fced11f",
+        "tab.activeBackground": "#282c34",
+        "tab.activeBorder": "#d19a66"
     },
-    "workbench.colorTheme": "Community Material Theme Palenight High Contrast",
-    "workbench.editor.historyBasedLanguageDetection": true,
+    "workbench.colorTheme": "One Dark Pro",
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
         "*.gif": "cweijan.officeViewer",
         "*.ipynb": "jupyter-notebook",
         "*.md": "default"
     },
-    "workbench.experimental.layoutControl.enabled": true,
     "workbench.iconTheme": "material-icon-theme",
     "workbench.list.automaticKeyboardNavigation": false,
-    "workbench.startupEditor": "none"
+    "workbench.localHistory.enabled": false,
+    "workbench.startupEditor": "none",
+    "files.autoSave": "afterDelay"
 }

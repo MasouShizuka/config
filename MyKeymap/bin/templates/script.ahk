@@ -5,6 +5,7 @@
 #WinActivateForce               ; 解决「 winactivate 最小化的窗口时不会把窗口放到顶层(被其他窗口遮住) 」
 #InstallKeybdHook               ; 可能是 ahk 自动卸载 hook 导致的丢失 hook,  如果用这行指令, ahk 是否就不会卸载 hook 了呢?
 #include bin/functions.ahk
+#include bin/actions.ahk
 
 {## 定义可重用的模板,  减少代码重复 ##}
 {% macro keymapToAhk(keymap) %}
@@ -35,10 +36,8 @@ SetDefaultMouseSpeed, 0
 coordmode, mouse, screen
 settitlematchmode, 2
 
-; win10 任务切换、任务视图
+; win10、win11 任务切换、任务视图
 GroupAdd, TASK_SWITCH_GROUP, ahk_class MultitaskingViewFrame
-; GroupAdd, TASK_SWITCH_GROUP, ahk_class Windows.UI.Core.CoreWindow
-; win11 任务切换、任务视图
 GroupAdd, TASK_SWITCH_GROUP, ahk_class XamlExplorerHostIslandWindow
 
 scrollOnceLineCount := {{{ Settings.scrollOnceLineCount if Settings.scrollOnceLineCount else 3 }}}
@@ -53,12 +52,6 @@ moveDelay1 = {{{ "T" + Settings.moveDelay1 if Settings.moveDelay1 else "T0.2" }}
 moveDelay2 = {{{ "T" + Settings.moveDelay2 if Settings.moveDelay2 else "T0.01" }}}
 
 SemicolonAbbrTip := true
-; time_enter_repeat = T0.2
-; delay_before_repeat = T0.01
-; fast_one := 110     
-; fast_repeat := 70
-; slow_one :=  10     
-; slow_repeat := 13
 
 allHotkeys := []
 {% if Settings.Mode3 %}
@@ -95,16 +88,15 @@ allHotkeys.Push("$Tab")
 Menu, Tray, NoStandard
 Menu, Tray, Add, 暂停, trayMenuHandler
 Menu, Tray, Add, 退出, trayMenuHandler
+Menu, Tray, Add, 重启程序, trayMenuHandler
 Menu, Tray, Add, 打开设置, trayMenuHandler 
-Menu, Tray, Add, 视频教程, trayMenuHandler
 Menu, Tray, Add, 帮助文档, trayMenuHandler 
-Menu, Tray, Add, 检查更新, trayMenuHandler 
 Menu, Tray, Add, 查看窗口标识符, trayMenuHandler 
 Menu, Tray, Add 
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.0 by 咸鱼阿康12333
+Menu, Tray, Tip, MyKeymap 1.1 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -119,7 +111,7 @@ global typoTip := new TypoTipWindow()
 semiHook := InputHook("C", "{Space}{BackSpace}{Esc}", {{{ SemicolonAbbrKeys|join(',')|ahkString }}})
 semiHook.OnChar := Func("onTypoChar")
 semiHook.OnEnd := Func("onTypoEnd")
-capsHook := InputHook("C", "{Space}{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
+capsHook := InputHook("C", "{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
 capsHook.OnChar := Func("capsOnTypoChar")
 capsHook.OnEnd := Func("capsOnTypoEnd")
 
@@ -141,7 +133,7 @@ RAlt::LCtrl
 
 {% if Settings.CapslockMode %}
 ; modified
-;!capslock::toggleCapslock()
+; !capslock::toggleCapslock()
 +capslock::toggleCapslock()
 
 *capslock::
@@ -155,7 +147,7 @@ RAlt::LCtrl
         enterCapslockAbbr(capsHook)
         {% else %}
         ; modified
-        ;toggleCapslock()
+        ; toggleCapslock()
         send {blind}{Esc}
         {% endif %}
     }
@@ -174,7 +166,7 @@ RAlt::LCtrl
     JMode := false
     DisableCapslockKey := false
     if (A_PriorKey == "j" && A_TimeSinceThisHotkey < 350)
-            send  {blind}j
+            send,  {blind}j
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -185,11 +177,13 @@ RAlt::LCtrl
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     PunctuationMode := true
+    DisableCapslockKey := true
     keywait `; 
     PunctuationMode := false
+    DisableCapslockKey := false
     if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 350)
         ; modified
-        ;enterSemicolonAbbr(semiHook)
+        ; enterSemicolonAbbr(semiHook)
         send {blind}`;
     enableOtherHotkey(thisHotkey)
     return
@@ -204,7 +198,7 @@ RAlt::LCtrl
     keywait 3 
     DigitMode := false
     if (A_PriorKey == "3" && (A_TickCount - start_tick < 250))
-        send {blind}3 
+        send, {blind}3 
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -216,7 +210,7 @@ RAlt::LCtrl
     keywait 9 
     Mode9 := false
     if (A_PriorKey == "9" && A_TimeSinceThisHotkey < 350)
-        send {blind}9 
+        send, {blind}9 
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -229,7 +223,7 @@ RAlt::LCtrl
     keywait `, 
     CommaMode := false
     if (A_PriorKey == "," && A_TimeSinceThisHotkey < 350)
-        send {blind}`, 
+        send, {blind}`, 
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -242,7 +236,7 @@ RAlt::LCtrl
     keywait Space 
     SpaceMode := false
     if (A_PriorKey == "Space" && A_TimeSinceThisHotkey < 350)
-        send {blind}{Space} 
+        send, {blind}{Space} 
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -255,7 +249,7 @@ $Tab::
     keywait Tab 
     TabMode := false
     if (A_PriorKey == "Tab" && A_TimeSinceThisHotkey < 350)
-        send {blind}{Tab} 
+        send, {blind}{Tab} 
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -321,18 +315,13 @@ enterLButtonMode()
 
 {% if Settings.JMode %}
 
-#if JModeK
-k::return
-{{{ keymapToAhk(JModeK) }}}
 
 #if JModeL
 l::return
 {{{ keymapToAhk(JModeL) }}}
 
 #if JMode
-k::enterJModeK()
 l::enterJModeL()
-
 {% for key,value in JMode.items()|sort(attribute="1.value") %}
     {% if value.value %}
 {{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
@@ -372,29 +361,12 @@ l::enterJModeL()
 
 {% if Settings.Mode3 %}
 #if DigitMode
-
 {% for key,value in Mode3.items()|sort(attribute="1.value") %}
     {% if value.value %}
 {{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
     {% endif %}
 {% endfor %}
 
-*r::
-    DigitMode := false
-    FnMode := true
-    keywait r
-    FnMode := false
-    return
-
-
-#if FnMode
-*r::return
-
-{% for key,value in Mode3R.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
 {% endif %}
 
 
@@ -438,9 +410,6 @@ space::
     CapslockSpaceMode := false
     return
 
-WheelUp::send {blind}^#{left}
-WheelDown::send {blind}^#{right}
-
 #if SLOWMODE
 {## 
 {% for key,value in Capslock.items()|sort(attribute="1.value") %}
@@ -458,11 +427,11 @@ WheelDown::send {blind}^#{right}
 *,::lbuttonDown()
 ; modified
 ; *N::leftClick()
-*N::leftClickWithoutFalse()
+*N::left_click_without_false()
 *.::moveCurrentWindow()
 ; modified
 ; *M::rightClick(true)
-*M::rightClickWithoutFalse(true)
+*M::right_click_without_false(true)
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -497,9 +466,9 @@ Esc::exitMouseMode()
 *K::very_slow_move_mouse("K", 0, 1)
 *L::very_slow_move_mouse("L", 1, 0)
 *,::lbuttonDown()
-*N::leftClickWithoutFalse()
+*N::left_click_without_false()
 *.::moveCurrentWindow()
-*M::rightClickWithoutFalse(true)
+*M::right_click_without_false(true)
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -521,6 +490,7 @@ Esc::exit_very_slow_mode()
     }
     enableOtherHotkey(thisHotkey)
     return
+
 
 #if FMode
 f::return
@@ -563,22 +533,11 @@ space::return
     {% endif %}
 {% endfor %}
 
-LButton::
-; if WinActive("ahk_class MultitaskingViewFrame")
-if ( A_PriorHotkey == "~LButton" || A_PriorHotkey == "LButton")
-    send #{tab}
-else
-    send ^!{tab}
-return
-WheelUp::send ^+{tab}
-WheelDown::send ^{tab}
 {% endif %}
 
 {% if Settings.CapslockMode %}
-#IfWinActive, ahk_group TASK_SWITCH_GROUP
+#If TASK_SWITCH_MODE
 ; modified
-; *W::send, {blind}+{Tab}
-; *R::send, {blind}{Tab}
 ; *D::send, {blind}{down}
 ; *E::send, {blind}{up}
 ; *S::send, {blind}{left}
@@ -696,3 +655,7 @@ delayedHideTipWindow()
 
 
 {{{ all_ahk_funcs|join('\n') }}}
+
+{% for value in send_key_functions %}
+{{{ value }}}
+{% endfor %}

@@ -4,8 +4,28 @@ patch:
     code.exe:
       ascii_mode: true
 
+  # 样式
   style:
     color_scheme: steam
-    horizontal: true
+    font_face: Microsoft YaHei
+    font_point: 14
+    horizontal: true 
+    fullscreen: false
+    inline_preedit: false
+    preedit_type: composition
+    display_tray_icon: false
+    label_format: "%s."
+    layout:
+      min_width: 160
+      min_height: 0
+      border_width: 3
+      margin_x: 12
+      margin_y: 12
+      spacing: 10
+      candidate_spacing: 20
+      hilite_spacing: 4
+      hilite_padding: 2
+      round_corner: 4
 
-  show_notifications_when: appropriate # 状态通知，可设为全开（always）全关（never）
+  # 状态通知，可设为全开（always）全关（never）
+  show_notifications_when: appropriate

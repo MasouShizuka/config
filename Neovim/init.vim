@@ -28,8 +28,8 @@ endif
 call plug#begin(g:plugin_path)
 
 Plug 'junegunn/vim-easy-align'
-xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
+xmap ga :EasyAlign 
 
 Plug 'machakann/vim-highlightedyank'
 highlight HighlightedyankRegion cterm=reverse gui=reverse
@@ -60,11 +60,10 @@ else
 
     Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 
-    Plug 'lifepillar/vim-gruvbox8'
-    let g:gruvbox_transp_bg = 1
-
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
     let g:VM_default_mappings = 0
+
+    Plug 'olimorris/onedarkpro.nvim'
 
     Plug 'preservim/nerdtree'
     map <Leader>n :NERDTreeToggle<CR>
@@ -133,7 +132,7 @@ endif
 
 
 if !exists('g:vscode')
-    colorscheme gruvbox8
+    colorscheme onedarkpro
 endif
 
 
@@ -155,15 +154,10 @@ onoremap L $
 nmap n nzz
 nmap N Nzz
 
-nmap <C-h> gT
-nmap <C-l> gt
-
 nmap s <leader><leader>s
 xmap s <leader><leader>s
 
 if exists('g:vscode')
-    " nnoremap % <Cmd>call VSCodeNotify('editor.action.jumpToBracket')<CR>
-
     nnoremap zc <Cmd>call VSCodeNotify('editor.fold')<CR>
     nnoremap zC <Cmd>call VSCodeNotify('editor.foldRecursively')<CR>
     nnoremap zo <Cmd>call VSCodeNotify('editor.unfold')<CR>
@@ -183,7 +177,7 @@ if exists('g:vscode')
     nnoremap <Leader>p <Cmd>call VSCodeNotify('extension.pasteImage')<CR>
     nnoremap <Leader>r <Cmd>call CompileRun()<CR>
     func! CompileRun()
-        if &filetype == 'xhtml'
+        if &filetype == 'html' || &filetype == 'xhtml'
             call VSCodeNotify('office.html.preview')
         elseif &filetype == 'markdown'
             call VSCodeNotify('markdown-preview-enhanced.openPreviewToTheSide')
@@ -198,10 +192,13 @@ else
     inoremap [ []<Esc>i
     inoremap { {}<Esc>i
 
-    inoremap <C-k> <Down>
-    inoremap <C-i> <Up>
     inoremap <C-j> <Left>
     inoremap <C-l> <Right>
+    inoremap <C-k> <Down>
+    inoremap <C-i> <Up>
+
+    nnoremap <C-h> gT
+    nnoremap <C-l> gt
 
     nnoremap <C-j> <C-w>w
     nnoremap <C-k> <C-w>W

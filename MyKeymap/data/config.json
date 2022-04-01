@@ -75,13 +75,13 @@
         "W": {
             "2": {
                 "type": "窗口操作",
-                "value": "send !{tab}"
+                "value": "send, !{tab}"
             }
         },
         "E": {
             "2": {
                 "type": "窗口操作",
-                "value": "send ^!{tab}"
+                "value": "action_enter_task_switch_mode()"
             }
         },
         "R": {
@@ -99,7 +99,7 @@
         "Y": {
             "2": {
                 "type": "窗口操作",
-                "value": "send {LControl down}{LWin down}{Left}{LWin up}{LControl up}"
+                "value": "send, {LControl down}{LWin down}{Left}{LWin up}{LControl up}"
             }
         },
         "U": {
@@ -129,7 +129,7 @@
         "P": {
             "2": {
                 "type": "窗口操作",
-                "value": "send {LControl down}{LWin down}{Right}{LWin up}{LControl up}"
+                "value": "send, {LControl down}{LWin down}{Right}{LWin up}{LControl up}"
             }
         },
         "A": {
@@ -140,14 +140,14 @@
         },
         "S": {
             "2": {
-                "type": "系统控制",
+                "type": "执行单行 ahk 代码",
                 "value": "run, bin\\ahk.exe bin\\soundControl.ahk"
             }
         },
         "D": {
             "2": {
                 "type": "窗口操作",
-                "value": "send #+{right}"
+                "value": "send, #+{right}"
             }
         },
         "F": {
@@ -216,7 +216,7 @@
         },
         "C": {
             "2": {
-                "type": "窗口操作",
+                "type": "执行单行 ahk 代码",
                 "value": "center_window()"
             }
         },
@@ -229,7 +229,8 @@
         "B": {
             "2": {
                 "type": "系统控制",
-                "value": "run, bin\\ahk.exe bin\\changeBrightness.ahk"
+                "value": "run, bin\\ahk.exe bin\\changeBrightness.ahk",
+                "label": "显示器亮度调节"
             }
         },
         "N": {
@@ -343,33 +344,37 @@
         "Q": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_ProgramFiles%\\Everything\\Everything.exe\n    ActivateOrRun(\"ahk_class EVERYTHING\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_class EVERYTHING\", \"\" A_ProgramFiles \"\\Everything\\Everything.exe\", \"\", \"\")",
                 "toActivate": "ahk_class EVERYTHING",
-                "toRun": "%A_ProgramFiles%\\Everything\\Everything.exe"
+                "toRun": "%A_ProgramFiles%\\Everything\\Everything.exe",
+                "comment": "召唤 Everything"
             }
         },
         "W": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_ProgramsCommon%\\Google Chrome.lnk\n    ActivateOrRun(\"ahk_exe chrome.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe chrome.exe\", \"\" A_ProgramsCommon \"\\Google Chrome.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe chrome.exe",
-                "toRun": "%A_ProgramsCommon%\\Google Chrome.lnk"
+                "toRun": "%A_ProgramsCommon%\\Google Chrome.lnk",
+                "comment": "召唤 Chrome"
             }
         },
         "E": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = C:\\Program Files (x86)\\Yinxiang Biji\\印象笔记\\Evernote.exe\n    ActivateOrRun(\"ahk_class YXMainFrame\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_class YXMainFrame\", \"C:\\Program Files (x86)\\Yinxiang Biji\\印象笔记\\Evernote.exe\", \"\", \"\")",
                 "toActivate": "ahk_class YXMainFrame",
-                "toRun": "C:\\Program Files (x86)\\Yinxiang Biji\\印象笔记\\Evernote.exe"
+                "toRun": "C:\\Program Files (x86)\\Yinxiang Biji\\印象笔记\\Evernote.exe",
+                "comment": ""
             }
         },
         "R": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = D:\\install\\Foxit Reader\\FoxitReader.exe\n    ActivateOrRun(\"ahk_exe FoxitReader.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe FoxitReader.exe\", \"D:\\install\\Foxit Reader\\FoxitReader.exe\", \"\", \"\")",
                 "toActivate": "ahk_exe FoxitReader.exe",
-                "toRun": "D:\\install\\Foxit Reader\\FoxitReader.exe"
+                "toRun": "D:\\install\\Foxit Reader\\FoxitReader.exe",
+                "comment": ""
             }
         },
         "T": {
@@ -387,7 +392,7 @@
         "U": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\JetBrains Toolbox\\DataGrip.lnk\n    ActivateOrRun(\"ahk_exe datagrip64.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe datagrip64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\DataGrip.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe datagrip64.exe",
                 "toRun": "%A_Programs%\\JetBrains Toolbox\\DataGrip.lnk"
             }
@@ -395,49 +400,55 @@
         "I": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = C:\\Program Files\\Typora\\Typora.exe\n    ActivateOrRun(\"ahk_exe Typora.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe Typora.exe\", \"C:\\Program Files\\Typora\\Typora.exe\", \"\", \"\")",
                 "toActivate": "ahk_exe Typora.exe",
-                "toRun": "C:\\Program Files\\Typora\\Typora.exe"
+                "toRun": "C:\\Program Files\\Typora\\Typora.exe",
+                "comment": "召唤 Typora"
             }
         },
         "O": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = shortcuts\\OneNote for Windows 10.lnk\n    ActivateOrRun(\"OneNote for Windows 10\", path)\n    return",
+                "value": "ActivateOrRun(\"OneNote for Windows 10\", \"shortcuts\\OneNote for Windows 10.lnk\", \"\", \"\")",
                 "toActivate": "OneNote for Windows 10",
-                "toRun": "shortcuts\\OneNote for Windows 10.lnk"
+                "toRun": "shortcuts\\OneNote for Windows 10.lnk",
+                "comment": "召唤 OneNote UWP"
             }
         },
         "P": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk\n    ActivateOrRun(\"ahk_exe POWERPNT.EXE\", path, \"\", \"\")\n    return",
+                "value": "ActivateOrRun(\"ahk_exe POWERPNT.EXE\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe POWERPNT.EXE",
-                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk"
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk",
+                "comment": "召唤 PowerPoint"
             }
         },
         "A": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = shortcuts\\Windows Terminal Preview.lnk\n    ActivateOrRun(\"ahk_exe WindowsTerminal.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe WindowsTerminal.exe\", \"shortcuts\\Windows Terminal Preview.lnk\", \"\", \"\")",
                 "toRun": "shortcuts\\Windows Terminal Preview.lnk",
-                "toActivate": "ahk_exe WindowsTerminal.exe"
+                "toActivate": "ahk_exe WindowsTerminal.exe",
+                "comment": "召唤 Windows Terminal"
             }
         },
         "S": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk\n    ActivateOrRun(\"ahk_exe Code.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe Code.exe\", \"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe Code.exe",
-                "toRun": "%A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk"
+                "toRun": "%A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk",
+                "comment": "召唤 Visual Studio Code"
             }
         },
         "D": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_ProgramsCommon%\\Microsoft Edge.lnk\n    ActivateOrRun(\"ahk_exe msedge.exe\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe msedge.exe\", \"\" A_ProgramsCommon \"\\Microsoft Edge.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe msedge.exe",
-                "toRun": "%A_ProgramsCommon%\\Microsoft Edge.lnk"
+                "toRun": "%A_ProgramsCommon%\\Microsoft Edge.lnk",
+                "comment": "召唤 Edge"
             }
         },
         "F": {
@@ -455,23 +466,25 @@
         "H": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_ProgramsCommon%\\Visual Studio 2019.lnk\n    ActivateOrRun(\"- Microsoft Visual Studio\", path)\n    return",
+                "value": "ActivateOrRun(\"- Microsoft Visual Studio\", \"\" A_ProgramsCommon \"\\Visual Studio 2019.lnk\", \"\", \"\")",
                 "toActivate": "- Microsoft Visual Studio",
-                "toRun": "%A_ProgramsCommon%\\Visual Studio 2019.lnk"
+                "toRun": "%A_ProgramsCommon%\\Visual Studio 2019.lnk",
+                "comment": "召唤 Visual Studio"
             }
         },
         "J": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk\n    ActivateOrRun(\"ahk_exe idea64.exe\", path, \"\", \"\")\n    return",
+                "value": "ActivateOrRun(\"ahk_exe idea64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe idea64.exe",
-                "toRun": "%idea%"
+                "toRun": "%idea%",
+                "comment": "召唤 IntelliJ IDEA"
             }
         },
         "K": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_ProgramFiles%\\DAUM\\PotPlayer\\PotPlayerMini64.exe\n    workingDir = \n    ActivateOrRun(\"ahk_class PotPlayer64\", path, \"\", workingDir)\n    return",
+                "value": "ActivateOrRun(\"ahk_class PotPlayer64\", \"\" A_ProgramFiles \"\\DAUM\\PotPlayer\\PotPlayerMini64.exe\", \"\", \"\")",
                 "toRun": "%A_ProgramFiles%\\DAUM\\PotPlayer\\PotPlayerMini64.exe",
                 "toActivate": "ahk_class PotPlayer64"
             }
@@ -479,9 +492,10 @@
         "L": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk\n    workingDir = \n    ActivateOrRun(\"ahk_exe EXCEL.EXE\", path, \"\", workingDir)\n    return",
+                "value": "ActivateOrRun(\"ahk_exe EXCEL.EXE\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk\", \"\", \"\")",
                 "toActivate": "ahk_exe EXCEL.EXE",
-                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk"
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk",
+                "comment": "召唤 Excel"
             }
         },
         ";": {
@@ -493,9 +507,10 @@
         "Z": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = D:\\\n    ActivateOrRun(\"ahk_class CabinetWClass ahk_exe Explorer.EXE\", path)\n    return",
+                "value": "ActivateOrRun(\"ahk_class CabinetWClass ahk_exe Explorer.EXE\", \"D:\\\", \"\", \"\")",
                 "toRun": "D:\\",
-                "toActivate": "ahk_class CabinetWClass ahk_exe Explorer.EXE"
+                "toActivate": "ahk_class CabinetWClass ahk_exe Explorer.EXE",
+                "comment": "召唤文件管理器"
             }
         },
         "X": {
@@ -518,26 +533,32 @@
         },
         "B": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"\", \"\" A_ProgramsCommon \"\\Google Chrome.lnk\", \"\", \"\")",
+                "toRun": "%A_ProgramsCommon%\\Google Chrome.lnk",
+                "toActivate": "",
+                "comment": "新开一个 Chrome 窗口"
             }
         },
         "N": {
             "2": {
                 "type": "窗口操作",
-                "value": "\n    global CapslockF__N\n    bindOrActivate(CapslockF__N)\n    return"
+                "value": "bindOrActivate(CapslockF__N)"
             }
         },
         "M": {
             "2": {
                 "type": "窗口操作",
-                "value": "\n    global CapslockF__M\n    bindOrActivate(CapslockF__M)\n    return"
+                "value": "bindOrActivate(CapslockF__M)"
             }
         },
         ",": {
             "2": {
-                "type": "窗口操作",
-                "value": "\n    global CapslockF__comma\n    bindOrActivate(CapslockF__comma)\n    return"
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"ahk_exe goland64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\GoLand.lnk\", \"\", \"\")",
+                "toActivate": "ahk_exe goland64.exe",
+                "toRun": "%A_Programs%\\JetBrains Toolbox\\GoLand.lnk",
+                "comment": ""
             }
         },
         ".": {
@@ -556,472 +577,248 @@
     "Mode3": {
         "0": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "1": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "2": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "3": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "4": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "5": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "6": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "7": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "8": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "9": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Space": {
-            "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{f1}\nreturn",
-                "keysToSend": "{f1}",
-                "prefix": "*"
-            }
-        },
-        "Q": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "W": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "E": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "R": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "T": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Y": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "U": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}4",
-                "keysToSend": "4",
-                "prefix": "*"
-            }
-        },
-        "I": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}5",
-                "keysToSend": "5",
-                "prefix": "*"
-            }
-        },
-        "O": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}6",
-                "keysToSend": "6",
-                "prefix": "*"
-            }
-        },
-        "P": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "A": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "S": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "D": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "F": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "G": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "H": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}0",
-                "keysToSend": "0",
-                "prefix": "*"
-            }
-        },
-        "J": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}1",
-                "keysToSend": "1",
-                "prefix": "*"
-            }
-        },
-        "K": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}2",
-                "keysToSend": "2",
-                "prefix": "*"
-            }
-        },
-        "L": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}3",
-                "keysToSend": "3",
-                "prefix": "*"
-            }
-        },
-        ";": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Z": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "X": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "C": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "V": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "B": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}7\nreturn",
-                "keysToSend": "7",
-                "prefix": "*"
-            }
-        },
-        "N": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}8",
-                "keysToSend": "8",
-                "prefix": "*"
-            }
-        },
-        "M": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}9",
-                "keysToSend": "9",
-                "prefix": "*"
-            }
-        },
-        ",": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        ".": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "/": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        }
-    },
-    "Mode3R": {
-        "0": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "1": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "2": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "3": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "4": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "5": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "6": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "7": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "8": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "9": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Space": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Q": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "W": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "E": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "R": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "T": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Y": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "U": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{f4}",
-                "keysToSend": "{f4}",
-                "prefix": "*"
-            }
-        },
-        "I": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{f5}",
-                "keysToSend": "{f5}",
-                "prefix": "*"
-            }
-        },
-        "O": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{f6}",
-                "keysToSend": "{f6}",
-                "prefix": "*"
-            }
-        },
-        "P": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "A": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "S": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "D": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "F": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "G": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "H": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{f10}",
+                "value": "send, {blind}{f10}",
                 "keysToSend": "{f10}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "F10 键"
+            }
+        },
+        "1": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f1}",
+                "keysToSend": "{f1}",
+                "prefix": "*",
+                "comment": "F1 键"
+            }
+        },
+        "2": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f2}",
+                "keysToSend": "{f2}",
+                "prefix": "*",
+                "comment": "F2 键"
+            }
+        },
+        "3": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "4": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f4}",
+                "keysToSend": "{f4}",
+                "prefix": "*",
+                "comment": "F4 键"
+            }
+        },
+        "5": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "6": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "7": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "8": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f8}",
+                "keysToSend": "{f8}",
+                "prefix": "*",
+                "comment": "F8 键"
+            }
+        },
+        "9": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f9}",
+                "keysToSend": "{f9}",
+                "prefix": "*",
+                "comment": "F9 键"
+            }
+        },
+        "Space": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f1}",
+                "keysToSend": "{f1}",
+                "prefix": "*",
+                "comment": ""
+            }
+        },
+        "Q": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "W": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "E": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f3}",
+                "keysToSend": "{f3}",
+                "prefix": "*",
+                "comment": "F3 键"
+            }
+        },
+        "R": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f5}",
+                "keysToSend": "{f5}",
+                "prefix": "*",
+                "comment": "F5 键"
+            }
+        },
+        "T": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f6}",
+                "keysToSend": "{f6}",
+                "prefix": "*",
+                "comment": "F6 键"
+            }
+        },
+        "Y": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f7}",
+                "keysToSend": "{f7}",
+                "prefix": "*",
+                "comment": "F7 键"
+            }
+        },
+        "U": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}4",
+                "keysToSend": "4",
+                "prefix": "*",
+                "comment": "数字 4 键"
+            }
+        },
+        "I": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}5",
+                "keysToSend": "5",
+                "prefix": "*",
+                "comment": "数字 5 键"
+            }
+        },
+        "O": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}6",
+                "keysToSend": "6",
+                "prefix": "*",
+                "comment": "数字 6 键"
+            }
+        },
+        "P": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f11}",
+                "keysToSend": "{f11}",
+                "prefix": "*",
+                "comment": "F11 键"
+            }
+        },
+        "A": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "S": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "D": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "F": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "G": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "H": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}0",
+                "keysToSend": "0",
+                "prefix": "*",
+                "comment": "数字 0 键"
             }
         },
         "J": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{f1}",
-                "keysToSend": "{f1}",
-                "prefix": "*"
+                "value": "send, {blind}1",
+                "keysToSend": "1",
+                "prefix": "*",
+                "comment": "数字 1 键"
             }
         },
         "K": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{f2}",
-                "keysToSend": "{f2}",
-                "prefix": "*"
+                "value": "send, {blind}2",
+                "keysToSend": "2",
+                "prefix": "*",
+                "comment": "数字 2 键"
             }
         },
         "L": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{f3}",
-                "keysToSend": "{f3}",
-                "prefix": "*"
+                "value": "send, {blind}3",
+                "keysToSend": "3",
+                "prefix": "*",
+                "comment": "数字 3 键"
             }
         },
         ";": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f12}",
+                "keysToSend": "{f12}",
+                "prefix": "*",
+                "comment": "F12 键"
             }
         },
         "Z": {
@@ -1051,41 +848,40 @@
         "B": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{f7}\nreturn",
-                "keysToSend": "{f7}",
-                "prefix": "*"
+                "value": "send, {blind}7",
+                "keysToSend": "7",
+                "prefix": "*",
+                "comment": "数字 7 键"
             }
         },
         "N": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{f8}",
-                "keysToSend": "{f8}",
-                "prefix": "*"
+                "value": "send, {blind}8",
+                "keysToSend": "8",
+                "prefix": "*",
+                "comment": "数字 8 键"
             }
         },
         "M": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{f9}",
-                "keysToSend": "{f9}",
-                "prefix": "*"
+                "value": "send, {blind}9",
+                "keysToSend": "9",
+                "prefix": "*",
+                "comment": "数字 9 键"
             }
         },
         ",": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{f11}",
-                "keysToSend": "{f11}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         ".": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{f12}\nreturn",
-                "keysToSend": "{f12}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "/": {
@@ -1178,6 +974,28 @@
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "3": {
+                "type": "系统控制",
+                "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"\" A_ProgramFiles \"\\Everything\\Everything.exe\", \"-filename \" sel.selected \"\")",
+                "label": "用指定程序打开选中的文件 / 文件夹",
+                "toRun": "%A_ProgramFiles%\\Everything\\Everything.exe",
+                "cmdArgs": "-filename %selected%",
+                "comment": "用 Everything 搜索选中文件夹里的文件"
+            },
+            "4": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}+!{f5}",
+                "keysToSend": "+!{f5}",
+                "prefix": "*",
+                "comment": "Git - 上一处修改"
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}+{f8}",
+                "keysToSend": "+{f8}",
+                "prefix": "*",
+                "comment": "Git - 上一处修改"
             }
         },
         "R": {
@@ -1190,6 +1008,14 @@
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "3": {
+                "type": "系统控制",
+                "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"wt.exe\", \"-d \" sel.selected \"\")",
+                "label": "用指定程序打开选中的文件 / 文件夹",
+                "toRun": "wt.exe",
+                "comment": "用 Windows Terminal 打开选中的文件夹",
+                "cmdArgs": "-d %selected%"
             }
         },
         "Y": {
@@ -1202,6 +1028,13 @@
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^1s",
+                "keysToSend": "^1s",
+                "prefix": "*",
+                "comment": "搜索 Symbol"
             }
         },
         "I": {
@@ -1232,24 +1065,71 @@
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^-",
+                "keysToSend": "^-",
+                "prefix": "*",
+                "comment": "代码跳转 - 回退"
             }
         },
         "D": {
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "4": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}!{f5}",
+                "keysToSend": "!{f5}",
+                "prefix": "*",
+                "comment": "Git - 下一处修改"
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f8}",
+                "keysToSend": "{f8}",
+                "prefix": "*",
+                "comment": "Git - 下一处修改"
             }
         },
         "F": {
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "3": {
+                "type": "系统控制",
+                "value": "action_copy_selected_file_path()",
+                "label": "复制选中文件的路径"
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+-",
+                "keysToSend": "^+-",
+                "prefix": "*",
+                "comment": "代码跳转 - 前进"
             }
         },
         "G": {
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "4": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+g",
+                "comment": "Git 面板",
+                "keysToSend": "^+g",
+                "prefix": "*"
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^0^g",
+                "keysToSend": "^0^g",
+                "prefix": "*",
+                "comment": "Git 面板"
             }
         },
         "H": {
@@ -1292,18 +1172,41 @@
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "3": {
+                "type": "系统控制",
+                "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"C:\\Program Files\\7-Zip\\7z.exe\", \"x \" sel.selected \" -o\"\"\" sel.current \"\\\" sel.purename \"\"\"\")",
+                "label": "用指定程序打开选中的文件 / 文件夹",
+                "toRun": "C:\\Program Files\\7-Zip\\7z.exe",
+                "cmdArgs": "x %selected% -o\"%current%\\%purename%\"",
+                "comment": "用 7-Zip 解压选中的文件"
             }
         },
         "C": {
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "3": {
+                "type": "系统控制",
+                "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"\" sel.selected \"\")",
+                "label": "用指定程序打开选中的文件 / 文件夹",
+                "toRun": "%code%",
+                "cmdArgs": "%selected%",
+                "comment": "用 Visual Studio Code 打开选中的文件"
             }
         },
         "V": {
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            },
+            "5": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}+!.",
+                "keysToSend": "+!.",
+                "prefix": "*",
+                "comment": "Shift + Alt + ."
             }
         },
         "B": {
@@ -1358,14 +1261,20 @@
         },
         "2": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+{tab}",
+                "keysToSend": "^+{tab}",
+                "prefix": "*",
+                "comment": "切换到左边的标签"
             }
         },
         "3": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}^{tab}",
+                "keysToSend": "^{tab}",
+                "prefix": "*",
+                "comment": "切换到右边的标签"
             }
         },
         "4": {
@@ -1407,49 +1316,49 @@
         "Space": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend {blind}{enter}\nreturn",
+                "value": "send, {blind}{enter}",
                 "keysToSend": "{enter}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "回车键"
             }
         },
         "Q": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{pgup}",
-                "prefix": "*",
-                "keysToSend": "{pgup}"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "W": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}+{tab}",
+                "value": "send, {blind}+{Tab}",
+                "keysToSend": "+{Tab}",
                 "prefix": "*",
-                "keysToSend": "+{tab}"
+                "comment": "常用键 - Shift + Tab 键"
             }
         },
         "E": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{up}",
+                "value": "send, {blind}{up}",
                 "prefix": "*",
-                "keysToSend": "{up}"
+                "keysToSend": "{up}",
+                "comment": "方向键 - 上"
             }
         },
         "R": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{tab}",
+                "value": "send, {blind}{tab}",
                 "keysToSend": "{tab}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "常用键 - Tab 键"
             }
         },
         "T": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{pgdn}",
-                "keysToSend": "{pgdn}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "Y": {
@@ -1467,8 +1376,9 @@
         "I": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}ji\nreturn",
-                "keysToSend": "ji",
+                "value": "send, {blind}^{left}",
+                "comment": "光标移动 - 左移一个单词",
+                "keysToSend": "^{left}",
                 "prefix": "*"
             }
         },
@@ -1487,41 +1397,46 @@
         "A": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{home}",
+                "value": "send, {blind}{home}",
                 "keysToSend": "{home}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "光标移动 - 行首"
             }
         },
         "S": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{left}",
+                "value": "send, {blind}{left}",
                 "keysToSend": "{left}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "方向键 - 左"
             }
         },
         "D": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{down}",
+                "value": "send, {blind}{down}",
                 "keysToSend": "{down}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "方向键 - 下"
             }
         },
         "F": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{right}",
+                "value": "send, {blind}{right}",
                 "keysToSend": "{right}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "方向键 - 右"
             }
         },
         "G": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{end}",
+                "value": "send, {blind}{end}",
                 "keysToSend": "{end}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "光标移动 - 行尾"
             }
         },
         "H": {
@@ -1538,8 +1453,11 @@
         },
         "K": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}^{right}",
+                "keysToSend": "^{right}",
+                "prefix": "*",
+                "comment": "光标移动 - 右移一个单词"
             }
         },
         "L": {
@@ -1557,39 +1475,46 @@
         "Z": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{appskey}",
+                "value": "send, {blind}{appskey}",
                 "keysToSend": "{appskey}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "常用键 - 打开右键菜单"
             }
         },
         "X": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{esc}",
+                "value": "send, {blind}{esc}",
                 "keysToSend": "{esc}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "常用键 - Esc 键"
             }
         },
         "C": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{backspace}",
-                "keysToSend": "{backspace}",
-                "prefix": "*"
+                "value": "send, {blind}{bs}",
+                "keysToSend": "{bs}",
+                "prefix": "*",
+                "comment": "删除 - BackSpace 键"
             }
         },
         "V": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{delete}",
-                "keysToSend": "{delete}",
-                "prefix": "*"
+                "value": "send, {blind}^{bs}",
+                "keysToSend": "^{bs}",
+                "prefix": "*",
+                "comment": "删除 - 删掉一个单词"
             }
         },
         "B": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}{del}",
+                "keysToSend": "{del}",
+                "prefix": "*",
+                "comment": "删除 - Delete 键"
             }
         },
         "N": {
@@ -1606,16 +1531,20 @@
         },
         ",": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}+{home}{bs}",
+                "keysToSend": "+{home}{bs}",
+                "prefix": "*",
+                "comment": "删除 - 从光标位置删除到行首"
             }
         },
         ".": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{insert}\nreturn",
+                "value": "send, {blind}{insert}",
                 "keysToSend": "{insert}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "Insert 键"
             }
         },
         "/": {
@@ -1700,7 +1629,7 @@
         },
         "W": {
             "2": {
-                "type": "启动程序或激活窗口",
+                "type": "什么也不做",
                 "value": ""
             }
         },
@@ -1937,7 +1866,7 @@
         "Space": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend {blind}{enter}\nreturn",
+                "value": "send, {blind}{enter}",
                 "keysToSend": "{enter}",
                 "prefix": "*"
             }
@@ -1956,10 +1885,8 @@
         },
         "E": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{up}",
-                "prefix": "*",
-                "keysToSend": "{up}"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "R": {
@@ -2006,42 +1933,32 @@
         },
         "A": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{home}\nreturn",
-                "keysToSend": "{home}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "S": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{left}",
-                "keysToSend": "{left}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "D": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{down}",
-                "keysToSend": "{down}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "F": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{right}",
-                "keysToSend": "{right}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "G": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{end}\nreturn",
-                "keysToSend": "{end}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "H": {
@@ -2076,34 +1993,28 @@
         },
         "Z": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend {blind}#v\nreturn",
-                "keysToSend": "#v",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "X": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{esc}\nreturn",
-                "keysToSend": "{esc}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "C": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}{backspace}",
-                "keysToSend": "{backspace}",
+                "value": "send, {blind}{bs}",
+                "keysToSend": "{bs}",
                 "prefix": "*"
             }
         },
         "V": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send {blind}{delete}",
-                "keysToSend": "{delete}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "B": {
@@ -2140,6 +2051,33 @@
             "2": {
                 "type": "什么也不做",
                 "value": ""
+            }
+        },
+        "WheelUp": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+{tab}",
+                "keysToSend": "^+{tab}",
+                "prefix": "*",
+                "comment": "上一个标签"
+            }
+        },
+        "WheelDown": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^{tab}",
+                "keysToSend": "^{tab}",
+                "prefix": "*",
+                "comment": "下一个标签"
+            }
+        },
+        "LButton": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}^!{tab}",
+                "keysToSend": "^!{tab}",
+                "prefix": "*",
+                "comment": "打开窗口管理器"
             }
         }
     },
@@ -2206,41 +2144,39 @@
         },
         "Space": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{space}\nreturn",
-                "keysToSend": "{space}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "Q": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F7}\nreturn",
-                "keysToSend": "{F7}",
+                "value": "send, {blind}{f7}",
+                "keysToSend": "{f7}",
                 "prefix": "*"
             }
         },
         "W": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F8}\nreturn",
-                "keysToSend": "{F8}",
+                "value": "send, {blind}{f8}",
+                "keysToSend": "{f8}",
                 "prefix": "*"
             }
         },
         "E": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F9}\nreturn",
-                "keysToSend": "{F9}",
+                "value": "send, {blind}{f9}",
+                "keysToSend": "{f9}",
                 "prefix": "*"
             }
         },
         "R": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F12}\nreturn",
-                "keysToSend": "{F12}",
+                "value": "send, {blind}{f12}",
+                "keysToSend": "{f12}",
                 "prefix": "*"
             }
         },
@@ -2256,41 +2192,62 @@
                 "value": ""
             }
         },
+        "U": {
+            "2": {
+                "type": "执行单行 ahk 代码",
+                "value": "scrollWheel(\"U\", 1)"
+            }
+        },
+        "I": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{up}",
+                "keysToSend": "{up}",
+                "prefix": "*",
+                "comment": ""
+            }
+        },
+        "O": {
+            "2": {
+                "type": "执行单行 ahk 代码",
+                "value": "scrollWheel(\"O\", 2)"
+            }
+        },
         "P": {
             "2": {
-                "type": "鼠标操作",
-                "value": "enterMouseMode()"
+                "type": "什么也不做",
+                "value": "enter_mouse_mode()"
             }
         },
         "A": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F4}\nreturn",
-                "keysToSend": "{F4}",
+                "value": "send, {blind}{f4}",
+                "keysToSend": "{f4}",
                 "prefix": "*"
             }
         },
         "S": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F5}\nreturn",
-                "keysToSend": "{F5}",
+                "value": "send, {blind}{f5}",
+                "keysToSend": "{f5}",
                 "prefix": "*"
             }
         },
         "D": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F6}\nreturn",
-                "keysToSend": "{F6}",
+                "value": "send, {blind}{f6}",
+                "keysToSend": "{f6}",
                 "prefix": "*"
             }
         },
         "F": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F11}\nreturn",
-                "keysToSend": "{F11}",
+                "value": "send, {blind}{f11}",
+                "keysToSend": "{f11}",
                 "prefix": "*"
             }
         },
@@ -2303,8 +2260,35 @@
         "H": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{backspace}\nreturn",
+                "value": "send, {blind}{backspace}",
                 "keysToSend": "{backspace}",
+                "prefix": "*",
+                "comment": ""
+            }
+        },
+        "J": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{left}",
+                "keysToSend": "{left}",
+                "prefix": "*",
+                "comment": ""
+            }
+        },
+        "K": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{down}",
+                "keysToSend": "{down}",
+                "prefix": "*",
+                "comment": ""
+            }
+        },
+        "L": {
+            "2": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{right}",
+                "keysToSend": "{right}",
                 "prefix": "*"
             }
         },
@@ -2317,32 +2301,32 @@
         "Z": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F1}\nreturn",
-                "keysToSend": "{F1}",
+                "value": "send, {blind}{f1}",
+                "keysToSend": "{f1}",
                 "prefix": "*"
             }
         },
         "X": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F2}\nreturn",
-                "keysToSend": "{F2}",
+                "value": "send, {blind}{f2}",
+                "keysToSend": "{f2}",
                 "prefix": "*"
             }
         },
         "C": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F3}\nreturn",
-                "keysToSend": "{F3}",
+                "value": "send, {blind}{f3}",
+                "keysToSend": "{f3}",
                 "prefix": "*"
             }
         },
         "V": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{F10}\nreturn",
-                "keysToSend": "{F10}",
+                "value": "send, {blind}{f10}",
+                "keysToSend": "{f10}",
                 "prefix": "*"
             }
         },
@@ -2352,76 +2336,28 @@
                 "value": ""
             }
         },
-        "U": {
-            "2": {
-                "type": "鼠标操作",
-                "value": "scrollWheel(\"U\", 1)",
-                "label": "滚轮上滑",
-                "prefix": "*"
-            }
-        },
-        "I": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{up}\nreturn",
-                "keysToSend": "{up}",
-                "prefix": "*"
-            }
-        },
-        "O": {
-            "2": {
-                "type": "鼠标操作",
-                "value": "scrollWheel(\"O\", 2)",
-                "label": "滚轮下滑",
-                "prefix": "*"
-            }
-        },
-        "J": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{left}\nreturn",
-                "keysToSend": "{left}",
-                "prefix": "*"
-            }
-        },
-        "K": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{down}\nreturn",
-                "keysToSend": "{down}",
-                "prefix": "*"
-            }
-        },
-        "L": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{right}\nreturn",
-                "keysToSend": "{right}",
-                "prefix": "*"
-            }
-        },
         "N": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{enter}\nreturn",
+                "value": "send, {blind}{enter}",
                 "keysToSend": "{enter}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": ""
             }
         },
         "M": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{F10}\nreturn",
-                "keysToSend": "+{F10}",
-                "prefix": "*"
+                "value": "send, {blind}+{f10}",
+                "keysToSend": "+{f10}",
+                "prefix": "*",
+                "comment": ""
             }
         },
         ",": {
             "2": {
-                "type": "鼠标操作",
-                "value": "leftClick()",
-                "label": "鼠标左键",
-                "prefix": "*"
+                "type": "执行单行 ahk 代码",
+                "value": "leftClick()"
             }
         },
         ".": {
@@ -2441,145 +2377,109 @@
         "xk": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}()\nsend, {blind}{left 1}\nreturn",
+                "value": "SemicolonAbbr2__xk()",
                 "keysToSend": "{text}()\n{left 1}",
-                "prefix": "*"
+                "prefix": "*",
+                "send_key_function": "SemicolonAbbr2__xk() {\n    send, {blind}{text}()\n    send, {blind}{left 1}\n}",
+                "comment": "输入一对 ()"
             }
         },
         "ss": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}\"\"\nsend, {blind}{left}\nreturn",
+                "value": "SemicolonAbbr2__ss()",
                 "keysToSend": "{text}\"\"\n{left}",
-                "prefix": "*"
+                "prefix": "*",
+                "send_key_function": "SemicolonAbbr2__ss() {\n    send, {blind}{text}\"\"\n    send, {blind}{left}\n}",
+                "comment": "输入一对 \"\""
             }
         },
         "sk": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}「  」\nsend, {blind}{left 2}\nreturn",
+                "value": "SemicolonAbbr2__sk()",
                 "keysToSend": "{text}「  」\n{left 2}",
-                "prefix": "*"
-            }
-        },
-        "sl": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}【】\nsend, {blind}{left 1}\nreturn",
-                "keysToSend": "{text}【】\n{left 1}",
-                "prefix": "*"
+                "prefix": "*",
+                "send_key_function": "SemicolonAbbr2__sk() {\n    send, {blind}{text}「  」\n    send, {blind}{left 2}\n}",
+                "comment": "输入一对 「  」"
             }
         },
         "zk": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "send {blind}[]{left}",
+                "value": "    send, {blind}[]{left}",
                 "keysToSend": "[]{left}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "输入一对 []"
             }
         },
         "dk": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}{}\nsend, {blind}{left}\nreturn",
+                "value": "SemicolonAbbr2__dk()",
                 "keysToSend": "{text}{}\n{left}",
-                "prefix": "*"
-            }
-        },
-        "jt": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}➤` ` \nreturn",
-                "keysToSend": "{text}➤ ",
-                "prefix": "*"
+                "prefix": "*",
+                "send_key_function": "SemicolonAbbr2__dk() {\n    send, {blind}{text}{}\n    send, {blind}{left}\n}",
+                "comment": "输入一对 {}"
             }
         },
         "gt": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}🐶\nreturn",
+                "value": "    send, {blind}{text}🐶",
                 "keysToSend": "{text}🐶",
-                "prefix": "*"
-            }
-        },
-        "lx": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}💚\nreturn",
-                "keysToSend": "{text}💚",
-                "prefix": "*"
-            }
-        },
-        "sm": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}《》\nsend, {blind}{left}\nreturn",
-                "keysToSend": "{text}《》\n{left}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "狗头符号🐶"
             }
         },
         "zh": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text} site:zhihu.com\nreturn",
+                "value": "    send, {blind}{text} site:zhihu.com",
                 "prefix": "*",
-                "keysToSend": "{text} site:zhihu.com"
+                "keysToSend": "{text} site:zhihu.com",
+                "comment": ""
             }
         },
         "gg": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}git add -A`; git commit -a -m \"\"`; git push origin (git branch --show-current)`;\nsend, {blind}{left 47}\nreturn",
+                "value": "SemicolonAbbr2__gg()",
                 "prefix": "*",
-                "keysToSend": "{text}git add -A; git commit -a -m \"\"; git push origin (git branch --show-current);\n{left 47}"
+                "keysToSend": "{text}git add -A; git commit -a -m \"\"; git push origin (git branch --show-current);\n{left 47}",
+                "send_key_function": "SemicolonAbbr2__gg() {\n    send, {blind}{text}git add -A`; git commit -a -m \"\"`; git push origin (git branch --show-current)`;\n    send, {blind}{left 47}\n}",
+                "comment": "一键 git 提交"
             }
         },
         "ver": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}#r\n             sleep 700\nsend, {blind}winver{enter}\nreturn",
+                "value": "SemicolonAbbr2__ver()",
                 "keysToSend": "#r\nsleep 700\nwinver{enter}",
-                "prefix": "*"
-            }
-        },
-        "xm": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}❖` ` \nreturn",
                 "prefix": "*",
-                "keysToSend": "{text}❖ "
-            }
-        },
-        "static": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}https://static.xianyukang.com/\nreturn",
-                "prefix": "*",
-                "keysToSend": "{text}https://static.xianyukang.com/"
+                "send_key_function": "SemicolonAbbr2__ver() {\n    send, {blind}#r\n    sleep 700\n    send, {blind}winver{enter}\n}",
+                "comment": "查看系统版本"
             }
         },
         "fs": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}、\nreturn",
+                "value": "    send, {blind}{text}、",
                 "keysToSend": "{text}、",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "输入中文顿号 、"
             }
         },
-        "fd": {
+        "red": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}，\nreturn",
-                "prefix": "*",
-                "keysToSend": "{text}，"
+                "type": "文字处理",
+                "value": "setColor(\"#D05\")"
             }
         },
-        "ff": {
+        "gre": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{text}。\nreturn",
-                "prefix": "*",
-                "keysToSend": "{text}。"
+                "type": "文字处理",
+                "value": "setColor(\"#080\")"
             }
         }
     },
@@ -2587,274 +2487,167 @@
         "ss": {
             "2": {
                 "type": "系统控制",
-                "value": "slideToShutdown()"
+                "value": "slideToShutdown()",
+                "label": "关机"
             }
         },
         "sl": {
             "2": {
                 "type": "系统控制",
-                "value": "DllCall(\"PowrProf\\SetSuspendState\", \"Int\", 0, \"Int\", 0, \"Int\", 0)"
-            }
-        },
-        "ex": {
-            "2": {
-                "type": "系统控制",
-                "value": "quit(false)"
+                "value": "DllCall(\"PowrProf\\SetSuspendState\", \"Int\", 0, \"Int\", 0, \"Int\", 0)",
+                "label": "睡眠"
             }
         },
         "rb": {
             "2": {
                 "type": "系统控制",
-                "value": "slideToReboot()"
-            }
-        },
-        "fp": {
-            "2": {
-                "type": "文字编辑",
-                "value": "setColor(\"#b309bb\")"
-            }
-        },
-        "fb": {
-            "2": {
-                "type": "文字编辑",
-                "value": "setColor(\"#2E66FF\")"
-            }
-        },
-        "fg": {
-            "2": {
-                "type": "文字编辑",
-                "value": "setColor(\"#080\")"
+                "value": "slideToReboot()",
+                "label": "重启"
             }
         },
         "dd": {
             "2": {
                 "type": "系统控制",
-                "value": "run, shell:downloads"
-            }
-        },
-        "dp": {
-            "2": {
-                "type": "系统控制",
-                "value": "run, shell:my pictures"
-            }
-        },
-        "dv": {
-            "2": {
-                "type": "系统控制",
-                "value": "run, shell:My Video"
-            }
-        },
-        "dr": {
-            "2": {
-                "type": "系统控制",
-                "value": "run, shell:RecycleBinFolder"
+                "value": "run, shell:downloads",
+                "label": "打开「 下载 」文件夹"
             }
         },
         "se": {
             "2": {
                 "type": "系统控制",
-                "value": "openSettings()"
+                "value": "openSettings()",
+                "label": "打开 MyKeymap 设置"
             }
         },
         "no": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = notepad.exe\n    ActivateOrRun(\"记事本\", path, \"\", \"\")\n    return",
+                "value": "ActivateOrRun(\"记事本\", \"notepad.exe\", \"\", \"\")",
                 "toRun": "notepad.exe",
                 "toActivate": "记事本",
-                "cmdArgs": ""
-            }
-        },
-        "sd": {
-            "2": {
-                "type": "系统控制",
-                "value": "run, bin\\ahk.exe bin\\soundControl.ahk"
+                "cmdArgs": "",
+                "comment": "召唤记事本"
             }
         },
         "ld": {
             "2": {
                 "type": "系统控制",
-                "value": "run, bin\\ahk.exe bin\\changeBrightness.ahk"
+                "value": "run, bin\\ahk.exe bin\\changeBrightness.ahk",
+                "label": "显示器亮度调节"
             }
         },
         "we": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = shortcuts\\网易云音乐.lnk\n    ActivateOrRun(\"网易云音乐\", path)\n    return",
+                "value": "ActivateOrRun(\"网易云音乐\", \"shortcuts\\网易云音乐.lnk\", \"\", \"\")",
                 "toActivate": "网易云音乐",
-                "toRun": "shortcuts\\网易云音乐.lnk"
+                "toRun": "shortcuts\\网易云音乐.lnk",
+                "comment": "网易云音乐 UWP"
             }
         },
         "st": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = shortcuts\\Store.lnk\n    ActivateOrRun(\"Microsoft Store\", path, \"\", \"\")\n    return",
+                "value": "ActivateOrRun(\"Microsoft Store\", \"shortcuts\\Store.lnk\", \"\", \"\")",
                 "toActivate": "Microsoft Store",
-                "toRun": "shortcuts\\Store.lnk"
-            }
-        },
-        "dw": {
-            "2": {
-                "type": "系统控制",
-                "value": "run, shell:Personal"
+                "toRun": "shortcuts\\Store.lnk",
+                "comment": "Windows 应用商店"
             }
         },
         "bb": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\n    ActivateOrRun(\"Bing 词典\", path, \"--app=https://cn.bing.com/dict/search?q=nice\", \"\")\n    return",
+                "value": "ActivateOrRun(\"Bing 词典\", \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\", \"--app=https://cn.bing.com/dict/search?q=nice\", \"\")",
                 "toActivate": "Bing 词典",
                 "toRun": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-                "cmdArgs": "--app=https://cn.bing.com/dict/search?q=nice"
-            }
-        },
-        "gg": {
-            "2": {
-                "type": "启动程序或激活窗口",
-                "value": "\n    path = C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\n    ActivateOrRun(\"Google 翻译\", path, \"--app=https://translate.google.cn/?op=translate&sl=auto&tl=zh-CN&text=nice\", \"\")\n    return",
-                "cmdArgs": "--app=https://translate.google.cn/?op=translate&sl=auto&tl=zh-CN&text=nice",
-                "toActivate": "Google 翻译",
-                "toRun": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-            }
-        },
-        "fr": {
-            "2": {
-                "type": "文字编辑",
-                "value": "setColor(\"#D05\")"
-            }
-        },
-        "fi": {
-            "2": {
-                "type": "文字编辑",
-                "value": "setColor(\"#FF00FF\")"
-            }
-        },
-        "ee": {
-            "2": {
-                "type": "窗口操作",
-                "value": "ToggleTopMost()"
+                "cmdArgs": "--app=https://cn.bing.com/dict/search?q=nice",
+                "comment": "Bing 词典"
             }
         },
         "dm": {
             "2": {
-                "type": "系统控制",
-                "value": "run, %A_WorkingDir%"
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"\", \".\\\", \"\", \"\")",
+                "toRun": ".\\",
+                "toActivate": "",
+                "comment": "打开 MyKeymap 文件夹"
             }
         },
         "rex": {
             "2": {
                 "type": "系统控制",
-                "value": "restartExplorer()"
+                "value": "restartExplorer()",
+                "label": "重启资源管理器"
             }
         },
-        "fw": {
+        "tm": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_ProgramsCommon%\\Google Chrome.lnk\n    ActivateOrRun(\"\", path, \"\", \"\")\n    return",
-                "toRun": "%A_ProgramsCommon%\\Google Chrome.lnk",
-                "toActivate": ""
+                "value": "ActivateOrRun(\"\", \"taskmgr.exe\", \"\", \"\")",
+                "toRun": "taskmgr.exe",
+                "toActivate": "",
+                "comment": "Task Manager 任务管理器"
             }
         },
-        "mm": {
+        "sp": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = D:\\notes\\MyKeymap-Roadmap.md\n    ActivateOrRun(\"MyKeymap-Roadmap.md - Typora\", path, \"\", \"\")\n    return",
-                "toActivate": "MyKeymap-Roadmap.md - Typora",
-                "toRun": "D:\\notes\\MyKeymap-Roadmap.md",
-                "cmdArgs": ""
+                "value": "ActivateOrRun(\"\", \"https://open.spotify.com/\", \"\", \"\")",
+                "toRun": "https://open.spotify.com/",
+                "toActivate": "",
+                "comment": "打开 Spotify 网页播放器"
             }
         },
-        "md": {
+        "lj": {
             "2": {
-                "type": "启动程序或激活窗口",
-                "value": "\n    path = D:\\project\\my_site\\docs\\MyKeymap.md\n    ActivateOrRun(\"MyKeymap.md - Typora\", path, \"\", \"\")\n    return",
-                "toRun": "D:\\project\\my_site\\docs\\MyKeymap.md",
-                "toActivate": "MyKeymap.md - Typora",
-                "cmdArgs": ""
+                "type": "系统控制",
+                "value": "run, shell:RecycleBinFolder",
+                "label": "打开「 回收站 」"
             }
         },
-        "cs": {
+        "help": {
             "2": {
-                "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk\n    ActivateOrRun(\"my_site - Visual Studio Code\", path, \"D:\\project\\my_site\", \"\")\n    return",
-                "cmdArgs": "D:\\project\\my_site",
-                "toActivate": "my_site - Visual Studio Code",
-                "toRun": "%code%"
+                "type": "系统控制",
+                "value": "run, bin\\site\\help.html",
+                "label": "回顾 MyKeymap 配置"
             }
         },
-        "cm": {
+        "bd ": {
             "2": {
                 "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk\n    ActivateOrRun(\"MyKeymap - Visual Studio Code\", path, \"D:\\MyFiles\\MyKeymap\", \"\")\n    return",
-                "toActivate": "MyKeymap - Visual Studio Code",
-                "toRun": "%code%",
-                "workingDir": "",
-                "cmdArgs": "D:\\MyFiles\\MyKeymap"
+                "value": "ActivateOrRun(\"\", \"https://www.baidu.com\", \"\", \"\")",
+                "toRun": "https://www.baidu.com",
+                "toActivate": "",
+                "comment": "打开百度 (bd后面有个空格哦)"
             }
         },
-        "ir": {
+        "ex": {
             "2": {
-                "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk\n    ActivateOrRun(\"room-api ahk_exe idea64.exe\", path, \"D:\\work\\room-api\", \"\")\n    return",
-                "toActivate": "room-api ahk_exe idea64.exe",
-                "toRun": "%idea%",
-                "cmdArgs": "D:\\work\\room-api"
-            }
-        },
-        "io": {
-            "2": {
-                "type": "启动程序或激活窗口",
-                "value": "\n    path = %A_Programs%\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk\n    ActivateOrRun(\"room-order-api ahk_exe idea64.exe\", path, \"D:\\work\\room-order-api\", \"\")\n    return",
-                "toActivate": "room-order-api ahk_exe idea64.exe",
-                "toRun": "%idea%",
-                "cmdArgs": "D:\\work\\room-order-api",
-                "workingDir": ""
-            }
-        },
-        "mw": {
-            "2": {
-                "type": "启动程序或激活窗口",
-                "value": "\n    path = D:\\notes\\working.md\n    ActivateOrRun(\"working.md - Typora\", path, \"\", \"\")\n    return",
-                "toActivate": "working.md - Typora",
-                "cmdArgs": "",
-                "toRun": "D:\\notes\\working.md"
+                "type": "系统控制",
+                "value": "quit(false)",
+                "label": "退出 MyKeymap"
             }
         }
     },
     "CapslockAbbrKeys": [
         "ss",
         "sl",
-        "ex",
         "rb",
-        "fp",
-        "fb",
-        "fg",
         "dd",
-        "dp",
-        "dv",
-        "dr",
         "se",
         "no",
-        "sd",
         "ld",
         "we",
         "st",
-        "dw",
         "bb",
-        "gg",
-        "fr",
-        "fi",
-        "ee",
         "dm",
         "rex",
-        "fw",
-        "mm",
-        "md",
-        "cs",
-        "cm",
-        "ir",
-        "io",
-        "mw"
+        "tm",
+        "sp",
+        "lj",
+        "help",
+        "bd ",
+        "ex"
     ],
     "snackbar": true,
     "snackbarText": "保存成功",
@@ -2862,21 +2655,15 @@
         "xk",
         "ss",
         "sk",
-        "sl",
         "zk",
         "dk",
-        "jt",
         "gt",
-        "lx",
-        "sm",
         "zh",
         "gg",
         "ver",
-        "xm",
-        "static",
         "fs",
-        "fd",
-        "ff"
+        "red",
+        "gre"
     ],
     "pathVariables": [
         {
@@ -2921,8 +2708,8 @@
         "scrollDelay2": "0.03",
         "moveDelay1": "0.13",
         "moveDelay2": "0.01",
-        "fastMoveRepeat": "40",
-        "fastMoveSingle": "40",
+        "fastMoveRepeat": "60",
+        "fastMoveSingle": "60",
         "slowMoveRepeat": "10",
         "slowMoveSingle": "10",
         "SpaceMode": true,
@@ -3045,10 +2832,8 @@
         },
         "I": {
             "2": {
-                "type": "鼠标操作",
-                "value": "very_slow_move_mouse(\"I\", 0, -1)",
-                "label": "鼠标上移",
-                "prefix": "*"
+                "type": "执行单行 ahk 代码",
+                "value": "very_slow_move_mouse(\"I\", 0, -1)"
             }
         },
         "O": {
@@ -3101,26 +2886,20 @@
         },
         "J": {
             "2": {
-                "type": "鼠标操作",
-                "value": "very_slow_move_mouse(\"J\", -1, 0)",
-                "label": "鼠标左移",
-                "prefix": "*"
+                "type": "执行单行 ahk 代码",
+                "value": "very_slow_move_mouse(\"J\", -1, 0)"
             }
         },
         "K": {
             "2": {
-                "type": "鼠标操作",
-                "value": "very_slow_move_mouse(\"K\", 0, 1)",
-                "label": "鼠标下移",
-                "prefix": "*"
+                "type": "执行单行 ahk 代码",
+                "value": "very_slow_move_mouse(\"K\", 0, 1)"
             }
         },
         "L": {
             "2": {
-                "type": "鼠标操作",
-                "value": "very_slow_move_mouse(\"L\", 1, 0)",
-                "label": "鼠标右移",
-                "prefix": "*"
+                "type": "执行单行 ahk 代码",
+                "value": "very_slow_move_mouse(\"L\", 1, 0)"
             }
         },
         ";": {
@@ -3260,7 +3039,7 @@
         "Q": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{backspace}\nreturn",
+                "value": "send, {blind}{backspace}",
                 "keysToSend": "{backspace}",
                 "prefix": "*"
             }
@@ -3268,7 +3047,7 @@
         "W": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}``\nreturn",
+                "value": "send, {blind}``",
                 "keysToSend": "``",
                 "prefix": "*"
             }
@@ -3276,7 +3055,7 @@
         "E": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}(\nreturn",
+                "value": "send, {blind}(",
                 "keysToSend": "(",
                 "prefix": "*"
             }
@@ -3284,7 +3063,7 @@
         "R": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind})\nreturn",
+                "value": "send, {blind})",
                 "keysToSend": ")",
                 "prefix": "*"
             }
@@ -3310,7 +3089,7 @@
         "I": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}-\nreturn",
+                "value": "send, {blind}-",
                 "keysToSend": "-",
                 "prefix": "*"
             }
@@ -3318,9 +3097,10 @@
         "O": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}=\nreturn",
+                "value": "send, {blind}=",
                 "keysToSend": "=",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": ""
             }
         },
         "P": {
@@ -3332,7 +3112,7 @@
         "A": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}1\nreturn",
+                "value": "send, {blind}1",
                 "keysToSend": "1",
                 "prefix": "*"
             }
@@ -3340,7 +3120,7 @@
         "S": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}2\nreturn",
+                "value": "send, {blind}2",
                 "keysToSend": "2",
                 "prefix": "*"
             }
@@ -3348,7 +3128,7 @@
         "D": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}3\nreturn",
+                "value": "send, {blind}3",
                 "keysToSend": "3",
                 "prefix": "*"
             }
@@ -3356,7 +3136,7 @@
         "F": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}4\nreturn",
+                "value": "send, {blind}4",
                 "keysToSend": "4",
                 "prefix": "*"
             }
@@ -3364,7 +3144,7 @@
         "G": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}5\nreturn",
+                "value": "send, {blind}5",
                 "keysToSend": "5",
                 "prefix": "*"
             }
@@ -3372,7 +3152,7 @@
         "H": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}6\nreturn",
+                "value": "send, {blind}6",
                 "keysToSend": "6",
                 "prefix": "*"
             }
@@ -3380,7 +3160,7 @@
         "J": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}7\nreturn",
+                "value": "send, {blind}7",
                 "keysToSend": "7",
                 "prefix": "*"
             }
@@ -3388,7 +3168,7 @@
         "K": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}8\nreturn",
+                "value": "send, {blind}8",
                 "keysToSend": "8",
                 "prefix": "*"
             }
@@ -3396,7 +3176,7 @@
         "L": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}9\nreturn",
+                "value": "send, {blind}9",
                 "keysToSend": "9",
                 "prefix": "*"
             }
@@ -3404,7 +3184,7 @@
         ";": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}0\nreturn",
+                "value": "send, {blind}0",
                 "keysToSend": "0",
                 "prefix": "*"
             }
@@ -3442,7 +3222,7 @@
         "N": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}[\nreturn",
+                "value": "send, {blind}[",
                 "keysToSend": "[",
                 "prefix": "*"
             }
@@ -3450,7 +3230,7 @@
         "M": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}]\nreturn",
+                "value": "send, {blind}]",
                 "keysToSend": "]",
                 "prefix": "*"
             }
@@ -3470,7 +3250,7 @@
         "/": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}\\\nreturn",
+                "value": "send, {blind}\\",
                 "keysToSend": "\\",
                 "prefix": "*"
             }
@@ -3799,296 +3579,29 @@
         },
         "W": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^+{tab}\nreturn",
-                "keysToSend": "^+{tab}",
-                "prefix": "*"
-            }
-        },
-        "E": {
-            "2": {
                 "type": "什么也不做",
                 "value": ""
-            }
-        },
-        "R": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^{tab}\nreturn",
-                "keysToSend": "^{tab}",
-                "prefix": "*"
-            }
-        },
-        "T": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Y": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "U": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "I": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "O": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "P": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "A": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^{home}\nreturn",
-                "keysToSend": "^{home}",
-                "prefix": "*"
-            }
-        },
-        "S": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^{left}\nreturn",
-                "keysToSend": "^{left}",
-                "prefix": "*"
-            }
-        },
-        "D": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "F": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^{right}\nreturn",
-                "keysToSend": "^{right}",
-                "prefix": "*"
-            }
-        },
-        "G": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^{end}\nreturn",
-                "keysToSend": "^{end}",
-                "prefix": "*"
-            }
-        },
-        "H": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "J": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "K": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "L": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        ";": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Z": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "X": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "C": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^{bs}\nreturn",
-                "keysToSend": "^{bs}",
-                "prefix": "*"
-            }
-        },
-        "V": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "B": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "N": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "M": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        ",": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        ".": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "/": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        }
-    },
-    "JModeK": {
-        "0": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "1": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "2": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "3": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "4": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "5": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "6": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "7": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "8": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "9": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Space": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "Q": {
-            "2": {
-                "type": "什么也不做",
-                "value": ""
-            }
-        },
-        "W": {
-            "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^+{left}\nreturn",
-                "keysToSend": "^+{left}",
-                "prefix": "*"
             }
         },
         "E": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{up}\nreturn",
+                "value": "send, {blind}+{up}",
                 "keysToSend": "+{up}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "文字选择 - 向上"
             }
         },
         "R": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}^+{right}\nreturn",
-                "keysToSend": "^+{right}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "T": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}{home}+{end}\nreturn",
-                "keysToSend": "{home}+{end}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "Y": {
@@ -4105,8 +3618,11 @@
         },
         "I": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+{left}",
+                "keysToSend": "^+{left}",
+                "prefix": "*",
+                "comment": "选择一个单词 - 向左"
             }
         },
         "O": {
@@ -4124,41 +3640,46 @@
         "A": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{home}\nreturn",
+                "value": "send, {blind}+{home}",
                 "keysToSend": "+{home}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "从光标位置选择到行首"
             }
         },
         "S": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{left}\nreturn",
+                "value": "send, {blind}+{left}",
                 "keysToSend": "+{left}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "文字选择 - 向左"
             }
         },
         "D": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{down}\nreturn",
+                "value": "send, {blind}+{down}",
                 "keysToSend": "+{down}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "文字选择 - 向下"
             }
         },
         "F": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{right}\nreturn",
+                "value": "send, {blind}+{right}",
                 "keysToSend": "+{right}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "文字选择 - 向右"
             }
         },
         "G": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{end}\nreturn",
+                "value": "send, {blind}+{end}",
                 "keysToSend": "+{end}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "从光标位置选择到行尾"
             }
         },
         "H": {
@@ -4175,8 +3696,11 @@
         },
         "K": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+{right}",
+                "keysToSend": "^+{right}",
+                "prefix": "*",
+                "comment": "选择一个单词 - 向右"
             }
         },
         "L": {
@@ -4200,31 +3724,34 @@
         "X": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{esc}\nreturn",
+                "value": "send, {blind}+{esc}",
                 "keysToSend": "+{esc}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "Shift + Esc"
             }
         },
         "C": {
             "2": {
                 "type": "输入文本或按键",
-                "value": "\nsend, {blind}{bs}\nreturn",
+                "value": "send, {blind}{bs}",
                 "keysToSend": "{bs}",
-                "prefix": "*"
+                "prefix": "*",
+                "comment": "BackSpace 键删掉中选的文字"
             }
         },
         "V": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "\nsend, {blind}+{del}\nreturn",
-                "keysToSend": "+{del}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "B": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}+{del}",
+                "keysToSend": "+{del}",
+                "prefix": "*",
+                "comment": "Shift + Del 永久删除文件"
             }
         },
         "N": {
@@ -4261,8 +3788,23 @@
     "windowSelectors": [
         {
             "id": "3",
-            "key": "IntelliJ IDEA",
-            "value": "ahk_exe idea64.exe"
+            "key": "📁 文件管理器",
+            "value": "ahk_exe explorer.exe"
+        },
+        {
+            "id": "4",
+            "key": "🔵 VS Code",
+            "value": "- Visual Studio Code"
+        },
+        {
+            "id": "5",
+            "key": "🔵 Visual Studio",
+            "value": "- Microsoft Visual Studio"
+        },
+        {
+            "id": "6",
+            "key": "",
+            "value": ""
         }
     ],
     "supportPerAppConfig": true,
@@ -4271,12 +3813,10 @@
             "Capslock",
             "CapslockF",
             "Mode3",
-            "Mode3R",
             "Mode9",
             "CapslockSpace",
             "SpaceMode",
             "JMode",
-            "JModeK",
             "JModeL",
             "TabMode",
             "Semicolon",
@@ -4558,5 +4098,13 @@
                 "value": ""
             }
         }
-    }
+    },
+    "send_key_functions": [
+        "SemicolonAbbr2__xk() {\n    send, {blind}{text}()\n    send, {blind}{left 1}\n}",
+        "SemicolonAbbr2__ss() {\n    send, {blind}{text}\"\"\n    send, {blind}{left}\n}",
+        "SemicolonAbbr2__sk() {\n    send, {blind}{text}「  」\n    send, {blind}{left 2}\n}",
+        "SemicolonAbbr2__dk() {\n    send, {blind}{text}{}\n    send, {blind}{left}\n}",
+        "SemicolonAbbr2__gg() {\n    send, {blind}{text}git add -A`; git commit -a -m \"\"`; git push origin (git branch --show-current)`;\n    send, {blind}{left 47}\n}",
+        "SemicolonAbbr2__ver() {\n    send, {blind}#r\n    sleep 700\n    send, {blind}winver{enter}\n}"
+    ]
 }

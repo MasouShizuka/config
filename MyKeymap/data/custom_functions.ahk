@@ -1,9 +1,9 @@
-; 自定义的函数写在这个文件里
+﻿; 自定义的函数写在这个文件里
 
 
-helloWorld()
-{
-    tip("hello world!")
+
+sendChinese() {
+    send, {text}你好中文!
 }
 
 center_window()
@@ -53,18 +53,18 @@ close_or_run_script(name)
         return name . " run"
 }
 
-enterMouseMode() 
+enter_mouse_mode() 
 {
     global SLOWMODE
     SLOWMODE := true
 }
 
-leftClickWithoutFalse() 
+left_click_without_false() 
 {
     send,  {blind}{LButton}
 }
 
-rightClickWithoutFalse(tempDisableRButton := false) 
+right_click_without_false(tempDisableRButton := false) 
 {
     if (!tempDisableRButton)
         send,  {blind}{RButton}

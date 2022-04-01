@@ -56,20 +56,20 @@ local user_opts = {
     iamaprogrammer = false,             -- use native mpv values and disable OSC
                                         -- internal track list management (and some
                                         -- functions that depend on it)
-    layout = "bottombar",               -- 原可选为 "bottombar" "topbar" "box" "slimbox" ；在osc_lazy中新增 "bottombox"
+    layout = "bottombar",               -- 原版可选为 "bottombar" "topbar" "box" "slimbox" ；在osc_lazy中新增 "bottombox"
     seekbarstyle = "bar",               -- bar, diamond or knob
     seekbarhandlesize = 0.6,            -- size ratio of the diamond and knob handle
     seekrangestyle = "inverted",        -- bar, line, slider, inverted or none
     seekrangeseparate = true,           -- wether the seekranges overlay on the bar-style seekbar
     seekrangealpha = 200,               -- transparency of seekranges
-    seekbarkeyframes = true,            -- use keyframes when dragging the seekbar
+    seekbarkeyframes = true,            -- use keyframes when dragging the seekbar       -- 现不受全局hr-seek的控制 
     title = "${media-title}",           -- string compatible with property-expansion
                                         -- to be shown as OSC title
     tooltipborder = 1,                  -- border of tooltip in bottom/topbar
-    timetotal = true,                   -- display total time instead of remaining time?   -- 原为false
+    timetotal = true,                   -- display total time instead of remaining time? -- 原版为false
     timems = false,                     -- display timecodes with milliseconds?
     visibility = "auto",                -- only used at init to set visibility_mode(...)
-    boxmaxchars = 150,                  -- title crop threshold for box layout             -- 原为80
+    boxmaxchars = 150,                  -- title crop threshold for box layout           -- 原版为80
     boxvideo = false,                   -- apply osc_param.video_margins to video
     windowcontrols = "auto",            -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
@@ -85,6 +85,7 @@ local user_opts = {
     sub_title = " ",                    -- bottombox布局的右侧子标题
     sub_title2 = "对比[${contrast}]  明度[${brightness}]  伽马[${gamma}]  饱和[${saturation}]  色相[${hue}]",
                                         -- bottombox布局的临时右侧子标题
+    seekbar_scrollseek = "fast",        -- 进度条的滚轮跳转模式 "fast" "second" "frame" 。不受全局hr-seek的控制
     showonpause = false,                -- 在暂停时常驻 OSC
     showonstart = false,                -- 在播放开始或当播放下一个文件时显示 OSC
     showonseek = false,                 -- 在跳转时显示 OSC
@@ -1955,8 +1956,10 @@ layouts["bottombox"] = function ()
     lo.button.maxchars = user_opts.boxmaxchars
 
     if (user_opts.layout == "bottombox") then
-        if (osc_param.display_aspect < 1) then
-            lo.button.maxchars = 50
+        if (osc_param.display_aspect < 1) then lo.button.maxchars = 50
+            if (osc_param.display_aspect < 0.8) then lo.button.maxchars = 35
+                if (osc_param.display_aspect < 0.6) then lo.button.maxchars = 20 end
+            end
         end
     end
 
@@ -2542,8 +2545,12 @@ function osc_init()
 
     -- playlist buttons
 
-    -- prev
+    -- prev -- 上一个
     ne = new_element("pl_prev", "button")
+
+    if (user_opts.layout == "bottombox") then
+        ne.visible = (osc_param.display_aspect > 0.5)
+    end
 
     ne.content = "\238\132\144"
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
@@ -2559,8 +2566,12 @@ function osc_init()
     ne.eventresponder["mbtn_right_up"] =
         function () show_message(get_playlist(), 3) end
 
-    --next
+    --next -- 下一个
     ne = new_element("pl_next", "button")
+
+    if (user_opts.layout == "bottombox") then
+        ne.visible = (osc_param.display_aspect > 0.5)
+    end
 
     ne.content = "\238\132\129"
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
@@ -2740,7 +2751,7 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "fullscreen") end
 
-    --seekbar
+    --seekbar --全局进度条增强
     ne = new_element("seekbar", "slider")
 
     ne.enabled = not (mp.get_property("percent-pos") == nil)
@@ -2802,9 +2813,9 @@ function osc_init()
             local seekto = get_slider_value(element)
             if (element.state.lastseek == nil) or
                 (not (element.state.lastseek == seekto)) then
-                    local flags = "absolute-percent"
+                    local flags = "absolute-percent+keyframes" -- 防止--hr-seek的影响
                     if not user_opts.seekbarkeyframes then
-                        flags = flags .. "+exact"
+                        flags = "absolute-percent+exact"       -- 防止--hr-seek的影响
                     end
                     mp.commandv("seek", seekto, flags)
                     element.state.lastseek = seekto
@@ -2819,8 +2830,26 @@ function osc_init()
     ne.eventresponder["mbtn_right_down"] = function (element) mp.commandv('script-message', 'Thumbnailer-toggle-osc') end
     ne.eventresponder["mbtn_right_dbl_press"] = function (element) mp.commandv('script-message', 'Thumbnailer-double') end
 
-    -- tc_left (current pos)
+    ne.eventresponder["wheel_up_press"] = function ()
+        if user_opts.seekbar_scrollseek == "fast" then mp.commandv('seek', -0.1, 'keyframes')
+        elseif user_opts.seekbar_scrollseek == "second" then mp.commandv('seek', -0.1, 'exact')
+        elseif user_opts.seekbar_scrollseek == "frame" then mp.commandv('frame-back-step')
+        end
+    end
+
+    ne.eventresponder["wheel_down_press"] = function ()
+        if user_opts.seekbar_scrollseek == "fast" then mp.commandv('seek', 0.1, 'keyframes')
+        elseif user_opts.seekbar_scrollseek == "second" then mp.commandv('seek', 0.1, 'exact')
+        elseif user_opts.seekbar_scrollseek == "frame" then mp.commandv('frame-step')
+        end
+    end
+
+    -- tc_left (current pos) -- 当前时间
     ne = new_element("tc_left", "button")
+
+    if (user_opts.layout == "bottombox") then
+        ne.visible = (osc_param.display_aspect > 0.5)
+    end
 
     ne.content = function ()
         if (state.tc_ms) then
@@ -2834,10 +2863,12 @@ function osc_init()
         request_init()
     end
 
-    -- tc_right (total/remaining time)
+    -- tc_right (total/remaining time) -- 总/剩余时间
     ne = new_element("tc_right", "button")
 
     ne.visible = (mp.get_property_number("duration", 0) > 0)
+    if (user_opts.layout == "bottombox") and (mp.get_property_number("duration", 0) > 0) then ne.visible = (osc_param.display_aspect > 0.5) end
+
     ne.content = function ()
         if (state.rightTC_trem) then
             if state.tc_ms then
@@ -3639,7 +3670,7 @@ function visibility_mode(mode, no_osd)
     utils.shared_script_property_set("osc-visibility", mode)
 
     if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
-        mp.osd_message("Thumbnailer_OSC的可见性：" .. mode)
+        mp.osd_message("OSC的可见性：" .. mode)
     end
 
     -- Reset the input state on a mode change. The input state will be

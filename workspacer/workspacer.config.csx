@@ -25,6 +25,7 @@ using workspacer.FocusIndicator;
 // 程序的进程名称列表
 static string[] process_name_list = {
     "Code",
+    "TE64",
     "vivaldi",
     "WindowsTerminal",
 };
@@ -360,8 +361,8 @@ Action<IConfigContext> doConfig = (context) => {
         "  ",
         "  ",
         "  ",
-        "  ",
         "  ",
+        "  ",
         "  ",
         "  ",
     };
@@ -387,9 +388,9 @@ Action<IConfigContext> doConfig = (context) => {
     context.WindowRouter.RouteProcessName("vivaldi", icons[1]);
     context.WindowRouter.RouteProcessName("QQ", icons[2]);
     context.WindowRouter.RouteProcessName("WeChat", icons[2]);
-    context.WindowRouter.RouteProcessName("mpv", icons[3]);
-    context.WindowRouter.RouteProcessName("cloudmusic", icons[4]);
-    context.WindowRouter.RouteProcessName("foobar2000", icons[4]);
+    context.WindowRouter.RouteProcessName("cloudmusic", icons[3]);
+    context.WindowRouter.RouteProcessName("foobar2000", icons[3]);
+    context.WindowRouter.RouteProcessName("mpv", icons[4]);
     context.WindowRouter.RouteProcessName("Thunder", icons[5]);
 
     // 菜单
