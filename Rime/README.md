@@ -5,6 +5,7 @@
 - [https://github.com/rime/home](https://github.com/rime/home)
 - [https://github.com/rime/weasel](https://github.com/rime/weasel)
 - [https://github.com/ssnhd/rime](https://github.com/ssnhd/rime)
+- [https://github.com/BlindingDark/rime-easy-en](https://github.com/BlindingDark/rime-easy-en)
 
 ## 配置文件
 
