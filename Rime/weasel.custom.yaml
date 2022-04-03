@@ -8,7 +8,7 @@ patch:
   style:
     color_scheme: steam
     font_face: Microsoft YaHei
-    font_point: 14
+    font_point: 20
     horizontal: true 
     fullscreen: false
     inline_preedit: false

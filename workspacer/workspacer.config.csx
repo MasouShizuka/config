@@ -287,8 +287,8 @@ Action<IConfigContext> doConfig = (context) => {
     //context.Branch = Branch.None;
 
     var background = new Color(0x0, 0x0, 0x0);
-    var bar_height = 24;
-    var font_size = 10;
+    var bar_height = 28;
+    var font_size = 14;
     var font_name = "Iosevka NF";
     var gap = 8;
 

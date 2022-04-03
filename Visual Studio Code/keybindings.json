@@ -1,6 +1,7 @@
 // 将键绑定放在此文件中以覆盖默认值auto[]
 [
     // Neovim
+
     {
         "key": "enter",
         "command": "-list.select",
@@ -226,6 +227,7 @@
 
 
     // Keyboard Quickfix
+
     {
         "key": "ctrl+.",
         "command": "-editor.action.quickFix",
@@ -240,11 +242,14 @@
 
 
     // Notebook
+
+    // 编辑
     {
         "key": "i",
         "command": "notebook.cell.edit",
         "when": "notebookCellListFocused && notebookEditable && !inputFocus"
     },
+    // 退出
     {
         "key": "ctrl+q",
         "command": "notebook.cell.quitEdit",
@@ -253,59 +258,16 @@
 
     // 移动 cell
     {
-        "key": "ctrl+alt+j",
+        "key": "shift+j",
         "command": "notebook.cell.moveDown",
-        "when": "notebookEditorFocused"
+        "when": "notebookEditorFocused && !inputFocus"
     },
     {
-        "key": "ctrl+alt+k",
+        "key": "shift+k",
         "command": "notebook.cell.moveUp",
-        "when": "notebookEditorFocused"
+        "when": "notebookEditorFocused && !inputFocus"
     },
 
-    // 去除 !inputFocus 条件
-    {
-        "key": "ctrl+enter",
-        "command": "-notebook.cell.insertCodeCellBelow",
-        "when": "notebookCellListFocused && !inputFocus"
-    },
-    {
-        "key": "ctrl+enter",
-        "command": "notebook.cell.insertCodeCellBelow",
-        "when": "notebookCellListFocused"
-    },
-    {
-        "key": "ctrl+shift+enter",
-        "command": "-notebook.cell.insertCodeCellAbove",
-        "when": "notebookCellListFocused && !inputFocus"
-    },
-    {
-        "key": "ctrl+shift+enter",
-        "command": "notebook.cell.insertCodeCellAbove",
-        "when": "notebookCellListFocused"
-    },
-
-    // 增加 inputFocus 条件
-    {
-        "key": "shift+enter",
-        "command": "-notebook.cell.executeAndSelectBelow",
-        "when": "notebookCellListFocused && notebookCellType == 'markup' || notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
-    },
-    {
-        "key": "shift+enter",
-        "command": "notebook.cell.executeAndSelectBelow",
-        "when": "inputFocus && notebookEditorFocused || notebookCellListFocused && notebookCellType == 'markup' || notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
-    },
-    {
-        "key": "ctrl+alt+enter",
-        "command": "-notebook.cell.execute",
-        "when": "notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
-    },
-    {
-        "key": "ctrl+alt+enter",
-        "command": "notebook.cell.execute",
-        "when": "inputFocus && notebookEditorFocused || notebookCellListFocused && notebookMissingKernelExtension && !notebookCellExecuting && notebookCellType == 'code' || notebookCellListFocused && !notebookCellExecuting && notebookCellType == 'code' && notebookKernelCount > 0"
-    },
 
 
 
@@ -620,7 +582,7 @@
     {
         "key": "ctrl+3",
         "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active"
+        "when": "terminal.active && terminalFocus"
     },
     // 面板 Docs View 或 Jupyter:Variables 页面时，则关闭面板
     {

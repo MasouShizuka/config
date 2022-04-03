@@ -44,7 +44,7 @@
         "shellscript": "cd $dirWithoutTrailingSlash && bash $fileName"
     },
     "code-runner.runInTerminal": true,
-    "debug.console.fontSize": 16,
+    "debug.console.fontSize": 20,
     "debug.toolBarLocation": "docked",
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.bracketPairColorization.enabled": true,
@@ -56,7 +56,7 @@
     "editor.find.seedSearchStringFromSelection": "selection",
     "editor.fontFamily": "'Iosevka'",
     "editor.fontLigatures": true,
-    "editor.fontSize": 16,
+    "editor.fontSize": 20,
     "editor.guides.bracketPairs": true,
     "editor.inlineSuggest.enabled": true,
     "editor.lineNumbers": "relative",
@@ -74,6 +74,7 @@
         "*.txt": "plaintext"
     },
     "files.autoGuessEncoding": true,
+    "files.autoSave": "afterDelay",
     "github.copilot.enable": {
         "*": true,
         "markdown": false,
@@ -109,6 +110,7 @@
         "image/png",
         "text/plain"
     ],
+    "notebook.lineNumbers": "on",
     "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
@@ -145,7 +147,7 @@
     "terminal.integrated.cursorBlinking": true,
     "terminal.integrated.cursorStyle": "line",
     "terminal.integrated.defaultProfile.windows": "PowerShell",
-    "terminal.integrated.fontSize": 16,
+    "terminal.integrated.fontSize": 20,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.tabs.enabled": true,
@@ -168,6 +170,5 @@
     "workbench.iconTheme": "material-icon-theme",
     "workbench.list.automaticKeyboardNavigation": false,
     "workbench.localHistory.enabled": false,
-    "workbench.startupEditor": "none",
-    "files.autoSave": "afterDelay"
+    "workbench.startupEditor": "none"
 }
