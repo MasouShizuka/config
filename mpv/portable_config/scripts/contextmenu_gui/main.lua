@@ -518,6 +518,14 @@ menuList = {
 
 }
 
+-- If mpv enters a stopped state, change the change the menu back to the "no file loaded" menu
+-- so that it will still popup.
+menuListBase = menuList
+mp.register_event("end-file", function()
+    menuList = menuListBase
+end)
+
+-- DO NOT create the "playing" menu tables until AFTER the file has loaded as we're unable to
 -- DO NOT create the "playing" menu tables until AFTER the file has loaded as we're unable to
 -- dynamically create some menus if it tries to build the table before the file is loaded.
 -- A prime example is the chapter-list or track-list values, which are unavailable until

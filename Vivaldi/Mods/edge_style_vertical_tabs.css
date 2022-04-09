@@ -30,10 +30,10 @@ v1.2.9: Added hover delay (Thanks to u/TwisterMc!)
 
 /* modified */
 /* .tabs-left #main {
-        margin-left: 50px;
-} */
+    margin-left: 50px;
+}
 
-/* .tabs-right #main {
+.tabs-right #main {
     margin-right: 50px;
 } */
 
@@ -106,9 +106,10 @@ v1.2.9: Added hover delay (Thanks to u/TwisterMc!)
 }
 
 #tabs-tabbar-container {
-    width: 50px !important;
     /* modified */
-    /* position: fixed; */
+    /* width: 0 !important;
+    position: fixed; */
+    width: 50px !important;
     top: 0;
     height: 100%;
     z-index: 99999999;
@@ -147,7 +148,8 @@ v1.2.9: Added hover delay (Thanks to u/TwisterMc!)
 
 #tabs-container.left:hover,
 #tabs-container.right:hover {
-    position: fixed;
+    /* modified */
+    /* position: fixed; */
     left: 0;
     z-index: 9999999;
     color: var(--colorFg) !important;
@@ -182,7 +184,8 @@ v1.2.9: Added hover delay (Thanks to u/TwisterMc!)
 #tabs-container.right:not(:hover) {
     width: 50px !important;
     height: 100%;
-    position: fixed;
+    /* modified */
+    /* position: fixed; */
     background-color: var(--colorBg);
     top: 0;
     left: 0;
@@ -251,7 +254,9 @@ v1.2.9: Added hover delay (Thanks to u/TwisterMc!)
     color: inherit !important;
 }
 .tab-position .tab.active {
-    background-color: var(--colorBgLighter) !important;
+    /* modified */
+    /* background-color: var(--colorBgLighter) !important; */
+    background-color: var(--colorHighlightBg) !important;
     color: var(--colorFg) !important;
     border: 1px solid var(--colorBgDarker) !important;
     box-shadow: 0px 5px 10px var(--colorBgDarker) !important;

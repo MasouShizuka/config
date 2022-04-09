@@ -9,7 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -36,8 +36,8 @@ form.Height = 0;
 form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 form.TopLevel = true;
 form.TopMost = true;
-static void refresh() {
-    Thread.Sleep(200);
+static async void refresh() {
+    await Task.Delay(300);
     // 激活 Form 并隐藏，以恢复程序的状态
     form.Show();
     form.Activate();
@@ -66,9 +66,9 @@ struct RECT
 [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
 [DllImport("User32.dll")] static extern bool SetCursorPos(int X, int Y);
-static void move_cursor_to_current_window_center() {
+static async void move_cursor_to_current_window_center() {
     try {
-        Thread.Sleep(100);
+        await Task.Delay(100);
         RECT r = new RECT();
         IntPtr foregroundWindow = GetForegroundWindow();
         GetWindowRect(foregroundWindow, out r);

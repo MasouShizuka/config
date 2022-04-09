@@ -219,8 +219,8 @@ function find_and_add_entries()
 
     local append = {[-1] = {}, [1] = {}}
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
-        -- for i = 1, opt.max_entries do
         -- modified
+        -- for i = 1, opt.max_entries do
         for i = 1, #files do
             local file = files[current + i * direction]
             local pl_e = pl[pl_current + i * direction]
@@ -414,7 +414,9 @@ function remove_vfSub()
 	mp.command(vfSub)
 end
 
-
+mp.register_event("file-loaded", function()
+	if mp.get_property("vf") ~= "" then mp.command("vf remove @LUA-load_plus") end
+end)
 
 mp.register_event("start-file", find_and_add_entries)
 
