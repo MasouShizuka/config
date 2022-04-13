@@ -6,10 +6,10 @@ patch:
 
   # 样式
   style:
-    color_scheme: steam
+    color_scheme: default
     font_face: Microsoft YaHei
     font_point: 20
-    horizontal: true 
+    horizontal: true
     fullscreen: false
     inline_preedit: false
     preedit_type: composition
@@ -22,10 +22,25 @@ patch:
       margin_x: 12
       margin_y: 12
       spacing: 10
-      candidate_spacing: 20
+      candidate_spacing: 10
       hilite_spacing: 4
       hilite_padding: 2
       round_corner: 4
 
   # 状态通知，可设为全开（always）全关（never）
   show_notifications_when: appropriate
+
+  preset_color_schemes/default:
+    name: 'Default'
+    back_color: 0x4b4b4b                   # 背景
+    border_color: 0x4b4b4b                 # 边框
+    text_color: 0xdedddd                   # 内选区域 文字
+    hilited_text_color: 0xdedddd           # 内选区域 高亮文字
+    hilited_back_color: 0x4b4b4b           # 内选区域 高亮背景
+    candidate_text_color: 0xffffff         # 候选项 文字
+    comment_text_color: 0xdedddd           # 候选项 提示
+    label_color: 0x888785                  # 候选项 编号
+    hilited_candidate_back_color: 0x4b4b4b # 候选项 高亮背景
+    hilited_candidate_text_color: 0xFFE696 # 候选项 高亮文字
+    hilited_comment_text_color: 0xdedddd   # 候选项 高亮提示 
+    hilited_label_color: 0xffffff          # 候选项 高亮编号

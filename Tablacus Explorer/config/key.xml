@@ -1,4 +1,36 @@
-﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F" Type="Tools">Search</All><All Key="$1,Ctrl+J" Type="Add-ons">Switch to next pane</All><All Key="Ctrl+K" Type="Add-ons">Switch to previous pane</All><All Key="Ctrl+P" Type="Addon switcher">preview</All><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+D" Type="Tools">Add to favorites</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="Ctrl+N" Type="Tools">New file</List><List Key="Ctrl+Shift+N" Type="Tools">New folder</List><List Key="$35" Type="Add-ons">Filter Bar</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">SevenZipCompress</List><List Key="Shift+C" Type="Context">自动解压(&amp;Z)</List><List Key="D" Type="Context">delete</List><List Key="E" Type="Context">VSCode</List><List Key="S" Type="Context">undelete</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
+﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F" Type="Tools">Search</All><All Key="$1,Ctrl+J" Type="Add-ons">Switch to next pane</All><All Key="Ctrl+K" Type="Add-ons">Switch to previous pane</All><All Key="Ctrl+P" Type="Addon switcher">preview</All><All Key="Ctrl+S" Type="Add-ons">Switch hidden items</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+D" Type="Tools">Add to favorites</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="Ctrl+T" Type="Tabs">New tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Inner Filter Bar</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">SevenZipCompress</List><List Key="Shift+C" Type="Context">自动解压(&amp;Z)</List><List Key="D" Type="JScript">const Items = await FV.Items(SVGIO_SELECTION | SVGIO_FLAG_VIEWORDER);
+const Count = await Items.Count;
+if (Count) {
+	let nIndex = Math.max(api.SendMessage(FV.hwndList, LVM_GETNEXTITEM, -1, LVIS_SELECTED), 0) - 1;
+
+	const hMenu = await api.CreatePopupMenu();
+	const ContextMenu = await api.ContextMenu(Items, FV);
+	if (ContextMenu) {
+		await ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_DEFAULTONLY);
+		await ContextMenu.InvokeCommand(0, ui_.hwnd, CommandID_DELETE - 1, null, null, SW_SHOWNORMAL, 0, 0);
+	}
+	api.DestroyMenu(hMenu);
+
+	if (nIndex &gt;= 0) {
+		FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+	}
+}</List><List Key="S" Type="JScript">const Items = await FV.Items(SVGIO_SELECTION | SVGIO_FLAG_VIEWORDER);
+const Count = await Items.Count;
+if (Count) {
+	let nIndex = Math.max(api.SendMessage(FV.hwndList, LVM_GETNEXTITEM, -1, LVIS_SELECTED), 0) - 1;
+
+	const hMenu = await api.CreatePopupMenu();
+	const ContextMenu = await api.ContextMenu(Items, FV);
+	if (ContextMenu) {
+		await ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_DEFAULTONLY);
+		await ContextMenu.InvokeCommand(0, ui_.hwnd, "undelete", null, null, SW_SHOWNORMAL, 0, 0);
+	}
+	api.DestroyMenu(hMenu);
+
+	if (nIndex &gt;= 0) {
+		FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+	}
+}</List><List Key="E" Type="Context">VSCode</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
 	FV.SelectItem(0, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
 }</List><List Key="Shift+G" Type="JScript">let count = FV.ItemCount(SVGIO_ALLVIEW);
 if (count &gt; 0) {
@@ -7,11 +39,10 @@ if (count &gt; 0) {
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
 	FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
-	// FV.SelectItem(nIndex, SVSI_DESELECT);
-	nIndex = nIndex + 1;
-	if (nIndex &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
-		// FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
-		FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+	if (nIndex + 1 &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
+		FV.SelectItem(nIndex, SVSI_DESELECT);
+		FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+		// FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
 	}
 }</List><List Key="Shift+J" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
@@ -25,11 +56,10 @@ if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
 	FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
-	// FV.SelectItem(nIndex, SVSI_DESELECT);
-	nIndex = nIndex - 1;
-	if (nIndex &gt;= 0) {
-		// FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
-		FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+	if (nIndex - 1 &gt;= 0) {
+		FV.SelectItem(nIndex, SVSI_DESELECT);
+		FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+		// FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
 	}
 }</List><List Key="Shift+K" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
@@ -39,79 +69,79 @@ if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
 	if (nIndex &gt;= 0) {
 		FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
 	}
-}</List><List Key="R" Type="Context">rename</List><List Key="Shift+R" Type="Open in new tab">回收站</List><List Key="Shift+S" Type="Background">{9F156763-7844-4DC4-B2B1-901F640F5155}</List><List Key="T" Type="Selected items">Open in new tab</List><List Key="Shift+T" Type="Add-ons">Undo close tab</List><List Key="Ctrl+T" Type="Tabs">New tab</List><List Key="V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
+}</List><List Key="N" Type="Tools">New file</List><List Key="Shift+N" Type="Tools">New folder</List><List Key="R" Type="Context">rename</List><List Key="Shift+R" Type="Open in new tab">回收站</List><List Key="Shift+S" Type="Background">{9F156763-7844-4DC4-B2B1-901F640F5155}</List><List Key="T" Type="Selected items">Open in new tab</List><List Key="Shift+T" Type="Add-ons">Undo close tab</List><List Key="V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
 if (FV) {
-  var hMenu = api.CreatePopupMenu(), hSubMenu;
-  var ContextMenu = FV.ViewMenu();
-  if (ContextMenu) {
-    ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7fff, CMF_DEFAULTONLY);
-    var mii = api.Memory("MENUITEMINFO");
-    mii.cbSize = mii.Size;
-    mii.fMask = MIIM_SUBMENU;
-    for (var i = 0; i &lt; api.GetMenuItemCount(hMenu); i++) {
-      api.GetMenuItemInfo(hMenu, i, true, mii);
-      if (mii.hSubMenu) {
-        hSubMenu = mii.hSubMenu;
-        mii.fMask = MIIM_FTYPE | MIIM_STATE;
-        for (var j = 0; j &lt; api.GetMenuItemCount(hSubMenu); j++) {
-          api.GetMenuItemInfo(hSubMenu, j, true, mii);
-          if (mii.fState &amp; MFS_CHECKED &amp;&amp; mii.fType &amp; MFT_RADIOCHECK) {
-            mii.fMask = MIIM_ID;
-            api.GetMenuItemInfo(hSubMenu, j + 1, true, mii);
-            if (mii.wID &lt;= 0) {
-              api.GetMenuItemInfo(hSubMenu, 0, true, mii);
-            }
-            ContextMenu.InvokeCommand(0, te.hwnd, mii.wID - 1, null, null, SW_SHOWNORMAL, 0, 0);
-            break;
-          }
-        }
-        break;
-      }
-    }
-    api.DestroyMenu(hMenu);
-  }
+	var hMenu = api.CreatePopupMenu(), hSubMenu;
+	var ContextMenu = FV.ViewMenu();
+	if (ContextMenu) {
+		ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7fff, CMF_DEFAULTONLY);
+		var mii = api.Memory("MENUITEMINFO");
+		mii.cbSize = mii.Size;
+		mii.fMask = MIIM_SUBMENU;
+		for (var i = 0; i &lt; api.GetMenuItemCount(hMenu); i++) {
+			api.GetMenuItemInfo(hMenu, i, true, mii);
+			if (mii.hSubMenu) {
+				hSubMenu = mii.hSubMenu;
+				mii.fMask = MIIM_FTYPE | MIIM_STATE;
+				for (var j = 0; j &lt; api.GetMenuItemCount(hSubMenu); j++) {
+					api.GetMenuItemInfo(hSubMenu, j, true, mii);
+					if (mii.fState &amp; MFS_CHECKED &amp;&amp; mii.fType &amp; MFT_RADIOCHECK) {
+						mii.fMask = MIIM_ID;
+						api.GetMenuItemInfo(hSubMenu, j + 1, true, mii);
+						if (mii.wID &lt;= 0) {
+							api.GetMenuItemInfo(hSubMenu, 0, true, mii);
+						}
+						ContextMenu.InvokeCommand(0, te.hwnd, mii.wID - 1, null, null, SW_SHOWNORMAL, 0, 0);
+						break;
+					}
+				}
+				break;
+			}
+		}
+		api.DestroyMenu(hMenu);
+	}
 }</List><List Key="Shift+V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
 if (FV) {
-  var hMenu = api.CreatePopupMenu(), hSubMenu;
-  var ContextMenu = FV.ViewMenu();
-  if (ContextMenu) {
-    ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7fff, CMF_DEFAULTONLY);
-    var mii = api.Memory("MENUITEMINFO");
-    mii.cbSize = mii.Size;
-    mii.fMask = MIIM_SUBMENU;
-    for (var i = 0; i &lt; api.GetMenuItemCount(hMenu); i++) {
-      api.GetMenuItemInfo(hMenu, i, true, mii);
-      if (mii.hSubMenu) {
-        hSubMenu = mii.hSubMenu;
-        mii.fMask = MIIM_FTYPE | MIIM_STATE;
-        for (var j = 0; j &lt; api.GetMenuItemCount(hSubMenu); j++) {
-          api.GetMenuItemInfo(hSubMenu, j, true, mii);
-          if (mii.fState &amp; MFS_CHECKED &amp;&amp; mii.fType &amp; MFT_RADIOCHECK) {
-            mii.fMask = MIIM_ID;
-            if (j) {
-              api.GetMenuItemInfo(hSubMenu, j - 1, true, mii);
-            } else {
-              mii.fMask = MIIM_ID | MIIM_FTYPE;
-              for (var k = 0; k &lt; api.GetMenuItemCount(hSubMenu); k++) {
-                api.GetMenuItemInfo(hSubMenu, k, true, mii);
-                if (mii.fType &amp; MFT_SEPARATOR) {
-                  mii.wID = wID;
-                  break;
-                }
-                wID = mii.wID;
-              }
-            }
-            if (mii.wID &gt; 0) {
-                ContextMenu.InvokeCommand(0, te.hwnd, mii.wID - 1, null, null, SW_SHOWNORMAL, 0, 0);
-            }
-            break;
-          }
-        }
-        break;
-      }
-    }
-    api.DestroyMenu(hMenu);
-  }
+	var hMenu = api.CreatePopupMenu(), hSubMenu;
+	var ContextMenu = FV.ViewMenu();
+	if (ContextMenu) {
+		ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7fff, CMF_DEFAULTONLY);
+		var mii = api.Memory("MENUITEMINFO");
+		mii.cbSize = mii.Size;
+		mii.fMask = MIIM_SUBMENU;
+		for (var i = 0; i &lt; api.GetMenuItemCount(hMenu); i++) {
+			api.GetMenuItemInfo(hMenu, i, true, mii);
+			if (mii.hSubMenu) {
+				hSubMenu = mii.hSubMenu;
+				mii.fMask = MIIM_FTYPE | MIIM_STATE;
+				for (var j = 0; j &lt; api.GetMenuItemCount(hSubMenu); j++) {
+					api.GetMenuItemInfo(hSubMenu, j, true, mii);
+					if (mii.fState &amp; MFS_CHECKED &amp;&amp; mii.fType &amp; MFT_RADIOCHECK) {
+						mii.fMask = MIIM_ID;
+						if (j) {
+							api.GetMenuItemInfo(hSubMenu, j - 1, true, mii);
+						} else {
+							mii.fMask = MIIM_ID | MIIM_FTYPE;
+							for (var k = 0; k &lt; api.GetMenuItemCount(hSubMenu); k++) {
+								api.GetMenuItemInfo(hSubMenu, k, true, mii);
+								if (mii.fType &amp; MFT_SEPARATOR) {
+									mii.wID = wID;
+									break;
+								}
+								wID = mii.wID;
+							}
+						}
+						if (mii.wID &gt; 0) {
+							ContextMenu.InvokeCommand(0, te.hwnd, mii.wID - 1, null, null, SW_SHOWNORMAL, 0, 0);
+						}
+						break;
+					}
+				}
+				break;
+			}
+		}
+		api.DestroyMenu(hMenu);
+	}
 }</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path);</List><List Key="Shift+1" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
 	Addons.Split.Exec(1, 1);
 } else {

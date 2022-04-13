@@ -154,6 +154,9 @@ onoremap L $
 nmap n nzz
 nmap N Nzz
 
+vnoremap < <gv
+vnoremap > >gv
+
 nmap s <leader><leader>s
 xmap s <leader><leader>s
 
@@ -166,6 +169,11 @@ if exists('g:vscode')
     nnoremap zm <Cmd>call VSCodeNotify('editor.foldAll')<CR>
     nnoremap zr <Cmd>call VSCodeNotify('editor.unfoldAll')<CR>
 
+    nmap <C-d> :+9<CR>:+9<CR>:+2<CR>zz
+    xmap <C-d> 9j9j
+    nmap <C-u> :-9<CR>:-9<CR>:-2<CR>zz
+    xmap <C-u> 9k9k
+
     xmap gc  <Plug>VSCodeCommentary
     nmap gc  <Plug>VSCodeCommentary
     omap gc  <Plug>VSCodeCommentary
@@ -175,8 +183,8 @@ if exists('g:vscode')
 
     nnoremap <Leader>b <Cmd>call VSCodeNotify('bookmarks.toggle')<CR>
     nnoremap <Leader>p <Cmd>call VSCodeNotify('extension.pasteImage')<CR>
-    nnoremap <Leader>r <Cmd>call CompileRun()<CR>
-    func! CompileRun()
+
+    function! Compile_Run()
         if &filetype == 'html' || &filetype == 'xhtml'
             call VSCodeNotify('office.html.preview')
         elseif &filetype == 'markdown'
@@ -184,7 +192,8 @@ if exists('g:vscode')
         else
             call VSCodeNotify('code-runner.run')
         endif
-    endfunc
+    endfunction
+    nnoremap <Leader>r <Cmd>call Compile_Run()<CR>
 else
     inoremap ' ''<Esc>i
     inoremap " ""<Esc>i
@@ -196,6 +205,11 @@ else
     inoremap <C-l> <Right>
     inoremap <C-k> <Down>
     inoremap <C-i> <Up>
+
+    nnoremap <C-d> <C-d>zz
+    xnoremap <C-d> <C-d>zz
+    nnoremap <C-u> <C-u>zz
+    xnoremap <C-u> <C-u>zz
 
     nnoremap <C-h> gT
     nnoremap <C-l> gt
@@ -216,21 +230,20 @@ else
     noremap <C-Left> <C-w><
     noremap <C-Right> <C-w>>
 
-    noremap <Leader>r :call CompileRun()<CR>
-    func! CompileRun()
-        exec 'w'
+    function! Compile_Run()
+        execute 'w'
         if &filetype == 'c'
-            exec '!g++ % -o %<'
-            exec '!time ./%<'
+            execute '!g++ % -o %<'
+            execute '!time ./%<'
         elseif &filetype == 'cpp'
             set splitbelow
-            exec '!g++ -std=c++11 % -Wall -o %<'
+            execute '!g++ -std=c++11 % -Wall -o %<'
             :sp
             :res -15
             :term ./%<
         elseif &filetype == 'cs'
             set splitbelow
-            silent! exec '!mcs %'
+            silent! execute '!mcs %'
             :sp
             :res -5
             :term mono %<.exe
@@ -246,15 +259,15 @@ else
             :sp
             :term python3 %
         elseif &filetype == 'html'
-            silent! exec '!'.g:mkdp_browser.' % &'
+            silent! execute '!'.g:mkdp_browser.' % &'
         elseif &filetype == 'markdown'
-            exec 'MarkdownPreviewToggle'
+            execute 'MarkdownPreviewToggle'
         elseif &filetype == 'tex'
-            silent! exec 'VimtexStop'
-            silent! exec 'VimtexCompile'
+            silent! execute 'VimtexStop'
+            silent! execute 'VimtexCompile'
         elseif &filetype == 'dart'
-            exec 'CocCommand flutter.run -d '.g:flutter_default_device.' '.g:flutter_run_args
-            silent! exec 'CocCommand flutter.dev.openDevLog'
+            execute 'CocCommand flutter.run -d '.g:flutter_default_device.' '.g:flutter_run_args
+            silent! execute 'CocCommand flutter.dev.openDevLog'
         elseif &filetype == 'javascript'
             set splitbelow
             :sp
@@ -264,10 +277,12 @@ else
             :sp
             :term go run .
         endif
-    endfunc
+    endfunction
+    noremap <Leader>r :call Compile_Run()<CR>
 
     if LINUX() && !WSL()
         let g:input_toggle = 1
+
         function! Fcitx2en()
             let s:input_status = system('fcitx-remote')
             if s:input_status == 2
@@ -275,6 +290,7 @@ else
                 let l:a = system('fcitx-remote -c')
             endif
         endfunction
+
         function! Fcitx2zh()
             let s:input_status = system('fcitx-remote')
             if s:input_status != 2 && g:input_toggle == 1
@@ -282,7 +298,9 @@ else
                 let g:input_toggle = 0
             endif
         endfunction
+
         set ttimeoutlen=150
+
         autocmd InsertLeave * call Fcitx2en()
         autocmd InsertEnter * call Fcitx2zh()
     endif

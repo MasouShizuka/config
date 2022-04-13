@@ -632,8 +632,11 @@
         },
         "7": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f7}",
+                "keysToSend": "{f7}",
+                "prefix": "*",
+                "comment": "F7 键"
             }
         },
         "8": {
@@ -997,6 +1000,13 @@
                 "keysToSend": "+{f8}",
                 "prefix": "*",
                 "comment": "Git - 上一处修改"
+            },
+            "6": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}+{f7}",
+                "keysToSend": "+{f7}",
+                "prefix": "*",
+                "comment": "Git - 上一处修改"
             }
         },
         "R": {
@@ -1093,6 +1103,13 @@
                 "keysToSend": "{f8}",
                 "prefix": "*",
                 "comment": "Git - 下一处修改"
+            },
+            "6": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}{f7}",
+                "comment": "Git - 下一处修改",
+                "keysToSend": "{f7}",
+                "prefix": "*"
             }
         },
         "F": {
@@ -1129,6 +1146,13 @@
                 "type": "输入文本或按键",
                 "value": "send, {blind}^0^g",
                 "keysToSend": "^0^g",
+                "prefix": "*",
+                "comment": "Git 面板"
+            },
+            "6": {
+                "type": "输入文本或按键",
+                "value": "send, {blind}!9",
+                "keysToSend": "!9",
                 "prefix": "*",
                 "comment": "Git 面板"
             }
@@ -2482,6 +2506,24 @@
                 "type": "文字处理",
                 "value": "setColor(\"#080\")"
             }
+        },
+        "blu": {
+            "2": {
+                "type": "文字处理",
+                "value": "setColor(\"#2E66FF\")"
+            }
+        },
+        "pur": {
+            "2": {
+                "type": "文字处理",
+                "value": "setColor(\"#b309bb\")"
+            }
+        },
+        "pin": {
+            "2": {
+                "type": "文字处理",
+                "value": "setColor(\"#FF00FF\")"
+            }
         }
     },
     "CapslockAbbr": {
@@ -2664,7 +2706,10 @@
         "ver",
         "fs",
         "red",
-        "gre"
+        "gre",
+        "blu",
+        "pur",
+        "pin"
     ],
     "pathVariables": [
         {
@@ -2703,7 +2748,7 @@
         "SemicolonMode": true,
         "RButtonMode": false,
         "mapRAltToCtrl": true,
-        "runOnStartup": true,
+        "runOnStartup": false,
         "scrollOnceLineCount": "1",
         "scrollDelay1": "0.2",
         "scrollDelay2": "0.03",
@@ -2720,7 +2765,9 @@
         "enableCapslockAbbr": false,
         "enableCommaMode": false,
         "CommaMode": false,
-        "numKeyConfigurable": true
+        "numKeyConfigurable": true,
+        "enableCapsF": false,
+        "enableCapsSpace": true
     },
     "CapslockSpace": {
         "0": {
@@ -3804,8 +3851,8 @@
         },
         {
             "id": "6",
-            "key": "",
-            "value": ""
+            "key": "🔵 JetBrains IDE",
+            "value": "ahk_class SunAwtFrame"
         }
     ],
     "supportPerAppConfig": true,

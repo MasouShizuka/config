@@ -21,19 +21,23 @@
 	top: 15px;
 }
 /* modified */
+/* #header {
+	min-height: 10px;
+}
+.window-minimize {
+	position: absolute;
+}
+button.window-minimize svg {
+    padding-bottom: 4px;
+}
+
+.window-maximize {
+	visibility: hidden;
+} */
 #header {
 	min-height: 0px;
 }
-/* .window-minimize {
-	position: absolute;
-} */
-/* button.window-minimize svg {
-    padding-bottom: 4px;
-} */
 
-/* .window-maximize {
-	visibility: hidden;
-} */
 #browser:not(.tabs-top) .vivaldi {
 	visibility: hidden;
 }
@@ -41,12 +45,14 @@
 	visibility: hidden;
 }
 
+/* modified */
 /* Adjust the following depending on number of extensions: */
+/* .toolbar-extensions {
+	padding-right: 60px;
+} */
 .toolbar-extensions {
 	padding-right: 136px;
 }
-
-/* modified */
 .minimal-ui #header{
     display: none;
 }
