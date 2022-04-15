@@ -4,5 +4,6 @@
 
 ## 说明
 
-- `sh` 文件可通过安装 `Git` 并使用 `Git Bash` 来运行
-    - 将 `Git/bin` 添加到 `系统Path` 环境变量后，可用 `bash` 命令直接运行 `sh` 文件
+- `sh` 文件可通过安装 `MSYS2` 来运行
+    - 将 `msys64/usr/bin` 添加到 `系统Path` 环境变量，之后可用 `bash` 命令运行 `sh` 文件
+    - 将 `msys64/mingw64/bin` 添加到 `系统Path` 环境变量

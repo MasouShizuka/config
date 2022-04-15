@@ -4,6 +4,14 @@
     "actions": 
     [
         {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "keys": "ctrl+c"
+        },
+        {
             "command": "unbound",
             "keys": "ctrl+shift+tab"
         },
@@ -172,19 +180,18 @@
             "keys": "ctrl+comma"
         },
         {
-            "command": 
-            {
-                "action": "copy",
-                "singleLine": false
-            },
-            "keys": "ctrl+c"
-        },
-        {
             "command": "paste",
             "keys": "ctrl+v"
         },
         {
-            "command": "openNewTabDropdown"
+            "command": 
+            {
+                "action": "quakeMode"
+            }
+        },
+        {
+            "command": "find",
+            "keys": "ctrl+f"
         },
         {
             "command": 
@@ -194,14 +201,7 @@
             "keys": "ctrl+shift+u"
         },
         {
-            "command": "find",
-            "keys": "ctrl+f"
-        },
-        {
-            "command": 
-            {
-                "action": "quakeMode"
-            }
+            "command": "openNewTabDropdown"
         },
         {
             "command": 

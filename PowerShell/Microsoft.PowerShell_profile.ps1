@@ -10,7 +10,6 @@ $runningInVsCode = $env:TERM_PROGRAM -eq "vscode"
 # alias
 
 Set-Alias ll ls
-Set-Alias zsh "C:\Program Files\Git\usr\bin\zsh.exe"
 
 
 # 主题
@@ -45,6 +44,10 @@ function which($command) {
     Get-Command -Name $command -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
 }
+# 打开 Zsh
+function zsh() {
+    C:/msys64/msys2_shell.cmd -defterm -here -mingw64 -no-start -shell zsh -use-full-path
+}
 
 
 # 启动执行命令
@@ -52,4 +55,3 @@ function which($command) {
 if (-not $runningInVsCode) {
     zsh
 }
-

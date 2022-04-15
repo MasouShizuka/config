@@ -1,9 +1,6 @@
 {
     "[bat]": {
         "editor.detectIndentation": true,
-        "editor.rulers": [
-            120
-        ],
         "editor.tabSize": 4,
         "editor.trimAutoWhitespace": true,
         "editor.useTabStops": false,
