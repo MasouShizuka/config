@@ -63,6 +63,9 @@ allHotkeys.Push("*9")
 {% if Settings.CommaMode %}
 allHotkeys.Push("*,")
 {% endif %}
+{% if Settings.DotMode %}
+allHotkeys.Push("*.")
+{% endif %}
 {% if Settings.JMode %}
 allHotkeys.Push("*j")
 {% endif %}
@@ -215,6 +218,13 @@ RAlt::LCtrl
     return
 {% endif %}
 
+; RAlt::
+;     disableOtherHotkey(thisHotkey)
+;     CommaMode := true
+;     keywait RAlt
+;     CommaMode := false
+;     enableOtherHotkey(thisHotkey)
+;     return
 {% if Settings.CommaMode %}
 *,::
     thisHotkey := A_ThisHotkey
@@ -224,6 +234,19 @@ RAlt::LCtrl
     CommaMode := false
     if (A_PriorKey == "," && A_TimeSinceThisHotkey < 350)
         send, {blind}`, 
+    enableOtherHotkey(thisHotkey)
+    return
+{% endif %}
+
+{% if Settings.DotMode %}
+*.::
+    thisHotkey := A_ThisHotkey
+    disableOtherHotkey(thisHotkey)
+    DotMode := true
+    keywait `. 
+    DotMode := false
+    if (A_PriorKey == "." && A_TimeSinceThisHotkey < 350)
+        send, {blind}`. 
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -316,12 +339,12 @@ enterLButtonMode()
 {% if Settings.JMode %}
 
 
-#if JModeL
-l::return
-{{{ keymapToAhk(JModeL) }}}
+#if JModeK
+k::return
+{{{ keymapToAhk(JModeK) }}}
 
 #if JMode
-l::enterJModeL()
+k::enterJModeK()
 {% for key,value in JMode.items()|sort(attribute="1.value") %}
     {% if value.value %}
 {{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
@@ -382,6 +405,11 @@ l::enterJModeL()
 {% if Settings.CommaMode %}
 #if CommaMode
 {{{ keymapToAhk(CommaMode) }}}
+{% endif %}
+
+{% if Settings.DotMode %}
+#if DotMode
+{{{ keymapToAhk(DotMode) }}}
 {% endif %}
 
 

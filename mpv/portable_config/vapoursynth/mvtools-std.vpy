@@ -21,7 +21,7 @@ def ffps(fps):
 if (container_fps <= 31):
     vfps,vden = ffps(container_fps)
     print(container_fps, vfps, vden)
-    
+
     clip = core.std.AssumeFPS(clip, fpsnum=int(vfps), fpsden=vden)
     _super  = core.mv.Super(clip, pel=2, sharp=1, rfilter=4,hpad=8,vpad=8,levels=0)
     mvbw = core.mv.Analyse(_super,   64, 64,    0, 

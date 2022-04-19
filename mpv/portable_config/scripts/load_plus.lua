@@ -259,164 +259,170 @@ end
 --
 
 function import_files()
-	local was_ontop = mp.get_property_native("ontop")
-	if was_ontop then mp.set_property_native("ontop", false) end
-	local res = utils.subprocess({
-		args = {'powershell', '-NoProfile', '-Command', [[& {
-			Trap {
-				Write-Error -ErrorRecord $_
-				Exit 1
-			}
-			Add-Type -AssemblyName PresentationFramework
-			$u8 = [System.Text.Encoding]::UTF8
-			$out = [Console]::OpenStandardOutput()
-			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
-			$ofd.Multiselect = $true
-			If ($ofd.ShowDialog() -eq $true) {
-				ForEach ($filename in $ofd.FileNames) {
-					$u8filename = $u8.GetBytes("$filename`n")
-					$out.Write($u8filename, 0, $u8filename.Length)
-				}
-			}
-		}]]},
-		cancellable = false,
-	})
-	if was_ontop then mp.set_property_native("ontop", true) end
-	if (res.status ~= 0) then return end
-	local first_file = true
-	for filename in string.gmatch(res.stdout, '[^\n]+') do
-		mp.commandv('loadfile', filename, first_file and 'replace' or 'append')
-		first_file = false
-	end
+    local was_ontop = mp.get_property_native("ontop")
+    if was_ontop then mp.set_property_native("ontop", false) end
+    local res = utils.subprocess({
+        args = {'powershell', '-NoProfile', '-Command', [[& {
+            Trap {
+                Write-Error -ErrorRecord $_
+                Exit 1
+            }
+            Add-Type -AssemblyName PresentationFramework
+            $u8 = [System.Text.Encoding]::UTF8
+            $out = [Console]::OpenStandardOutput()
+            $ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+            $ofd.Multiselect = $true
+            If ($ofd.ShowDialog() -eq $true) {
+                ForEach ($filename in $ofd.FileNames) {
+                    $u8filename = $u8.GetBytes("$filename`n")
+                    $out.Write($u8filename, 0, $u8filename.Length)
+                }
+            }
+        }]]},
+        cancellable = false,
+    })
+    if was_ontop then mp.set_property_native("ontop", true) end
+    if (res.status ~= 0) then return end
+    local first_file = true
+    for filename in string.gmatch(res.stdout, '[^\n]+') do
+        mp.commandv('loadfile', filename, first_file and 'replace' or 'append')
+        first_file = false
+    end
 end
 
 function import_url()
-	local was_ontop = mp.get_property_native("ontop")
-	if was_ontop then mp.set_property_native("ontop", false) end
-	local res = utils.subprocess({
-		args = {'powershell', '-NoProfile', '-Command', [[& {
-			Trap {
-				Write-Error -ErrorRecord $_
-				Exit 1
-			}
-			Add-Type -AssemblyName Microsoft.VisualBasic
-			$u8 = [System.Text.Encoding]::UTF8
-			$out = [Console]::OpenStandardOutput()
+    local was_ontop = mp.get_property_native("ontop")
+    if was_ontop then mp.set_property_native("ontop", false) end
+    local res = utils.subprocess({
+        args = {'powershell', '-NoProfile', '-Command', [[& {
+            Trap {
+                Write-Error -ErrorRecord $_
+                Exit 1
+            }
+            Add-Type -AssemblyName Microsoft.VisualBasic
+            $u8 = [System.Text.Encoding]::UTF8
+            $out = [Console]::OpenStandardOutput()
             $urlname = [Microsoft.VisualBasic.Interaction]::InputBox("输入地址", "打开", "https://")
             $u8urlname = $u8.GetBytes("$urlname")
             $out.Write($u8urlname, 0, $u8urlname.Length)
-		}]]},
-		cancellable = false,
-	})
-	if was_ontop then mp.set_property_native("ontop", true) end
-	if (res.status ~= 0) then return end
-	mp.commandv('loadfile', res.stdout)
+        }]]},
+        cancellable = false,
+    })
+    if was_ontop then mp.set_property_native("ontop", true) end
+    if (res.status ~= 0) then return end
+    mp.commandv('loadfile', res.stdout)
 end
 
 function append_aid()
-	local was_ontop = mp.get_property_native("ontop")
-	if was_ontop then mp.set_property_native("ontop", false) end
-	local res = utils.subprocess({
-		args = {'powershell', '-NoProfile', '-Command', [[& {
-			Trap {
-				Write-Error -ErrorRecord $_
-				Exit 1
-			}
-			Add-Type -AssemblyName PresentationFramework
-			$u8 = [System.Text.Encoding]::UTF8
-			$out = [Console]::OpenStandardOutput()
-			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
-			$ofd.Multiselect = $false
-			If ($ofd.ShowDialog() -eq $true) {
-				ForEach ($filename in $ofd.FileNames) {
-					$u8filename = $u8.GetBytes("$filename")
-					$out.Write($u8filename, 0, $u8filename.Length)
-				}
-			}
-		}]]},
-		cancellable = false,
-	})
-	if was_ontop then mp.set_property_native("ontop", true) end
-	if (res.status ~= 0) then return end
-	for filename in string.gmatch(res.stdout, '[^\n]+') do
-		mp.commandv('audio-add', filename, 'auto')
-	end
+    local was_ontop = mp.get_property_native("ontop")
+    if was_ontop then mp.set_property_native("ontop", false) end
+    local res = utils.subprocess({
+        args = {'powershell', '-NoProfile', '-Command', [[& {
+            Trap {
+                Write-Error -ErrorRecord $_
+                Exit 1
+            }
+            Add-Type -AssemblyName PresentationFramework
+            $u8 = [System.Text.Encoding]::UTF8
+            $out = [Console]::OpenStandardOutput()
+            $ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+            $ofd.Multiselect = $false
+            If ($ofd.ShowDialog() -eq $true) {
+                ForEach ($filename in $ofd.FileNames) {
+                    $u8filename = $u8.GetBytes("$filename")
+                    $out.Write($u8filename, 0, $u8filename.Length)
+                }
+            }
+        }]]},
+        cancellable = false,
+    })
+    if was_ontop then mp.set_property_native("ontop", true) end
+    if (res.status ~= 0) then return end
+    for filename in string.gmatch(res.stdout, '[^\n]+') do
+        mp.commandv('audio-add', filename, 'auto')
+    end
 end
 
 function append_sid()
-	local was_ontop = mp.get_property_native("ontop")
-	if was_ontop then mp.set_property_native("ontop", false) end
-	local res = utils.subprocess({
-		args = {'powershell', '-NoProfile', '-Command', [[& {
-			Trap {
-				Write-Error -ErrorRecord $_
-				Exit 1
-			}
-			Add-Type -AssemblyName PresentationFramework
-			$u8 = [System.Text.Encoding]::UTF8
-			$out = [Console]::OpenStandardOutput()
-			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
-			$ofd.Multiselect = $false
-			If ($ofd.ShowDialog() -eq $true) {
-				ForEach ($filename in $ofd.FileNames) {
-					$u8filename = $u8.GetBytes("$filename")
-					$out.Write($u8filename, 0, $u8filename.Length)
-				}
-			}
-		}]]},
-		cancellable = false,
-	})
-	if was_ontop then mp.set_property_native("ontop", true) end
-	if (res.status ~= 0) then return end
-	for filename in string.gmatch(res.stdout, '[^\n]+') do
-		mp.commandv('sub-add', filename, 'cached')
-	end
+    local was_ontop = mp.get_property_native("ontop")
+    if was_ontop then mp.set_property_native("ontop", false) end
+    local res = utils.subprocess({
+        args = {'powershell', '-NoProfile', '-Command', [[& {
+            Trap {
+                Write-Error -ErrorRecord $_
+                Exit 1
+            }
+            Add-Type -AssemblyName PresentationFramework
+            $u8 = [System.Text.Encoding]::UTF8
+            $out = [Console]::OpenStandardOutput()
+            $ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+            $ofd.Multiselect = $false
+            If ($ofd.ShowDialog() -eq $true) {
+                ForEach ($filename in $ofd.FileNames) {
+                    $u8filename = $u8.GetBytes("$filename")
+                    $out.Write($u8filename, 0, $u8filename.Length)
+                }
+            }
+        }]]},
+        cancellable = false,
+    })
+    if was_ontop then mp.set_property_native("ontop", true) end
+    if (res.status ~= 0) then return end
+    for filename in string.gmatch(res.stdout, '[^\n]+') do
+        mp.commandv('sub-add', filename, 'cached')
+    end
 end
 
 function append_vfSub()
-	local was_ontop = mp.get_property_native("ontop")
-	if was_ontop then mp.set_property_native("ontop", false) end
-	local res = utils.subprocess({
-		args = {'powershell', '-NoProfile', '-Command', [[& {
-			Trap {
-				Write-Error -ErrorRecord $_
-				Exit 1
-			}
-			Add-Type -AssemblyName PresentationFramework
-			$u8 = [System.Text.Encoding]::UTF8
-			$out = [Console]::OpenStandardOutput()
-			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
-			$ofd.Multiselect = $false
-			If ($ofd.ShowDialog() -eq $true) {
-				ForEach ($filename in $ofd.FileNames) {
-					$u8filename = $u8.GetBytes("$filename")
-					$out.Write($u8filename, 0, $u8filename.Length)
-				}
-			}
-		}]]},
-		cancellable = false,
-	})
-	if was_ontop then mp.set_property_native("ontop", true) end
-	if (res.status ~= 0) then return end
-	for filename in string.gmatch(res.stdout, '[^\n]+') do
-		local vfSub = "vf append ``@LUA-load_plus:subtitles=filename=\"" .. res.stdout .. "\"``"
-		mp.command(vfSub)
-	end
+    local was_ontop = mp.get_property_native("ontop")
+    if was_ontop then mp.set_property_native("ontop", false) end
+    local res = utils.subprocess({
+        args = {'powershell', '-NoProfile', '-Command', [[& {
+            Trap {
+                Write-Error -ErrorRecord $_
+                Exit 1
+            }
+            Add-Type -AssemblyName PresentationFramework
+            $u8 = [System.Text.Encoding]::UTF8
+            $out = [Console]::OpenStandardOutput()
+            $ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+            $ofd.Multiselect = $false
+            If ($ofd.ShowDialog() -eq $true) {
+                ForEach ($filename in $ofd.FileNames) {
+                    $u8filename = $u8.GetBytes("$filename")
+                    $out.Write($u8filename, 0, $u8filename.Length)
+                }
+            }
+        }]]},
+        cancellable = false,
+    })
+    if was_ontop then mp.set_property_native("ontop", true) end
+    if (res.status ~= 0) then return end
+    for filename in string.gmatch(res.stdout, '[^\n]+') do
+        local vfSub = "vf append ``@LUA-load_plus:subtitles=filename=\"" .. res.stdout .. "\"``"
+        mp.command(vfSub)
+    end
+end
+
+local function filter_state(label, key, value)
+    local filters = mp.get_property_native("vf")
+    for _, filter in pairs(filters) do
+        if filter["label"] == label and (not key or key and filter[key] == value) then return true end
+    end
+    return false
 end
 
 function toggle_vfSub()
-	local vfSub = "vf toggle @LUA-load_plus"
-	mp.command(vfSub)
+    local vfSub = "vf toggle @LUA-load_plus"
+    if filter_state("LUA-load_plus") then mp.command(vfSub) end
 end
 
 function remove_vfSub()
-	local vfSub = "vf remove @LUA-load_plus"
-	mp.command(vfSub)
+    local vfSub = "vf remove @LUA-load_plus"
+    if filter_state("LUA-load_plus") then mp.command(vfSub) end
 end
 
-mp.register_event("file-loaded", function()
-	if mp.get_property("vf") ~= "" then mp.command("vf remove @LUA-load_plus") end
-end)
+mp.register_event("file-loaded", remove_vfSub)
 
 mp.register_event("start-file", find_and_add_entries)
 

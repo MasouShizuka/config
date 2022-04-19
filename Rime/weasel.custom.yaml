@@ -3,6 +3,8 @@ patch:
   app_options:
     code.exe:
       ascii_mode: true
+    te64.exe:
+      ascii_mode: true
 
   # 样式
   style:

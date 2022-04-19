@@ -251,7 +251,7 @@ public class Multi_Titles_Widget : BarWidgetBase {
             windowTitle = GetTrimmedTitle(windowTitle, maxTitleLength);
         }
 
-        windowTitle = string.Format("{0}{1}{2}", string.IsNullOrEmpty(TitlePreamble) ? '[' : TitlePreamble, windowTitle, string.IsNullOrEmpty(TitlePostamble) ? ']' : TitlePostamble);
+        windowTitle = string.Format("{0}{1}{2}", TitlePreamble, windowTitle, TitlePostamble);
 
         return Part(windowTitle, window.IsFocused ? windowHasFocusColor : null, fontname: fontName, partClicked: clickAction != null ? clickAction(window) : null);
     }
@@ -287,9 +287,9 @@ Action<IConfigContext> doConfig = (context) => {
     //context.Branch = Branch.None;
 
     var background = new Color(0x0, 0x0, 0x0);
-    var bar_height = 28;
-    var font_size = 14;
-    var font_name = "Iosevka NF";
+    var bar_height = 26;
+    var font_size = 13;
+    var font_name = "Sarasa Mono SC Nerd Font";
     var gap = 8;
 
     // 顶栏
@@ -307,11 +307,12 @@ Action<IConfigContext> doConfig = (context) => {
                 LeftPadding = "[",
                 RightPadding = "]",
             },
+            new TextWidget("┃"),
             new Multi_Titles_Widget() {
                 MaxTitleLength = 38,
                 ShowAllWindowTitles = true,
-                TitlePreamble = " ",
-                TitlePostamble = " ",
+                TitlePreamble = "",
+                TitlePostamble = " ┃",
             }
         },
 
@@ -320,13 +321,13 @@ Action<IConfigContext> doConfig = (context) => {
                 LeftPadding = "[",
                 RightPadding = "]",
             },
-            new TextWidget("⌨"),
+            new TextWidget(" "),
             new Input_Method_Widget() {
                 Interval = 500,
             },
             new TextWidget(""),
             new BatteryWidget(),
-            new TextWidget(""),
+            new TextWidget(" "),
             new TimeWidget(1000, "yyyy-MM-dd HH:mm:ss ddd"),
         },
     });

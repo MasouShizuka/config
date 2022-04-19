@@ -4,14 +4,6 @@
     "actions": 
     [
         {
-            "command": 
-            {
-                "action": "copy",
-                "singleLine": false
-            },
-            "keys": "ctrl+c"
-        },
-        {
             "command": "unbound",
             "keys": "ctrl+shift+tab"
         },
@@ -180,18 +172,19 @@
             "keys": "ctrl+comma"
         },
         {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "keys": "ctrl+c"
+        },
+        {
             "command": "paste",
             "keys": "ctrl+v"
         },
         {
-            "command": 
-            {
-                "action": "quakeMode"
-            }
-        },
-        {
-            "command": "find",
-            "keys": "ctrl+f"
+            "command": "openNewTabDropdown"
         },
         {
             "command": 
@@ -201,7 +194,14 @@
             "keys": "ctrl+shift+u"
         },
         {
-            "command": "openNewTabDropdown"
+            "command": "find",
+            "keys": "ctrl+f"
+        },
+        {
+            "command": 
+            {
+                "action": "quakeMode"
+            }
         },
         {
             "command": 
@@ -413,7 +413,7 @@
             "cursorShape": "filledBox",
             "font": 
             {
-                "face": "Iosevka",
+                "face": "\u7b49\u8ddd\u66f4\u7eb1\u9ed1\u4f53 SC Nerd Font",
                 "size": 16
             },
             "opacity": 75,

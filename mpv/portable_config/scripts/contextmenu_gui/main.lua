@@ -526,7 +526,6 @@ mp.register_event("end-file", function()
 end)
 
 -- DO NOT create the "playing" menu tables until AFTER the file has loaded as we're unable to
--- DO NOT create the "playing" menu tables until AFTER the file has loaded as we're unable to
 -- dynamically create some menus if it tries to build the table before the file is loaded.
 -- A prime example is the chapter-list or track-list values, which are unavailable until
 -- the file has been loaded.
@@ -593,7 +592,7 @@ mp.register_event("file-loaded", function()
 
 -- 二级菜单 —— 导航
         navi_menu = {
-            {COMMAND, "【外置脚本】OSD高级播放列表", "", "script-binding playlistmanager/showplaylist", "", false},
+            {COMMAND, "【外置脚本】OSD高级播放列表", "", "script-binding uosc/playlist", "", false},
             {COMMAND, "OSD轨道信息", "", "show-text ${track-list} 5000", "", false},
             {COMMAND, "重播", "", "seek 0 absolute", "", false},
             {COMMAND, "上一帧", "", "frame-back-step", "", false, true},

@@ -4,4 +4,4 @@ config="$aria2_dir/aria2.conf"
 exe="$aria2_dir/aria2c.exe"
 
 $tracker
-nohup "$exe" --conf-path="$config" >/dev/null 2>&1 &
+"$exe" --conf-path="$config" >/dev/null 2>&1 &

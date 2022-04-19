@@ -75,7 +75,7 @@ patch:
     good_old_caps_lock: true
     switch_key:
       Shift_L: commit_code # "左 Shift" 已输入的编码字符上屏并切换至西文输入模式
-      Shift_R: commit_code # "右 Shift" 已输入的编码字符上屏并切换至西文输入模式
+      Shift_R: commit_text # "右 Shift" 已输入的候选文字上屏并切换至西文输入模式
       Control_L: noop
       Control_R: noop
       Caps_Lock: noop

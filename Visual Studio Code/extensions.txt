@@ -48,6 +48,7 @@ ryu1kn.partial-diff
 ryuta46.multi-command
 shalimski.swapdiff
 shd101wyy.markdown-preview-enhanced
+techer.open-in-browser
 timonwong.shellcheck
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate

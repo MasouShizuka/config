@@ -69,7 +69,7 @@ if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
 	if (nIndex &gt;= 0) {
 		FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
 	}
-}</List><List Key="N" Type="Tools">New file</List><List Key="Shift+N" Type="Tools">New folder</List><List Key="R" Type="Context">rename</List><List Key="Shift+R" Type="Open in new tab">回收站</List><List Key="Shift+S" Type="Background">{9F156763-7844-4DC4-B2B1-901F640F5155}</List><List Key="T" Type="Selected items">Open in new tab</List><List Key="Shift+T" Type="Add-ons">Undo close tab</List><List Key="V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
+}</List><List Key="N" Type="Background">.txt</List><List Key="Shift+N" Type="Background">NewFolder</List><List Key="R" Type="Context">rename</List><List Key="Shift+R" Type="Open in new tab">回收站</List><List Key="Shift+S" Type="Background">{9F156763-7844-4DC4-B2B1-901F640F5155}</List><List Key="T" Type="Selected items">Open in new tab</List><List Key="Shift+T" Type="Add-ons">Undo close tab</List><List Key="V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
 if (FV) {
 	var hMenu = api.CreatePopupMenu(), hSubMenu;
 	var ContextMenu = FV.ViewMenu();
