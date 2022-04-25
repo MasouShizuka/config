@@ -45,8 +45,9 @@ static async void refresh() {
 }
 static void refresh_window(IWindow focused_window) {
     if (focused_window != null) {
+        string focused_window_process_name = focused_window.ProcessName;
         foreach (string process_name in process_name_list) {
-            if (focused_window.ProcessName == process_name) {
+            if (focused_window_process_name == process_name) {
                 refresh();
                 break;
             }
@@ -56,8 +57,7 @@ static void refresh_window(IWindow focused_window) {
 
 // 移动鼠标到当前窗口的中心
 [StructLayout(LayoutKind.Sequential)]
-struct RECT
-{
+struct RECT {
     public int Left;
     public int Top;
     public int Right;
@@ -273,10 +273,10 @@ public class Multi_Titles_Widget : BarWidgetBase {
         }
 
         // return title.Remove(maxTitleLength.Value, title.Length - maxTitleLength.Value) + "...";
-        int halfMaxTitleLength = maxTitleLength.Value / 2;
-        int cutLength = title.Length - halfMaxTitleLength;
-        string title1 = title.Remove(halfMaxTitleLength, cutLength);
-        string title2 = title.Remove(0, title.Length - (maxTitleLength.Value - halfMaxTitleLength));
+        int title1_length = maxTitleLength.Value / 2;
+        int title2_length = maxTitleLength.Value - title1_length;
+        string title1 = title.Substring(0, title1_length);
+        string title2 = title.Remove(0, title.Length - title2_length);
         return title1 + "..." + title2;
     }
     #endregion
@@ -361,9 +361,9 @@ Action<IConfigContext> doConfig = (context) => {
     string[] icons = {
         "  ",
         "  ",
-        "  ",
+        "  ",
         "  ",
-        "  ",
+        "  ",
         "  ",
         "  ",
     };

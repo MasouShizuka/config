@@ -3259,20 +3259,14 @@
         },
         ",": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send, {blind}{{}",
-                "keysToSend": "{{}",
-                "prefix": "*",
-                "comment": ""
+                "type": "什么也不做",
+                "value": ""
             }
         },
         ".": {
             "2": {
-                "type": "输入文本或按键",
-                "value": "send, {blind}{}}",
-                "keysToSend": "{}}",
-                "prefix": "*",
-                "comment": ""
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "/": {

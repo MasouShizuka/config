@@ -9,7 +9,7 @@ patch:
   # 样式
   style:
     color_scheme: default
-    font_face: Microsoft YaHei
+    font_face: Sarasa Mono SC Nerd Font
     font_point: 20
     horizontal: true
     fullscreen: false

@@ -420,13 +420,13 @@
     // 面板不可见且 neovim.mode != insert 时，则切换上一个编辑器
     {
         "key": "ctrl+h",
-        "command": "workbench.action.previousEditor",
+        "command": "workbench.action.previousEditorInGroup",
         "when": "!panelVisible && neovim.mode != insert"
     },
     // 面板不可见且 neovim.mode != insert 时，则切换下一个编辑器
     {
         "key": "ctrl+l",
-        "command": "workbench.action.nextEditor",
+        "command": "workbench.action.nextEditorInGroup",
         "when": "!panelVisible && neovim.mode != insert"
     },
     // 移动编辑器到左边
@@ -465,47 +465,66 @@
         "key": "ctrl+j",
         "command": "-workbench.action.togglePanel"
     },
-    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换编辑器组
+    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换焦点到下一个编辑器组
     {
         "key": "ctrl+j",
-        "command": "workbench.action.navigateEditorGroups",
+        "command": "workbench.action.focusNextGroup",
         "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert"
     },
-    // 侧边栏未聚焦且 neovim.mode != insert 时，则切换到上一个编辑器组
+    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换焦点到上一个编辑器组
     {
         "key": "ctrl+k",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!sideBarFocus && neovim.mode != insert"
+        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert"
     },
-    // 移动到上一个编辑器组
+    // 移动当前编辑器到左侧编辑器组
     {
         "key": "ctrl+s ctrl+h",
-        "command": "workbench.action.moveEditorToPreviousGroup"
+        "command": "workbench.action.moveEditorToLeftGroup"
     },
-    // 移动到下一个编辑器组
+    // 移动当前编辑器到右侧编辑器组
     {
         "key": "ctrl+s ctrl+l",
-        "command": "workbench.action.moveEditorToNextGroup"
+        "command": "workbench.action.moveEditorToRightGroup"
     },
-    // 分屏到左边
+    // 移动当前编辑器到下侧编辑器组
+    {
+        "key": "ctrl+s ctrl+j",
+        "command": "workbench.action.moveEditorToBelowGroup"
+    },
+    // 移动当前编辑器到上侧编辑器组
+    {
+        "key": "ctrl+s ctrl+k",
+        "command": "workbench.action.moveEditorToAboveGroup"
+    },
+    // 分屏到左侧
     {
         "key": "ctrl+shift+s ctrl+shift+h",
         "command": "workbench.action.splitEditorLeft"
     },
-    // 分屏到右边
+    // 分屏到右侧
     {
         "key": "ctrl+shift+s ctrl+shift+l",
         "command": "workbench.action.splitEditorRight"
     },
-    // 分屏到下边
+    // 分屏到下侧
     {
-        "key": "ctrl+s ctrl+j",
+        "key": "ctrl+shift+s ctrl+shift+j",
         "command": "workbench.action.splitEditorDown"
     },
-    // 分屏到上边
+    // 分屏到上侧
     {
-        "key": "ctrl+s ctrl+k",
+        "key": "ctrl+shift+s ctrl+shift+k",
         "command": "workbench.action.splitEditorUp"
+    },
+    {
+        "key": "ctrl+shift+w",
+        "command": "-workbench.action.closeWindow"
+    },
+    // 关闭编辑器组
+    {
+        "key": "ctrl+shift+w",
+        "command": "workbench.action.closeEditorsInGroup"
     },
     // 增加当前编辑器组宽度
     {

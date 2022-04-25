@@ -4,6 +4,14 @@
     "actions": 
     [
         {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "keys": "ctrl+c"
+        },
+        {
             "command": "unbound",
             "keys": "ctrl+shift+tab"
         },
@@ -172,19 +180,18 @@
             "keys": "ctrl+comma"
         },
         {
-            "command": 
-            {
-                "action": "copy",
-                "singleLine": false
-            },
-            "keys": "ctrl+c"
-        },
-        {
             "command": "paste",
             "keys": "ctrl+v"
         },
         {
-            "command": "openNewTabDropdown"
+            "command": 
+            {
+                "action": "quakeMode"
+            }
+        },
+        {
+            "command": "find",
+            "keys": "ctrl+f"
         },
         {
             "command": 
@@ -194,14 +201,7 @@
             "keys": "ctrl+shift+u"
         },
         {
-            "command": "find",
-            "keys": "ctrl+f"
-        },
-        {
-            "command": 
-            {
-                "action": "quakeMode"
-            }
+            "command": "openNewTabDropdown"
         },
         {
             "command": 
@@ -405,12 +405,16 @@
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "experimental.rendering.forceFullRepaint": false,
+    "experimental.rendering.software": false,
     "language": "zh-Hans-CN",
     "profiles": 
     {
         "defaults": 
         {
+            "colorScheme": "Campbell",
             "cursorShape": "filledBox",
+            "experimental.retroTerminalEffect": false,
             "font": 
             {
                 "face": "\u7b49\u8ddd\u66f4\u7eb1\u9ed1\u4f53 SC Nerd Font",
@@ -679,5 +683,7 @@
     ],
     "showTerminalTitleInTitlebar": true,
     "tabWidthMode": "equal",
-    "useAcrylicInTabRow": true
+    "trimBlockSelection": true,
+    "useAcrylicInTabRow": true,
+    "windowingBehavior": "useNew"
 }
