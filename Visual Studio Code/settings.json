@@ -80,6 +80,34 @@
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWw7Zmxvd2NoYXJ0O3VtbFwiLFwiY3VzdG9tTGlicmFyaWVzXCI6W1wiTC5zY3JhdGNocGFkXCJdLFwicGx1Z2luc1wiOltdLFwicmVjZW50Q29sb3JzXCI6W1wiMDAwMDAwXCJdLFwiZm9ybWF0V2lkdGhcIjoyNDAsXCJjcmVhdGVUYXJnZXRcIjpmYWxzZSxcInBhZ2VGb3JtYXRcIjp7XCJ4XCI6MCxcInlcIjowLFwid2lkdGhcIjoxMTY5LFwiaGVpZ2h0XCI6ODI3fSxcInNlYXJjaFwiOnRydWUsXCJzaG93U3RhcnRTY3JlZW5cIjp0cnVlLFwiZ3JpZENvbG9yXCI6XCIjZDBkMGQwXCIsXCJkYXJrR3JpZENvbG9yXCI6XCIjNmU2ZTZlXCIsXCJhdXRvc2F2ZVwiOnRydWUsXCJyZXNpemVJbWFnZXNcIjpudWxsLFwib3BlbkNvdW50ZXJcIjowLFwidmVyc2lvblwiOjE4LFwidW5pdFwiOjEsXCJpc1J1bGVyT25cIjpmYWxzZSxcInVpXCI6XCJcIn0ifQ==",
     "jupyter.askForKernelRestart": false,
+    "Lua.diagnostics.globals": [
+        "mp"
+    ],
+    "Lua.diagnostics.neededFileStatus": {
+        "ambiguity-1": "Opened",
+        "circle-doc-class": "Opened",
+        "close-non-object": "Opened",
+        "count-down-loop": "Opened",
+        "different-requires": "Opened",
+        "doc-field-no-class": "Opened",
+        "duplicate-doc-alias": "Opened",
+        "duplicate-doc-field": "Opened",
+        "duplicate-doc-param": "Opened",
+        "duplicate-index": "Opened",
+        "duplicate-set-field": "Opened",
+        "global-in-nil-env": "Opened",
+        "lowercase-global": "Opened",
+        "newfield-call": "Opened",
+        "newline-call": "Opened",
+        "unbalanced-assignments": "Opened",
+        "undefined-doc-class": "Opened",
+        "undefined-doc-name": "Opened",
+        "undefined-doc-param": "Opened",
+        "undefined-env-child": "Opened",
+        "undefined-global": "Opened",
+        "unknown-diag-code": "Opened"
+    },
+    "Lua.telemetry.enable": false,
     "markdown-preview-enhanced.chromePath": "C:\\Users\\MasouShizuka\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
     "markdown-preview-enhanced.mathRenderingOption": "MathJax",
     "markdown-preview-enhanced.previewTheme": "one-dark.css",
@@ -154,6 +182,7 @@
         "tab.activeBorder": "#d19a66"
     },
     "workbench.colorTheme": "One Dark Pro",
+    "workbench.editor.defaultBinaryEditor": "hexEditor.hexedit",
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
         "*.gif": "cweijan.officeViewer",

@@ -18,12 +18,10 @@ patch:
     bindings:
       # 自定义快捷键
 
-      - { when: composing, accept: Up, send: Home }           # "Up" 光标移至首
-      - { when: composing, accept: Down, send: End }          # "Down" 光标移至尾
       - { when: composing, accept: Left, send: Shift+Left }   # "Left" 向左选拼音分词
       - { when: composing, accept: Right, send: Shift+Right } # "Right" 向右选拼音分词
-      - { when: composing, accept: Shift+Left, send: Left }   # "Shift+Left" 向左移动
-      - { when: composing, accept: Shift+Right, send: Right } # "Shift+Right" 向右移动
+      - { when: composing, accept: Shift+Left, send: Home }   # "Shift+Left" 光标移至首
+      - { when: composing, accept: Shift+Right, send: End } # "Shift+Right" 光标移至尾
 
       # 默认快捷键
 

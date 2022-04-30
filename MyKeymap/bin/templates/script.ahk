@@ -125,6 +125,15 @@ return
 RAlt::LCtrl
 {% endif %}
 
+!F21::
+    MyRun2(run_target, run_args, run_workingdir)
+    ; tip(A_TickCount - run_start)
+    Return
+!F22::
+    ActivateOrRun2(run_to_activate, run_target, run_args, run_workingdir)
+    ; tip(A_TickCount - run_start)
+    Return
+
 !+'::
     Suspend, Permit
     toggleSuspend()
@@ -444,7 +453,8 @@ space::
 {% endif %}
 
 #if SLOWMODE
-{## 
+; modified
+{##
 {% for key,value in Capslock.items()|sort(attribute="1.value") %}
     {% if value.value and value.type == "鼠标操作" %}
 {{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ "rightClick(true)" if value.value == "rightClick()" else value.value | replace("fast", "slow") }}}
@@ -472,12 +482,8 @@ space::
 ; modified
 *P::exitMouseMode()
 Esc::exitMouseMode()
+*Space::exitMouseMode()
 ; modified
-; *Space::exitMouseMode()
-*Space::
-    name := "hide_mouse_cursor_when_idle.ahk"
-    close_or_run_script(name)
-    exitMouseMode()
 *capslock up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -508,10 +514,7 @@ Esc::exitMouseMode()
 *U::scrollWheel("U", 1)
 *P::exit_very_slow_mode()
 Esc::exit_very_slow_mode()
-*Space::
-    name := "hide_mouse_cursor_when_idle.ahk"
-    close_or_run_script(name)
-    exitMouseMode()
+*Space::exit_very_slow_mode()
 *capslock up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)

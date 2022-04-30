@@ -1,8 +1,9 @@
-## mod from HAvsFunc
-## 抗源抖动脚本（此类问题常见于胶片转录作品），CPU开销很大
+### mod from HAvsFunc
+### 抗源抖动脚本（此类问题常见于胶片转录作品），CPU开销很大
 
 import vapoursynth as vs
-core = vs.core
+from vapoursynth import core
+
 input = video_in
 
 cut1 = input

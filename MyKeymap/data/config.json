@@ -152,8 +152,8 @@
         },
         "F": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "close_or_run_script(\"hide_mouse_cursor_when_idle.ahk\")"
             }
         },
         "G": {
@@ -563,8 +563,10 @@
         },
         ".": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"ahk_exe datagrip64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\DataGrip.lnk\", \"\", \"\")",
+                "toRun": "%A_Programs%\\JetBrains Toolbox\\DataGrip.lnk",
+                "toActivate": "ahk_exe datagrip64.exe"
             }
         },
         "/": {
@@ -1390,9 +1392,11 @@
         },
         "I": {
             "2": {
-                "type": "文字处理",
-                "value": "send, {blind}{home}+{end}",
-                "prefix": "*"
+                "type": "输入文本或按键",
+                "value": "send, {blind}ji",
+                "keysToSend": "ji",
+                "prefix": "*",
+                "comment": "防止连按 J+I 造成的误触"
             }
         },
         "O": {
@@ -1462,8 +1466,9 @@
         },
         "L": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "文字处理",
+                "value": "send, {blind}{home}+{end}",
+                "prefix": "*"
             }
         },
         ";": {
@@ -1521,8 +1526,9 @@
         },
         ",": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "文字处理",
+                "value": "send, {blind}{del}",
+                "prefix": "*"
             }
         },
         ".": {
@@ -4243,9 +4249,8 @@
         },
         "I": {
             "2": {
-                "type": "文字处理",
-                "value": "send, {blind}{home}+{end}",
-                "prefix": "*"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "O": {
@@ -4315,8 +4320,9 @@
         },
         "L": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "文字处理",
+                "value": "send, {blind}{home}+{end}",
+                "prefix": "*"
             }
         },
         ";": {

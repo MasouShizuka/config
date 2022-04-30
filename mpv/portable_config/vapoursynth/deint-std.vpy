@@ -1,5 +1,6 @@
-## znedi3参考，进行反交错
+### znedi3参考，进行反交错
 
+import vapoursynth as vs
 from vapoursynth import core
 
 input=video_in

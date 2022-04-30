@@ -1,14 +1,15 @@
-##倍帧，转8bit，低开销（高于32帧的源自动忽略）
+### 倍帧，一般开销
 
 import vapoursynth as vs
-core = vs.core
+from vapoursynth import core
+
 clip = video_in
 
 vden = 1000
 dden = 1000
 
-if (container_fps < 32):
-    clip = clip.resize.Point(format=vs.YUV420P8)
+if (container_fps < 32) :
+
     vfps = container_fps*vden
     dfps = container_fps*2*dden
 
@@ -19,7 +20,7 @@ if (container_fps < 32):
     mvfw = core.mv.Recalculate(super, mvfw, blksize=16, search=2, searchparam=1, thsad=200)
     mvbw = core.mv.Recalculate(super, mvbw, blksize=16, search=2, searchparam=1, thsad=200)
     clip = core.mv.BlockFPS(clip, super, mvbw, mvfw, num=dfps, den=dden)
-    
-    ##num/den=目标帧率
-    
+
+    ##num/den=目标帧率=dfps/dden
+
     clip.set_output()
