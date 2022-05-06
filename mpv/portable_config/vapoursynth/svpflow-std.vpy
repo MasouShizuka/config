@@ -1,4 +1,4 @@
-### 一般消耗，补偿帧为8位
+### svpflow补60帧，一般消耗，补偿帧为8位
 
 import vapoursynth as vs
 from vapoursynth import core

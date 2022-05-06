@@ -238,21 +238,6 @@
 
 
 
-    // Keyboard Quickfix
-
-    {
-        "key": "ctrl+.",
-        "command": "-editor.action.quickFix",
-        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
-    },
-    {
-        "key": "ctrl+;",
-        "command": "keyboard-quickfix.openQuickFix",
-        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
-    },
-
-
-
     // Notebook
 
     // 编辑
@@ -574,6 +559,18 @@
         "key": "ctrl+shift+n",
         "command": "editor.action.moveSelectionToNextFindMatch",
         "when": "editorFocus"
+    },
+
+    {
+        "key": "ctrl+.",
+        "command": "-editor.action.quickFix",
+        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+    },
+    // Quickfix
+    {
+        "key": "ctrl+;",
+        "command": "editor.action.quickFix",
+        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
     },
 
 

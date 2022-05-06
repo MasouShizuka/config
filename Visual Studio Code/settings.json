@@ -10,8 +10,10 @@
         "editor.defaultFormatter": "yzhang.markdown-all-in-one"
     },
     "[plaintext]": {
-        // "files.autoGuessEncoding": false,
         "files.encoding": "gbk"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "auto-close-tag.activationOnLanguage": [
         "xml",
@@ -34,6 +36,9 @@
     ],
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
+    "black-formatter.args": [
+        "--skip-string-normalization"
+    ],
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
         "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
@@ -43,7 +48,6 @@
     "code-runner.runInTerminal": true,
     "debug.console.fontSize": 20,
     "diffEditor.ignoreTrimWhitespace": false,
-    "editor.bracketPairColorization.enabled": true,
     "editor.cursorBlinking": "solid",
     "editor.cursorSmoothCaretAnimation": true,
     "editor.cursorSurroundingLines": 5,
@@ -78,7 +82,7 @@
         "yaml": false
     },
     "hediet.vscode-drawio.codeLinkActivated": true,
-    "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWw7Zmxvd2NoYXJ0O3VtbFwiLFwiY3VzdG9tTGlicmFyaWVzXCI6W1wiTC5zY3JhdGNocGFkXCJdLFwicGx1Z2luc1wiOltdLFwicmVjZW50Q29sb3JzXCI6W1wiMDAwMDAwXCJdLFwiZm9ybWF0V2lkdGhcIjoyNDAsXCJjcmVhdGVUYXJnZXRcIjpmYWxzZSxcInBhZ2VGb3JtYXRcIjp7XCJ4XCI6MCxcInlcIjowLFwid2lkdGhcIjoxMTY5LFwiaGVpZ2h0XCI6ODI3fSxcInNlYXJjaFwiOnRydWUsXCJzaG93U3RhcnRTY3JlZW5cIjp0cnVlLFwiZ3JpZENvbG9yXCI6XCIjZDBkMGQwXCIsXCJkYXJrR3JpZENvbG9yXCI6XCIjNmU2ZTZlXCIsXCJhdXRvc2F2ZVwiOnRydWUsXCJyZXNpemVJbWFnZXNcIjpudWxsLFwib3BlbkNvdW50ZXJcIjowLFwidmVyc2lvblwiOjE4LFwidW5pdFwiOjEsXCJpc1J1bGVyT25cIjpmYWxzZSxcInVpXCI6XCJcIn0ifQ==",
+    "hediet.vscode-drawio.theme": "Kennedy",
     "jupyter.askForKernelRestart": false,
     "Lua.diagnostics.globals": [
         "mp"
@@ -137,10 +141,6 @@
     "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
-    "python.formatting.blackArgs": [
-        "--skip-string-normalization"
-    ],
-    "python.formatting.provider": "black",
     "python.languageServer": "Pylance",
     "python.terminal.activateEnvironment": false,
     "search.showLineNumbers": true,

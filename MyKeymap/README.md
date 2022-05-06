@@ -3,6 +3,7 @@
 ## 仓库
 
 - [https://github.com/xianyukang/MyKeymap](https://github.com/xianyukang/MyKeymap)
+- [https://github.com/sam-brysbaert/ahkHideCursor](https://github.com/sam-brysbaert/ahkHideCursor)
 
 ## 配置文件
 

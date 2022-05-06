@@ -114,7 +114,8 @@ global typoTip := new TypoTipWindow()
 semiHook := InputHook("C", "{Space}{BackSpace}{Esc}", {{{ SemicolonAbbrKeys|join(',')|ahkString }}})
 semiHook.OnChar := Func("onTypoChar")
 semiHook.OnEnd := Func("onTypoEnd")
-capsHook := InputHook("C", "{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
+capsHook := InputHook("C", "{CapsLock}{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
+capsHook.KeyOpt("{CapsLock}", "S")
 capsHook.OnChar := Func("capsOnTypoChar")
 capsHook.OnEnd := Func("capsOnTypoEnd")
 
@@ -425,6 +426,11 @@ k::enterJModeK()
 {% if Settings.CapslockMode %}
 #if CapslockMode
 
+; modified
+*N::left_click_down()
+*N Up::left_click_up()
+*M::right_click_down()
+*M Up::right_click_up()
 {% for key,value in Capslock.items()|sort(attribute="1.value") %}
     {% if value.value %}
 {{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
@@ -470,11 +476,13 @@ space::
 *,::lbuttonDown()
 ; modified
 ; *N::leftClick()
-*N::left_click_without_false()
+*N::left_click_down_without_false()
+*N Up::left_click_up_without_false()
 *.::moveCurrentWindow()
 ; modified
 ; *M::rightClick(true)
-*M::right_click_without_false(true)
+*M::right_click_down_without_false(true)
+*M Up::right_click_up_without_false(true)
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -505,9 +513,11 @@ Esc::exitMouseMode()
 *K::very_slow_move_mouse("K", 0, 1)
 *L::very_slow_move_mouse("L", 1, 0)
 *,::lbuttonDown()
-*N::left_click_without_false()
+*N::left_click_down_without_false()
+*N Up::left_click_up_without_false()
 *.::moveCurrentWindow()
-*M::right_click_without_false(true)
+*M::right_click_down_without_false(true)
+*M Up::right_click_up_without_false(true)
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -659,33 +669,39 @@ capsOnTypoEnd(ih) {
 enterCapslockAbbr(ih) 
 {
     WM_USER := 0x0400
-    SHOW_TYPO_WINDOW := WM_USER + 0x0001
-    HIDE_TYPO_WINDOW := WM_USER + 0x0002
+    SHOW_COMMAND_INPUT := WM_USER + 0x0001
+    HIDE_COMMAND_INPUT := WM_USER + 0x0002
+    CANCEL_COMMAND_INPUT := WM_USER + 0x0003
+    Hotkey, *capslock, off
 
-    postMessageToTipWidnow(SHOW_TYPO_WINDOW)
+    postMessageToTipWidnow(SHOW_COMMAND_INPUT)
     result := ""
 
 
     ih.Start()
     endReason := ih.Wait()
     ih.Stop()
-    if InStr(endReason, "EndKey") {
-    }
+
     if InStr(endReason, "Match") {
         lastChar := SubStr(ih.Match, ih.Match.Length-1)
         postCharToTipWidnow(lastChar)
-        SetTimer, delayedHideTipWindow, -50
+        SetTimer, delayedHideTipWindow, -1
     } else {
-        postMessageToTipWidnow(HIDE_TYPO_WINDOW)
+        if InStr(endReason, "EndKey") {
+            postMessageToTipWidnow(CANCEL_COMMAND_INPUT)
+        } else {
+            postMessageToTipWidnow(HIDE_COMMAND_INPUT)
+        }
     }
     if (ih.Match)
         execCapslockAbbr(ih.Match)
+    Hotkey, *capslock, on
 }
 
 delayedHideTipWindow()
 {
-    HIDE_TYPO_WINDOW := 0x0400 + 0x0002
-    postMessageToTipWidnow(HIDE_TYPO_WINDOW)
+    HIDE_COMMAND_INPUT := 0x0400 + 0x0002
+    postMessageToTipWidnow(HIDE_COMMAND_INPUT)
 }
 
 

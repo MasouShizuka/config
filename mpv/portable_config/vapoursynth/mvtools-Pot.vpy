@@ -1,4 +1,4 @@
-### 某播放器的内置脚本，开销不低
+### 某播放器的内置脚本，开销不低。目标为60帧
 
 import vapoursynth as vs
 from vapoursynth import core

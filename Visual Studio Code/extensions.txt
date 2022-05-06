@@ -27,11 +27,14 @@ mehyaa.workspace-storage-cleanup
 mhutchie.git-graph
 mkxml.vscode-filesize
 MS-CEINTL.vscode-language-pack-zh-hans
+ms-python.black-formatter
+ms-python.isort
 ms-python.python
 ms-python.vscode-pylance
 ms-toolsai.jupyter
 ms-toolsai.jupyter-keymap
 ms-toolsai.jupyter-renderers
+ms-toolsai.vscode-jupyter-powertoys
 ms-vscode.hexeditor
 mtxr.sqltools
 mtxr.sqltools-driver-mysql
@@ -40,7 +43,6 @@ mushan.vscode-paste-image
 njpwerner.autodocstring
 njqdev.vscode-python-typehint
 oderwat.indent-rainbow
-pascalsenn.keyboard-quickfix
 PKief.material-icon-theme
 Remisa.shellman
 richie5um2.vscode-sort-json

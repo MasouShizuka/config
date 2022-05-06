@@ -59,18 +59,75 @@ enter_mouse_mode()
     SLOWMODE := true
 }
 
-left_click_without_false() 
+left_click_down()
 {
-    send,  {blind}{LButton}
+    send,  {blind}{LButton Down}
 }
 
-right_click_without_false(tempDisableRButton := false) 
+left_click_up()
 {
+    global SLOWMODE
+    send,  {blind}{LButton Up}
+    SLOWMODE := false
+}
+
+left_click_down_without_false() 
+{
+    send,  {blind}{LButton Down}
+}
+
+left_click_up_without_false() 
+{
+    send,  {blind}{LButton Up}
+}
+
+right_click_down(tempDisableRButton := false) 
+{
+    global SLOWMODE
     if (!tempDisableRButton)
-        send,  {blind}{RButton}
+        send,  {blind}{RButton Down}
     else {
         setHotkeyStatus("RButton", false)
-        send,  {blind}{RButton}
+        send,  {blind}{RButton Down}
+        sleep, 70
+        setHotkeyStatus("RButton", true)
+    }
+    SLOWMODE := false
+}
+
+right_click_up(tempDisableRButton := false) 
+{
+    global SLOWMODE
+    if (!tempDisableRButton)
+        send,  {blind}{RButton Up}
+    else {
+        setHotkeyStatus("RButton", false)
+        send,  {blind}{RButton Up}
+        sleep, 70
+        setHotkeyStatus("RButton", true)
+    }
+    SLOWMODE := false
+}
+
+right_click_down_without_false(tempDisableRButton := false) 
+{
+    if (!tempDisableRButton)
+        send,  {blind}{RButton Down}
+    else {
+        setHotkeyStatus("RButton", false)
+        send,  {blind}{RButton Down}
+        sleep, 70
+        setHotkeyStatus("RButton", true)
+    }
+}
+
+right_click_up_without_false(tempDisableRButton := false) 
+{
+    if (!tempDisableRButton)
+        send,  {blind}{RButton Up}
+    else {
+        setHotkeyStatus("RButton", false)
+        send,  {blind}{RButton Up}
         sleep, 70
         setHotkeyStatus("RButton", true)
     }

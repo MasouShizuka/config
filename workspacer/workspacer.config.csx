@@ -381,6 +381,7 @@ Action<IConfigContext> doConfig = (context) => {
     }
 
     // 忽略的程序
+    context.WindowRouter.IgnoreProcessName("ApplicationFrameHost");
     context.WindowRouter.IgnoreProcessName("copyq");
     context.WindowRouter.IgnoreProcessName("Flow.Launcher");
     context.WindowRouter.IgnoreProcessName("Snipaste");

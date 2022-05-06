@@ -30,9 +30,8 @@ if (container_fps < 32) :
         cut1 = cut0.resize.Bilinear(format=vs.RGBS, matrix_in_s="709")
     cut2 = core.rife.RIFE(clip=cut1, model=9, multiplier=2, gpu_id=GPU, gpu_thread=GPU_t, tta=False, uhd=False, sc=True)
 
+    output = cut2.resize.Bilinear(format=vs.YUV444P16, matrix_s="709")
     if input.get_frame(0).props._ColorRange == 0 :
-        output = cut2.resize.Bilinear(format=vs.YUV444P16, matrix_s="709", range=1)
-    else :
-        output = cut2.resize.Bilinear(format=vs.YUV444P16, matrix_s="709")
+        output = output.resize.Bilinear(range=1)
 
 output.set_output()
