@@ -6,9 +6,11 @@ from vapoursynth import core
 input = video_in
 
 max_Leng = 720
+scene_th = 0.1
 GPU = 0
 GPU_t = 2
 # 若视频的短边超过该长度将被强制降采样，高端显卡的推荐值范围 1080 -- 720 （如果对你的显卡非常自信，可以尝试把该值提高到 2160）
+# 场景切换的检测阈值，初始设置保守，设置为 0.2 可获得更明显的效果但引入更多瑕疵
 # 使用的显卡序号，0为排序一号
 # 使用的显卡线程数
 
@@ -25,7 +27,7 @@ else :
 
 if (container_fps < 32) :
 
-    cut0 = input.misc.SCDetect()
+    cut0 = core.misc.SCDetect(clip=input, threshold=scene_th)
 
     if short_edge > max_Leng :
         cut1 = cut0.resize.Bicubic(width=w_ds, height=h_ds, format=vs.RGBS, matrix_in_s="709")

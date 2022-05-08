@@ -20,6 +20,9 @@ using workspacer.Gap;
 using workspacer.ActionMenu;
 using workspacer.FocusIndicator;
 
+[DllImport("user32.dll")]
+static extern IntPtr GetForegroundWindow();
+
 // 某些程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
 // 需要进行一定的操作才能恢复
 // 程序的进程名称列表
@@ -56,6 +59,10 @@ static void refresh_window(IWindow focused_window) {
 }
 
 // 移动鼠标到当前窗口的中心
+[DllImport("user32.dll")]
+static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+[DllImport("User32.dll")]
+static extern bool SetCursorPos(int X, int Y);
 [StructLayout(LayoutKind.Sequential)]
 struct RECT {
     public int Left;
@@ -63,15 +70,11 @@ struct RECT {
     public int Right;
     public int Bottom;
 }
-[DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-[DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
-[DllImport("User32.dll")] static extern bool SetCursorPos(int X, int Y);
 static async void move_cursor_to_current_window_center() {
     try {
         await Task.Delay(100);
         RECT r = new RECT();
-        IntPtr foregroundWindow = GetForegroundWindow();
-        GetWindowRect(foregroundWindow, out r);
+        GetWindowRect(GetForegroundWindow(), out r);
         int width = r.Right - r.Left;
         int height = r.Bottom - r.Top;
         int x = r.Left + width / 2;
@@ -121,14 +124,14 @@ public class Input_Method_Widget : BarWidgetBase {
 
     private System.Timers.Timer _timer;
 
-    [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
-    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd, IntPtr proccess);
-    [DllImport("user32.dll")] static extern IntPtr GetKeyboardLayout(uint thread);
+    [DllImport("user32.dll")]
+    static extern uint GetWindowThreadProcessId(IntPtr hwnd, IntPtr proccess);
+    [DllImport("user32.dll")]
+    static extern IntPtr GetKeyboardLayout(uint thread);
     public override IBarWidgetPart[] GetParts() {
         string input_method = "";
         try {
-            IntPtr foregroundWindow = GetForegroundWindow();
-            uint foregroundProcess = GetWindowThreadProcessId(foregroundWindow, IntPtr.Zero);
+            uint foregroundProcess = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
             int keyboardLayout = GetKeyboardLayout(foregroundProcess).ToInt32() & 0xFFFF;
             input_method = new CultureInfo(keyboardLayout).TwoLetterISOLanguageName;
             if (input_method == "en") {
@@ -442,7 +445,8 @@ Action<IConfigContext> doConfig = (context) => {
             context.WorkspaceContainer.CreateWorkspace(name);
         });
         menuBuilder.AddFreeForm("rename focused workspace", (name) => {
-            context.Workspaces.FocusedWorkspace.Name = name; });
+            context.Workspaces.FocusedWorkspace.Name = name;
+        });
         menuBuilder.Add("delete focused workspace", () => {
             context.WorkspaceContainer.RemoveWorkspace(context.Workspaces.FocusedWorkspace);
         });
@@ -598,7 +602,7 @@ Action<IConfigContext> doConfig = (context) => {
         // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.I, () => _context.ToggleConsoleWindow(), "toggle debug console");
         // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.Oem2, () => ShowKeybindDialog(), "toggle keybind window");
 
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.A, () => {
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.A, async () => {
             var windows = context.Workspaces.FocusedWorkspace.ManagedWindows.Where(w => w.CanLayout).ToList();
             if (windows.Count > 1) {
                 for (var i = 0; i < windows.Count - 1; i++) {
@@ -606,7 +610,7 @@ Action<IConfigContext> doConfig = (context) => {
                 }
             }
         }, "rotate stack clockwise");
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.X, () => {
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.X, async () => {
             var windows = context.Workspaces.FocusedWorkspace.ManagedWindows.Where(w => w.CanLayout).ToList();
             if (windows.Count > 1) {
                 for (var i = 0; i < windows.Count - 1; i++) {
@@ -639,6 +643,37 @@ Action<IConfigContext> doConfig = (context) => {
                 }
             }
         }, "minimize focused window");
+
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.F, async () => {
+            var focused_window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (context.Workspaces.FocusedWorkspace.LayoutName == "full") {
+                if (focused_window != null) {
+                    if (focused_window.IsMinimized) {
+                        focused_window.ShowNormal();
+                    }
+                }
+            } else {
+                var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
+                for (var i = 0; i < windows.Count; i++) {
+                    var window = windows[i];
+                    if (window.IsMinimized) {
+                        window.ShowNormal();
+                    }
+                }
+            }
+            refresh_window(focused_window);
+            context.Workspaces.FocusedWorkspace.DoLayout();
+        }, "unhide all windows");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D, async () => {
+            var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
+            for (var i = 0; i < windows.Count; i++) {
+                var window = windows[i];
+                if (!window.IsMinimized) {
+                    await Task.Delay(10);
+                    window.ShowMinimized();
+                }
+            }
+        }, "hide all windows");
 
         context.Keybinds.Subscribe(mod, workspacer.Keys.M, () => actionMenu.ShowMenu(actionMenuBuilder), "open action menu");
     };
