@@ -178,10 +178,14 @@
     "workbench.colorCustomizations": {
         "editor.lineHighlightBackground": "#1073cf2d",
         "editor.lineHighlightBorder": "#9fced11f",
-        "tab.activeBackground": "#282c34",
-        "tab.activeBorder": "#d19a66"
+        "editor.selectionHighlightBackground": "#ffffff10",
+        "editor.selectionHighlightBorder": "#dddddd",
+        "editorCursor.foreground": "#528bff",
+        "notebook.cellEditorBackground": "#21252b",
+        "tab.activeBorder": "#d19a66",
+        "titleBar.inactiveBackground": "#282c34"
     },
-    "workbench.colorTheme": "One Dark Pro",
+    "workbench.colorTheme": "One Dark Pro Flat",
     "workbench.editor.defaultBinaryEditor": "hexEditor.hexedit",
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {

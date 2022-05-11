@@ -56,5 +56,6 @@ timonwong.shellcheck
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate
 XadillaX.viml
+YXL.cloudmusic
 yzhang.markdown-all-in-one
 zhuangtongfa.material-theme

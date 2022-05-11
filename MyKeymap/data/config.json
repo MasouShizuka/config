@@ -2647,6 +2647,26 @@
                 "toActivate": "",
                 "comment": "打开蓝牙设置"
             }
+        },
+        "mm": {
+            "2": {
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"MyKeymap - Visual Studio Code\", \"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"D:\\MyFiles\\MyKeymap\", \"\")",
+                "comment": "召唤常用项目 MyKeymap",
+                "toActivate": "MyKeymap - Visual Studio Code",
+                "toRun": "%code%",
+                "cmdArgs": "D:\\MyFiles\\MyKeymap"
+            }
+        },
+        "ms": {
+            "2": {
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"my_site - Visual Studio Code\", \"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"D:\\project\\my_site\", \"\")",
+                "comment": "召唤常用项目 My Site",
+                "toActivate": "my_site - Visual Studio Code",
+                "cmdArgs": "D:\\project\\my_site",
+                "toRun": "%code%"
+            }
         }
     },
     "CapslockAbbrKeys": [
@@ -2668,7 +2688,9 @@
         "help",
         "bd ",
         "ex",
-        "ly"
+        "ly",
+        "mm",
+        "ms"
     ],
     "snackbar": true,
     "snackbarText": "保存成功",
@@ -4402,6 +4424,13 @@
                 "type": "什么也不做",
                 "value": ""
             }
+        }
+    },
+    "SpecialKeys": {
+        "Caps Up": {
+            "type": "文字处理",
+            "value": "send, {blind}{esc}",
+            "prefix": "*"
         }
     }
 }

@@ -4,13 +4,20 @@
 #r "D:\Tools\Workspacer\plugins\workspacer.ActionMenu\workspacer.ActionMenu.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.FocusIndicator\workspacer.FocusIndicator.dll"
 
+#load "C:\Users\MasouShizuka\.workspacer\Active_Layout_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Battery_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Input_Method_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Multi_Titles_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Text_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Time_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Workspace_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Workspacer_Status_Widget.csx"
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using workspacer;
@@ -19,9 +26,6 @@ using workspacer.Bar.Widgets;
 using workspacer.Gap;
 using workspacer.ActionMenu;
 using workspacer.FocusIndicator;
-
-[DllImport("user32.dll")]
-static extern IntPtr GetForegroundWindow();
 
 // 某些程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
 // 需要进行一定的操作才能恢复
@@ -36,7 +40,7 @@ static string[] process_name_list = {
 static Form form = new Form();
 form.Width = 0;
 form.Height = 0;
-form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+form.FormBorderStyle = FormBorderStyle.None;
 form.TopLevel = true;
 form.TopMost = true;
 static async void refresh() {
@@ -59,6 +63,8 @@ static void refresh_window(IWindow focused_window) {
 }
 
 // 移动鼠标到当前窗口的中心
+[DllImport("user32.dll")]
+static extern IntPtr GetForegroundWindow();
 [DllImport("user32.dll")]
 static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 [DllImport("User32.dll")]
@@ -84,254 +90,85 @@ static async void move_cursor_to_current_window_center() {
     }
 }
 
-// workspacer 启用状态的 widget
-public class Workspacer_Status_Widget : BarWidgetBase {
-    public Color status_on { get; set; } = Color.Green;
-    public Color status_off { get; set; } = Color.Red;
-    public int Interval { get; set; } = 1000;
-
-    private IConfigContext config_context;
-    private System.Timers.Timer _timer;
-
-    public Workspacer_Status_Widget(IConfigContext context) {
-        config_context = context;
-    }
-
-    public override IBarWidgetPart[] GetParts() {
-        var status = "";
-        var color = status_on;
-        if (config_context.Enabled) {
-            status = "on";
-        } else {
-            status = "off";
-            color = status_off;
-        }
-        return Parts(Part(LeftPadding + status + RightPadding, fore: color, fontname: FontName, partClicked: () => {
-            config_context.Enabled = !config_context.Enabled;
-        }));
-    }
-
-    public override void Initialize() {
-        _timer = new System.Timers.Timer(Interval);
-        _timer.Elapsed += (s, e) => MarkDirty();
-        _timer.Enabled = true;
-    }
-}
-
-// 输入法状态的 widget
-public class Input_Method_Widget : BarWidgetBase {
-    public int Interval { get; set; } = 1000;
-
-    private System.Timers.Timer _timer;
-
-    [DllImport("user32.dll")]
-    static extern uint GetWindowThreadProcessId(IntPtr hwnd, IntPtr proccess);
-    [DllImport("user32.dll")]
-    static extern IntPtr GetKeyboardLayout(uint thread);
-    public override IBarWidgetPart[] GetParts() {
-        string input_method = "";
-        try {
-            uint foregroundProcess = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
-            int keyboardLayout = GetKeyboardLayout(foregroundProcess).ToInt32() & 0xFFFF;
-            input_method = new CultureInfo(keyboardLayout).TwoLetterISOLanguageName;
-            if (input_method == "en") {
-                input_method = "ENG";
-            } else if (input_method == "zh") {
-                input_method = "拼";
-            }
-        } catch (Exception _) {
-        }
-        return Parts(Part(LeftPadding + input_method + RightPadding, fontname: FontName));
-    }
-
-    public override void Initialize() {
-        _timer = new System.Timers.Timer(Interval);
-        _timer.Elapsed += (s, e) => MarkDirty();
-        _timer.Enabled = true;
-    }
-}
-
-// 多标题的 widget
-public class Multi_Titles_Widget : BarWidgetBase {
-    #region Properties
-    public Color WindowHasFocusColor { get; set; } = Color.Yellow;
-    public bool IsShortTitle { get; set; } = false;
-    public int? MaxTitleLength { get; set; } = null;
-    public bool ShowAllWindowTitles { get; set; } = false;
-    public string TitlePreamble { get; set; } = null;
-    public string TitlePostamble { get; set; } = null;
-    public string NoWindowMessage { get; set; } = "No Windows";
-    public Func<IWindow, Action> TitlePartClicked = ClickAction;
-    public Func<IWindow, object> OrderWindowsBy = (window) => 0;
-
-    private System.Timers.Timer _timer;
-    public int Interval { get; set; } = 1000;
-    #endregion
-
-    public override void Initialize() {
-        Context.Workspaces.WindowAdded += RefreshAdd;
-        Context.Workspaces.WindowRemoved += RefreshRemove;
-        Context.Workspaces.WindowUpdated += RefreshUpdated;
-        Context.Workspaces.FocusedMonitorUpdated += RefreshFocusedMonitor;
-
-        _timer = new System.Timers.Timer(Interval);
-        _timer.Elapsed += (s, e) => MarkDirty();
-        _timer.Enabled = true;
-    }
-
-    #region Get Windows
-    private IEnumerable<IWindow> GetWindows(bool filterOnTitleFilled = true) {
-        var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
-        // return currentWorkspace.Where(window => !filterOnTitleFilled || !string.IsNullOrEmpty(window.Title));
-        return currentWorkspace.Windows.Where(w => w.CanLayout).Where(window => !filterOnTitleFilled || !string.IsNullOrEmpty(window.Title));
-    }
-
-    private IWindow GetWindow() {
-        var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
-        return currentWorkspace.FocusedWindow ??
-               currentWorkspace.LastFocusedWindow ??
-               currentWorkspace.ManagedWindows.FirstOrDefault();
-    }
-
-    #endregion
-
-    #region Events
-    private void RefreshRemove(IWindow window, IWorkspace workspace) {
-        var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
-        if (workspace == currentWorkspace && !string.IsNullOrEmpty(window.Title) && !GetWindows().Contains(window)) {
-            MarkDirty();
-        }
-    }
-
-    private void RefreshAdd(IWindow window, IWorkspace workspace) {
-        var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
-        if (workspace == currentWorkspace && !string.IsNullOrEmpty(window.Title) && GetWindows().Contains(window)) {
-            MarkDirty();
-        }
-    }
-
-    private void RefreshUpdated(IWindow window, IWorkspace workspace) {
-        var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
-        if (workspace == currentWorkspace && !string.IsNullOrEmpty(window.Title) && GetWindows().Contains(window)) {
-            MarkDirty();
-        }
-    }
-
-    private void RefreshFocusedMonitor() {
-        MarkDirty();
-    }
-
-    private static Action ClickAction(IWindow window) {
-        return new Action(() => {
-            if (window == null) {
-                return;
-            }
-
-            window.ShowInCurrentState();
-            window.BringToTop();
-            window.Focus();
-        });
-    }
-    #endregion
-
-    #region Title Generation
-    public override IBarWidgetPart[] GetParts() {
-        var windows = ShowAllWindowTitles ? GetWindows() : new[] { GetWindow() };
-        if (windows == null || !windows.Any()) {
-            return Parts(Part(NoWindowMessage, null, fontname: FontName));
-        }
-
-        return windows.OrderByDescending(OrderWindowsBy).Select(w => CreateTitlePart(w, WindowHasFocusColor, FontName, IsShortTitle, MaxTitleLength, TitlePartClicked)).ToArray();
-    }
-
-    private IBarWidgetPart CreateTitlePart(IWindow window, Color windowHasFocusColor, string fontName, bool isShortTitle = false, int? maxTitleLength = null, Func<IWindow, Action> clickAction = null) {
-        var windowTitle = window.Title;
-        if (isShortTitle) {
-            windowTitle = GetShortTitle(windowTitle);
-        }
-
-        if (maxTitleLength.HasValue) {
-            windowTitle = GetTrimmedTitle(windowTitle, maxTitleLength);
-        }
-
-        windowTitle = string.Format("{0}{1}{2}", TitlePreamble, windowTitle, TitlePostamble);
-
-        return Part(windowTitle, window.IsFocused ? windowHasFocusColor : null, fontname: fontName, partClicked: clickAction != null ? clickAction(window) : null);
-    }
-    #endregion
-
-    #region Title Formating
-    public static string GetShortTitle(string title) {
-        var parts = title.Split(new char[] { '-', '—', '|' }, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 0) {
-            return title.Trim();
-        }
-
-        return parts.Last().Trim();
-    }
-
-    public static string GetTrimmedTitle(string title, int? maxTitleLength = null) {
-        if (!maxTitleLength.HasValue || title.Length <= maxTitleLength.Value) {
-            return title;
-        }
-
-        // return title.Remove(maxTitleLength.Value, title.Length - maxTitleLength.Value) + "...";
-        int title1_length = maxTitleLength.Value / 2;
-        int title2_length = maxTitleLength.Value - title1_length;
-        string title1 = title.Substring(0, title1_length);
-        string title2 = title.Remove(0, title.Length - title2_length);
-        return title1 + "..." + title2;
-    }
-    #endregion
-}
-
 Action<IConfigContext> doConfig = (context) => {
     // Uncomment to switch update branch (or to disable updates)
     //context.Branch = Branch.None;
 
-    var background = new Color(0x0, 0x0, 0x0);
-    var bar_height = 26;
-    var font_size = 13;
+    var color_black = new Color(0x21, 0x22, 0x2C);
+    var color_green = new Color(0x7E, 0xCA, 0x9C);
+    var color_grey = new Color(0x28, 0x2A, 0x36);
+    var color_orange = new Color(0xFF, 0xB8, 0x6C);
+    var color_purple = new Color(0xD6, 0xAC, 0xFF);
+    var color_red = new Color(0xFF, 0x55, 0x55);
+    var color_white = new Color(0xAB, 0xB2, 0xBF);
+    var color_yellow = new Color(0xF1, 0xFA, 0x8C);
+
+    var background_color = color_black;
+    var background_focus_color = color_grey;
+    var bar_height = 25;
     var font_name = "Sarasa Mono SC Nerd Font";
+    var font_size = 15;
     var gap = 8;
 
     // 顶栏
     context.AddBar(new BarPluginConfig() {
         BarHeight = bar_height,
-        DefaultWidgetBackground = background,
+        DefaultWidgetBackground = background_color,
         FontName = font_name,
         FontSize = font_size,
 
         LeftWidgets = () => new IBarWidget[] {
-            new WorkspaceWidget() {
-                WorkspaceIndicatingBackColor = background,
+            new Workspace_Widget() {
+                WorkspaceHasFocusForeColor = color_red,
+                WorkspaceHasFocusBackColor = background_focus_color,
             },
-            new ActiveLayoutWidget() {
+            new Active_Layout_Widget() {
                 LeftPadding = "[",
                 RightPadding = "]",
+                ForeColor = color_green,
             },
-            new TextWidget("┃"),
+            new Text_Widget("┃") {
+                ForeColor = color_white,
+            },
             new Multi_Titles_Widget() {
+                ForeColor = color_white,
+                WindowHasFocusForeColor = color_yellow,
+                WindowHasFocusBackColor = background_focus_color,
                 MaxTitleLength = 38,
                 ShowAllWindowTitles = true,
                 TitlePreamble = "",
-                TitlePostamble = " ┃",
+                TitlePostamble = "┃",
             }
         },
 
         RightWidgets = () => new IBarWidget[] {
             new Workspacer_Status_Widget(context) {
                 LeftPadding = "[",
-                RightPadding = "]",
+                RightPadding = "] ",
+                status_on = color_green,
+                status_off = color_red,
             },
-            new TextWidget(" "),
+            new Text_Widget(" ") {
+                ForeColor = color_black,
+                BackColor = color_orange,
+            },
             new Input_Method_Widget() {
+                ForeColor = color_orange,
                 Interval = 500,
             },
-            new TextWidget(""),
-            new BatteryWidget(),
-            new TextWidget(" "),
-            new TimeWidget(1000, "yyyy-MM-dd HH:mm:ss ddd"),
+            new Battery_Widget() {
+                IconColor = color_black,
+                HighChargeColor = color_green,
+                MedChargeColor = color_yellow,
+                LowChargeColor = color_red,
+            },
+            new Text_Widget(" ") {
+                ForeColor = color_black,
+                BackColor = color_purple,
+            },
+            new Time_Widget(1000, "yyyy-MM-dd HH:mm:ss ddd") {
+                ForeColor = color_purple,
+            },
         },
     });
 
@@ -362,13 +199,13 @@ Action<IConfigContext> doConfig = (context) => {
 
     // workspace
     string[] icons = {
-        "  ",
-        "  ",
-        "  ",
-        "  ",
-        "  ",
-        "  ",
-        "  ",
+        " ",
+        " ",
+        " ",
+        " ",
+        " ",
+        " ",
+        " ",
     };
     (string, ILayoutEngine[])[] workspaces = {
         (icons[0], defaultLayouts()),
@@ -400,7 +237,7 @@ Action<IConfigContext> doConfig = (context) => {
 
     // 菜单
     var actionMenu = context.AddActionMenu(new ActionMenuPluginConfig() {
-        Background = background,
+        Background = background_color,
         MenuHeight = bar_height,
         FontName = font_name,
         FontSize = font_size,
