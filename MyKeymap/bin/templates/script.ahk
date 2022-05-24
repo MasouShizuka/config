@@ -95,6 +95,8 @@ Menu, Tray, Add, 重启程序, trayMenuHandler
 Menu, Tray, Add, 打开设置, trayMenuHandler 
 Menu, Tray, Add, 帮助文档, trayMenuHandler 
 Menu, Tray, Add, 查看窗口标识符, trayMenuHandler 
+Menu, Tray, Default, 暂停
+Menu, Tray, Click, 1
 Menu, Tray, Add 
 
 Menu, Tray, Icon
@@ -111,13 +113,14 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -3, "ptr")
 
 global typoTip := new TypoTipWindow()
 
-semiHook := InputHook("C", "{Space}{BackSpace}{Esc}", {{{ SemicolonAbbrKeys|join(',')|ahkString }}})
-semiHook.OnChar := Func("onTypoChar")
-semiHook.OnEnd := Func("onTypoEnd")
+semiHook := InputHook("C", "{CapsLock}{Space}{BackSpace}{Esc}", {{{ SemicolonAbbrKeys|join(',')|ahkString }}})
+semiHook.KeyOpt("{CapsLock}", "S")
+semiHook.OnChar := Func("onSemiHookChar")
+semiHook.OnEnd := Func("onSemiHookEnd")
 capsHook := InputHook("C", "{CapsLock}{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
 capsHook.KeyOpt("{CapsLock}", "S")
-capsHook.OnChar := Func("capsOnTypoChar")
-capsHook.OnEnd := Func("capsOnTypoEnd")
+capsHook.OnChar := Func("onCapsHookChar")
+capsHook.OnEnd := Func("onCapsHookEnd")
 
 #include data/custom_functions.ahk
 return
@@ -190,10 +193,9 @@ RAlt::LCtrl
     keywait `; 
     PunctuationMode := false
     DisableCapslockKey := false
-    if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 350)
-        ; modified
-        ; enterSemicolonAbbr(semiHook)
-        send {blind}`;
+    if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 350) {
+         {{{ SpecialKeys["; Up"].value }}}       
+    }
     enableOtherHotkey(thisHotkey)
     return
 {% endif %}
@@ -457,7 +459,7 @@ space::
 #if SLOWMODE
 ; modified
 {##
-{% for key,value in Capslock.items()|sort(attribute="1.value") %}
+{% for key,value in MouseMoveMode.items()|sort(attribute="1.value") %}
     {% if value.value and value.type == "鼠标操作" %}
 {{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ "rightClick(true)" if value.value == "rightClick()" else value.value | replace("fast", "slow") }}}
     {% endif %}
@@ -630,77 +632,6 @@ execCapslockAbbr(typo) {
     return true
 }
 
-enterSemicolonAbbr(ih) 
-{
-    global DisableCapslockKey
-    DisableCapslockKey := true
-
-    typoTip.show("    ") 
-    ih.Start()
-    ih.Wait()
-    ih.Stop()
-    typoTip.hide()
-    DisableCapslockKey := false
-
-
-    if (ih.Match)
-        execSemicolonAbbr(ih.Match)
-}
-
-onTypoChar(ih, char) {
-    typoTip.show(ih.Input)
-}
-
-onTypoEnd(ih) {
-    ; typoTip.show(ih.Input)
-}
-capsOnTypoChar(ih, char) {
-    postCharToTipWidnow(char)
-}
-
-capsOnTypoEnd(ih) {
-    ; typoTip.show(ih.Input)
-}
-
-enterCapslockAbbr() 
-{
-    global capsHook
-    ih := capsHook
-    WM_USER := 0x0400
-    SHOW_COMMAND_INPUT := WM_USER + 0x0001
-    HIDE_COMMAND_INPUT := WM_USER + 0x0002
-    CANCEL_COMMAND_INPUT := WM_USER + 0x0003
-    Suspend, On
-
-    postMessageToTipWidnow(SHOW_COMMAND_INPUT)
-    result := ""
-
-
-    ih.Start()
-    endReason := ih.Wait()
-    ih.Stop()
-    Suspend, Off
-
-    if InStr(endReason, "Match") {
-        lastChar := SubStr(ih.Match, ih.Match.Length-1)
-        postCharToTipWidnow(lastChar)
-        SetTimer, delayedHideTipWindow, -1
-    } else {
-        if InStr(endReason, "EndKey") {
-            postMessageToTipWidnow(CANCEL_COMMAND_INPUT)
-        } else {
-            postMessageToTipWidnow(HIDE_COMMAND_INPUT)
-        }
-    }
-    if (ih.Match)
-        execCapslockAbbr(ih.Match)
-}
-
-delayedHideTipWindow()
-{
-    HIDE_COMMAND_INPUT := 0x0400 + 0x0002
-    postMessageToTipWidnow(HIDE_COMMAND_INPUT)
-}
 
 
 

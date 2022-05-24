@@ -142,7 +142,6 @@
     "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.languageServer": "Pylance",
-    "python.terminal.activateEnvironment": false,
     "search.showLineNumbers": true,
     "search.smartCase": true,
     "security.workspace.trust.enabled": false,

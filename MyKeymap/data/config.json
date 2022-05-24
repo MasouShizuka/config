@@ -2771,7 +2771,8 @@
         "enableCapsF": false,
         "enableCapsSpace": true,
         "DotMode": false,
-        "enableDotMode": false
+        "enableDotMode": false,
+        "MouseMoveMode": "Capslock"
     },
     "CapslockSpace": {
         "0": {
@@ -4430,6 +4431,12 @@
         "Caps Up": {
             "type": "文字处理",
             "value": "send, {blind}{esc}",
+            "prefix": "*"
+        },
+        "; Up": {
+            "type": "输入文本或按键",
+            "value": "send, {blind}`;",
+            "keysToSend": "`;",
             "prefix": "*"
         }
     }

@@ -406,13 +406,13 @@
     {
         "key": "ctrl+h",
         "command": "workbench.action.previousEditorInGroup",
-        "when": "!panelVisible && neovim.mode != insert"
+        "when": "!panelVisible || editorFocus || notebookEditorFocused"
     },
     // 面板不可见且 neovim.mode != insert 时，则切换下一个编辑器
     {
         "key": "ctrl+l",
         "command": "workbench.action.nextEditorInGroup",
-        "when": "!panelVisible && neovim.mode != insert"
+        "when": "!panelVisible || editorFocus || notebookEditorFocused"
     },
     // 移动编辑器到左边
     {

@@ -153,9 +153,6 @@ onoremap L $
 nmap n nzz
 nmap N Nzz
 
-vnoremap < <gv
-vnoremap > >gv
-
 nmap s <leader><leader>s
 xmap s <leader><leader>s
 
@@ -184,9 +181,7 @@ if exists('g:vscode')
     nnoremap <Leader>p <Cmd>call VSCodeNotify('extension.pasteImage')<CR>
 
     function! Compile_Run()
-        if &filetype == 'html' || &filetype == 'xhtml'
-            call VSCodeNotify('office.html.preview')
-        elseif &filetype == 'markdown'
+        if &filetype == 'markdown'
             call VSCodeNotify('markdown-preview-enhanced.openPreviewToTheSide')
         else
             call VSCodeNotify('code-runner.run')

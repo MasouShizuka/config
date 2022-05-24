@@ -97,7 +97,7 @@ vec4 hook() {
 //!COMPONENTS 4
 //!DESC SSimDownscaler mean & R
 
-#define sigma_nsq   49. / (255.*255.)
+#define sigma_nsq   10. / (255.*255.)
 #define locality    2.0
 
 #define offset      vec2(0,0)
