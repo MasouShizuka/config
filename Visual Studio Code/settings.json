@@ -83,6 +83,12 @@
     },
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.theme": "Kennedy",
+    "isort.args": [
+        "--profile",
+        "black",
+        "--multi-line=3",
+        "--trailing-comma"
+    ],
     "jupyter.askForKernelRestart": false,
     "Lua.diagnostics.globals": [
         "mp"

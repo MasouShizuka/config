@@ -622,3 +622,8 @@ Drop-Down Tab Stacks based on LonM.vivaldi.net (but heavily modified)
     background-position: top right !important;
     background-repeat: no-repeat !important;
 }
+
+/* modified */
+.tabs-left #panels-container + div[style*='height: auto;'] {
+    max-width: 0;
+}

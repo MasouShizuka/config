@@ -181,7 +181,9 @@ if exists('g:vscode')
     nnoremap <Leader>p <Cmd>call VSCodeNotify('extension.pasteImage')<CR>
 
     function! Compile_Run()
-        if &filetype == 'markdown'
+        if &filetype == 'html' || &filetype == 'xhtml'
+            call VSCodeNotify('office.html.preview')
+        elseif &filetype == 'markdown'
             call VSCodeNotify('markdown-preview-enhanced.openPreviewToTheSide')
         else
             call VSCodeNotify('code-runner.run')
