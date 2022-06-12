@@ -55,7 +55,7 @@ public class Battery_Widget : BarWidgetBase {
             charge_icon = "";
         }
 
-        IBarWidgetPart part_icon = Part(charge_icon, fore:Color.Black, back: charge_color, fontname: FontName);
+        IBarWidgetPart part_icon = Part(charge_icon, fore:IconColor, back: charge_color, fontname: FontName);
         IBarWidgetPart part_battery = Part(currentBatteryCharge.ToString("#0%"), fore: charge_color, fontname: FontName);
 
         IBarWidgetPart[] parts = {

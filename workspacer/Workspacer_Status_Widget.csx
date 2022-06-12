@@ -23,9 +23,9 @@ public class Workspacer_Status_Widget : BarWidgetBase {
             color = status_off;
         }
 
-        return Parts(Part(LeftPadding + status + RightPadding, fore: color, fontname: FontName, partClicked: () => {
+        return Parts(Part(LeftPadding + status + RightPadding, fore: color, partClicked: () => {
             config_context.Enabled = !config_context.Enabled;
-        }));
+        }, fontname: FontName));
     }
 
     public override void Initialize() {

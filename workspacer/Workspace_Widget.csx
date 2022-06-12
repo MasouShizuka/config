@@ -34,7 +34,7 @@ public class Workspace_Widget : BarWidgetBase {
     private IBarWidgetPart CreatePart(IWorkspace workspace, int index) {
         return Part(GetDisplayName(workspace, index), fore: GetDisplayForeColor(workspace, index), back: GetDisplayBackColor(workspace, index), partClicked: () => {
             Context.Workspaces.SwitchMonitorToWorkspace(Context.Monitor.Index, index);
-        }, FontName);
+        }, fontname: FontName);
     }
 
     private void UpdateWorkspaces() {

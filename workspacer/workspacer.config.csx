@@ -1,13 +1,14 @@
 #r "D:\Tools\Workspacer\workspacer.Shared.dll"
-#r "D:\Tools\Workspacer\plugins\workspacer.Bar\workspacer.Bar.dll"
-#r "D:\Tools\Workspacer\plugins\workspacer.Gap\workspacer.Gap.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.ActionMenu\workspacer.ActionMenu.dll"
+#r "D:\Tools\Workspacer\plugins\workspacer.Bar\workspacer.Bar.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.FocusIndicator\workspacer.FocusIndicator.dll"
+#r "D:\Tools\Workspacer\plugins\workspacer.Gap\workspacer.Gap.dll"
 
 #load "C:\Users\MasouShizuka\.workspacer\Active_Layout_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Battery_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Input_Method_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Multi_Titles_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Network_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Text_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Time_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Workspace_Widget.csx"
@@ -21,14 +22,15 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using workspacer;
+using workspacer.ActionMenu;
 using workspacer.Bar;
 using workspacer.Bar.Widgets;
-using workspacer.Gap;
-using workspacer.ActionMenu;
 using workspacer.FocusIndicator;
+using workspacer.Gap;
 
-// 某些程序（例如 Vscode）会在调用某些 api 后卡住，例如切换 workspace 时
+// 某些程序（例如 vscode）会在调用某些 api 后卡住，例如切换 workspace 时
 // 需要进行一定的操作才能恢复
+
 // 程序的进程名称列表
 static string[] process_name_list = {
     "Code",
@@ -43,13 +45,14 @@ form.Height = 0;
 form.FormBorderStyle = FormBorderStyle.None;
 form.TopLevel = true;
 form.TopMost = true;
+// 通过激活 Form 后再将其隐藏的方式刷新 workspacer
 static async void refresh() {
     await Task.Delay(300);
-    // 激活 Form 并隐藏，以恢复程序的状态
     form.Show();
     form.Activate();
     form.Hide();
 }
+// 对指定的程序进行刷新
 static void refresh_window(IWindow focused_window) {
     if (focused_window != null) {
         string focused_window_process_name = focused_window.ProcessName;
@@ -110,6 +113,16 @@ Action<IConfigContext> doConfig = (context) => {
     var font_size = 15;
     var gap = 8;
 
+    // 能最小化窗口
+    context.CanMinimizeWindows = true;
+
+    // 窗口间的间距
+    context.AddGap(new GapPluginConfig() {
+        InnerGap = gap,
+        OuterGap = gap / 2,
+        Delta = gap / 2,
+    });
+
     // 顶栏
     context.AddBar(new BarPluginConfig() {
         BarHeight = bar_height,
@@ -148,6 +161,11 @@ Action<IConfigContext> doConfig = (context) => {
                 status_on = color_green,
                 status_off = color_red,
             },
+            new Network_Widget() {
+                ForeColor = color_black,
+                BackColor = color_purple,
+                Interval = 1000,
+            },
             new Text_Widget(" ") {
                 ForeColor = color_black,
                 BackColor = color_orange,
@@ -162,28 +180,15 @@ Action<IConfigContext> doConfig = (context) => {
                 MedChargeColor = color_yellow,
                 LowChargeColor = color_red,
             },
-            new Text_Widget(" ") {
+            new Time_Widget(1000, "yyyy-MM-dd HH:mm:ss ddd") {
                 ForeColor = color_black,
                 BackColor = color_purple,
-            },
-            new Time_Widget(1000, "yyyy-MM-dd HH:mm:ss ddd") {
-                ForeColor = color_purple,
             },
         },
     });
 
     // 聚焦窗口时的外框
     context.AddFocusIndicator();
-
-    // 窗口间的间距
-    context.AddGap(new GapPluginConfig() {
-        InnerGap = gap,
-        OuterGap = gap / 2,
-        Delta = gap / 2,
-    });
-
-    // 能最小化窗口
-    context.CanMinimizeWindows = true;
 
     // 布局类型
     Func<ILayoutEngine[]> defaultLayouts = () => new ILayoutEngine[] {
@@ -322,7 +327,6 @@ Action<IConfigContext> doConfig = (context) => {
 
         context.Keybinds.Subscribe(mod, workspacer.Keys.J, () => {
             var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
-            var _lastFocused = context.Workspaces.FocusedWorkspace.LastFocusedWindow;
             var didFocus = false;
             for (var i = 0; i < windows.Count; i++) {
                 var window = windows[i];
@@ -344,16 +348,11 @@ Action<IConfigContext> doConfig = (context) => {
                 }
             }
             if (!didFocus && windows.Count > 0) {
-                if (_lastFocused != null) {
-                    _lastFocused.Focus();
-                } else {
-                    windows[0].Focus();
-                }
+                windows[0].Focus();
             }
         }, "focus next window");
         context.Keybinds.Subscribe(mod, workspacer.Keys.K, () => {
             var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
-            var _lastFocused = context.Workspaces.FocusedWorkspace.LastFocusedWindow;
             var didFocus = false;
             for (var i = 0; i < windows.Count; i++) {
                 var window = windows[i];
@@ -375,11 +374,7 @@ Action<IConfigContext> doConfig = (context) => {
                 }
             }
             if (!didFocus && windows.Count > 0) {
-                if (_lastFocused != null) {
-                    _lastFocused.Focus();
-                } else {
-                    windows[0].Focus();
-                }
+                windows[0].Focus();
             }
         }, "focus previous window");
 

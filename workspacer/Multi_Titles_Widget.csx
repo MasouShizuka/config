@@ -108,9 +108,9 @@ public class Multi_Titles_Widget : BarWidgetBase {
             windowTitle = GetTrimmedTitle(windowTitle, maxTitleLength);
         }
 
-        IBarWidgetPart title_preamble = Part(TitlePreamble, fore: ForeColor, fontname: fontName, partClicked: clickAction != null ? clickAction(window) : null);
-        IBarWidgetPart window_title = Part(windowTitle, fore: window.IsFocused ? WindowHasFocusForeColor : ForeColor, back: window.IsFocused ? WindowHasFocusBackColor : BackColor, fontname: fontName, partClicked: clickAction != null ? clickAction(window) : null);
-        IBarWidgetPart title_postamble = Part(TitlePostamble, fore: ForeColor, fontname: fontName, partClicked: clickAction != null ? clickAction(window) : null);
+        IBarWidgetPart title_preamble = Part(TitlePreamble, fore: ForeColor, partClicked: clickAction != null ? clickAction(window) : null, fontname: fontName);
+        IBarWidgetPart window_title = Part(windowTitle, fore: window.IsFocused ? WindowHasFocusForeColor : ForeColor, back: window.IsFocused ? WindowHasFocusBackColor : BackColor, partClicked: clickAction != null ? clickAction(window) : null, fontname: fontName);
+        IBarWidgetPart title_postamble = Part(TitlePostamble, fore: ForeColor, partClicked: clickAction != null ? clickAction(window) : null, fontname: fontName);
 
         IBarWidgetPart[] parts = {
             title_preamble,
