@@ -22,6 +22,5 @@
         1. 找到 `msys64\etc\nsswitch.conf`
         2. 修改 `db_home: cygwin desc` 为 `db_home: windows`
     3. 安装 `Zsh`：`pacman -S zsh`
-- `MSYS2` 与 `Windows Terminal` 存在 BUG，即启用 `zsh-syntax-highlighting` 后，渲染高亮字符时光标会抖动，但仅限显示，不影响使用，请参考 [Cursor shaking in oh-my-zsh](https://github.com/microsoft/terminal/issues/8661)
 - `MSYS2` 的 `Zsh` 不能进行 `Conda` 下的环境切换，请参考 [Conda in Windows under MSYS2 and Zsh line ending problems](https://github.com/conda/conda/issues/9922)
     - 妥协手段：令 `Zsh` 运行于 `Powershell` 中，即让 `Powershell` 启动时执行 `Zsh`，若要进行 `Conda` 环境切换，则使用 `exit` 退出 `Zsh`，在 `Powershell` 中完成后，再进入 `Zsh`

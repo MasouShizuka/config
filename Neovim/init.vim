@@ -157,6 +157,8 @@ nmap s <leader><leader>s
 xmap s <leader><leader>s
 
 if exists('g:vscode')
+    nnoremap o A<CR>
+
     nnoremap zc <Cmd>call VSCodeNotify('editor.fold')<CR>
     nnoremap zC <Cmd>call VSCodeNotify('editor.foldRecursively')<CR>
     nnoremap zo <Cmd>call VSCodeNotify('editor.unfold')<CR>

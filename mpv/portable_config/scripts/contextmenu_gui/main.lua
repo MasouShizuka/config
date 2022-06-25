@@ -180,9 +180,9 @@ local function vidTrackMenu()
             elseif vidTrackImage then vidTrackTitle = "[" .. vidTrackCodec .. "]" .. "," .. vidTrackwh
             elseif vidTrackFps then vidTrackTitle = "[" .. vidTrackCodec .. "]" .. "," .. vidTrackwh .. "," .. vidTrackFps .. " FPS"
             else vidTrackTitle = "视频轨 " .. i end
-            if vidTrackForced then  vidTrackTitle = vidTrackTitle .. "," .. "Forced" end
-            if vidTrackDefault then  vidTrackTitle = vidTrackTitle .. "," .. "Default" end
-            if vidTrackExternal then  vidTrackTitle = vidTrackTitle .. "," .. "External" end
+            if vidTrackForced then  vidTrackTitle = vidTrackTitle .. "（强制）" end
+            if vidTrackDefault then  vidTrackTitle = vidTrackTitle .. "（默认）" end
+            if vidTrackExternal then  vidTrackTitle = vidTrackTitle .. "（外挂）" end
 
             local vidTrackCommand = "set vid " .. vidTrackID
             table.insert(vidTrackMenuVal, {RADIO, vidTrackTitle, "", vidTrackCommand, function() return checkTrack(vidTrackNum) end, false, true})
@@ -256,9 +256,9 @@ local function audTrackMenu()
             elseif audTrackLang then audTrackTitle = audTrackLang .. "[" .. audTrackCodec .. "]" .. "," .. audTrackChannels .. " ch" .. "," .. audTrackSamplerate .. " kHz"
             elseif audTrackChannels then audTrackTitle = "[" .. audTrackCodec .. "]" .. "," .. audTrackChannels .. " ch" .. "," .. audTrackSamplerate .. " kHz"
             else audTrackTitle = "音频轨 " .. i end
-            if audTrackForced then  audTrackTitle = audTrackTitle .. "," .. "Forced" end
-            if audTrackDefault then  audTrackTitle = audTrackTitle .. "," .. "Default" end
-            if audTrackExternal then  audTrackTitle = audTrackTitle .. "," .. "External" end
+            if audTrackForced then  audTrackTitle = audTrackTitle .. "（强制）" end
+            if audTrackDefault then  audTrackTitle = audTrackTitle .. "（默认）" end
+            if audTrackExternal then  audTrackTitle = audTrackTitle .. "（外挂）" end
 
             local audTrackCommand = "set aid " .. audTrackID
             if (i == 1) then
@@ -311,9 +311,9 @@ local function subTrackMenu()
             elseif subTrackLang then subTrackTitle = subTrackLang .. "[" .. subTrackCodec .. "]"
             elseif subTrackCodec then subTrackTitle = "[" .. subTrackCodec .. "]"
             else subTrackTitle = "字幕轨 " .. i end
-            if subTrackForced then  subTrackTitle = subTrackTitle .. "," .. "Forced" end
-            if subTrackDefault then  subTrackTitle = subTrackTitle .. "," .. "Default" end
-            if subTrackExternal then  subTrackTitle = subTrackTitle .. "," .. "External" end
+            if subTrackForced then  subTrackTitle = subTrackTitle .. "（强制）" end
+            if subTrackDefault then  subTrackTitle = subTrackTitle .. "（默认）" end
+            if subTrackExternal then  subTrackTitle = subTrackTitle .. "（外挂）" end
 
             local subTrackCommand = "set sid " .. subTrackID
             if (i == 1) then

@@ -6,10 +6,29 @@
         {
             "command": 
             {
+                "action": "swapPane",
+                "direction": "previous"
+            },
+            "keys": "ctrl+shift+e"
+        },
+        {
+            "command": 
+            {
+                "action": "prevTab"
+            },
+            "keys": "ctrl+shift+h"
+        },
+        {
+            "command": 
+            {
                 "action": "copy",
                 "singleLine": false
             },
             "keys": "ctrl+c"
+        },
+        {
+            "command": "paste",
+            "keys": "ctrl+v"
         },
         {
             "command": "unbound",
@@ -180,8 +199,20 @@
             "keys": "ctrl+comma"
         },
         {
-            "command": "paste",
-            "keys": "ctrl+v"
+            "command": "unbound",
+            "keys": "ctrl+alt+u"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+alt+d"
+        },
+        {
+            "command": 
+            {
+                "action": "moveTab",
+                "direction": "forward"
+            },
+            "keys": "ctrl+shift+period"
         },
         {
             "command": 
@@ -201,9 +232,6 @@
             "keys": "ctrl+shift+u"
         },
         {
-            "command": "openNewTabDropdown"
-        },
-        {
             "command": 
             {
                 "action": "splitPane",
@@ -213,7 +241,22 @@
             "keys": "ctrl+alt+j"
         },
         {
+            "command": "openNewTabDropdown"
+        },
+        {
+            "command": "toggleFocusMode"
+        },
+        {
             "command": "closeWindow"
+        },
+        {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "right",
+                "splitMode": "duplicate"
+            },
+            "keys": "ctrl+alt+l"
         },
         {
             "command": 
@@ -244,13 +287,6 @@
         {
             "command": 
             {
-                "action": "prevTab"
-            },
-            "keys": "ctrl+shift+h"
-        },
-        {
-            "command": 
-            {
                 "action": "splitPane",
                 "split": "left",
                 "splitMode": "duplicate"
@@ -273,6 +309,15 @@
             "keys": "ctrl+shift+l"
         },
         {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "up",
+                "splitMode": "duplicate"
+            },
+            "keys": "ctrl+alt+k"
+        },
+        {
             "command": "closePane",
             "keys": "ctrl+shift+w"
         },
@@ -289,16 +334,7 @@
             "keys": "ctrl+shift+t"
         },
         {
-            "command": 
-            {
-                "action": "swapPane",
-                "direction": "previous"
-            },
-            "keys": "ctrl+shift+e"
-        },
-        {
-            "command": "scrollDownPage",
-            "keys": "ctrl+alt+d"
+            "command": "scrollDownPage"
         },
         {
             "command": "togglePaneZoom",
@@ -307,20 +343,11 @@
         {
             "command": 
             {
-                "action": "splitPane",
-                "split": "up",
-                "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+k"
-        },
-        {
-            "command": 
-            {
                 "action": "commandPalette"
             }
         },
         {
-            "command": "toggleFocusMode"
+            "command": "scrollUpPage"
         },
         {
             "command": 
@@ -335,12 +362,7 @@
             }
         },
         {
-            "command": 
-            {
-                "action": "moveTab",
-                "direction": "forward"
-            },
-            "keys": "ctrl+shift+period"
+            "command": "identifyWindow"
         },
         {
             "command": 
@@ -349,9 +371,6 @@
                 "direction": "previousInOrder"
             },
             "keys": "ctrl+shift+k"
-        },
-        {
-            "command": "identifyWindow"
         },
         {
             "command": 
@@ -381,25 +400,12 @@
             "command": "openSystemMenu"
         },
         {
-            "command": 
-            {
-                "action": "splitPane",
-                "split": "right",
-                "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+l"
-        },
-        {
             "command": "scrollToBottom",
             "keys": "ctrl+end"
         },
         {
             "command": "scrollToTop",
             "keys": "ctrl+home"
-        },
-        {
-            "command": "scrollUpPage",
-            "keys": "ctrl+alt+u"
         }
     ],
     "copyFormatting": "none",

@@ -112,10 +112,8 @@
         },
         "I": {
             "2": {
-                "type": "鼠标操作",
-                "value": "fastMoveMouse(\"I\", 0, -1)",
-                "label": "鼠标上移",
-                "prefix": "*"
+                "type": "可能会用到的内置函数",
+                "value": "fast_move_mouse(\"I\", 0, -1)"
             }
         },
         "O": {
@@ -172,26 +170,20 @@
         },
         "J": {
             "2": {
-                "type": "鼠标操作",
-                "value": "fastMoveMouse(\"J\", -1, 0)",
-                "label": "鼠标左移",
-                "prefix": "*"
+                "type": "可能会用到的内置函数",
+                "value": "fast_move_mouse(\"J\", -1, 0)"
             }
         },
         "K": {
             "2": {
-                "type": "鼠标操作",
-                "value": "fastMoveMouse(\"K\", 0, 1)",
-                "label": "鼠标下移",
-                "prefix": "*"
+                "type": "可能会用到的内置函数",
+                "value": "fast_move_mouse(\"K\", 0, 1)"
             }
         },
         "L": {
             "2": {
-                "type": "鼠标操作",
-                "value": "fastMoveMouse(\"L\", 1, 0)",
-                "label": "鼠标右移",
-                "prefix": "*"
+                "type": "可能会用到的内置函数",
+                "value": "fast_move_mouse(\"L\", 1, 0)"
             }
         },
         ";": {
@@ -496,8 +488,9 @@
         },
         ";": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "activate_it_by_hotkey_or_run(\"TIM.exe\", \"^!z\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\腾讯软件\\TIM\\TIM.lnk\")",
+                "comment": "如果存在 TIM.exe 进程则发送 Ctrl+Alt+Z 打开 Tim,  否则启动 Tim"
             }
         },
         "Z": {
@@ -529,11 +522,8 @@
         },
         "B": {
             "2": {
-                "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"\", \"\" A_ProgramsCommon \"\\Google Chrome.lnk\", \"\", \"\")",
-                "toRun": "%A_ProgramsCommon%\\Google Chrome.lnk",
-                "toActivate": "",
-                "comment": "新开一个 Chrome 窗口"
+                "type": "窗口操作",
+                "value": "winMinimizeIgnoreDesktop()"
             }
         },
         "N": {
@@ -567,8 +557,8 @@
         },
         "/": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "窗口操作",
+                "value": "bindOrActivate_unbind()"
             }
         }
     },
@@ -979,7 +969,7 @@
             "3": {
                 "type": "系统控制",
                 "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"\" A_ProgramFiles \"\\Everything\\Everything.exe\", \"-filename \" sel.selected \"\")",
-                "label": "用指定程序打开选中的文件 / 文件夹",
+                "label": "用指定程序打开选中的文件",
                 "toRun": "%A_ProgramFiles%\\Everything\\Everything.exe",
                 "cmdArgs": "-filename %selected%",
                 "comment": "用 Everything 搜索选中文件夹里的文件"
@@ -1020,7 +1010,7 @@
             "3": {
                 "type": "系统控制",
                 "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"wt.exe\", \"-d \" sel.selected \"\")",
-                "label": "用指定程序打开选中的文件 / 文件夹",
+                "label": "用指定程序打开选中的文件",
                 "toRun": "wt.exe",
                 "comment": "用 Windows Terminal 打开选中的文件夹",
                 "cmdArgs": "-d %selected%"
@@ -1198,7 +1188,7 @@
             "3": {
                 "type": "系统控制",
                 "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"C:\\Program Files\\7-Zip\\7z.exe\", \"x \" sel.selected \" -o\"\"\" sel.current \"\\\" sel.purename \"\"\"\")",
-                "label": "用指定程序打开选中的文件 / 文件夹",
+                "label": "用指定程序打开选中的文件",
                 "toRun": "C:\\Program Files\\7-Zip\\7z.exe",
                 "cmdArgs": "x %selected% -o\"%current%\\%purename%\"",
                 "comment": "用 7-Zip 解压选中的文件"
@@ -1212,7 +1202,7 @@
             "3": {
                 "type": "系统控制",
                 "value": "sel := Explorer_GetSelection(), action_open_selected_with(\"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"\" sel.selected \"\")",
-                "label": "用指定程序打开选中的文件 / 文件夹",
+                "label": "用指定程序打开选中的文件",
                 "toRun": "%code%",
                 "cmdArgs": "%selected%",
                 "comment": "用 Visual Studio Code 打开选中的文件"
@@ -2619,7 +2609,7 @@
         "help": {
             "2": {
                 "type": "系统控制",
-                "value": "run, bin\\site\\help.html",
+                "value": "openHelpHtml()",
                 "label": "回顾 MyKeymap 配置"
             }
         },
@@ -2772,7 +2762,9 @@
         "enableCapsSpace": true,
         "DotMode": false,
         "enableDotMode": false,
-        "MouseMoveMode": "Capslock"
+        "MouseMoveMode": "Capslock",
+        "showMouseMovePrompt": true,
+        "enableCustomHotkeys": true
     },
     "CapslockSpace": {
         "0": {
@@ -3879,7 +3871,8 @@
             "CommaMode",
             "DotMode",
             "CapslockAbbr",
-            "SemicolonAbbr"
+            "SemicolonAbbr",
+            "CustomHotkeys"
         ]
     },
     "CommaMode": {
@@ -4438,6 +4431,29 @@
             "value": "send, {blind}`;",
             "keysToSend": "`;",
             "prefix": "*"
+        }
+    },
+    "CustomHotkeys": {
+        "+!'": {
+            "2": {
+                "type": "系统控制",
+                "value": "\nSuspend, Permit\ntoggleSuspend()\nreturn",
+                "label": "暂停 MyKeymap"
+            }
+        },
+        "+capslock": {
+            "2": {
+                "type": "系统控制",
+                "value": "toggleCapslock()",
+                "label": "切换 Capslock 状态"
+            }
+        },
+        "!'": {
+            "2": {
+                "type": "系统控制",
+                "value": "\nSuspend, Toggle\nReloadProgram()\nreturn",
+                "label": "重启 MyKeymap"
+            }
         }
     }
 }

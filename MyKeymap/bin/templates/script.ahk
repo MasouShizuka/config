@@ -44,6 +44,9 @@ scrollOnceLineCount := {{{ Settings.scrollOnceLineCount if Settings.scrollOnceLi
 scrollDelay1 = {{{ "T" + Settings.scrollDelay1 if Settings.scrollDelay1 else "T0.2" }}}
 scrollDelay2 = {{{ "T" + Settings.scrollDelay2 if Settings.scrollDelay2 else "T0.03" }}}
 
+{% if Settings.showMouseMovePrompt %}
+global mouseMovePrompt := newMouseMovePromptWindow()
+{% endif %}
 fastMoveSingle := {{{ Settings.fastMoveSingle if Settings.fastMoveSingle else 110 }}}
 fastMoveRepeat := {{{ Settings.fastMoveRepeat if Settings.fastMoveRepeat else 70 }}}
 slowMoveSingle := {{{ Settings.slowMoveSingle if Settings.slowMoveSingle else 10 }}}
@@ -101,7 +104,7 @@ Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.1 by 咸鱼阿康
+Menu, Tray, Tip, MyKeymap 1.1.18 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -117,7 +120,7 @@ semiHook := InputHook("C", "{CapsLock}{Space}{BackSpace}{Esc}", {{{ SemicolonAbb
 semiHook.KeyOpt("{CapsLock}", "S")
 semiHook.OnChar := Func("onSemiHookChar")
 semiHook.OnEnd := Func("onSemiHookEnd")
-capsHook := InputHook("C", "{CapsLock}{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
+capsHook := InputHook("", "{CapsLock}{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
 capsHook.KeyOpt("{CapsLock}", "S")
 capsHook.OnChar := Func("onCapsHookChar")
 capsHook.OnEnd := Func("onCapsHookEnd")
@@ -140,20 +143,13 @@ RAlt::LCtrl
     ; tip(A_TickCount - run_start)
     Return
 
-!+'::
-    Suspend, Permit
-    toggleSuspend()
-    return
-!'::
-    Suspend, Toggle
-    ReloadProgram()
-    return
+{% for key,value in CustomHotkeys.items()|sort(attribute="1.value") %}
+    {% if value.value %}
+{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
+    {% endif %}
+{% endfor %}
 
 {% if Settings.CapslockMode %}
-; modified
-; !capslock::toggleCapslock()
-+capslock::toggleCapslock()
-
 *capslock::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -467,10 +463,10 @@ space::
 ##}
 
 */::centerMouse()
-*I::slowMoveMouse("I", 0, -1)
-*J::slowMoveMouse("J", -1, 0)
-*K::slowMoveMouse("K", 0, 1)
-*L::slowMoveMouse("L", 1, 0)
+*I::slow_move_mouse("I", 0, -1)
+*J::slow_move_mouse("J", -1, 0)
+*K::slow_move_mouse("K", 0, 1)
+*L::slow_move_mouse("L", 1, 0)
 *,::lbuttonDown()
 ; modified
 ; *N::leftClick()

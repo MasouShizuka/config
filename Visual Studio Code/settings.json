@@ -65,6 +65,7 @@
     "editor.mouseWheelZoom": true,
     "editor.renderLineHighlight": "all",
     "editor.renderWhitespace": "trailing",
+    "editor.scrollBeyondLastLine": false,
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
     "editor.suggestSelection": "first",

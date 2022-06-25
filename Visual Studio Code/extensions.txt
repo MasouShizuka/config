@@ -12,7 +12,6 @@ formulahendry.auto-rename-tag
 formulahendry.code-runner
 foxundermoon.shell-format
 gera2ld.markmap-vscode
-GitHub.copilot
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
 ionutvmi.path-autocomplete
