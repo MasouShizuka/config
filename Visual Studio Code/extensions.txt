@@ -35,9 +35,6 @@ ms-toolsai.jupyter-keymap
 ms-toolsai.jupyter-renderers
 ms-toolsai.vscode-jupyter-powertoys
 ms-vscode.hexeditor
-mtxr.sqltools
-mtxr.sqltools-driver-mysql
-mtxr.sqltools-driver-sqlite
 mushan.vscode-paste-image
 njpwerner.autodocstring
 njqdev.vscode-python-typehint

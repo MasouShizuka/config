@@ -156,8 +156,8 @@
         },
         "G": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "close_or_run_script(\"komorebi.ahk\")"
             }
         },
         "H": {

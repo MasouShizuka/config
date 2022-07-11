@@ -1,6 +1,6 @@
 --[[
 
-uosc 2.16.0 - 2022-Mar-21 | https://github.com/darsain/uosc
+uosc 2.17.0 - 2022-Apr-30 | https://github.com/darsain/uosc
 
 Minimalist cursor proximity based UI for MPV player.
 
@@ -3347,8 +3347,9 @@ mp.add_key_binding(nil, 'playlist', function()
         local active_item
         for index, item in ipairs(mp.get_property_native('playlist')) do
             local is_url = item.filename:find('://')
+            local item_title = type(item.title) == 'string' and #item.title > 0 and item.title or false
             items[index] = {
-                title = is_url and item.filename or serialize_path(item.filename).basename,
+                title = item_title or (is_url and item.filename or serialize_path(item.filename).basename),
                 hint = tostring(index),
                 value = index
             }

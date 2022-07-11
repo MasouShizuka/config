@@ -58,6 +58,7 @@ enter_mouse_mode()
     global SLOWMODE
     SLOWMODE := true
     if mouseMovePrompt
+        WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
         mouseMovePrompt.show("🖱️", 19, 17)
 }
 
@@ -148,6 +149,7 @@ fast_move_mouse(key, direction_x, direction_y) {
     repeat_y := direction_y *fastMoveRepeat 
     mousemove, %one_x% , %one_y%, 0, R
     if mouseMovePrompt
+        WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
         mouseMovePrompt.show("🖱️", 19, 17)
     keywait, %key%, %moveDelay1%
     while (errorlevel != 0)
@@ -167,6 +169,7 @@ slow_move_mouse(key, direction_x, direction_y) {
     repeat_y := direction_y * slowMoveRepeat
     mousemove, %one_x% , %one_y%, 0, R
     if mouseMovePrompt
+        WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
         mouseMovePrompt.show("🖱️", 19, 17)
     keywait, %key%, %moveDelay1%
     while (errorlevel != 0)
@@ -188,6 +191,7 @@ very_slow_move_mouse(key, direction_x, direction_y)
     repeat_y := direction_y
     mousemove, %one_x% , %one_y%, 0, R
     if mouseMovePrompt
+        WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
         mouseMovePrompt.show("🖱️", 19, 17)
     keywait, %key%, %moveDelay1%
     while (errorlevel != 0)

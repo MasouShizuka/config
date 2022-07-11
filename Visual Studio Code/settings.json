@@ -76,12 +76,7 @@
     },
     "files.autoGuessEncoding": true,
     "files.autoSave": "afterDelay",
-    "github.copilot.enable": {
-        "*": true,
-        "markdown": false,
-        "plaintext": true,
-        "yaml": false
-    },
+    "git.mergeEditor": true,
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.theme": "Kennedy",
     "isort.args": [
@@ -155,22 +150,6 @@
     "shellcheck.exclude": [
         "2148"
     ],
-    "sqltools.connections": [
-        {
-            "database": "Shizuka",
-            "driver": "MySQL",
-            "mysqlOptions": {
-                "authProtocol": "default"
-            },
-            "name": "Shizuka",
-            "password": "root",
-            "port": 3306,
-            "previewLimit": 50,
-            "server": "localhost",
-            "username": "root"
-        }
-    ],
-    "sqltools.useNodeRuntime": true,
     "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.defaultProfile.windows": "PowerShell",
@@ -180,6 +159,7 @@
     "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.tabs.location": "left",
     "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
+    "window.commandCenter": true,
     "window.dialogStyle": "custom",
     "workbench.colorCustomizations": {
         "editor.lineHighlightBackground": "#1073cf2d",
@@ -192,7 +172,6 @@
         "titleBar.inactiveBackground": "#282c34"
     },
     "workbench.colorTheme": "One Dark Pro Flat",
-    "workbench.editor.defaultBinaryEditor": "hexEditor.hexedit",
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
         "*.gif": "cweijan.officeViewer",
