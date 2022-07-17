@@ -28,7 +28,7 @@
 }
 
 .ws-btn {
-    padding: 5px;
+    padding: 0 5px;
     background: rgba(60, 56, 54, 0.4);
     border: 1px solid rgba(168, 153, 132, 0.4);
     margin: 2px 1px;
@@ -73,10 +73,12 @@
 
 .komorebi-multi-window .window {
     background: #83a598;
+    text-align: left;
 }
 
 .komorebi-multi-window .window-focused {
     background: #f1fa8c;
+    text-align: left;
 }
 
 .custom-widget {

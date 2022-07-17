@@ -43,7 +43,7 @@ def ass_simplified_to_traditional():
                     else:
                         f2.write(line)
                     line = f1.readline()
-                print(name + '.ass已转化')
+                print(name + '.ass 已转化')
 
 
 if __name__ == '__main__':

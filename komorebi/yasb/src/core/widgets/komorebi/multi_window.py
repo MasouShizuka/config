@@ -46,7 +46,7 @@ class WindowButton(QPushButton):
         self.setStyleSheet('')
 
     def set_focus(self):
-        SetForegroundWindow(self.hwnd)
+        SetForegroundWindow(self.window_info['hwnd'])
 
 
 class MultiWindowWidget(BaseWidget):

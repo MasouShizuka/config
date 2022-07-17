@@ -110,10 +110,11 @@ Run, %komorebi_path%komorebic.exe workspace-rule exe Thunder.exe 0 5, , Hide
 
 ; Always float, matching on class
 ; Run, %komorebi_path%komorebic.exe float-rule class SunAwtDialog, , Hide
-Run, %komorebi_path%komorebic.exe float-rule class TaskManagerWindow, , Hide
+; Run, %komorebi_path%komorebic.exe float-rule class TaskManagerWindow, , Hide
 ; Always float, matching on title
 ; Run, %komorebi_path%komorebic.exe float-rule title "Control Panel", , Hide
 ; Run, %komorebi_path%komorebic.exe float-rule title Calculator, , Hide
+Run, %komorebi_path%komorebic.exe float-rule title "Chrome Legacy Window", , Hide
 ; Always float, matching on executable name
 ; Run, %komorebi_path%komorebic.exe float-rule exe Wally.exe, , Hide
 ; Run, %komorebi_path%komorebic.exe float-rule exe wincompose.exe, , Hide
@@ -121,14 +122,14 @@ Run, %komorebi_path%komorebic.exe float-rule class TaskManagerWindow, , Hide
 Run, %komorebi_path%komorebic.exe float-rule exe ApplicationFrameHost.exe, , Hide
 Run, %komorebi_path%komorebic.exe float-rule exe "Clash Verge.exe", , Hide
 Run, %komorebi_path%komorebic.exe float-rule exe copyq.exe, , Hide
-Run, %komorebi_path%komorebic.exe float-rule exe "Flow.Launcher.exe", , Hide
+Run, %komorebi_path%komorebic.exe float-rule exe Flow.Launcher.exe, , Hide
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, %komorebi_path%komorebic.exe manage-rule exe TIM.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe TE64.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe WeChat.exe, , Hide
-Run, %komorebi_path%komorebic.exe manage-rule exe clodmusic.exe, , Hide
+Run, %komorebi_path%komorebic.exe manage-rule exe cloudmusic.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe foobar2000.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe mpv.exe, , Hide
 
@@ -136,7 +137,7 @@ Run, %komorebi_path%komorebic.exe manage-rule exe mpv.exe, , Hide
 ; Run, %komorebi_path%komorebic.exe identify-tray-application exe Discord.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe "Clash Verge.exe", , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe copyq.exe, , Hide
-Run, %komorebi_path%komorebic.exe identify-tray-application exe "Flow.Launcher.exe", , Hide
+Run, %komorebi_path%komorebic.exe identify-tray-application exe Flow.Launcher.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe WeChat.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe foobar2000.exe, , Hide
@@ -264,49 +265,42 @@ return
 
 ; Switch to workspace
 !1::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 0, , Hide
 Sleep 1000
 refresh_window()
 return
 
 !2::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 1, , Hide
 Sleep 1000
 refresh_window()
 return
 
 !3::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 2, , Hide
 Sleep 1000
 refresh_window()
 return
 
 !4::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 3, , Hide
 Sleep 1000
 refresh_window()
 return
 
 !5::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 4, , Hide
 Sleep 1000
 refresh_window()
 return
 
 !6::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 5, , Hide
 Sleep 1000
 refresh_window()
 return
 
 !7::
-Send !
 Run, %komorebi_path%komorebic.exe focus-workspace 6, , Hide
 Sleep 1000
 refresh_window()
