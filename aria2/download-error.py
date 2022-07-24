@@ -1,4 +1,5 @@
 import sys
+
 from winotify import Notification, audio
 
 app_id = 'Aria2'

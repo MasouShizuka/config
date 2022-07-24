@@ -64,7 +64,9 @@ class MultiWindowWidget(BaseWidget):
         update_title: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_title['update_interval'], class_name='komorebi-multi-window')
+        super().__init__(
+            update_title['update_interval'], class_name='komorebi-multi-window'
+        )
         self._show_alt = False
         self._label = label
         self._label_alt = label_alt
@@ -89,7 +91,9 @@ class MultiWindowWidget(BaseWidget):
 
         self.widget_layout.addWidget(self._multi_window_container)
         self.register_callback('toggle_label', self._toggle_title_text)
-        self.register_callback('_update_workspace_windows_title', self._update_workspace_windows_title)
+        self.register_callback(
+            '_update_workspace_windows_title', self._update_workspace_windows_title
+        )
 
         self.callback_left = callbacks['on_left']
         self.callback_right = callbacks['on_right']
@@ -152,25 +156,22 @@ class MultiWindowWidget(BaseWidget):
 
                 self._clear_container_layout()
 
+                windows = self._focused_workspace['containers']['elements']
+                if self._focused_workspace['monocle_container'] is not None:
+                    windows.insert(0, self._focused_workspace['monocle_container'])
                 focused_window_index = self._focused_workspace['containers']['focused']
-                for i, k in enumerate(
-                    self._focused_workspace['containers']['elements']
-                ):
+                for i, k in enumerate(windows):
                     window_info = k['windows']['elements'][0]
-                    tid, pid = GetWindowThreadProcessId(
-                        window_info['hwnd']
-                    )
+                    tid, pid = GetWindowThreadProcessId(window_info['hwnd'])
                     window_info['pid'] = pid
 
                     window_button = WindowButton(window_info, self._active_label)
-
                     if i == focused_window_index:
                         window_button.update_focused()
 
                     if self._show_icon:
                         p = Process(pid)
                         exe_path = p.exe()
-
                         pixmap = self._get_icon_pixmap(exe_path)
                         qicon = QIcon(pixmap)
                         window_button.setIcon(qicon)

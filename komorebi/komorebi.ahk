@@ -80,13 +80,6 @@ Run, bash %komorebi_path%komorebi_yasb.sh, , Hide
 
 ; Set the layouts of different workspaces
 ; Run, %komorebi_path%komorebic.exe workspace-layout 0 1 columns, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 0 vertical-stack, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 1 vertical-stack, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 2 vertical-stack, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 3 vertical-stack, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 4 vertical-stack, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 5 vertical-stack, , Hide
-Run, %komorebi_path%komorebic.exe workspace-layout 0 6 vertical-stack, , Hide
 
 ; Set the floaty layout to not tile any windows
 ; Run, %komorebi_path%komorebic.exe workspace-tiling 0 4 disable, , Hide
@@ -114,7 +107,6 @@ Run, %komorebi_path%komorebic.exe workspace-rule exe Thunder.exe 0 5, , Hide
 ; Always float, matching on title
 ; Run, %komorebi_path%komorebic.exe float-rule title "Control Panel", , Hide
 ; Run, %komorebi_path%komorebic.exe float-rule title Calculator, , Hide
-Run, %komorebi_path%komorebic.exe float-rule title "Chrome Legacy Window", , Hide
 ; Always float, matching on executable name
 ; Run, %komorebi_path%komorebic.exe float-rule exe Wally.exe, , Hide
 ; Run, %komorebi_path%komorebic.exe float-rule exe wincompose.exe, , Hide
@@ -126,10 +118,9 @@ Run, %komorebi_path%komorebic.exe float-rule exe Flow.Launcher.exe, , Hide
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, %komorebi_path%komorebic.exe manage-rule exe TIM.exe, , Hide
-Run, %komorebi_path%komorebic.exe manage-rule exe TE64.exe, , Hide
+; Run, %komorebi_path%komorebic.exe manage-rule exe TE64.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe WeChat.exe, , Hide
-Run, %komorebi_path%komorebic.exe manage-rule exe cloudmusic.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe foobar2000.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe mpv.exe, , Hide
 
@@ -138,6 +129,7 @@ Run, %komorebi_path%komorebic.exe manage-rule exe mpv.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe "Clash Verge.exe", , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe copyq.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe Flow.Launcher.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-tray-application exe ShareX.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe WeChat.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe foobar2000.exe, , Hide
@@ -234,34 +226,34 @@ Run, %komorebi_path%komorebic.exe resize-axis vertical increase, , Hide
 return
 
 ; Stack the focused window in a given direction
-!^h::
-Run, %komorebi_path%komorebic.exe stack left, , Hide
-return
+; !+Left::
+; Run, komorebic.exe stack left, , Hide
+; return
 
-!^j::
-Run, %komorebi_path%komorebic.exe stack down, , Hide
-return
+; !+Down::
+; Run, komorebic.exe stack down, , Hide
+; return
 
-!^k::
-Run, %komorebi_path%komorebic.exe stack up, , Hide
-return
+; !+Up::
+; Run, komorebic.exe stack up, , Hide
+; return
 
-!^l::
-Run, %komorebi_path%komorebic.exe stack right, , Hide
-return
+; !+Right::
+; Run, komorebic.exe stack right, , Hide
+; return
 
-!s::
-Run, %komorebi_path%komorebic.exe cycle-stack next, , Hide
-return
+; !+]::
+; Run, %komorebi_path%komorebic.exe cycle-stack next, , Hide
+; return
 
 ; !+[::
 ; Run, %komorebi_path%komorebic.exe cycle-stack previous, , Hide
 ; return
 
 ; Unstack the focused window
-!+s::
-Run, %komorebi_path%komorebic.exe unstack, , Hide
-return
+; !+d::
+; Run, %komorebi_path%komorebic.exe unstack, , Hide
+; return
 
 ; Switch to workspace
 !1::

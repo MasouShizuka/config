@@ -222,7 +222,7 @@ DELETE_EMPTY_DIR() {
     if [[ "${DELETE_EMPTY_DIR}" = "true" ]]; then
         echo -e "$(DATE_TIME) ${INFO} Deleting empty directory ..."
         if [[ "${DOWNLOAD_DIR}" =~ "${ARIA2_DOWNLOAD_DIR}" ]]; then
-            find "${ARIA2_DOWNLOAD_DIR}" -depth -maxdepth 1 ! -path "${ARIA2_DOWNLOAD_DIR}" -type d -empty -exec rm -vrf {} \;
+            find "${ARIA2_DOWNLOAD_DIR}" ! -path "${ARIA2_DOWNLOAD_DIR}" -depth -maxdepth 1 -type d -empty -exec rm -vrf {} \;
         else
             find "${DOWNLOAD_DIR}" -depth -maxdepth 1 -type d -empty -exec rm -vrf {} \;
         fi
