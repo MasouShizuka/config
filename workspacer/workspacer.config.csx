@@ -9,6 +9,7 @@
 #load "C:\Users\MasouShizuka\.workspacer\Input_Method_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Multi_Titles_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Network_Widget.csx"
+#load "C:\Users\MasouShizuka\.workspacer\Performance_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Text_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Time_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Workspace_Widget.csx"
@@ -180,7 +181,22 @@ Action<IConfigContext> doConfig = (context) => {
             new Network_Widget() {
                 ForeColor = color_black,
                 BackColor = color_purple,
-                Interval = 1000,
+            },
+            new Text_Widget("⚙") {
+                ForeColor = color_black,
+                BackColor = color_red,
+            },
+            new Cpu_Performance_Widget() {
+                ForeColor = color_red,
+                RightPadding = "%",
+            },
+            new Text_Widget("🗏") {
+                ForeColor = color_black,
+                BackColor = color_green,
+            },
+            new Memory_Performance_Widget() {
+                ForeColor = color_green,
+                RightPadding = "%",
             },
             new Text_Widget(" ") {
                 ForeColor = color_black,

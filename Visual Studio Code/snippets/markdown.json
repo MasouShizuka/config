@@ -1,0 +1,181 @@
+{
+    // Place your snippets for markdown here. Each snippet is defined under a snippet name and has a prefix, body and 
+    // description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+    // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+    // same ids are connected.
+    // Example:
+    // "Print to console": {
+    // 	"prefix": "log",
+    // 	"body": [
+    // 		"console.log('$1');",
+    // 		"$2"
+    // 	],
+    // 	"description": "Log output to console"
+    // }
+
+    "Insert heading level 1": {
+        "prefix": [
+            ",t1",
+            "，t1"
+        ],
+        "body": "# ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert heading level 1"
+    },
+    "Insert heading level 2": {
+        "prefix": [
+            ",t2",
+            "，t2"
+        ],
+        "body": "## ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert heading level 2"
+    },
+    "Insert heading level 3": {
+        "prefix": [
+            ",t3",
+            "，t3"
+        ],
+        "body": "### ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert heading level 3"
+    },
+    "Insert heading level 4": {
+        "prefix": [
+            ",t4",
+            "，t4"
+        ],
+        "body": "#### ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert heading level 4"
+    },
+    "Insert heading level 5": {
+        "prefix": [
+            ",t5",
+            "，t5"
+        ],
+        "body": "##### ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert heading level 5"
+    },
+    "Insert heading level 6": {
+        "prefix": [
+            ",t6",
+            "，t6"
+        ],
+        "body": "###### ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert heading level 6"
+    },
+
+    "Insert bold text": {
+        "prefix": [
+            ",b",
+            "，b"
+        ],
+        "body": "**${1:${TM_SELECTED_TEXT}}**$0",
+        "description": "Insert bold text"
+    },
+    "Insert italic text": {
+        "prefix": [
+            ",i",
+            "，i"
+        ],
+        "body": "*${1:${TM_SELECTED_TEXT}}*$0",
+        "description": "Insert italic text"
+    },
+    "Insert bold italic text": {
+        "prefix": [
+            ",e",
+            "，e"
+        ],
+        "body": "***${1:${TM_SELECTED_TEXT}}***$0",
+        "description": "Insert bold italic text"
+    },
+    "Insert highlight text": {
+        "prefix": [
+            ",h",
+            "，h"
+        ],
+        "body": "==${1:${TM_SELECTED_TEXT}}==",
+        "description": "Insert highlight text"
+    },
+    "Insert strikethrough": {
+        "prefix": [
+            ",s",
+            "，s"
+        ],
+        "body": "~~${1:${TM_SELECTED_TEXT}}~~",
+        "description": "Insert strikethrough"
+    },
+
+    "Insert quoted text": {
+        "prefix": [
+            ",q",
+            "，q"
+        ],
+        "body": "> ${1:${TM_SELECTED_TEXT}}",
+        "description": "Insert quoted text"
+    },
+
+    "Insert inline code": {
+        "prefix": [
+            ",c",
+            "，c"
+        ],
+        "body": "`${1:${TM_SELECTED_TEXT}}`$0",
+        "description": "Insert inline code"
+    },
+    "Insert fenced code block": {
+        "prefix": [
+            ",,c",
+            "，，c"
+        ],
+        "body": [
+            "```${1|python,c,c++,c#,ruby,go,java,php,htm,css,javascript,json,markdown,console|}",
+            "${TM_SELECTED_TEXT}$0",
+            "```"
+        ],
+        "description": "Insert fenced code block"
+    },
+    "Insert inline math": {
+        "prefix": [
+            ",m",
+            "，m"
+        ],
+        "body": "$${1:${TM_SELECTED_TEXT}}$",
+        "description": "Insert inline math"
+    },
+    "Insert fenced math": {
+        "prefix": [
+            ",,m",
+            "，，m"
+        ],
+        "body": [
+            "$$",
+            "${1:${TM_SELECTED_TEXT}}",
+            "$$"
+        ],
+        "description": "Insert fenced math"
+    },
+
+    "Insert horizontal rule": {
+        "prefix": [
+            ",n",
+            "，n"
+        ],
+        "body": "---\n",
+        "description": "Insert horizontal rule"
+    },
+
+    "Insert link": {
+        "prefix": [
+            ",l",
+            "，l"
+        ],
+        "body": "[${TM_SELECTED_TEXT:${1:text}}](${2:https://})$0",
+        "description": "Insert link"
+    },
+    "Insert image": {
+        "prefix": [
+            ",p",
+            "，p"
+        ],
+        "body": "![${TM_SELECTED_TEXT:${1:alt}}](${2:https://})$0",
+        "description": "Insert image"
+    }
+}

@@ -32,7 +32,7 @@ refresh_window()
 
 ; Start komorebi
 Run, %komorebi_path%komorebic.exe start, , Hide
-Sleep, 2000
+Sleep, 3000
 
 
 
@@ -118,7 +118,6 @@ Run, %komorebi_path%komorebic.exe float-rule exe Flow.Launcher.exe, , Hide
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, %komorebi_path%komorebic.exe manage-rule exe TIM.exe, , Hide
-; Run, %komorebi_path%komorebic.exe manage-rule exe TE64.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe WeChat.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe foobar2000.exe, , Hide

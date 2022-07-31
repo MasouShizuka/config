@@ -4,12 +4,16 @@
     "actions": 
     [
         {
+            "command": "paste",
+            "keys": "ctrl+v"
+        },
+        {
             "command": 
             {
-                "action": "swapPane",
-                "direction": "previous"
+                "action": "copy",
+                "singleLine": false
             },
-            "keys": "ctrl+shift+e"
+            "keys": "ctrl+c"
         },
         {
             "command": 
@@ -21,14 +25,28 @@
         {
             "command": 
             {
-                "action": "copy",
-                "singleLine": false
+                "action": "swapPane",
+                "direction": "previous"
             },
-            "keys": "ctrl+c"
+            "keys": "ctrl+shift+e"
         },
         {
-            "command": "paste",
-            "keys": "ctrl+v"
+            "command": "find",
+            "keys": "ctrl+f"
+        },
+        {
+            "command": 
+            {
+                "action": "quakeMode"
+            }
+        },
+        {
+            "command": 
+            {
+                "action": "moveTab",
+                "direction": "forward"
+            },
+            "keys": "ctrl+shift+period"
         },
         {
             "command": "unbound",
@@ -205,24 +223,6 @@
         {
             "command": "unbound",
             "keys": "ctrl+alt+d"
-        },
-        {
-            "command": 
-            {
-                "action": "moveTab",
-                "direction": "forward"
-            },
-            "keys": "ctrl+shift+period"
-        },
-        {
-            "command": 
-            {
-                "action": "quakeMode"
-            }
-        },
-        {
-            "command": "find",
-            "keys": "ctrl+f"
         },
         {
             "command": 
@@ -420,6 +420,7 @@
         {
             "colorScheme": "Campbell",
             "cursorShape": "filledBox",
+            "elevate": true,
             "experimental.retroTerminalEffect": false,
             "font": 
             {

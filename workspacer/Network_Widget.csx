@@ -72,7 +72,7 @@ public class Network_Widget : BarWidgetBase {
         double download_speed = get_download_speed();
         string download_speed_text = get_text(download_speed);
 
-        System.Action part_clicked = () => Process.Start("taskmgr.exe");
+        System.Action part_clicked = () => Process.Start("explorer.exe", @"shell:::{26EE0668-A00A-44D7-9371-BEB064C98683}\3");
 
         IBarWidgetPart part_upload_speed_icon = Part("", fore:ForeColor, back: BackColor, partClicked: part_clicked, fontname: FontName);
         IBarWidgetPart part_upload_speed = Part(upload_speed_text, fore: BackColor, partClicked: part_clicked, fontname: FontName);

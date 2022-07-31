@@ -48,7 +48,8 @@ class WorkspaceButton(QPushButton):
 
 class WorkspaceWidget(BaseWidget):
     k_signal_connect = pyqtSignal(dict)
-    k_signal_update = pyqtSignal(dict, dict)
+    k_signal_workspace_focus = pyqtSignal(dict, dict)
+    k_signal_update_buttons = pyqtSignal(dict, dict)
     k_signal_disconnect = pyqtSignal()
 
     validation_schema = VALIDATION_SCHEMA
@@ -76,27 +77,6 @@ class WorkspaceWidget(BaseWidget):
         self._workspace_buttons: list[WorkspaceButton] = []
         self._hide_empty_workspaces = hide_empty_workspaces
 
-        self._workspace_focus_events = [
-            KomorebiEvent.CycleFocusWorkspace.value,
-            KomorebiEvent.CycleFocusMonitor.value,
-            KomorebiEvent.FocusMonitorWorkspaceNumber.value,
-            KomorebiEvent.FocusMonitorNumber.value,
-            KomorebiEvent.FocusWorkspaceNumber.value
-        ]
-
-        self._update_buttons_event_watchlist = [
-            KomorebiEvent.EnsureWorkspaces.value,
-            KomorebiEvent.Manage.value,
-            KomorebiEvent.MoveContainerToWorkspaceNumber.value,
-            KomorebiEvent.NewWorkspace.value,
-            KomorebiEvent.ReloadConfiguration.value,
-            KomorebiEvent.SendContainerToMonitorNumber.value,
-            KomorebiEvent.SendContainerToWorkspaceNumber.value,
-            KomorebiEvent.Unmanage.value,
-            KomorebiEvent.WatchConfiguration.value,
-            KomorebiEvent.WorkspaceName.value
-        ]
-
         # Disable default mouse event handling inherited from BaseWidget
         self.mousePressEvent = None
 
@@ -120,13 +100,39 @@ class WorkspaceWidget(BaseWidget):
         self._register_signals_and_events()
 
     def _register_signals_and_events(self):
+        workspace_focus_event_watchlist = [
+            KomorebiEvent.CycleFocusWorkspace,
+            KomorebiEvent.CycleFocusMonitor,
+            KomorebiEvent.FocusMonitorWorkspaceNumber,
+            KomorebiEvent.FocusMonitorNumber,
+            KomorebiEvent.FocusWorkspaceNumber,
+        ]
+
+        update_buttons_event_watchlist = [
+            KomorebiEvent.MoveWorkspaceToMonitorNumber,
+            KomorebiEvent.EnsureWorkspaces,
+            KomorebiEvent.Manage,
+            KomorebiEvent.MoveContainerToWorkspaceNumber,
+            KomorebiEvent.NewWorkspace,
+            KomorebiEvent.ReloadConfiguration,
+            KomorebiEvent.SendContainerToMonitorNumber,
+            KomorebiEvent.SendContainerToWorkspaceNumber,
+            KomorebiEvent.Unmanage,
+            KomorebiEvent.WatchConfiguration,
+            KomorebiEvent.WorkspaceName,
+        ]
+
         self.k_signal_connect.connect(self._on_komorebi_connect_event)
-        self.k_signal_update.connect(self._on_komorebi_update_event)
+        self.k_signal_workspace_focus.connect(self._on_komorebi_workspace_focus_event)
+        self.k_signal_update_buttons.connect(self._on_komorebi_update_buttons_event)
         self.k_signal_disconnect.connect(self._on_komorebi_disconnect_event)
 
         self._event_service.register_event(KomorebiEvent.KomorebiConnect, self.k_signal_connect)
         self._event_service.register_event(KomorebiEvent.KomorebiDisconnect, self.k_signal_disconnect)
-        self._event_service.register_event(KomorebiEvent.KomorebiUpdate, self.k_signal_update)
+        for event_type in workspace_focus_event_watchlist:
+            self._event_service.register_event(event_type, self.k_signal_workspace_focus)
+        for event_type in update_buttons_event_watchlist:
+            self._event_service.register_event(event_type, self.k_signal_update_buttons)
 
     def _reset(self):
         self._komorebi_state = None
@@ -147,7 +153,18 @@ class WorkspaceWidget(BaseWidget):
     def _on_komorebi_disconnect_event(self) -> None:
         self._show_offline_status()
 
-    def _on_komorebi_update_event(self, event: dict, state: dict) -> None:
+    def _on_komorebi_workspace_focus_event(self, event: dict, state: dict) -> None:
+        if self._update_komorebi_state(state):
+            if self._has_active_workspace_index_changed():
+                try:
+                    prev_workspace_button = self._workspace_buttons[self._prev_workspace_index]
+                    self._update_button(prev_workspace_button)
+                    new_workspace_button = self._workspace_buttons[self._curr_workspace_index]
+                    self._update_button(new_workspace_button)
+                except (IndexError, TypeError):
+                    self._add_or_update_buttons()
+
+    def _on_komorebi_update_buttons_event(self, event: dict, state: dict) -> None:
         if self._update_komorebi_state(state):
             if event['type'] == KomorebiEvent.MoveWorkspaceToMonitorNumber.value:
                 if event['content'] != self._komorebi_screen['index']:
@@ -160,19 +177,7 @@ class WorkspaceWidget(BaseWidget):
                         for workspace_index in unknown_indexes:
                             self._try_remove_workspace_button(workspace_index)
 
-                self._add_or_update_buttons()
-
-            elif event['type'] in self._workspace_focus_events and self._has_active_workspace_index_changed():
-                try:
-                    prev_workspace_button = self._workspace_buttons[self._prev_workspace_index]
-                    self._update_button(prev_workspace_button)
-                    new_workspace_button = self._workspace_buttons[self._curr_workspace_index]
-                    self._update_button(new_workspace_button)
-                except (IndexError, TypeError):
-                    self._add_or_update_buttons()
-
-            elif event['type'] in self._update_buttons_event_watchlist:
-                self._add_or_update_buttons()
+            self._add_or_update_buttons()
 
     def _clear_container_layout(self):
         for i in reversed(range(self._workspace_container_layout.count())):

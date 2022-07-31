@@ -16,7 +16,7 @@ public class Battery_Widget : BarWidgetBase {
     public double LowChargeThreshold { get; set; } = 0.10;
     public double MedChargeThreshold { get; set; } = 0.50;
     public int Interval { get; set; } = 5000;
-    
+
     private System.Timers.Timer _timer;
 
     public override IBarWidgetPart[] GetParts() {

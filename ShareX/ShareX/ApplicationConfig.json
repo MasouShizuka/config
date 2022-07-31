@@ -249,9 +249,9 @@
           "PixelateSize": 15,
           "HighlightColor": "Yellow"
         },
-        "LastRegionTool": "RegionRectangle",
-        "LastAnnotationTool": "DrawingEllipse",
-        "LastEditorTool": "ToolSelect",
+        "LastRegionTool": null,
+        "LastAnnotationTool": null,
+        "LastEditorTool": null,
         "ImageEditorStartMode": "AutoSize",
         "ImageEditorWindowState": {
           "Location": "0, 0",
@@ -598,7 +598,7 @@
   "TaskbarProgressEnabled": true,
   "UseWhiteShareXIcon": false,
   "RememberMainFormPosition": false,
-  "MainFormPosition": "1283, 48",
+  "MainFormPosition": "13, 48",
   "RememberMainFormSize": false,
   "MainFormSize": "1264, 1539",
   "TrayLeftClickAction": "RectangleRegion",

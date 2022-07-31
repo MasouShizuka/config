@@ -5,6 +5,8 @@ patch:
       ascii_mode: true
     te64.exe:
       ascii_mode: true
+    windowsterminal.exe:
+      ascii_mode: true
 
   # 样式
   style:

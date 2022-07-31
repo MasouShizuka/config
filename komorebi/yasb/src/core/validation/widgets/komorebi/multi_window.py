@@ -2,6 +2,7 @@ DEFAULTS = {
     "label": '{win[title]}',
     'label_alt': '[class={win[class_name]} exe={win[exe]} hwnd={win[hwnd]}]',
     'show_icon': True,
+    'min_update_interval': 100,
     'update_title': {
         'live_update': True,
         'update_interval': 1000
@@ -25,6 +26,12 @@ VALIDATION_SCHEMA = {
     'show_icon': {
         'type': 'boolean',
         'default': DEFAULTS['show_icon']
+    },
+    'min_update_interval': {
+        'type': 'integer',
+        'default': DEFAULTS['min_update_interval'],
+        'min': 0,
+        'max': 60000
     },
     'update_title': {
         'type': 'dict',

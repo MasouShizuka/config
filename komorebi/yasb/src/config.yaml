@@ -88,7 +88,7 @@ bars:
       windows_app_bar: true
     dimensions:
       width: "100%"
-      height: 28
+      height: 32
     padding:
       top: 0
       left: 0
@@ -96,8 +96,8 @@ bars:
       right: 0
     widgets:
       left:   ["komorebi_workspaces", "komorebi_active_layout"]
-      center: ["komorebi_multi_window"]
-      right:  ["explorer_button", "network", "cpu", "memory", "input_method", "battery", "clock"]
+      center: ["input_method", "komorebi_multi_window"]
+      right:  ["explorer_button", "network", "cpu", "memory", "battery", "clock"]
 
 # widgets:
   # my-clock-widget:
@@ -546,6 +546,7 @@ widgets:
       label: "{win[title]}"
       label_alt: "[class={win[class]} exe={win[exe]} hwnd={win[hwnd]}]"
       show_icon: true
+      min_update_interval: 100
       update_title:
         live_update: true
         update_interval: 1000

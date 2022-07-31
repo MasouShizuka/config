@@ -7,7 +7,12 @@
         "files.encoding": "gbk"
     },
     "[markdown]": {
-        "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        "editor.quickSuggestions": {
+            "comments": false,
+            "other": true,
+            "strings": true
+        }
     },
     "[plaintext]": {
         "files.encoding": "gbk"
@@ -15,25 +20,6 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "auto-close-tag.activationOnLanguage": [
-        "xml",
-        "php",
-        "blade",
-        "ejs",
-        "jinja",
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-        "plaintext",
-        "markdown",
-        "vue",
-        "liquid",
-        "erb",
-        "lang-cfml",
-        "cfml",
-        "HTML (Eex)"
-    ],
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
     "black-formatter.args": [
@@ -60,6 +46,7 @@
     "editor.guides.bracketPairs": true,
     "editor.inlineSuggest.enabled": true,
     "editor.lineNumbers": "relative",
+    "editor.linkedEditing": true,
     "editor.minimap.renderCharacters": false,
     "editor.minimap.showSlider": "always",
     "editor.mouseWheelZoom": true,

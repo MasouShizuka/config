@@ -27,9 +27,10 @@ class KomorebiEvent(Event):
 
     CycleFocusMonitor = "CycleFocusMonitor"
     CycleFocusWorkspace = "CycleFocusWorkspace"
+    CycleFocusWindow = "CycleFocusWindow"
     FocusChange = "FocusChange"
-    FocusWorkspaceNumber = "FocusWorkspaceNumber"
     FocusMonitorNumber = "FocusMonitorNumber"
+    FocusWorkspaceNumber = "FocusWorkspaceNumber"
     FocusMonitorWorkspaceNumber = "FocusMonitorWorkspaceNumber"
 
     CycleMoveWindow = "CycleMoveWindow"

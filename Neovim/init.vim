@@ -1,3 +1,4 @@
+"  判断 OS 函数
 silent function! WINDOWS()
     return has('win64') || has('win32') || has('win16')
 endfunction
@@ -18,6 +19,11 @@ let &t_ut=''
 
 
 
+" ##########
+" # plugin #
+" ##########
+
+"  插件目录
 let g:plugin_path = ''
 if WINDOWS()
     let g:plugin_path = 'D:/Tools/Neovim/plugged'
@@ -87,6 +93,10 @@ call plug#end()
 
 
 
+" #######
+" # set #
+" #######
+
 set autochdir
 set autoread
 set clipboard+=unnamedplus
@@ -130,11 +140,19 @@ endif
 
 
 
+" ###############
+" # colorscheme #
+" ###############
+
 if !exists('g:vscode')
     colorscheme onedarkpro
 endif
 
 
+
+" ############
+" # filetype #
+" ############
 
 filetype on
 filetype indent on
@@ -142,6 +160,10 @@ filetype plugin on
 filetype plugin indent on
 
 
+
+" #######
+" # map #
+" #######
 
 nnoremap H ^
 xnoremap H ^
@@ -227,6 +249,69 @@ else
     noremap <C-Down> <C-w>-
     noremap <C-Left> <C-w><
     noremap <C-Right> <C-w>>
+
+    " Markdown快捷输入
+
+    " 替换操作
+    autocmd Filetype markdown inoremap ,f <Esc>/<++><CR>:nohlsearch<CR>c4l
+    autocmd Filetype markdown inoremap ，f <Esc>/<++><CR>:nohlsearch<CR>c4l
+    " 一级标题
+    autocmd Filetype markdown inoremap ,t1 #<Space><Enter><Enter><++><Esc>2kA
+    autocmd Filetype markdown inoremap ，t1 #<Space><Enter><Enter><++><Esc>2kA
+    " 二级标题
+    autocmd Filetype markdown inoremap ,t2 ##<Space><Enter><Enter><++><Esc>2kA
+    autocmd Filetype markdown inoremap ，t2 ##<Space><Enter><Enter><++><Esc>2kA
+    " 三级标题
+    autocmd Filetype markdown inoremap ,t3 ###<Space><Enter><Enter><++><Esc>2kA
+    autocmd Filetype markdown inoremap ，t3 ###<Space><Enter><Enter><++><Esc>2kA
+    " 四级标题
+    autocmd Filetype markdown inoremap ,t4 ####<Space><Enter><Enter><++><Esc>2kA
+    autocmd Filetype markdown inoremap ，t4 ####<Space><Enter><Enter><++><Esc>2kA
+    " 五级标题
+    autocmd Filetype markdown inoremap ,t5 #####<Space><Enter><Enter><++><Esc>2kA
+    autocmd Filetype markdown inoremap ，t5 #####<Space><Enter><Enter><++><Esc>2kA
+    " 六级标题
+    autocmd Filetype markdown inoremap ,t6 ######<Space><Enter><Enter><++><Esc>2kA
+    autocmd Filetype markdown inoremap ，t6 ######<Space><Enter><Enter><++><Esc>2kA
+    " 粗体文本
+    autocmd Filetype markdown inoremap ,b ****<++><Esc>F*hi
+    autocmd Filetype markdown inoremap ，b ****<++><Esc>F*hi
+    " 斜体文本
+    autocmd Filetype markdown inoremap ,i **<++><Esc>F*i
+    autocmd Filetype markdown inoremap ，i **<++><Esc>F*i
+    " 粗斜体文本
+    autocmd Filetype markdown inoremap ,e ******<++><Esc>F*hhi
+    autocmd Filetype markdown inoremap ，e ******<++><Esc>F*hhi
+    " 高亮
+    autocmd Filetype markdown inoremap ,h ====<++><Esc>F=hi
+    autocmd Filetype markdown inoremap ，h ====<++><Esc>F=hi
+    " 下划线
+    autocmd Filetype markdown inoremap ,s ~~~~<++><Esc>F~hi
+    autocmd Filetype markdown inoremap ，s ~~~~<++><Esc>F~hi
+    " 引用
+    autocmd Filetype markdown inoremap ,q > 
+    autocmd Filetype markdown inoremap ，q > 
+    " 标注
+    autocmd Filetype markdown inoremap ,c ``<++><Esc>F`i
+    autocmd Filetype markdown inoremap ，c ``<++><Esc>F`i
+    " 插入代码块
+    autocmd Filetype markdown inoremap ,,c ```<Enter><++><Enter>```<Enter><Enter><++><Esc>4kA
+    autocmd Filetype markdown inoremap ，,c ```<Enter><++><Enter>```<Enter><Enter><++><Esc>4kA
+    " 行内公式
+    autocmd Filetype markdown inoremap ,m $$<++><Esc>F$i
+    autocmd Filetype markdown inoremap ，m $$<++><Esc>F$i
+    " 行间公式
+    autocmd Filetype markdown inoremap ,,m $$<Enter><Enter>$$<Enter><Enter><++><Esc>3ki
+    autocmd Filetype markdown inoremap ，,m $$<Enter><Enter>$$<Enter><Enter><++><Esc>3ki
+    " 插入分隔线
+    autocmd Filetype markdown inoremap ,n ---<Enter><Enter>
+    autocmd Filetype markdown inoremap ，n ---<Enter><Enter>
+    " 插入图片
+    autocmd Filetype markdown inoremap ,p ![](<++>)<++><Esc>F[a
+    autocmd Filetype markdown inoremap ，p ![](<++>)<++><Esc>F[a
+    " 插入链接
+    autocmd Filetype markdown inoremap ,l [](<++>)<++><Esc>F[a
+    autocmd Filetype markdown inoremap ，l [](<++>)<++><Esc>F[a
 
     function! Compile_Run()
         execute 'w'

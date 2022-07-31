@@ -6,9 +6,6 @@ cweijan.vscode-office
 DavidAnson.vscode-markdownlint
 DotJoshJohnson.xml
 eamodio.gitlens
-formulahendry.auto-close-tag
-formulahendry.auto-complete-tag
-formulahendry.auto-rename-tag
 formulahendry.code-runner
 foxundermoon.shell-format
 gera2ld.markmap-vscode
@@ -49,6 +46,7 @@ shd101wyy.markdown-preview-enhanced
 sumneko.lua
 techer.open-in-browser
 timonwong.shellcheck
+VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate
 XadillaX.viml

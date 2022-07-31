@@ -1,4 +1,5 @@
 import logging
+import time
 
 from core.event_enums import KomorebiEvent
 from core.event_service import EventService
@@ -61,7 +62,8 @@ class MultiWindowWidget(BaseWidget):
         label: str,
         label_alt: str,
         show_icon: bool,
-        update_title: int,
+        min_update_interval: int,
+        update_title: dict,
         callbacks: dict[str, str],
     ):
         super().__init__(
@@ -71,6 +73,8 @@ class MultiWindowWidget(BaseWidget):
         self._label = label
         self._label_alt = label_alt
         self._show_icon = show_icon
+        self._min_update_interval = min_update_interval
+        self._last_update_time = 0
         self._active_label = label
         self._event_service = EventService()
         self._komorebic = KomorebiClient()
@@ -107,21 +111,18 @@ class MultiWindowWidget(BaseWidget):
 
     def _register_signals_and_events(self):
         window_change_event_watchlist = [
-            KomorebiEvent.FocusChange,
-            KomorebiEvent.FocusWorkspaceNumber,
-            KomorebiEvent.FocusMonitorWorkspaceNumber,
+            KomorebiEvent.ToggleMonocle,
             KomorebiEvent.CycleFocusMonitor,
             KomorebiEvent.CycleFocusWorkspace,
+            KomorebiEvent.CycleFocusWindow,
+            KomorebiEvent.FocusChange,
             KomorebiEvent.FocusMonitorNumber,
-            KomorebiEvent.Manage,
-            KomorebiEvent.Unmanage,
-            KomorebiEvent.MoveContainerToMonitorNumber,
-            KomorebiEvent.MoveContainerToWorkspaceNumber,
-            KomorebiEvent.MoveWorkspaceToMonitorNumber,
-            KomorebiEvent.SendContainerToMonitorNumber,
-            KomorebiEvent.SendContainerToWorkspaceNumber,
+            KomorebiEvent.FocusWorkspaceNumber,
+            KomorebiEvent.FocusMonitorWorkspaceNumber,
             KomorebiEvent.CycleMoveWindow,
             KomorebiEvent.Promote,
+            KomorebiEvent.Manage,
+            KomorebiEvent.Unmanage,
         ]
 
         self.k_signal_connect.connect(self._on_komorebi_connect_event)
@@ -142,6 +143,11 @@ class MultiWindowWidget(BaseWidget):
         self._update_workspace_windows(state)
 
     def _on_komorebi_window_change_event(self, event: dict, state: dict):
+        prev_last_update_time = self._last_update_time
+        last_update_time = int(round(time.time() * 1000))
+        if last_update_time - prev_last_update_time < self._min_update_interval:
+            return
+        self._last_update_time = last_update_time
         self._update_workspace_windows(state)
 
     def _update_workspace_windows(self, state: dict):
@@ -157,9 +163,10 @@ class MultiWindowWidget(BaseWidget):
                 self._clear_container_layout()
 
                 windows = self._focused_workspace['containers']['elements']
+                focused_window_index = self._focused_workspace['containers']['focused']
                 if self._focused_workspace['monocle_container'] is not None:
                     windows.insert(0, self._focused_workspace['monocle_container'])
-                focused_window_index = self._focused_workspace['containers']['focused']
+                    focused_window_index = 0
                 for i, k in enumerate(windows):
                     window_info = k['windows']['elements'][0]
                     tid, pid = GetWindowThreadProcessId(window_info['hwnd'])
@@ -168,7 +175,6 @@ class MultiWindowWidget(BaseWidget):
                     window_button = WindowButton(window_info, self._active_label)
                     if i == focused_window_index:
                         window_button.update_focused()
-
                     if self._show_icon:
                         p = Process(pid)
                         exe_path = p.exe()
