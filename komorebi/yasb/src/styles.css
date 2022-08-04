@@ -59,13 +59,6 @@
     margin: 2px;
 }
 
-.input-method-widget .label {
-    background: #ffb86c;
-    border-radius: 8px;
-    margin: 2px;
-    padding: 2px;
-}
-
 .komorebi-multi-window .window,
 .komorebi-multi-window .window-focused {
     background: #83a598;
@@ -87,6 +80,7 @@
 .network-widget .label,
 .cpu-widget .label,
 .memory-widget .label,
+.input-method-widget .label,
 .battery-widget .label,
 .clock-widget .label {
     border-radius: 8px;
@@ -140,6 +134,10 @@
 
 .memory-widget .label.status-high {
     background: #cc241d;
+}
+
+.input-method-widget .label {
+    background: #ffb86c;
 }
 
 .battery-widget .label.status-critical {

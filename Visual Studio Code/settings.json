@@ -74,7 +74,8 @@
     ],
     "jupyter.askForKernelRestart": false,
     "Lua.diagnostics.globals": [
-        "mp"
+        "mp",
+        "vim"
     ],
     "Lua.diagnostics.neededFileStatus": {
         "ambiguity-1": "Opened",
@@ -128,7 +129,6 @@
     ],
     "notebook.lineNumbers": "on",
     "oneDarkPro.italic": false,
-    "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.languageServer": "Pylance",
     "search.showLineNumbers": true,

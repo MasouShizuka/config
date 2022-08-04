@@ -7,10 +7,11 @@
 
 ## 配置文件
 
-| 文件     | 路径                                        | 说明                |
-| -------- | ------------------------------------------- | ------------------- |
-| init.vim | `C:/Users/User/AppData/Local/nvim/init.vim` | Neovim 全局配置文件 |
+| 文件     | 路径                                        | 说明     |
+| -------- | ------------------------------------------- | -------- |
+| lua      | `C:/Users/User/AppData/Local/nvim/` | 配置文件 |
+| init.lua | `C:/Users/User/AppData/Local/nvim/` | 配置文件 |
 
 ## 注意
 
-本配置文件可兼容 `Neovim` 与 `VSCode-Neovim`
+本配置文件可兼容 `neovim` 与 `VSCode-Neovim`

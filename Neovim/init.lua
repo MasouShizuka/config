@@ -1,0 +1,7 @@
+require("basic")
+require("keybindings")
+require("plugins")
+require("plugin-conf")
+require("colorscheme")
+require("autocmd")
+require("neovide")
