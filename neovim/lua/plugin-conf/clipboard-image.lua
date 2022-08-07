@@ -17,6 +17,7 @@ require 'clipboard-image'.setup {
     -- Missing options from `markdown` field will be replaced by options from `default` field
     markdown = {
         img_dir = "_images",
+        img_dir_txt = "_images",
         img_name = function() return os.date('%Y-%m-%d-%H-%M-%S') end,
     }
 }

@@ -75,7 +75,7 @@ require('bufferline').setup {
         -- can also be a table containing 2 custom separators
         -- [focused and unfocused]. eg: { '|', '|' }
         -- separator_style = "slant" | "thick" | "thin" | { 'any', 'any' },
-        separator_style = "thick",
+        separator_style = "thin",
         enforce_regular_tabs = false,
         always_show_bufferline = true,
         -- sort_by = 'insert_after_current' | 'insert_at_end' | 'id' | 'extension' | 'relative_directory' | 'directory' |

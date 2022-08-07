@@ -129,6 +129,7 @@ Run, %komorebi_path%komorebic.exe identify-tray-application exe "Clash Verge.exe
 Run, %komorebi_path%komorebic.exe identify-tray-application exe copyq.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe Flow.Launcher.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe ShareX.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-tray-application exe Steam++.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe WeChat.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe foobar2000.exe, , Hide

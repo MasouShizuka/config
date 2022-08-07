@@ -32,6 +32,7 @@ ms-toolsai.jupyter-keymap
 ms-toolsai.jupyter-renderers
 ms-toolsai.vscode-jupyter-powertoys
 ms-vscode.hexeditor
+mushan.vscode-paste-image
 njpwerner.autodocstring
 njqdev.vscode-python-typehint
 oderwat.indent-rainbow

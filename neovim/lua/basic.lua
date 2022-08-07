@@ -1,18 +1,4 @@
-local os_name = vim.loop.os_uname().sysname
-
-function is_windows()
-    return os_name == "Windows_NT"
-end
-
-function is_macos()
-    return os_name == "Darwin"
-end
-
-function is_linux()
-    return os_name == "Linux"
-end
-
-
+local global = require("global")
 
 -- 当文件被外部程序修改时，自动加载
 vim.opt.autoread = true
@@ -78,6 +64,9 @@ vim.opt.signcolumn = "yes"
 -- 右侧参考线，超过表示代码太长了，考虑换行
 vim.opt.colorcolumn = "88"
 
+-- Dont' pass messages to |ins-completin menu|
+vim.opt.shortmess:append "c"
+
 -- 永远显示 tabline
 vim.opt.showtabline = 2
 -- 使用增强状态栏插件后不再需要 vim 的模式提示
@@ -86,6 +75,9 @@ vim.opt.showmode = false
 -- split window 从下边和右边出现
 vim.opt.splitbelow = true
 vim.opt.splitright = true
+
+-- termguicolors
+vim.opt.termguicolors = true
 
 -- smaller updatetime
 vim.opt.updatetime = 300
@@ -96,9 +88,9 @@ vim.opt.timeoutlen = 500
 vim.opt.wildmenu = true
 
 -- 文件格式
-if is_windows() then
+if global.is_windows then
     vim.opt.fileformat = "dos"
-elseif is_linux() then
+elseif global.is_linux then
     vim.opt.fileformat = "unix"
 end
 
@@ -109,3 +101,6 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 ]]
+
+-- syntax on
+vim.cmd "syntax on"

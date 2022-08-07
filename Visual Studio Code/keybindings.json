@@ -24,33 +24,6 @@
         "when": "editorTextFocus && neovim.init"
     },
 
-    {
-        "key": "ctrl+j",
-        "command": "-editor.action.insertLineAfter",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && !neovim.recording && neovim.mode == 'insert'"
-    },
-    // 插入模式下的光标移动
-    {
-        "key": "ctrl+j",
-        "command": "cursorLeft",
-        "when": "editorTextFocus && neovim.mode == insert"
-    },
-    {
-        "key": "ctrl+l",
-        "command": "cursorRight",
-        "when": "editorTextFocus && neovim.mode == insert"
-    },
-    {
-        "key": "ctrl+k",
-        "command": "cursorDown",
-        "when": "editorTextFocus && neovim.mode == insert"
-    },
-    {
-        "key": "ctrl+i",
-        "command": "cursorUp",
-        "when": "editorTextFocus && neovim.mode == insert"
-    },
-
     // 设置 ctrl+j 向下移动条目
     {
         "key": "ctrl+n",
@@ -183,7 +156,7 @@
     {
         "key": "ctrl+d",
         "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert || neovim.recording",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
         "args": "<c-d>"
     },
     {
@@ -194,8 +167,20 @@
     {
         "key": "ctrl+u",
         "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert || neovim.recording",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
         "args": "<c-u>"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
+        "args": "<c-n>"
+    },
+    {
+        "key": "ctrl+q",
+        "command": "vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
+        "args": "<c-q>"
     },
     {
         "key": "ctrl+s",
@@ -314,15 +299,26 @@
         "when": "sideBarFocus"
     },
 
-    // 聚焦资源管理试图时，则选择以进行比较
+    {
+        "key": "y",
+        "command": "-filesExplorer.copy",
+        "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
+    },
+    // 复制
     {
         "key": "c",
+        "command": "filesExplorer.copy",
+        "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
+    },
+    // 聚焦资源管理视图时，则选择以进行比较
+    {
+        "key": "s",
         "command": "selectForCompare",
         "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus || explorerViewletVisible && openEditorsFocus"
     },
-    // 聚焦资源管理试图时，则与已选项目进行比较
+    // 聚焦资源管理视图时，则与已选项目进行比较
     {
-        "key": "shift+c",
+        "key": "shift+s",
         "command": "compareFiles",
         "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus || explorerViewletVisible && openEditorsFocus"
     },
@@ -546,22 +542,6 @@
     },
 
     {
-        "key": "ctrl+d",
-        "command": "-editor.action.addSelectionToNextFindMatch",
-        "when": "editorFocus"
-    },
-    // 选中下一个与当前位置的字符串相同的字符串
-    {
-        "key": "ctrl+n",
-        "command": "editor.action.addSelectionToNextFindMatch"
-    },
-    {
-        "key": "ctrl+shift+n",
-        "command": "editor.action.moveSelectionToNextFindMatch",
-        "when": "editorFocus"
-    },
-
-    {
         "key": "ctrl+.",
         "command": "-editor.action.quickFix",
         "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
@@ -643,6 +623,20 @@
         "command": "workbench.action.terminal.focusPrevious",
         "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
     },
+    // 搜索最近运行的命令
+    {
+        "key": "ctrl+r",
+        "command": "workbench.action.terminal.runRecentCommand",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+alt+r",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "\u0012" /*^R*/
+        },
+        "when": "terminalFocus"
+    },
     // 面板终端页面且聚焦时，则终止终端
     {
         "key": "ctrl+w",
@@ -714,7 +708,7 @@
     {
         "key": "ctrl+j",
         "command": "workbench.action.quickOpenNavigateNextInViewPicker",
-        "when": "inQuickOpen && inViewsPicker"
+        "when": "inQuickOpen && inViewsPicker || inQuickOpen && inTerminalRunCommandPicker"
     },
     // 设置 ctrl+k 向上移动条目
     {
@@ -735,7 +729,7 @@
     {
         "key": "ctrl+k",
         "command": "workbench.action.quickOpenNavigatePreviousInViewPicker",
-        "when": "inQuickOpen && inViewsPicker"
+        "when": "inQuickOpen && inViewsPicker || inQuickOpen && inTerminalRunCommandPicker"
     },
 
     // 去除切换编辑器快捷键
