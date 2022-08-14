@@ -1,18 +1,39 @@
-# 激活 oh-my-posh 的主题 negligible
-eval "$(~/Documents/PowerShell/Modules/oh-my-posh/oh-my-posh.exe --init --shell zsh --config ~/Documents/PowerShell/Modules/oh-my-posh/themes/negligible.omp.json)"
+########
+# 主题 #
+########
+
+eval "$(oh-my-posh init zsh --config ~/AppData/Local/Programs/oh-my-posh/themes/negligible.omp.json)"
+
+
+
+#########
+# Alias #
+#########
 
 alias ll="ls -al --color -h --time-style=long-iso"
 
-# 命令补全
-autoload -U compinit && compinit
+
+
+############
+# 环境变量 #
+############
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.utf8
 export LC_CTYPE=en_US.utf8
 
+
+
+########
+# 设置 #
+########
+
+# 命令补全
+autoload -U compinit && compinit
 # 命令行别名的自动补全
 setopt completealiases
-# 历史文件相关设置
+
+# 历史文件
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
@@ -30,5 +51,23 @@ zstyle ":completion:*" menu select
 # 刷新自动补全
 zstyle ":completion:*" rehash true
 
+
+
+########
+# 插件 #
+########
+
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+
+
+#########
+# conda #
+#########
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+# eval "$('/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' 'shell.zsh' 'hook')"
+. /c/Users/MasouShizuka/miniconda3/etc/profile.d/conda_fixed.sh
+# <<< conda initialize <<<

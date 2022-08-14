@@ -10,3 +10,4 @@
 | 文件                             | 路径                                  | 说明                |
 | -------------------------------- | ------------------------------------- | ------------------- |
 | Microsoft.PowerShell_profile.ps1 | `C:/Users/User/Documents/PowerShell/` | PowerShell 配置文件 |
+| profile.ps1                      | `C:/Users/User/Documents/PowerShell/` | PowerShell 配置文件 |

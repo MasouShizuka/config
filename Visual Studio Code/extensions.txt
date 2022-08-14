@@ -49,6 +49,5 @@ timonwong.shellcheck
 VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate
-XadillaX.viml
 yzhang.markdown-all-in-one
 zhuangtongfa.material-theme

@@ -410,7 +410,7 @@
     ],
     "copyFormatting": "none",
     "copyOnSelect": false,
-    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "defaultProfile": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
     "experimental.rendering.forceFullRepaint": false,
     "experimental.rendering.software": false,
     "language": "zh-Hans-CN",
@@ -433,11 +433,12 @@
         "list": 
         [
             {
-                "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe -nologo",
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "commandline": "C:\\msys64\\msys2_shell.cmd -defterm -here -no-start -mingw64 -use-full-path",
+                "guid": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
                 "hidden": false,
-                "name": "PowerShell",
-                "source": "Windows.Terminal.PowershellCore"
+                "icon": "C:\\msys64\\mingw64.ico",
+                "name": "MINGW64 / MSYS2",
+                "startingDirectory": "%USERPROFILE%"
             },
             {
                 "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
@@ -445,6 +446,13 @@
                 "icon": "D:\\Tools\\ArchWSL\\Arch.png",
                 "name": "Arch",
                 "source": "Windows.Terminal.Wsl"
+            },
+            {
+                "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe -nologo",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
             },
             {
                 "commandline": "C:\\Program Files\\Git\\bin\\bash.exe -li",

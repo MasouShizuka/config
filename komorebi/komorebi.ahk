@@ -31,7 +31,7 @@ refresh_window()
 }
 
 ; Start komorebi
-Run, %komorebi_path%komorebic.exe start, , Hide
+Run, %komorebi_path%komorebic.exe start --await-configuration, , Hide
 Sleep, 3000
 
 
@@ -48,6 +48,10 @@ Run, %komorebi_path%komorebic.exe watch-configuration enable, , Hide
 
 ; Window hiding behavior
 Run, %komorebi_path%komorebic.exe window-hiding-behaviour minimize, , Hide
+
+; Enable Active Window Border
+Run, %komorebi_path%komorebic.exe active-window-border enable, , Hide
+Run, %komorebi_path%komorebic.exe active-window-border-colour 214 172 255, Hide
 
 ; Configure focus related with mouse
 Run, %komorebi_path%komorebic.exe focus-follows-mouse disable, , Hide
@@ -69,7 +73,6 @@ Run, %komorebi_path%komorebic.exe ensure-workspaces 0 7, , Hide
 ; Run, %komorebi_path%komorebic.exe workspace-name 0 3 matrix, , Hide
 ; Run, %komorebi_path%komorebic.exe workspace-name 0 4 floaty, , Hide
 Run, bash %komorebi_path%komorebi_workspace.sh, , Hide
-Run, bash %komorebi_path%komorebi_yasb.sh, , Hide
 
 ; Set the padding of the different workspaces
 ; Run, %komorebi_path%komorebic.exe container-padding 0 1 30, , Hide
@@ -87,7 +90,6 @@ Run, bash %komorebi_path%komorebi_yasb.sh, , Hide
 ; Always show chat apps on the second workspace
 ; Run, %komorebi_path%komorebic.exe workspace-rule exe slack.exe 0 1, , Hide
 ; Run, %komorebi_path%komorebic.exe workspace-rule exe Discord.exe 0 1, , Hide
-Run, %komorebi_path%komorebic.exe workspace-rule exe vivaldi.exe 0 1, , Hide
 Run, %komorebi_path%komorebic.exe workspace-rule exe QQ.exe 0 2, , Hide
 Run, %komorebi_path%komorebic.exe workspace-rule exe WeChat.exe 0 2, , Hide
 Run, %komorebi_path%komorebic.exe workspace-rule exe cloudmusic.exe 0 3, , Hide
@@ -118,24 +120,34 @@ Run, %komorebi_path%komorebic.exe float-rule exe Flow.Launcher.exe, , Hide
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, %komorebi_path%komorebic.exe manage-rule exe TIM.exe, , Hide
-Run, %komorebi_path%komorebic.exe manage-rule exe QQ.exe, , Hide
-Run, %komorebi_path%komorebic.exe manage-rule exe WeChat.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe foobar2000.exe, , Hide
 Run, %komorebi_path%komorebic.exe manage-rule exe mpv.exe, , Hide
+Run, %komorebi_path%komorebic.exe manage-rule exe QQ.exe, , Hide
+Run, %komorebi_path%komorebic.exe manage-rule exe WeChat.exe, , Hide
 
 ; Identify applications that close to the tray
 ; Run, %komorebi_path%komorebic.exe identify-tray-application exe Discord.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe "Clash Verge.exe", , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe copyq.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe Flow.Launcher.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-tray-application exe foobar2000.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-tray-application exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe ShareX.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe Steam++.exe, , Hide
-Run, %komorebi_path%komorebic.exe identify-tray-application exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe WeChat.exe, , Hide
-Run, %komorebi_path%komorebic.exe identify-tray-application exe foobar2000.exe, , Hide
 
 ; Identify applications that have overflowing borders
-; Run, %komorebi_path%komorebic.exe identify-border-overflow exe Discord.exe, , Hide
+; Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe Discord.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe cloudmusic.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe Code.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe QQ.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe vivaldi.exe, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe WeChat.exe, , Hide
+
+
+
+Run, %komorebi_path%komorebic.exe complete-configuration, , Hide
+Run, bash %komorebi_path%komorebi_yasb.sh, , Hide
 
 
 

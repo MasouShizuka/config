@@ -1,3 +1,3 @@
 require("hop").setup{
-    keys = 'etovxqpdygfblzhckisuran'
+    keys = 'etovxqpdygfblzhckisuran',
 }

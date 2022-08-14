@@ -9,9 +9,10 @@
 
 ## 配置文件
 
-| 文件   | 路径             | 说明         |
-| ------ | ---------------- | ------------ |
-| .zshrc | `C:/Users/User/` | Zsh 配置文件 |
+| 文件          | 路径             | 说明          |
+| ------------- | ---------------- | ------------- |
+| .bash_profile | `C:/Users/User/` | Bash 配置文件 |
+| .zshrc        | `C:/Users/User/` | Zsh 配置文件  |
 
 ## 注意
 
@@ -22,5 +23,5 @@
         1. 找到 `msys64\etc\nsswitch.conf`
         2. 修改 `db_home: cygwin desc` 为 `db_home: windows`
     3. 安装 `Zsh`：`pacman -S zsh`
-- `MSYS2` 的 `Zsh` 不能进行 `Conda` 下的环境切换，请参考 [Conda in Windows under MSYS2 and Zsh line ending problems](https://github.com/conda/conda/issues/9922)
-    - 妥协手段：令 `Zsh` 运行于 `Powershell` 中，即让 `Powershell` 启动时执行 `Zsh`，若要进行 `Conda` 环境切换，则使用 `exit` 退出 `Zsh`，在 `Powershell` 中完成后，再进入 `Zsh`
+- `MSYS2` 的 `Zsh` 不能进行 `Conda` 下的环境切换，请参考 [Conda in Windows under MSYS2 and Zsh line ending problems](https://github.com/conda/conda/issues/9922)，可按照其中的说明修改 `C:/Users/User/miniconda3/etc/profile.d/conda.sh`
+    - 若 `Zsh` 主题中存在符号字符，可能会导致切换环境时 conda 无法 decode，需要设置 `conda config --set changeps1 False`

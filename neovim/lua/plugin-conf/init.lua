@@ -3,10 +3,11 @@ local global = require("global")
 require("plugin-conf/hop")
 require("plugin-conf/nvim-hlslens")
 require("plugin-conf/nvim-surround")
-require("plugin-conf/vim-im-select")
+require("plugin-conf/substitute")
+require("plugin-conf/vim-visual-multi")
 
 if global.is_windows then
-    require("plugin-conf/vim-visual-multi")
+    require("plugin-conf/vim-im-select")
 end
 
 if not global.is_vscode then
