@@ -13,7 +13,6 @@
 #load "C:\Users\MasouShizuka\.workspacer\Text_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Time_Widget.csx"
 #load "C:\Users\MasouShizuka\.workspacer\Workspace_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Workspacer_Status_Widget.csx"
 
 using System;
 using System.Collections.Concurrent;
@@ -152,10 +151,12 @@ Action<IConfigContext> doConfig = (context) => {
                 WorkspaceHasFocusForeColor = color_red,
                 WorkspaceHasFocusBackColor = background_focus_color,
             },
-            new Active_Layout_Widget() {
+            new Active_Layout_Widget(context) {
                 LeftPadding = "[",
                 RightPadding = "]",
                 ForeColor = color_green,
+                DisableColor = color_red,
+                Interval = 500,
             },
             new Text_Widget("┃") {
                 ForeColor = color_white,
@@ -172,15 +173,17 @@ Action<IConfigContext> doConfig = (context) => {
         },
 
         RightWidgets = () => new IBarWidget[] {
-            new Workspacer_Status_Widget(context) {
-                LeftPadding = "[",
-                RightPadding = "] ",
-                status_on = color_green,
-                status_off = color_red,
-            },
             new Network_Widget() {
                 ForeColor = color_black,
                 BackColor = color_purple,
+            },
+            new Text_Widget(" ") {
+                ForeColor = color_black,
+                BackColor = color_orange,
+            },
+            new Input_Method_Widget() {
+                ForeColor = color_orange,
+                Interval = 500,
             },
             new Text_Widget("⚙") {
                 ForeColor = color_black,
@@ -197,14 +200,6 @@ Action<IConfigContext> doConfig = (context) => {
             new Memory_Performance_Widget() {
                 ForeColor = color_green,
                 RightPadding = "%",
-            },
-            new Text_Widget(" ") {
-                ForeColor = color_black,
-                BackColor = color_orange,
-            },
-            new Input_Method_Widget() {
-                ForeColor = color_orange,
-                Interval = 500,
             },
             new Battery_Widget() {
                 IconColor = color_black,
@@ -453,7 +448,6 @@ Action<IConfigContext> doConfig = (context) => {
         context.Keybinds.Subscribe(mod, workspacer.Keys.D7, () => context.Workspaces.SwitchToWorkspace(6), "switch to workspace 7");
         context.Keybinds.Subscribe(mod, workspacer.Keys.D8, () => context.Workspaces.SwitchToWorkspace(7), "switch to workspace 8");
         context.Keybinds.Subscribe(mod, workspacer.Keys.D9, () => context.Workspaces.SwitchToWorkspace(8), "switch to workspace 9");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.S, () => context.Workspaces.SwitchToWorkspace(workspaces.Length - 1), "switch to workspace Others");
 
         // Subscribe(mod, workspacer.Keys.Left, () => _context.Workspaces.SwitchToPreviousWorkspace(), "switch to previous workspace");
         // Subscribe(mod, workspacer.Keys.Right, () => _context.Workspaces.SwitchToNextWorkspace(), "switch to next workspace");
@@ -477,7 +471,6 @@ Action<IConfigContext> doConfig = (context) => {
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D7, () => context.Workspaces.MoveFocusedWindowToWorkspace(6), "switch focused window to workspace 7");
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D8, () => context.Workspaces.MoveFocusedWindowToWorkspace(7), "switch focused window to workspace 8");
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.D9, () => context.Workspaces.MoveFocusedWindowToWorkspace(8), "switch focused window to workspace 9");
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.S, () => context.Workspaces.MoveFocusedWindowToWorkspace(workspaces.Length - 1), "switch focused window to workspace Others");
 
         // Subscribe(mod, workspacer.Keys.O, () => _context.Windows.DumpWindowDebugOutput(), "dump debug info to console for all windows");
         // Subscribe(mod | KeyModifiers.LShift, workspacer.Keys.O, () => _context.Windows.DumpWindowUnderCursorDebugOutput(), "dump debug info to console for window under cursor");

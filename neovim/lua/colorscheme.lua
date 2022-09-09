@@ -5,13 +5,11 @@ if not vim.g.neovide then
         {
             dark_theme = "onedark", -- The default dark theme
             light_theme = "onelight", -- The default light theme
-            -- The theme function can be overwritten with a string value for the theme
-            -- theme = "onedark" | "onelight" | "onedark_vivid" | "onedark_dark"
             colors = {}, -- Override default colors by specifying colors for 'onelight' or 'onedark' themes
-            hlgroups = {}, -- Override default highlight groups
-            filetype_hlgroups = {}, -- Override default highlight groups for specific filetypes
-            plugins = { -- Override which plugins highlight groups are loaded
-                -- NOTE: Plugins have been omitted for brevity - Please see the plugins section of the README
+            highlights = {}, -- Override default highlight groups
+            ft_highlights = {}, -- Override default highlight groups for specific filetypes
+            plugins = { -- Override which plugin highlight groups are loaded
+                -- See the Supported Plugins section for a list of available plugins
             },
             styles = { -- Choose from "bold,italic,underline"
                 strings = "NONE", -- Style that is applied to strings.
@@ -22,14 +20,14 @@ if not vim.g.neovide then
                 virtual_text = "NONE", -- Style that is applied to virtual text
             },
             options = {
-                bold = false, -- Use the themes opinionated bold styles?
-                italic = false, -- Use the themes opinionated italic styles?
-                underline = false, -- Use the themes opinionated underline styles?
-                undercurl = false, -- Use the themes opinionated undercurl styles?
+                bold = false, -- Use the colorscheme's opinionated bold styles?
+                italic = false, -- Use the colorscheme's opinionated italic styles?
+                underline = false, -- Use the colorscheme's opinionated underline styles?
+                undercurl = false, -- Use the colorscheme's opinionated undercurl styles?
                 cursorline = false, -- Use cursorline highlighting?
                 transparency = true, -- Use a transparent background?
-                terminal_colors = false, -- Use the theme's colors for Neovim's :terminal?
-                window_unfocussed_color = false, -- When the window is out of focus, change the normal background?
+                terminal_colors = false, -- Use the colorscheme's colors for Neovim's :terminal?
+                window_unfocused_color = false, -- When the window is out of focus, change the normal background?
             }
         }
     )

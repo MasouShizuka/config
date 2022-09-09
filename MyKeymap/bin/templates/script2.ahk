@@ -1,4 +1,4 @@
-#NoEnv
+﻿#NoEnv
 #SingleInstance Force
 #MaxHotkeysPerInterval 70
 #NoTrayIcon
@@ -7,20 +7,17 @@
 #include bin/functions.ahk
 #include bin/actions.ahk
 
-{## 定义可重用的模板,  减少代码重复 ##}
-{% macro keymapToAhk(keymap) %}
-{% for key,value in keymap.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endmacro %}
+{{ define "keymapToAhk" }}
+{{- range toList . -}}
+{{ .Prefix }}{{ escapeAhkHotkey .Key }}::{{ .Value }}
+{{ end }}
+{{ end }}
 
 StringCaseSense, On
 SetWorkingDir %A_ScriptDir%\..
-{% if Settings.runAsAdmin %}
+{{ if .Settings.runAsAdmin -}}
 requireAdmin()
-{% endif %}
+{{- end }}
 closeOldInstance()
 
 SetBatchLines -1
@@ -40,56 +37,36 @@ settitlematchmode, 2
 GroupAdd, TASK_SWITCH_GROUP, ahk_class MultitaskingViewFrame
 GroupAdd, TASK_SWITCH_GROUP, ahk_class XamlExplorerHostIslandWindow
 
-scrollOnceLineCount := {{{ Settings.scrollOnceLineCount if Settings.scrollOnceLineCount else 3 }}}
-scrollDelay1 = {{{ "T" + Settings.scrollDelay1 if Settings.scrollDelay1 else "T0.2" }}}
-scrollDelay2 = {{{ "T" + Settings.scrollDelay2 if Settings.scrollDelay2 else "T0.03" }}}
+scrollOnceLineCount := {{ .Settings.scrollOnceLineCount }}
+scrollDelay1 = {{ concat "T" .Settings.scrollDelay1 }}
+scrollDelay2 = {{ concat "T" .Settings.scrollDelay2 }}
 
-{% if Settings.showMouseMovePrompt %}
+{{ if .Settings.showMouseMovePrompt }}
 global mouseMovePrompt := newMouseMovePromptWindow()
-{% endif %}
-fastMoveSingle := {{{ Settings.fastMoveSingle if Settings.fastMoveSingle else 110 }}}
-fastMoveRepeat := {{{ Settings.fastMoveRepeat if Settings.fastMoveRepeat else 70 }}}
-slowMoveSingle := {{{ Settings.slowMoveSingle if Settings.slowMoveSingle else 10 }}}
-slowMoveRepeat := {{{ Settings.slowMoveRepeat if Settings.slowMoveRepeat else 13 }}}
-moveDelay1 = {{{ "T" + Settings.moveDelay1 if Settings.moveDelay1 else "T0.2" }}}
-moveDelay2 = {{{ "T" + Settings.moveDelay2 if Settings.moveDelay2 else "T0.01" }}}
+{{ end }}
+
+exitMouseModeAfterClick := {{ .Settings.exitMouseModeAfterClick }}
+fastMoveSingle := {{ .Settings.fastMoveSingle }}
+fastMoveRepeat := {{ .Settings.fastMoveRepeat }}
+slowMoveSingle := {{ .Settings.slowMoveSingle }}
+slowMoveRepeat := {{ .Settings.slowMoveRepeat }}
+moveDelay1 = {{ concat "T" .Settings.moveDelay1 }}
+moveDelay2 = {{ concat "T" .Settings.moveDelay2 }}
 
 SemicolonAbbrTip := true
 
 allHotkeys := []
-{% if Settings.Mode3 %}
-allHotkeys.Push("*3")
-{% endif %}
-{% if Settings.Mode9 %}
-allHotkeys.Push("*9")
-{% endif %}
-{% if Settings.CommaMode %}
-allHotkeys.Push("*,")
-{% endif %}
-{% if Settings.DotMode %}
-allHotkeys.Push("*.")
-{% endif %}
-{% if Settings.JMode %}
-allHotkeys.Push("*j")
-{% endif %}
-{% if Settings.CapslockMode %}
-allHotkeys.Push("*capslock")
-{% endif %}
-{% if Settings.SemicolonMode %}
-allHotkeys.Push("*;")
-{% endif %}
-{% if Settings.LButtonMode %}
-allHotkeys.Push("~LButton")
-{% endif %}
-{% if Settings.RButtonMode %}
-allHotkeys.Push("RButton")
-{% endif %}
-{% if Settings.SpaceMode %}
-allHotkeys.Push("*Space")
-{% endif %}
-{% if Settings.TabMode %}
-allHotkeys.Push("$Tab")
-{% endif %}
+{{ if .Settings.Mode3 }}allHotkeys.Push("*3"){{ end }}
+{{ if .Settings.Mode9 }}allHotkeys.Push("*9"){{ end }}
+{{ if .Settings.CommaMode }}allHotkeys.Push("*,"){{ end }}
+{{ if .Settings.DotMode }}allHotkeys.Push("*."){{ end }}
+{{ if .Settings.JMode }}allHotkeys.Push("*j"){{ end }}
+{{ if .Settings.CapslockMode }}allHotkeys.Push("*capslock"){{ end }}
+{{ if .Settings.SemicolonMode }}allHotkeys.Push("*;"){{ end }}
+{{ if .Settings.LButtonMode }}allHotkeys.Push("~LButton"){{ end }}
+{{ if .Settings.RButtonMode }}allHotkeys.Push("RButton"){{ end }}
+{{ if .Settings.SpaceMode }}allHotkeys.Push("*Space"){{ end }}
+{{ if .Settings.TabMode }}allHotkeys.Push("$Tab"){{ end }}
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, 暂停, trayMenuHandler
@@ -104,7 +81,7 @@ Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.1.18 by 咸鱼阿康
+Menu, Tray, Tip, MyKeymap 1.2.3 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -116,21 +93,17 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -3, "ptr")
 
 global typoTip := new TypoTipWindow()
 
-semiHook := InputHook("C", "{CapsLock}{Space}{BackSpace}{Esc}", {{{ SemicolonAbbrKeys|join(',')|ahkString }}})
+semiHook := InputHook("", "{CapsLock}{BackSpace}{Esc}{;}{Space}", {{ .SemicolonAbbrKeys|join ","|ahkString }})
 semiHook.KeyOpt("{CapsLock}", "S")
 semiHook.OnChar := Func("onSemiHookChar")
 semiHook.OnEnd := Func("onSemiHookEnd")
-capsHook := InputHook("", "{CapsLock}{BackSpace}{Esc}", {{{ CapslockAbbrKeys|join(',')|ahkString }}})
+capsHook := InputHook("", "{CapsLock}{BackSpace}{Esc}", {{ .CapslockAbbrKeys|join ","|ahkString }})
 capsHook.KeyOpt("{CapsLock}", "S")
 capsHook.OnChar := Func("onCapsHookChar")
 capsHook.OnEnd := Func("onCapsHookEnd")
 
 #include data/custom_functions.ahk
 return
-
-{% if Settings.mapRAltToCtrl %}
-RAlt::LCtrl
-{% endif %}
 
 !F21::
     Suspend, Permit
@@ -139,17 +112,19 @@ RAlt::LCtrl
     Return
 !F22::
     Suspend, Permit
-    ActivateOrRun2(run_to_activate, run_target, run_args, run_workingdir)
+    ActivateOrRun2(run_to_activate, run_target, run_args, run_workingdir, run_run_as_admin)
     ; tip(A_TickCount - run_start)
     Return
 
-{% for key,value in CustomHotkeys.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
+{{ .Settings.KeyMapping }}
 
-{% if Settings.CapslockMode %}
+{{ range toList .CustomHotkeys -}}
+{{ if or (contains .Value "toggleSuspend()") (contains .Value "ReloadProgram()") -}}
+{{ escapeAhkHotkey .Key }}::{{ .Value }}
+{{- end }}
+{{ end }}
+
+{{ if .Settings.CapslockMode -}}
 *capslock::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -157,14 +132,14 @@ RAlt::LCtrl
     keywait capslock
     CapslockMode := false
     if (A_ThisHotkey == "*capslock" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
-        {{{ SpecialKeys["Caps Up"].value }}}
+        {{ (index .SpecialKeys "Caps Up").value }}
     }
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
 
-{% if Settings.JMode %}
+{{ if .Settings.JMode }}
 *j::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -177,10 +152,10 @@ RAlt::LCtrl
             send,  {blind}j
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
 
-{% if Settings.SemicolonMode %}
+{{ if .Settings.SemicolonMode }}
 *`;::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -189,14 +164,14 @@ RAlt::LCtrl
     keywait `; 
     PunctuationMode := false
     DisableCapslockKey := false
-    if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 350) {
-         {{{ SpecialKeys["; Up"].value }}}       
+    if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 250) {
+         {{ (index .SpecialKeys "; Up").value }}
     }
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
-{% if Settings.Mode3 %}
+{{ if .Settings.Mode3 }}
 *3::
     start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
@@ -208,8 +183,8 @@ RAlt::LCtrl
         send, {blind}3 
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
-{% if Settings.Mode9 %}
+{{ end }}
+{{ if .Settings.Mode9 }}
 *9::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -220,16 +195,9 @@ RAlt::LCtrl
         send, {blind}9 
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
-; RAlt::
-;     disableOtherHotkey(thisHotkey)
-;     CommaMode := true
-;     keywait RAlt
-;     CommaMode := false
-;     enableOtherHotkey(thisHotkey)
-;     return
-{% if Settings.CommaMode %}
+{{ if .Settings.CommaMode }}
 *,::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -240,9 +208,9 @@ RAlt::LCtrl
         send, {blind}`, 
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
-{% if Settings.DotMode %}
+{{ if .Settings.DotMode }}
 *.::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -253,9 +221,9 @@ RAlt::LCtrl
         send, {blind}`. 
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
-{% if Settings.SpaceMode %}
+{{ if .Settings.SpaceMode }}
 *Space::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -266,9 +234,9 @@ RAlt::LCtrl
         send, {blind}{Space} 
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
-{% if Settings.TabMode %}
+{{ if .Settings.TabMode }}
 $Tab::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -279,9 +247,9 @@ $Tab::
         send, {blind}{Tab} 
     enableOtherHotkey(thisHotkey)
     return
-{% endif %}
+{{ end }}
 
-{% if Settings.RButtonMode %}
+{{ if .Settings.RButtonMode }}
 RButton::
 enterRButtonMode()
 {
@@ -322,10 +290,10 @@ enterRButtonMode()
     return
 
 }
-{% endif %}
+{{ end }}
 
 
-{% if Settings.LButtonMode %}
+{{ if .Settings.LButtonMode }}
 ~LButton::
 enterLButtonMode()
 {
@@ -335,104 +303,65 @@ enterLButtonMode()
     LButtonMode := false
     return
 }
-{% endif %}
+{{ end }}
 
 
 
 
-{% if Settings.JMode %}
-
-
+{{ if .Settings.JMode }}
 #if JModeK
 k::return
-{{{ keymapToAhk(JModeK) }}}
-
+{{ template "keymapToAhk" .JModeK }}
 #if JMode
 k::enterJModeK()
-{% for key,value in JMode.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
+{{ template "keymapToAhk" .JMode }}
+{{ end }}
 
-    
-{% endif %}
-
-{% if Settings.SemicolonMode %}
+{{ if .Settings.SemicolonMode }}
 #if PunctuationMode
-{% for key,value in Semicolon.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endif %}
+{{ template "keymapToAhk" .Semicolon }}
+{{ end }}
 
-{% if Settings.SpaceMode %}
+{{ if .Settings.SpaceMode }}
 #if SpaceMode
-{% for key,value in SpaceMode.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endif %}
+{{ template "keymapToAhk" .SpaceMode }}
+{{ end }}
 
-{% if Settings.TabMode %}
+{{ if .Settings.TabMode }}
 #if TabMode
-{% for key,value in TabMode.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endif %}
+{{ template "keymapToAhk" .TabMode }}
+{{ end }}
 
-
-{% if Settings.Mode3 %}
+{{ if .Settings.Mode3 }}
 #if DigitMode
-{% for key,value in Mode3.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
+{{ template "keymapToAhk" .Mode3 }}
+{{ end }}
 
-{% endif %}
-
-
-{% if Settings.Mode9 %}
+{{ if .Settings.Mode9 }}
 #if Mode9
-{% for key,value in Mode9.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endif %}
+{{ template "keymapToAhk" .Mode9 }}
+{{ end }}
 
-{% if Settings.CommaMode %}
+{{ if .Settings.CommaMode }}
 #if CommaMode
-{{{ keymapToAhk(CommaMode) }}}
-{% endif %}
+{{ template "keymapToAhk" .CommaMode }}
+{{ end }}
 
-{% if Settings.DotMode %}
+{{ if .Settings.DotMode }}
 #if DotMode
-{{{ keymapToAhk(DotMode) }}}
-{% endif %}
+{{ template "keymapToAhk" .DotMode }}
+{{ end }}
 
-
-{% if Settings.CapslockMode %}
+{{ if .Settings.CapslockMode }}
 #if CapslockMode
-
+{{ template "keymapToAhk" .Capslock }}
 ; modified
 *N::left_click_down()
 *N Up::left_click_up()
 *M::right_click_down()
 *M Up::right_click_up()
-{% for key,value in Capslock.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
 
-
-{% if Settings.enableCapsF %}
+{{ if .Settings.enableCapsF }}
 f::
     FMode := true
     CapslockMode := false
@@ -440,9 +369,9 @@ f::
     keywait f
     FMode := false
     return
-{% endif %}
+{{ end }}
 
-{% if Settings.enableCapsSpace %}
+{{ if .Settings.enableCapsSpace }}
 space::
     CapslockSpaceMode := true
     CapslockMode := false
@@ -450,42 +379,25 @@ space::
     keywait space
     CapslockSpaceMode := false
     return
-{% endif %}
+{{ end }}
 
 #if SLOWMODE
-; modified
-{##
-{% for key,value in MouseMoveMode.items()|sort(attribute="1.value") %}
-    {% if value.value and value.type == "鼠标操作" %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ "rightClick(true)" if value.value == "rightClick()" else value.value | replace("fast", "slow") }}}
-    {% endif %}
-{% endfor %}
-##}
+; {{ template "keymapToAhk" .MouseMoveMode }}
+; Esc::exitMouseMode()
+; *Space::exitMouseMode()
 
+; modified
 */::centerMouse()
 *I::slow_move_mouse("I", 0, -1)
 *J::slow_move_mouse("J", -1, 0)
 *K::slow_move_mouse("K", 0, 1)
 *L::slow_move_mouse("L", 1, 0)
-*,::lbuttonDown()
-; modified
-; *N::leftClick()
 *N::left_click_down_without_false()
 *N Up::left_click_up_without_false()
-*.::moveCurrentWindow()
-; modified
-; *M::rightClick(true)
 *M::right_click_down_without_false(true)
 *M Up::right_click_up_without_false(true)
-*`;::scrollWheel(";", 4)
-*H::scrollWheel("H", 3)
-*O::scrollWheel("O", 2)
-*U::scrollWheel("U", 1)
-; modified
-*P::exitMouseMode()
 Esc::exitMouseMode()
 *Space::exitMouseMode()
-; modified
 *capslock up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -516,7 +428,6 @@ Esc::exitMouseMode()
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
 *U::scrollWheel("U", 1)
-*P::exit_very_slow_mode()
 Esc::exit_very_slow_mode()
 *Space::exit_very_slow_mode()
 *capslock up::
@@ -531,51 +442,30 @@ Esc::exit_very_slow_mode()
     enableOtherHotkey(thisHotkey)
     return
 
-
 #if FMode
 f::return
-
-{% for key,value in CapslockF.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
+{{ template "keymapToAhk" .CapslockF }}
 
 #if CapslockSpaceMode
 space::return
-
-{% for key,value in CapslockSpace.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-
+{{ template "keymapToAhk" .CapslockSpace }}
 
 #if DisableCapslockKey
 *capslock::return
 *capslock up::return
-{% endif %}
+{{ end }}
 
-{% if Settings.LButtonMode %}
+{{ if .Settings.LButtonMode }}
 #if LButtonMode
-{% for key,value in LButtonMode.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endif %}
+{{ template "keymapToAhk" .LButtonMode }}
+{{ end }}
 
-{% if Settings.RButtonMode %}
+{{ if .Settings.RButtonMode }}
 #if RButtonMode
-{% for key,value in RButtonMode.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-{{{ value.prefix }}}{{{ escapeAhkHotkey(key) }}}::{{{ value.value }}}
-    {% endif %}
-{% endfor %}
+{{ template "keymapToAhk" .RButtonMode }}
+{{ end }}
 
-{% endif %}
-
-{% if Settings.CapslockMode %}
+{{ if .Settings.CapslockMode }}
 #If TASK_SWITCH_MODE
 ; modified
 ; *D::send, {blind}{down}
@@ -588,7 +478,14 @@ space::return
 *D::send, {blind}{right}
 *X::send,  {blind}{del}
 *Space::send, {blind}{enter}
-{% endif %}
+{{ end }}
+
+#if !keymapIsActive
+{{ range toList .CustomHotkeys -}}
+{{ if not (or (contains .Value "toggleSuspend()") (contains .Value "ReloadProgram()")) -}}
+{{ escapeAhkHotkey .Key }}::{{ .Value }}
+{{- end }}
+{{ end }}
 #If
 
 
@@ -597,13 +494,11 @@ space::return
 execSemicolonAbbr(typo) {
     switch typo 
     {
-{% for key,value in SemicolonAbbr.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-        case {{{ key|ahkString }}}:
-            {{{ value.value }}}
-    {% endif %}
-{% endfor %}
-        default: 
+    {{ range toList .SemicolonAbbr -}}
+        case {{ .Key|ahkString }}:
+            {{ .Value }}
+    {{ end -}}
+        default:
             return false
     }
     return true
@@ -612,15 +507,11 @@ execSemicolonAbbr(typo) {
 execCapslockAbbr(typo) {
     switch typo 
     {
-{% if Settings.CapslockMode %}
-{% for key,value in CapslockAbbr.items()|sort(attribute="1.value") %}
-    {% if value.value %}
-        case {{{ key|ahkString }}}:
-           {{{ value.value }}}
-    {% endif %}
-{% endfor %}
-{% endif %}
-        default: 
+    {{ range toList .CapslockAbbr -}}
+        case {{ .Key|ahkString }}:
+            {{ .Value }}
+    {{ end -}}
+        default:
             return false
     }
     return true
@@ -629,8 +520,8 @@ execCapslockAbbr(typo) {
 
 
 
-{{{ all_ahk_funcs|join('\n') }}}
+{{ .all_ahk_funcs|join "\n" }}
 
-{% for value in send_key_functions %}
-{{{ value }}}
-{% endfor %}
+{{ range .send_key_functions -}}
+{{ . }}
+{{ end }}

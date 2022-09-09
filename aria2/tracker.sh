@@ -27,9 +27,6 @@
 # BT tracker is provided by the following project.
 # https://github.com/XIU2/TrackersListCollection
 #
-# Fallback URLs provided by jsDelivr
-# https://www.jsdelivr.com
-#
 
 RED_FONT_PREFIX="\033[31m"
 GREEN_FONT_PREFIX="\033[32m"
@@ -47,10 +44,10 @@ DATE_TIME() {
 }
 
 GET_TRACKERS() {
-
+    
     if [[ -z "${CUSTOM_TRACKER_URL}" ]]; then
         echo && echo -e "$(DATE_TIME) ${INFO} Get BT trackers..."
-        TRACKER=$(
+        TRACKER=$(taticaycom
             ${DOWNLOADER} https://trackerslist.com/all_aria2.txt ||
                 ${DOWNLOADER} https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection@master/all_aria2.txt ||
                 ${DOWNLOADER} https://trackers.p3terx.com/all_aria2.txt

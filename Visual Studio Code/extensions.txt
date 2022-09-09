@@ -46,6 +46,7 @@ shd101wyy.markdown-preview-enhanced
 sumneko.lua
 techer.open-in-browser
 timonwong.shellcheck
+usernamehw.errorlens
 VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate

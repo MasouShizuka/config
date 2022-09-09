@@ -7,8 +7,25 @@ OnExit("komorebic_stop")
 komorebic_stop()
 {
     Run, %komorebi_path%komorebic.exe stop, , Hide
+    unhide_taskbar()
     return
 }
+
+
+
+hide_taskbar()
+{
+    WinSet, Transparent, 0, ahk_class Shell_TrayWnd
+}
+unhide_taskbar()
+{
+    WinSet, Transparent, 255, ahk_class Shell_TrayWnd
+    WinSet, Transparent, OFF, ahk_class Shell_TrayWnd
+}
+hide_taskbar()
+global is_taskbar_hide := true
+
+
 
 global process_name_list := ["TE64.exe"]
 refresh_window()
@@ -29,6 +46,8 @@ refresh_window()
         }
     }
 }
+
+
 
 ; Start komorebi
 Run, %komorebi_path%komorebic.exe start --await-configuration, , Hide
@@ -51,7 +70,7 @@ Run, %komorebi_path%komorebic.exe window-hiding-behaviour minimize, , Hide
 
 ; Enable Active Window Border
 Run, %komorebi_path%komorebic.exe active-window-border enable, , Hide
-Run, %komorebi_path%komorebic.exe active-window-border-colour 214 172 255, Hide
+Run, %komorebi_path%komorebic.exe active-window-border-colour 214 172 255 --window-kind single, Hide
 
 ; Configure focus related with mouse
 Run, %komorebi_path%komorebic.exe focus-follows-mouse disable, , Hide
@@ -129,7 +148,6 @@ Run, %komorebi_path%komorebic.exe manage-rule exe WeChat.exe, , Hide
 ; Run, %komorebi_path%komorebic.exe identify-tray-application exe Discord.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe "Clash Verge.exe", , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe copyq.exe, , Hide
-Run, %komorebi_path%komorebic.exe identify-tray-application exe Flow.Launcher.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe foobar2000.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe QQ.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-tray-application exe ShareX.exe, , Hide
@@ -387,7 +405,7 @@ return
 Run, %komorebi_path%komorebic.exe change-layout ultrawide-vertical-stack, , Hide
 return
 
-; Pause responding to any window events or komorebic commands, Alt + P
+; Pause responding to any window events or komorebic commands
 !+esc::
 Run, %komorebi_path%komorebic.exe toggle-pause, , Hide
 return
@@ -396,43 +414,49 @@ return
 Run, %komorebi_path%komorebic.exe toggle-tiling, , Hide
 return
 
-; Float the focused window, Alt + T
+; Float the focused window
 !+t::
 Run, %komorebi_path%komorebic.exe toggle-float, , Hide
 return
 
-; Toggle the Monocle layout for the focused window, Alt + Shift + F
+; Toggle the Monocle layout for the focused window
 !m::
 Run, %komorebi_path%komorebic.exe toggle-monocle, , Hide
 return
 
-; Toggle native maximize for the focused window, Alt + Shift + =
+; Toggle native maximize for the focused window
 !f::
-Run, %komorebi_path%komorebic.exe toggle-maximize, , Hide
-Run, %komorebi_path%komorebic.exe toggle-pause, , Hide
-Run, %komorebi_path%komorebic.exe toggle-maximize, , Hide
+WinGet, MX, MinMax, A
+if MX
+    WinRestore, A
+else
+    WinMaximize, A
 return
 
 !d::
 WinMinimize, A
 return
 
-; Flip horizontally, Alt + X
+; Flip horizontally
 !x::
 Run, %komorebi_path%komorebic.exe flip-layout horizontal, , Hide
 return
 
-; Flip vertically, Alt + Y
+; Flip vertically
 !y::
 Run, %komorebi_path%komorebic.exe flip-layout vertical, , Hide
 return
 
-; Promote the focused window to the top of the tree, Alt + Shift + Enter
-!e::
+; Promote the focused window to the top of the tree
+!+e::
 Run, %komorebi_path%komorebic.exe promote, , Hide
 return
 
-; Force a retile if things get janky, Alt + Shift + R
+!e::
+Run, %komorebi_path%komorebic.exe promote-focus, , Hide
+return
+
+; Force a retile if things get janky
 !n::
 Run, %komorebi_path%komorebic.exe retile, , Hide
 return
@@ -442,11 +466,19 @@ Run, %komorebi_path%komorebic.exe manage, , Hide
 Run, %komorebi_path%komorebic.exe cycle-focus next, , Hide
 return
 
-; Reload ~/komorebi.ahk, Alt + O
+; Reload ~/komorebi.ahk
 ; !o::
 ; Run, %komorebi_path%komorebic.exe reload-configuration, , Hide
 ; return
 
 !+b::
 Run, bash %komorebi_path%komorebi_yasb.sh, , Hide
+return
+
+!z::
+if is_taskbar_hide
+    unhide_taskbar()
+else
+    hide_taskbar()
+is_taskbar_hide := !is_taskbar_hide
 return

@@ -33,12 +33,12 @@
     },
     "code-runner.runInTerminal": true,
     "debug.console.fontSize": 20,
+    "debug.showBreakpointsInOverviewRuler": true,
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.cursorBlinking": "solid",
     "editor.cursorSmoothCaretAnimation": true,
     "editor.cursorSurroundingLines": 5,
     "editor.detectIndentation": false,
-    "editor.experimental.stickyScroll.enabled": true,
     "editor.find.autoFindInSelection": "multiline",
     "editor.find.seedSearchStringFromSelection": "selection",
     "editor.fontFamily": "Sarasa Mono SC Nerd Font",
@@ -170,5 +170,6 @@
     },
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,
-    "workbench.startupEditor": "none"
+    "workbench.startupEditor": "none",
+    "editor.stickyScroll.enabled": true
 }

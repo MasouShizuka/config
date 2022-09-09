@@ -53,7 +53,7 @@ close_or_run_script(name)
         return name . " run"
 }
 
-enter_mouse_mode() 
+enter_mouse_mode()
 {
     global SLOWMODE
     SLOWMODE := true

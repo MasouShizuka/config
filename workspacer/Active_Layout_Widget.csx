@@ -1,22 +1,31 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using workspacer;
 using workspacer.Bar;
 
 public class Active_Layout_Widget : BarWidgetBase {
     public Color ForeColor { get; set; } = null;
     public Color BackColor { get; set; } = null;
+    public Color DisableColor { get; set; } = null;
     public int Interval { get; set; } = 1000;
 
+    private IConfigContext config_context;
     private System.Timers.Timer _timer;
 
-    public override IBarWidgetPart[] GetParts() {
-        var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
+    public Active_Layout_Widget(IConfigContext context) {
+        config_context = context;
+    }
 
-        return Parts(Part(LeftPadding + currentWorkspace.LayoutName + RightPadding, fore: ForeColor, back: BackColor, partClicked: () => {
+    public override IBarWidgetPart[] GetParts() {
+        var layout_name = "";
+        var fore_color = ForeColor;
+        if (!config_context.Enabled) {
+            layout_name = "pause";
+            fore_color = DisableColor;
+        } else {
+            var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
+            layout_name = currentWorkspace.LayoutName;
+        }
+
+        return Parts(Part(LeftPadding + layout_name + RightPadding, fore: fore_color, back: BackColor, partClicked: () => {
             Context.Workspaces.FocusedWorkspace.NextLayoutEngine();
         }, fontname: FontName));
     }

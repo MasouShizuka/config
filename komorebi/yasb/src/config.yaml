@@ -385,7 +385,7 @@ widgets:
       label: "{icon}  {percent}%"
       label_alt: "{percent}% {time_remaining}"
       update_interval: 5000
-      time_remaining_natural: true
+      time_remaining_natural: false
       charging_options:
         icon_format: "{charging_icon} {icon}"
         blink_charging_icon: False
