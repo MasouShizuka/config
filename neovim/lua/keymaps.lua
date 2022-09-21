@@ -81,7 +81,7 @@ if global.is_vscode then
             if &filetype == "html" || &filetype == "xhtml"
                 call VSCodeNotify("office.html.preview")
             elseif &filetype == "markdown"
-                call VSCodeNotify("markdown-preview-enhanced.openPreviewToTheSide")
+                call VSCodeNotify("markdown.showPreviewToSide")
             else
                 call VSCodeNotify("code-runner.run")
             endif

@@ -1,6 +1,7 @@
 #r "D:\Tools\Workspacer\workspacer.Shared.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.ActionMenu\workspacer.ActionMenu.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.Bar\workspacer.Bar.dll"
+#r "D:\Tools\workspacer\plugins\workspacer.FocusBorder\workspacer.FocusBorder.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.FocusIndicator\workspacer.FocusIndicator.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.Gap\workspacer.Gap.dll"
 
@@ -25,6 +26,7 @@ using workspacer;
 using workspacer.ActionMenu;
 using workspacer.Bar;
 using workspacer.Bar.Widgets;
+using workspacer.FocusBorder;
 using workspacer.FocusIndicator;
 using workspacer.Gap;
 
@@ -214,8 +216,19 @@ Action<IConfigContext> doConfig = (context) => {
         },
     });
 
-    // 聚焦窗口时的外框
-    context.AddFocusIndicator();
+    // 当前窗口的外框
+    var focusBorderPluginConfig = new FocusBorderPluginConfig();
+    focusBorderPluginConfig.BorderColor = color_purple;
+    focusBorderPluginConfig.BorderSize = 10;
+    focusBorderPluginConfig.Opacity = 1.0;
+    context.AddFocusBorder(focusBorderPluginConfig);
+
+    // 切换窗口时的外框
+    var focusIndicatorPluginConfig = new FocusIndicatorPluginConfig();
+    focusIndicatorPluginConfig.BorderColor = Color.Red;
+    focusIndicatorPluginConfig.BorderSize = 10;
+    focusIndicatorPluginConfig.TimeToShow = 200;
+    context.AddFocusIndicator(focusIndicatorPluginConfig);
 
     // 布局类型
     Func<ILayoutEngine[]> defaultLayouts = () => new ILayoutEngine[] {

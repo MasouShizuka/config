@@ -11,6 +11,8 @@ eval "$(oh-my-posh init zsh --config ~/AppData/Local/Programs/oh-my-posh/themes/
 #########
 
 alias ll="ls -al --color -h --time-style=long-iso"
+alias vi=nvim
+alias vim=nvim
 
 
 
@@ -18,6 +20,7 @@ alias ll="ls -al --color -h --time-style=long-iso"
 # 环境变量 #
 ############
 
+export EDITOR=nvim
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.utf8
 export LC_CTYPE=en_US.utf8

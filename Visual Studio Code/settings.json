@@ -1,11 +1,4 @@
 {
-    "[bat]": {
-        "editor.detectIndentation": true,
-        "editor.tabSize": 4,
-        "editor.trimAutoWhitespace": true,
-        "editor.useTabStops": false,
-        "files.encoding": "gbk"
-    },
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one",
         "editor.quickSuggestions": {
@@ -45,27 +38,25 @@
     "editor.fontLigatures": true,
     "editor.fontSize": 20,
     "editor.guides.bracketPairs": true,
-    "editor.inlineSuggest.enabled": true,
     "editor.lineNumbers": "relative",
     "editor.linkedEditing": true,
     "editor.minimap.renderCharacters": false,
     "editor.minimap.showSlider": "always",
-    "editor.mouseWheelZoom": true,
     "editor.renderLineHighlight": "all",
     "editor.renderWhitespace": "trailing",
     "editor.scrollBeyondLastLine": false,
     "editor.showFoldingControls": "always",
+    "editor.stickyScroll.enabled": true,
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
-    "editor.suggestSelection": "first",
     "editor.wordWrap": "on",
+    "errorLens.followCursor": "activeLine",
     "explorer.confirmDragAndDrop": false,
     "files.associations": {
         "*.txt": "plaintext"
     },
     "files.autoGuessEncoding": true,
     "files.autoSave": "afterDelay",
-    "git.mergeEditor": true,
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.theme": "Kennedy",
     "isort.args": [
@@ -106,9 +97,11 @@
     },
     "Lua.telemetry.enable": false,
     "markdown-preview-enhanced.chromePath": "C:\\Users\\MasouShizuka\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
+    "markdown-preview-enhanced.hideDefaultVSCodeMarkdownPreviewButtons": false,
     "markdown-preview-enhanced.mathRenderingOption": "MathJax",
     "markdown-preview-enhanced.previewTheme": "one-dark.css",
     "markdown.extension.list.indentationSize": "inherit",
+    "markdown.preview.fontSize": 18,
     "markdownlint.config": {
         "MD007": false,
         "MD009": false,
@@ -119,9 +112,29 @@
         "MD037": false,
         "MD040": false
     },
-    "markdownShortcuts.icons.citations": true,
-    "markdownShortcuts.icons.image": true,
-    "markdownShortcuts.icons.link": true,
+    "mdtableeditor.commandViews": {
+        "context": [
+            "MdTableEditor.changeAlignCenter",
+            "MdTableEditor.changeAlignLeft",
+            "MdTableEditor.changeAlignRight",
+            "MdTableEditor.columnSelectEmpty",
+            "MdTableEditor.insertBottom",
+            "MdTableEditor.insertLeft",
+            "MdTableEditor.insertRight",
+            "MdTableEditor.insertTop",
+            "MdTableEditor.moveBottom",
+            "MdTableEditor.moveLeft",
+            "MdTableEditor.moveRight",
+            "MdTableEditor.moveTop",
+            "MdTableEditor.removeColumn",
+            "MdTableEditor.removeRow",
+            "MdTableEditor.sortNumberAsc",
+            "MdTableEditor.sortNumberDesc",
+            "MdTableEditor.sortTextAsc.ignore",
+            "MdTableEditor.sortTextDesc.ignore"
+        ],
+        "toolbar": []
+    },
     "notebook.cellToolbarLocation": {
         "default": "left",
         "jupyter-notebook": "left"
@@ -146,7 +159,6 @@
     "terminal.integrated.defaultProfile.windows": "PowerShell",
     "terminal.integrated.fontSize": 20,
     "terminal.integrated.persistentSessionReviveProcess": "never",
-    "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.tabs.location": "left",
     "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
     "window.dialogStyle": "custom",
@@ -170,6 +182,5 @@
     },
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,
-    "workbench.startupEditor": "none",
-    "editor.stickyScroll.enabled": true
+    "workbench.startupEditor": "none"
 }

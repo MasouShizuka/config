@@ -22,34 +22,35 @@ unhide_taskbar()
     WinSet, Transparent, 255, ahk_class Shell_TrayWnd
     WinSet, Transparent, OFF, ahk_class Shell_TrayWnd
 }
-hide_taskbar()
-global is_taskbar_hide := true
+global is_taskbar_hide := false
 
 
 
 global process_name_list := ["TE64.exe"]
 refresh_window()
 {
-    WinGet, Active_Process, ProcessName, A
+    WinGet, active_id, ID, A
+    WinGet, active_processname, ProcessName, A
     for index, process_name in process_name_list
     {
-        if (Active_Process = process_name)
+        if (active_processname = process_name)
         {
-            A_prev := A
-            Gui, Color, EEAA99
             Gui +LastFound
-            WinSet, TransColor, EEAA99
+            WinSet, TransColor, 0
             Gui, Show
             Gui, Destroy
-            WinActivate, A_prev
             break
         }
     }
+    WinActivate, ahk_id %active_id%
 }
 
 
 
-; Start komorebi
+;##################
+;# Start komorebi #
+;##################
+
 Run, %komorebi_path%komorebic.exe start --await-configuration, , Hide
 Sleep, 3000
 
@@ -125,6 +126,7 @@ Run, %komorebi_path%komorebic.exe workspace-rule exe Thunder.exe 0 5, , Hide
 ; Always float, matching on class
 ; Run, %komorebi_path%komorebic.exe float-rule class SunAwtDialog, , Hide
 ; Run, %komorebi_path%komorebic.exe float-rule class TaskManagerWindow, , Hide
+Run, %komorebi_path%komorebic.exe float-rule class _WwB, , Hide
 ; Always float, matching on title
 ; Run, %komorebi_path%komorebic.exe float-rule title "Control Panel", , Hide
 ; Run, %komorebi_path%komorebic.exe float-rule title Calculator, , Hide
@@ -162,7 +164,19 @@ Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe QQ.ex
 Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe vivaldi.exe, , Hide
 Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe WeChat.exe, , Hide
 
+; Office
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe WINWORD.EXE, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe POWERPNT.EXE, , Hide
+Run, %komorebi_path%komorebic.exe identify-border-overflow-application exe EXCEL.EXE, , Hide
+Run, %komorebi_path%komorebic.exe identify-layered-application exe WINWORD.EXE, , Hide
+Run, %komorebi_path%komorebic.exe identify-layered-application exe POWERPNT.EXE, , Hide
+Run, %komorebi_path%komorebic.exe identify-layered-application exe EXCEL.EXE, , Hide
 
+
+
+;##################
+;# Start komorebi #
+;##################
 
 Run, %komorebi_path%komorebic.exe complete-configuration, , Hide
 Run, bash %komorebi_path%komorebi_yasb.sh, , Hide
@@ -359,10 +373,14 @@ return
 
 !u::
 Run, %komorebi_path%komorebic.exe cycle-monitor next, , Hide
+Sleep 200
+refresh_window()
 return
 
 !i::
 Run, %komorebi_path%komorebic.exe cycle-monitor previous, , Hide
+Sleep 200
+refresh_window()
 return
 
 !+u::

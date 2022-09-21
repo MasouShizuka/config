@@ -14,6 +14,8 @@ oh-my-posh init pwsh --config "~/AppData/Local/Programs/oh-my-posh/themes/neglig
 #########
 
 Set-Alias ll ls
+Set-Alias vi nvim
+Set-Alias vim nvim
 
 
 
