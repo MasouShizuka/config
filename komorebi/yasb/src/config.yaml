@@ -96,7 +96,7 @@ bars:
       right: 0
     widgets:
       left:   ["komorebi_workspaces", "komorebi_active_layout"]
-      center: ["komorebi_multi_window"]
+      center: ["komorebi_multi_window", "komorebi_refresh_window"]
       right:  ["explorer_button", "network", "input_method", "cpu", "memory", "battery", "clock"]
 
 # widgets:
@@ -546,7 +546,7 @@ widgets:
       label: "{win[title]}"
       label_alt: "[class={win[class]} exe={win[exe]} hwnd={win[hwnd]}]"
       show_icon: true
-      min_update_interval: 100
+      min_update_interval: 200
       update_title:
         live_update: true
         update_interval: 1000
@@ -554,6 +554,14 @@ widgets:
         on_left: "do_nothing"
         on_middle: "do_nothing"
         on_right: "toggle_label"
+
+  komorebi_refresh_window:
+    type: "komorebi.refresh_window.RefreshWindowWidget"
+    options:
+      refresh_delay: 100
+      min_refresh_interval: 400
+      refresh_process_name_list:
+        - 'TE64.exe'
 
   network:
     type: "yasb.network.NetworkWidget"

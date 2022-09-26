@@ -38,9 +38,8 @@
         },
         "0": {
             "2": {
-                "comment": "设置窗口位置、不修改大小",
-                "type": "可能会用到的内置函数",
-                "value": "set_window_position_and_size(10, 10, \"DEFAULT\", \"DEFAULT\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "1": {
@@ -93,9 +92,8 @@
         },
         "9": {
             "2": {
-                "label": "复制选中文件的路径",
-                "type": "系统控制",
-                "value": "action_copy_selected_file_path()"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         ";": {
@@ -164,7 +162,7 @@
         "G": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"komorebi.ahk\")"
+                "value": "close_or_run_script(\"komorebi.ahk\", \"D:/Tools/komorebi/komorebi.ahk\")"
             }
         },
         "H": {
@@ -289,8 +287,8 @@
         },
         "Z": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "turn_off_monitor()"
             }
         },
         "[": {
@@ -325,12 +323,12 @@
         },
         "bb": {
             "2": {
-                "cmdArgs": "--app=https://cn.bing.com/dict/search?q=nice",
-                "comment": "Bing 词典",
+                "cmdArgs": "--app=https://cn.bing.com/dict/search?q={selected_text}",
+                "comment": "查询选中的单词 (低配版划词翻译)",
                 "toActivate": "Bing 词典",
                 "toRun": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"Bing 词典\", \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\", \"--app=https://cn.bing.com/dict/search?q=nice\", \"\")"
+                "value": "ActivateOrRun(\"Bing 词典\", \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\", \"--app=https://cn.bing.com/dict/search?q={selected_text}\", \"\")"
             }
         },
         "bd ": {
@@ -363,6 +361,15 @@
                 "label": "退出 MyKeymap",
                 "type": "系统控制",
                 "value": "quit(false)"
+            }
+        },
+        "gg": {
+            "2": {
+                "comment": "划词搜索: Google 选中的文本",
+                "toActivate": "",
+                "toRun": "https://google.com/search?q={selected_text}",
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"\", \"https://google.com/search?q={selected_text}\", \"\", \"\")"
             }
         },
         "help": {
@@ -504,6 +511,7 @@
         "dd",
         "dm",
         "ex",
+        "gg",
         "help",
         "ld",
         "lj",
@@ -530,11 +538,8 @@
         },
         ",": {
             "2": {
-                "comment": "",
-                "toActivate": "ahk_exe goland64.exe",
-                "toRun": "%A_Programs%\\JetBrains Toolbox\\GoLand.lnk",
-                "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe goland64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\GoLand.lnk\", \"\", \"\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "-": {
@@ -4126,6 +4131,15 @@
                 "value": "setColor(\"#D05\")"
             }
         },
+        "sj": {
+            "2": {
+                "comment": "输入当前时间",
+                "keysToSend": "%A_YYYY%-%A_MM%-%A_DD% %A_Hour%:%A_Min%",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, {blind}%A_YYYY%-%A_MM%-%A_DD% %A_Hour%:%A_Min%"
+            }
+        },
         "sk": {
             "2": {
                 "comment": "输入一对 「  」",
@@ -4198,6 +4212,7 @@
         "pin",
         "pur",
         "red",
+        "sj",
         "sk",
         "ss",
         "ver",
@@ -4251,7 +4266,9 @@
         "scrollOnceLineCount": "1",
         "showMouseMovePrompt": true,
         "slowMoveRepeat": "10",
-        "slowMoveSingle": "10"
+        "slowMoveSingle": "10",
+        "windowSwitcherKeymap": "*W::send, {blind}{up}\n*S::send, {blind}{down}\n*A::send, {blind}{left}\n*D::send, {blind}{right}\n*X::send,  {blind}{del}\n*Space::send, {blind}{enter}",
+        "windowSwitcherKeys": "W/S/A/D/X"
     },
     "SpaceMode": {
         "'": {

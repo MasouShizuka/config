@@ -54,6 +54,7 @@ moveDelay1 = {{ concat "T" .Settings.moveDelay1 }}
 moveDelay2 = {{ concat "T" .Settings.moveDelay2 }}
 
 SemicolonAbbrTip := true
+keymapLockState := {}
 
 allHotkeys := []
 {{ if .Settings.Mode3 }}allHotkeys.Push("*3"){{ end }}
@@ -81,7 +82,7 @@ Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.2.3 by 咸鱼阿康
+Menu, Tray, Tip, MyKeymap 1.2.4 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -129,6 +130,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CapslockMode := true
+    keymapLockState.currentMode := "CapslockMode"
     keywait capslock
     CapslockMode := false
     if (A_ThisHotkey == "*capslock" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
@@ -144,6 +146,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     JMode := true
+    keymapLockState.currentMode := "JMode"
     DisableCapslockKey := true
     keywait j
     JMode := false
@@ -159,10 +162,11 @@ return
 *`;::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
-    PunctuationMode := true
+    SemicolonMode := true
+    keymapLockState.currentMode := "SemicolonMode"
     DisableCapslockKey := true
     keywait `; 
-    PunctuationMode := false
+    SemicolonMode := false
     DisableCapslockKey := false
     if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 250) {
          {{ (index .SpecialKeys "; Up").value }}
@@ -177,6 +181,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     DigitMode := true
+    keymapLockState.currentMode := "DigitMode"
     keywait 3 
     DigitMode := false
     if (A_PriorKey == "3" && (A_TickCount - start_tick < 250))
@@ -189,6 +194,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     Mode9 := true
+    keymapLockState.currentMode := "Mode9"
     keywait 9 
     Mode9 := false
     if (A_PriorKey == "9" && A_TimeSinceThisHotkey < 350)
@@ -202,6 +208,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CommaMode := true
+    keymapLockState.currentMode := "CommaMode"
     keywait `, 
     CommaMode := false
     if (A_PriorKey == "," && A_TimeSinceThisHotkey < 350)
@@ -215,6 +222,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     DotMode := true
+    keymapLockState.currentMode := "DotMode"
     keywait `. 
     DotMode := false
     if (A_PriorKey == "." && A_TimeSinceThisHotkey < 350)
@@ -228,6 +236,7 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     SpaceMode := true
+    keymapLockState.currentMode := "SpaceMode"
     keywait Space 
     SpaceMode := false
     if (A_PriorKey == "Space" && A_TimeSinceThisHotkey < 350)
@@ -241,6 +250,7 @@ $Tab::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     TabMode := true
+    keymapLockState.currentMode := "TabMode"
     keywait Tab 
     TabMode := false
     if (A_PriorKey == "Tab" && A_TimeSinceThisHotkey < 350)
@@ -318,7 +328,7 @@ k::enterJModeK()
 {{ end }}
 
 {{ if .Settings.SemicolonMode }}
-#if PunctuationMode
+#if SemicolonMode
 {{ template "keymapToAhk" .Semicolon }}
 {{ end }}
 
@@ -368,6 +378,9 @@ f::
     SLOWMODE := false
     keywait f
     FMode := false
+    if keymapLockState.locked {
+        CapslockMode := true
+    }
     return
 {{ end }}
 
@@ -378,8 +391,12 @@ space::
     SLOWMODE := false
     keywait space
     CapslockSpaceMode := false
+    if keymapLockState.locked {
+        CapslockMode := true
+    }
     return
 {{ end }}
+{{- end }}
 
 #if SLOWMODE
 ; {{ template "keymapToAhk" .MouseMoveMode }}
@@ -442,6 +459,7 @@ Esc::exit_very_slow_mode()
     enableOtherHotkey(thisHotkey)
     return
 
+{{ if .Settings.CapslockMode -}}
 #if FMode
 f::return
 {{ template "keymapToAhk" .CapslockF }}
@@ -465,20 +483,8 @@ space::return
 {{ template "keymapToAhk" .RButtonMode }}
 {{ end }}
 
-{{ if .Settings.CapslockMode }}
 #If TASK_SWITCH_MODE
-; modified
-; *D::send, {blind}{down}
-; *E::send, {blind}{up}
-; *S::send, {blind}{left}
-; *F::send, {blind}{right}
-*S::send, {blind}{down}
-*W::send, {blind}{up}
-*A::send, {blind}{left}
-*D::send, {blind}{right}
-*X::send,  {blind}{del}
-*Space::send, {blind}{enter}
-{{ end }}
+{{ .Settings.windowSwitcherKeymap }}
 
 #if !keymapIsActive
 {{ range toList .CustomHotkeys -}}

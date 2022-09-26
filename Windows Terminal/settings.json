@@ -23,16 +23,29 @@
             "keys": "ctrl+shift+h"
         },
         {
+            "command": "duplicateTab",
+            "keys": "ctrl+shift+t"
+        },
+        {
+            "command": "find",
+            "keys": "ctrl+f"
+        },
+        {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "left",
+                "splitMode": "duplicate"
+            },
+            "keys": "ctrl+alt+h"
+        },
+        {
             "command": 
             {
                 "action": "swapPane",
                 "direction": "previous"
             },
             "keys": "ctrl+shift+e"
-        },
-        {
-            "command": "find",
-            "keys": "ctrl+f"
         },
         {
             "command": 
@@ -47,6 +60,14 @@
                 "direction": "forward"
             },
             "keys": "ctrl+shift+period"
+        },
+        {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "down"
+            },
+            "keys": "ctrl+shift+down"
         },
         {
             "command": "unbound",
@@ -227,6 +248,14 @@
         {
             "command": 
             {
+                "action": "resizePane",
+                "direction": "right"
+            },
+            "keys": "ctrl+shift+right"
+        },
+        {
+            "command": 
+            {
                 "action": "scrollUp"
             },
             "keys": "ctrl+shift+u"
@@ -262,9 +291,20 @@
             "command": 
             {
                 "action": "moveFocus",
+                "direction": "previousInOrder"
+            },
+            "keys": "ctrl+shift+k"
+        },
+        {
+            "command": 
+            {
+                "action": "moveFocus",
                 "direction": "nextInOrder"
             },
             "keys": "ctrl+shift+j"
+        },
+        {
+            "command": "toggleSplitOrientation"
         },
         {
             "command": 
@@ -275,31 +315,22 @@
             }
         },
         {
-            "command": 
-            {
-                "action": "scrollDown"
-            },
-            "keys": "ctrl+shift+d"
-        },
-        {
-            "command": "toggleSplitOrientation"
-        },
-        {
-            "command": 
-            {
-                "action": "splitPane",
-                "split": "left",
-                "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+h"
+            "command": "identifyWindow"
         },
         {
             "command": 
             {
                 "action": "resizePane",
-                "direction": "right"
+                "direction": "up"
             },
-            "keys": "ctrl+shift+right"
+            "keys": "ctrl+shift+up"
+        },
+        {
+            "command": 
+            {
+                "action": "scrollDown"
+            },
+            "keys": "ctrl+shift+d"
         },
         {
             "command": 
@@ -330,10 +361,6 @@
             "keys": "ctrl+shift+comma"
         },
         {
-            "command": "duplicateTab",
-            "keys": "ctrl+shift+t"
-        },
-        {
             "command": "scrollDownPage"
         },
         {
@@ -360,33 +387,6 @@
             {
                 "action": "splitPane"
             }
-        },
-        {
-            "command": "identifyWindow"
-        },
-        {
-            "command": 
-            {
-                "action": "moveFocus",
-                "direction": "previousInOrder"
-            },
-            "keys": "ctrl+shift+k"
-        },
-        {
-            "command": 
-            {
-                "action": "resizePane",
-                "direction": "up"
-            },
-            "keys": "ctrl+shift+up"
-        },
-        {
-            "command": 
-            {
-                "action": "resizePane",
-                "direction": "down"
-            },
-            "keys": "ctrl+shift+down"
         },
         {
             "command": 

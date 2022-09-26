@@ -9,22 +9,18 @@ Show_Cursor_Status := True
 SetTimer, Check_Idle, 250
 Check_Idle:
     MouseGetPos, X, Y
-    if (X != Last_X || Y != Last_Y)
-    {
+    if (X != Last_X || Y != Last_Y) {
         RestoreCursor()
         Show_Cursor_Status := True
         Last_X := X, Last_Y := Y
         Last_Time := A_TickCount
-    }
-    else if (A_TickCount >= Last_Time + Show_Cursor_Duration && Show_Cursor_Status)
-    {
+    } else if (A_TickCount >= Last_Time + Show_Cursor_Duration && Show_Cursor_Status) {
         SetCursorBlank()
         Show_Cursor_Status := False
     }
 return
 
-SetCursorBlank()
-{
+SetCursorBlank() {
     SystemCursors = 32512IDC_ARROW,32513IDC_IBEAM,32514IDC_WAIT,32515IDC_CROSS
     ,32516IDC_UPARROW,32640IDC_SIZE,32641IDC_ICON,32642IDC_SIZENWSE
     ,32643IDC_SIZENESW,32644IDC_SIZEWE,32645IDC_SIZENS,32646IDC_SIZEALL
@@ -41,8 +37,7 @@ SetCursorBlank()
     }
 }
 
-RestoreCursor()
-{
+RestoreCursor() {
     SPI_SETCURSORS := 0x57
     DllCall("SystemParametersInfo", UInt, SPI_SETCURSORS, UInt, 0, UInt, 0, UInt, 0)
 }

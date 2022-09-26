@@ -1,12 +1,5 @@
---[[ uosc 3.1.2 - 2022-Aug-25 | https://github.com/tomasklaen/uosc ]]
-local uosc_version = '3.1.2'
-
-function lock_osc(name, value)
-	if value == true then
-		mp.set_property('osc', 'no')
-	end
-end
-mp.observe_property('osc', 'bool', lock_osc)
+--[[ uosc 4.0.1 - 2022-Sep-24 | https://github.com/tomasklaen/uosc ]]
+local uosc_version = '4.0.1'
 
 local assdraw = require('mp.assdraw')
 local opt = require('mp.options')
@@ -19,9 +12,20 @@ local quarter_pi_sin = math.sin(math.pi / 4)
 --[[ BASE HELPERS ]]
 
 ---@param number number
-function round(number)
-	local modulus = number % 1
-	return modulus < 0.5 and math.floor(number) or math.ceil(number)
+function round(number) return math.floor(number + 0.5) end
+
+---@param min number
+---@param value number
+---@param max number
+function clamp(min, value, max) return math.max(min, math.min(value, max)) end
+
+---@param rgba string `rrggbb` or `rrggbbaa` hex string.
+function serialize_rgba(rgba)
+	local a = rgba:sub(7, 8)
+	return {
+		color = rgba:sub(5, 6) .. rgba:sub(3, 4) .. rgba:sub(1, 2),
+		opacity = clamp(0, tonumber(#a == 2 and a or 'ff', 16) / 255, 1),
+	}
 end
 
 ---@param str string
@@ -100,6 +104,17 @@ function itable_slice(itable, start_pos, end_pos)
 	return new_table
 end
 
+---@generic T
+---@param a T[]|nil
+---@param b T[]|nil
+---@return T[]
+function itable_join(a, b)
+	local result = {}
+	if a then for _, value in ipairs(a) do result[#result + 1] = value end end
+	if b then for _, value in ipairs(b) do result[#result + 1] = value end end
+	return result
+end
+
 ---@param target any[]
 ---@param source any[]
 function itable_append(target, source)
@@ -122,15 +137,6 @@ end
 ---@generic T
 ---@param table T
 ---@return T
-function table_copy(table)
-	local result = {}
-	for key, value in pairs(table) do result[key] = type(value) == 'table' and table_copy(value) or value end
-	return result
-end
-
----@generic T
----@param table T
----@return T
 function table_shallow_copy(table)
 	local result = {}
 	for key, value in pairs(table) do result[key] = value end
@@ -139,7 +145,7 @@ end
 
 --[[ OPTIONS ]]
 
-local options = {
+local defaults = {
 	timeline_style = 'line',
 	timeline_line_width = 2,
 	timeline_line_width_fullscreen = 3,
@@ -171,7 +177,7 @@ local options = {
 	volume_step = 1,
 
 	speed_persistency = '',
-	speed_opacity = 1,
+	speed_opacity = 0.6,
 	speed_step = 0.1,
 	speed_step_is_factor = false,
 
@@ -179,8 +185,6 @@ local options = {
 	menu_item_height_fullscreen = 50,
 	menu_min_width = 260,
 	menu_min_width_fullscreen = 360,
-	menu_wasd_navigation = false,
-	menu_hjkl_navigation = false,
 	menu_opacity = 1,
 	menu_parent_opacity = 0.4,
 
@@ -190,9 +194,13 @@ local options = {
 	top_bar_persistency = '',
 	top_bar_controls = true,
 	top_bar_title = true,
+	top_bar_title_opacity = 0.8,
 
 	window_border_size = 1,
 	window_border_opacity = 0.8,
+
+	autoload = false,
+	shuffle = false,
 
 	ui_scale = 1,
 	font_scale = 1,
@@ -209,19 +217,28 @@ local options = {
 	time_precision = 0,
 	font_bold = false,
 	autohide = false,
+	buffered_time_threshold = 60,
 	pause_indicator = 'flash',
 	curtain_opacity = 0.5,
 	stream_quality_options = '4320,2160,1440,1080,720,480,360,240,144',
-	directory_navigation_loops = false,
-	media_types = '3gp,aac,aiff,alac,ape,apng,asf,avi,avif,bmp,dsf,f4v,flac,flv,gif,h264,h265,heic,heif,jfif,jpeg,jpg,jxl,m2ts,m4a,m4v,mid,midi,mka,mkv,mov,mp3,mp4,mp4a,mp4v,mpeg,mpg,oga,ogg,ogm,ogv,opus,png,rm,rmvb,svg,tak,tta,tif,tiff,ts,vob,wav,weba,webm,webp,wma,wmv,wv',
+	media_types = '3g2,3gp,aac,aiff,ape,apng,asf,au,avi,avif,bmp,dsf,f4v,flac,flv,gif,h264,h265,j2k,jp2,jfif,jpeg,jpg,jxl,m2ts,m4a,m4v,mid,midi,mj2,mka,mkv,mov,mp3,mp4,mp4a,mp4v,mpeg,mpg,oga,ogg,ogm,ogv,opus,png,rm,rmvb,spx,svg,tak,tga,tta,tif,tiff,ts,vob,wav,weba,webm,webp,wma,wmv,wv,y4m',
 	subtitle_types = 'aqt,ass,gsub,idx,jss,lrc,mks,pgs,pjs,psb,rt,slt,smi,sub,sup,srt,ssa,ssf,ttxt,txt,usf,vt,vtt',
 	font_height_to_letter_width_ratio = 0.5,
 	default_directory = '~/',
-	chapter_ranges = '^op| op$|opening<968638:0.5>.*, ^ed| ed$|^end|ending$<968638:0.5>.*|{eof}, sponsor start<3535a5:.5>sponsor end, segment start<3535a5:0.5>segment end',
+	chapter_ranges = 'openings:30abf964,endings:30abf964,ads:c54e4e80',
+	chapter_range_patterns = 'openings:オープニング;endings:エンディング',
 }
+local options = table_shallow_copy(defaults)
 opt.read_options(options, 'uosc')
 -- Normalize values
 options.proximity_out = math.max(options.proximity_out, options.proximity_in + 1)
+options.foreground = serialize_rgba(options.foreground).color
+options.foreground_text = serialize_rgba(options.foreground_text).color
+options.background = serialize_rgba(options.background).color
+options.background_text = serialize_rgba(options.background_text).color
+if options.chapter_ranges:sub(1, 4) == '^op|' then options.chapter_ranges = defaults.chapter_ranges end
+-- Ensure required environment configuration
+if options.autoload then mp.commandv('set', 'keep-open-pause', 'no') end
 
 --[[ CONFIG ]]
 
@@ -324,68 +341,49 @@ local config = {
 			}
 		end
 	end)(),
-	chapter_serializers = (function()
-		-- Parse `chapter_ranges` option into workable data structure
-		local chapter_ranges = {}
-		for _, definition in ipairs(split(options.chapter_ranges, ' *,+ *')) do
-			local start_patterns, color, opacity, end_patterns = string.match(
-				definition, '([^<]+)<(%x%x%x%x%x%x):(%d?%.?%d*)>([^>]+)'
-			)
-
-			-- Valid definition
-			if start_patterns then
-				start_patterns = start_patterns:lower()
-				end_patterns = end_patterns:lower()
-				local uses_bof = start_patterns:find('{bof}') ~= nil
-				local uses_eof = end_patterns:find('{eof}') ~= nil
-				local chapter_range = {
-					start_patterns = split(start_patterns, '|'),
-					end_patterns = split(end_patterns, '|'),
-					color = color,
-					opacity = tonumber(opacity),
-					ranges = {},
-					uses_bof = uses_bof,
-					uses_eof = uses_eof,
-				}
-
-				-- Filter out special keywords so we don't use them when matching titles
-				if uses_bof then
-					chapter_range.start_patterns = itable_remove(chapter_range.start_patterns, '{bof}')
-				end
-				if uses_eof and chapter_range.end_patterns then
-					chapter_range.end_patterns = itable_remove(chapter_range.end_patterns, '{eof}')
-				end
-
-				chapter_ranges[#chapter_ranges + 1] = chapter_range
+	chapter_ranges = (function()
+		---@type table<string, string[]> Alternative patterns.
+		local alt_patterns = {}
+		if options.chapter_range_patterns and options.chapter_range_patterns ~= '' then
+			for _, definition in ipairs(split(options.chapter_range_patterns, ';+ *')) do
+				local name_patterns = split(definition, ' *:')
+				local name, patterns = name_patterns[1], name_patterns[2]
+				if name and patterns then alt_patterns[name] = split(patterns, ',') end
 			end
 		end
-		return chapter_ranges
+
+		---@type table<string, {color: string; opacity: number; patterns?: string[]}>
+		local ranges = {}
+		if options.chapter_ranges and options.chapter_ranges ~= '' then
+			for _, definition in ipairs(split(options.chapter_ranges, ' *,+ *')) do
+				local name_color = split(definition, ' *:+ *')
+				local name, color = name_color[1], name_color[2]
+				if name and color
+					and name:match('^[a-zA-Z0-9_]+$') and color:match('^[a-fA-F0-9]+$')
+					and (#color == 6 or #color == 8) then
+					local range = serialize_rgba(name_color[2])
+					range.patterns = alt_patterns[name]
+					ranges[name_color[1]] = range
+				end
+			end
+		end
+		return ranges
 	end)(),
 }
 -- Adds `{element}_persistency` property with table of flags when the element should be visible (`{paused = true}`)
 for _, name in ipairs({'timeline', 'controls', 'volume', 'top_bar', 'speed'}) do
 	local option_name = name .. '_persistency'
 	local value, flags = options[option_name], {}
-
 	if type(value) == 'string' then
 		for _, state in ipairs(split(value, ' *, *')) do flags[state] = true end
 	end
-
 	config[option_name] = flags
 end
 
 --[[ STATE ]]
 
-local display = {
-	width = 1280,
-	height = 720,
-	aspect = 1.77778,
-}
-local cursor = {
-	hidden = true, -- true when autohidden or outside of the player window
-	x = 0,
-	y = 0,
-}
+local display = {width = 1280, height = 720, scale_x = 1, scale_y = 1}
+local cursor = {hidden = true, x = 0, y = 0}
 local state = {
 	os = (function()
 		if os.getenv('windir') ~= nil then return 'windows' end
@@ -422,24 +420,28 @@ local state = {
 	has_sub = false,
 	has_chapter = false,
 	has_playlist = false,
+	shuffle = options.shuffle,
 	cursor_autohide_timer = mp.add_timeout(mp.get_property_native('cursor-autohide') / 1000, function()
 		if not options.autohide then return end
 		handle_mouse_leave()
 	end),
 	mouse_bindings_enabled = false,
 	uncached_ranges = nil,
+	cache = nil,
 	render_delay = config.render_delay,
 	first_real_mouse_move_received = false,
 	playlist_count = 0,
 	playlist_pos = 0,
 	margin_top = 0,
 	margin_bottom = 0,
+	hidpi_scale = 1,
 }
+local thumbnail = {width = 0, height = 0, disabled = false}
 
 --[[ HELPERS ]]
 
 -- Sorting comparator close to (but not exactly) how file explorers sort files
-local word_order_comparator = (function()
+local file_order_comparator = (function()
 	local symbol_order
 	local default_order
 
@@ -629,7 +631,7 @@ function wrap_text(text, target_line_length)
 		lines[#lines + 1] = string.sub(text, line_start)
 		if line_length > max_length then max_length = line_length end
 	end
-	return table.concat(lines, '\n'), max_length
+	return table.concat(lines, '\n'), max_length, #lines
 end
 
 -- Escape a string for verbatim display on the OSD
@@ -758,39 +760,79 @@ function get_files_in_directory(directory, allowed_types)
 		end)
 	end
 
-	table.sort(files, word_order_comparator)
+	table.sort(files, file_order_comparator)
 
 	return files
 end
 
+-- Returns full absolute paths of files in the same directory as file_path,
+-- and index of the current file in the table.
 ---@param file_path string
----@param direction 'forward'|'backward'
 ---@param allowed_types? string[]
----@return nil|string
-function get_adjacent_file(file_path, direction, allowed_types)
+function get_adjacent_paths(file_path, allowed_types)
 	local current_file = serialize_path(file_path)
 	if not current_file then return end
 	local files = get_files_in_directory(current_file.dirname, allowed_types)
 	if not files then return end
-
+	local current_file_index
+	local paths = {}
 	for index, file in ipairs(files) do
-		if current_file.basename == file then
-			if direction == 'forward' then
-				if files[index + 1] then return utils.join_path(current_file.dirname, files[index + 1]) end
-				if options.directory_navigation_loops and files[1] then
-					return utils.join_path(current_file.dirname, files[1])
-				end
-			else
-				if files[index - 1] then return utils.join_path(current_file.dirname, files[index - 1]) end
-				if options.directory_navigation_loops and files[#files] then
-					return utils.join_path(current_file.dirname, files[#files])
-				end
-			end
-
-			-- This is the only file in directory
-			return nil
-		end
+		paths[#paths + 1] = utils.join_path(current_file.dirname, file)
+		if current_file.basename == file then current_file_index = index end
 	end
+	if not current_file_index then return end
+	return paths, current_file_index
+end
+
+-- Navigates in a list, using delta or, when `state.shuffle` is enabled,
+-- randomness to determine the next item. Loops around if `loop-playlist` is enabled.
+---@param list table
+---@param current_index number
+---@param delta number
+function decide_navigation_in_list(list, current_index, delta)
+	if #list < 2 then return #list, list[#list] end
+
+	if state.shuffle then
+		local new_index = current_index
+		while current_index == new_index do new_index = math.random(#list) end
+		return new_index, list[new_index]
+	end
+
+	local new_index = current_index + delta
+	if mp.get_property_native('loop-playlist') then
+		if new_index > #list then new_index = new_index % #list
+		elseif new_index < 1 then new_index = #list - new_index end
+	elseif new_index < 1 or new_index > #list then
+		return
+	end
+
+	return new_index, list[new_index]
+end
+
+---@param delta number
+function navigate_directory(delta)
+	if not state.path or is_protocol(state.path) then return false end
+	local paths, current_index = get_adjacent_paths(state.path, config.media_types)
+	if paths and current_index then
+		local _, path = decide_navigation_in_list(paths, current_index, delta)
+		if path then mp.commandv('loadfile', path) return true end
+	end
+	return false
+end
+
+---@param delta number
+function navigate_playlist(delta)
+	local playlist, pos = mp.get_property_native('playlist'), mp.get_property_native('playlist-pos-1')
+	if playlist and #playlist > 1 and pos then
+		local index = decide_navigation_in_list(playlist, pos, delta)
+		if index then mp.commandv('playlist-play-index', index - 1) return true end
+	end
+	return false
+end
+
+---@param delta number
+function navigate_item(delta)
+	if state.has_playlist then return navigate_playlist(delta) else return navigate_directory(delta) end
 end
 
 -- Can't use `os.remove()` as it fails on paths with unicode characters.
@@ -808,79 +850,93 @@ function delete_file(path)
 	})
 end
 
-function serialize_chapter_ranges(chapters)
-	state.chapter_ranges = {}
+function serialize_chapter_ranges(normalized_chapters)
+	local ranges = {}
+	local simple_ranges = {
+		{name = 'openings', patterns = {'^op ', '^op$', ' op$', 'opening$'}, requires_next_chapter = true},
+		{name = 'intros', patterns = {'^intro$'}, requires_next_chapter = true},
+		{name = 'endings', patterns = {'^ed ', '^ed$', ' ed$', 'ending$'}},
+		{name = 'outros', patterns = {'^outro$'}},
+	}
+	local sponsor_ranges = {}
 
-	for _, chapter_serializer in ipairs(config.chapter_serializers) do
-		local current_range = nil
-		-- bof and eof should be used only once per timeline
-		-- eof is only used when last range is missing end
-		local bof_used = false
+	-- Extend with alt patterns
+	for _, meta in ipairs(simple_ranges) do
+		local alt_patterns = config.chapter_ranges[meta.name] and config.chapter_ranges[meta.name].patterns
+		if alt_patterns then meta.patterns = itable_join(meta.patterns, alt_patterns) end
+	end
 
-		local function start_range(chapter)
-			-- If there is already a range started, should we append or overwrite?
-			-- I chose overwrite here.
-			current_range = {['start'] = chapter}
-		end
+	-- Clone chapters
+	local chapters = {}
+	for i, normalized in ipairs(normalized_chapters) do chapters[i] = table_shallow_copy(normalized) end
 
-		local function end_range(chapter)
-			current_range['end'] = chapter
-			current_range.color = chapter_serializer.color
-			current_range.opacity = chapter_serializer.opacity
-			state.chapter_ranges[#state.chapter_ranges + 1] = current_range
-			-- Mark both chapter objects
-			current_range['start']._uosc_used_as_range_point = true
-			current_range['end']._uosc_used_as_range_point = true
-			-- Clear for next range
-			current_range = nil
-		end
-
-		for _, chapter in ipairs(chapters) do
-			if type(chapter.title) == 'string' then
-				local lowercase_title = chapter.title:lower()
-
-				-- Is ending check and handling
-				if chapter_serializer.end_patterns then
-					for _, end_pattern in ipairs(chapter_serializer.end_patterns) do
-						if lowercase_title:find(end_pattern) then
-							if current_range == nil and chapter_serializer.uses_bof and not bof_used then
-								bof_used = true
-								start_range({time = 0})
-							end
-							if current_range ~= nil then
-								end_range(chapter)
-								chapter.is_end_only = end_pattern ~= '.*'
-							end
-							break
-						end
-					end
-				end
-
-				-- Is start check and handling
-				for _, start_pattern in ipairs(chapter_serializer.start_patterns) do
-					if lowercase_title:find(start_pattern) and current_range == nil then
-						start_range(chapter)
-						chapter.is_end_only = false
-						break
+	for i, chapter in ipairs(chapters) do
+		-- Simple ranges
+		for _, meta in ipairs(simple_ranges) do
+			if config.chapter_ranges[meta.name] then
+				local match = itable_find(meta.patterns, function(p) return chapter.lowercase_title:find(p) end)
+				if match then
+					local next_chapter = chapters[i + 1]
+					if next_chapter or not meta.requires_next_chapter then
+						ranges[#ranges + 1] = table_assign({
+							start = chapter.time,
+							['end'] = next_chapter and next_chapter.time or infinity,
+						}, config.chapter_ranges[meta.name])
+						chapter.is_range_point = true
+						if next_chapter then next_chapter.is_range_point = true end
 					end
 				end
 			end
 		end
 
-		-- If there is an unfinished range and range type accepts eof, use it
-		if current_range ~= nil and chapter_serializer.uses_eof then
-			end_range({time = infinity})
+		-- Sponsor blocks
+		if config.chapter_ranges.ads then
+			local id = chapter.lowercase_title:match('segment start *%(([%w]%w-)%)')
+			if id then
+				for j = i + 1, #chapters, 1 do
+					local end_chapter = chapters[j]
+					local end_match = end_chapter.lowercase_title:match('segment end *%(' .. id .. '%)')
+					if end_match then
+						local range = table_assign({
+							start_chapter = chapter, end_chapter = end_chapter,
+							start = chapter.time, ['end'] = end_chapter.time,
+						}, config.chapter_ranges.ads)
+						ranges[#ranges + 1], sponsor_ranges[#sponsor_ranges + 1] = range, range
+						chapter.is_range_point, end_chapter.is_range_point, end_chapter.is_end_only = true, true, true
+						break
+					end
+				end
+			end
 		end
 	end
+
+	-- Fix overlapping sponsor block segments
+	for index, range in ipairs(sponsor_ranges) do
+		local next_range = sponsor_ranges[index + 1]
+		if next_range then
+			local delta = next_range.start - range['end']
+			if delta < 0 then
+				local mid_point = range['end'] + delta / 2
+				range['end'], range.end_chapter.time = mid_point - 0.01, mid_point - 0.01
+				next_range.start, next_range.start_chapter.time = mid_point, mid_point
+			end
+		end
+	end
+	table.sort(chapters, function(a, b) return a.time < b.time end)
+
+	return chapters, ranges
 end
 
 -- Ensures chapters are in chronological order
 function normalize_chapters(chapters)
-	if not chapters then return end
-
-	-- Ensure chronological order of chapters
+	if not chapters then return {} end
+	-- Ensure chronological order
 	table.sort(chapters, function(a, b) return a.time < b.time end)
-
+	-- Ensure titles
+	for index, chapter in ipairs(chapters) do
+		chapter.title = chapter.title or ('Chapter ' .. index)
+		chapter.lowercase_title = chapter.title:lower()
+	end
 	return chapters
 end
 
@@ -889,7 +945,7 @@ function serialize_chapters(chapters)
 	if not chapters then return end
 	for index, chapter in ipairs(chapters) do
 		chapter.index = index
-		chapter.title_wrapped, chapter.title_wrapped_width = wrap_text(chapter.title, 25)
+		chapter.title_wrapped, chapter.title_wrapped_width, chapter.title_wrapped_lines = wrap_text(chapter.title, 25)
 		chapter.title_wrapped = ass_escape(chapter.title_wrapped)
 	end
 	return chapters
@@ -971,21 +1027,21 @@ end
 -- Tooltip
 ---@param element {ax: number; ay: number; bx: number; by: number}
 ---@param value string|number
----@param opts? {size?: number; offset?: number; align?: number; bold?: boolean; italic?: boolean; text_length_override?: number}
+---@param opts? {size?: number; offset?: number; bold?: boolean; italic?: boolean; text_length_override?: number; responsive?: boolean}
 function ass_mt:tooltip(element, value, opts)
 	opts = opts or {}
 	opts.size = opts.size or 16
 	opts.border = options.text_border
 	opts.border_color = options.background
 	local offset = opts.offset or opts.size / 2
-	local align_top = element.ay - offset > opts.size * 5
+	local align_top = opts.responsive == false or element.ay - offset > opts.size * 2
 	local x = element.ax + (element.bx - element.ax) / 2
 	local y = align_top and element.ay - offset or element.by + offset
 	local text_width = opts.text_length_override
 		and opts.text_length_override * opts.size * options.font_height_to_letter_width_ratio
 		or text_width_estimate(value, opts.size)
 	local margin = text_width / 2
-	self:txt(math.max(margin, math.min(x, display.width - margin)), y, align_top and 2 or 8, value, opts)
+	self:txt(clamp(margin, x, display.width - margin), y, align_top and 2 or 8, value, opts)
 end
 
 -- Rectangle
@@ -1042,21 +1098,20 @@ end
 ---@param bx number
 ---@param by number
 ---@param char string Texture font character.
----@param opts {size?: number; color: string; align?: number; shift?: number; opacity?: number; clip?: string}
+---@param opts {size?: number; color: string; opacity?: number; clip?: string; anchor_x?: number, anchor_y?: number}
 function ass_mt:texture(ax, ay, bx, by, char, opts)
 	opts = opts or {}
-	local width, height, align = bx - ax, by - ay, opts.align or 1
+	local anchor_x, anchor_y = opts.anchor_x or ax, opts.anchor_y or ay
 	local clip = opts.clip or ('\\clip(' .. ax .. ',' .. ay .. ',' .. bx .. ',' .. by .. ')')
 	local tile_size, opacity = opts.size or 100, opts.opacity or 0.2
-	local align_modulo = align % 3
-	local shift = (opts.shift or 0) * (align_modulo == 0 and -1 or 1)
-	local line = string.rep(char, math.ceil((width + shift) / tile_size))
+	local x, y = ax - (ax - anchor_x) % tile_size, ay - (ay - anchor_y) % tile_size
+	local width, height = bx - x, by - y
+	local line = string.rep(char, math.ceil((width / tile_size)))
 	local lines = ''
 	for i = 1, math.ceil(height / tile_size), 1 do lines = lines .. (lines == '' and '' or '\\N') .. line end
 	self:txt(
-		(align_modulo == 1 and ax or align_modulo == 0 and bx or ax + width / 2) - shift,
-		align < 4 and by or align > 6 and ay or ay + height / 2,
-		align, lines, {font = 'uosc_textures', size = tile_size, color = opts.color, opacity = opacity, clip = clip})
+		x, y, 7, lines,
+		{font = 'uosc_textures', size = tile_size, color = opts.color, opacity = opacity, clip = clip})
 end
 
 --[[ ELEMENTS COLLECTION ]]
@@ -1199,13 +1254,11 @@ mp.set_key_bindings({
 --[[ STATE UPDATES ]]
 
 function update_display_dimensions()
-	local dpi_scale = mp.get_property_native('display-hidpi-scale', 1.0)
-	dpi_scale = dpi_scale * options.ui_scale
-
-	local width, height, aspect = mp.get_osd_size()
-	display.width = width / dpi_scale
-	display.height = height / dpi_scale
-	display.aspect = aspect
+	local scale = (state.hidpi_scale or 1) * options.ui_scale
+	local real_width, real_height = mp.get_osd_size()
+	local scaled_width, scaled_height = round(real_width / scale), round(real_height / scale)
+	display.width, display.height = scaled_width, scaled_height
+	display.scale_x, display.scale_y = real_width / scaled_width, real_height / scaled_height
 
 	-- Tell elements about this
 	Elements:trigger('display')
@@ -1386,7 +1439,7 @@ function Element:update_proximity()
 	else
 		local range = options.proximity_out - options.proximity_in
 		self.proximity_raw = get_point_to_rectangle_proximity(cursor, self)
-		self.proximity = 1 - (math.min(math.max(self.proximity_raw - options.proximity_in, 0), range) / range)
+		self.proximity = 1 - (clamp(0, self.proximity_raw - options.proximity_in, range) / range)
 	end
 end
 
@@ -1394,7 +1447,7 @@ end
 function Element:get_visibility()
 	-- Hide when menu is open, unless this is a menu
 	---@diagnostic disable-next-line: undefined-global
-	if not self.ignores_menu and menu and menu:is_open() then return 0 end
+	if not self.ignores_menu and Menu and Menu:is_open() then return 0 end
 
 	-- Persistency
 	local persist = config[self.id .. '_persistency'];
@@ -1496,7 +1549,7 @@ menu.close()
 ---@alias MenuData {type?: string; title?: string; hint?: string; keep_open?: boolean; separator?: boolean; items?: MenuDataItem[]; selected_index?: integer;}
 ---@alias MenuDataItem MenuDataValue|MenuData
 ---@alias MenuDataValue {title?: string; hint?: string; icon?: string; value: any; bold?: boolean; italic?: boolean; muted?: boolean; active?: boolean; keep_open?: boolean; separator?: boolean;}
----@alias MenuOptions {on_open?: fun(), on_close?: fun()}
+---@alias MenuOptions {blurred?: boolean; on_open?: fun(), on_close?: fun()}
 
 -- Internal data structure created from `Menu`.
 ---@alias MenuStack {id?: string; type?: string; title?: string; hint?: string; selected_index?: number; keep_open?: boolean; separator?: boolean; items: MenuStackItem[]; parent_menu?: MenuStack; active?: boolean; width: number; height: number; top: number; scroll_y: number; scroll_height: number; title_length: number; title_width: number; hint_length: number; hint_width: number; max_width: number; is_root?: boolean;}
@@ -1510,7 +1563,11 @@ local Menu = class(Element)
 ---@param callback fun(value: any)
 ---@param opts? MenuOptions
 function Menu:open(data, callback, opts)
-	if self:is_open() then self:close(true) end
+	local open_menu = self:is_open()
+	if open_menu then
+		open_menu.is_being_replaced = true
+		open_menu:close(true)
+	end
 	return Menu:new(data, callback, opts)
 end
 
@@ -1555,6 +1612,9 @@ end
 ---@param opts? MenuOptions
 ---@return Menu
 function Menu:new(data, callback, opts) return Class.new(self, data, callback, opts) --[[@as Menu]] end
+---@param data MenuData
+---@param callback fun(value: any)
+---@param opts? MenuOptions
 function Menu:init(data, callback, opts)
 	Element.init(self, 'menu', {ignores_menu = true})
 
@@ -1580,18 +1640,30 @@ function Menu:init(data, callback, opts)
 	---@type table<string, MenuStack> Map of submenus by their ids, such as `'Tools > Aspect ratio'`.
 	self.by_id = {}
 	self.key_bindings = {}
+	self.is_being_replaced = false
 	self.is_closing = false
 
 	self:update(data)
 
-	for _, menu in ipairs(self.all) do
-		self:scroll_to_index(menu.selected_index, menu)
+	if self.opts.blurred then
+		if self.current then self.current.selected_index = nil end
+	else
+		for _, menu in ipairs(self.all) do
+			self:scroll_to_index(menu.selected_index, menu)
+		end
 	end
 
 	self:tween_property('opacity', 0, 1)
 	self:enable_key_bindings()
 	Elements.curtain:fadein()
 	if self.opts.on_open then self.opts.on_open() end
+end
+
+function Menu:destroy()
+	Element.destroy(self)
+	self:disable_key_bindings()
+	if not self.is_being_replaced then Elements.curtain:fadeout() end
+	if self.opts.on_close then self.opts.on_close() end
 end
 
 ---@param data MenuData
@@ -1707,7 +1779,7 @@ function Menu:update_dimensions()
 	local min_width = state.fullormaxed and options.menu_min_width_fullscreen or options.menu_min_width
 
 	for _, menu in ipairs(self.all) do
-		menu.width = round(math.min(math.max(menu.max_width, min_width), display.width * 0.9))
+		menu.width = round(clamp(min_width, menu.max_width, display.width * 0.9))
 		local title_height = (menu.is_root and menu.title) and self.scroll_step or 0
 		local max_height = round((display.height - title_height) * 0.9)
 		local content_height = self.scroll_step * #menu.items
@@ -1763,7 +1835,7 @@ end
 ---@param menu? MenuStack
 function Menu:scroll_to(pos, menu)
 	menu = menu or self.current
-	menu.scroll_y = math.max(math.min(pos or 0, menu.scroll_height), 0)
+	menu.scroll_y = clamp(0, pos or 0, menu.scroll_height)
 	request_render()
 end
 
@@ -1881,7 +1953,7 @@ function Menu:back()
     -- modified
     if #menu.items > 0 then
         local item = menu.items[1]
-        if item.hint and item.hint == 'parent dir' then
+        if item.hint and (item.hint == 'parent dir' or item.hint == 'Drives') then
             self.callback(item.value)
             return
         end
@@ -1959,7 +2031,7 @@ function Menu:on_pgup()
 	local menu = self.current
 	local items_per_page = round((menu.height / self.scroll_step) * 0.4)
 	local paged_index = (menu.selected_index and menu.selected_index or #menu.items) - items_per_page
-	menu.selected_index = math.min(math.max(1, paged_index), #menu.items)
+	menu.selected_index = clamp(1, paged_index, #menu.items)
 	if menu.selected_index > 0 then self:scroll_to_index(menu.selected_index) end
 end
 
@@ -1967,7 +2039,7 @@ function Menu:on_pgdwn()
 	local menu = self.current
 	local items_per_page = round((menu.height / self.scroll_step) * 0.4)
 	local paged_index = (menu.selected_index and menu.selected_index or 1) + items_per_page
-	menu.selected_index = math.min(math.max(1, paged_index), #menu.items)
+	menu.selected_index = clamp(1, paged_index, #menu.items)
 	if menu.selected_index > 0 then self:scroll_to_index(menu.selected_index) end
 end
 
@@ -1979,13 +2051,6 @@ end
 function Menu:on_end()
 	self.current.selected_index = #self.current.items
 	if self.current.selected_index > 0 then self:scroll_to_index(self.current.selected_index) end
-end
-
-function Menu:destroy()
-	Element.destroy(self)
-	self:disable_key_bindings()
-	Elements.curtain:fadeout()
-	if self.opts.on_close then self.opts.on_close() end
 end
 
 function Menu:add_key_binding(key, name, fn, flags)
@@ -2003,21 +2068,12 @@ function Menu:enable_key_bindings()
 	self:add_key_binding('shift+right', 'menu-select-soft1', self:create_action('open_selected_item_soft'))
 	self:add_key_binding('shift+mbtn_left', 'menu-select-soft', self:create_action('open_selected_item_soft'))
 
-	if options.menu_wasd_navigation then
-		self:add_key_binding('w', 'menu-prev2', self:create_action('prev'), 'repeatable')
-		self:add_key_binding('a', 'menu-back2', self:create_action('back'))
-		self:add_key_binding('s', 'menu-next2', self:create_action('next'), 'repeatable')
-		self:add_key_binding('d', 'menu-select2', self:create_action('open_selected_item_preselect'))
-		self:add_key_binding('shift+d', 'menu-select-soft2', self:create_action('open_selected_item_soft'))
-	end
-
-	if options.menu_hjkl_navigation then
-		self:add_key_binding('h', 'menu-back3', self:create_action('back'))
-		self:add_key_binding('j', 'menu-next3', self:create_action('next'), 'repeatable')
-		self:add_key_binding('k', 'menu-prev3', self:create_action('prev'), 'repeatable')
-		self:add_key_binding('l', 'menu-select3', self:create_action('open_selected_item_preselect'))
-		self:add_key_binding('shift+l', 'menu-select-soft3', self:create_action('open_selected_item_soft'))
-	end
+    -- modified
+    self:add_key_binding('h', 'menu-back3', self:create_action('back'))
+    self:add_key_binding('j', 'menu-next3', self:create_action('next'), 'repeatable')
+    self:add_key_binding('k', 'menu-prev3', self:create_action('prev'), 'repeatable')
+    self:add_key_binding('l', 'menu-select3', self:create_action('open_selected_item_preselect'))
+    self:add_key_binding('shift+l', 'menu-select-soft3', self:create_action('open_selected_item_soft'))
 
 	self:add_key_binding('mbtn_back', 'menu-back-alt3', self:create_action('back'))
 	self:add_key_binding('bs', 'menu-back-alt4', self:create_action('back'))
@@ -2088,7 +2144,7 @@ function Menu:render()
 			if next_is_highlighted then separator_by = item_by end
 			if separator_by - separator_ay > 0 and item_by < by then
 				ass:rect(ax + spacing / 2, separator_ay, bx - spacing / 2, separator_by, {
-					color = options.foreground, opacity = opacity * 0.13,
+					color = options.foreground, opacity = opacity * (item.separator and 0.08 or 0.06),
 				})
 			end
 
@@ -2266,7 +2322,7 @@ function Speed:on_global_mouse_move()
 
 	local speed_current = state.speed
 	local speed_drag_current = self.dragging.start_speed + self.dragging.speed_distance
-	speed_drag_current = math.min(math.max(speed_drag_current, 0.01), 100)
+	speed_drag_current = clamp(0.01, speed_drag_current, 100)
 	local drag_dir_up = speed_drag_current > speed_current
 
 	local speed_step_next = speed_current
@@ -2320,7 +2376,7 @@ function Speed:render()
 
 	-- Background
 	ass:rect(self.ax, self.ay, self.bx, self.by, {
-		color = options.background, radius = 2, opacity = opacity * 0.6,
+		color = options.background, radius = 2, opacity = opacity * options.speed_opacity,
 	})
 
 	-- Coordinates
@@ -2333,7 +2389,7 @@ function Speed:render()
 	local speed_at_center = state.speed
 	if self.dragging then
 		speed_at_center = self.dragging.start_speed + self.dragging.speed_distance
-		speed_at_center = math.min(math.max(speed_at_center, 0.01), 100)
+		speed_at_center = clamp(0.01, speed_at_center, 100)
 	end
 	local nearest_notch_speed = round(speed_at_center / self.notch_every) * self.notch_every
 	local nearest_notch_x = half_x + (((nearest_notch_speed - speed_at_center) / self.notch_every) * self.notch_spacing)
@@ -2368,7 +2424,7 @@ function Speed:render()
 	-- Center guide
 	ass:new_event()
 	ass:append('{\\blur0\\bord1\\shad0\\1c&H' .. options.foreground .. '\\3c&H' .. options.background .. '}')
-	ass:opacity(options.speed_opacity, opacity)
+	ass:opacity(opacity)
 	ass:pos(0, 0)
 	ass:draw_start()
 	ass:move_to(half_x, by - 2 - guide_size)
@@ -2487,6 +2543,7 @@ function CycleButton:new(id, props) return Class.new(self, id, props) --[[@as Cy
 ---@param id string
 ---@param props CycleButtonProps
 function CycleButton:init(id, props)
+	local is_state_prop = itable_index_of({'shuffle'}, props.prop)
 	self.prop = props.prop
 	self.states = props.states
 
@@ -2497,10 +2554,17 @@ function CycleButton:init(id, props)
 	self.current_state_index = 1
 	self.on_click = function()
 		local new_state = self.states[self.current_state_index + 1] or self.states[1]
-		mp.set_property(self.prop, new_state.value)
+		if is_state_prop then
+			local new_value = new_state.value
+			if itable_index_of({'yes', 'no'}, new_state.value) then new_value = new_value == 'yes' end
+			set_state(self.prop, new_value)
+		else
+			mp.set_property(self.prop, new_state.value)
+		end
 	end
 
 	self.handle_change = function(name, value)
+		if is_state_prop and type(value) == 'boolean' then value = value and 'yes' or 'no' end
 		local index = itable_find(self.states, function(state) return state.value == value end)
 		self.current_state_index = index or 1
 		self.icon = self.states[self.current_state_index].icon
@@ -2508,7 +2572,12 @@ function CycleButton:init(id, props)
 		request_render()
 	end
 
-	mp.observe_property(self.prop, 'string', self.handle_change)
+	-- Built in state props
+	if is_state_prop then
+		self['on_prop_' .. self.prop] = function(self, value) self.handle_change(self.prop, value) end
+	else
+		mp.observe_property(self.prop, 'string', self.handle_change)
+	end
 end
 
 function CycleButton:destroy()
@@ -2541,7 +2610,7 @@ function WindowBorder:render()
 		local ass = assdraw.ass_new()
 		local clip = '\\iclip(' .. self.size .. ',' .. self.size .. ',' ..
 			(display.width - self.size) .. ',' .. (display.height - self.size) .. ')'
-		ass:rect(0, 0, display.width, display.height, {
+		ass:rect(0, 0, display.width + 1, display.height + 1, {
 			color = options.background, clip = clip, opacity = options.window_border_opacity,
 		})
 		return ass
@@ -2689,7 +2758,7 @@ function Timeline:get_time_at_x(x)
 	local line_width = (options.timeline_style == 'line' and self:get_effective_line_width() or 1)
 	local time_width = self.width - line_width
 	local progress_x = x - self.ax - line_width / 2
-	local progress = math.max(0, math.min(progress_x / time_width, 1))
+	local progress = clamp(0, progress_x / time_width, 1)
 	return state.duration * progress
 end
 
@@ -2707,6 +2776,7 @@ function Timeline:on_prop_time() self:decide_enabled() end
 function Timeline:on_prop_border() self:update_dimensions() end
 function Timeline:on_prop_fullormaxed() self:update_dimensions() end
 function Timeline:on_display() self:update_dimensions() end
+function Timeline:on_mouse_leave() mp.commandv('script-message-to', 'thumbfast', 'clear') end
 function Timeline:on_global_mbtn_left_up() self.pressed = false end
 function Timeline:on_global_mouse_leave() self.pressed = false end
 function Timeline:on_global_mouse_move()
@@ -2727,9 +2797,9 @@ function Timeline:render()
 	local ass = assdraw.ass_new()
 
 	-- Text opacity rapidly drops to 0 just before it starts overflowing, or before it reaches timeline.size_min
-	local hide_text_below = math.max(self.font_size * 0.7, size_min * 2)
+	local hide_text_below = math.max(self.font_size * 0.8, size_min * 2)
 	local hide_text_ramp = hide_text_below / 2
-	local text_opacity = math.max(math.min(size - hide_text_below, hide_text_ramp), 0) / hide_text_ramp
+	local text_opacity = clamp(0, size - hide_text_below, hide_text_ramp) / hide_text_ramp
 
 	local spacing = math.max(math.floor((self.size_max - self.font_size) / 2.5), 4)
 	local progress = state.time / state.duration
@@ -2740,27 +2810,33 @@ function Timeline:render()
 	local fax, fay, fbx, fby = 0, bay + self.top_border, 0, bby
 	local fcy = fay + (size / 2)
 
-	local line_width = 0
+	local time_x = bax + self.width * progress
+	local line_width, past_x_adjustment, future_x_adjustment = 0, 1, 1
 
 	if is_line then
-		local minimized_fraction = 1 - (size - size_min) / (self.size_max - size_min)
+		local minimized_fraction = 1 - math.min((size - size_min) / ((self.size_max - size_min) / 8), 1)
 		local width_normal = self:get_effective_line_width()
 		local max_min_width_delta = size_min > 0
 			and width_normal - width_normal * options.timeline_line_width_minimized_scale
 			or 0
 		line_width = width_normal - (max_min_width_delta * minimized_fraction)
-		local time_width = self.width - line_width
-		fax = bax + time_width * progress
+		fax = bax + (self.width - line_width) * progress
 		fbx = fax + line_width
+		local past_time_width, future_time_width = time_x - bax, bbx - time_x
+		past_x_adjustment = (past_time_width - (time_x - fax)) / past_time_width
+		future_x_adjustment = (future_time_width - (fbx - time_x)) / future_time_width
 	else
-		fax = bax
-		fbx = bax + self.width * progress
+		fax, fbx = bax, bax + self.width * progress
 	end
 
-	local time_ax = bax + line_width / 2
-	local time_width = self.width - line_width
 	local foreground_size = fby - fay
 	local foreground_coordinates = round(fax) .. ',' .. fay .. ',' .. round(fbx) .. ',' .. fby -- for clipping
+
+	-- line_x_adjustment: adjusts x coordinate so that it never lies inside of the line
+	-- it's as if line cuts the timeline and squeezes itself into the cut
+	local lxa = line_width == 0 and function(x) return x end or function(x)
+		return x < time_x and bax + (x - bax) * past_x_adjustment or bbx - (bbx - x) * future_x_adjustment
+	end
 
 	-- Background
 	ass:new_event()
@@ -2779,30 +2855,29 @@ function Timeline:render()
 	-- Uncached ranges
 	local buffered_time = nil
 	if state.uncached_ranges then
-		local opts = {size = 80, align = 3}
+		local opts = {size = 80, anchor_y = fby}
 		local texture_char = visibility > 0 and 'b' or 'a'
+		local offset = opts.size / (visibility > 0 and 24 or 28)
 		for _, range in ipairs(state.uncached_ranges) do
 			if not buffered_time and (range[1] > state.time or range[2] > state.time) then
 				buffered_time = range[1] - state.time
 			end
-			local ax = range[1] < 0.5 and bax or math.floor(time_ax + time_width * (range[1] / state.duration))
+			local ax = range[1] < 0.5 and bax or math.floor(lxa(bax + self.width * (range[1] / state.duration)))
 			local bx = range[2] > state.duration - 0.5 and bbx or
-				math.ceil(time_ax + time_width * (range[2] / state.duration))
-			opts.color, opts.opacity, opts.shift = 'ffffff', 0.4 - (0.2 * visibility), 0
+				math.ceil(lxa(bax + self.width * (range[2] / state.duration)))
+			opts.color, opts.opacity, opts.anchor_x = 'ffffff', 0.4 - (0.2 * visibility), bax
 			ass:texture(ax, fay, bx, fby, texture_char, opts)
-			opts.color, opts.opacity, opts.shift = '000000', 0.6 - (0.2 * visibility), opts.size / 22
+			opts.color, opts.opacity, opts.anchor_x = '000000', 0.6 - (0.2 * visibility), bax + offset
 			ass:texture(ax, fay, bx, fby, texture_char, opts)
 		end
 	end
 
 	-- Custom ranges
 	for _, chapter_range in ipairs(state.chapter_ranges) do
-		local rax = time_ax + time_width * (chapter_range['start'].time / state.duration)
-		local rbx = time_ax + time_width * math.min(chapter_range['end'].time / state.duration, 1)
-		-- for 1px chapter size, use the whole size of the bar including padding
-		local ray = size <= 1 and bay or fay
-		local rby = size <= 1 and bby or fby
-		ass:rect(rax, ray, rbx, rby, {color = chapter_range.color, opacity = chapter_range.opacity})
+		local rax = chapter_range.start < 0.1 and 0 or lxa(bax + self.width * (chapter_range.start / state.duration))
+		local rbx = chapter_range['end'] > state.duration - 0.1 and bbx
+			or lxa(bax + self.width * math.min(chapter_range['end'] / state.duration, 1))
+		ass:rect(rax, fay, rbx, fby, {color = chapter_range.color, opacity = chapter_range.opacity})
 	end
 
 	-- Chapters
@@ -2814,7 +2889,8 @@ function Timeline:render()
 
 		if diamond_radius > 0 then
 			local function draw_chapter(time)
-				local chapter_x, chapter_y = time_ax + time_width * (time / state.duration), fay - 1
+				local chapter_x = bax + line_width / 2 + (self.width - line_width) * (time / state.duration)
+				local chapter_y = fay - 1
 				ass:new_event()
 				ass:append(string.format(
 					'{\\pos(0,0)\\blur0\\yshad0.01\\bord%f\\1c&H%s\\3c&H%s\\4c&H%s\\1a&H%X&\\3a&H00&\\4a&H00&}',
@@ -2831,7 +2907,7 @@ function Timeline:render()
 
 			if state.chapters ~= nil then
 				for i, chapter in ipairs(state.chapters) do
-					if not chapter._uosc_used_as_range_point then draw_chapter(chapter.time) end
+					if not chapter.is_range_point then draw_chapter(chapter.time) end
 				end
 			end
 
@@ -2852,10 +2928,10 @@ function Timeline:render()
 	-- Time values
 	if text_opacity > 0 then
 		-- Upcoming cache time
-		if buffered_time and buffered_time > 0 and buffered_time < 60 then
+		if buffered_time and options.buffered_time_threshold > 0 and buffered_time < options.buffered_time_threshold then
 			local x, align = fbx + 5, 4
 			local font_size = self.font_size * 0.8
-			local human = round(buffered_time) .. 's'
+			local human = round(math.max(buffered_time, 0)) .. 's'
 			local width = text_width_estimate(human, font_size)
 			local min_x = bax + 5 + text_width_estimate(state.time_human, self.font_size)
 			local max_x = bbx - 5 - text_width_estimate(state.duration_or_remaining_time_human, self.font_size)
@@ -2879,32 +2955,48 @@ function Timeline:render()
 	-- Hovered time and chapter
 	if (self.proximity_raw == 0 or self.pressed) and not (Elements.speed and Elements.speed.dragging) then
 		local hovered_seconds = self:get_time_at_x(cursor.x)
-		local chapter_title, chapter_title_width
-
-		if state.chapters then
-			local _, chapter = itable_find(state.chapters, function(c) return hovered_seconds >= c.time end, true)
-			if chapter and not chapter.is_end_only then
-				chapter_title = chapter.title_wrapped
-				chapter_title_width = chapter.title_wrapped_width
-			end
-		end
 
 		-- Cursor line
 		-- 0.5 to switch when the pixel is half filled in
 		local color = ((fax - 0.5) < cursor.x and cursor.x < (fbx + 0.5)) and
 			options.background or options.foreground
-		local line = {ax = cursor.x - 0.5, ay = fay, bx = cursor.x + 0.5, by = fby}
-		ass:rect(line.ax, line.ay, line.bx, line.by, {color = color, opacity = 0.2})
+		local ax, ay, bx, by = cursor.x - 0.5, fay, cursor.x + 0.5, fby
+		ass:rect(ax, ay, bx, by, {color = color, opacity = 0.2})
+		local tooltip_anchor = {ax = ax, ay = ay, bx = bx, by = by}
 
 		-- Timestamp
-		ass:tooltip(line, format_time(hovered_seconds), {size = self.font_size, offset = 2})
+		ass:tooltip(tooltip_anchor, format_time(hovered_seconds), {size = self.font_size, offset = 4})
+		tooltip_anchor.ay = tooltip_anchor.ay - self.font_size - 4
+
+		-- Thumbnail
+		if not thumbnail.disabled and thumbnail.width ~= 0 and thumbnail.height ~= 0 then
+			local scale_x, scale_y = display.scale_x, display.scale_y
+			local border, margin_x, margin_y = math.ceil(2 * scale_x), round(10 * scale_x), round(5 * scale_y)
+			local thumb_x_margin, thumb_y_margin = border + margin_x, border + margin_y
+			local thumb_width, thumb_height = thumbnail.width, thumbnail.height
+			local thumb_x = round(clamp(
+				thumb_x_margin, cursor.x * scale_x - thumb_width / 2,
+				display.width * scale_x - thumb_width - thumb_x_margin
+			))
+			local thumb_y = round(tooltip_anchor.ay * scale_y - thumb_y_margin - thumb_height)
+			local ax, ay = (thumb_x - border) / scale_x, (thumb_y - border) / scale_y
+			local bx, by = (thumb_x + thumb_width + border) / scale_x, (thumb_y + thumb_height + border) / scale_y
+			ass:rect(ax, ay, bx, by, {
+				color = options.foreground, border = 1, border_color = options.background, radius = 3, opacity = 0.8,
+			})
+			mp.commandv('script-message-to', 'thumbfast', 'thumb', hovered_seconds, thumb_x, thumb_y)
+			tooltip_anchor.ax, tooltip_anchor.bx, tooltip_anchor.ay = ax, bx, ay
+		end
 
 		-- Chapter title
-		if chapter_title then
-			ass:tooltip(line, chapter_title, {
-				offset = 2 + self.font_size * 1.4, size = self.font_size, bold = true,
-				text_length_override = chapter_title_width,
-			})
+		if #state.chapters > 0 then
+			local _, chapter = itable_find(state.chapters, function(c) return hovered_seconds >= c.time end, true)
+			if chapter and not chapter.is_end_only then
+				ass:tooltip(tooltip_anchor, chapter.title_wrapped, {
+					size = self.font_size, offset = 10, responsive = false, bold = true,
+					text_length_override = chapter.title_wrapped_width,
+				})
+			end
 		end
 	end
 
@@ -3062,7 +3154,9 @@ function TopBar:render()
 			local text = state.title or 'n/a'
 			local bx = math.min(max_bx, title_ax + text_width_estimate(text, self.font_size) + padding * 2)
 			local by = self.by - bg_margin
-			ass:rect(title_ax, title_ay, bx, by, { color = options.background, opacity = visibility * 0.8, radius = 2, })
+			ass:rect(title_ax, title_ay, bx, by, {
+				color = options.background, opacity = visibility * options.top_bar_title_opacity, radius = 2,
+			})
 			ass:txt(title_ax + padding, self.ay + (self.size / 2), 4, text, {
 				size = self.font_size, wrap = 2, color = options.foreground, border = 1, border_color = options.background,
 				opacity = visibility, clip = string.format('\\clip(%d, %d, %d, %d)', self.ax, self.ay, max_bx, self.by),
@@ -3077,8 +3171,10 @@ function TopBar:render()
 			local text = '└ ' .. state.current_chapter.index .. ': ' .. state.current_chapter.title
 			local ax, by = title_ax + padding / 2, title_ay + height
 			local bx = math.min(max_bx, title_ax + text_width_estimate(text, font_size) + padding * 2)
-			ass:rect(ax, title_ay, bx, by, {color = options.background, opacity = visibility * 0.8, radius = 2})
-			ass:txt(ax + padding, title_ay + height / 2, 4, '{\\i1}' .. text ..'{\\i0}', {
+			ass:rect(ax, title_ay, bx, by, {
+				color = options.background, opacity = visibility * options.top_bar_title_opacity, radius = 2,
+			})
+			ass:txt(ax + padding, title_ay + height / 2, 4, '{\\i1}' .. text .. '{\\i0}', {
 				size = font_size, wrap = 2, color = options.foreground, border = 1, border_color = options.background,
 				opacity = visibility * 0.8, clip = string.format('\\clip(%d, %d, %d, %d)', title_ax, title_ay, bx, by),
 			})
@@ -3109,7 +3205,7 @@ function Controls:init()
 
 	-- Serialize control elements
 	local shorthands = {
-		menu = 'command:menu:script-binding uosc/menu?Menu',
+		menu = 'command:menu:script-binding uosc/menu-blurred?Menu',
 		subtitles = 'command:subtitles:script-binding uosc/subtitles#sub>0?Subtitles',
 		audio = 'command:graphic_eq:script-binding uosc/audio#audio>1?Audio',
 		['audio-device'] = 'command:speaker:script-binding uosc/audio-device?Audio device',
@@ -3439,7 +3535,7 @@ end
 function VolumeSlider:set_volume(volume)
 	volume = round(volume / options.volume_step) * options.volume_step
 	if state.volume == volume then return end
-	mp.commandv('set', 'volume', math.max(math.min(volume, state.volume_max), 0))
+	mp.commandv('set', 'volume', clamp(0, volume, state.volume_max))
 end
 
 function VolumeSlider:set_from_cursor()
@@ -3586,12 +3682,12 @@ function VolumeSlider:render()
 	if not state.has_audio then
 		local fg_100_path = create_nudged_path(options.volume_border)
 		local texture_opts = {
-			size = 200, color = options.foreground, opacity = visibility * 0.1,
+			size = 200, color = options.foreground, opacity = visibility * 0.1, anchor_x = ax,
 			clip = '\\clip(' .. fg_100_path.scale .. ',' .. fg_100_path.text .. ')',
 		}
 		ass:texture(ax, ay, bx, by, 'a', texture_opts)
 		texture_opts.color = options.background
-		texture_opts.shift = 5
+		texture_opts.anchor_x = ax + texture_opts.size / 28
 		ass:texture(ax, ay, bx, by, 'a', texture_opts)
 	end
 
@@ -3611,7 +3707,7 @@ function Volume:init()
 end
 
 function Volume:get_visibility()
-	return self.slider.pressed and 1 or Element.get_visibility(self)
+	return self.slider.pressed and 1 or Elements.timeline.proximity_raw == 0 and -1 or Element.get_visibility(self)
 end
 
 function Volume:update_dimensions()
@@ -3669,135 +3765,11 @@ if options.controls and options.controls ~= 'never' then Controls:new() end
 if itable_index_of({'left', 'right'}, options.volume) then Volume:new() end
 Curtain:new()
 
--- EVENT HANDLERS
-
-function create_state_setter(name, callback)
-	return function(_, value)
-		set_state(name, value)
-		if callback then callback() end
-		request_render()
-	end
-end
-
-function set_state(name, value)
-	state[name] = value
-	Elements:trigger('prop_' .. name, value)
-end
-
-function update_cursor_position()
-	cursor.x, cursor.y = mp.get_mouse_pos()
-
-	-- mpv reports initial mouse position on linux as (0, 0), which always
-	-- displays the top bar, so we hardcode cursor position as infinity until
-	-- we receive a first real mouse move event with coordinates other than 0,0.
-	if not state.first_real_mouse_move_received then
-		if cursor.x > 0 and cursor.y > 0 then
-			state.first_real_mouse_move_received = true
-		else
-			cursor.x = infinity
-			cursor.y = infinity
-		end
-	end
-
-	local dpi_scale = mp.get_property_native('display-hidpi-scale', 1.0)
-	dpi_scale = dpi_scale * options.ui_scale
-
-	-- add 0.5 to be in the middle of the pixel
-	cursor.x = (cursor.x + 0.5) / dpi_scale
-	cursor.y = (cursor.y + 0.5) / dpi_scale
-
-	Elements:update_proximities()
-	request_render()
-end
-
-function handle_mouse_leave()
-	-- Slowly fadeout elements that are currently visible
-	for _, element_name in ipairs({'timeline', 'volume', 'top_bar'}) do
-		local element = Elements[element_name]
-		if element and element.proximity > 0 then
-			element:tween_property('forced_visibility', element:get_visibility(), 0, function()
-				element.forced_visibility = nil
-			end)
-		end
-	end
-
-	cursor.hidden = true
-	Elements:update_proximities()
-	Elements:trigger('global_mouse_leave')
-end
-
-function handle_mouse_enter()
-	cursor.hidden = false
-	update_cursor_position()
-	Elements:trigger('global_mouse_enter')
-end
-
-function handle_mouse_move()
-	-- Handle case when we are in cursor hidden state but not left the actual
-	-- window (i.e. when autohide simulates mouse_leave).
-	if cursor.hidden then
-		handle_mouse_enter()
-		return
-	end
-
-	update_cursor_position()
-	Elements:proximity_trigger('mouse_move')
-	request_render()
-
-	-- Restart timer that hides UI when mouse is autohidden
-	if options.autohide then
-		state.cursor_autohide_timer:kill()
-		state.cursor_autohide_timer:resume()
-	end
-end
-
-function navigate_directory(direction)
-	local path = mp.get_property_native('path')
-
-	if not path or is_protocol(path) then return end
-
-	local next_file = get_adjacent_file(path, direction, config.media_types)
-
-	if next_file then
-		mp.commandv('loadfile', utils.join_path(serialize_path(path).dirname, next_file))
-	end
-end
-
-function load_file_in_current_directory(index)
-	local path = mp.get_property_native('path')
-
-	if not path or is_protocol(path) then return end
-
-	local serialized = serialize_path(path)
-	if serialized and serialized.dirname then
-		local files = get_files_in_directory(serialized.dirname, config.media_types)
-
-		if not files then return end
-		if index < 0 then index = #files + index + 1 end
-
-		if files[index] then
-			mp.commandv('loadfile', utils.join_path(serialized.dirname, files[index]))
-		end
-	end
-end
-
-function update_render_delay(name, fps)
-	if fps then state.render_delay = 1 / fps end
-end
-
-function observe_display_fps(name, fps)
-	if fps then
-		mp.unobserve_property(update_render_delay)
-		mp.unobserve_property(observe_display_fps)
-		mp.observe_property('display-fps', 'native', update_render_delay)
-	end
-end
-
 --[[ MENUS ]]
 
 ---@param data MenuData
----@param submenu_id? string ID of submenu to pre-open.
-function open_command_menu(data, submenu_id)
+---@param opts? {submenu?: string; blurred?: boolean}
+function open_command_menu(data, opts)
 	local menu = Menu:open(data, function(value)
 		if type(value) == 'string' then
 			mp.command(value)
@@ -3805,15 +3777,15 @@ function open_command_menu(data, submenu_id)
 			---@diagnostic disable-next-line: deprecated
 			mp.commandv((unpack or table.unpack)(value))
 		end
-	end)
-	if submenu_id then menu:activate_submenu(submenu_id) end
+	end, opts)
+	if opts and opts.submenu then menu:activate_submenu(opts.submenu) end
 	return menu
 end
 
----@param submenu_id? string Id of submenu to pre-open
-function toggle_menu_with_items(submenu_id)
+---@param opts? {submenu?: string; blurred?: boolean}
+function toggle_menu_with_items(opts)
 	if Menu:is_open('menu') then Menu:close()
-	else open_command_menu({type = 'menu', items = config.menu_items}, submenu_id) end
+	else open_command_menu({type = 'menu', items = config.menu_items}, opts) end
 end
 
 ---@param options {type: string; title: string; list_prop: string; list_serializer: fun(name: string, value: any): MenuDataItem[]; active_prop?: string; on_active_prop: fun(name: string, value: any, menu: Menu): integer; on_select: fun(value: any)}
@@ -3885,7 +3857,7 @@ function create_select_tracklist_type_menu_opener(menu_title, track_type, track_
 
 		for _, track in ipairs(tracklist) do
 			if track.type == track_type then
-				local hint_vals = {
+				local hint_values = {
 					track.lang and track.lang:upper() or nil,
 					track['demux-h'] and (track['demux-w'] and track['demux-w'] .. 'x' .. track['demux-h']
 						or track['demux-h'] .. 'p'),
@@ -3896,16 +3868,16 @@ function create_select_tracklist_type_menu_opener(menu_title, track_type, track_
 					track.forced and 'forced' or nil,
 					track.default and 'default' or nil,
 				}
-				local hint_vals_filtered = {}
-				for i = 1, #hint_vals do
-					if hint_vals[i] then
-						hint_vals_filtered[#hint_vals_filtered + 1] = hint_vals[i]
+				local hint_values_filtered = {}
+				for i = 1, #hint_values do
+					if hint_values[i] then
+						hint_values_filtered[#hint_values_filtered + 1] = hint_values[i]
 					end
 				end
 
 				items[#items + 1] = {
 					title = (track.title and track.title or 'Track ' .. track.id),
-					hint = table.concat(hint_vals_filtered, ', '),
+					hint = table.concat(hint_values_filtered, ', '),
 					value = track.id,
 					active = track.selected,
 				}
@@ -3967,7 +3939,7 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 	end
 
 	-- Files are already sorted
-	table.sort(directories, word_order_comparator)
+	table.sort(directories, file_order_comparator)
 
 	-- Pre-populate items with parent directory selector if not at root
 	-- Each item value is a serialized path table it points to.
@@ -4081,6 +4053,125 @@ function open_drives_menu(handle_select, opts)
 	return Menu:open({type = opts.type, title = opts.title or 'Drives', items = items}, handle_select)
 end
 
+-- EVENT HANDLERS
+
+function create_state_setter(name, callback)
+	return function(_, value)
+		set_state(name, value)
+		if callback then callback() end
+		request_render()
+	end
+end
+
+function set_state(name, value)
+	state[name] = value
+	Elements:trigger('prop_' .. name, value)
+end
+
+function update_cursor_position()
+	cursor.x, cursor.y = mp.get_mouse_pos()
+
+	-- mpv reports initial mouse position on linux as (0, 0), which always
+	-- displays the top bar, so we hardcode cursor position as infinity until
+	-- we receive a first real mouse move event with coordinates other than 0,0.
+	if not state.first_real_mouse_move_received then
+		if cursor.x > 0 and cursor.y > 0 then
+			state.first_real_mouse_move_received = true
+		else
+			cursor.x = infinity
+			cursor.y = infinity
+		end
+	end
+
+	-- add 0.5 to be in the middle of the pixel
+	cursor.x = (cursor.x + 0.5) / display.scale_x
+	cursor.y = (cursor.y + 0.5) / display.scale_y
+
+	Elements:update_proximities()
+	request_render()
+end
+
+function handle_mouse_leave()
+	-- Slowly fadeout elements that are currently visible
+	for _, element_name in ipairs({'timeline', 'volume', 'top_bar'}) do
+		local element = Elements[element_name]
+		if element and element.proximity > 0 then
+			element:tween_property('forced_visibility', element:get_visibility(), 0, function()
+				element.forced_visibility = nil
+			end)
+		end
+	end
+
+	cursor.hidden = true
+	Elements:update_proximities()
+	Elements:trigger('global_mouse_leave')
+end
+
+function handle_mouse_enter()
+	cursor.hidden = false
+	update_cursor_position()
+	Elements:trigger('global_mouse_enter')
+end
+
+function handle_mouse_move()
+	-- Handle case when we are in cursor hidden state but not left the actual
+	-- window (i.e. when autohide simulates mouse_leave).
+	if cursor.hidden then
+		handle_mouse_enter()
+		return
+	end
+
+	update_cursor_position()
+	Elements:proximity_trigger('mouse_move')
+	request_render()
+
+	-- Restart timer that hides UI when mouse is autohidden
+	if options.autohide then
+		state.cursor_autohide_timer:kill()
+		state.cursor_autohide_timer:resume()
+	end
+end
+
+function handle_file_end()
+	local resume = false
+	if not state.loop_file then
+		if state.has_playlist then resume = state.shuffle and navigate_playlist(1)
+		else resume = options.autoload and navigate_directory(1) end
+	end
+	-- Resume only when navigation happened
+	if resume then mp.command('set pause no') end
+end
+local file_end_timer = mp.add_timeout(1, handle_file_end)
+file_end_timer:kill()
+
+function load_file_index_in_current_directory(index)
+	if not state.path or is_protocol(state.path) then return end
+
+	local serialized = serialize_path(state.path)
+	if serialized and serialized.dirname then
+		local files = get_files_in_directory(serialized.dirname, config.media_types)
+
+		if not files then return end
+		if index < 0 then index = #files + index + 1 end
+
+		if files[index] then
+			mp.commandv('loadfile', utils.join_path(serialized.dirname, files[index]))
+		end
+	end
+end
+
+function update_render_delay(name, fps)
+	if fps then state.render_delay = 1 / fps end
+end
+
+function observe_display_fps(name, fps)
+	if fps then
+		mp.unobserve_property(update_render_delay)
+		mp.unobserve_property(observe_display_fps)
+		mp.observe_property('display-fps', 'native', update_render_delay)
+	end
+end
+
 --[[ HOOKS]]
 
 -- Mouse movement key binds
@@ -4115,20 +4206,42 @@ end
 mp.set_key_bindings(mouse_keybinds, 'mouse_movement', 'force')
 mp.enable_key_bindings('mouse_movement', 'allow-vo-dragging+allow-hide-cursor')
 
+mp.observe_property('osc', 'bool', function(name, value) if value == true then mp.set_property('osc', 'no') end end)
 function update_title(title_template)
 	if title_template:sub(-6) == ' - mpv' then title_template = title_template:sub(1, -7) end
 	set_state('title', mp.command_native({'expand-text', title_template}))
 end
 mp.register_event('file-loaded', function()
+	set_state('path', normalize_path(mp.get_property_native('path')))
 	update_title(mp.get_property_native('title'))
 end)
-mp.register_event('end-file ', function() set_state('title', nil) end)
+mp.register_event('end-file', function(event)
+	set_state('title', nil)
+	if event.reason == 'eof' then
+		file_end_timer:kill()
+		handle_file_end()
+	end
+end)
 mp.observe_property('title', 'string', function(_, title)
 	-- Don't change title if there is currently none
 	if state.title then update_title(title) end
 end)
 mp.observe_property('playback-time', 'number', create_state_setter('time', function()
+	-- Create a file-end event that triggers right before file ends
+	file_end_timer:kill()
+	if state.duration and state.time then
+		local remaining = (state.duration - state.time) / state.speed
+		if remaining < 5 then
+			local timeout = remaining - 0.02
+			if timeout > 0 then
+				file_end_timer.timeout = timeout
+				file_end_timer:resume()
+			else handle_file_end() end
+		end
+	end
+
 	update_human_times()
+
 	-- Select current chapter
 	local current_chapter
 	if state.time and state.chapters then
@@ -4159,13 +4272,15 @@ mp.observe_property('track-list', 'native', function(name, value)
 	Elements:trigger('dispositions')
 end)
 mp.observe_property('chapter-list', 'native', function(_, chapters)
-	local chapters = serialize_chapters(chapters)
+	local chapters, chapter_ranges = serialize_chapters(chapters), {}
+	if chapters then chapters, chapter_ranges = serialize_chapter_ranges(chapters) end
 	set_state('chapters', chapters)
-	serialize_chapter_ranges(chapters)
+	set_state('chapter_ranges', chapter_ranges)
 	set_state('has_chapter', #chapters > 0)
 	Elements:trigger('dispositions')
 end)
 mp.observe_property('border', 'bool', create_state_setter('border'))
+mp.observe_property('loop-file', 'native', create_state_setter('loop_file'))
 mp.observe_property('ab-loop-a', 'number', create_state_setter('ab_loop_a'))
 mp.observe_property('ab-loop-b', 'number', create_state_setter('ab_loop_b'))
 mp.observe_property('playlist-pos-1', 'number', create_state_setter('playlist_pos'))
@@ -4177,7 +4292,7 @@ end)
 mp.observe_property('fullscreen', 'bool', create_state_setter('fullscreen', update_fullormaxed))
 mp.observe_property('window-maximized', 'bool', create_state_setter('maximized', update_fullormaxed))
 mp.observe_property('idle-active', 'bool', create_state_setter('idle'))
-mp.observe_property('pause', 'bool', create_state_setter('pause'))
+mp.observe_property('pause', 'bool', create_state_setter('pause', function() file_end_timer:kill() end))
 mp.observe_property('volume', 'number', create_state_setter('volume'))
 mp.observe_property('volume-max', 'number', create_state_setter('volume_max'))
 mp.observe_property('mute', 'bool', create_state_setter('mute'))
@@ -4185,43 +4300,53 @@ mp.observe_property('osd-dimensions', 'native', function(name, val)
 	update_display_dimensions()
 	request_render()
 end)
-mp.observe_property('display-hidpi-scale', 'native', update_display_dimensions)
+mp.observe_property('display-hidpi-scale', 'native', create_state_setter('hidpi_scale', update_display_dimensions))
+mp.observe_property('cache', 'native', create_state_setter('cache'))
 mp.observe_property('demuxer-via-network', 'native', create_state_setter('is_stream', function()
-	set_state('uncached_ranges', state.is_stream and state.duration and {0, state.duration} or nil)
 	Elements:trigger('dispositions')
 end))
 mp.observe_property('demuxer-cache-state', 'native', function(prop, cache_state)
-	local cached_ranges = cache_state and cache_state['seekable-ranges'] or {}
-	local uncached_ranges = nil
-	if state.duration and state.is_stream then
-		-- Normalize
-		local ranges = {}
-		for _, range in ipairs(cached_ranges) do
-			ranges[#ranges + 1] = {
-				math.max(range['start'] or 0, 0),
-				math.min(range['end'] or state.duration, state.duration),
-			}
-		end
-		table.sort(ranges, function(a, b) return a[1] < b[1] end)
-		-- Invert cached ranges into uncached ranges, as that's what we're rendering
-		local inverted_ranges = {{0, state.duration}}
-		for _, cached in pairs(ranges) do
-			inverted_ranges[#inverted_ranges][2] = cached[1]
-			inverted_ranges[#inverted_ranges + 1] = {cached[2], state.duration}
-		end
-		uncached_ranges = {}
-		local last_range = nil
-		for _, range in ipairs(inverted_ranges) do
-			if last_range and last_range[2] + 0.5 > range[1] then -- fuse ranges
-				last_range[2] = range[2]
-			else
-				if range[2] - range[1] > 0.5 then -- skip short ranges
-					uncached_ranges[#uncached_ranges + 1] = range
-					last_range = range
-				end
+	local cached_ranges, bof, eof, uncached_ranges = nil, nil, nil, nil
+	if cache_state then
+		cached_ranges, bof, eof = cache_state['seekable-ranges'], cache_state['bof-cached'], cache_state['eof-cached']
+	else cached_ranges = {} end
+
+	if not (state.duration and (#cached_ranges > 0 or state.cache == 'yes' or
+		(state.cache == 'auto' and state.is_stream))) then
+		if state.uncached_ranges then set_state('uncached_ranges', nil) end
+		return
+	end
+
+	-- Normalize
+	local ranges = {}
+	for _, range in ipairs(cached_ranges) do
+		ranges[#ranges + 1] = {
+			math.max(range['start'] or 0, 0),
+			math.min(range['end'] or state.duration, state.duration),
+		}
+	end
+	table.sort(ranges, function(a, b) return a[1] < b[1] end)
+	if bof then ranges[1][1] = 0 end
+	if eof then ranges[#ranges][2] = state.duration end
+	-- Invert cached ranges into uncached ranges, as that's what we're rendering
+	local inverted_ranges = {{0, state.duration}}
+	for _, cached in pairs(ranges) do
+		inverted_ranges[#inverted_ranges][2] = cached[1]
+		inverted_ranges[#inverted_ranges + 1] = {cached[2], state.duration}
+	end
+	uncached_ranges = {}
+	local last_range = nil
+	for _, range in ipairs(inverted_ranges) do
+		if last_range and last_range[2] + 0.5 > range[1] then -- fuse ranges
+			last_range[2] = range[2]
+		else
+			if range[2] - range[1] > 0.5 then -- skip short ranges
+				uncached_ranges[#uncached_ranges + 1] = range
+				last_range = range
 			end
 		end
 	end
+
 	set_state('uncached_ranges', uncached_ranges)
 end)
 mp.observe_property('display-fps', 'native', observe_display_fps)
@@ -4262,6 +4387,7 @@ mp.add_key_binding(nil, 'decide-pause-indicator', function()
 	Elements.pause_indicator:decide()
 end)
 mp.add_key_binding(nil, 'menu', function() toggle_menu_with_items() end)
+mp.add_key_binding(nil, 'menu-blurred', function() toggle_menu_with_items({blurred = true}) end)
 local track_loaders = {
 	{name = 'subtitles', prop = 'sub', allowed_types = config.subtitle_types},
 	{name = 'audio', prop = 'audio', allowed_types = config.media_types},
@@ -4272,7 +4398,7 @@ for _, loader in ipairs(track_loaders) do
 	mp.add_key_binding(nil, menu_type, function()
 		if Menu:is_open(menu_type) then Menu:close() return end
 
-		local path = mp.get_property_native('path') --[[@as string|nil|false]]
+		local path = state.path
 		if path then
 			if is_protocol(path) then
 				path = false
@@ -4327,34 +4453,21 @@ mp.add_key_binding(nil, 'chapters', create_self_updating_menu_opener({
 	list_serializer = function(_, chapters)
 		local items = {}
 		chapters = normalize_chapters(chapters)
-		local active_found = false
-
-		for index, chapter in ipairs(chapters) do
+		for _, chapter in ipairs(chapters) do
 			local item = {
 				title = chapter.title or '',
 				hint = mp.format_time(chapter.time),
 				value = chapter.time,
 			}
 			items[#items + 1] = item
-            -- modified
-			-- if active_found == false then
-			-- 	local is_active = chapter.time >= state.time
-			-- 	if is_active then
-			-- 		item.active = true
-			-- 		active_found = true
-            --     end
-			-- end
 		end
-        for index = #items, 1, -1 do
-            if state.time >= items[index].value then
-                items[index].active = true
-                active_found = true
-                break
-            end
-        end
-        if active_found == false and #items > 0 then
-            items[1].active = true
-        end
+		if not state.time then return items end
+		for index = #items, 1, -1 do
+			if state.time >= items[index].value then
+				items[index].active = true
+				break
+			end
+		end
 		return items
 	end,
 	active_prop = 'playback-time',
@@ -4377,23 +4490,19 @@ mp.add_key_binding(nil, 'chapters', create_self_updating_menu_opener({
 	on_select = function(time) mp.commandv('seek', tostring(time), 'absolute') end,
 }))
 mp.add_key_binding(nil, 'show-in-directory', function()
-	local path = mp.get_property_native('path')
-
 	-- Ignore URLs
-	if not path or is_protocol(path) then return end
-
-	path = normalize_path(path)
+	if not state.path or is_protocol(state.path) then return end
 
 	if state.os == 'windows' then
-		utils.subprocess_detached({args = {'explorer', '/select,', path}, cancellable = false})
+		utils.subprocess_detached({args = {'explorer', '/select,', state.path}, cancellable = false})
 	elseif state.os == 'macos' then
-		utils.subprocess_detached({args = {'open', '-R', path}, cancellable = false})
+		utils.subprocess_detached({args = {'open', '-R', state.path}, cancellable = false})
 	elseif state.os == 'linux' then
-		local result = utils.subprocess({args = {'nautilus', path}, cancellable = false})
+		local result = utils.subprocess({args = {'nautilus', state.path}, cancellable = false})
 
 		-- Fallback opens the folder with xdg-open instead
 		if result.status ~= 0 then
-			utils.subprocess({args = {'xdg-open', serialize_path(path).dirname}, cancellable = false})
+			utils.subprocess({args = {'xdg-open', serialize_path(state.path).dirname}, cancellable = false})
 		end
 	end
 end)
@@ -4421,10 +4530,10 @@ mp.add_key_binding(nil, 'stream-quality', function()
 
 		mp.set_property_number('playlist-pos', playlist_pos)
 
-		-- Tries to determine live stream vs. pre-recordered VOD. VOD has non-zero
+		-- Tries to determine live stream vs. pre-recorded VOD. VOD has non-zero
 		-- duration property. When reloading VOD, to keep the current time position
 		-- we should provide offset from the start. Stream doesn't have fixed start.
-		-- Decent choice would be to reload stream from it's current 'live' positon.
+		-- Decent choice would be to reload stream from it's current 'live' position.
 		-- That's the reason we don't pass the offset when reloading streams.
 		if duration and duration > 0 then
 			local function seeker()
@@ -4438,18 +4547,17 @@ end)
 mp.add_key_binding(nil, 'open-file', function()
 	if Menu:is_open('open-file') then Menu:close() return end
 
-	local path = mp.get_property_native('path')
 	local directory
 	local active_file
 
-	if path == nil or is_protocol(path) then
+	if state.path == nil or is_protocol(state.path) then
 		local serialized = serialize_path(get_default_directory())
 		if serialized then
 			directory = serialized.path
 			active_file = nil
 		end
 	else
-		local serialized = serialize_path(path)
+		local serialized = serialize_path(state.path)
 		if serialized then
 			directory = serialized.dirname
 			active_file = serialized.path
@@ -4457,15 +4565,14 @@ mp.add_key_binding(nil, 'open-file', function()
 	end
 
 	if not directory then
-		msg.error('Couldn\'t serialize path "' .. path .. '".')
+		msg.error('Couldn\'t serialize path "' .. state.path .. '".')
 		return
 	end
 
 	-- Update active file in directory navigation menu
 	local function handle_file_loaded()
 		if Menu:is_open('open-file') then
-			local path = normalize_path(mp.get_property_native('path'))
-			Elements.menu:activate_value(path)
+			Elements.menu:activate_value(normalize_path(mp.get_property_native('path')))
 		end
 	end
 
@@ -4481,6 +4588,7 @@ mp.add_key_binding(nil, 'open-file', function()
 		}
 	)
 end)
+mp.add_key_binding(nil, 'shuffle', function() set_state('shuffle', not state.shuffle) end)
 mp.add_key_binding(nil, 'items', function()
 	if state.has_playlist then
 		mp.command('script-binding uosc/playlist')
@@ -4488,65 +4596,54 @@ mp.add_key_binding(nil, 'items', function()
 		mp.command('script-binding uosc/open-file')
 	end
 end)
-mp.add_key_binding(nil, 'next', function()
-	if state.has_playlist then
-		mp.command('playlist-next')
-	else
-		navigate_directory('forward')
-	end
-end)
-mp.add_key_binding(nil, 'prev', function()
-	if state.has_playlist then
-		mp.command('playlist-prev')
-	else
-		navigate_directory('backward')
-	end
-end)
-mp.add_key_binding(nil, 'next-file', function() navigate_directory('forward') end)
-mp.add_key_binding(nil, 'prev-file', function() navigate_directory('backward') end)
+mp.add_key_binding(nil, 'next', function() navigate_item(1) end)
+mp.add_key_binding(nil, 'prev', function() navigate_item(-1) end)
+mp.add_key_binding(nil, 'next-file', function() navigate_directory(1) end)
+mp.add_key_binding(nil, 'prev-file', function() navigate_directory(-1) end)
 mp.add_key_binding(nil, 'first', function()
 	if state.has_playlist then
 		mp.commandv('set', 'playlist-pos-1', '1')
 	else
-		load_file_in_current_directory(1)
+		load_file_index_in_current_directory(1)
 	end
 end)
 mp.add_key_binding(nil, 'last', function()
 	if state.has_playlist then
 		mp.commandv('set', 'playlist-pos-1', tostring(state.playlist_count))
 	else
-		load_file_in_current_directory(-1)
+		load_file_index_in_current_directory(-1)
 	end
 end)
-mp.add_key_binding(nil, 'first-file', function() load_file_in_current_directory(1) end)
-mp.add_key_binding(nil, 'last-file', function() load_file_in_current_directory(-1) end)
+mp.add_key_binding(nil, 'first-file', function() load_file_index_in_current_directory(1) end)
+mp.add_key_binding(nil, 'last-file', function() load_file_index_in_current_directory(-1) end)
 mp.add_key_binding(nil, 'delete-file-next', function()
 	local next_file = nil
-	local path = mp.get_property_native('path')
-	local is_local_file = path and not is_protocol(path)
+	local is_local_file = state.path and not is_protocol(state.path)
 
 	if is_local_file then
-		path = normalize_path(path)
-		if Menu:is_open('open-file') then Elements.menu:delete_value(path) end
+		if Menu:is_open('open-file') then Elements.menu:delete_value(state.path) end
 	end
 
 	if state.has_playlist then
 		mp.commandv('playlist-remove', 'current')
 	else
 		if is_local_file then
-			next_file = get_adjacent_file(path, 'forward', config.media_types)
+			local paths, current_index = get_adjacent_paths(state.path, config.media_types)
+			if paths and current_index then
+				local index, path = decide_navigation_in_list(paths, current_index, 1)
+				if path then next_file = path end
+			end
 		end
 
 		if next_file then mp.commandv('loadfile', next_file)
 		else mp.commandv('stop') end
 	end
 
-	if is_local_file then delete_file(path) end
+	if is_local_file then delete_file(state.path) end
 end)
 mp.add_key_binding(nil, 'delete-file-quit', function()
-	local path = mp.get_property_native('path')
 	mp.command('stop')
-	if path and not is_protocol(path) then delete_file(normalize_path(path)) end
+	if state.path and not is_protocol(state.path) then delete_file(state.path) end
 	mp.command('quit')
 end)
 mp.add_key_binding(nil, 'audio-device', create_self_updating_menu_opener({
@@ -4597,7 +4694,7 @@ end)
 
 -- MESSAGE HANDLERS
 
-mp.register_script_message('show-submenu', toggle_menu_with_items)
+mp.register_script_message('show-submenu', function(id) toggle_menu_with_items({submenu = id}) end)
 mp.register_script_message('get-version', function(script)
 	mp.commandv('script-message-to', script, 'uosc-version', config.version)
 end)
@@ -4607,7 +4704,7 @@ mp.register_script_message('open-menu', function(json, submenu_id)
 		msg.error('open-menu: received json didn\'t produce a table with menu configuration')
 	else
 		if data.type and Menu:is_open(data.type) then Menu:close()
-		else open_command_menu(data, submenu_id) end
+		else open_command_menu(data, {submenu_id = submenu_id}) end
 	end
 end)
 mp.register_script_message('update-menu', function(json)
@@ -4618,5 +4715,14 @@ mp.register_script_message('update-menu', function(json)
 		local menu = data.type and Menu:is_open(data.type)
 		if menu then menu:update(data)
 		else open_command_menu(data) end
+	end
+end)
+mp.register_script_message('thumbfast-info', function(json)
+	local data = utils.parse_json(json)
+	if type(data) ~= 'table' or not data.width or not data.height then
+		thumbnail.disabled = true
+		msg.error('thumbfast-info: received json didn\'t produce a table with thumbnail information')
+	else
+		thumbnail = data
 	end
 end)

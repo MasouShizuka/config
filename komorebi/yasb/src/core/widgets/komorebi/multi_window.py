@@ -1,5 +1,5 @@
 import logging
-import time
+from time import time
 
 from core.event_enums import KomorebiEvent
 from core.event_service import EventService
@@ -69,13 +69,16 @@ class MultiWindowWidget(BaseWidget):
         super().__init__(
             update_title['update_interval'], class_name='komorebi-multi-window'
         )
-        self._show_alt = False
         self._label = label
         self._label_alt = label_alt
+        self._show_alt = False
+        self._active_label = label
+
         self._show_icon = show_icon
+
         self._min_update_interval = min_update_interval
         self._last_update_time = 0
-        self._active_label = label
+
         self._event_service = EventService()
         self._komorebic = KomorebiClient()
         self._komorebi_screen = None
@@ -119,6 +122,7 @@ class MultiWindowWidget(BaseWidget):
             KomorebiEvent.FocusMonitorNumber,
             KomorebiEvent.FocusWorkspaceNumber,
             KomorebiEvent.FocusMonitorWorkspaceNumber,
+            KomorebiEvent.PromoteFocus,
             KomorebiEvent.CycleMoveWindow,
             KomorebiEvent.Promote,
             KomorebiEvent.Manage,
@@ -144,11 +148,10 @@ class MultiWindowWidget(BaseWidget):
 
     def _on_komorebi_window_change_event(self, event: dict, state: dict):
         prev_last_update_time = self._last_update_time
-        last_update_time = int(round(time.time() * 1000))
-        if last_update_time - prev_last_update_time < self._min_update_interval:
-            return
-        self._last_update_time = last_update_time
-        self._update_workspace_windows(state)
+        last_update_time = round(time() * 1000)
+        if last_update_time - prev_last_update_time >= self._min_update_interval:
+            self._last_update_time = last_update_time
+            self._update_workspace_windows(state)
 
     def _update_workspace_windows(self, state: dict):
         try:
@@ -167,23 +170,24 @@ class MultiWindowWidget(BaseWidget):
                 if self._focused_workspace['monocle_container'] is not None:
                     windows.insert(0, self._focused_workspace['monocle_container'])
                     focused_window_index = 0
-                for i, k in enumerate(windows):
-                    window_info = k['windows']['elements'][0]
+                for index, window in enumerate(windows):
+                    window_info = window['windows']['elements'][0]
                     tid, pid = GetWindowThreadProcessId(window_info['hwnd'])
                     window_info['pid'] = pid
 
                     window_button = WindowButton(window_info, self._active_label)
-                    if i == focused_window_index:
-                        window_button.update_focused()
                     if self._show_icon:
                         p = Process(pid)
                         exe_path = p.exe()
                         pixmap = self._get_icon_pixmap(exe_path)
                         qicon = QIcon(pixmap)
                         window_button.setIcon(qicon)
+                    if index == focused_window_index:
+                        window_button.update_focused()
 
                     self._multi_window_container_layout.addWidget(window_button)
                     self._window_buttons.append(window_button)
+
         except Exception:
             logging.exception('Failed to update window widget state')
 
@@ -237,7 +241,6 @@ class MultiWindowWidget(BaseWidget):
 
         # Create a QtGui.QPixmap from the QtGui.QImage.
         pixmap = QPixmap.fromImage(image).copy()
-        # qicon = QIcon(pixmap)
 
         # Destroy the icons.
         for icon_list in icons:

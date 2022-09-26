@@ -52,8 +52,6 @@ map("v", "K", ":move '<-2<CR>gv-gv", opt)
 
 if global.is_vscode then
     vim.cmd [[
-        nnoremap o A<CR>
-
         nnoremap zc <Cmd>call VSCodeNotify("editor.fold")<CR>
         nnoremap zC <Cmd>call VSCodeNotify("editor.foldRecursively")<CR>
         nnoremap zo <Cmd>call VSCodeNotify("editor.unfold")<CR>
