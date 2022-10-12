@@ -559,7 +559,7 @@ widgets:
     type: "komorebi.refresh_window.RefreshWindowWidget"
     options:
       refresh_delay: 100
-      min_refresh_interval: 400
+      min_refresh_interval: 500
       refresh_process_name_list:
         - 'TE64.exe'
 

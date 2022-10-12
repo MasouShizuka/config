@@ -82,7 +82,7 @@ Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.2.4 by 咸鱼阿康
+Menu, Tray, Tip, MyKeymap 1.2.5 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -404,7 +404,6 @@ space::
 ; *Space::exitMouseMode()
 
 ; modified
-*/::centerMouse()
 *I::slow_move_mouse("I", 0, -1)
 *J::slow_move_mouse("J", -1, 0)
 *K::slow_move_mouse("K", 0, 1)
@@ -413,6 +412,8 @@ space::
 *N Up::left_click_up_without_false()
 *M::right_click_down_without_false(true)
 *M Up::right_click_up_without_false(true)
+*,::lbuttonDown()
+*/::run, bin/ahk.exe bin/moveMouseToCaret.ahk
 Esc::exitMouseMode()
 *Space::exitMouseMode()
 *capslock up::
@@ -430,21 +431,21 @@ Esc::exitMouseMode()
 ; modified
 #if VERYSLOWMODE
 
-*/::centerMouse()
 *I::very_slow_move_mouse("I", 0, -1)
 *J::very_slow_move_mouse("J", -1, 0)
 *K::very_slow_move_mouse("K", 0, 1)
 *L::very_slow_move_mouse("L", 1, 0)
-*,::lbuttonDown()
-*N::left_click_down_without_false()
-*N Up::left_click_up_without_false()
-*.::moveCurrentWindow()
-*M::right_click_down_without_false(true)
-*M Up::right_click_up_without_false(true)
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
 *U::scrollWheel("U", 1)
+*N::left_click_down_without_false()
+*N Up::left_click_up_without_false()
+*M::right_click_down_without_false(true)
+*M Up::right_click_up_without_false(true)
+*,::lbuttonDown()
+*.::moveCurrentWindow()
+*/::run, bin/ahk.exe bin/moveMouseToCaret.ahk
 Esc::exit_very_slow_mode()
 *Space::exit_very_slow_mode()
 *capslock up::

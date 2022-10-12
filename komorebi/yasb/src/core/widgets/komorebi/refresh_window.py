@@ -9,6 +9,7 @@ from core.validation.widgets.komorebi.refresh_window import VALIDATION_SCHEMA
 from core.widgets.base import BaseWidget
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget
+from win32gui import GetForegroundWindow, SetForegroundWindow
 
 try:
     from core.utils.komorebi.event_listener import KomorebiEventListener
@@ -78,6 +79,9 @@ class RefreshWindowWidget(BaseWidget):
                 focused_window_info = focused_window['windows']['elements'][0]
                 if focused_window_info['exe'] in self._refresh_process_name_list:
                     self._refresh_window()
+
+                if GetForegroundWindow() != focused_window_info['hwnd']:
+                    SetForegroundWindow(focused_window_info['hwnd'])
         except Exception:
             logging.exception('Failed to update window widget state')
 
@@ -85,6 +89,12 @@ class RefreshWindowWidget(BaseWidget):
         try:
             self._screen_hwnd = get_monitor_hwnd(int(QWidget.winId(self)))
             self._komorebi_state = komorebi_state
+
+            focused_monitor_index = self._komorebi_state['monitors']['focused']
+            focused_screen = self._komorebi_state['monitors']['elements'][focused_monitor_index]
+            focused_screen_hwnd = focused_screen['id']
+            if self._screen_hwnd != focused_screen_hwnd:
+                return False
 
             if self._komorebi_state:
                 self._komorebi_screen = self._komorebic.get_screen_by_hwnd(

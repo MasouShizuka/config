@@ -52,6 +52,9 @@ map("v", "K", ":move '<-2<CR>gv-gv", opt)
 
 if global.is_vscode then
     vim.cmd [[
+        nnoremap o <Cmd>call VSCodeNotify("editor.action.insertLineAfter")<CR>i
+        nnoremap O <Cmd>call VSCodeNotify("editor.action.insertLineBefore")<CR>i
+
         nnoremap zc <Cmd>call VSCodeNotify("editor.fold")<CR>
         nnoremap zC <Cmd>call VSCodeNotify("editor.foldRecursively")<CR>
         nnoremap zo <Cmd>call VSCodeNotify("editor.unfold")<CR>
@@ -71,7 +74,7 @@ if global.is_vscode then
         nmap gcc <Plug>VSCodeCommentaryLine
 
         nnoremap ge <Cmd>call VSCodeNotify("editor.action.goToReferences")<CR>
-''
+
         nnoremap <Leader>b <Cmd>call VSCodeNotify("bookmarks.toggle")<CR>
         nnoremap <Leader>p <Cmd>call VSCodeNotify("extension.pasteImage")<CR>
 
@@ -155,8 +158,8 @@ else
         autocmd Filetype markdown inoremap .s ~~~~<++><Esc>F~hi
         autocmd Filetype markdown inoremap 。s ~~~~<++><Esc>F~hi
         " 引用
-        autocmd Filetype markdown inoremap .q > 
-        autocmd Filetype markdown inoremap 。q > 
+        autocmd Filetype markdown inoremap .q >
+        autocmd Filetype markdown inoremap 。q >
         " 标注
         autocmd Filetype markdown inoremap .c ``<++><Esc>F`i
         autocmd Filetype markdown inoremap 。c ``<++><Esc>F`i

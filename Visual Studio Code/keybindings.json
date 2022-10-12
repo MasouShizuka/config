@@ -20,7 +20,13 @@
     },
     {
         "key": "escape",
-        "command": "vscode-neovim.escape",
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "vscode-neovim.escape",
+                "editor.action.trimTrailingWhitespace"
+            ]
+        },
         "when": "editorTextFocus && neovim.init"
     },
 

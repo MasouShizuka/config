@@ -120,7 +120,7 @@
     },
     "UseDefaultCaptureSettings": true,
     "CaptureSettings": {
-      "ShowCursor": true,
+      "ShowCursor": false,
       "ScreenshotDelay": 0.0,
       "CaptureTransparent": false,
       "CaptureShadow": true,
@@ -808,76 +808,84 @@
   "HistoryCheckURL": false,
   "RecentTasks": [
     {
-      "FilePath": "D:\\Downloads\\TE64_Znac9wPgks.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-07-23T00:53:48.7362118Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\01.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:23:06.1309142Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\01.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:23:46.0861926Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\02.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:24:20.5792998Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\03.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:25:38.7099932Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\02.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:32:35.2145698Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\01.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:33:52.4490416Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\02.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:34:09.6534944Z"
+      "Time": null
     },
     {
-      "FilePath": "D:\\Downloads\\03.png",
+      "FilePath": null,
       "URL": null,
       "ThumbnailURL": null,
       "DeletionURL": null,
       "ShortenedURL": null,
-      "Time": "2022-08-12T02:34:36.680087Z"
+      "Time": null
+    },
+    {
+      "FilePath": null,
+      "URL": null,
+      "ThumbnailURL": null,
+      "DeletionURL": null,
+      "ShortenedURL": null,
+      "Time": null
     }
   ],
   "RecentTasksSave": true,

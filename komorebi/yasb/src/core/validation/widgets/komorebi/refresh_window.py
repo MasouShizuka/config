@@ -1,6 +1,6 @@
 DEFAULTS = {
     'refresh_delay': 100,
-    'min_refresh_interval': 400,
+    'min_refresh_interval': 500,
     'refresh_process_name_list': [],
 }
 

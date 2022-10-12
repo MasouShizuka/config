@@ -187,7 +187,6 @@ class MultiWindowWidget(BaseWidget):
 
                     self._multi_window_container_layout.addWidget(window_button)
                     self._window_buttons.append(window_button)
-
         except Exception:
             logging.exception('Failed to update window widget state')
 

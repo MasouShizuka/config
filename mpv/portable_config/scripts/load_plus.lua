@@ -33,12 +33,12 @@ local options = require 'mp.options'
 local utils = require 'mp.utils'
 
 opt = {
-    level = -1,          -- <-1/0/1> 自动填充的等级，分别对应 按预设条件/始终阻止/仅近似名文件
-    video = true,        -- <yes/no> 是否填充视频
-    audio = false,       -- <yes/no> 是否填充音频
-    image = false,       -- <yes/no> 是否填充图片
-    skip_hidden = true,  -- <yes/no> 跳过隐藏文件（当资源管理器内勾选“显示隐藏的文件”时无效）
-    max_entries = 150    -- <大于0的整数> 当前条目前后各追加的文件数 
+    level = -1,                  -- <-1/0/1> 自动填充的等级，分别对应 按预设条件/始终阻止/仅近似名文件
+    video = true,                -- <yes/no> 是否填充视频
+    audio = false,               -- <yes/no> 是否填充音频
+    image = false,               -- <yes/no> 是否填充图片
+    skip_hidden = true,          -- <yes/no> 跳过隐藏文件（当资源管理器内勾选“显示隐藏的文件”时无效）
+    max_entries = "unlimited"    -- <unlimited/大于0的整数> 当前条目前后各追加的文件数
 }
 options.read_options(opt)
 
@@ -193,18 +193,18 @@ function find_and_add_entries()
         if ext == nil then
             return false
         end
-    if opt.level == 1 then
-        local name = mp.get_property("filename")
-        local namepre = string.sub(name, 1, 6)
-        local namepre0 = string.gsub(namepre, "%p", "%%%1")
-        for ext, _ in pairs(EXTENSIONS) do
-            if string.match(name, ext.."$") ~= nil then
-                if string.match(v, "^"..namepre0) == nil then
-                return false
+        if opt.level == 1 then
+            local name = mp.get_property("filename")
+            local namepre = string.sub(name, 1, 6)
+            local namepre0 = string.gsub(namepre, "%p", "%%%1")
+            for ext, _ in pairs(EXTENSIONS) do
+                if string.match(name, ext.."$") ~= nil then
+                    if string.match(v, "^"..namepre0) == nil then
+                    return false
+                    end
                 end
             end
         end
-    end
         return EXTENSIONS[string.lower(ext)]
     end)
     table.sort(files, alnumcomp)
@@ -228,9 +228,13 @@ function find_and_add_entries()
 
     local append = {[-1] = {}, [1] = {}}
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
-        -- modified
-        -- for i = 1, opt.max_entries do
-        for i = 1, #files do
+        local max_entries
+        if opt.max_entries == "unlimited" then
+            max_entries = #files
+        else
+            max_entries = opt.max_entries
+        end
+        for i = 1, max_entries do
             local file = files[current + i * direction]
             local pl_e = pl[pl_current + i * direction]
             if file == nil or file[1] == "." then
@@ -470,7 +474,7 @@ function merge2aids()
 end
 function reset2aids()
 	mp.command("set lavfi-complex \"\"")
-	marked_A, marked_B = nil
+	marked_A, marked_B = nil, nil
 	mp.osd_message("已取消并轨和标记", 1)
 end
 

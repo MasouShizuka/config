@@ -5,15 +5,15 @@
 #r "D:\Tools\Workspacer\plugins\workspacer.FocusIndicator\workspacer.FocusIndicator.dll"
 #r "D:\Tools\Workspacer\plugins\workspacer.Gap\workspacer.Gap.dll"
 
-#load "C:\Users\MasouShizuka\.workspacer\Active_Layout_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Battery_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Input_Method_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Multi_Titles_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Network_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Performance_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Text_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Time_Widget.csx"
-#load "C:\Users\MasouShizuka\.workspacer\Workspace_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Active_Layout_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Battery_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Input_Method_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Multi_Titles_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Network_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Performance_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Text_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Time_Widget.csx"
+#load "C:\Users\MasouShizuka\.config\workspacer\Workspace_Widget.csx"
 
 using System;
 using System.Collections.Concurrent;
@@ -267,6 +267,7 @@ Action<IConfigContext> doConfig = (context) => {
 
     // 忽略的程序
     context.WindowRouter.IgnoreProcessName("ApplicationFrameHost");
+    context.WindowRouter.IgnoreProcessName("Bandizip64");
     context.WindowRouter.IgnoreProcessName("copyq");
     context.WindowRouter.IgnoreProcessName("Flow.Launcher");
     context.WindowRouter.IgnoreProcessName("Snipaste");
@@ -341,7 +342,6 @@ Action<IConfigContext> doConfig = (context) => {
         return menuBuilder;
     };
     var actionMenuBuilder = createActionMenuBuilder();
-
     // 快捷键
     Action setKeybindings = () => {
         KeyModifiers mod = KeyModifiers.Alt;
@@ -358,8 +358,34 @@ Action<IConfigContext> doConfig = (context) => {
 
         context.Keybinds.Subscribe(mod, workspacer.Keys.Q, () => context.Workspaces.FocusedWorkspace.CloseFocusedWindow(), "close focused window");
 
-        context.Keybinds.Subscribe(mod, workspacer.Keys.W, () => context.Workspaces.FocusedWorkspace.NextLayoutEngine(), "next layout");
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.W, () => context.Workspaces.FocusedWorkspace.PreviousLayoutEngine(), "previous layout");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.W, () => {
+            var layout_name = context.Workspaces.FocusedWorkspace.LayoutName;
+            context.Workspaces.FocusedWorkspace.NextLayoutEngine();
+            if (layout_name == "full") {
+                var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
+                for (var i = 0; i < windows.Count; i++) {
+                    var window = windows[i];
+                    if (window.IsMinimized) {
+                        window.ShowNormal();
+                    }
+                }
+                context.Workspaces.FocusedWorkspace.DoLayout();
+            }
+            }, "next layout");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.W, () => {
+            var layout_name = context.Workspaces.FocusedWorkspace.LayoutName;
+            context.Workspaces.FocusedWorkspace.PreviousLayoutEngine();
+            if (layout_name == "full") {
+                var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
+                for (var i = 0; i < windows.Count; i++) {
+                    var window = windows[i];
+                    if (window.IsMinimized) {
+                        window.ShowNormal();
+                    }
+                }
+                context.Workspaces.FocusedWorkspace.DoLayout();
+            }
+            }, "previous layout");
         context.Keybinds.Subscribe(mod, workspacer.Keys.N, () => context.Workspaces.FocusedWorkspace.ResetLayout(), "reset layout");
 
         context.Keybinds.Subscribe(mod, workspacer.Keys.J, () => {

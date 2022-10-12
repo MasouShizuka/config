@@ -18,6 +18,7 @@
     "black-formatter.args": [
         "--skip-string-normalization"
     ],
+    "ChineseInputAssistant.markdownUse": "no",
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
         "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
@@ -44,7 +45,6 @@
     "editor.minimap.showSlider": "always",
     "editor.renderLineHighlight": "all",
     "editor.renderWhitespace": "trailing",
-    "editor.scrollBeyondLastLine": false,
     "editor.showFoldingControls": "always",
     "editor.stickyScroll.enabled": true,
     "editor.suggest.preview": true,
@@ -97,7 +97,7 @@
     },
     "Lua.telemetry.enable": false,
     "markdown.extension.list.indentationSize": "inherit",
-    "markdown.preview.fontSize": 18,
+    "markdown.preview.fontSize": 20,
     "markdownlint.config": {
         "MD007": false,
         "MD009": false,
@@ -140,6 +140,7 @@
         "text/plain"
     ],
     "notebook.lineNumbers": "on",
+    "notebook.output.textLineLimit": 500,
     "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",

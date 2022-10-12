@@ -30,10 +30,8 @@
         },
         "/": {
             "2": {
-                "label": "移动鼠标到窗口中心",
-                "prefix": "*",
-                "type": "鼠标操作",
-                "value": "centerMouse()"
+                "type": "可能会用到的内置函数",
+                "value": "run, bin\\ahk.exe bin\\moveMouseToCaret.ahk"
             }
         },
         "0": {
@@ -1873,14 +1871,14 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}^+{tab}"
+                "value": "send, ^+{tab}"
             }
         },
         "3": {
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}^{tab}"
+                "value": "send, ^{tab}"
             }
         },
         "4": {
@@ -1943,7 +1941,7 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}^{bs}"
+                "value": "sendevent, ^{bs}"
             }
         },
         "BS": {
@@ -2024,7 +2022,7 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}{home}+{end}"
+                "value": "sendevent, {home}+{end}"
             }
         },
         "M": {
@@ -2055,7 +2053,7 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}{appskey}"
+                "value": "send, {appskey}"
             }
         },
         "R": {
@@ -2083,7 +2081,7 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}+{home}{bs}"
+                "value": "sendevent, +{end}{bs}"
             }
         },
         "U": {
@@ -2110,14 +2108,13 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}{esc}"
+                "value": "send, {esc}"
             }
         },
         "Y": {
             "2": {
-                "prefix": "*",
-                "type": "文字处理",
-                "value": "send, {blind}^y"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "Z": {
@@ -4180,6 +4177,15 @@
                 "value": "SemicolonAbbr2__xk()"
             }
         },
+        "year": {
+            "2": {
+                "comment": "明年是 ? 年",
+                "keysToSend": "% \"明年是\" . (A_YYYY + 1) . \"年\"",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, % \"明年是\" . (A_YYYY + 1) . \"年\""
+            }
+        },
         "zh": {
             "2": {
                 "comment": "",
@@ -4217,6 +4223,7 @@
         "ss",
         "ver",
         "xk",
+        "year",
         "zh",
         "zk"
     ],

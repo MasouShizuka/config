@@ -14,6 +14,7 @@ public class Network_Widget : BarWidgetBase {
     private System.Timers.Timer _timer;
 
     public string get_text(double speed) {
+        int decimal_places = 1;
         string size = "B";
 
         int i = 0;
@@ -33,7 +34,7 @@ public class Network_Widget : BarWidgetBase {
             size = "GB";
         }
 
-        return Round(speed, 1) + " " + size;
+        return Round(speed, decimal_places) + " " + size;
     }
 
     public double get_upload_speed() {
