@@ -274,16 +274,6 @@
         "Priority": 0,
         "Disabled": false
       },
-      "c3406b5c-22f0-4984-b018-3dae897cab3f": {
-        "ID": "c3406b5c-22f0-4984-b018-3dae897cab3f",
-        "Name": "Dictionary",
-        "Version": "2.2.3",
-        "ActionKeywords": [
-          "d"
-        ],
-        "Priority": 0,
-        "Disabled": false
-      },
       "F737A9223560B3C6833B5FFB8CDF78E5": {
         "ID": "F737A9223560B3C6833B5FFB8CDF78E5",
         "Name": "Window Walker",
@@ -293,16 +283,6 @@
         ],
         "Priority": 0,
         "Disabled": false
-      },
-      "8025ce8b-b1ce-49cd-af48-b343a0df8606": {
-        "ID": "8025ce8b-b1ce-49cd-af48-b343a0df8606",
-        "Name": "Clipboard History",
-        "Version": "1.1.1",
-        "ActionKeywords": [
-          "cb"
-        ],
-        "Priority": 0,
-        "Disabled": true
       },
       "E2D2C23B084D41D1B6F60EC79D62CAH6": {
         "ID": "E2D2C23B084D41D1B6F60EC79D62CAH6",
@@ -340,16 +320,6 @@
         "Version": "2.2.3",
         "ActionKeywords": [
           "r"
-        ],
-        "Priority": 0,
-        "Disabled": false
-      },
-      "9B36CE6181FC47FBB597AA2C29CD9B0A": {
-        "ID": "9B36CE6181FC47FBB597AA2C29CD9B0A",
-        "Name": "Colors",
-        "Version": "2.0.1",
-        "ActionKeywords": [
-          "*"
         ],
         "Priority": 0,
         "Disabled": false

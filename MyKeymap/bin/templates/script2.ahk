@@ -73,12 +73,12 @@ Menu, Tray, NoStandard
 Menu, Tray, Add, 暂停, trayMenuHandler
 Menu, Tray, Add, 退出, trayMenuHandler
 Menu, Tray, Add, 重启程序, trayMenuHandler
-Menu, Tray, Add, 打开设置, trayMenuHandler 
-Menu, Tray, Add, 帮助文档, trayMenuHandler 
-Menu, Tray, Add, 查看窗口标识符, trayMenuHandler 
+Menu, Tray, Add, 打开设置, trayMenuHandler
+Menu, Tray, Add, 帮助文档, trayMenuHandler
+Menu, Tray, Add, 查看窗口标识符, trayMenuHandler
 Menu, Tray, Default, 暂停
 Menu, Tray, Click, 1
-Menu, Tray, Add 
+Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
@@ -165,7 +165,7 @@ return
     SemicolonMode := true
     keymapLockState.currentMode := "SemicolonMode"
     DisableCapslockKey := true
-    keywait `; 
+    keywait `;
     SemicolonMode := false
     DisableCapslockKey := false
     if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 250) {
@@ -182,10 +182,10 @@ return
     disableOtherHotkey(thisHotkey)
     DigitMode := true
     keymapLockState.currentMode := "DigitMode"
-    keywait 3 
+    keywait 3
     DigitMode := false
     if (A_PriorKey == "3" && (A_TickCount - start_tick < 250))
-        send, {blind}3 
+        send, {blind}3
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -195,10 +195,10 @@ return
     disableOtherHotkey(thisHotkey)
     Mode9 := true
     keymapLockState.currentMode := "Mode9"
-    keywait 9 
+    keywait 9
     Mode9 := false
     if (A_PriorKey == "9" && A_TimeSinceThisHotkey < 350)
-        send, {blind}9 
+        send, {blind}9
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -209,10 +209,10 @@ return
     disableOtherHotkey(thisHotkey)
     CommaMode := true
     keymapLockState.currentMode := "CommaMode"
-    keywait `, 
+    keywait `,
     CommaMode := false
     if (A_PriorKey == "," && A_TimeSinceThisHotkey < 350)
-        send, {blind}`, 
+        send, {blind}`,
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -223,10 +223,10 @@ return
     disableOtherHotkey(thisHotkey)
     DotMode := true
     keymapLockState.currentMode := "DotMode"
-    keywait `. 
+    keywait `.
     DotMode := false
     if (A_PriorKey == "." && A_TimeSinceThisHotkey < 350)
-        send, {blind}`. 
+        send, {blind}`.
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -237,10 +237,10 @@ return
     disableOtherHotkey(thisHotkey)
     SpaceMode := true
     keymapLockState.currentMode := "SpaceMode"
-    keywait Space 
+    keywait Space
     SpaceMode := false
     if (A_PriorKey == "Space" && A_TimeSinceThisHotkey < 350)
-        send, {blind}{Space} 
+        send, {blind}{Space}
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -251,10 +251,10 @@ $Tab::
     disableOtherHotkey(thisHotkey)
     TabMode := true
     keymapLockState.currentMode := "TabMode"
-    keywait Tab 
+    keywait Tab
     TabMode := false
     if (A_PriorKey == "Tab" && A_TimeSinceThisHotkey < 350)
-        send, {blind}{Tab} 
+        send, {blind}{Tab}
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -290,7 +290,7 @@ enterRButtonMode()
 	if (!triggerOtherHotkey && movedMouse) {
 		SendInput, {Blind}{RButton down}
 		keywait, RButton
-	} 
+	}
 	else if (!triggerOtherHotkey) {
 		SendInput, {Blind}{RButton}
 	}
@@ -414,8 +414,8 @@ space::
 *M Up::right_click_up_without_false(true)
 *,::lbuttonDown()
 */::run, bin/ahk.exe bin/moveMouseToCaret.ahk
-Esc::exitMouseMode()
-*Space::exitMouseMode()
+Esc::exit_mouse_mode()
+*Space::exit_mouse_mode()
 *capslock up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -423,7 +423,7 @@ Esc::exitMouseMode()
     keywait capslock
     CapslockMode := false
     if (A_ThisHotkey == "*capslock up" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
-        exitMouseMode()
+        exit_mouse_mode()
     }
     enableOtherHotkey(thisHotkey)
     return
@@ -446,8 +446,8 @@ Esc::exitMouseMode()
 *,::lbuttonDown()
 *.::moveCurrentWindow()
 */::run, bin/ahk.exe bin/moveMouseToCaret.ahk
-Esc::exit_very_slow_mode()
-*Space::exit_very_slow_mode()
+Esc::exit_mouse_mode()
+*Space::exit_mouse_mode()
 *capslock up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
@@ -455,7 +455,7 @@ Esc::exit_very_slow_mode()
     keywait capslock
     CapslockMode := false
     if (A_ThisHotkey == "*capslock up" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
-        exit_very_slow_mode()
+        exit_mouse_mode()
     }
     enableOtherHotkey(thisHotkey)
     return
@@ -499,7 +499,7 @@ space::return
 
 
 execSemicolonAbbr(typo) {
-    switch typo 
+    switch typo
     {
     {{ range toList .SemicolonAbbr -}}
         case {{ .Key|ahkString }}:
@@ -512,7 +512,7 @@ execSemicolonAbbr(typo) {
 }
 
 execCapslockAbbr(typo) {
-    switch typo 
+    switch typo
     {
     {{ range toList .CapslockAbbr -}}
         case {{ .Key|ahkString }}:

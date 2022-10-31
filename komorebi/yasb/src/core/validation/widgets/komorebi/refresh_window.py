@@ -1,6 +1,6 @@
 DEFAULTS = {
     'refresh_delay': 100,
-    'min_refresh_interval': 500,
+    'min_interval': 1000,
     'refresh_process_name_list': [],
 }
 
@@ -11,9 +11,9 @@ VALIDATION_SCHEMA = {
         'min': 0,
         'max': 60000
     },
-    'min_refresh_interval': {
+    'min_interval': {
         'type': 'integer',
-        'default': DEFAULTS['min_refresh_interval'],
+        'default': DEFAULTS['min_interval'],
         'min': 0,
         'max': 60000
     },

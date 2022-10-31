@@ -478,15 +478,69 @@ Action<IConfigContext> doConfig = (context) => {
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.Q, context.Quit, "quit workspacer");
         context.Keybinds.Subscribe(mod, workspacer.Keys.R, context.Restart, "restart workspacer");
 
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D1, () => context.Workspaces.SwitchToWorkspace(0), "switch to workspace 1");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D2, () => context.Workspaces.SwitchToWorkspace(1), "switch to workspace 2");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D3, () => context.Workspaces.SwitchToWorkspace(2), "switch to workspace 3");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D4, () => context.Workspaces.SwitchToWorkspace(3), "switch to workspace 4");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D5, () => context.Workspaces.SwitchToWorkspace(4), "switch to workspace 5");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D6, () => context.Workspaces.SwitchToWorkspace(5), "switch to workspace 6");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D7, () => context.Workspaces.SwitchToWorkspace(6), "switch to workspace 7");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D8, () => context.Workspaces.SwitchToWorkspace(7), "switch to workspace 8");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.D9, () => context.Workspaces.SwitchToWorkspace(8), "switch to workspace 9");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D1, () => {
+            context.Workspaces.SwitchToWorkspace(0);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 1");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D2, () => {
+            context.Workspaces.SwitchToWorkspace(1);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 2");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D3, () => {
+            context.Workspaces.SwitchToWorkspace(2);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 3");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D4, () => {
+            context.Workspaces.SwitchToWorkspace(3);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 4");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D5, () => {
+            context.Workspaces.SwitchToWorkspace(4);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 5");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D6, () => {
+            context.Workspaces.SwitchToWorkspace(5);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 6");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D7, () => {
+            context.Workspaces.SwitchToWorkspace(6);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 7");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D8, () => {
+            context.Workspaces.SwitchToWorkspace(7);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 8");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.D9, () => {
+            context.Workspaces.SwitchToWorkspace(8);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "switch to workspace 9");
 
         // Subscribe(mod, workspacer.Keys.Left, () => _context.Workspaces.SwitchToPreviousWorkspace(), "switch to previous workspace");
         // Subscribe(mod, workspacer.Keys.Right, () => _context.Workspaces.SwitchToNextWorkspace(), "switch to next workspace");
@@ -494,9 +548,27 @@ Action<IConfigContext> doConfig = (context) => {
         // Subscribe(mod | KeyModifiers.Control, workspacer.Keys.Right, () => _context.Workspaces.MoveFocusedWindowAndSwitchToNextWorkspace(), "move window to next workspace and switch to it");
         context.Keybinds.Subscribe(mod, workspacer.Keys.Oemtilde, () => context.Workspaces.SwitchToLastFocusedWorkspace(), "switch to last focused workspace");
 
-        context.Keybinds.Subscribe(mod, workspacer.Keys.U, () => context.Workspaces.SwitchFocusedMonitor(0), "focus monitor 1");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.I, () => context.Workspaces.SwitchFocusedMonitor(1), "focus monitor 2");
-        context.Keybinds.Subscribe(mod, workspacer.Keys.O, () => context.Workspaces.SwitchFocusedMonitor(2), "focus monitor 3");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.U, () => {
+            context.Workspaces.SwitchFocusedMonitor(0);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "focus monitor 1");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.I, () => {
+            context.Workspaces.SwitchFocusedMonitor(1);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "focus monitor 2");
+        context.Keybinds.Subscribe(mod, workspacer.Keys.O, () => {
+            context.Workspaces.SwitchFocusedMonitor(2);
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "focus monitor 3");
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.U, () => context.Workspaces.MoveFocusedWindowToMonitor(0), "move focused window to monitor 1");
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.I, () => context.Workspaces.MoveFocusedWindowToMonitor(1), "move focused window to monitor 2");
         context.Keybinds.Subscribe(mod_shift, workspacer.Keys.O, () => context.Workspaces.MoveFocusedWindowToMonitor(2), "move focused window to monitor 3");

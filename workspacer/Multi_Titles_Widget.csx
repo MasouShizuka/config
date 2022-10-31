@@ -38,13 +38,15 @@ public class Multi_Titles_Widget : BarWidgetBase {
     private IEnumerable<IWindow> GetWindows(bool filterOnTitleFilled = true) {
         var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
 
+        // return currentWorkspace.ManagedWindows.Where(window => !filterOnTitleFilled || !string.IsNullOrEmpty(window.Title));
         return currentWorkspace.Windows.Where(w => w.CanLayout).Where(window => !filterOnTitleFilled || !string.IsNullOrEmpty(window.Title));
     }
 
     private IWindow GetWindow() {
         var currentWorkspace = Context.WorkspaceContainer.GetWorkspaceForMonitor(Context.Monitor);
-
-        return currentWorkspace.FocusedWindow ?? currentWorkspace.LastFocusedWindow ?? currentWorkspace.ManagedWindows.FirstOrDefault();
+        return currentWorkspace.FocusedWindow ??
+                currentWorkspace.LastFocusedWindow ??
+                currentWorkspace.ManagedWindows.FirstOrDefault();
     }
 
     #endregion
@@ -95,9 +97,11 @@ public class Multi_Titles_Widget : BarWidgetBase {
             return Parts(Part(NoWindowMessage, null, fontname: FontName));
         }
 
+        // return windows.OrderByDescending(OrderWindowsBy).Select(w => CreateTitlePart(w, WindowHasFocusColor, FontName, IsShortTitle, MaxTitleLength, TitlePartClicked)).ToArray();
         return windows.OrderByDescending(OrderWindowsBy).SelectMany(w => CreateTitlePart(w, WindowHasFocusForeColor, FontName, IsShortTitle, MaxTitleLength, TitlePartClicked)).ToArray();
     }
 
+    // private IBarWidgetPart CreateTitlePart(IWindow window, Color windowHasFocusColor, string fontName, bool isShortTitle = false, int? maxTitleLength = null, Func<IWindow, Action> clickAction = null) {
     private IBarWidgetPart[] CreateTitlePart(IWindow window, Color WindowHasFocusForeColor, string fontName, bool isShortTitle = false, int? maxTitleLength = null, Func<IWindow, Action> clickAction = null) {
         var windowTitle = window.Title;
         if (isShortTitle) {
@@ -107,6 +111,10 @@ public class Multi_Titles_Widget : BarWidgetBase {
         if (maxTitleLength.HasValue) {
             windowTitle = GetTrimmedTitle(windowTitle, maxTitleLength);
         }
+
+        // windowTitle = string.Format("{0}{1}{2}", string.IsNullOrEmpty(TitlePreamble) ? '[' : TitlePreamble, windowTitle, string.IsNullOrEmpty(TitlePostamble) ? ']' : TitlePostamble);
+
+        // return Part(windowTitle, window.IsFocused ? windowHasFocusColor : null, fontname: fontName, partClicked: clickAction != null ? clickAction(window) : null);
 
         IBarWidgetPart title_preamble = Part(TitlePreamble, fore: ForeColor, partClicked: clickAction != null ? clickAction(window) : null, fontname: fontName);
         IBarWidgetPart window_title = Part(windowTitle, fore: window.IsFocused ? WindowHasFocusForeColor : ForeColor, back: window.IsFocused ? WindowHasFocusBackColor : BackColor, partClicked: clickAction != null ? clickAction(window) : null, fontname: fontName);
@@ -147,6 +155,8 @@ public class Multi_Titles_Widget : BarWidgetBase {
         if (!maxTitleLength.HasValue || title.Length <= maxTitleLength.Value) {
             return title;
         }
+
+        // return title.Remove(maxTitleLength.Value, title.Length - maxTitleLength.Value) + "...";
 
         int title1_length = maxTitleLength.Value / 2;
         int title2_length = maxTitleLength.Value - title1_length;

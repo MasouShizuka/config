@@ -111,10 +111,10 @@ right_click_up_without_false(tempDisableRButton := false) {
 fast_move_mouse(key, direction_x, direction_y) {
     global fastMoveSingle, fastMoveRepeat, moveDelay1, moveDelay2, SLOWMODE
     SLOWMODE := true
-    one_x := direction_x *fastMoveSingle 
-    one_y := direction_y *fastMoveSingle 
-    repeat_x := direction_x *fastMoveRepeat 
-    repeat_y := direction_y *fastMoveRepeat 
+    one_x := direction_x *fastMoveSingle
+    one_y := direction_y *fastMoveSingle
+    repeat_x := direction_x *fastMoveRepeat
+    repeat_y := direction_y *fastMoveRepeat
     mousemove, %one_x% , %one_y%, 0, R
     if (mouseMovePrompt) {
         WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
@@ -173,8 +173,10 @@ very_slow_move_mouse(key, direction_x, direction_y) {
     }
 }
 
-exit_very_slow_mode() {
+exit_mouse_mode() {
+    global SLOWMODE
     global VERYSLOWMODE
+    SLOWMODE := false
     VERYSLOWMODE := false
     send {blind}{Lbutton up}
     if (mouseMovePrompt) {

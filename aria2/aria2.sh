@@ -4,4 +4,4 @@ config="$aria2_dir/aria2.conf"
 exe="$aria2_dir/aria2c.exe"
 
 bash "$tracker"
-"$exe" --conf-path="$config" &
+powershell Start-Process "$exe" -ArgumentList "--conf-path=$config" -WindowStyle hidden

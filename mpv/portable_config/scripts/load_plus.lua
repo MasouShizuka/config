@@ -1,17 +1,14 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/autoload.lua
-COMMIT_ 20210624 ee27629
-SOURCE_ https://github.com/rossy/mpv-open-file-dialog
-COMMIT_ 20160310 04fe818
+COMMIT_ 4bc6686b6a80bbae78febf97652e2f0841ca396a
+SOURCE_ https://github.com/rossy/mpv-open-file-dialog/blob/master/open-file-dialog.lua
+COMMIT_ 04fe818fc703d8c5dcc3a6aabe1caeed8286bdbb
 
 功能集一：
   列表文件为1时自动填充同目录下的其它文件，可使用对应的 load_plus.conf 管理脚本设置。
 
 功能集二：
   自定义快捷键 在mpv中唤起一个打开文件的窗口用于快速加载文件/网址
-
-功能集三：
-  自定义快捷键 双音轨同步播放
 
 示例：在 input.conf 中另起写入下列内容
 w        script-binding    load_plus/import_files   # 打开文件
@@ -21,11 +18,6 @@ ALT+w    script-binding    load_plus/append_sid     # 追加其它字幕（切�
 e        script-binding    load_plus/append_vfSub   # 装载次字幕（滤镜型）
 E        script-binding    load_plus/toggle_vfSub   # 隐藏/显示 当前的次字幕（滤镜型）
 CTRL+e   script-binding    load_plus/remove_vfSub   # 移除次字幕（滤镜型）
-
-F1       script-binding    load_plus/mark_aidA      # 标记当前音轨为A
-F2       script-binding    load_plus/mark_aidB      # 标记当前音轨为B
-F3       script-binding    load_plus/merge2aids     # 合并AB音频轨
-F4       script-binding    load_plus/reset2aids     # 取消并轨和标记
 ]]--
 
 local msg = require 'mp.msg'
@@ -60,7 +52,7 @@ function SetUnion (a,b)
 end
 
 EXTENSIONS_VIDEO = Set {
-    '3gp',
+    '3g2','3gp',
     'amv','asf','avi',
     'f4v','flv',
     'm2ts','m4v','mkv','mov','mp4','mpeg','mpg',
@@ -69,14 +61,15 @@ EXTENSIONS_VIDEO = Set {
     'ts',
     'vob',
     'webm','wmv',
+    'y4m',
 }
 
 EXTENSIONS_AUDIO = Set {
-    'aac','aiff','alac','ape',
+    'aac','aiff','alac','ape','au',
     'dsf',
     'flac',
     'm4a','mp3',
-    'ogg','opus',
+    'oga','ogg','ogm','opus',
     'tak','tta',
     'wav','wma','wv',
 }
@@ -85,11 +78,11 @@ EXTENSIONS_IMAGE = Set {
     'apng','avif',
     'bmp',
     'gif',
-    'heic','heif',
-    'jfif','jpeg','jpg',
+    'j2k', 'jfif','jp2','jpeg','jpg',
     'png',
     'svg',
-    'tif','tiff',
+    'tga','tif','tiff',
+    'uci',
     'webp',
 }
 
@@ -155,6 +148,16 @@ function alnumcomp(x, y)
     return #xt < #yt
 end
 
+function get_playlist_filenames()
+  local filenames = {}
+  for n = 0, pl_count - 1, 1 do
+    local filename = mp.get_property('playlist/'..n..'/filename')
+    local _, file = utils.split_path(filename)
+    filenames[file] = true
+  end
+  return filenames
+end
+
 function find_and_add_entries()
     local path = mp.get_property("path", "")
     local dir, filename = utils.split_path(path)
@@ -167,7 +170,7 @@ function find_and_add_entries()
         return
     end
 
-    local pl_count = mp.get_property_number("playlist-count", 1)
+    pl_count = mp.get_property_number("playlist-count", 1)
     if pl_count > 1 then
         msg.warn("自动队列中止：已手动创建/修改播放列表")
         return
@@ -193,18 +196,18 @@ function find_and_add_entries()
         if ext == nil then
             return false
         end
-        if opt.level == 1 then
-            local name = mp.get_property("filename")
-            local namepre = string.sub(name, 1, 6)
-            local namepre0 = string.gsub(namepre, "%p", "%%%1")
-            for ext, _ in pairs(EXTENSIONS) do
-                if string.match(name, ext.."$") ~= nil then
-                    if string.match(v, "^"..namepre0) == nil then
-                    return false
-                    end
+    if opt.level == 1 then
+        local name = mp.get_property("filename")
+        local namepre = string.sub(name, 1, 6)
+        local namepre0 = string.gsub(namepre, "%p", "%%%1")
+        for ext, _ in pairs(EXTENSIONS) do
+            if string.match(name, ext.."$") ~= nil then
+                if string.match(v, "^"..namepre0) == nil then
+                return false
                 end
             end
         end
+    end
         return EXTENSIONS[string.lower(ext)]
     end)
     table.sort(files, alnumcomp)
@@ -227,6 +230,7 @@ function find_and_add_entries()
     msg.trace("自动队列：当前文件所处序列 "..current)
 
     local append = {[-1] = {}, [1] = {}}
+    local filenames = get_playlist_filenames()
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
         local max_entries
         if opt.max_entries == "unlimited" then
@@ -236,19 +240,13 @@ function find_and_add_entries()
         end
         for i = 1, max_entries do
             local file = files[current + i * direction]
-            local pl_e = pl[pl_current + i * direction]
             if file == nil or file[1] == "." then
                 break
             end
 
             local filepath = dir .. file
-            if pl_e then
-                -- If there's a playlist entry, and it's the same file, stop.
-                msg.trace(pl_e.filename.." == "..filepath.." ?")
-                if pl_e.filename == filepath then
-                    break
-                end
-            end
+            -- skip files already in playlist
+            if filenames[file] then break end
 
             if direction == -1 then
                 if pl_current == 1 then -- never add additional entries in the middle
@@ -436,55 +434,9 @@ function remove_vfSub()
 end
 
 
---
--- 双音轨同步播放
---
-
-local marked_A = nil
-local marked_B = nil
-function mark_aidA()
-	marked_A = mp.get_property("aid")
-	if marked_A == "auto" or marked_A == "no"
-	then
-		mp.osd_message("当前音轨无效", 1)
-		marked_A = nil
-	else
-		mp.osd_message("预标记当前音轨序列 " .. marked_A .. " 为并行轨A", 1)
-	end
-end
-function mark_aidB()
-	marked_B = mp.get_property("aid")
-	if marked_B == "auto" or marked_B == "no"
-	then
-		mp.osd_message("当前音轨无效", 1)
-		marked_B = nil
-	else
-		mp.osd_message("预标记当前音轨序列 " .. marked_B .. " 为并行轨B", 1)
-	end
-end
-function merge2aids()
-	if marked_A == marked_B or marked_A == nil or marked_B == nil
-	then
-		mp.osd_message("无效的AB轨", 1)
-	else
-		local complexFilter = "set lavfi-complex \"[aid" .. marked_A .. "] [aid" .. marked_B .. "] amix [ao]\""
-		mp.command(complexFilter)
-		mp.osd_message("已合并AB轨", 1)
-	end
-end
-function reset2aids()
-	mp.command("set lavfi-complex \"\"")
-	marked_A, marked_B = nil, nil
-	mp.osd_message("已取消并轨和标记", 1)
-end
-
-
-
 mp.register_event("file-loaded", remove_vfSub)
 
 mp.register_event("start-file", find_and_add_entries)
-
-mp.register_event("end-file", function() if marked_A ~= nil or marked_B ~= nil then reset2aids() end end)
 
 mp.add_key_binding(nil, 'import_files', import_files)
 mp.add_key_binding(nil, 'import_url', import_url)
@@ -493,8 +445,3 @@ mp.add_key_binding(nil, 'append_sid', append_sid)
 mp.add_key_binding(nil, 'append_vfSub', append_vfSub)
 mp.add_key_binding(nil, 'toggle_vfSub', toggle_vfSub)
 mp.add_key_binding(nil, 'remove_vfSub', remove_vfSub)
-
-mp.add_key_binding(nil, 'mark_aidA', mark_aidA)
-mp.add_key_binding(nil, 'mark_aidB', mark_aidB)
-mp.add_key_binding(nil, 'merge2aids', merge2aids)
-mp.add_key_binding(nil, 'reset2aids', reset2aids)

@@ -27,13 +27,14 @@ class RefreshWindowWidget(BaseWidget):
     def __init__(
         self,
         refresh_delay: int,
-        min_refresh_interval: int,
+        min_interval: int,
         refresh_process_name_list: list[str],
     ):
         super().__init__(class_name='komorebi-refresh-window')
         self._refresh_delay = refresh_delay
-        self._min_refresh_interval = min_refresh_interval
+        self._min_interval = min_interval
         self._last_refresh_time = 0
+        self._last_focus_time = 0
 
         self._refresh_process_name_list = refresh_process_name_list
 
@@ -81,7 +82,7 @@ class RefreshWindowWidget(BaseWidget):
                     self._refresh_window()
 
                 if GetForegroundWindow() != focused_window_info['hwnd']:
-                    SetForegroundWindow(focused_window_info['hwnd'])
+                    self._focus_window(focused_window_info['hwnd'])
         except Exception:
             logging.exception('Failed to update window widget state')
 
@@ -91,7 +92,9 @@ class RefreshWindowWidget(BaseWidget):
             self._komorebi_state = komorebi_state
 
             focused_monitor_index = self._komorebi_state['monitors']['focused']
-            focused_screen = self._komorebi_state['monitors']['elements'][focused_monitor_index]
+            focused_screen = self._komorebi_state['monitors']['elements'][
+                focused_monitor_index
+            ]
             focused_screen_hwnd = focused_screen['id']
             if self._screen_hwnd != focused_screen_hwnd:
                 return False
@@ -110,7 +113,7 @@ class RefreshWindowWidget(BaseWidget):
     def _refresh_window(self):
         prev_last_refresh_time = self._last_refresh_time
         last_refresh_time = round(time() * 1000)
-        if last_refresh_time - prev_last_refresh_time >= self._min_refresh_interval:
+        if last_refresh_time - prev_last_refresh_time >= self._min_interval:
             from tkinter import Tk
 
             root = Tk()
@@ -121,3 +124,11 @@ class RefreshWindowWidget(BaseWidget):
             root.mainloop()
 
             self._last_refresh_time = last_refresh_time
+
+    def _focus_window(self, hwnd):
+        prev_last_focus_time = self._last_focus_time
+        last_focus_time = round(time() * 1000)
+        if last_focus_time - prev_last_focus_time >= self._min_interval:
+            SetForegroundWindow(hwnd)
+
+            self._last_focus_time = last_focus_time

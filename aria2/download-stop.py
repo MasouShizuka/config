@@ -18,7 +18,9 @@ if __name__ == '__main__':
         )
         startupinfo.wShowWindow = subprocess.SW_HIDE
         p = subprocess.Popen(
-            ['bash', 'delete.sh', *(sys.argv[1:])], startupinfo=startupinfo
+            ['bash', 'delete.sh', *(sys.argv[1:])],
+            shell=True,
+            startupinfo=startupinfo,
         )
 
     toast = Notification(app_id=app_id, title=title, msg=msg, icon=icon)

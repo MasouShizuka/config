@@ -29,6 +29,7 @@
     "debug.console.fontSize": 20,
     "debug.showBreakpointsInOverviewRuler": true,
     "diffEditor.ignoreTrimWhitespace": false,
+    "editor.accessibilitySupport": "off",
     "editor.cursorBlinking": "solid",
     "editor.cursorSmoothCaretAnimation": true,
     "editor.cursorSurroundingLines": 5,
@@ -52,6 +53,11 @@
     "editor.wordWrap": "on",
     "errorLens.followCursor": "activeLine",
     "explorer.confirmDragAndDrop": false,
+    "extensions.experimental.affinity": {
+        "asvetliakov.vscode-neovim": 1,
+        "Gruntfuggly.todo-tree": 1
+    },
+    "fauxpilot.maxTokens": 64,
     "files.associations": {
         "*.txt": "plaintext"
     },
@@ -97,6 +103,8 @@
     },
     "Lua.telemetry.enable": false,
     "markdown.extension.list.indentationSize": "inherit",
+    "markdown.marp.enableHtml": true,
+    "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 20,
     "markdownlint.config": {
         "MD007": false,
@@ -142,7 +150,7 @@
     "notebook.lineNumbers": "on",
     "notebook.output.textLineLimit": 500,
     "oneDarkPro.italic": false,
-    "pasteImage.path": "${currentFileDir}\\_images",
+    "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.languageServer": "Pylance",
     "search.showLineNumbers": true,

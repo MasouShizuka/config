@@ -4628,7 +4628,7 @@
             "2": {
                 "prefix": "*",
                 "type": "文字处理",
-                "value": "send, {blind}{esc}"
+                "value": "send, {esc}"
             }
         }
     },

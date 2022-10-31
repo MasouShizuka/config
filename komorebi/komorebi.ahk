@@ -416,11 +416,13 @@ Run, komorebic.exe change-layout ultrawide-vertical-stack, , Hide
 return
 
 ; Pause responding to any window events or komorebic commands
-!+esc::
+!+Capslock::
+!+Esc::
 Run, komorebic.exe toggle-pause, , Hide
 return
 
-!esc::
+!Capslock::
+!Esc::
 Run, komorebic.exe toggle-tiling, , Hide
 return
 

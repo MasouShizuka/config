@@ -50,11 +50,32 @@ vim.cmd [[
 map("v", "J", ":move '>+1<CR>gv-gv", opt)
 map("v", "K", ":move '<-2<CR>gv-gv", opt)
 
+-- 调整光标所在行到屏幕的位置
+map("n", "zj", "zt", { noremap = false, silent = true })
+map("n", "zk", "zb", { noremap = false, silent = true })
+
 if global.is_vscode then
     vim.cmd [[
+        " 翻半页居中
+        nmap <C-d> 9j9j2jzz
+        vmap <C-d> 9j9j2jzz
+        nmap <C-u> 9k9k2kzz
+        vmap <C-u> 9k9k2kzz
+
+        " 插入新行
         nnoremap o <Cmd>call VSCodeNotify("editor.action.insertLineAfter")<CR>i
         nnoremap O <Cmd>call VSCodeNotify("editor.action.insertLineBefore")<CR>i
 
+        " 注释
+        xmap gc  <Plug>VSCodeCommentary
+        nmap gc  <Plug>VSCodeCommentary
+        omap gc  <Plug>VSCodeCommentary
+        nmap gcc <Plug>VSCodeCommentaryLine
+
+        " 转到引用
+        nnoremap ge <Cmd>call VSCodeNotify("editor.action.goToReferences")<CR>
+
+        " 折叠
         nnoremap zc <Cmd>call VSCodeNotify("editor.fold")<CR>
         nnoremap zC <Cmd>call VSCodeNotify("editor.foldRecursively")<CR>
         nnoremap zo <Cmd>call VSCodeNotify("editor.unfold")<CR>
@@ -63,22 +84,11 @@ if global.is_vscode then
         nnoremap zm <Cmd>call VSCodeNotify("editor.foldAll")<CR>
         nnoremap zr <Cmd>call VSCodeNotify("editor.unfoldAll")<CR>
 
-        nmap <C-d> 9j9j2jzz
-        vmap <C-d> 9j9j2jzz
-        nmap <C-u> 9k9k2kzz
-        vmap <C-u> 9k9k2kzz
+        " 格式化
+        nnoremap <Leader>f <Cmd>call VSCodeNotify("editor.action.formatDocument")<CR>
 
-        xmap gc  <Plug>VSCodeCommentary
-        nmap gc  <Plug>VSCodeCommentary
-        omap gc  <Plug>VSCodeCommentary
-        nmap gcc <Plug>VSCodeCommentaryLine
-
-        nnoremap ge <Cmd>call VSCodeNotify("editor.action.goToReferences")<CR>
-
-        nnoremap <Leader>b <Cmd>call VSCodeNotify("bookmarks.toggle")<CR>
-        nnoremap <Leader>p <Cmd>call VSCodeNotify("extension.pasteImage")<CR>
-
-        function! Compile_Run()
+        " 运行
+        function! Run()
             if &filetype == "html" || &filetype == "xhtml"
                 call VSCodeNotify("office.html.preview")
             elseif &filetype == "markdown"
@@ -87,16 +97,21 @@ if global.is_vscode then
                 call VSCodeNotify("code-runner.run")
             endif
         endfunction
-        nnoremap <Leader>r <Cmd>call Compile_Run()<CR>
+        nnoremap <Leader>r <Cmd>call Run()<CR>
+
+        " vscode 扩展
+        nnoremap <Leader>b <Cmd>call VSCodeNotify("bookmarks.toggle")<CR>
+        nnoremap <Leader>p <Cmd>call VSCodeNotify("extension.pasteImage")<CR>
+
     ]]
 else
-    -- 命令行下上一个下一个
+    -- 命令行上一个下一个
     map("c", "<Down>", "<C-n>", { noremap = true })
     map("c", "<Up>", "<C-p>", { noremap = true })
     map("c", "<C-j>", "<C-n>", { noremap = true })
     map("c", "<C-k>", "<C-p>", { noremap = true })
 
-    -- 居中
+    -- 翻半页居中
     map("n", "<C-d>", "<C-d>zz", opt)
     map("v", "<C-d>", "<C-d>zz", opt)
     map("n", "<C-u>", "<C-u>zz", opt)
@@ -182,7 +197,7 @@ else
         autocmd Filetype markdown inoremap .l [](<++>)<++><Esc>F[a
         autocmd Filetype markdown inoremap 。l [](<++>)<++><Esc>F[a
 
-        function! Compile_Run()
+        function! Run()
             execute "w"
             if &filetype == "c"
                 execute "!g++ % -o %<"
@@ -230,7 +245,7 @@ else
                 :term go run .
             endif
         endfunction
-        noremap <Leader>r :call Compile_Run()<CR>
+        noremap <Leader>r :call Run()<CR>
     ]]
 end
 

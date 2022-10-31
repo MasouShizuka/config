@@ -78,7 +78,7 @@ local function clean_data_file()
     file:write(content)
 
     file:close()
-    mp.osd_message("已清理记录的属性", 3)
+    mp.osd_message("已清理记录的属性", 1)
 end
 
 

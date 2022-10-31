@@ -75,9 +75,9 @@ vim.opt.splitright = true
 vim.opt.termguicolors = true
 
 -- 等待键盘快捷键连击时间
-vim.opt.timeoutlen = 500
+vim.opt.timeoutlen = 1000
 -- updatetime
-vim.opt.updatetime = 500
+vim.opt.updatetime = 1000
 
 -- 超过屏幕长度换行
 vim.opt.wrap = true
