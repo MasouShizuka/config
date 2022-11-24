@@ -26,4 +26,4 @@
 ## 说明
 
 - `py` 文件可用命令 `pyinstaller -Fw -i AriaNg.ico xxx.py` 生成 `aria2.conf` 中对应的 `exe` 文件
-- 脚本中用到了 `jq` 命令，因此需要安装：`pacman -S mingw-w64-x86_64-jq`
+- 脚本中用到了 `jq` 命令，因此需要安装：`pacman -S mingw-w64-ucrt-x86_64-jq`

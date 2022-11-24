@@ -14,6 +14,8 @@ return require("packer").startup(function(use)
 
 
 
+    use "otavioschwanck/cool-substitute.nvim"
+
     use {
         "phaazon/hop.nvim",
         branch = "v2",
@@ -21,16 +23,61 @@ return require("packer").startup(function(use)
 
     use "kevinhwang91/nvim-hlslens"
 
-    use "kylechui/nvim-surround"
+    use {
+        "kylechui/nvim-surround",
+        tag = "*",
+    }
 
     use "gbprod/substitute.nvim"
 
     use "junegunn/vim-easy-align"
 
     use {
-        "mg979/vim-visual-multi",
-        branch = "master",
+        "thinca/vim-textobj-between",
+        requires = "kana/vim-textobj-user",
     }
+
+    use {
+        "D4KU/vim-textobj-chainmember",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "Chun-Yang/vim-textobj-chunk",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "kana/vim-textobj-entire",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "kana/vim-textobj-indent",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "sgur/vim-textobj-parameter",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "saaguero/vim-textobj-pastedtext",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "beloglazov/vim-textobj-quotes",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use {
+        "Julian/vim-textobj-variable-segment",
+        requires = "kana/vim-textobj-user",
+    }
+
+    use "svban/YankAssassin.vim"
 
     if global.is_windows then
         use "brglng/vim-im-select"
@@ -39,8 +86,8 @@ return require("packer").startup(function(use)
     if not global.is_vscode then
         use {
             "akinsho/bufferline.nvim",
-            tag = "v2.*",
-            requires = "kyazdani42/nvim-web-devicons",
+            tag = "v3.*",
+            requires = "nvim-tree/nvim-web-devicons",
         }
 
         use "ekickx/clipboard-image.nvim"
@@ -52,7 +99,7 @@ return require("packer").startup(function(use)
         use {
             "nvim-lualine/lualine.nvim",
             requires = {
-                "kyazdani42/nvim-web-devicons",
+                "nvim-tree/nvim-web-devicons",
                 opt = true
             },
         }
@@ -67,7 +114,7 @@ return require("packer").startup(function(use)
         use {
             "kyazdani42/nvim-tree.lua",
             requires = {
-                "kyazdani42/nvim-web-devicons",
+                "nvim-tree/nvim-web-devicons",
             },
             tag = "nightly",
         }

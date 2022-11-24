@@ -102,9 +102,11 @@ class ActiveLayoutWidget(BaseWidget):
             KomorebiEvent.ToggleTiling,
             KomorebiEvent.ToggleMonocle,
             KomorebiEvent.ToggleMaximize,
-            KomorebiEvent.FocusWorkspaceNumber,
-            KomorebiEvent.FocusMonitorNumber,
             KomorebiEvent.CycleFocusMonitor,
+            KomorebiEvent.CycleFocusWorkspace,
+            KomorebiEvent.FocusMonitorNumber,
+            KomorebiEvent.FocusMonitorWorkspaceNumber,
+            KomorebiEvent.FocusWorkspaceNumber,
         ]
 
         self.k_signal_connect.connect(self._on_komorebi_connect_event)

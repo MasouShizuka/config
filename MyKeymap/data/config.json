@@ -261,8 +261,8 @@
         },
         "V": {
             "2": {
-                "type": "文字处理",
-                "value": "ActivateOrRun(\"用剪切板收集文本\", \"bin\\ahk.exe\", \"bin\\CollectText.ahk\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "W": {
@@ -275,6 +275,20 @@
             "2": {
                 "type": "窗口操作",
                 "value": "SmartCloseWindow()"
+            },
+            "4": {
+                "comment": "Ctrl + W 关闭标签",
+                "keysToSend": "^w",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, {blind}^w"
+            },
+            "5": {
+                "comment": "Ctrl + W 关闭标签",
+                "keysToSend": "^w",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, {blind}^w"
             }
         },
         "Y": {
@@ -548,10 +562,8 @@
         },
         ".": {
             "2": {
-                "toActivate": "ahk_exe datagrip64.exe",
-                "toRun": "%A_Programs%\\JetBrains Toolbox\\DataGrip.lnk",
-                "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe datagrip64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\DataGrip.lnk\", \"\", \"\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "/": {
@@ -2000,10 +2012,8 @@
         "I": {
             "2": {
                 "comment": "防止连按 J+I 造成的误触",
-                "keysToSend": "ji",
-                "prefix": "*",
-                "type": "输入文本或按键",
-                "value": "send, {blind}ji"
+                "type": "可能会用到的内置函数",
+                "value": "防止J模式误触(\"ji\")"
             }
         },
         "J": {
@@ -2792,8 +2802,11 @@
         },
         "5": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "comment": "Ctrl + Shift + S",
+                "keysToSend": "^+s",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, {blind}^+s"
             }
         },
         "6": {
@@ -4045,6 +4058,16 @@
                 "value": "setColor(\"#2E66FF\")"
             }
         },
+        "dh": {
+            "2": {
+                "comment": "插入一行电话号码",
+                "keysToSend": "{home}\nsleep 50\n电话号码: 123456{enter}",
+                "prefix": "*",
+                "send_key_function": "SemicolonAbbr2__dh() {\n    send, {blind}{home}\n    sleep 50\n    send, {blind}电话号码: 123456{enter}\n}",
+                "type": "输入文本或按键",
+                "value": "SemicolonAbbr2__dh()"
+            }
+        },
         "dk": {
             "2": {
                 "comment": "输入一对 {}",
@@ -4207,6 +4230,7 @@
     },
     "SemicolonAbbrKeys": [
         "blu",
+        "dh",
         "dk",
         "dq",
         "fs",
@@ -4969,6 +4993,7 @@
         }
     ],
     "send_key_functions": [
+        "SemicolonAbbr2__dh() {\n    send, {blind}{home}\n    sleep 50\n    send, {blind}电话号码: 123456{enter}\n}",
         "SemicolonAbbr2__dk() {\n    send, {blind}{text}{}\n    send, {blind}{left}\n}",
         "SemicolonAbbr2__gg() {\n    send, {blind}{text}git add -A`; git commit -a -m \"\"`; git push origin (git branch --show-current)`;\n    send, {blind}{left 47}\n}",
         "SemicolonAbbr2__sk() {\n    send, {blind}{text}「  」\n    send, {blind}{left 2}\n}",
@@ -4987,13 +5012,13 @@
         },
         {
             "id": "4",
-            "key": "",
-            "value": ""
+            "key": "🌐 Chrome",
+            "value": "ahk_exe chrome.exe"
         },
         {
             "id": "5",
-            "key": "",
-            "value": ""
+            "key": "🌐 Edge",
+            "value": "ahk_exe msedge.exe"
         },
         {
             "id": "6",

@@ -82,7 +82,7 @@ Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.2.5 by 咸鱼阿康
+Menu, Tray, Tip, MyKeymap 1.2.6 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -106,21 +106,19 @@ capsHook.OnEnd := Func("onCapsHookEnd")
 #include data/custom_functions.ahk
 return
 
-!F21::
+^F21::
     Suspend, Permit
     MyRun2(run_target, run_args, run_workingdir)
-    ; tip(A_TickCount - run_start)
     Return
-!F22::
+^F22::
     Suspend, Permit
     ActivateOrRun2(run_to_activate, run_target, run_args, run_workingdir, run_run_as_admin)
-    ; tip(A_TickCount - run_start)
     Return
 
 {{ .Settings.KeyMapping }}
 
 {{ range toList .CustomHotkeys -}}
-{{ if or (contains .Value "toggleSuspend()") (contains .Value "ReloadProgram()") -}}
+{{ if and .Key (or (contains .Value "toggleSuspend()") (contains .Value "ReloadProgram()")) -}}
 {{ escapeAhkHotkey .Key }}::{{ .Value }}
 {{- end }}
 {{ end }}
@@ -226,7 +224,7 @@ return
     keywait `.
     DotMode := false
     if (A_PriorKey == "." && A_TimeSinceThisHotkey < 350)
-        send, {blind}`.
+        sendevent, {blind}`.
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
@@ -489,7 +487,7 @@ space::return
 
 #if !keymapIsActive
 {{ range toList .CustomHotkeys -}}
-{{ if not (or (contains .Value "toggleSuspend()") (contains .Value "ReloadProgram()")) -}}
+{{ if and .Key (not (or (contains .Value "toggleSuspend()") (contains .Value "ReloadProgram()"))) -}}
 {{ escapeAhkHotkey .Key }}::{{ .Value }}
 {{- end }}
 {{ end }}

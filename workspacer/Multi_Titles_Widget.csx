@@ -18,9 +18,6 @@ public class Multi_Titles_Widget : BarWidgetBase {
     public string NoWindowMessage { get; set; } = "No Windows";
     public Func<IWindow, Action> TitlePartClicked = ClickAction;
     public Func<IWindow, object> OrderWindowsBy = (window) => 0;
-
-    private System.Timers.Timer _timer;
-    public int Interval { get; set; } = 1000;
     #endregion
 
     public override void Initialize() {
@@ -28,10 +25,6 @@ public class Multi_Titles_Widget : BarWidgetBase {
         Context.Workspaces.WindowRemoved += RefreshRemove;
         Context.Workspaces.WindowUpdated += RefreshUpdated;
         Context.Workspaces.FocusedMonitorUpdated += RefreshFocusedMonitor;
-
-        _timer = new System.Timers.Timer(Interval);
-        _timer.Elapsed += (s, e) => MarkDirty();
-        _timer.Enabled = true;
     }
 
     #region Get Windows

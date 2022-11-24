@@ -1,4 +1,4 @@
-require('bufferline').setup {
+require("bufferline").setup {
     options = {
         -- mode = "buffers" | "tabs", -- set to "tabs" to only show tabpages instead
         mode = "tabs",

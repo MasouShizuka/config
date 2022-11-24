@@ -10,25 +10,33 @@
         {
             "command": 
             {
+                "action": "prevTab"
+            },
+            "keys": "ctrl+shift+h"
+        },
+        {
+            "command": 
+            {
                 "action": "copy",
                 "singleLine": false
             },
             "keys": "ctrl+c"
         },
         {
-            "command": 
-            {
-                "action": "prevTab"
-            },
-            "keys": "ctrl+shift+h"
+            "command": "find",
+            "keys": "ctrl+f"
         },
         {
             "command": "duplicateTab",
             "keys": "ctrl+shift+t"
         },
         {
-            "command": "find",
-            "keys": "ctrl+f"
+            "command": 
+            {
+                "action": "swapPane",
+                "direction": "previous"
+            },
+            "keys": "ctrl+shift+e"
         },
         {
             "command": 
@@ -42,16 +50,16 @@
         {
             "command": 
             {
-                "action": "swapPane",
-                "direction": "previous"
-            },
-            "keys": "ctrl+shift+e"
+                "action": "quakeMode"
+            }
         },
         {
             "command": 
             {
-                "action": "quakeMode"
-            }
+                "action": "resizePane",
+                "direction": "down"
+            },
+            "keys": "ctrl+shift+down"
         },
         {
             "command": 
@@ -65,9 +73,9 @@
             "command": 
             {
                 "action": "resizePane",
-                "direction": "down"
+                "direction": "right"
             },
-            "keys": "ctrl+shift+down"
+            "keys": "ctrl+shift+right"
         },
         {
             "command": "unbound",
@@ -248,14 +256,6 @@
         {
             "command": 
             {
-                "action": "resizePane",
-                "direction": "right"
-            },
-            "keys": "ctrl+shift+right"
-        },
-        {
-            "command": 
-            {
                 "action": "scrollUp"
             },
             "keys": "ctrl+shift+u"
@@ -276,7 +276,12 @@
             "command": "toggleFocusMode"
         },
         {
-            "command": "closeWindow"
+            "command": 
+            {
+                "action": "moveFocus",
+                "direction": "previousInOrder"
+            },
+            "keys": "ctrl+shift+k"
         },
         {
             "command": 
@@ -288,12 +293,10 @@
             "keys": "ctrl+alt+l"
         },
         {
-            "command": 
-            {
-                "action": "moveFocus",
-                "direction": "previousInOrder"
-            },
-            "keys": "ctrl+shift+k"
+            "command": "closeWindow"
+        },
+        {
+            "command": "toggleSplitOrientation"
         },
         {
             "command": 
@@ -304,7 +307,15 @@
             "keys": "ctrl+shift+j"
         },
         {
-            "command": "toggleSplitOrientation"
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "up"
+            },
+            "keys": "ctrl+shift+up"
+        },
+        {
+            "command": "identifyWindow"
         },
         {
             "command": 
@@ -313,17 +324,6 @@
                 "split": "auto",
                 "splitMode": "duplicate"
             }
-        },
-        {
-            "command": "identifyWindow"
-        },
-        {
-            "command": 
-            {
-                "action": "resizePane",
-                "direction": "up"
-            },
-            "keys": "ctrl+shift+up"
         },
         {
             "command": 
@@ -335,18 +335,18 @@
         {
             "command": 
             {
-                "action": "nextTab"
-            },
-            "keys": "ctrl+shift+l"
-        },
-        {
-            "command": 
-            {
                 "action": "splitPane",
                 "split": "up",
                 "splitMode": "duplicate"
             },
             "keys": "ctrl+alt+k"
+        },
+        {
+            "command": 
+            {
+                "action": "nextTab"
+            },
+            "keys": "ctrl+shift+l"
         },
         {
             "command": "closePane",
@@ -433,38 +433,38 @@
         "list": 
         [
             {
-                "commandline": "C:\\msys64\\msys2_shell.cmd -defterm -here -no-start -mingw64 -use-full-path",
+                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -use-full-path",
                 "guid": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
                 "hidden": false,
-                "icon": "C:\\msys64\\mingw64.ico",
-                "name": "MINGW64 / MSYS2",
+                "icon": "C:/msys64/ucrt64.ico",
+                "name": "UCRT64 / MSYS2",
                 "startingDirectory": "%USERPROFILE%"
             },
             {
                 "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
                 "hidden": false,
-                "icon": "D:\\Tools\\ArchWSL\\Arch.png",
+                "icon": "D:/Tools/ArchWSL/Arch.png",
                 "name": "Arch",
                 "source": "Windows.Terminal.Wsl"
             },
             {
-                "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe -nologo",
+                "commandline": "C:/Program Files/PowerShell/7/pwsh.exe -nologo",
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
                 "name": "PowerShell",
                 "source": "Windows.Terminal.PowershellCore"
             },
             {
-                "commandline": "C:\\Program Files\\Git\\bin\\bash.exe -li",
+                "commandline": "C:/Program Files/Git/bin/bash.exe -li",
                 "guid": "{6c6fa2ca-edb6-4489-9346-61ce302a091a}",
-                "icon": "C:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico",
+                "icon": "C:/Program Files/Git/mingw64/share/git/git-for-windows.ico",
                 "name": "Git Bash",
                 "startingDirectory": "%USERPROFILE%"
             },
             {
-                "commandline": "cmd.exe /k \"%USERPROFILE%\\miniconda3\\Scripts\\activate.bat %USERPROFILE%\\miniconda3\"",
+                "commandline": "cmd.exe /k \"%USERPROFILE%/miniconda3/Scripts/activate.bat %USERPROFILE%/miniconda3\"",
                 "guid": "{866fcf0d-83ce-434f-b2ad-f068afd65e91}",
-                "icon": "%USERPROFILE%\\miniconda3\\Menu\\Iconleak-Atrous-Console.ico",
+                "icon": "%USERPROFILE%/miniconda3/Menu/Iconleak-Atrous-Console.ico",
                 "name": "Anaconda3",
                 "startingDirectory": "%USERPROFILE%"
             },
@@ -483,6 +483,24 @@
                 "hidden": false,
                 "name": "Azure Cloud Shell",
                 "source": "Windows.Terminal.Azure"
+            },
+            {
+                "guid": "{d487de73-e3bb-5848-a44b-c0f70f1fd853}",
+                "hidden": false,
+                "name": "Developer Command Prompt for VS 2022",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{a83c150f-013a-5f0f-aac1-9025ac45e7e9}",
+                "hidden": false,
+                "name": "Developer PowerShell for VS 2022",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{16208362-94fc-5b1f-a491-5b2624d5ab56}",
+                "hidden": true,
+                "name": "Visual Studio Debug Console",
+                "source": "VSDebugConsole"
             }
         ]
     },

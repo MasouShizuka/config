@@ -17,6 +17,7 @@ Gruntfuggly.todo-tree
 hediet.vscode-drawio
 holmescn.vscode-wordcount-cjk
 ionutvmi.path-autocomplete
+James-Yu.latex-workshop
 Kelvin.vscode-sshfs
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
@@ -46,6 +47,7 @@ oderwat.indent-rainbow
 PKief.material-icon-theme
 Remisa.shellman
 richie5um2.vscode-sort-json
+rust-lang.rust-analyzer
 ryu1kn.partial-diff
 ryuta46.multi-command
 shalimski.swapdiff
@@ -57,5 +59,6 @@ Venthe.fauxpilot
 VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate
+yzhang.dictionary-completion
 yzhang.markdown-all-in-one
 zhuangtongfa.material-theme

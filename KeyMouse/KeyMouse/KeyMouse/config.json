@@ -1,0 +1,36 @@
+{
+    "profile":
+    {
+        "runOnStartUp": false,
+        "backgroundColor": "#CCFFCC",
+        "fontColor": "#000000",
+        "fontSize": 9,
+        "font": "Arial Rounded MT Bold",
+        "windowBkgdColor": "#CCBBAA",
+        "windowFontColor": "#000000",
+        "windowFontSize": 11,
+        "windowFont": "Arial Rounded MT Bold",
+        "opacity": 70,
+        "invertClickType": false,
+        "onlyForeWindow": true,
+        "enableWindowSwitching": true,
+        "enableCache": false,
+        "showHintOnlyCurrentMonitor": true,
+        "hintDistance": 60
+    },
+    "keybindings":
+    {
+        "toggleEnable": "alt+[",
+        "forceNotUseCache": "space",
+        "escape": "esc",
+        "rightClickPrefix": "shift+a",
+        "singleClickPrefix": "shift+s",
+        "doubleClickPrefix": "shift+d",
+        "selectModeSingle": "alt+;",
+        "selectModeDouble": "alt+shift+;",
+        "fastSelectMode": "alt+ctrl+;",
+        "hintModeSingle": "alt+.",
+        "hintModeDouble": "alt+shift+.",
+        "fastHintMode": "alt+ctrl+."
+    }
+}

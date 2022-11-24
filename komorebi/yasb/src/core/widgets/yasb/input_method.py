@@ -12,26 +12,26 @@ class InputMethodWidget(BaseWidget):
     def __init__(
         self,
         label: str,
-        language_dict: dict[int: str],
+        language_dict: dict[int:str],
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name='input-method-widget')
-        self._user32 = WinDLL('user32', use_last_error=True)
+        super().__init__(update_interval, class_name="input-method-widget")
+        self._user32 = WinDLL("user32", use_last_error=True)
         self._language_dict = language_dict
 
         self._label_content = label
 
         self._label = QLabel()
-        self._label.setProperty('class', 'label')
+        self._label.setProperty("class", "label")
         self.widget_layout.addWidget(self._label)
 
-        self.register_callback('update_label', self._update_label)
+        self.register_callback("update_label", self._update_label)
 
-        self.callback_left = callbacks['on_left']
-        self.callback_right = callbacks['on_right']
-        self.callback_middle = callbacks['on_middle']
-        self.callback_timer = 'update_label'
+        self.callback_left = callbacks["on_left"]
+        self.callback_right = callbacks["on_right"]
+        self.callback_middle = callbacks["on_middle"]
+        self.callback_timer = "update_label"
 
         self.start_timer()
 
@@ -40,14 +40,14 @@ class InputMethodWidget(BaseWidget):
         try:
             language_id = self._get_language_id()
             label_formatted = label_formatted.replace(
-                '{language}',
+                "{language}",
                 self._language_dict[language_id],
             )
 
             self._label.setText(label_formatted)
         except Exception:
             self._label.setText(self._label_content)
-            logging.exception('Failed to retrieve updated network info')
+            logging.exception("Failed to retrieve updated network info")
 
     def _get_language_id(self) -> int:
         hwnd = self._user32.GetForegroundWindow()

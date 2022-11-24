@@ -1,4 +1,4 @@
-require 'clipboard-image'.setup {
+require("clipboard-image").setup {
     -- Default configuration for all filetype
     default = {
         -- Use table for nested dir (New feature form PR #20)

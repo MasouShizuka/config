@@ -1,10 +1,11 @@
 local global = require("global")
 
+require("plugin-conf/cool-substitute")
 require("plugin-conf/hop")
 require("plugin-conf/nvim-hlslens")
 require("plugin-conf/nvim-surround")
 require("plugin-conf/substitute")
-require("plugin-conf/vim-visual-multi")
+require("plugin-conf/vim-textobj-pastedtext")
 
 if global.is_windows then
     require("plugin-conf/vim-im-select")

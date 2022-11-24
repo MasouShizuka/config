@@ -63,8 +63,18 @@ if global.is_vscode then
         vmap <C-u> 9k9k2kzz
 
         " 插入新行
-        nnoremap o <Cmd>call VSCodeNotify("editor.action.insertLineAfter")<CR>i
-        nnoremap O <Cmd>call VSCodeNotify("editor.action.insertLineBefore")<CR>i
+        function! Insert_Line_After()
+            startinsert
+            sleep 100m
+            call VSCodeNotify("editor.action.insertLineAfter")
+        endfunction
+        function! Insert_Line_Before()
+            startinsert
+            sleep 100m
+            call VSCodeNotify("editor.action.insertLineBefore")
+        endfunction
+        nnoremap o <Cmd>call Insert_Line_After()<CR>
+        nnoremap O <Cmd>call Insert_Line_Before()<CR>
 
         " 注释
         xmap gc  <Plug>VSCodeCommentary
@@ -72,8 +82,30 @@ if global.is_vscode then
         omap gc  <Plug>VSCodeCommentary
         nmap gcc <Plug>VSCodeCommentaryLine
 
+        " 块注释
+        function! s:Vscode_Block_Commentary(...) abort
+            if !a:0
+                let &operatorfunc = matchstr(expand('<sfile>'), '[^. ]*$')
+                return 'g@'
+            elseif a:0 > 1
+                let [line1, line2] = [a:1, a:2]
+            else
+                let [line1, line2] = [line("'["), line("']")]
+            endif
+
+            call VSCodeCallRange('editor.action.blockComment', line1, line2, 0)
+        endfunction
+        xnoremap <expr> gb <SID>Vscode_Block_Commentary()
+        nnoremap <expr> gb <SID>Vscode_Block_Commentary()
+        onoremap <expr> gb <SID>Vscode_Block_Commentary()
+        nnoremap <expr> gbb <SID>Vscode_Block_Commentary() . '_'
+
         " 转到引用
         nnoremap ge <Cmd>call VSCodeNotify("editor.action.goToReferences")<CR>
+        nnoremap gE <Cmd>call VSCodeNotify("editor.action.referenceSearch.trigger")<CR>
+
+        " Debug 显示悬浮
+        nnoremap gH <Cmd>call VSCodeNotify("editor.debug.action.showDebugHover")<CR>
 
         " 折叠
         nnoremap zc <Cmd>call VSCodeNotify("editor.fold")<CR>
@@ -85,7 +117,11 @@ if global.is_vscode then
         nnoremap zr <Cmd>call VSCodeNotify("editor.unfoldAll")<CR>
 
         " 格式化
-        nnoremap <Leader>f <Cmd>call VSCodeNotify("editor.action.formatDocument")<CR>
+        function! Vscode_Fomat()
+            call VSCodeNotify("editor.action.formatDocument")
+            call VSCodeNotify("notebook.formatCell")
+        endfunction
+        nnoremap <Leader>f <Cmd>call Vscode_Fomat()<CR>
 
         " 运行
         function! Run()
@@ -93,6 +129,8 @@ if global.is_vscode then
                 call VSCodeNotify("office.html.preview")
             elseif &filetype == "markdown"
                 call VSCodeNotify("markdown.showPreviewToSide")
+            elseif &filetype == "tex"
+                call VSCodeNotify("latex-workshop.build")
             else
                 call VSCodeNotify("code-runner.run")
             endif

@@ -26,7 +26,7 @@ try:
     from core.utils.komorebi.event_listener import KomorebiEventListener
 except ImportError:
     KomorebiEventListener = None
-    logging.warning('Failed to load Komorebi Event Listener')
+    logging.warning("Failed to load Komorebi Event Listener")
 
 
 class WindowButton(QPushButton):
@@ -34,20 +34,20 @@ class WindowButton(QPushButton):
         super().__init__()
         self.window_info = window_info
 
-        self.setProperty('class', 'window')
+        self.setProperty("class", "window")
         self.setText(label.format(win=window_info))
         self.clicked.connect(self.set_focus)
 
     def update_focused(self):
-        self.setProperty('class', f'window-focused')
-        self.setStyleSheet('')
+        self.setProperty("class", f"window-focused")
+        self.setStyleSheet("")
 
     def update_unfocused(self):
-        self.setProperty('class', f'window')
-        self.setStyleSheet('')
+        self.setProperty("class", f"window")
+        self.setStyleSheet("")
 
     def set_focus(self):
-        SetForegroundWindow(self.window_info['hwnd'])
+        SetForegroundWindow(self.window_info["hwnd"])
 
 
 class MultiWindowWidget(BaseWidget):
@@ -67,7 +67,8 @@ class MultiWindowWidget(BaseWidget):
         callbacks: dict[str, str],
     ):
         super().__init__(
-            update_title['update_interval'], class_name='komorebi-multi-window'
+            update_title["update_interval"],
+            class_name="komorebi-multi-window",
         )
         self._label = label
         self._label_alt = label_alt
@@ -92,22 +93,22 @@ class MultiWindowWidget(BaseWidget):
         self._multi_window_container: QWidget = QWidget()
         self._multi_window_container.setLayout(self._multi_window_container_layout)
         self._multi_window_container.setProperty(
-            'class',
-            'komorebi-workspaces-container',
+            "class",
+            "komorebi-workspaces-container",
         )
 
         self.widget_layout.addWidget(self._multi_window_container)
-        self.register_callback('toggle_label', self._toggle_title_text)
+        self.register_callback("toggle_label", self._toggle_title_text)
         self.register_callback(
-            '_update_workspace_windows_title', self._update_workspace_windows_title
+            "_update_workspace_windows_title", self._update_workspace_windows_title
         )
 
-        self.callback_left = callbacks['on_left']
-        self.callback_right = callbacks['on_right']
-        self.callback_middle = callbacks['on_middle']
-        self.callback_timer = '_update_workspace_windows_title'
+        self.callback_left = callbacks["on_left"]
+        self.callback_right = callbacks["on_right"]
+        self.callback_middle = callbacks["on_middle"]
+        self.callback_timer = "_update_workspace_windows_title"
 
-        if update_title['live_update']:
+        if update_title["live_update"]:
             self.start_timer()
 
         self._register_signals_and_events()
@@ -116,12 +117,12 @@ class MultiWindowWidget(BaseWidget):
         window_change_event_watchlist = [
             KomorebiEvent.ToggleMonocle,
             KomorebiEvent.CycleFocusMonitor,
-            KomorebiEvent.CycleFocusWorkspace,
             KomorebiEvent.CycleFocusWindow,
+            KomorebiEvent.CycleFocusWorkspace,
             KomorebiEvent.FocusChange,
             KomorebiEvent.FocusMonitorNumber,
-            KomorebiEvent.FocusWorkspaceNumber,
             KomorebiEvent.FocusMonitorWorkspaceNumber,
+            KomorebiEvent.FocusWorkspaceNumber,
             KomorebiEvent.PromoteFocus,
             KomorebiEvent.CycleMoveWindow,
             KomorebiEvent.Promote,
@@ -165,15 +166,15 @@ class MultiWindowWidget(BaseWidget):
 
                 self._clear_container_layout()
 
-                windows = self._focused_workspace['containers']['elements']
-                focused_window_index = self._focused_workspace['containers']['focused']
-                if self._focused_workspace['monocle_container'] is not None:
-                    windows.insert(0, self._focused_workspace['monocle_container'])
+                windows = self._focused_workspace["containers"]["elements"]
+                focused_window_index = self._focused_workspace["containers"]["focused"]
+                if self._focused_workspace["monocle_container"] is not None:
+                    windows.insert(0, self._focused_workspace["monocle_container"])
                     focused_window_index = 0
                 for index, window in enumerate(windows):
-                    window_info = window['windows']['elements'][0]
-                    tid, pid = GetWindowThreadProcessId(window_info['hwnd'])
-                    window_info['pid'] = pid
+                    window_info = window["windows"]["elements"][0]
+                    tid, pid = GetWindowThreadProcessId(window_info["hwnd"])
+                    window_info["pid"] = pid
 
                     window_button = WindowButton(window_info, self._active_label)
                     if self._show_icon:
@@ -188,7 +189,7 @@ class MultiWindowWidget(BaseWidget):
                     self._multi_window_container_layout.addWidget(window_button)
                     self._window_buttons.append(window_button)
         except Exception:
-            logging.exception('Failed to update window widget state')
+            logging.exception("Failed to update window widget state")
 
     def _update_komorebi_state(self, komorebi_state: dict) -> bool:
         try:
@@ -251,8 +252,8 @@ class MultiWindowWidget(BaseWidget):
     def _update_workspace_windows_title(self):
         for window_button in self._window_buttons:
             window_info = window_button.window_info
-            hwnd = window_info['hwnd']
+            hwnd = window_info["hwnd"]
             title = GetWindowText(hwnd)
-            window_info['title'] = title
+            window_info["title"] = title
 
             window_button.setText(self._active_label.format(win=window_info))

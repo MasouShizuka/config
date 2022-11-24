@@ -11,18 +11,20 @@
         "files.encoding": "gbk"
     },
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
     },
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
-    "black-formatter.args": [
-        "--skip-string-normalization"
-    ],
     "ChineseInputAssistant.markdownUse": "no",
     "code-runner.executorMap": {
-        "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
-        "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
+        "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
+        "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
         "java": "cd $dirWithoutTrailingSlash && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
+        "rust": "cargo run # $fileName",
         "shellscript": "cd $dirWithoutTrailingSlash && bash $fileName"
     },
     "code-runner.runInTerminal": true,
@@ -71,42 +73,106 @@
         "--multi-line=3",
         "--trailing-comma"
     ],
+    "isort.check": true,
+    "isort.severity": {
+        "E": "Information"
+    },
     "json.format.keepLines": true,
     "jupyter.askForKernelRestart": false,
+    "latex-workshop.latex.autoBuild.run": "never",
+    "latex-workshop.latex.autoClean.run": "onFailed",
+    "latex-workshop.latex.recipe.default": "lastUsed",
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "XeLaTeX",
+            "tools": [
+                "xelatexmk"
+            ]
+        },
+        {
+            "name": "PDFLaTeX",
+            "tools": [
+                "pdflatex"
+            ]
+        },
+        {
+            "name": "BibTeX",
+            "tools": [
+                "bibtex"
+            ]
+        },
+        {
+            "name": "latexmk 🔃",
+            "tools": [
+                "latexmk"
+            ]
+        },
+        {
+            "name": "latexmk (latexmkrc)",
+            "tools": [
+                "latexmk_rconly"
+            ]
+        },
+        {
+            "name": "latexmk (lualatex)",
+            "tools": [
+                "lualatexmk"
+            ]
+        },
+        {
+            "name": "xelatexmk -> bibtex -> xelatexmk × 2",
+            "tools": [
+                "xelatexmk",
+                "bibtex",
+                "xelatexmk",
+                "xelatexmk"
+            ]
+        },
+        {
+            "name": "pdflatex ➞ bibtex ➞ pdflatex × 2",
+            "tools": [
+                "pdflatex",
+                "bibtex",
+                "pdflatex",
+                "pdflatex"
+            ]
+        },
+        {
+            "name": "Compile Rnw files",
+            "tools": [
+                "rnw2tex",
+                "latexmk"
+            ]
+        },
+        {
+            "name": "Compile Jnw files",
+            "tools": [
+                "jnw2tex",
+                "latexmk"
+            ]
+        },
+        {
+            "name": "tectonic",
+            "tools": [
+                "tectonic"
+            ]
+        }
+    ],
+    "latex-workshop.showContextMenu": true,
+    "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
     "Lua.diagnostics.globals": [
         "mp",
         "vim"
     ],
-    "Lua.diagnostics.neededFileStatus": {
-        "ambiguity-1": "Opened",
-        "circle-doc-class": "Opened",
-        "close-non-object": "Opened",
-        "count-down-loop": "Opened",
-        "different-requires": "Opened",
-        "doc-field-no-class": "Opened",
-        "duplicate-doc-alias": "Opened",
-        "duplicate-doc-field": "Opened",
-        "duplicate-doc-param": "Opened",
-        "duplicate-index": "Opened",
-        "duplicate-set-field": "Opened",
-        "global-in-nil-env": "Opened",
-        "lowercase-global": "Opened",
-        "newfield-call": "Opened",
-        "newline-call": "Opened",
-        "unbalanced-assignments": "Opened",
-        "undefined-doc-class": "Opened",
-        "undefined-doc-name": "Opened",
-        "undefined-doc-param": "Opened",
-        "undefined-env-child": "Opened",
-        "undefined-global": "Opened",
-        "unknown-diag-code": "Opened"
-    },
     "Lua.telemetry.enable": false,
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.enableHtml": true,
+    "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 20,
+    "markdown.updateLinksOnFileMove.enabled": "always",
     "markdownlint.config": {
+        "MD001": false,
         "MD007": false,
         "MD009": false,
         "MD024": false,
@@ -153,6 +219,7 @@
     "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.languageServer": "Pylance",
+    "search.defaultViewMode": "tree",
     "search.showLineNumbers": true,
     "search.smartCase": true,
     "security.workspace.trust.enabled": false,
@@ -161,7 +228,6 @@
     ],
     "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
-    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "terminal.integrated.fontSize": 20,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.tabs.location": "left",

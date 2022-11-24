@@ -15,7 +15,7 @@ try:
     from core.utils.komorebi.event_listener import KomorebiEventListener
 except ImportError:
     KomorebiEventListener = None
-    logging.warning('Failed to load Komorebi Event Listener')
+    logging.warning("Failed to load Komorebi Event Listener")
 
 
 class RefreshWindowWidget(BaseWidget):
@@ -30,7 +30,7 @@ class RefreshWindowWidget(BaseWidget):
         min_interval: int,
         refresh_process_name_list: list[str],
     ):
-        super().__init__(class_name='komorebi-refresh-window')
+        super().__init__(class_name="komorebi-refresh-window")
         self._refresh_delay = refresh_delay
         self._min_interval = min_interval
         self._last_refresh_time = 0
@@ -71,31 +71,31 @@ class RefreshWindowWidget(BaseWidget):
                 if not self._focused_workspace:
                     return
 
-                windows = self._focused_workspace['containers']['elements']
-                focused_window_index = self._focused_workspace['containers']['focused']
-                if self._focused_workspace['monocle_container'] is not None:
-                    windows.insert(0, self._focused_workspace['monocle_container'])
+                windows = self._focused_workspace["containers"]["elements"]
+                focused_window_index = self._focused_workspace["containers"]["focused"]
+                if self._focused_workspace["monocle_container"] is not None:
+                    windows.insert(0, self._focused_workspace["monocle_container"])
                     focused_window_index = 0
                 focused_window = windows[focused_window_index]
-                focused_window_info = focused_window['windows']['elements'][0]
-                if focused_window_info['exe'] in self._refresh_process_name_list:
+                focused_window_info = focused_window["windows"]["elements"][0]
+                if focused_window_info["exe"] in self._refresh_process_name_list:
                     self._refresh_window()
 
-                if GetForegroundWindow() != focused_window_info['hwnd']:
-                    self._focus_window(focused_window_info['hwnd'])
+                if GetForegroundWindow() != focused_window_info["hwnd"]:
+                    self._focus_window(focused_window_info["hwnd"])
         except Exception:
-            logging.exception('Failed to update window widget state')
+            logging.exception("Failed to update window widget state")
 
     def _update_komorebi_state(self, komorebi_state: dict) -> bool:
         try:
             self._screen_hwnd = get_monitor_hwnd(int(QWidget.winId(self)))
             self._komorebi_state = komorebi_state
 
-            focused_monitor_index = self._komorebi_state['monitors']['focused']
-            focused_screen = self._komorebi_state['monitors']['elements'][
+            focused_monitor_index = self._komorebi_state["monitors"]["focused"]
+            focused_screen = self._komorebi_state["monitors"]["elements"][
                 focused_monitor_index
             ]
-            focused_screen_hwnd = focused_screen['id']
+            focused_screen_hwnd = focused_screen["id"]
             if self._screen_hwnd != focused_screen_hwnd:
                 return False
 
@@ -117,9 +117,9 @@ class RefreshWindowWidget(BaseWidget):
             from tkinter import Tk
 
             root = Tk()
-            root.wm_attributes('-topmost', 1)
+            root.wm_attributes("-topmost", 1)
             root.focus_force()
-            root.attributes('-alpha', 0)
+            root.attributes("-alpha", 0)
             root.after(self._refresh_delay, root.destroy)
             root.mainloop()
 

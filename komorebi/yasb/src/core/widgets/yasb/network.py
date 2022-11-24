@@ -17,7 +17,7 @@ class NetworkWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name='network-widget')
+        super().__init__(update_interval, class_name="network-widget")
         self._update_interval = update_interval
         self._bytes_sent_prev = 0
         self._bytes_recv_prev = 0
@@ -28,18 +28,18 @@ class NetworkWidget(BaseWidget):
 
         self._label = QLabel()
         self._label_alt = QLabel()
-        self._label.setProperty('class', 'label')
-        self._label_alt.setProperty('class', 'label alt')
+        self._label.setProperty("class", "label")
+        self._label_alt.setProperty("class", "label alt")
         self.widget_layout.addWidget(self._label)
         self.widget_layout.addWidget(self._label_alt)
 
-        self.register_callback('toggle_label', self._toggle_label)
-        self.register_callback('update_label', self._update_label)
+        self.register_callback("toggle_label", self._toggle_label)
+        self.register_callback("update_label", self._update_label)
 
-        self.callback_left = callbacks['on_left']
-        self.callback_right = callbacks['on_right']
-        self.callback_middle = callbacks['on_middle']
-        self.callback_timer = 'update_label'
+        self.callback_left = callbacks["on_left"]
+        self.callback_right = callbacks["on_right"]
+        self.callback_middle = callbacks["on_middle"]
+        self.callback_timer = "update_label"
 
         self._label.show()
         self._label_alt.hide()
@@ -69,8 +69,8 @@ class NetworkWidget(BaseWidget):
         try:
             upload_speed, download_speed = self._get_speed()
             label_options = [
-                ('{upload_speed}', naturalsize(upload_speed, gnu=True)),
-                ('{download_speed}', naturalsize(download_speed, gnu=True)),
+                ("{upload_speed}", naturalsize(upload_speed, gnu=True)),
+                ("{download_speed}", naturalsize(download_speed, gnu=True)),
             ]
             for fmt_str, value in label_options:
                 active_label_formatted = active_label_formatted.replace(
@@ -81,7 +81,7 @@ class NetworkWidget(BaseWidget):
             active_label.setText(active_label_formatted)
         except Exception:
             active_label.setText(active_label_content)
-            logging.exception('Failed to retrieve updated network info')
+            logging.exception("Failed to retrieve updated network info")
 
     def _get_speed(self) -> tuple[float]:
         bytes_sent = net_io_counters().bytes_sent

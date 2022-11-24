@@ -3,12 +3,12 @@ import sys
 
 from winotify import Notification, audio
 
-app_id = 'Aria2'
-title = '下载停止'
-icon = 'D:/Tools/aria2/AriaNg.ico'
+app_id = "Aria2"
+title = "下载停止"
+icon = "D:/Tools/aria2/AriaNg.ico"
 
-if __name__ == '__main__':
-    msg = ''
+if __name__ == "__main__":
+    msg = ""
     if len(sys.argv) >= 4:
         msg = sys.argv[3]
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
         )
         startupinfo.wShowWindow = subprocess.SW_HIDE
         p = subprocess.Popen(
-            ['bash', 'delete.sh', *(sys.argv[1:])],
+            ["bash", "delete.sh", *(sys.argv[1:])],
             shell=True,
             startupinfo=startupinfo,
         )

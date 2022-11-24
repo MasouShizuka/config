@@ -110,11 +110,16 @@ static void change_window_size(int x, int y) {
     SetWindowPos(hWnd, 0, 0, 0, cx, cy, 0x0002 | 0x0004);
 }
 
+// 切换当前 layout 和 full layout
+static bool is_full = false;
+static int switch_steps = 0;
+
 Action<IConfigContext> doConfig = (context) => {
     // Uncomment to switch update branch (or to disable updates)
     //context.Branch = Branch.None;
 
     var color_black = new Color(0x21, 0x22, 0x2C);
+    var color_blue = new Color(0x42, 0xA5, 0xF5);
     var color_green = new Color(0x7E, 0xCA, 0x9C);
     var color_grey = new Color(0x28, 0x2A, 0x36);
     var color_orange = new Color(0xFF, 0xB8, 0x6C);
@@ -143,6 +148,7 @@ Action<IConfigContext> doConfig = (context) => {
 
     // 顶栏
     context.AddBar(new BarPluginConfig() {
+        Background = background_color,
         BarHeight = bar_height,
         DefaultWidgetBackground = background_color,
         FontName = font_name,
@@ -218,7 +224,7 @@ Action<IConfigContext> doConfig = (context) => {
 
     // 当前窗口的外框
     var focusBorderPluginConfig = new FocusBorderPluginConfig();
-    focusBorderPluginConfig.BorderColor = color_purple;
+    focusBorderPluginConfig.BorderColor = color_blue;
     focusBorderPluginConfig.BorderSize = 10;
     focusBorderPluginConfig.Opacity = 1.0;
     context.AddFocusBorder(focusBorderPluginConfig);
@@ -463,9 +469,33 @@ Action<IConfigContext> doConfig = (context) => {
             }
         }, "focus primary window");
 
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.E, () => context.Workspaces.FocusedWorkspace.SwapFocusAndPrimaryWindow(), "swap focus and primary window");
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.J, () => context.Workspaces.FocusedWorkspace.SwapFocusAndNextWindow(), "swap focus and next window");
-        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.K, () => context.Workspaces.FocusedWorkspace.SwapFocusAndPreviousWindow(), "swap focus and previous window");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.E, () => {
+            var windows = context.Workspaces.FocusedWorkspace.ManagedWindows.Where(w => w.CanLayout).ToList();
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            var focused_window_index = windows.FindIndex(w => w == window);
+            if (windows.Count > 1) {
+                for (var i = 0; i < focused_window_index; i++) {
+                    context.Workspaces.FocusedWorkspace.SwapFocusAndPreviousWindow();
+                }
+            }
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "swap focus and primary window");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.J, () => {
+            context.Workspaces.FocusedWorkspace.SwapFocusAndNextWindow();
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "swap focus and next window");
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.K, () => {
+            context.Workspaces.FocusedWorkspace.SwapFocusAndPreviousWindow();
+            var window = context.Workspaces.FocusedWorkspace.FocusedWindow;
+            if (window != null) {
+                move_cursor_to_window_center(window);
+            }
+        }, "swap focus and previous window");
 
         context.Keybinds.Subscribe(mod, workspacer.Keys.H, () => context.Workspaces.FocusedWorkspace.ShrinkPrimaryArea(), "shrink primary area");
         context.Keybinds.Subscribe(mod, workspacer.Keys.L, () => context.Workspaces.FocusedWorkspace.ExpandPrimaryArea(), "expand primary area");
@@ -661,6 +691,37 @@ Action<IConfigContext> doConfig = (context) => {
             }
         }, "hide all windows");
 
+        context.Keybinds.Subscribe(mod, workspacer.Keys.M, () => {
+            if (!is_full) {
+                var layout_name = context.Workspaces.FocusedWorkspace.LayoutName;
+                if (layout_name != "full") {
+                    while (layout_name != "full") {
+                        context.Workspaces.FocusedWorkspace.PreviousLayoutEngine();
+                        layout_name = context.Workspaces.FocusedWorkspace.LayoutName;
+                        switch_steps++;
+                    }
+                    is_full = true;
+                }
+            } else {
+                while (switch_steps != 0) {
+                    context.Workspaces.FocusedWorkspace.NextLayoutEngine();
+                    switch_steps--;
+                }
+                is_full = false;
+
+                var windows = context.Workspaces.FocusedWorkspace.Windows.Where(w => w.CanLayout).ToList();
+                for (var i = 0; i < windows.Count; i++) {
+                    var window = windows[i];
+                    if (window.IsMinimized) {
+                        window.ShowNormal();
+                    }
+                }
+                context.Workspaces.FocusedWorkspace.DoLayout();
+            }
+        }, "switch between current and full layout");
+
+        context.Keybinds.Subscribe(mod_shift, workspacer.Keys.M, () => actionMenu.ShowMenu(actionMenuBuilder), "open action menu");
+
         context.Keybinds.Subscribe(mod_ctrl, workspacer.Keys.Up, () => move_window(0, -window_step), "move window up");
         context.Keybinds.Subscribe(mod_ctrl, workspacer.Keys.Down, () => move_window(0, window_step), "move window down");
         context.Keybinds.Subscribe(mod_ctrl, workspacer.Keys.Left, () => move_window(-window_step, 0), "move window left");
@@ -670,8 +731,6 @@ Action<IConfigContext> doConfig = (context) => {
         context.Keybinds.Subscribe(mod_ctrl_shift, workspacer.Keys.Down, () => change_window_size(0, window_step), "increase window height");
         context.Keybinds.Subscribe(mod_ctrl_shift, workspacer.Keys.Left, () => change_window_size(-window_step, 0), "decrease window width");
         context.Keybinds.Subscribe(mod_ctrl_shift, workspacer.Keys.Right, () => change_window_size(window_step, 0), "increase window width");
-
-        context.Keybinds.Subscribe(mod, workspacer.Keys.M, () => actionMenu.ShowMenu(actionMenuBuilder), "open action menu");
     };
     setKeybindings();
 };

@@ -26,12 +26,12 @@ class KomorebiEvent(Event):
     ToggleTiling = "ToggleTiling"
 
     CycleFocusMonitor = "CycleFocusMonitor"
-    CycleFocusWorkspace = "CycleFocusWorkspace"
     CycleFocusWindow = "CycleFocusWindow"
+    CycleFocusWorkspace = "CycleFocusWorkspace"
     FocusChange = "FocusChange"
     FocusMonitorNumber = "FocusMonitorNumber"
-    FocusWorkspaceNumber = "FocusWorkspaceNumber"
     FocusMonitorWorkspaceNumber = "FocusMonitorWorkspaceNumber"
+    FocusWorkspaceNumber = "FocusWorkspaceNumber"
     PromoteFocus = "PromoteFocus"
 
     CycleMoveWindow = "CycleMoveWindow"

@@ -11,9 +11,9 @@ from moviepy.editor import VideoFileClip
 """
 
 # 视频与字幕的路径
-path = r''
+path = r""
 # 输出路径
-output_dir = r''
+output_dir = r""
 
 
 def get_time(sec):
@@ -22,7 +22,7 @@ def get_time(sec):
     m = int(sec // 60)
     sec %= 60
     s = sec
-    return '{}:{}:{:.2f}'.format(h, m, s)
+    return "{}:{}:{:.2f}".format(h, m, s)
 
 
 def get_video_duration(file_path):
@@ -32,12 +32,12 @@ def get_video_duration(file_path):
 
 def ass_cut_part_exceed_video():
     if not os.path.exists(path):
-        print('目录不存在')
+        print("目录不存在")
         return 0
 
     global output_dir
-    if output_dir == '' or output_dir == path:
-        output_dir = os.path.join(path, 'output')
+    if output_dir == "" or output_dir == path:
+        output_dir = os.path.join(path, "output")
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
@@ -45,22 +45,22 @@ def ass_cut_part_exceed_video():
     for file in files:
         name, ext = os.path.splitext(file)
         ext = ext.lower()[1:]
-        if ext in ('mkv', 'mp4'):
-            danmaku = os.path.join(path, name + '.ass')
+        if ext in ("mkv", "mp4"):
+            danmaku = os.path.join(path, name + ".ass")
             if os.path.exists(danmaku):
                 try:
-                    output_ass = os.path.join(output_dir, name + '.ass')
+                    output_ass = os.path.join(output_dir, name + ".ass")
                     if os.path.exists(output_ass):
                         os.remove(output_ass)
 
                     length = datetime.strptime(
                         get_time(get_video_duration(os.path.join(path, file))),
-                        '%H:%M:%S.%f',
+                        "%H:%M:%S.%f",
                     )
 
-                    rule = re.compile(r'^Dialogue\:.+?\,.+?\,(\d+\:\d+\:\d+\.\d+)\,.+$')
-                    with open(danmaku, 'r', encoding='utf-8') as f1, open(
-                        output_ass, 'a', encoding='utf-8'
+                    rule = re.compile(r"^Dialogue\:.+?\,.+?\,(\d+\:\d+\:\d+\.\d+)\,.+$")
+                    with open(danmaku, "r", encoding="utf-8") as f1, open(
+                        output_ass, "a", encoding="utf-8"
                     ) as f2:
                         line = f1.readline()
                         while line:
@@ -69,7 +69,7 @@ def ass_cut_part_exceed_video():
                                 try:
                                     end = datetime.strptime(
                                         info.group(1),
-                                        '%H:%M:%S.%f',
+                                        "%H:%M:%S.%f",
                                     )
                                 except:
                                     pass
@@ -78,10 +78,10 @@ def ass_cut_part_exceed_video():
                             else:
                                 f2.write(line)
                             line = f1.readline()
-                        print(name + '.ass 已转化')
+                        print(name + ".ass 已转化")
                 except:
                     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ass_cut_part_exceed_video()

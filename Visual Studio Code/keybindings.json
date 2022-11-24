@@ -1,22 +1,13 @@
 // 将键绑定放在此文件中以覆盖默认值auto[]
 [
-    // Neovim
-
-    {
-        "key": "enter",
-        "command": "-list.select",
-        "when": "listFocus && !inputFocus"
-    },
-    {
-        "key": "enter",
-        "command": "list.select",
-        "when": "listFocus && !inputFocus && !notebookCellListFocused"
-    },
+    ////////////
+    // Neovim //
+    ////////////
 
     {
         "key": "escape",
         "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.init && !markersNavigationVisible && !parameterHintsVisible && !referenceSearchVisible"
+        "when": "editorTextFocus && neovim.init && !dirtyDiffVisible && !findWidgetVisible && !inReferenceSearchEditor && !markersNavigationVisible && !notebookCellFocused && !notificationCenterVisible && !parameterHintsVisible && !referenceSearchVisible && neovim.mode == 'normal'"
     },
     {
         "key": "escape",
@@ -177,34 +168,22 @@
         "args": "<c-u>"
     },
     {
-        "key": "ctrl+n",
-        "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
-        "args": "<c-n>"
-    },
-    {
         "key": "ctrl+q",
         "command": "vscode-neovim.send",
         "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
         "args": "<c-q>"
-    },
-    {
-        "key": "ctrl+s",
-        "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode == 'insert'",
-        "args": "<c-s>"
     },
 
     // 去除 Neovim 的接收键位
     {
         "key": "ctrl+c",
         "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode == 'insert'"
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && !dirtyDiffVisible && !findWidgetVisible && !inReferenceSearchEditor && !markersNavigationVisible && !notebookCellFocused && !notificationCenterVisible && !parameterHintsVisible && !referenceSearchVisible && neovim.mode == 'normal'"
     },
     {
         "key": "ctrl+c",
         "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != 'normal'"
     },
     {
         "key": "ctrl+f",
@@ -229,7 +208,9 @@
 
 
 
-    // Notebook
+    //////////////
+    // Notebook //
+    //////////////
 
     // 编辑
     {
@@ -258,10 +239,9 @@
 
 
 
-
-    // VS Code
-
-    // 侧边栏相关
+    ////////////////////////////
+    // VS Code 侧边栏区域相关 //
+    ////////////////////////////
 
     {
         "key": "ctrl+1",
@@ -340,7 +320,14 @@
     // 在文件中替换
     {
         "key": "ctrl+shift+f",
-        "command": "workbench.action.replaceInFiles"
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "workbench.action.replaceInFiles",
+                "workbench.action.search.toggleQueryDetails",
+                "workbench.action.replaceInFiles"
+            ]
+        }
     },
     // 搜索视图聚焦时，则切换到搜索列表
     {
@@ -369,7 +356,10 @@
 
 
 
-    // 编辑器区域相关
+
+    ////////////////////////////
+    // VS Code 编辑器区域相关 //
+    ////////////////////////////
 
     {
         "key": "ctrl+2",
@@ -456,13 +446,13 @@
     {
         "key": "ctrl+j",
         "command": "workbench.action.focusNextGroup",
-        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert"
+        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert && neovim.mode != 'cmdline_normal'"
     },
     // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换焦点到上一个编辑器组
     {
         "key": "ctrl+k",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert"
+        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert && neovim.mode != 'cmdline_normal'"
     },
     // 移动当前编辑器到左侧编辑器组
     {
@@ -547,6 +537,49 @@
         "when": "inDiffEditor"
     },
 
+    // 转到下一个更改
+    {
+        "key": "alt+f5",
+        "command": "-workbench.action.editor.nextChange",
+        "when": "editorTextFocus && !textCompareEditorActive"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "workbench.action.editor.nextChange",
+        "when": "editorTextFocus && !textCompareEditorActive"
+    },
+    {
+        "key": "alt+f5",
+        "command": "-workbench.action.compareEditor.nextChange",
+        "when": "textCompareEditorVisible"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "workbench.action.compareEditor.nextChange",
+        "when": "textCompareEditorVisible"
+    },
+    // 转到上一个更改
+    {
+        "key": "shift+alt+f5",
+        "command": "-workbench.action.editor.previousChange",
+        "when": "editorTextFocus && !textCompareEditorActive"
+    },
+    {
+        "key": "ctrl+shift+n",
+        "command": "workbench.action.editor.previousChange",
+        "when": "editorTextFocus && !textCompareEditorActive"
+    },
+    {
+        "key": "shift+alt+f5",
+        "command": "-workbench.action.compareEditor.previousChange",
+        "when": "textCompareEditorVisible"
+    },
+    {
+        "key": "ctrl+shift+n",
+        "command": "workbench.action.compareEditor.previousChange",
+        "when": "textCompareEditorVisible"
+    },
+
     {
         "key": "ctrl+.",
         "command": "-editor.action.quickFix",
@@ -561,7 +594,9 @@
 
 
 
-    // 面板相关
+    //////////////////////////
+    // VS Code 面板区域相关 //
+    //////////////////////////
 
     {
         "key": "ctrl+3",
@@ -683,7 +718,9 @@
 
 
 
-    // 其他
+    //////////////////////
+    // VS Code 其他相关 //
+    //////////////////////
 
     {
         "key": "ctrl+0",

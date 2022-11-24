@@ -103,8 +103,8 @@ class WorkspaceWidget(BaseWidget):
         workspace_focus_event_watchlist = [
             KomorebiEvent.CycleFocusWorkspace,
             KomorebiEvent.CycleFocusMonitor,
-            KomorebiEvent.FocusMonitorWorkspaceNumber,
             KomorebiEvent.FocusMonitorNumber,
+            KomorebiEvent.FocusMonitorWorkspaceNumber,
             KomorebiEvent.FocusWorkspaceNumber,
         ]
 
