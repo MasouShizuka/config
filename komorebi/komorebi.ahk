@@ -6,10 +6,12 @@
 #Persistent
 OnExit("komorebic_stop")
 komorebic_stop() {
-    Stop()
     if (is_taskbar_hide) {
         unhide_taskbar()
     }
+    Stop()
+    Run, rm ~/komorebic.sock, , Hide
+    Run, rm -rf ~/AppData/Local/komorebi, , Hide
     return
 }
 
@@ -38,11 +40,8 @@ RunWait, komorebic.exe start --await-configuration, , Hide
 ;# Setting #
 ;###########
 
-global main_monitor := 0
 SysGet, monitor_count, MonitorCount
-if (monitor_count > 1) {
-    main_monitor := monitor_count - 1
-}
+global main_monitor := monitor_count - 1
 
 ; Configure the invisible border dimensions
 InvisibleBorders(7, 0, 14, 7)
@@ -121,6 +120,7 @@ WorkspaceRule("exe", "Thunder.exe", main_monitor, 5)
 ; Run, komorebic.exe float-rule class SunAwtDialog, , Hide
 ; Run, komorebic.exe float-rule class TaskManagerWindow, , Hide
 FloatRule("class", "ExplorerBrowserControl")
+FloatRule("class", "TApplication")
 ; Always float, matching on title
 ; Run, komorebic.exe float-rule title "Control Panel", , Hide
 ; Run, komorebic.exe float-rule title Calculator, , Hide
@@ -133,10 +133,6 @@ FloatRule("exe", "ApplicationFrameHost.exe")
 FloatRule("exe", "Clash Verge.exe")
 FloatRule("exe", "copyq.exe")
 FloatRule("exe", "Flow.Launcher.exe")
-; Office
-FloatRule("exe", "WINWORD.EXE")
-FloatRule("exe", "POWERPNT.EXE")
-FloatRule("exe", "EXCEL.EXE")
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, komorebic.exe manage-rule exe TIM.exe, , Hide
@@ -164,6 +160,15 @@ IdentifyBorderOverflowApplication("exe", "QQ.exe")
 IdentifyBorderOverflowApplication("exe", "ShareX.exe")
 IdentifyBorderOverflowApplication("exe", "vivaldi.exe")
 IdentifyBorderOverflowApplication("exe", "WeChat.exe")
+
+; Office
+FloatRule("class", "_WwB")
+IdentifyBorderOverflowApplication("exe", "EXCEL.EXE")
+IdentifyBorderOverflowApplication("exe", "POWERPNT.EXE")
+IdentifyBorderOverflowApplication("exe", "WINWORD.EXE")
+IdentifyLayeredApplication("exe", "EXCEL.EXE")
+IdentifyLayeredApplication("exe", "POWERPNT.EXE")
+IdentifyLayeredApplication("exe", "WINWORD.EXE")
 
 
 

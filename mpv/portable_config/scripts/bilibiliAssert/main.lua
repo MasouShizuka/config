@@ -12,7 +12,7 @@ function log(string, secs)
 end
 
 -- download/load function
-function assert()
+function assprocess()
     -- get video cid
     local cid = mp.get_opt('cid')
     if (cid == nil)
@@ -59,5 +59,5 @@ function delete_ass()
 end
 mp.register_event('end-file', delete_ass)
 
--- mp.add_key_binding('b',	assert)
-mp.register_event('start-file', assert)
+-- mp.add_key_binding('b',	assprocess)
+mp.register_event('start-file', assprocess)

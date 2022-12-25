@@ -4,6 +4,7 @@
 #NoTrayIcon
 #WinActivateForce               ; 解决「 winactivate 最小化的窗口时不会把窗口放到顶层(被其他窗口遮住) 」
 #InstallKeybdHook               ; 可能是 ahk 自动卸载 hook 导致的丢失 hook,  如果用这行指令, ahk 是否就不会卸载 hook 了呢?
+#MenuMaskKey vkFF
 #include bin/functions.ahk
 #include bin/actions.ahk
 
@@ -36,6 +37,10 @@ settitlematchmode, 2
 ; win10、win11 任务切换、任务视图
 GroupAdd, TASK_SWITCH_GROUP, ahk_class MultitaskingViewFrame
 GroupAdd, TASK_SWITCH_GROUP, ahk_class XamlExplorerHostIslandWindow
+{{ range .windowSelectors -}}
+{{ if .groupCode}}{{ .groupCode }}
+{{ end }}
+{{- end }}
 
 scrollOnceLineCount := {{ .Settings.scrollOnceLineCount }}
 scrollDelay1 = {{ concat "T" .Settings.scrollDelay1 }}
@@ -68,6 +73,8 @@ allHotkeys := []
 {{ if .Settings.RButtonMode }}allHotkeys.Push("RButton"){{ end }}
 {{ if .Settings.SpaceMode }}allHotkeys.Push("*Space"){{ end }}
 {{ if .Settings.TabMode }}allHotkeys.Push("$Tab"){{ end }}
+{{ if .Settings.AdditionalMode1 }}allHotkeys.Push("{{ .Settings.AdditionalMode1Info.Hotkey }}"){{ end }}
+{{ if .Settings.AdditionalMode2 }}allHotkeys.Push("{{ .Settings.AdditionalMode2Info.Hotkey }}"){{ end }}
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, 暂停, trayMenuHandler
@@ -82,7 +89,7 @@ Menu, Tray, Add
 
 Menu, Tray, Icon
 Menu, Tray, Icon, bin\logo.ico,, 1
-Menu, Tray, Tip, MyKeymap 1.2.6 by 咸鱼阿康
+Menu, Tray, Tip, MyKeymap 1.2.7 by 咸鱼阿康
 ; processPath := getProcessPath()
 ; SetWorkingDir, %processPath%
 
@@ -125,13 +132,14 @@ return
 
 {{ if .Settings.CapslockMode -}}
 *capslock::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CapslockMode := true
     keymapLockState.currentMode := "CapslockMode"
     keywait capslock
     CapslockMode := false
-    if (A_ThisHotkey == "*capslock" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
+    if (A_ThisHotkey == "*capslock" && A_PriorKey == "CapsLock" && (A_TickCount - start_tick < 350)) {
         {{ (index .SpecialKeys "Caps Up").value }}
     }
     enableOtherHotkey(thisHotkey)
@@ -141,6 +149,7 @@ return
 
 {{ if .Settings.JMode }}
 *j::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     JMode := true
@@ -149,7 +158,7 @@ return
     keywait j
     JMode := false
     DisableCapslockKey := false
-    if (A_PriorKey == "j" && A_TimeSinceThisHotkey < 350)
+    if (A_PriorKey == "j" && (A_TickCount - start_tick < 300))
             send,  {blind}j
     enableOtherHotkey(thisHotkey)
     return
@@ -158,6 +167,7 @@ return
 
 {{ if .Settings.SemicolonMode }}
 *`;::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     SemicolonMode := true
@@ -166,7 +176,7 @@ return
     keywait `;
     SemicolonMode := false
     DisableCapslockKey := false
-    if (A_PriorKey == ";" && A_TimeSinceThisHotkey < 250) {
+    if (A_PriorKey == ";" && (A_TickCount - start_tick < 300)) {
          {{ (index .SpecialKeys "; Up").value }}
     }
     enableOtherHotkey(thisHotkey)
@@ -182,20 +192,21 @@ return
     keymapLockState.currentMode := "DigitMode"
     keywait 3
     DigitMode := false
-    if (A_PriorKey == "3" && (A_TickCount - start_tick < 250))
+    if (A_PriorKey == "3" && (A_TickCount - start_tick < 300))
         send, {blind}3
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
 {{ if .Settings.Mode9 }}
 *9::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     Mode9 := true
     keymapLockState.currentMode := "Mode9"
     keywait 9
     Mode9 := false
-    if (A_PriorKey == "9" && A_TimeSinceThisHotkey < 350)
+    if (A_PriorKey == "9" && (A_TickCount - start_tick < 300))
         send, {blind}9
     enableOtherHotkey(thisHotkey)
     return
@@ -203,13 +214,14 @@ return
 
 {{ if .Settings.CommaMode }}
 *,::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CommaMode := true
     keymapLockState.currentMode := "CommaMode"
     keywait `,
     CommaMode := false
-    if (A_PriorKey == "," && A_TimeSinceThisHotkey < 350)
+    if (A_PriorKey == "," && (A_TickCount - start_tick < 300))
         send, {blind}`,
     enableOtherHotkey(thisHotkey)
     return
@@ -217,27 +229,61 @@ return
 
 {{ if .Settings.DotMode }}
 *.::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     DotMode := true
     keymapLockState.currentMode := "DotMode"
     keywait `.
     DotMode := false
-    if (A_PriorKey == "." && A_TimeSinceThisHotkey < 350)
-        sendevent, {blind}`.
+    if (A_PriorKey == "." && (A_TickCount - start_tick < 300))
+        send, {blind}`.
+    enableOtherHotkey(thisHotkey)
+    return
+{{ end }}
+
+{{ if .Settings.AdditionalMode1 }}
+{{ .Settings.AdditionalMode1Info.Hotkey }}::
+    start_tick := A_TickCount
+    thisHotkey := A_ThisHotkey
+    disableOtherHotkey(thisHotkey)
+    AdditionalMode1 := true
+    keymapLockState.currentMode := "AdditionalMode1"
+    keywait {{ .Settings.AdditionalMode1Info.WaitKey }}
+    AdditionalMode1 := false
+    if (A_PriorKey == "{{ .Settings.AdditionalMode1Info.PriorKey }}" && (A_TickCount - start_tick < 300)) {
+        {{ .Settings.AdditionalMode1Info.Send }}
+    }
+    enableOtherHotkey(thisHotkey)
+    return
+{{ end }}
+
+{{ if .Settings.AdditionalMode2 }}
+{{ .Settings.AdditionalMode2Info.Hotkey }}::
+    start_tick := A_TickCount
+    thisHotkey := A_ThisHotkey
+    disableOtherHotkey(thisHotkey)
+    AdditionalMode2 := true
+    keymapLockState.currentMode := "AdditionalMode2"
+    keywait {{ .Settings.AdditionalMode2Info.WaitKey }}
+    AdditionalMode2 := false
+    if (A_PriorKey == "{{ .Settings.AdditionalMode2Info.PriorKey }}" && (A_TickCount - start_tick < 300)) {
+        {{ .Settings.AdditionalMode2Info.Send }}
+    }
     enableOtherHotkey(thisHotkey)
     return
 {{ end }}
 
 {{ if .Settings.SpaceMode }}
 *Space::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     SpaceMode := true
     keymapLockState.currentMode := "SpaceMode"
     keywait Space
     SpaceMode := false
-    if (A_PriorKey == "Space" && A_TimeSinceThisHotkey < 350)
+    if (A_PriorKey == "Space" && (A_TickCount - start_tick < 300))
         send, {blind}{Space}
     enableOtherHotkey(thisHotkey)
     return
@@ -245,13 +291,14 @@ return
 
 {{ if .Settings.TabMode }}
 $Tab::
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     TabMode := true
     keymapLockState.currentMode := "TabMode"
     keywait Tab
     TabMode := false
-    if (A_PriorKey == "Tab" && A_TimeSinceThisHotkey < 350)
+    if (A_PriorKey == "Tab" && (A_TickCount - start_tick < 300))
         send, {blind}{Tab}
     enableOtherHotkey(thisHotkey)
     return
@@ -318,10 +365,10 @@ enterLButtonMode()
 
 {{ if .Settings.JMode }}
 #if JModeK
-k::return
+*k::return
 {{ template "keymapToAhk" .JModeK }}
 #if JMode
-k::enterJModeK()
+*k::enterJModeK()
 {{ template "keymapToAhk" .JMode }}
 {{ end }}
 
@@ -358,6 +405,18 @@ k::enterJModeK()
 {{ if .Settings.DotMode }}
 #if DotMode
 {{ template "keymapToAhk" .DotMode }}
+{{ end }}
+
+{{ if .Settings.AdditionalMode1 }}
+#if AdditionalMode1
+{{ .Settings.AdditionalMode1Info.WaitKey }}::return
+{{ template "keymapToAhk" .AdditionalMode1 }}
+{{ end }}
+
+{{ if .Settings.AdditionalMode2 }}
+#if AdditionalMode2
+{{ .Settings.AdditionalMode2Info.WaitKey }}::return
+{{ template "keymapToAhk" .AdditionalMode2 }}
 {{ end }}
 
 {{ if .Settings.CapslockMode }}

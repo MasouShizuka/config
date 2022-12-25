@@ -56,25 +56,15 @@ map("n", "zk", "zb", { noremap = false, silent = true })
 
 if global.is_vscode then
     vim.cmd [[
-        " 翻半页居中
-        nmap <C-d> 9j9j2jzz
-        vmap <C-d> 9j9j2jzz
-        nmap <C-u> 9k9k2kzz
-        vmap <C-u> 9k9k2kzz
+        " 移动 9 行居中，防止增加 vscode 的 navigation history
+        nmap <C-d> 9j
+        vmap <C-d> 9jzz
+        nmap <C-u> 9kzz
+        vmap <C-u> 9kzz
 
         " 插入新行
-        function! Insert_Line_After()
-            startinsert
-            sleep 100m
-            call VSCodeNotify("editor.action.insertLineAfter")
-        endfunction
-        function! Insert_Line_Before()
-            startinsert
-            sleep 100m
-            call VSCodeNotify("editor.action.insertLineBefore")
-        endfunction
-        nnoremap o <Cmd>call Insert_Line_After()<CR>
-        nnoremap O <Cmd>call Insert_Line_Before()<CR>
+        nnoremap o i<Cmd>call VSCodeNotify("editor.action.insertLineAfter")<CR>
+        nnoremap O i<Cmd>call VSCodeNotify("editor.action.insertLineBefore")<CR>
 
         " 注释
         xmap gc  <Plug>VSCodeCommentary
@@ -140,7 +130,6 @@ if global.is_vscode then
         " vscode 扩展
         nnoremap <Leader>b <Cmd>call VSCodeNotify("bookmarks.toggle")<CR>
         nnoremap <Leader>p <Cmd>call VSCodeNotify("extension.pasteImage")<CR>
-
     ]]
 else
     -- 命令行上一个下一个

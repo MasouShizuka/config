@@ -59,7 +59,6 @@
         "asvetliakov.vscode-neovim": 1,
         "Gruntfuggly.todo-tree": 1
     },
-    "fauxpilot.maxTokens": 64,
     "files.associations": {
         "*.txt": "plaintext"
     },
@@ -158,6 +157,8 @@
             ]
         }
     ],
+    "latex-workshop.message.error.show": false,
+    "latex-workshop.message.warning.show": false,
     "latex-workshop.showContextMenu": true,
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
     "Lua.diagnostics.globals": [

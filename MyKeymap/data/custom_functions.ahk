@@ -1,15 +1,29 @@
-﻿; 自定义的函数写在这个文件里
+﻿; 自定义的函数写在这个文件里,  然后能在 MyKeymap 中调用
 
-
-
-sendChinese() {
+sendSomeChinese() {
     send, {text}你好中文!
 }
 
 center_window() {
-    WinExist("A")
-    WinGetPos, , , sizeX, sizeY
-    WinMove, (A_ScreenWidth / 2) - (sizeX / 2), (A_ScreenHeight / 2) - (sizeY / 2)
+    if (!WinExist("A")) {
+        return
+    }
+
+    WinGetPos, X, Y, W, H
+    CX := X + W / 2
+    CY := Y + H / 2
+
+    SysGet, MonitorCount, MonitorCount
+    Loop, %MonitorCount% {
+        SysGet, MonitorWorkArea, MonitorWorkArea, %A_Index%
+        if(CX >= MonitorWorkAreaLeft && CX <= MonitorWorkAreaRight && CY >= MonitorWorkAreaTop && CY <= MonitorWorkAreaBottom) {
+            MW := (MonitorWorkAreaRight - MonitorWorkAreaLeft)
+            MH := (MonitorWorkAreaBottom - MonitorWorkAreaTop)
+
+            WinMove, MonitorWorkAreaLeft + (MW - W) / 2, MonitorWorkAreaTop + (MH - H) / 2
+            break
+        }
+    }
 }
 
 close_or_run_script(name, path:="") {

@@ -76,6 +76,7 @@ class RefreshWindowWidget(BaseWidget):
                 if self._focused_workspace["monocle_container"] is not None:
                     windows.insert(0, self._focused_workspace["monocle_container"])
                     focused_window_index = 0
+
                 focused_window = windows[focused_window_index]
                 focused_window_info = focused_window["windows"]["elements"][0]
                 if focused_window_info["exe"] in self._refresh_process_name_list:

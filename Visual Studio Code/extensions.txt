@@ -52,10 +52,11 @@ ryu1kn.partial-diff
 ryuta46.multi-command
 shalimski.swapdiff
 sumneko.lua
+tamasfe.even-better-toml
 techer.open-in-browser
 timonwong.shellcheck
 usernamehw.errorlens
-Venthe.fauxpilot
+vadimcn.vscode-lldb
 VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
 w88975.code-translate

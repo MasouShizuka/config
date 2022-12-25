@@ -561,7 +561,7 @@ widgets:
       refresh_delay: 100
       min_interval: 1000
       refresh_process_name_list:
-        - 'TE64.exe'
+        - "TE64.exe"
 
   network:
     type: "yasb.network.NetworkWidget"

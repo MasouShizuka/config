@@ -18,14 +18,14 @@ function multi_subtitles_exist(id)
     return false, -1
 end
 
-function multi_subtitles_update(id, vf2)
+function multi_subtitles_update(id, vf)
     local exist, index = multi_subtitles_exist(id)
     if exist then
         table.remove(multi_subtitles_info, index)
     else
         multi_subtitles_info[#multi_subtitles_info + 1] = {
             id = id,
-            remove_command = 'vf remove' .. vf2
+            remove_command = 'vf remove' .. vf,
         }
     end
 end
@@ -34,6 +34,7 @@ function multi_subtitles_toggle(id)
     if type(id) == 'string' then
         id = tonumber(id)
     end
+
     if id == 0 then
         multi_subtitles_clear()
     else
@@ -45,6 +46,7 @@ function multi_subtitles_toggle(id)
             else
                 vf1 = 'append'
             end
+
             if track.type == 'sub' and track.id == id then
                 if not track.external then
                     local path = mp.get_property_native('path')
@@ -65,19 +67,18 @@ function multi_subtitles_toggle(id)
         end
     end
 end
-
-function multi_subtitles_recovery()
-    local info = multi_subtitles_info
-    multi_subtitles_clear()
-    for index, value in ipairs(info) do
-        multi_subtitles_toggle(value.id)
-    end
-end
+mp.register_script_message('multi_subtitles_toggle', multi_subtitles_toggle)
 
 function multi_subtitles_menu()
     local utils = require('mp.utils')
+
     local items = {}
-    items[#items + 1] = { title = 'Clear', italic = true, muted = true, value = 0 }
+    items[#items + 1] = {
+        title = 'Clear',
+        italic = true,
+        muted = true,
+        value = { 'script-message-to', 'multi_subtitles', 'multi_subtitles_toggle', 0 },
+    }
     for index, track in ipairs(mp.get_property_native('track-list')) do
         if track.type == 'sub' then
             items[#items + 1] = {
@@ -85,7 +86,7 @@ function multi_subtitles_menu()
                 hint = track.lang and track.lang:upper() or nil,
                 value = { 'script-message-to', 'multi_subtitles', 'multi_subtitles_toggle', track.id },
                 external = track.external,
-                external_path = track['external-filename']
+                external_path = track['external-filename'],
             }
         end
     end
@@ -94,11 +95,20 @@ function multi_subtitles_menu()
         title = 'Multi-Subtitles',
         items = items,
     }
+
     local json = utils.format_json(menu)
     mp.commandv('script-message-to', 'uosc', 'open-menu', json)
 end
-
 mp.add_key_binding(nil, 'multi-subtitles-menu', multi_subtitles_menu)
+
+function multi_subtitles_recovery()
+    local info = multi_subtitles_info
+    multi_subtitles_clear()
+
+    for index, value in ipairs(info) do
+        multi_subtitles_toggle(value.id)
+    end
+end
 
 local clock = os.clock
 function sleep(n)
@@ -117,5 +127,3 @@ mp.add_key_binding(nil, 'playlist-prev-keep-multi-subtitles-status', function()
     sleep(0.5)
     multi_subtitles_recovery()
 end)
-
-mp.register_script_message('multi_subtitles_toggle', multi_subtitles_toggle)

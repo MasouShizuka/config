@@ -1,9 +1,11 @@
 {
   "MaxResult": 100,
   "QuickAccessLinks": [],
-  "QuickFolderAccessLinks": [],
-  "UseWindowsIndexForDirectorySearch": true,
   "IndexSearchExcludedSubdirectoryPaths": [],
+  "EditorPath": "",
+  "ShellPath": "cmd",
+  "UseLocationAsWorkingDir": true,
+  "ShowWindowsContextMenu": true,
   "SearchActionKeyword": "*",
   "SearchActionKeywordEnabled": true,
   "FileContentSearchActionKeyword": "doc:",
@@ -14,5 +16,12 @@
   "IndexSearchKeywordEnabled": false,
   "QuickAccessActionKeyword": "*",
   "QuickAccessKeywordEnabled": false,
-  "WarnWindowsSearchServiceOff": true
+  "WarnWindowsSearchServiceOff": true,
+  "IndexSearchEngine": 1,
+  "PathEnumerationEngine": 1,
+  "ContentSearchEngine": 1,
+  "EverythingInstalledPath": "D:\\Tools\\Flow.Launcher\\UserData\\Plugins\\Everything\\Everything.exe",
+  "SortOption": 1,
+  "EnableEverythingContentSearch": false,
+  "EverythingEnabled": true
 }

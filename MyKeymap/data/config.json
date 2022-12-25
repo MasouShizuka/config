@@ -1,4 +1,548 @@
 {
+    "AdditionalMode1": {
+        "'": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        ",": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "-": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        ".": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "/": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "0": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "1": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "2": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "3": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "4": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "5": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "6": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "7": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "8": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "9": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        ";": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "=": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "A": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "B": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "BS": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "C": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "D": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "E": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Enter": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "F": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "G": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "H": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "I": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "J": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "K": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "L": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "M": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "N": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "O": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "P": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Q": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "R": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "S": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Space": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "T": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "U": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "V": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "W": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "X": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Y": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Z": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "[": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "\\": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "]": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        }
+    },
+    "AdditionalMode2": {
+        ",": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        ".": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "/": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "0": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "1": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "2": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "3": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "4": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "5": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "6": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "7": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "8": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "9": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        ";": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "A": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "B": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "C": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "D": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "E": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "F": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "G": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "H": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "I": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "J": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "K": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "L": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "M": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "N": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "O": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "P": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Q": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "R": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "S": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Space": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "T": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "U": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "V": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "W": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "X": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Y": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        },
+        "Z": {
+            "2": {
+                "type": "什么也不做",
+                "value": ""
+            }
+        }
+    },
     "Capslock": {
         "'": {
             "2": {
@@ -384,6 +928,13 @@
                 "value": "ActivateOrRun(\"\", \"https://google.com/search?q={selected_text}\", \"\", \"\")"
             }
         },
+        "gj": {
+            "2": {
+                "label": "关机",
+                "type": "系统控制",
+                "value": "slideToShutdown()"
+            }
+        },
         "help": {
             "2": {
                 "label": "回顾 MyKeymap 配置",
@@ -474,18 +1025,13 @@
         },
         "sp": {
             "2": {
-                "comment": "打开 Spotify 网页播放器",
-                "toActivate": "",
+                "cmdArgs": "",
+                "comment": "Spotify 网页",
+                "toActivate": "Spotify",
                 "toRun": "https://open.spotify.com/",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"\", \"https://open.spotify.com/\", \"\", \"\")"
-            }
-        },
-        "ss": {
-            "2": {
-                "label": "关机",
-                "type": "系统控制",
-                "value": "slideToShutdown()"
+                "value": "ActivateOrRun(\"Spotify\", \"https://open.spotify.com/\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "st": {
@@ -524,6 +1070,7 @@
         "dm",
         "ex",
         "gg",
+        "gj",
         "help",
         "ld",
         "lj",
@@ -536,7 +1083,6 @@
         "se",
         "sl",
         "sp",
-        "ss",
         "st",
         "tm",
         "we"
@@ -568,8 +1114,8 @@
         },
         "/": {
             "2": {
-                "type": "窗口操作",
-                "value": "bindOrActivate_unbind()"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "0": {
@@ -634,9 +1180,8 @@
         },
         ";": {
             "2": {
-                "comment": "如果存在 TIM.exe 进程则发送 Ctrl+Alt+Z 打开 Tim,  否则启动 Tim",
-                "type": "可能会用到的内置函数",
-                "value": "activate_it_by_hotkey_or_run(\"TIM.exe\", \"^!z\", \"shortcuts\\TIM.lnk\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "=": {
@@ -647,17 +1192,19 @@
         },
         "A": {
             "2": {
-                "comment": "召唤 Windows Terminal",
+                "cmdArgs": "",
+                "comment": "Windows Terminal",
                 "toActivate": "ahk_exe WindowsTerminal.exe",
                 "toRun": "wt.exe",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe WindowsTerminal.exe\", \"wt.exe\", \"\", \"\", false)"
+                "value": "ActivateOrRun(\"ahk_exe WindowsTerminal.exe\", \"wt.exe\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "B": {
             "2": {
-                "type": "窗口操作",
-                "value": "winMinimizeIgnoreDesktop()"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "BS": {
@@ -674,20 +1221,24 @@
         },
         "D": {
             "2": {
-                "comment": "召唤 Edge",
+                "cmdArgs": "",
+                "comment": "Edge",
                 "toActivate": "ahk_exe msedge.exe",
-                "toRun": "%A_ProgramsCommon%\\Microsoft Edge.lnk",
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe msedge.exe\", \"\" A_ProgramsCommon \"\\Microsoft Edge.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe msedge.exe\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "E": {
             "2": {
-                "comment": "召唤文件管理器",
+                "cmdArgs": "",
+                "comment": "文件管理器",
                 "toActivate": "ahk_class CabinetWClass ahk_exe Explorer.EXE",
                 "toRun": "D:\\",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_class CabinetWClass ahk_exe Explorer.EXE\", \"D:\\\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_class CabinetWClass ahk_exe Explorer.EXE\", \"D:\\\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "Enter": {
@@ -710,85 +1261,103 @@
         },
         "H": {
             "2": {
-                "comment": "召唤 Visual Studio",
+                "cmdArgs": "",
+                "comment": "Visual Studio",
                 "toActivate": "- Microsoft Visual Studio",
-                "toRun": "%A_ProgramsCommon%\\Visual Studio 2019.lnk",
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Visual Studio 2019.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"- Microsoft Visual Studio\", \"\" A_ProgramsCommon \"\\Visual Studio 2019.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"- Microsoft Visual Studio\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Visual Studio 2019.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "I": {
             "2": {
-                "comment": "召唤 Typora",
+                "cmdArgs": "",
+                "comment": "Typora",
                 "toActivate": "ahk_exe Typora.exe",
                 "toRun": "C:\\Program Files\\Typora\\Typora.exe",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe Typora.exe\", \"C:\\Program Files\\Typora\\Typora.exe\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe Typora.exe\", \"C:\\Program Files\\Typora\\Typora.exe\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "J": {
             "2": {
-                "comment": "召唤 IntelliJ IDEA",
-                "toActivate": "ahk_exe idea64.exe",
-                "toRun": "%idea%",
+                "cmdArgs": "",
+                "comment": "IntelliJ IDEA",
+                "toActivate": "detect_hidden_window: ahk_exe idea64.exe",
+                "toRun": "%A_Programs%\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe idea64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"detect_hidden_window: ahk_exe idea64.exe\", \"\" A_Programs \"\\JetBrains Toolbox\\IntelliJ IDEA Ultimate.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "K": {
             "2": {
+                "comment": "PotPlayer",
                 "toActivate": "ahk_class PotPlayer64",
-                "toRun": "%A_ProgramFiles%\\DAUM\\PotPlayer\\PotPlayerMini64.exe",
+                "toRun": "%A_ProgramsCommon%\\Daum\\PotPlayer 64 bit\\PotPlayer 64 bit.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_class PotPlayer64\", \"\" A_ProgramFiles \"\\DAUM\\PotPlayer\\PotPlayerMini64.exe\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_class PotPlayer64\", \"\" A_ProgramsCommon \"\\Daum\\PotPlayer 64 bit\\PotPlayer 64 bit.lnk\", \"\", \"\")"
             }
         },
         "L": {
             "2": {
-                "comment": "召唤 Excel",
+                "comment": "Excel",
                 "toActivate": "ahk_exe EXCEL.EXE",
-                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk",
+                "toRun": "%A_ProgramsCommon%\\Excel.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe EXCEL.EXE\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe EXCEL.EXE\", \"\" A_ProgramsCommon \"\\Excel.lnk\", \"\", \"\")"
             }
         },
         "M": {
             "2": {
-                "type": "窗口操作",
-                "value": "bindOrActivate(CapslockF__M)"
+                "cmdArgs": "",
+                "comment": "TIM",
+                "toActivate": "if_exist_then_send: TIM.exe, ^!z",
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\腾讯软件\\TIM\\TIM.lnk",
+                "type": "启动程序或激活窗口",
+                "value": "ActivateOrRun(\"if_exist_then_send: TIM.exe, ^!z\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\腾讯软件\\TIM\\TIM.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "N": {
             "2": {
-                "type": "窗口操作",
-                "value": "bindOrActivate(CapslockF__N)"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "O": {
             "2": {
-                "comment": "召唤 OneNote UWP",
-                "toActivate": "OneNote for Windows 10",
-                "toRun": "shortcuts\\OneNote for Windows 10.lnk",
+                "cmdArgs": "",
+                "comment": "OneNote 桌面版",
+                "toActivate": "ahk_exe ONENOTE.EXE",
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\OneNote.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"OneNote for Windows 10\", \"shortcuts\\OneNote for Windows 10.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe ONENOTE.EXE\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\OneNote.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "P": {
             "2": {
-                "comment": "召唤 PowerPoint",
+                "cmdArgs": "",
+                "comment": "PowerPoint",
                 "toActivate": "ahk_exe POWERPNT.EXE",
                 "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe POWERPNT.EXE\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe POWERPNT.EXE\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "Q": {
             "2": {
-                "comment": "召唤 Everything",
+                "cmdArgs": "",
+                "comment": "Everything",
                 "toActivate": "ahk_class EVERYTHING",
-                "toRun": "%A_ProgramFiles%\\Everything\\Everything.exe",
+                "toRun": "C:\\Program Files\\Everything\\Everything.exe",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_class EVERYTHING\", \"\" A_ProgramFiles \"\\Everything\\Everything.exe\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_class EVERYTHING\", \"C:\\Program Files\\Everything\\Everything.exe\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "R": {
@@ -802,11 +1371,13 @@
         },
         "S": {
             "2": {
-                "comment": "召唤 Visual Studio Code",
+                "cmdArgs": "",
+                "comment": "Visual Studio Code",
                 "toActivate": "ahk_exe Code.exe",
                 "toRun": "%A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe Code.exe\", \"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe Code.exe\", \"\" A_Programs \"\\Visual Studio Code\\Visual Studio Code.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "Space": {
@@ -835,11 +1406,13 @@
         },
         "W": {
             "2": {
-                "comment": "召唤 Chrome",
+                "cmdArgs": "",
+                "comment": "Chrome",
                 "toActivate": "ahk_exe chrome.exe",
-                "toRun": "%A_ProgramsCommon%\\Google Chrome.lnk",
+                "toRun": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Google Chrome.lnk",
                 "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_exe chrome.exe\", \"\" A_ProgramsCommon \"\\Google Chrome.lnk\", \"\", \"\")"
+                "value": "ActivateOrRun(\"ahk_exe chrome.exe\", \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Google Chrome.lnk\", \"\", \"\")",
+                "workingDir": ""
             }
         },
         "X": {
@@ -856,11 +1429,8 @@
         },
         "Z": {
             "2": {
-                "comment": "",
-                "toActivate": "ahk_class YXMainFrame",
-                "toRun": "C:\\Program Files (x86)\\Yinxiang Biji\\印象笔记\\Evernote.exe",
-                "type": "启动程序或激活窗口",
-                "value": "ActivateOrRun(\"ahk_class YXMainFrame\", \"C:\\Program Files (x86)\\Yinxiang Biji\\印象笔记\\Evernote.exe\", \"\", \"\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "[": {
@@ -4252,9 +4822,13 @@
         "zk"
     ],
     "Settings": {
+        "AdditionalMode1": false,
+        "AdditionalMode1Key": "",
+        "AdditionalMode2": false,
+        "AdditionalMode2Key": "",
         "CapslockMode": true,
         "CommaMode": false,
-        "CustomShellMenu": "args = {file}\nexe = %A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk\nadd_menu_item(\"C\", \"在 Code 中打开\", \"icons\\vscode.ico\", exe, args)\n\nargs = -filename {file}\nexe = C:\\Program Files\\Everything\\Everything.exe\nadd_menu_item(\"E\", \"在 Everything 中搜索\", \"icons\\everything.png\", exe, args)\n\nargs = -d {file}\nexe = wt.exe\nadd_menu_item(\"T\", \"在 Windows Termianl 中打开\", \"icons\\terminal.png\", exe, args)\n\nargs = a {file}.7z {file}\nexe = C:\\Program Files\\7-Zip\\7z.exe\nadd_menu_item(\"Z\", \"用 7-Zip 压缩\", \"icons\\7z.ico\", exe, args)\n\nargs = x {file} -o{dir}\\{filenameNoExt}\nexe = C:\\Program Files\\7-Zip\\7z.exe\nadd_menu_item(\"X\", \"用 7-Zip 解压缩\", \"icons\\7z.ico\", exe, args)\n",
+        "CustomShellMenu": "args = {file}\nexe = %A_Programs%\\Visual Studio Code\\Visual Studio Code.lnk\nadd_menu_item(\"C\", \"在 Code 中打开\", \"icons\\vscode.ico\", exe, args)\n\nargs = -filename {file}\nexe = C:\\Program Files\\Everything\\Everything.exe\nadd_menu_item(\"E\", \"在 Everything 中搜索\", \"icons\\everything.png\", exe, args)\n\nargs = -d {file}\nexe = wt.exe\nadd_menu_item(\"T\", \"在 Windows Termianl 中打开\", \"icons\\terminal.png\", exe, args)\n\nargs = smartArchiveZipFile\nexe = C:\\Program Files\\7-Zip\\7zg.exe\nadd_menu_item(\"Z\", \"用 7-Zip 压缩\", \"icons\\7z.ico\", exe, args)\n\nargs = smartExtractZipFile\nexe = C:\\Program Files\\7-Zip\\7z.exe\nadd_menu_item(\"X\", \"用 7-Zip 解压缩\", \"icons\\7z.ico\", exe, args)\n",
         "DotMode": false,
         "JMode": false,
         "KeyMapping": "RAlt::LCtrl\n",
@@ -4968,6 +5542,8 @@
             "LButtonMode",
             "CommaMode",
             "DotMode",
+            "AdditionalMode1",
+            "AdditionalMode2",
             "CapslockAbbr",
             "SemicolonAbbr",
             "CustomHotkeys",
@@ -5006,21 +5582,29 @@
     "supportPerAppConfig": true,
     "windowSelectors": [
         {
+            "groupCode": "GroupAdd, window_group_3, ahk_exe explorer.exe",
+            "groupName": "window_group_3",
             "id": "3",
             "key": "📁 文件管理器",
             "value": "ahk_exe explorer.exe"
         },
         {
+            "groupCode": "GroupAdd, window_group_4, ahk_exe chrome.exe\nGroupAdd, window_group_4, ahk_exe msedge.exe\nGroupAdd, window_group_4, ahk_exe firefox.exe",
+            "groupName": "window_group_4",
             "id": "4",
-            "key": "🌐 Chrome",
-            "value": "ahk_exe chrome.exe"
+            "key": "🌐 浏览器分组",
+            "value": "ahk_exe chrome.exe\nahk_exe msedge.exe\nahk_exe firefox.exe"
         },
         {
+            "groupCode": "",
+            "groupName": "window_group_5",
             "id": "5",
-            "key": "🌐 Edge",
-            "value": "ahk_exe msedge.exe"
+            "key": "",
+            "value": ""
         },
         {
+            "groupCode": "",
+            "groupName": "window_group_6",
             "id": "6",
             "key": "",
             "value": ""
