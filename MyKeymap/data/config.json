@@ -586,20 +586,20 @@
         },
         "1": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "close_or_run_script(\"hide_mouse_cursor_when_idle.ahk\")"
             }
         },
         "2": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "close_or_run_script(\"komorebi.ahk\", \"D:/Tools/komorebi/komorebi.ahk\")"
             }
         },
         "3": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "turn_off_monitor()"
             }
         },
         "4": {
@@ -680,7 +680,7 @@
         "D": {
             "2": {
                 "type": "窗口操作",
-                "value": "send, #+{right}"
+                "value": "winMinimizeIgnoreDesktop()"
             }
         },
         "E": {
@@ -697,14 +697,14 @@
         },
         "F": {
             "2": {
-                "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"hide_mouse_cursor_when_idle.ahk\")"
+                "type": "窗口操作",
+                "value": "winMaximizeIgnoreDesktop()"
             }
         },
         "G": {
             "2": {
-                "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"komorebi.ahk\", \"D:/Tools/komorebi/komorebi.ahk\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "H": {
@@ -768,7 +768,7 @@
         "Q": {
             "2": {
                 "type": "窗口操作",
-                "value": "winMaximizeIgnoreDesktop()"
+                "value": "SmartCloseWindow()"
             }
         },
         "R": {
@@ -818,7 +818,7 @@
         "X": {
             "2": {
                 "type": "窗口操作",
-                "value": "SmartCloseWindow()"
+                "value": "send, #+{right}"
             },
             "4": {
                 "comment": "Ctrl + W 关闭标签",
@@ -843,8 +843,8 @@
         },
         "Z": {
             "2": {
-                "type": "可能会用到的内置函数",
-                "value": "turn_off_monitor()"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "[": {

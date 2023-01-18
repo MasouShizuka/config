@@ -19,7 +19,6 @@
     },
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
-    "ChineseInputAssistant.markdownUse": "no",
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
         "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",

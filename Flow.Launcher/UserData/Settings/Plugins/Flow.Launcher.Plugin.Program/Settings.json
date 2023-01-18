@@ -20,7 +20,8 @@
   "EnableDescription": false,
   "HideAppsPath": true,
   "EnableRegistrySource": true,
-  "EnablePATHSource": false,
+  "EnablePathSource": false,
+  "EnableUWP": true,
   "CustomizedExplorer": "explorer",
   "CustomizedArgs": "%s"
 }

@@ -1,1 +1,1 @@
-require("substitute").setup {}
+require("substitute").setup()

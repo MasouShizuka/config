@@ -10,6 +10,8 @@
 
 | 文件                 | 路径     | 说明                                                                                                                                                                                             |
 | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| aria2_python         | `aria2/` | 生成 `on-download` 的可执行文件的 `python` 项目                                                                                                                                                  |
+| aria2_rust           | `aria2/` | 生成 `on-download` 的可执行文件的 `rust` 项目                                                                                                                                                    |
 | aria2.conf           | `aria2/` | aria2 配置文件                                                                                                                                                                                   |
 | aria2.sh             | `aria2/` | aria2 启动脚本                                                                                                                                                                                   |
 | script.conf          | `aria2/` | aria2 附加功能脚本配置文件。                                                                                                                                                                     |
@@ -19,11 +21,9 @@
 | tracker.sh           | `aria2/` | BT tracker 列表更新脚本。在 aria2 配置文件(aria2.conf)所在目录执行即可获取最新 tracker 列表并添加到配置文件中。                                                                                  |
 | dht.dat</br>dht6.dat | `aria2/` | DHT 网络节点数据文件。提升 BT 下载率和下载速度的关键之一。                                                                                                                                       |
 | AriaNg.ico           | `aria2/` | aria2 图标                                                                                                                                                                                       |
-| download-stop.py     | `aria2/` | 生成 `on-download-stop` 的执行文件                                                                                                                                                               |
-| download-complete.py | `aria2/` | 生成 `on-download-complete` 的执行文件                                                                                                                                                           |
-| download-error.py    | `aria2/` | 生成 `on-download-error` 的执行文件                                                                                                                                                              |
 
 ## 说明
 
-- `py` 文件可用命令 `pyinstaller -Fw -i AriaNg.ico xxx.py` 生成 `aria2.conf` 中对应的 `exe` 文件
+- `aria2_python` 项目可用命令 `pyinstaller -Fw -i AriaNg.ico xxx.py` 生成 `aria2.conf` 中对应的 `exe` 文件
+- `aria2_rust` 项目可用命令 `cargo build --release` 生成 `aria2.conf` 中对应的 `exe` 文件
 - 脚本中用到了 `jq` 命令，因此需要安装：`pacman -S mingw-w64-ucrt-x86_64-jq`

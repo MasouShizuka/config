@@ -3,7 +3,6 @@ asvetliakov.vscode-neovim
 bierner.docs-view
 bierner.markdown-preview-github-styles
 clover.md-table-editor
-CodeInChinese.ChineseInputAssistant
 cweijan.vscode-office
 DavidAnson.vscode-markdownlint
 DotJoshJohnson.xml

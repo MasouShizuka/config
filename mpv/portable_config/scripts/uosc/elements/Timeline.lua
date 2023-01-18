@@ -301,8 +301,8 @@ function Timeline:render()
 				end
 			end
 
-			if state.ab_loop_a and state.ab_loop_a > 0 then draw_chapter(state.ab_loop_a) end
-			if state.ab_loop_b and state.ab_loop_b > 0 then draw_chapter(state.ab_loop_b) end
+			if state.ab_loop_a and state.ab_loop_a > 0 then draw_chapter(state.ab_loop_a, diamond_radius) end
+			if state.ab_loop_b and state.ab_loop_b > 0 then draw_chapter(state.ab_loop_b, diamond_radius) end
 		end
 	end
 
@@ -336,8 +336,8 @@ function Timeline:render()
 		end
 
 		-- End time
-		if state.duration_or_remaining_time_human then
-			draw_timeline_text(bbx - spacing, fcy, 6, state.duration_or_remaining_time_human, time_opts)
+		if state.destination_time_human then
+			draw_timeline_text(bbx - spacing, fcy, 6, state.destination_time_human, time_opts)
 		end
 	end
 

@@ -4,6 +4,7 @@
   "ColorScheme": "System",
   "ShowOpenResultHotkey": true,
   "WindowSize": 1280,
+  "PreviewHotkey": "F1",
   "Language": "zh-cn",
   "Theme": "My Theme",
   "UseDropShadowEffect": false,
@@ -20,7 +21,7 @@
   "UseSound": false,
   "UseClock": true,
   "UseDate": true,
-  "TimeFormat": "HH:mm",
+  "TimeFormat": "HH:mm:ss",
   "DateFormat": "MM\u0027/\u0027dd dddd",
   "FirstLaunch": false,
   "SettingWindowWidth": 1200,
@@ -103,6 +104,7 @@
   ],
   "ShouldUsePinyin": true,
   "AlwaysPreview": true,
+  "AlwaysStartEn": false,
   "QuerySearchPrecision": "Regular",
   "AutoUpdates": false,
   "WindowLeft": null,
@@ -122,13 +124,15 @@
   "IgnoreHotkeysOnFullscreen": false,
   "Proxy": {
     "Enabled": false,
-    "Server": null,
-    "Port": 0,
+    "Server": "127.0.0.1",
+    "Port": 7890,
     "UserName": null,
     "Password": null
   },
   "LastQueryMode": "Selected",
   "PluginSettings": {
+    "PythonExecutablePath": "",
+    "NodeExecutablePath": "",
     "PythonDirectory": "C:\\Users\\MasouShizuka\\miniconda3",
     "Plugins": {
       "0ECADE17459B49F587BF81DC3A125110": {

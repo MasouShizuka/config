@@ -120,6 +120,7 @@ WorkspaceRule("exe", "Thunder.exe", main_monitor, 5)
 ; Run, komorebic.exe float-rule class SunAwtDialog, , Hide
 ; Run, komorebic.exe float-rule class TaskManagerWindow, , Hide
 FloatRule("class", "ExplorerBrowserControl")
+FloatRule("class", "jsplitter_panel_container")
 FloatRule("class", "TApplication")
 ; Always float, matching on title
 ; Run, komorebic.exe float-rule title "Control Panel", , Hide
@@ -188,7 +189,8 @@ Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
 ;###########
 
 !q::
-WinClose, A
+; WinClose, A
+Close()
 return
 
 !+q::
@@ -451,7 +453,8 @@ if (MX) {
 return
 
 !d::
-WinMinimize, A
+; WinMinimize, A
+Minimize()
 return
 
 ; Flip horizontally
