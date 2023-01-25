@@ -56,12 +56,6 @@ map("n", "zk", "zb", { noremap = false, silent = true })
 
 if global.is_vscode then
     vim.cmd [[
-        " 移动 9 行居中，防止增加 vscode 的 navigation history
-        nmap <C-d> 9j
-        vmap <C-d> 9jzz
-        nmap <C-u> 9kzz
-        vmap <C-u> 9kzz
-
         " 插入新行
         nnoremap o i<Cmd>call VSCodeNotify("editor.action.insertLineAfter")<CR>
         nnoremap O i<Cmd>call VSCodeNotify("editor.action.insertLineBefore")<CR>
@@ -137,12 +131,6 @@ else
     map("c", "<Up>", "<C-p>", { noremap = true })
     map("c", "<C-j>", "<C-n>", { noremap = true })
     map("c", "<C-k>", "<C-p>", { noremap = true })
-
-    -- 翻半页居中
-    map("n", "<C-d>", "<C-d>zz", opt)
-    map("v", "<C-d>", "<C-d>zz", opt)
-    map("n", "<C-u>", "<C-u>zz", opt)
-    map("v", "<C-u>", "<C-u>zz", opt)
 
     -- 分屏
     map("n", "<C-j>", "<C-w>w", opt)

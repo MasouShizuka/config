@@ -14,7 +14,7 @@
 // License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) feature map 1
 //!BIND LUMA
 //!SAVE FEATURE1
@@ -51,7 +51,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) feature map 2
 //!BIND LUMA
 //!SAVE FEATURE2
@@ -88,7 +88,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) feature map 3
 //!BIND LUMA
 //!SAVE FEATURE3
@@ -125,7 +125,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) feature map 4
 //!BIND LUMA
 //!SAVE FEATURE4
@@ -162,7 +162,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 1_1
 //!BIND FEATURE1
 //!BIND FEATURE2
@@ -214,7 +214,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 1_2
 //!BIND FEATURE1
 //!BIND FEATURE2
@@ -266,7 +266,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 1_3
 //!BIND FEATURE1
 //!BIND FEATURE2
@@ -318,7 +318,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 1_4
 //!BIND FEATURE1
 //!BIND FEATURE2
@@ -370,7 +370,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 2_1
 //!BIND MODEL21
 //!BIND MODEL22
@@ -422,7 +422,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 2_2
 //!BIND MODEL21
 //!BIND MODEL22
@@ -474,7 +474,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 2_3
 //!BIND MODEL21
 //!BIND MODEL22
@@ -526,7 +526,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 2_4
 //!BIND MODEL21
 //!BIND MODEL22
@@ -578,7 +578,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 3_1
 //!BIND MODEL1
 //!BIND MODEL2
@@ -630,7 +630,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 3_2
 //!BIND MODEL1
 //!BIND MODEL2
@@ -682,7 +682,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 3_3
 //!BIND MODEL1
 //!BIND MODEL2
@@ -734,7 +734,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 3_4
 //!BIND MODEL1
 //!BIND MODEL2
@@ -786,7 +786,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 4_1
 //!BIND MODEL21
 //!BIND MODEL22
@@ -838,7 +838,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 4_2
 //!BIND MODEL21
 //!BIND MODEL22
@@ -890,7 +890,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 4_3
 //!BIND MODEL21
 //!BIND MODEL22
@@ -942,7 +942,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) mapping 4_4
 //!BIND MODEL21
 //!BIND MODEL22
@@ -994,7 +994,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) sub-band residuals 1
 //!BIND MODEL1
 //!BIND MODEL2
@@ -1016,7 +1016,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) sub-band residuals 2
 //!BIND MODEL1
 //!BIND MODEL2
@@ -1038,7 +1038,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) sub-band residuals 3
 //!BIND MODEL1
 //!BIND MODEL2
@@ -1060,7 +1060,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) sub-band residuals 4
 //!BIND MODEL1
 //!BIND MODEL2
@@ -1082,7 +1082,7 @@ return res;
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!DESC (FSRCNNX_x2_16-0-4-1) sub-pixel convolution 1
 //!BIND RES1
 //!BIND RES2
@@ -1133,7 +1133,7 @@ return vec4(res);
 }
 
 //!HOOK LUMA
-//!WHEN OUTPUT.w LUMA.w / 1.300 > OUTPUT.h LUMA.h / 1.300 > *
+//!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!WIDTH LUMA.w 2 *
 //!HEIGHT LUMA.h 2 *
 //!DESC (FSRCNNX_x2_16-0-4-1) aggregation

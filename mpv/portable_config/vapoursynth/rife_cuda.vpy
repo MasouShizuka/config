@@ -20,7 +20,7 @@ FPS_num = 2
 GPU = 0
 GPU_t = 2
 St_eng = False
-WS_size = 256
+WS_size = 0
 Lk_fmt = False
 ## 是否对超过DCI2K分辨率的源进行补帧
 ## 补帧倍率（整数）
@@ -32,7 +32,7 @@ Lk_fmt = False
 
 if container_fps > 32 :
 	raise Exception("源帧率超过限制的范围，已临时禁用该脚本。")
-if not Lt_D2K and (size_in > 2048 * 1088) :
+if (not Lt_D2K and (size_in > 2048 * 1088)) or (size_in  > 4096 * 2176) :
 	raise Exception("源分辨率超过限制的范围，已临时禁用该脚本。")
 if not St_eng and (((w_in > 4096) or (h_in > 2176)) or ((w_in < 289) or (h_in < 225))) :
 	raise Exception("源分辨率不属于动态引擎支持的范围，已临时禁用该脚本。")
@@ -54,8 +54,8 @@ cut0 = core.misc.SCDetect(clip=input, threshold=0.15)
 cut1 = core.resize.Bilinear(clip=cut0, format=vs.RGBH, matrix_in_s="709")
 cut2 = core.std.AddBorders(clip=cut1, right=w_tmp, bottom=h_tmp)
 cut3 = RIFE(clip=cut2, multi=FPS_num, scale=scale_model, model=RIFEModel.v4_6, backend=BackendV2.TRT(
-	num_streams=GPU_t, fp16=True, output_format=1,
-	workspace=None if WS_size < 128 else (WS_size if St_eng else WS_size * 2), use_cuda_graph=False,
+	num_streams=GPU_t, force_fp16=True, output_format=1,
+	workspace=None if WS_size < 128 else (WS_size if St_eng else WS_size * 2), use_cuda_graph=True,
 	static_shape=St_eng, min_shapes=[0, 0] if St_eng else [320, 256],
 	opt_shapes=None if St_eng else [1920, 1088], max_shapes=None if St_eng else ([4096, 2176] if Lt_D2K else [2048, 1088]),
 	use_cublas=False, use_cudnn=False, device_id=GPU))

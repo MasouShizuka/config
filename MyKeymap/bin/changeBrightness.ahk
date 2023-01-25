@@ -8,7 +8,8 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 Menu, Tray, Icon, logo.ico
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 
-#Include, %A_ScriptDir%\Monitor.ahk
+#include %A_ScriptDir%/custom/monitor_center.ahk
+#Include %A_ScriptDir%/Monitor.ahk
 
 Gui, +LastFound
 SysGet, monCount, MonitorCount
@@ -57,7 +58,7 @@ IfLoseFocusThenExit()
 
 class CLayout
 {
-    __New() 
+    __New()
     {
         this.X := 50
         this.Y := 50
@@ -75,14 +76,16 @@ class CLayout
         ; Gui Add, Text, x10 y280 w290 h20 +0x200, EDSF调节亮度、WR切换显示器、X退出
         Gui Add, Text, x10 y280 w290 h20 +0x200, WSAD调节亮度、QE切换显示器、X退出
         Gui Add, Text, x10 y300 w490 h20 +0x200, 如果不起作用, 用 Win+P 断开并重连该显示器, 然后重启本程序试试
-        
+
     }
     show()
     {
         global GuiHwnd
         w :=  this.X + 70
         h :=  320
-        Gui Show, w%w% h%h%, 显示器亮度调节
+        GetCurrentMonitorCenter(x, y)
+        Gui Show, w%w% h%h% x%x% y%y%, 显示器亮度调节
+        ; Gui Show, w%w% h%h%, 显示器亮度调节
         disableIME(GuiHwnd)
     }
 
@@ -100,14 +103,14 @@ class CLayout
         this.mon[i].deactivate()
     }
     next() {
-        if (this.curr >= this.count) 
+        if (this.curr >= this.count)
             return
         this.mon[this.curr].deactivate()
         this.curr += 1
         this.mon[this.curr].activate()
     }
     prev() {
-        if (this.curr <= 1) 
+        if (this.curr <= 1)
             return
         this.mon[this.curr].deactivate()
         this.curr -= 1
@@ -231,7 +234,7 @@ WM_KEYDOWN(wParam, lParam)
         case "q": layout.prev()
         case "e": layout.next()
         case "x": ExitApp
-        default: 
+        default:
             ; sleep 500
         return 0
     }
@@ -252,14 +255,14 @@ ChangeBrightness( ByRef brightness, timeout = 1 )
 {
 
 	For property in ComObjGet( "winmgmts:\\.\root\WMI" ).ExecQuery( "SELECT * FROM WmiMonitorBrightnessMethods" )
-		property.WmiSetBrightness( timeout, brightness )	
+		property.WmiSetBrightness( timeout, brightness )
 
 }
 
 GetCurrentBrightNess()
 {
     For property in ComObjGet( "winmgmts:\\.\root\WMI" ).ExecQuery( "SELECT * FROM WmiMonitorBrightness" )
-        currentBrightness := property.CurrentBrightness	
+        currentBrightness := property.CurrentBrightness
 
     return currentBrightness
 }

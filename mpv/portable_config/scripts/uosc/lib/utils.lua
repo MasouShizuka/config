@@ -23,9 +23,9 @@ sort_filenames = (function()
 
 	-- Alphanumeric sorting for humans in Lua
 	-- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
-	local function pad_number(d)
-		local dec, n = d:match('(%.?)0*(.+)')
-		return #dec > 0 and ('%.12f'):format(d) or ('%03d%s'):format(#n, n)
+	local function pad_number(n, d)
+		return #d > 0 and ("%03d%s%.12f"):format(#n, n, tonumber(d) / (10 ^ #d))
+			or ("%03d%s"):format(#n, n)
 	end
 
 	--- In place sorting of filenames
@@ -35,7 +35,7 @@ sort_filenames = (function()
 		for i, filename in ipairs(filenames) do
 			local first_char = filename:sub(1, 1)
 			local order = symbol_order[first_char] or default_order
-			local formatted = filename:lower():gsub('%.?%d+', pad_number)
+			local formatted = filename:lower():gsub('0*(%d+)%.?(%d*)', pad_number)
 			tuples[i] = {order, formatted, filename}
 		end
 		table.sort(tuples, function(a, b)
@@ -380,7 +380,29 @@ end
 -- `status:number(<0=error), stdout, stderr, error_string, killed_by_us:boolean`
 ---@param path string
 function delete_file(path)
-	local args = state.os == 'windows' and {'cmd', '/C', 'del', path} or {'rm', path}
+	if state.os == 'windows' then
+		if options.use_trash then
+            local ps_code = [[
+				Add-Type -AssemblyName Microsoft.VisualBasic
+				[Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('__path__', 'OnlyErrorDialogs', 'SendToRecycleBin')
+			]]
+
+            local escaped_path = string.gsub(path, "'", "''")
+            escaped_path = string.gsub(escaped_path, "’", "’’")
+            escaped_path = string.gsub(escaped_path, "%%", "%%%%")
+            ps_code = string.gsub(ps_code, "__path__", escaped_path)
+		    args = { 'powershell', '-NoProfile', '-Command', ps_code }
+		else
+			args = { 'cmd', '/C', 'del', path }
+		end
+	else
+		if options.use_trash then
+			--On Linux and Macos the app trash-cli/trash must be installed first.
+		    args = { 'trash', path }
+	    else
+		    args = { 'rm', path }
+		end
+	end
 	return mp.command_native({
 		name = 'subprocess',
 		args = args,

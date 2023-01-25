@@ -17,13 +17,14 @@ return require("packer").startup(function(use)
     use "wbthomason/packer.nvim"
 
 
-
     use "otavioschwanck/cool-substitute.nvim"
 
     use {
         "phaazon/hop.nvim",
         branch = "v2",
     }
+
+    use "karb94/neoscroll.nvim"
 
     use "kevinhwang91/nvim-hlslens"
 

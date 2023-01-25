@@ -6,6 +6,8 @@ SetWorkingDir %A_ScriptDir%
 Menu, Tray, Icon, logo.ico
 SendMode Input
 
+#include %A_ScriptDir%/custom/monitor_center.ahk
+
 layout := new CLayout()
 
 ind := 1
@@ -32,7 +34,7 @@ IfLoseFocusThenExit()
 
 class CLayout
 {
-    __New() 
+    __New()
     {
         this.X := 180
         this.Y := 10
@@ -56,7 +58,8 @@ class CLayout
         global GuiHwnd
         w :=  this.X + 175
         h :=  320
-        Gui Show, w%w% h%h%, 声音控制
+        GetCurrentMonitorCenter(x, y)
+        Gui Show, w%w% h%h% x%x% y%y%, 声音控制
         disableIME(GuiHwnd)
     }
 
@@ -74,14 +77,14 @@ class CLayout
         this.mon[i].deactivate()
     }
     next() {
-        if (this.curr >= this.count) 
+        if (this.curr >= this.count)
             return
         this.mon[this.curr].deactivate()
         this.curr += 1
         this.mon[this.curr].activate()
     }
     prev() {
-        if (this.curr <= 1) 
+        if (this.curr <= 1)
             return
         this.mon[this.curr].deactivate()
         this.curr -= 1
@@ -206,7 +209,7 @@ WM_KEYDOWN(wParam, lParam)
         ; case "g": send {Media_Next}
         case "q": send {Media_Prev}
         case "e": send {Media_Next}
-        case "v": 
+        case "v":
             run, ms-settings:apps-volume
             ExitApp
         case "c": send {Media_Play_Pause}
@@ -220,12 +223,12 @@ WM_KEYDOWN(wParam, lParam)
         case "w": layout.incBrightness(5)
         ; case "w": layout.prev()
         ; case "r": layout.next()
-        case "Space": 
+        case "Space":
             SoundSet, +1,, Mute
             SoundGet, val, MASTER, MUTE
             layout.mute(val)
         case "x": ExitApp
-        default: 
+        default:
             ; sleep 500
         return 0
     }

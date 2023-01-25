@@ -9,16 +9,16 @@ Show_Cursor_Status := True
 SetTimer, Check_Idle, 250
 Check_Idle:
     MouseGetPos, X, Y
-    if (X != Last_X || Y != Last_Y) {
+    If (X != Last_X || Y != Last_Y) {
         RestoreCursor()
         Show_Cursor_Status := True
         Last_X := X, Last_Y := Y
         Last_Time := A_TickCount
-    } else if (A_TickCount >= Last_Time + Show_Cursor_Duration && Show_Cursor_Status) {
+    } Else If (A_TickCount >= Last_Time + Show_Cursor_Duration && Show_Cursor_Status) {
         SetCursorBlank()
         Show_Cursor_Status := False
     }
-return
+Return
 
 SetCursorBlank() {
     SystemCursors = 32512IDC_ARROW,32513IDC_IBEAM,32514IDC_WAIT,32515IDC_CROSS

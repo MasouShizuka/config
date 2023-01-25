@@ -8,19 +8,11 @@ from core.utils.win32.utilities import get_monitor_hwnd
 from core.validation.widgets.komorebi.multi_window import VALIDATION_SCHEMA
 from core.widgets.base import BaseWidget
 from psutil import Process
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QIcon, QImage, QPixmap
-from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QWidget
-from win32gui import (
-    DestroyIcon,
-    DrawIconEx,
-    ExtractIconEx,
-    GetDC,
-    GetWindowText,
-    SetForegroundWindow,
-)
+from PyQt6.QtCore import QFileInfo, pyqtSignal
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QFileIconProvider, QHBoxLayout, QPushButton, QWidget
+from win32gui import GetWindowText, SetForegroundWindow
 from win32process import GetWindowThreadProcessId
-from win32ui import CreateBitmap, CreateDCFromHandle
 
 try:
     from core.utils.komorebi.event_listener import KomorebiEventListener
@@ -134,7 +126,8 @@ class MultiWindowWidget(BaseWidget):
         self.k_signal_window_change.connect(self._on_komorebi_window_change_event)
 
         self._event_service.register_event(
-            KomorebiEvent.KomorebiConnect, self.k_signal_connect
+            KomorebiEvent.KomorebiConnect,
+            self.k_signal_connect,
         )
 
         for event_type in window_change_event_watchlist:
@@ -180,8 +173,7 @@ class MultiWindowWidget(BaseWidget):
                     if self._show_icon:
                         p = Process(pid)
                         exe_path = p.exe()
-                        pixmap = self._get_icon_pixmap(exe_path)
-                        qicon = QIcon(pixmap)
+                        qicon = QIcon(QFileIconProvider().icon(QFileInfo(exe_path)))
                         window_button.setIcon(qicon)
                     if index == focused_window_index:
                         window_button.update_focused()
@@ -216,38 +208,6 @@ class MultiWindowWidget(BaseWidget):
             old_workspace_widget.deleteLater()
 
         self._window_buttons.clear()
-
-    def _get_icon_pixmap(self, exe_path) -> QPixmap:
-        # Get the icons
-        icons = ExtractIconEx(exe_path, 0)
-        icon = icons[0][0]
-        width = height = 32
-
-        # Create DC and bitmap and make them compatible.
-        hdc = CreateDCFromHandle(GetDC(0))
-        hbmp = CreateBitmap()
-        hbmp.CreateCompatibleBitmap(hdc, width, height)
-        hdc = hdc.CreateCompatibleDC()
-        hdc.SelectObject(hbmp)
-
-        # Draw the icon.
-        DrawIconEx(hdc.GetHandleOutput(), 0, 0, icon, width, height, 0, None, 0x0003)
-
-        # Get the icon's bits and convert to a QtGui.QImage.
-        bitmapbits = hbmp.GetBitmapBits(True)
-        image = QImage(
-            bitmapbits, width, height, QImage.Format.Format_ARGB32_Premultiplied
-        )
-
-        # Create a QtGui.QPixmap from the QtGui.QImage.
-        pixmap = QPixmap.fromImage(image).copy()
-
-        # Destroy the icons.
-        for icon_list in icons:
-            for icon in icon_list:
-                DestroyIcon(icon)
-
-        return pixmap
 
     def _update_workspace_windows_title(self):
         for window_button in self._window_buttons:

@@ -1,4 +1,4 @@
-# Neovim
+# neovim
 
 ## 仓库
 

@@ -587,13 +587,13 @@
         "1": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"hide_mouse_cursor_when_idle.ahk\")"
+                "value": "close_or_run_script(\"bin/custom/hide_mouse_cursor_when_idle.ahk\")"
             }
         },
         "2": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"komorebi.ahk\", \"D:/Tools/komorebi/komorebi.ahk\")"
+                "value": "close_or_run_script(\"D:/Tools/komorebi/komorebi.ahk\")"
             }
         },
         "3": {
@@ -703,8 +703,8 @@
         },
         "G": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "close_or_run_script(\"bin/custom/activate_tray_icon.ahk\")"
             }
         },
         "H": {
@@ -780,7 +780,7 @@
         "S": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "run, bin\\ahk.exe bin\\soundControl.ahk"
+                "value": "close_or_run_script(\"bin/soundControl.ahk\")"
             }
         },
         "Space": {

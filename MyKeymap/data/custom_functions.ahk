@@ -5,8 +5,8 @@ sendSomeChinese() {
 }
 
 center_window() {
-    if (!WinExist("A")) {
-        return
+    If (!WinExist("A")) {
+        Return
     }
 
     WinGetPos, X, Y, W, H
@@ -16,69 +16,81 @@ center_window() {
     SysGet, MonitorCount, MonitorCount
     Loop, %MonitorCount% {
         SysGet, MonitorWorkArea, MonitorWorkArea, %A_Index%
-        if(CX >= MonitorWorkAreaLeft && CX <= MonitorWorkAreaRight && CY >= MonitorWorkAreaTop && CY <= MonitorWorkAreaBottom) {
+        If (CX >= MonitorWorkAreaLeft && CX <= MonitorWorkAreaRight && CY >= MonitorWorkAreaTop && CY <= MonitorWorkAreaBottom) {
             MW := (MonitorWorkAreaRight - MonitorWorkAreaLeft)
             MH := (MonitorWorkAreaBottom - MonitorWorkAreaTop)
 
             WinMove, MonitorWorkAreaLeft + (MW - W) / 2, MonitorWorkAreaTop + (MH - H) / 2
-            break
+            Break
         }
     }
 }
 
-close_or_run_script(name, path:="") {
+close_or_run_script(path) {
+    StringReplace, path, path, /, \, All
+    SplitPath, path, name
+
     DetectHiddenWindows On
     SetTitleMatchMode RegEx
     running_script := "i)" . name . ".* ahk_class AutoHotkey"
-    if (WinExist(running_script)) {
+    If (WinExist(running_script)) {
         WinClose
         WinWaitClose, running_script, , 2
-    } else {
-        if (path == "") {
-            path := "bin/custom/" . name
-        }
-        run, bin/ahk.exe %path%
+    } Else {
+        Run, bin/ahk.exe %path%
     }
+    DetectHiddenWindows Off
 }
 
 enter_mouse_mode() {
     global SLOWMODE
     SLOWMODE := true
-    if (mouseMovePrompt) {
+    If (MouseMovePrompt) {
         WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
     }
-    mouseMovePrompt.show("🖱️", 19, 17)
+    MouseMovePrompt.show("🖱️", 19, 17)
+}
+
+exit_mouse_mode() {
+    global SLOWMODE
+    global VERYSLOWMODE
+    SLOWMODE := false
+    VERYSLOWMODE := false
+    Send, {Blind}{LButton Up}
+    If (MouseMovePrompt) {
+        MouseMovePrompt.hide()
+    }
 }
 
 left_click_down() {
-    send, {blind}{LButton Down}
+    Send, {Blind}{LButton Down}
 }
 
 left_click_up() {
     global SLOWMODE
-    send, {blind}{LButton Up}
+    Send, {Blind}{LButton Up}
     SLOWMODE := false
-    if (mouseMovePrompt) {
-        mouseMovePrompt.hide()
+    If (MouseMovePrompt) {
+        MouseMovePrompt.hide()
     }
 }
 
 left_click_down_without_false() {
-    send, {blind}{LButton Down}
+    Send, {Blind}{LButton Down}
 }
 
 left_click_up_without_false() {
-    send, {blind}{LButton Up}
+    Send, {Blind}{LButton Up}
 }
 
 right_click_down(tempDisableRButton := false) {
     global SLOWMODE
-    if (!tempDisableRButton) {
-        send, {blind}{RButton Down}
-    } else {
+    If (!tempDisableRButton) {
+        Send, {Blind}{RButton Down}
+    } Else {
         setHotkeyStatus("RButton", false)
-        send, {blind}{RButton Down}
-        sleep, 70
+        Send, {Blind}{RButton Down}
+        Sleep, 70
         setHotkeyStatus("RButton", true)
     }
     SLOWMODE := false
@@ -86,38 +98,38 @@ right_click_down(tempDisableRButton := false) {
 
 right_click_up(tempDisableRButton := false) {
     global SLOWMODE
-    if (!tempDisableRButton) {
-        send, {blind}{RButton Up}
-    } else {
+    If (!tempDisableRButton) {
+        Send, {Blind}{RButton Up}
+    } Else {
         setHotkeyStatus("RButton", false)
-        send, {blind}{RButton Up}
-        sleep, 70
+        Send, {Blind}{RButton Up}
+        Sleep, 70
         setHotkeyStatus("RButton", true)
     }
     SLOWMODE := false
-    if (mouseMovePrompt) {
-        mouseMovePrompt.hide()
+    If (MouseMovePrompt) {
+        MouseMovePrompt.hide()
     }
 }
 
 right_click_down_without_false(tempDisableRButton := false) {
-    if (!tempDisableRButton) {
-        send, {blind}{RButton Down}
-    } else {
+    If (!tempDisableRButton) {
+        Send, {Blind}{RButton Down}
+    } Else {
         setHotkeyStatus("RButton", false)
-        send, {blind}{RButton Down}
-        sleep, 70
+        Send, {Blind}{RButton Down}
+        Sleep, 70
         setHotkeyStatus("RButton", true)
     }
 }
 
 right_click_up_without_false(tempDisableRButton := false) {
-    if (!tempDisableRButton) {
-        send, {blind}{RButton Up}
-    } else {
+    If (!tempDisableRButton) {
+        Send, {Blind}{RButton Up}
+    } Else {
         setHotkeyStatus("RButton", false)
-        send, {blind}{RButton Up}
-        sleep, 70
+        Send, {Blind}{RButton Up}
+        Sleep, 70
         setHotkeyStatus("RButton", true)
     }
 }
@@ -129,18 +141,18 @@ fast_move_mouse(key, direction_x, direction_y) {
     one_y := direction_y *fastMoveSingle
     repeat_x := direction_x *fastMoveRepeat
     repeat_y := direction_y *fastMoveRepeat
-    mousemove, %one_x% , %one_y%, 0, R
-    if (mouseMovePrompt) {
+    MouseMove, %one_x% , %one_y%, 0, R
+    If (MouseMovePrompt) {
         WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
     }
-    mouseMovePrompt.show("🖱️", 19, 17)
-    keywait, %key%, %moveDelay1%
-    while (errorlevel != 0) {
-        mousemove, %repeat_x%, %repeat_y%, 0, R
-        if (mouseMovePrompt) {
-            mouseMovePrompt.show("🖱️", 19, 17)
+    MouseMovePrompt.show("🖱️", 19, 17)
+    KeyWait, %key%, %moveDelay1%
+    While, errorlevel != 0 {
+        MouseMove, %repeat_x%, %repeat_y%, 0, R
+        If (MouseMovePrompt) {
+            MouseMovePrompt.show("🖱️", 19, 17)
         }
-        keywait, %key%, %moveDelay2%
+        KeyWait, %key%, %moveDelay2%
     }
 }
 
@@ -150,18 +162,18 @@ slow_move_mouse(key, direction_x, direction_y) {
     one_y := direction_y * slowMoveSingle
     repeat_x := direction_x * slowMoveRepeat
     repeat_y := direction_y * slowMoveRepeat
-    mousemove, %one_x% , %one_y%, 0, R
-    if (mouseMovePrompt) {
+    MouseMove, %one_x% , %one_y%, 0, R
+    If (MouseMovePrompt) {
         WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
     }
-    mouseMovePrompt.show("🖱️", 19, 17)
-    keywait, %key%, %moveDelay1%
-    while (errorlevel != 0) {
-        mousemove, %repeat_x%, %repeat_y%, 0, R
-        if (mouseMovePrompt) {
-            mouseMovePrompt.show("🖱️", 19, 17)
+    MouseMovePrompt.show("🖱️", 19, 17)
+    KeyWait, %key%, %moveDelay1%
+    While, errorlevel != 0 {
+        MouseMove, %repeat_x%, %repeat_y%, 0, R
+        if (MouseMovePrompt) {
+            MouseMovePrompt.show("🖱️", 19, 17)
         }
-        keywait, %key%, %moveDelay2%
+        KeyWait, %key%, %moveDelay2%
     }
 }
 
@@ -172,33 +184,22 @@ very_slow_move_mouse(key, direction_x, direction_y) {
     one_y := direction_y
     repeat_x := direction_x
     repeat_y := direction_y
-    mousemove, %one_x% , %one_y%, 0, R
-    if (mouseMovePrompt) {
+    MouseMove, %one_x% , %one_y%, 0, R
+    If (MouseMovePrompt) {
         WinSet, AlwaysOnTop, On, ahk_class AutoHotkeyGUI
     }
-    mouseMovePrompt.show("🖱️", 19, 17)
-    keywait, %key%, %moveDelay1%
-    while (errorlevel != 0) {
-        mousemove, %repeat_x%, %repeat_y%, 0, R
-        if (mouseMovePrompt) {
-            mouseMovePrompt.show("🖱️", 19, 17)
+    MouseMovePrompt.show("🖱️", 19, 17)
+    KeyWait, %key%, %moveDelay1%
+    While, errorlevel != 0 {
+        MouseMove, %repeat_x%, %repeat_y%, 0, R
+        If (MouseMovePrompt) {
+            MouseMovePrompt.show("🖱️", 19, 17)
         }
-        keywait, %key%, %moveDelay2%
-    }
-}
-
-exit_mouse_mode() {
-    global SLOWMODE
-    global VERYSLOWMODE
-    SLOWMODE := false
-    VERYSLOWMODE := false
-    send {blind}{Lbutton up}
-    if (mouseMovePrompt) {
-        mouseMovePrompt.hide()
+        KeyWait, %key%, %moveDelay2%
     }
 }
 
 turn_off_monitor() {
-    sleep, 1000
-    sendmessage 0x112, 0xF170, 2, , Program Manager
+    Sleep, 1000
+    SendMessage 0x112, 0xF170, 2, , Program Manager
 }

@@ -2,6 +2,7 @@ local global = require("global")
 
 require("plugin-conf/cool-substitute")
 require("plugin-conf/hop")
+require("plugin-conf/neoscroll")
 require("plugin-conf/nvim-hlslens")
 require("plugin-conf/nvim-surround")
 require("plugin-conf/substitute")

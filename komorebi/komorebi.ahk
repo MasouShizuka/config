@@ -1,18 +1,21 @@
 ﻿#SingleInstance Force
 
 ; You can generate a fresh version of this file with "komorebic ahk-library"
-#Include %A_ScriptDir%\komorebic.lib.ahk
+#Include %A_ScriptDir%/komorebic.lib.ahk
 
 #Persistent
 OnExit("komorebic_stop")
 komorebic_stop() {
-    if (is_taskbar_hide) {
+    If (is_taskbar_hide) {
         unhide_taskbar()
     }
+
     Stop()
+
     Run, rm ~/komorebic.sock, , Hide
     Run, rm -rf ~/AppData/Local/komorebi, , Hide
-    return
+
+    Return
 }
 
 
@@ -130,6 +133,7 @@ FloatRule("title", "Hotkey sink")
 ; Run, komorebic.exe float-rule exe Wally.exe, , Hide
 ; Run, komorebic.exe float-rule exe wincompose.exe, , Hide
 ; Run, komorebic.exe float-rule exe 1Password.exe, , Hide
+FloatRule("exe", "ahk.exe")
 FloatRule("exe", "ApplicationFrameHost.exe")
 FloatRule("exe", "Clash Verge.exe")
 FloatRule("exe", "copyq.exe")
@@ -189,13 +193,13 @@ Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
 ;###########
 
 !q::
-; WinClose, A
-Close()
-return
+    ; WinClose, A
+    Close()
+Return
 
 !+q::
-Stop()
-return
+    Stop()
+Return
 
 ; Change the focused window, Alt + Vim direction keys (HJKL)
 ; !h::
@@ -215,12 +219,12 @@ return
 ; return
 
 !j::
-CycleFocus("next")
-return
+    CycleFocus("next")
+Return
 
 !k::
-CycleFocus("previous")
-return
+    CycleFocus("previous")
+Return
 
 ; Move the focused window in a given direction, Alt + Shift + Vim direction keys (HJKL)
 ; !+h::
@@ -240,28 +244,28 @@ return
 ; return
 
 !+j::
-CycleMove("next")
-return
+    CycleMove("next")
+Return
 
 !+k::
-CycleMove("previous")
-return
+    CycleMove("previous")
+Return
 
 !h::
-ResizeAxis("horizontal", "decrease")
-return
+    ResizeAxis("horizontal", "decrease")
+Return
 
 !l::
-ResizeAxis("horizontal", "increase")
-return
+    ResizeAxis("horizontal", "increase")
+Return
 
 !+h::
-ResizeAxis("vertical", "decrease")
-return
+    ResizeAxis("vertical", "decrease")
+Return
 
 !+l::
-ResizeAxis("vertical", "increase")
-return
+    ResizeAxis("vertical", "increase")
+Return
 
 ; Stack the focused window in a given direction
 ; !+Left::
@@ -295,199 +299,199 @@ return
 
 ; Switch to workspace
 !1::
-; Run, komorebic.exe focus-workspace 0, , Hide
-FocusMonitorWorkspace(main_monitor, 0)
-return
+    ; Run, komorebic.exe focus-workspace 0, , Hide
+    FocusMonitorWorkspace(main_monitor, 0)
+Return
 
 !2::
-; Run, komorebic.exe focus-workspace 1, , Hide
-FocusMonitorWorkspace(main_monitor, 1)
-return
+    ; Run, komorebic.exe focus-workspace 1, , Hide
+    FocusMonitorWorkspace(main_monitor, 1)
+Return
 
 !3::
-; Run, komorebic.exe focus-workspace 2, , Hide
-FocusMonitorWorkspace(main_monitor, 2)
-return
+    ; Run, komorebic.exe focus-workspace 2, , Hide
+    FocusMonitorWorkspace(main_monitor, 2)
+Return
 
 !4::
-; Run, komorebic.exe focus-workspace 3, , Hide
-FocusMonitorWorkspace(main_monitor, 3)
-return
+    ; Run, komorebic.exe focus-workspace 3, , Hide
+    FocusMonitorWorkspace(main_monitor, 3)
+Return
 
 !5::
-; Run, komorebic.exe focus-workspace 4, , Hide
-FocusMonitorWorkspace(main_monitor, 4)
-return
+    ; Run, komorebic.exe focus-workspace 4, , Hide
+    FocusMonitorWorkspace(main_monitor, 4)
+Return
 
 !6::
-; Run, komorebic.exe focus-workspace 5, , Hide
-FocusMonitorWorkspace(main_monitor, 5)
-return
+    ; Run, komorebic.exe focus-workspace 5, , Hide
+    FocusMonitorWorkspace(main_monitor, 5)
+Return
 
 !7::
-; Run, komorebic.exe focus-workspace 6, , Hide
-FocusMonitorWorkspace(main_monitor, 6)
-return
+    ; Run, komorebic.exe focus-workspace 6, , Hide
+    FocusMonitorWorkspace(main_monitor, 6)
+Return
 
 ; Move window to workspace
 !+1::
-; Run, komorebic.exe send-to-workspace 0, , Hide
-SendToMonitorWorkspace(main_monitor, 0)
-return
+    ; Run, komorebic.exe send-to-workspace 0, , Hide
+    SendToMonitorWorkspace(main_monitor, 0)
+Return
 
 !+2::
-; Run, komorebic.exe send-to-workspace 1, , Hide
-SendToMonitorWorkspace(main_monitor, 1)
-return
+    ; Run, komorebic.exe send-to-workspace 1, , Hide
+    SendToMonitorWorkspace(main_monitor, 1)
+Return
 
 !+3::
-; Run, komorebic.exe send-to-workspace 2, , Hide
-SendToMonitorWorkspace(main_monitor, 2)
-return
+    ; Run, komorebic.exe send-to-workspace 2, , Hide
+    SendToMonitorWorkspace(main_monitor, 2)
+Return
 
 !+4::
-; Run, komorebic.exe send-to-workspace 3, , Hide
-SendToMonitorWorkspace(main_monitor, 3)
-return
+    ; Run, komorebic.exe send-to-workspace 3, , Hide
+    SendToMonitorWorkspace(main_monitor, 3)
+Return
 
 !+5::
-; Run, komorebic.exe send-to-workspace 4, , Hide
-SendToMonitorWorkspace(main_monitor, 4)
-return
+    ; Run, komorebic.exe send-to-workspace 4, , Hide
+    SendToMonitorWorkspace(main_monitor, 4)
+Return
 
 !+6::
-; Run, komorebic.exe send-to-workspace 5, , Hide
-SendToMonitorWorkspace(main_monitor, 5)
-return
+    ; Run, komorebic.exe send-to-workspace 5, , Hide
+    SendToMonitorWorkspace(main_monitor, 5)
+Return
 
 !+7::
-; Run, komorebic.exe send-to-workspace 6, , Hide
-SendToMonitorWorkspace(main_monitor, 6)
-return
+    ; Run, komorebic.exe send-to-workspace 6, , Hide
+    SendToMonitorWorkspace(main_monitor, 6)
+Return
 
 !u::
-FocusMonitor(0)
-return
+    FocusMonitor(0)
+Return
 
 !i::
-FocusMonitor(1)
-return
+    FocusMonitor(1)
+Return
 
 !o::
-FocusMonitor(2)
-return
+    FocusMonitor(2)
+Return
 
 !+u::
-SendToMonitor(0)
-return
+    SendToMonitor(0)
+Return
 
 !+i::
-SendToMonitor(1)
-return
+    SendToMonitor(1)
+Return
 
 !+o::
-SendToMonitor(2)
-return
+    SendToMonitor(2)
+Return
 
 ; Switch to the default bsp tiling layout
 !b::
-; Run, komorebic.exe workspace-layout 0 0 bsp, , Hide
-ChangeLayout("bsp")
-return
+    ; Run, komorebic.exe workspace-layout 0 0 bsp, , Hide
+    ChangeLayout("bsp")
+Return
 
 ; Switch to an equal-width, max-height column layout
 !c::
-; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
-ChangeLayout("columns")
-return
+    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
+    ChangeLayout("columns")
+Return
 
 ; Switch to an equal-height, max-width column layout
 !r::
-; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
-ChangeLayout("rows")
-return
+    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
+    ChangeLayout("rows")
+Return
 
 !+c::
-; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
-ChangeLayout("vertical-stack")
-return
+    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
+    ChangeLayout("vertical-stack")
+Return
 
 !+r::
-; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
-ChangeLayout("horizontal-stack")
-return
+    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
+    ChangeLayout("horizontal-stack")
+Return
 
 !+m::
-ChangeLayout("ultrawide-vertical-stack")
-return
+    ChangeLayout("ultrawide-vertical-stack")
+Return
 
 ; Pause responding to any window events or komorebic commands
 !+Capslock::
 !+Esc::
-TogglePause()
-return
+    TogglePause()
+Return
 
 !Capslock::
 !Esc::
-ToggleTiling()
-return
+    ToggleTiling()
+Return
 
 ; Float the focused window
 !+f::
-ToggleFloat()
-return
+    ToggleFloat()
+Return
 
 ; Toggle the Monocle layout for the focused window
 !m::
-ToggleMonocle()
-return
+    ToggleMonocle()
+Return
 
 ; Toggle native maximize for the focused window
 !f::
-WinGet, MX, MinMax, A
-if (MX) {
-    WinRestore, A
-} else {
-    WinMaximize, A
-}
-return
+    WinGet, MX, MinMax, A
+    If (MX) {
+        WinRestore, A
+    } Else {
+        WinMaximize, A
+    }
+Return
 
 !d::
-; WinMinimize, A
-Minimize()
-return
+    ; WinMinimize, A
+    Minimize()
+Return
 
 ; Flip horizontally
 !x::
-FlipLayout("horizontal")
-return
+    FlipLayout("horizontal")
+Return
 
 ; Flip vertically
 !y::
-FlipLayout("vertical")
-return
+    FlipLayout("vertical")
+Return
 
 ; Promote the focused window to the top of the tree
 !+e::
-Promote()
-return
+    Promote()
+Return
 
 !e::
-PromoteFocus()
-return
+    PromoteFocus()
+Return
 
 ; Force a retile if things get janky
 !n::
-Retile()
-return
+    Retile()
+Return
 
 !t::
-Manage()
-return
+    Manage()
+Return
 
 !+t::
-Unmanage()
-return
+    Unmanage()
+Return
 
 ; Reload ~/komorebi.ahk
 ; !o::
@@ -495,14 +499,14 @@ return
 ; return
 
 !+b::
-Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
-return
+    Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+Return
 
 !z::
-if (is_taskbar_hide) {
-    unhide_taskbar()
-} else {
-    hide_taskbar()
-}
-is_taskbar_hide := !is_taskbar_hide
-return
+    If (is_taskbar_hide) {
+        unhide_taskbar()
+    } Else {
+        hide_taskbar()
+    }
+    is_taskbar_hide := !is_taskbar_hide
+Return
