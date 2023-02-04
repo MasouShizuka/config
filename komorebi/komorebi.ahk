@@ -6,10 +6,6 @@
 #Persistent
 OnExit("komorebic_stop")
 komorebic_stop() {
-    If (is_taskbar_hide) {
-        unhide_taskbar()
-    }
-
     Stop()
 
     Run, rm ~/komorebic.sock, , Hide
@@ -17,17 +13,6 @@ komorebic_stop() {
 
     Return
 }
-
-
-
-hide_taskbar() {
-    WinSet, Transparent, 0, ahk_class Shell_TrayWnd
-}
-unhide_taskbar() {
-    WinSet, Transparent, 255, ahk_class Shell_TrayWnd
-    WinSet, Transparent, OFF, ahk_class Shell_TrayWnd
-}
-global is_taskbar_hide := false
 
 
 
@@ -61,6 +46,7 @@ CrossMonitorMoveBehaviour("insert")
 ; Enable Active Window Border
 ActiveWindowBorder("enable")
 ActiveWindowBorderColour(66, 165, 245, "single")
+ActiveWindowBorderWidth(14)
 
 ; Configure focus related with mouse
 FocusFollowsMouse("disable", "windows")
@@ -159,18 +145,12 @@ IdentifyTrayApplication("exe", "WeChat.exe")
 
 ; Identify applications that have overflowing borders
 ; Run, komorebic.exe identify-border-overflow-application exe Discord.exe, , Hide
-IdentifyBorderOverflowApplication("exe", "cloudmusic.exe")
 IdentifyBorderOverflowApplication("exe", "Code.exe")
 IdentifyBorderOverflowApplication("exe", "QQ.exe")
-IdentifyBorderOverflowApplication("exe", "ShareX.exe")
-IdentifyBorderOverflowApplication("exe", "vivaldi.exe")
 IdentifyBorderOverflowApplication("exe", "WeChat.exe")
 
 ; Office
 FloatRule("class", "_WwB")
-IdentifyBorderOverflowApplication("exe", "EXCEL.EXE")
-IdentifyBorderOverflowApplication("exe", "POWERPNT.EXE")
-IdentifyBorderOverflowApplication("exe", "WINWORD.EXE")
 IdentifyLayeredApplication("exe", "EXCEL.EXE")
 IdentifyLayeredApplication("exe", "POWERPNT.EXE")
 IdentifyLayeredApplication("exe", "WINWORD.EXE")
@@ -299,73 +279,59 @@ Return
 
 ; Switch to workspace
 !1::
-    ; Run, komorebic.exe focus-workspace 0, , Hide
     FocusMonitorWorkspace(main_monitor, 0)
 Return
 
 !2::
-    ; Run, komorebic.exe focus-workspace 1, , Hide
     FocusMonitorWorkspace(main_monitor, 1)
 Return
 
 !3::
-    ; Run, komorebic.exe focus-workspace 2, , Hide
     FocusMonitorWorkspace(main_monitor, 2)
 Return
 
 !4::
-    ; Run, komorebic.exe focus-workspace 3, , Hide
     FocusMonitorWorkspace(main_monitor, 3)
 Return
 
 !5::
-    ; Run, komorebic.exe focus-workspace 4, , Hide
     FocusMonitorWorkspace(main_monitor, 4)
 Return
 
 !6::
-    ; Run, komorebic.exe focus-workspace 5, , Hide
     FocusMonitorWorkspace(main_monitor, 5)
 Return
 
 !7::
-    ; Run, komorebic.exe focus-workspace 6, , Hide
     FocusMonitorWorkspace(main_monitor, 6)
 Return
 
 ; Move window to workspace
 !+1::
-    ; Run, komorebic.exe send-to-workspace 0, , Hide
     SendToMonitorWorkspace(main_monitor, 0)
 Return
 
 !+2::
-    ; Run, komorebic.exe send-to-workspace 1, , Hide
     SendToMonitorWorkspace(main_monitor, 1)
 Return
 
 !+3::
-    ; Run, komorebic.exe send-to-workspace 2, , Hide
     SendToMonitorWorkspace(main_monitor, 2)
 Return
 
 !+4::
-    ; Run, komorebic.exe send-to-workspace 3, , Hide
     SendToMonitorWorkspace(main_monitor, 3)
 Return
 
 !+5::
-    ; Run, komorebic.exe send-to-workspace 4, , Hide
     SendToMonitorWorkspace(main_monitor, 4)
 Return
 
 !+6::
-    ; Run, komorebic.exe send-to-workspace 5, , Hide
     SendToMonitorWorkspace(main_monitor, 5)
 Return
 
 !+7::
-    ; Run, komorebic.exe send-to-workspace 6, , Hide
     SendToMonitorWorkspace(main_monitor, 6)
 Return
 
@@ -395,29 +361,24 @@ Return
 
 ; Switch to the default bsp tiling layout
 !b::
-    ; Run, komorebic.exe workspace-layout 0 0 bsp, , Hide
     ChangeLayout("bsp")
 Return
 
 ; Switch to an equal-width, max-height column layout
 !c::
-    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
     ChangeLayout("columns")
 Return
 
 ; Switch to an equal-height, max-width column layout
 !r::
-    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
     ChangeLayout("rows")
 Return
 
 !+c::
-    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
     ChangeLayout("vertical-stack")
 Return
 
 !+r::
-    ; Run, komorebic.exe workspace-layout 0 0 columns, , Hide
     ChangeLayout("horizontal-stack")
 Return
 
@@ -500,13 +461,4 @@ Return
 
 !+b::
     Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
-Return
-
-!z::
-    If (is_taskbar_hide) {
-        unhide_taskbar()
-    } Else {
-        hide_taskbar()
-    }
-    is_taskbar_hide := !is_taskbar_hide
 Return

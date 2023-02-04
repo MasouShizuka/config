@@ -566,16 +566,16 @@
         },
         ".": {
             "2": {
-                "label": "让当前窗口进入拖动模式",
-                "prefix": "*",
-                "type": "鼠标操作",
-                "value": "moveCurrentWindow()"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "/": {
             "2": {
-                "type": "可能会用到的内置函数",
-                "value": "run, bin\\ahk.exe bin\\moveMouseToCaret.ahk"
+                "label": "让当前窗口进入拖动模式",
+                "prefix": "*",
+                "type": "鼠标操作",
+                "value": "moveCurrentWindow()"
             }
         },
         "0": {
@@ -599,7 +599,7 @@
         "3": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "turn_off_monitor()"
+                "value": "close_or_run_script(\"bin/custom/activate_tray_icon.ahk\")"
             }
         },
         "4": {
@@ -703,8 +703,8 @@
         },
         "G": {
             "2": {
-                "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"bin/custom/activate_tray_icon.ahk\")"
+                "type": "窗口操作",
+                "value": "SwitchWindows()"
             }
         },
         "H": {
@@ -773,8 +773,8 @@
         },
         "R": {
             "2": {
-                "type": "窗口操作",
-                "value": "SwitchWindows()"
+                "type": "可能会用到的内置函数",
+                "value": "switch_IME()"
             }
         },
         "S": {
@@ -805,8 +805,8 @@
         },
         "V": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "hide_taskbar()"
             }
         },
         "W": {
@@ -843,8 +843,8 @@
         },
         "Z": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "type": "可能会用到的内置函数",
+                "value": "turn_off_monitor()"
             }
         },
         "[": {

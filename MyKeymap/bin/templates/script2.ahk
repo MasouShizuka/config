@@ -14,7 +14,6 @@
 {{ end }}
 {{ end }}
 
-StringCaseSense, On
 SetWorkingDir %A_ScriptDir%\..
 {{ if .Settings.runAsAdmin -}}
 requireAdmin()
@@ -136,10 +135,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CapslockMode := true
-    keymapLockState.currentMode := "CapslockMode"
+    ResetCurrentModeLockState("CapslockMode")
     keywait capslock
     CapslockMode := false
-    if (A_ThisHotkey == "*capslock" && A_PriorKey == "CapsLock" && (A_TickCount - start_tick < 350)) {
+    if (A_ThisHotkey = "*capslock" && A_PriorKey = "CapsLock" && (A_TickCount - start_tick < 350)) {
         {{ (index .SpecialKeys "Caps Up").value }}
     }
     enableOtherHotkey(thisHotkey)
@@ -153,12 +152,12 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     JMode := true
-    keymapLockState.currentMode := "JMode"
+    ResetCurrentModeLockState("JMode")
     DisableCapslockKey := true
     keywait j
     JMode := false
     DisableCapslockKey := false
-    if (A_PriorKey == "j" && (A_TickCount - start_tick < 300))
+    if (A_PriorKey = "j" && (A_TickCount - start_tick < 300))
             send,  {blind}j
     enableOtherHotkey(thisHotkey)
     return
@@ -171,12 +170,12 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     SemicolonMode := true
-    keymapLockState.currentMode := "SemicolonMode"
+    ResetCurrentModeLockState("SemicolonMode")
     DisableCapslockKey := true
     keywait `;
     SemicolonMode := false
     DisableCapslockKey := false
-    if (A_PriorKey == ";" && (A_TickCount - start_tick < 300)) {
+    if (A_PriorKey = ";" && (A_TickCount - start_tick < 300)) {
          {{ (index .SpecialKeys "; Up").value }}
     }
     enableOtherHotkey(thisHotkey)
@@ -188,11 +187,11 @@ return
     start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
-    DigitMode := true
-    keymapLockState.currentMode := "DigitMode"
+    Mode3 := true
+    ResetCurrentModeLockState("Mode3")
     keywait 3
-    DigitMode := false
-    if (A_PriorKey == "3" && (A_TickCount - start_tick < 300))
+    Mode3 := false
+    if (A_PriorKey = "3" && (A_TickCount - start_tick < 300))
         send, {blind}3
     enableOtherHotkey(thisHotkey)
     return
@@ -203,10 +202,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     Mode9 := true
-    keymapLockState.currentMode := "Mode9"
+    ResetCurrentModeLockState("Mode9")
     keywait 9
     Mode9 := false
-    if (A_PriorKey == "9" && (A_TickCount - start_tick < 300))
+    if (A_PriorKey = "9" && (A_TickCount - start_tick < 300))
         send, {blind}9
     enableOtherHotkey(thisHotkey)
     return
@@ -218,10 +217,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CommaMode := true
-    keymapLockState.currentMode := "CommaMode"
+    ResetCurrentModeLockState("CommaMode")
     keywait `,
     CommaMode := false
-    if (A_PriorKey == "," && (A_TickCount - start_tick < 300))
+    if (A_PriorKey = "," && (A_TickCount - start_tick < 300))
         send, {blind}`,
     enableOtherHotkey(thisHotkey)
     return
@@ -233,10 +232,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     DotMode := true
-    keymapLockState.currentMode := "DotMode"
+    ResetCurrentModeLockState("DotMode")
     keywait `.
     DotMode := false
-    if (A_PriorKey == "." && (A_TickCount - start_tick < 300))
+    if (A_PriorKey = "." && (A_TickCount - start_tick < 300))
         send, {blind}`.
     enableOtherHotkey(thisHotkey)
     return
@@ -248,10 +247,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     AdditionalMode1 := true
-    keymapLockState.currentMode := "AdditionalMode1"
+    ResetCurrentModeLockState("AdditionalMode1")
     keywait {{ .Settings.AdditionalMode1Info.WaitKey }}
     AdditionalMode1 := false
-    if (A_PriorKey == "{{ .Settings.AdditionalMode1Info.PriorKey }}" && (A_TickCount - start_tick < 300)) {
+    if (A_PriorKey = "{{ .Settings.AdditionalMode1Info.PriorKey }}" && (A_TickCount - start_tick < 300)) {
         {{ .Settings.AdditionalMode1Info.Send }}
     }
     enableOtherHotkey(thisHotkey)
@@ -264,10 +263,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     AdditionalMode2 := true
-    keymapLockState.currentMode := "AdditionalMode2"
+    ResetCurrentModeLockState("AdditionalMode2")
     keywait {{ .Settings.AdditionalMode2Info.WaitKey }}
     AdditionalMode2 := false
-    if (A_PriorKey == "{{ .Settings.AdditionalMode2Info.PriorKey }}" && (A_TickCount - start_tick < 300)) {
+    if (A_PriorKey = "{{ .Settings.AdditionalMode2Info.PriorKey }}" && (A_TickCount - start_tick < 300)) {
         {{ .Settings.AdditionalMode2Info.Send }}
     }
     enableOtherHotkey(thisHotkey)
@@ -280,10 +279,10 @@ return
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     SpaceMode := true
-    keymapLockState.currentMode := "SpaceMode"
+    ResetCurrentModeLockState("SpaceMode")
     keywait Space
     SpaceMode := false
-    if (A_PriorKey == "Space" && (A_TickCount - start_tick < 300))
+    if (A_PriorKey = "Space" && (A_TickCount - start_tick < 300))
         send, {blind}{Space}
     enableOtherHotkey(thisHotkey)
     return
@@ -295,10 +294,10 @@ $Tab::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     TabMode := true
-    keymapLockState.currentMode := "TabMode"
+    ResetCurrentModeLockState("TabMode")
     keywait Tab
     TabMode := false
-    if (A_PriorKey == "Tab" && (A_TickCount - start_tick < 300))
+    if (A_PriorKey = "Tab" && (A_TickCount - start_tick < 300))
         send, {blind}{Tab}
     enableOtherHotkey(thisHotkey)
     return
@@ -388,7 +387,7 @@ enterLButtonMode()
 {{ end }}
 
 {{ if .Settings.Mode3 }}
-#if DigitMode
+#if Mode3
 {{ template "keymapToAhk" .Mode3 }}
 {{ end }}
 
@@ -427,6 +426,8 @@ enterLButtonMode()
 *N Up::left_click_up()
 *M::right_click_down()
 *M Up::right_click_up()
+*.::middle_click_down()
+*. Up::middle_click_up()
 
 {{ if .Settings.enableCapsF }}
 f::
@@ -456,21 +457,23 @@ space::
 {{- end }}
 
 #if SLOWMODE
-; {{ template "keymapToAhk" .MouseMoveMode }}
-; Esc::exitMouseMode()
-; *Space::exitMouseMode()
-
 ; modified
 *I::slow_move_mouse("I", 0, -1)
 *J::slow_move_mouse("J", -1, 0)
 *K::slow_move_mouse("K", 0, 1)
 *L::slow_move_mouse("L", 1, 0)
-*N::left_click_down_without_false()
-*N Up::left_click_up_without_false()
-*M::right_click_down_without_false(true)
-*M Up::right_click_up_without_false(true)
+*`;::scrollWheel(";", 4)
+*H::scrollWheel("H", 3)
+*O::scrollWheel("O", 2)
+*U::scrollWheel("U", 1)
+*N::left_click_down()
+*N Up::left_click_up_without_hide_mouse_move_prompt()
+*M::right_click_down(true)
+*M Up::right_click_up_without_hide_mouse_move_prompt(true)
 *,::lbuttonDown()
-*/::run, bin/ahk.exe bin/moveMouseToCaret.ahk
+*.::middle_click_down()
+*. Up::middle_click_up_without_hide_mouse_move_prompt()
+*/::moveCurrentWindow()
 Esc::exit_mouse_mode()
 *Space::exit_mouse_mode()
 *capslock up::
@@ -485,7 +488,6 @@ Esc::exit_mouse_mode()
     enableOtherHotkey(thisHotkey)
     return
 
-; modified
 #if VERYSLOWMODE
 
 *I::very_slow_move_mouse("I", 0, -1)
@@ -496,13 +498,14 @@ Esc::exit_mouse_mode()
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
 *U::scrollWheel("U", 1)
-*N::left_click_down_without_false()
-*N Up::left_click_up_without_false()
-*M::right_click_down_without_false(true)
-*M Up::right_click_up_without_false(true)
+*N::left_click_down()
+*N Up::left_click_up_without_hide_mouse_move_prompt()
+*M::right_click_down(true)
+*M Up::right_click_up_without_hide_mouse_move_prompt(true)
 *,::lbuttonDown()
-*.::moveCurrentWindow()
-*/::run, bin/ahk.exe bin/moveMouseToCaret.ahk
+*.::middle_click_down()
+*. Up::middle_click_up_without_hide_mouse_move_prompt()
+*/::moveCurrentWindow()
 Esc::exit_mouse_mode()
 *Space::exit_mouse_mode()
 *capslock up::

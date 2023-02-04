@@ -1,7 +1,7 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions":
+    "actions": 
     [
         {
             "command": "find",
@@ -12,14 +12,14 @@
             "keys": "ctrl+shift+t"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "prevTab"
             },
             "keys": "ctrl+shift+h"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "copy",
                 "singleLine": false
@@ -31,7 +31,7 @@
             "keys": "ctrl+v"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "swapPane",
                 "direction": "previous"
@@ -39,7 +39,7 @@
             "keys": "ctrl+shift+e"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane",
                 "split": "left",
@@ -48,13 +48,13 @@
             "keys": "ctrl+alt+h"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "quakeMode"
             }
         },
         {
-            "command":
+            "command": 
             {
                 "action": "moveTab",
                 "direction": "forward"
@@ -62,7 +62,7 @@
             "keys": "ctrl+shift+period"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "resizePane",
                 "direction": "down"
@@ -246,7 +246,7 @@
             "keys": "ctrl+alt+d"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "resizePane",
                 "direction": "right"
@@ -254,14 +254,14 @@
             "keys": "ctrl+shift+right"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "scrollUp"
             },
             "keys": "ctrl+shift+u"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane",
                 "split": "down",
@@ -279,7 +279,7 @@
             "command": "closeWindow"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane",
                 "split": "right",
@@ -288,7 +288,7 @@
             "keys": "ctrl+alt+l"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "moveFocus",
                 "direction": "previousInOrder"
@@ -296,7 +296,7 @@
             "keys": "ctrl+shift+k"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "moveFocus",
                 "direction": "nextInOrder"
@@ -307,7 +307,7 @@
             "command": "toggleSplitOrientation"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane",
                 "split": "auto",
@@ -318,7 +318,7 @@
             "command": "identifyWindow"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "resizePane",
                 "direction": "up"
@@ -326,21 +326,21 @@
             "keys": "ctrl+shift+up"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "scrollDown"
             },
             "keys": "ctrl+shift+d"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "nextTab"
             },
             "keys": "ctrl+shift+l"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane",
                 "split": "up",
@@ -353,7 +353,7 @@
             "keys": "ctrl+shift+w"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "moveTab",
                 "direction": "backward"
@@ -368,7 +368,7 @@
             "keys": "ctrl+shift+o"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "commandPalette"
             }
@@ -377,19 +377,19 @@
             "command": "scrollUpPage"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "globalSummon"
             }
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane"
             }
         },
         {
-            "command":
+            "command": 
             {
                 "action": "resizePane",
                 "direction": "left"
@@ -414,15 +414,15 @@
     "experimental.rendering.forceFullRepaint": false,
     "experimental.rendering.software": false,
     "language": "zh-Hans-CN",
-    "profiles":
+    "profiles": 
     {
-        "defaults":
+        "defaults": 
         {
             "colorScheme": "Campbell",
             "cursorShape": "filledBox",
             "elevate": true,
             "experimental.retroTerminalEffect": false,
-            "font":
+            "font": 
             {
                 "face": "\u7b49\u8ddd\u66f4\u7eb1\u9ed1\u4f53 SC Nerd Font",
                 "size": 16
@@ -430,7 +430,7 @@
             "opacity": 75,
             "useAcrylic": true
         },
-        "list":
+        "list": 
         [
             {
                 "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -use-full-path",
@@ -504,7 +504,7 @@
             }
         ]
     },
-    "schemes":
+    "schemes": 
     [
         {
             "background": "#0C0C0C",

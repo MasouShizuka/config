@@ -81,6 +81,7 @@
 .input-method-widget .label,
 .cpu-widget .label,
 .memory-widget .label,
+.gpu-widget .label,
 .battery-widget .label,
 .clock-widget .label {
     border-radius: 8px;
@@ -138,6 +139,10 @@
 
 .memory-widget .label.status-high {
     background: #cc241d;
+}
+
+.gpu-widget .label {
+    background: #ec6b64;
 }
 
 .battery-widget .label.status-critical {

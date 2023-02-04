@@ -119,7 +119,7 @@
   "HideOnStartup": true,
   "HideNotifyIcon": false,
   "LeaveCmdOpen": false,
-  "HideWhenDeactive": true,
+  "HideWhenDeactivated": true,
   "SearchWindowPosition": 1,
   "IgnoreHotkeysOnFullscreen": false,
   "Proxy": {
