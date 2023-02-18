@@ -83,9 +83,10 @@ class CLayout
         global GuiHwnd
         w :=  this.X + 70
         h :=  320
-        GetCurrentMonitorCenter(x, y)
+        GetCurrentMonitorCenter(cx, cy)
+        x := cx - w / 2
+        y := cy - h / 2
         Gui Show, w%w% h%h% x%x% y%y%, 显示器亮度调节
-        ; Gui Show, w%w% h%h%, 显示器亮度调节
         disableIME(GuiHwnd)
     }
 

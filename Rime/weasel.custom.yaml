@@ -46,5 +46,5 @@ patch:
     label_color: 0x999999                  # 候选项 编号
     hilited_candidate_back_color: 0x4b4b4b # 候选项 高亮背景
     hilited_candidate_text_color: 0xffe696 # 候选项 高亮文字
-    hilited_comment_text_color: 0xdddddd   # 候选项 高亮提示 
+    hilited_comment_text_color: 0xdddddd   # 候选项 高亮提示
     hilited_label_color: 0x999999          # 候选项 高亮编号

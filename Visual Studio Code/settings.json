@@ -17,6 +17,16 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true
     },
+    "auto-run-command.rules": [
+        {
+            "command": [
+                "workbench.action.terminal.kill",
+                "workbench.action.closePanel"
+            ],
+            "condition": "always",
+            "message": "Close panel"
+        }
+    ],
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
     "code-runner.executorMap": {

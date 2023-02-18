@@ -11,7 +11,7 @@ require("cool-substitute").setup(
             --   apply_substitute_all = "ga", -- Substitute all
             --   force_terminate_substitute = "g!!", -- Terminate macro (if some bug happens)
             --   terminate_substitute = "<esc>", -- Terminate macro
-            --   skip_substitute = "<cr>", -- Skip this occurrence
+            --   skip_substitute = "n", -- Skip this occurrence
             --   goto_next = "<C-j>", -- Go to next occurence
             --   goto_previous = "<C-k>", -- Go to previous occurrence
         },

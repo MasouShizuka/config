@@ -42,7 +42,10 @@ LV_Modify(1, "Focus")
 LV_Modify(1, "Select")
 
 OnMessage(0x100, "WM_KEYDOWN")
-GetCurrentMonitorCenter(x, y)
+GetClientSize(w, h)
+GetCurrentMonitorCenter(cx, cy)
+x := cx - w / 2
+y := cy - h / 2
 Gui, Show, x%x% y%y%, %title_left%%help%
 disableIME(GuiHwnd)
 SetTimer, IfLoseFocusThenExit, 700

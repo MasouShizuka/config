@@ -8,8 +8,23 @@
             "keys": "ctrl+f"
         },
         {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "left"
+            },
+            "keys": "ctrl+shift+left"
+        },
+        {
+            "command": "paste",
+            "keys": "ctrl+v"
+        },
+        {
             "command": "duplicateTab",
             "keys": "ctrl+shift+t"
+        },
+        {
+            "command": "openSystemMenu"
         },
         {
             "command": 
@@ -27,8 +42,13 @@
             "keys": "ctrl+c"
         },
         {
-            "command": "paste",
-            "keys": "ctrl+v"
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "left",
+                "splitMode": "duplicate"
+            },
+            "keys": "ctrl+alt+h"
         },
         {
             "command": 
@@ -41,17 +61,12 @@
         {
             "command": 
             {
-                "action": "splitPane",
-                "split": "left",
-                "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+h"
-        },
-        {
-            "command": 
-            {
                 "action": "quakeMode"
             }
+        },
+        {
+            "command": "scrollToTop",
+            "keys": "ctrl+home"
         },
         {
             "command": 
@@ -60,6 +75,13 @@
                 "direction": "forward"
             },
             "keys": "ctrl+shift+period"
+        },
+        {
+            "command": "toggleSplitOrientation"
+        },
+        {
+            "command": "closePane",
+            "keys": "ctrl+shift+w"
         },
         {
             "command": 
@@ -248,10 +270,27 @@
         {
             "command": 
             {
+                "action": "splitPane",
+                "split": "auto",
+                "splitMode": "duplicate"
+            }
+        },
+        {
+            "command": 
+            {
                 "action": "resizePane",
                 "direction": "right"
             },
             "keys": "ctrl+shift+right"
+        },
+        {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "right",
+                "splitMode": "duplicate"
+            },
+            "keys": "ctrl+alt+l"
         },
         {
             "command": 
@@ -276,16 +315,23 @@
             "command": "toggleFocusMode"
         },
         {
+            "command": 
+            {
+                "action": "moveFocus",
+                "direction": "nextInOrder"
+            },
+            "keys": "ctrl+shift+j"
+        },
+        {
             "command": "closeWindow"
         },
         {
             "command": 
             {
-                "action": "splitPane",
-                "split": "right",
-                "splitMode": "duplicate"
+                "action": "moveTab",
+                "direction": "backward"
             },
-            "keys": "ctrl+alt+l"
+            "keys": "ctrl+shift+comma"
         },
         {
             "command": 
@@ -296,23 +342,8 @@
             "keys": "ctrl+shift+k"
         },
         {
-            "command": 
-            {
-                "action": "moveFocus",
-                "direction": "nextInOrder"
-            },
-            "keys": "ctrl+shift+j"
-        },
-        {
-            "command": "toggleSplitOrientation"
-        },
-        {
-            "command": 
-            {
-                "action": "splitPane",
-                "split": "auto",
-                "splitMode": "duplicate"
-            }
+            "command": "togglePaneZoom",
+            "keys": "ctrl+shift+o"
         },
         {
             "command": "identifyWindow"
@@ -349,23 +380,7 @@
             "keys": "ctrl+alt+k"
         },
         {
-            "command": "closePane",
-            "keys": "ctrl+shift+w"
-        },
-        {
-            "command": 
-            {
-                "action": "moveTab",
-                "direction": "backward"
-            },
-            "keys": "ctrl+shift+comma"
-        },
-        {
             "command": "scrollDownPage"
-        },
-        {
-            "command": "togglePaneZoom",
-            "keys": "ctrl+shift+o"
         },
         {
             "command": 
@@ -389,23 +404,8 @@
             }
         },
         {
-            "command": 
-            {
-                "action": "resizePane",
-                "direction": "left"
-            },
-            "keys": "ctrl+shift+left"
-        },
-        {
-            "command": "openSystemMenu"
-        },
-        {
             "command": "scrollToBottom",
             "keys": "ctrl+end"
-        },
-        {
-            "command": "scrollToTop",
-            "keys": "ctrl+home"
         }
     ],
     "copyFormatting": "none",
@@ -425,7 +425,7 @@
             "font": 
             {
                 "face": "\u7b49\u8ddd\u66f4\u7eb1\u9ed1\u4f53 SC Nerd Font",
-                "size": 16
+                "size": 16.0
             },
             "opacity": 75,
             "useAcrylic": true
@@ -433,7 +433,7 @@
         "list": 
         [
             {
-                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -use-full-path",
+                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -shell zsh -ucrt64 -use-full-path",
                 "guid": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
                 "hidden": false,
                 "icon": "C:/msys64/ucrt64.ico",
@@ -489,18 +489,6 @@
                 "hidden": true,
                 "name": "Visual Studio Debug Console",
                 "source": "VSDebugConsole"
-            },
-            {
-                "guid": "{0c3ac265-d7d7-5d7d-b907-814925476e0d}",
-                "hidden": false,
-                "name": "Developer Command Prompt for VS 2022",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
-                "guid": "{6d04568e-9dc9-56b5-a593-969f0b3c2561}",
-                "hidden": false,
-                "name": "Developer PowerShell for VS 2022",
-                "source": "Windows.Terminal.VisualStudio"
             }
         ]
     },
@@ -716,6 +704,7 @@
     ],
     "showTerminalTitleInTitlebar": true,
     "tabWidthMode": "equal",
+    "themes": [],
     "trimBlockSelection": true,
     "useAcrylicInTabRow": true,
     "windowingBehavior": "useNew"

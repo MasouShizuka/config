@@ -830,7 +830,16 @@
   ],
   "HistorySaveTasks": true,
   "HistoryCheckURL": false,
-  "RecentTasks": null,
+  "RecentTasks": [
+    {
+      "FilePath": null,
+      "URL": null,
+      "ThumbnailURL": null,
+      "DeletionURL": null,
+      "ShortenedURL": null,
+      "Time": null
+    }
+  ],
   "RecentTasksSave": true,
   "RecentTasksMaxCount": 10,
   "RecentTasksShowInMainWindow": true,

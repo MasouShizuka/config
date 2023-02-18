@@ -10,6 +10,7 @@ eamodio.gitlens
 foam.foam-vscode
 formulahendry.code-runner
 foxundermoon.shell-format
+gabrielgrinberg.auto-run-command
 gera2ld.markmap-vscode
 golang.go
 Gruntfuggly.todo-tree

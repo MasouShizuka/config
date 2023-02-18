@@ -218,7 +218,7 @@
         "command": "notebook.cell.edit",
         "when": "notebookCellListFocused && notebookEditable && !inputFocus"
     },
-    // 退出
+    // 退出编辑
     {
         "key": "ctrl+q",
         "command": "notebook.cell.quitEdit",
@@ -234,6 +234,18 @@
     {
         "key": "shift+k",
         "command": "notebook.cell.moveUp",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
+
+    {
+        "key": "v",
+        "command": "-notebook.cell.paste",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
+    // 粘贴
+    {
+        "key": "p",
+        "command": "notebook.cell.paste",
         "when": "notebookEditorFocused && !inputFocus"
     },
 

@@ -1,14 +1,6 @@
 Import-Module posh-git
 Import-Module PSReadLine
 
-########
-# 主题 #
-########
-
-oh-my-posh init pwsh --config "~/AppData/Local/Programs/oh-my-posh/themes/negligible.omp.json" | Invoke-Expression
-
-
-
 #########
 # Alias #
 #########
@@ -19,34 +11,18 @@ Set-Alias vim nvim
 
 
 
-############
-# 环境变量 #
-############
+########################
+# Environment Variable #
+########################
 
 $history="$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\$($host.Name)_history.txt"
 $runningInVsCode = $env:TERM_PROGRAM -eq "vscode"
 
 
 
-####################
-# PSReadLineOption #
-####################
-
-Set-PSReadLineOption –HistoryNoDuplicates:$True
-Set-PSReadLineOption -HistorySearchCursorMovesToEnd
-Set-PSReadLineOption -PredictionSource History
-if (-not $runningInVsCode) {
-    Set-PSReadLineOption -PredictionViewStyle ListView
-}
-
-Set-PSReadLineKeyHandler -Key "Tab" -Function MenuComplete
-Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
-
-
-
-##############
-# 自定义函数 #
-##############
+############
+# Function #
+############
 
 # 打开目录
 function open($path=".") {
@@ -61,5 +37,31 @@ function which($command) {
 
 # 打开 Zsh
 function zsh() {
-    C:/msys64/msys2_shell.cmd -defterm -here -mingw64 -no-start -use-full-path -shell zsh
+    C:/msys64/msys2_shell.cmd -defterm -here -no-start -shell zsh -ucrt64 -use-full-path
 }
+
+
+
+####################
+# PSReadLineOption #
+####################
+
+Set-PSReadLineOption –HistoryNoDuplicates:$True
+Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+Set-PSReadLineOption -PredictionSource History
+if (-not $runningInVsCode) {
+    Set-PSReadLineOption -PredictionViewStyle ListView
+} else {
+    Set-PSReadLineKeyHandler -Chord "Shift+RightArrow" -Function ForwardWord
+}
+
+Set-PSReadLineKeyHandler -Key "Tab" -Function MenuComplete
+Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
+
+
+
+#########
+# Theme #
+#########
+
+oh-my-posh init pwsh --config "~/AppData/Local/Programs/oh-my-posh/themes/negligible.omp.json" | Invoke-Expression

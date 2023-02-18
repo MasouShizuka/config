@@ -4,7 +4,7 @@ eval "$(oh-my-posh init bash --config ~/AppData/Local/Programs/oh-my-posh/themes
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-eval "$('/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' 'shell.bash' 'hook')"
+if [ -f '/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' ]; then
+    eval "$('/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' 'shell.bash' 'hook')"
+fi
 # <<< conda initialize <<<
-
-exec zsh

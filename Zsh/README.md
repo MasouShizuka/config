@@ -9,10 +9,11 @@
 
 ## 配置文件
 
-| 文件          | 路径             | 说明          |
-| ------------- | ---------------- | ------------- |
-| .bash_profile | `C:/Users/User/` | Bash 配置文件 |
-| .zshrc        | `C:/Users/User/` | Zsh 配置文件  |
+| 文件           | 路径                                      | 说明                |
+| -------------- | ----------------------------------------- | ------------------- |
+| .bash_profile  | `C:/Users/User/`                          | Bash 配置文件       |
+| .zshrc         | `C:/Users/User/`                          | Zsh 配置文件        |
+| conda_fixed.sh | `C:/Users/User/miniconda3/etc/profile.d/` | 修正后的 Conda 脚本 |
 
 ## 注意
 

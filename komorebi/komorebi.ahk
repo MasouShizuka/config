@@ -38,7 +38,7 @@ InvisibleBorders(7, 0, 14, 7)
 WatchConfiguration("enable")
 
 ; Default to minimizing windows when switching workspaces
-WindowHidingBehaviour("minimize")
+WindowHidingBehaviour("cloak")
 
 ; Set cross-monitor move behaviour to insert instead of swap
 CrossMonitorMoveBehaviour("insert")
@@ -110,6 +110,7 @@ WorkspaceRule("exe", "Thunder.exe", main_monitor, 5)
 ; Run, komorebic.exe float-rule class TaskManagerWindow, , Hide
 FloatRule("class", "ExplorerBrowserControl")
 FloatRule("class", "jsplitter_panel_container")
+FloatRule("class", "SessionDragWnd")
 FloatRule("class", "TApplication")
 ; Always float, matching on title
 ; Run, komorebic.exe float-rule title "Control Panel", , Hide
