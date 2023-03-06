@@ -18,7 +18,18 @@
                 "editor.action.trimTrailingWhitespace"
             ]
         },
-        "when": "editorTextFocus && neovim.init"
+        "when": "editorTextFocus && neovim.init && neovim.mode == 'insert' && !inSnippetMode"
+    },
+    // 提高 leaveSnippet 优先级
+    {
+        "key": "escape",
+        "command": "-leaveSnippet",
+        "when": "editorTextFocus && inSnippetMode"
+    },
+    {
+        "key": "escape",
+        "command": "leaveSnippet",
+        "when": "editorTextFocus && inSnippetMode"
     },
 
     // 设置 ctrl+j 向下移动条目
@@ -218,6 +229,12 @@
         "command": "notebook.cell.edit",
         "when": "notebookCellListFocused && notebookEditable && !inputFocus"
     },
+
+    {
+        "key": "escape",
+        "command": "-notebook.cell.quitEdit",
+        "when": "inputFocus && notebookEditorFocused && !editorHasMultipleSelections && !editorHasSelection && !editorHoverVisible"
+    },
     // 退出编辑
     {
         "key": "ctrl+q",
@@ -406,13 +423,13 @@
         "when": "editorFocus || editorIsOpen"
     },
 
-    // 面板不可见且 neovim.mode != insert 时，则切换上一个编辑器
+    // 面板不可见时，则切换上一个编辑器
     {
         "key": "ctrl+h",
         "command": "workbench.action.previousEditorInGroup",
         "when": "!panelVisible || editorFocus || notebookEditorFocused"
     },
-    // 面板不可见且 neovim.mode != insert 时，则切换下一个编辑器
+    // 面板不可见时，则切换下一个编辑器
     {
         "key": "ctrl+l",
         "command": "workbench.action.nextEditorInGroup",
@@ -454,17 +471,17 @@
         "key": "ctrl+j",
         "command": "-workbench.action.togglePanel"
     },
-    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换焦点到下一个编辑器组
+    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != cmdline_normal 时，则切换焦点到下一个编辑器组
     {
         "key": "ctrl+j",
         "command": "workbench.action.focusNextGroup",
-        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && neovim.mode != 'cmdline_normal'"
     },
-    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != insert 时，则切换焦点到上一个编辑器组
+    // 侧边栏未聚焦且终端未聚焦且 neovim.mode != cmdline_normal 时，则切换焦点到上一个编辑器组
     {
         "key": "ctrl+k",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!sideBarFocus && !terminalFocus && neovim.mode != insert && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && neovim.mode != 'cmdline_normal'"
     },
     // 移动当前编辑器到左侧编辑器组
     {
@@ -617,7 +634,6 @@
     // 面板未打开时，则打开面板并聚焦
     {
         "key": "ctrl+3",
-        // "command": "workbench.action.togglePanel",
         "command": "extension.multiCommand.execute",
         "args": {
             "sequence": [
@@ -645,24 +661,24 @@
         "command": "workbench.action.terminal.toggleTerminal",
         "when": "terminal.active && terminalFocus"
     },
-    // 面板 Docs View 或 Jupyter:Variables 页面时，则关闭面板
+    // 面板 Jupyter:Variables 页面时，则关闭面板
     {
         "key": "ctrl+3",
         "command": "workbench.action.closePanel",
-        "when": "view.docsView.documentation.visible || view.jupyterViewVariables.visible"
+        "when": "view.jupyterViewVariables.visible"
     },
 
     // 面板聚焦时，则切换上一个面板视图
     {
         "key": "ctrl+h",
         "command": "workbench.action.previousPanelView",
-        "when": "panelFocus || view.docsView.documentation.visible || view.jupyterViewVariables.visible"
+        "when": "panelFocus || view.jupyterViewVariables.visible"
     },
     // 面板聚焦时，则切换下一个面板视图
     {
         "key": "ctrl+l",
         "command": "workbench.action.nextPanelView",
-        "when": "panelFocus || view.docsView.documentation.visible || view.jupyterViewVariables.visible"
+        "when": "panelFocus || view.jupyterViewVariables.visible"
     },
 
     // 面板终端页面且聚焦时，则切换终端
@@ -696,7 +712,7 @@
         "command": "workbench.action.terminal.kill",
         "when": "terminal.active && terminalFocus"
     },
-    // 面板终端中重定义命令，否则失效，原因不明
+    // 面板终端中重定义命令，否则失效
     {
         "key": "ctrl+f",
         "command": "-workbench.action.terminal.focusFind",
@@ -726,6 +742,41 @@
         "key": "ctrl+down",
         "command": "workbench.action.terminal.scrollToNextCommand",
         "when": "terminalFocus && terminalHasBeenCreated && !accessibilityModeEnabled || terminalFocus && terminalProcessSupported && !accessibilityModeEnabled"
+    },
+
+
+
+    //////////////////////////////
+    // VS Code 辅助侧栏区域相关 //
+    //////////////////////////////
+
+    {
+        "key": "ctrl+4",
+        "command": "-workbench.action.focusFourthEditorGroup"
+    },
+    // 辅助侧栏未打开时，则打开辅助侧栏并聚焦
+    {
+        "key": "ctrl+4",
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "workbench.action.toggleAuxiliaryBar",
+                "workbench.action.focusActiveEditorGroup"
+            ]
+        },
+        "when": "!auxiliaryBarVisible"
+    },
+    // 辅助侧栏已打开未聚焦时，则聚焦辅助侧栏
+    {
+        "key": "ctrl+4",
+        "command": "workbench.action.focusAuxiliaryBar",
+        "when": "auxiliaryBarVisible && !auxiliaryBarFocus"
+    },
+    // 编辑器未聚焦时，则关闭辅助侧栏
+    {
+        "key": "ctrl+4",
+        "command": "workbench.action.closeAuxiliaryBar",
+        "when": "auxiliaryBarVisible && !editorFocus"
     },
 
 

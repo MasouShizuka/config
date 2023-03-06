@@ -24,5 +24,6 @@
   "EverythingInstalledPath": "D:\\Tools\\Flow.Launcher\\UserData\\Plugins\\Everything\\Everything.exe",
   "SortOption": 3,
   "EnableEverythingContentSearch": false,
-  "EverythingEnabled": true
+  "EverythingEnabled": true,
+  "EverythingSearchFullPath": false
 }

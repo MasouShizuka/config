@@ -598,8 +598,8 @@
         },
         "3": {
             "2": {
-                "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"bin/custom/activate_tray_icon.ahk\")"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "4": {

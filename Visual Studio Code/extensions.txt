@@ -1,8 +1,8 @@
 alefragnani.Bookmarks
 asvetliakov.vscode-neovim
 bierner.docs-view
-bierner.markdown-preview-github-styles
 clover.md-table-editor
+cweijan.epub-reader
 cweijan.vscode-office
 DavidAnson.vscode-markdownlint
 DotJoshJohnson.xml

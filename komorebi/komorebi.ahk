@@ -5,6 +5,7 @@
 
 #Persistent
 OnExit("komorebic_stop")
+
 komorebic_stop() {
     Stop()
 
@@ -27,9 +28,6 @@ RunWait, komorebic.exe start --await-configuration, , Hide
 ;###########
 ;# Setting #
 ;###########
-
-SysGet, monitor_count, MonitorCount
-global main_monitor := monitor_count - 1
 
 ; Configure the invisible border dimensions
 InvisibleBorders(7, 0, 14, 7)
@@ -54,13 +52,50 @@ MouseFollowsFocus("enable")
 
 
 
+;###########
+;# Monitor #
+;###########
+
+SysGet, monitor_count, MonitorCount
+global main_monitor := monitor_count - 1
+
+global monitor_key_value := {"u": 0, "i": 1, "o": 2}
+
+global focus_monitor_prefix := "!"
+For key, value in monitor_key_value {
+    Hotkey, % focus_monitor_prefix . key, focus_monitor
+}
+
+global send_to_monitor_prefix := "!+"
+For key, value in monitor_key_value {
+    Hotkey, % send_to_monitor_prefix . key, send_to_monitor
+}
+
+
+
 ;#############
 ;# Workspace #
 ;#############
 
+global workspace_key_value := {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6}
+global workspace_icon := [""" """, """ """, """ """, """ """, """ """, """ """, """ """]
+
+global container_padding := 10
+global workspace_padding := 10
+
 ; Ensure there are 7 workspaces created on monitor 0
 ; Run, komorebic.exe ensure-workspaces 0 7, , Hide
-EnsureWorkspaces(main_monitor, 7)
+EnsureWorkspaces(main_monitor, workspace_key_value.Length())
+
+global focus_monitor_workspace_prefix := "!"
+For key, value in workspace_key_value {
+    Hotkey, % focus_monitor_workspace_prefix . key, focus_monitor_workspace
+}
+
+global send_to_monitor_workspace_prefix := "!+"
+For key, value in workspace_key_value {
+    Hotkey, % send_to_monitor_workspace_prefix . key, send_to_monitor_workspace
+}
 
 ; Give the workspaces some optional names
 ; Run, komorebic.exe workspace-name 0 0 bsp, , Hide
@@ -68,13 +103,9 @@ EnsureWorkspaces(main_monitor, 7)
 ; Run, komorebic.exe workspace-name 0 2 thicc, , Hide
 ; Run, komorebic.exe workspace-name 0 3 matrix, , Hide
 ; Run, komorebic.exe workspace-name 0 4 floaty, , Hide
-WorkspaceName(main_monitor, 0, """ """)
-WorkspaceName(main_monitor, 1, """ """)
-WorkspaceName(main_monitor, 2, """ """)
-WorkspaceName(main_monitor, 3, """ """)
-WorkspaceName(main_monitor, 4, """ """)
-WorkspaceName(main_monitor, 5, """ """)
-WorkspaceName(main_monitor, 6, """ """)
+For key, value in workspace_key_value {
+    WorkspaceName(main_monitor, value, workspace_icon[value + 1])
+}
 
 ; Set the padding of the different workspaces
 ; Run, komorebic.exe container-padding 0 1 30, , Hide
@@ -82,6 +113,16 @@ WorkspaceName(main_monitor, 6, """ """)
 ; Run, komorebic.exe workspace-padding 0 2 200, , Hide
 ; Run, komorebic.exe container-padding 0 3 0, , Hide
 ; Run, komorebic.exe workspace-padding 0 3 0, , Hide
+For key, value in workspace_key_value {
+    ContainerPadding(main_monitor, value, container_padding)
+    WorkspacePadding(main_monitor, value, workspace_padding)
+}
+For key, value in monitor_key_value {
+    If (value != main_monitor) {
+        ContainerPadding(value, 0, container_padding)
+        WorkspacePadding(value, 0, workspace_padding)
+    }
+}
 
 ; Set the layouts of different workspaces
 ; Run, komorebic.exe workspace-layout 0 1 columns, , Hide
@@ -148,6 +189,7 @@ IdentifyTrayApplication("exe", "WeChat.exe")
 ; Run, komorebic.exe identify-border-overflow-application exe Discord.exe, , Hide
 IdentifyBorderOverflowApplication("exe", "Code.exe")
 IdentifyBorderOverflowApplication("exe", "QQ.exe")
+IdentifyBorderOverflowApplication("exe", "vivaldi.exe")
 IdentifyBorderOverflowApplication("exe", "WeChat.exe")
 
 ; Office
@@ -279,110 +321,92 @@ Return
 ; return
 
 ; Switch to workspace
-!1::
-    FocusMonitorWorkspace(main_monitor, 0)
-Return
-
-!2::
-    FocusMonitorWorkspace(main_monitor, 1)
-Return
-
-!3::
-    FocusMonitorWorkspace(main_monitor, 2)
-Return
-
-!4::
-    FocusMonitorWorkspace(main_monitor, 3)
-Return
-
-!5::
-    FocusMonitorWorkspace(main_monitor, 4)
-Return
-
-!6::
-    FocusMonitorWorkspace(main_monitor, 5)
-Return
-
-!7::
-    FocusMonitorWorkspace(main_monitor, 6)
+focus_monitor_workspace:
+    key := SubStr(A_ThisHotkey, StrLen(focus_monitor_workspace_prefix) + 1)
+    value := workspace_key_value[key]
+    FocusMonitorWorkspace(main_monitor, value)
 Return
 
 ; Move window to workspace
-!+1::
-    SendToMonitorWorkspace(main_monitor, 0)
+send_to_monitor_workspace:
+    key := SubStr(A_ThisHotkey, StrLen(send_to_monitor_workspace_prefix) + 1)
+    value := workspace_key_value[key]
+    SendToMonitorWorkspace(main_monitor, value)
 Return
 
-!+2::
-    SendToMonitorWorkspace(main_monitor, 1)
+focus_monitor:
+    key := SubStr(A_ThisHotkey, StrLen(focus_monitor_prefix) + 1)
+    value := monitor_key_value[key]
+    FocusMonitor(value)
 Return
 
-!+3::
-    SendToMonitorWorkspace(main_monitor, 2)
-Return
-
-!+4::
-    SendToMonitorWorkspace(main_monitor, 3)
-Return
-
-!+5::
-    SendToMonitorWorkspace(main_monitor, 4)
-Return
-
-!+6::
-    SendToMonitorWorkspace(main_monitor, 5)
-Return
-
-!+7::
-    SendToMonitorWorkspace(main_monitor, 6)
-Return
-
-!u::
-    FocusMonitor(0)
-Return
-
-!i::
-    FocusMonitor(1)
-Return
-
-!o::
-    FocusMonitor(2)
-Return
-
-!+u::
-    SendToMonitor(0)
-Return
-
-!+i::
-    SendToMonitor(1)
-Return
-
-!+o::
-    SendToMonitor(2)
+send_to_monitor:
+    key := SubStr(A_ThisHotkey, StrLen(send_to_monitor_prefix) + 1)
+    value := monitor_key_value[key]
+    SendToMonitor(value)
 Return
 
 ; Switch to the default bsp tiling layout
+; famous binary space partition
+; -------------
+; |     |     |
+; |     |------
+; |     |  |  |
+; -------------
 !b::
     ChangeLayout("bsp")
 Return
 
 ; Switch to an equal-width, max-height column layout
+; max-height column layout on the main workspace
+; -------------
+; |   |   |   |
+; |   |   |   |
+; -------------
 !c::
     ChangeLayout("columns")
 Return
 
 ; Switch to an equal-height, max-width column layout
+; max-width column layout on the main workspace
+; ------------
+; |          |
+; ------------
+; |          |
+; ------------
+; |          |
+; ------------
 !r::
     ChangeLayout("rows")
 Return
 
+; -----------
+; |    |    |
+; |    |-----
+; |    |    |
+; |    |-----
+; |    |    |
+; -----------
 !+c::
     ChangeLayout("vertical-stack")
 Return
 
+; ----------------
+; |              |
+; ----------------
+; |    |    |    |
+; ----------------
 !+r::
     ChangeLayout("horizontal-stack")
 Return
 
+; ------------
+; |  |    |  |
+; |  |    |---
+; |  |    |  |
+; |  |    |---
+; |  |    |  |
+; ------------
 !+m::
     ChangeLayout("ultrawide-vertical-stack")
 Return

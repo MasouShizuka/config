@@ -19,9 +19,12 @@ alias vim=nvim
 ########################
 
 export EDITOR=nvim
+
 export LANG=en_US.utf8
 export LC_ALL=en_US.UTF-8
 export LC_CTYPE=en_US.utf8
+
+export MSYS=winsymlinks:nativestrict
 
 
 
@@ -117,7 +120,7 @@ zstyle ":completion:*" rehash true
 # Theme #
 #########
 
-eval "$(oh-my-posh init zsh --config ~/AppData/Local/Programs/oh-my-posh/themes/negligible.omp.json)"
+eval "$(oh-my-posh init zsh --config $POSH_THEMES_PATH/negligible.omp.json)"
 
 
 

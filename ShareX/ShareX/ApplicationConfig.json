@@ -25,8 +25,8 @@
       "PlaySoundAfterCapture": true,
       "PlaySoundAfterUpload": true,
       "ShowToastNotificationAfterTaskCompleted": true,
-      "ToastWindowDuration": 3.0,
-      "ToastWindowFadeDuration": 1.0,
+      "ToastWindowDuration": 3,
+      "ToastWindowFadeDuration": 1,
       "ToastWindowPlacement": "BottomRight",
       "ToastWindowSize": "400, 300",
       "ToastWindowLeftClickAction": "OpenUrl",
@@ -89,19 +89,19 @@
                 "Colors": [
                   {
                     "Color": "68, 120, 194",
-                    "Location": 0.0
+                    "Location": 0
                   },
                   {
                     "Color": "13, 58, 122",
-                    "Location": 50.0
+                    "Location": 50
                   },
                   {
                     "Color": "6, 36, 78",
-                    "Location": 50.0
+                    "Location": 50
                   },
                   {
                     "Color": "23, 89, 174",
-                    "Location": 100.0
+                    "Location": 100
                   }
                 ]
               },
@@ -121,7 +121,7 @@
     "UseDefaultCaptureSettings": true,
     "CaptureSettings": {
       "ShowCursor": false,
-      "ScreenshotDelay": 0.0,
+      "ScreenshotDelay": 0,
       "CaptureTransparent": false,
       "CaptureShadow": true,
       "CaptureShadowOffset": 100,
@@ -310,9 +310,9 @@
       "GIFFPS": 15,
       "ScreenRecordShowCursor": true,
       "ScreenRecordAutoStart": true,
-      "ScreenRecordStartDelay": 0.0,
+      "ScreenRecordStartDelay": 0,
       "ScreenRecordFixedDuration": false,
-      "ScreenRecordDuration": 3.0,
+      "ScreenRecordDuration": 3,
       "ScreenRecordTwoPassEncoding": false,
       "ScreenRecordAskConfirmationOnAbort": false,
       "ScreenRecordTransparentRegion": false,
@@ -338,7 +338,7 @@
       },
       "OCROptions": {
         "Language": "zh-Hans-CN",
-        "ScaleFactor": 2.0,
+        "ScaleFactor": 2,
         "SingleLine": false,
         "Silent": false,
         "AutoCopy": false,
@@ -830,16 +830,7 @@
   ],
   "HistorySaveTasks": true,
   "HistoryCheckURL": false,
-  "RecentTasks": [
-    {
-      "FilePath": null,
-      "URL": null,
-      "ThumbnailURL": null,
-      "DeletionURL": null,
-      "ShortenedURL": null,
-      "Time": null
-    }
-  ],
+  "RecentTasks": [],
   "RecentTasksSave": true,
   "RecentTasksMaxCount": 10,
   "RecentTasksShowInMainWindow": true,
@@ -878,7 +869,7 @@
     "CenterImage": false,
     "TextFont": {
       "FontFamily": "Arial",
-      "Size": 10.0,
+      "Size": 10,
       "Style": "Regular",
       "GraphicsUnit": "Point"
     },
@@ -886,7 +877,7 @@
     "DefaultPrinterOverride": ""
   },
   "AutoCaptureRegion": "0, 0, 0, 0",
-  "AutoCaptureRepeatTime": 60.0,
+  "AutoCaptureRepeatTime": 60,
   "AutoCaptureMinimizeToTray": true,
   "AutoCaptureWaitUpload": true,
   "ScreenRecordRegion": "0, 0, 0, 0",

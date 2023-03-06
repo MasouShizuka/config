@@ -1,43 +1,84 @@
 #Persistent
-OnExit("RestoreCursor")
+OnExit("unhide_mouse")
 
-Show_Cursor_Duration := 3000
+show_cursor_duration := 3000
 
-MouseGetPos, Last_X, Last_Y
-Last_Time := A_TickCount - Show_Cursor_Duration
-Show_Cursor_Status := True
-SetTimer, Check_Idle, 250
-Check_Idle:
-    MouseGetPos, X, Y
-    If (X != Last_X || Y != Last_Y) {
-        RestoreCursor()
-        Show_Cursor_Status := True
-        Last_X := X, Last_Y := Y
-        Last_Time := A_TickCount
-    } Else If (A_TickCount >= Last_Time + Show_Cursor_Duration && Show_Cursor_Status) {
-        SetCursorBlank()
-        Show_Cursor_Status := False
+MouseGetPos, last_x, last_y
+last_time := A_TickCount - show_cursor_duration
+show_cursor_status := True
+SetTimer, check_idle, 250
+check_idle:
+    MouseGetPos, x, y
+    If (x != last_x || y != last_y) {
+        unhide_mouse()
+        show_cursor_status := True
+        last_x := x, last_y := y
+        last_time := A_TickCount
+    } Else If (A_TickCount >= last_time + show_cursor_duration && show_cursor_status) {
+        hide_mosue()
+        show_cursor_status := False
     }
 Return
 
-SetCursorBlank() {
-    SystemCursors = 32512IDC_ARROW,32513IDC_IBEAM,32514IDC_WAIT,32515IDC_CROSS
-    ,32516IDC_UPARROW,32640IDC_SIZE,32641IDC_ICON,32642IDC_SIZENWSE
-    ,32643IDC_SIZENESW,32644IDC_SIZEWE,32645IDC_SIZENS,32646IDC_SIZEALL
-    ,32648IDC_NO,32649IDC_HAND,32650IDC_APPSTARTING,32651IDC_HELP
-
-    VarSetCapacity(AndMask, 32*4, 0xFF), VarSetCapacity(XorMask, 32*4, 0)
-
-    Loop, Parse, SystemCursors, `,
-    {
-        Type = BlankCursor
-        %Type%%A_Index% := DllCall("CreateCursor", Uint, 0, Int, 0, Int, 0, Int, 32, Int, 32, Uint, &AndMask, Uint, &XorMask)
-        CursorHandle := DllCall("CopyImage", Uint, %Type%%A_Index%, Uint,0x2, Int,0, Int,0, Int,0)
-        DllCall("SetSystemCursor", Uint,CursorHandle, Int, SubStr(A_Loopfield, 1, 5))
-    }
+hide_mosue() {
+    show_Mouse(False)
 }
 
-RestoreCursor() {
-    SPI_SETCURSORS := 0x57
-    DllCall("SystemParametersInfo", UInt, SPI_SETCURSORS, UInt, 0, UInt, 0, UInt, 0)
+unhide_mouse() {
+    show_Mouse(True)
+}
+
+;-------------------------------------------------------------------------------
+show_Mouse(bShow := True) { ; show/hide the mouse cursor
+;-------------------------------------------------------------------------------
+    ; WINAPI: SystemParametersInfo, CreateCursor, CopyImage, SetSystemCursor
+    ; https://msdn.microsoft.com/en-us/library/windows/desktop/ms724947.aspx
+    ; https://msdn.microsoft.com/en-us/library/windows/desktop/ms648385.aspx
+    ; https://msdn.microsoft.com/en-us/library/windows/desktop/ms648031.aspx
+    ; https://msdn.microsoft.com/en-us/library/windows/desktop/ms648395.aspx
+    ;---------------------------------------------------------------------------
+    static BlankCursor, CleanUp := {base: {__Delete: "show_Mouse"}}
+    static CursorList := "32512, 32513, 32514, 32515, 32516, 32640, 32641"
+        . ",32642, 32643, 32644, 32645, 32646, 32648, 32649, 32650, 32651"
+    local ANDmask, XORmask, CursorHandle
+
+    If bShow ; shortcut for showing the mouse cursor, also RESETS MOUSE on exit
+             ; https://autohotkey.com/boards/viewtopic.php?p=173756#p173756
+
+        Return, DllCall("SystemParametersInfo" ; dll returns BOOL
+            , "UInt", 0x57              ; UINT  uiAction    (SPI_SETCURSORS)
+            , "UInt", 0                 ; UINT  uiParam
+            , "Ptr",  0                 ; PVOID pvParam
+            , "UInt", 0)                ; UINT  fWinIni
+
+    If Not BlankCursor { ; create BlankCursor only once
+        VarSetCapacity(ANDmask, 32 * 4, 0xFF)
+        VarSetCapacity(XORmask, 32 * 4, 0x00)
+
+        BlankCursor := DllCall("CreateCursor" ; dll returns HCURSOR
+            , "Ptr", 0                  ; HINSTANCE  hInst
+            , "Int", 0                  ; int        xHotSpot
+            , "Int", 0                  ; int        yHotSpot
+            , "Int", 32                 ; int        nWidth
+            , "Int", 32                 ; int        nHeight
+            , "Ptr", &ANDmask           ; const VOID *pvANDPlane
+            , "Ptr", &XORmask           ; const VOID *pvXORPlane
+            , "Ptr")                    ; return HCURSOR
+    }
+
+    ; set all system cursors to blank, each needs a new copy
+    Loop, Parse, CursorList, `,, %A_Space%
+    {
+        CursorHandle := DllCall("CopyImage" ; dll returns HANDLE
+            , "Ptr",  BlankCursor       ; HANDLE hImage
+            , "UInt", 2                 ; UINT   uType      (IMAGE_CURSOR)
+            , "Int",  0                 ; int    cxDesired
+            , "Int",  0                 ; int    cyDesired
+            , "UInt", 0                 ; UINT   fuFlags
+            , "Ptr")                    ; return HANDLE
+
+        DllCall("SetSystemCursor" ; dll returns BOOL
+            , "Ptr",  CursorHandle      ; HCURSOR hcur
+            , "UInt", A_Loopfield)      ; DWORD   id
+    }
 }

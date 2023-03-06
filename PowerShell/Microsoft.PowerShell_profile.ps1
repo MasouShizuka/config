@@ -64,4 +64,4 @@ Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 # Theme #
 #########
 
-oh-my-posh init pwsh --config "~/AppData/Local/Programs/oh-my-posh/themes/negligible.omp.json" | Invoke-Expression
+oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/negligible.omp.json" | Invoke-Expression
