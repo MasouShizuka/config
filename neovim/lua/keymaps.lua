@@ -7,52 +7,42 @@
 -- command_mode      = "c",
 
 local global = require("global")
-
 local map = vim.api.nvim_set_keymap
-
-local opt = {
-    noremap = true,
-    silent = true,
-}
 
 -- 设置 leader 为空格
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-
-
--- 快捷键
-
 -- 不保存到寄存器
-map("n", "C", '"_c', opt)
-map("v", "C", '"_c', opt)
-map("n", "D", '"_d', opt)
-map("v", "D", '"_d', opt)
-map("v", "p", '"_dP', opt)
+map("n", "C", '"_c', { noremap = true, silent = true })
+map("v", "C", '"_c', { noremap = true, silent = true })
+map("n", "D", '"_d', { noremap = true, silent = true })
+map("v", "D", '"_d', { noremap = true, silent = true })
+
+-- 选中上次粘贴的文本
+map("n", "gp", "`[v`]", { noremap = true, silent = true })
 
 -- 跳到行首行尾不带空格
-map("n", "H", "^", opt)
-map("v", "H", "^", opt)
-map("o", "H", "^", opt)
-map("n", "L", "g_", opt)
-map("v", "L", "g_", opt)
-map("o", "L", "g_", opt)
+map("n", "H", "^", { noremap = true, silent = true })
+map("v", "H", "^", { noremap = true, silent = true })
+map("o", "H", "^", { noremap = true, silent = true })
+map("n", "L", "g_", { noremap = true, silent = true })
+map("v", "L", "g_", { noremap = true, silent = true })
+map("o", "L", "g_", { noremap = true, silent = true })
 
 -- 折行时小步上下移动
-vim.cmd [[
-    nmap <expr> j v:count == 0 ? "gj" : "j"
-    vmap <expr> j v:count == 0 ? "gj" : "j"
-    nmap <expr> k v:count == 0 ? "gk" : "k"
-    vmap <expr> k v:count == 0 ? "gk" : "k"
-]]
+map("n", "j", "v:count == 0 ? 'gjzz' : 'j'", { expr = true, silent = true })
+map("v", "j", "v:count == 0 ? 'gjzz' : 'j'", { expr = true, silent = true })
+map("n", "k", "v:count == 0 ? 'gkzz' : 'k'", { expr = true, silent = true })
+map("v", "k", "v:count == 0 ? 'gkzz' : 'k'", { expr = true, silent = true })
 
 -- 上下移动选中文本
-map("v", "J", ":move '>+1<CR>gv-gv", opt)
-map("v", "K", ":move '<-2<CR>gv-gv", opt)
+map("v", "J", ":move '>+1<CR>gv-gv", { noremap = true, silent = true })
+map("v", "K", ":move '<-2<CR>gv-gv", { noremap = true, silent = true })
 
 -- 调整光标所在行到屏幕的位置
-map("n", "zj", "zt", { noremap = false, silent = true })
-map("n", "zk", "zb", { noremap = false, silent = true })
+map("n", "zj", "zt", { silent = true })
+map("n", "zk", "zb", { silent = true })
 
 if global.is_vscode then
     vim.cmd [[
@@ -133,20 +123,20 @@ else
     map("c", "<C-k>", "<C-p>", { noremap = true })
 
     -- 分屏
-    map("n", "<C-j>", "<C-w>w", opt)
-    map("n", "<C-k>", "<C-w>W", opt)
-    map("n", "<C-s><C-j>", ":set splitbelow<CR><C-w>s", opt)
-    map("n", "<C-s><C-k>", ":set nosplitbelow<CR><C-w>s", opt)
-    map("n", "<C-s><C-l>", ":set splitright<CR><C-w>v", opt)
-    map("n", "<C-s><C-h>", ":set nosplitright<CR><C-w>v", opt)
-    map("n", "<C-Up>", "<C-w>+", opt)
-    map("n", "<C-Down>", "<C-w>-", opt)
-    map("n", "<C-Left>", "<C-w><", opt)
-    map("n", "<C-Right>", "<C-w>>", opt)
+    map("n", "<C-j>", "<C-w>w", { noremap = true, silent = true })
+    map("n", "<C-k>", "<C-w>W", { noremap = true, silent = true })
+    map("n", "<C-s><C-j>", ":set splitbelow<CR><C-w>s", { noremap = true, silent = true })
+    map("n", "<C-s><C-k>", ":set nosplitbelow<CR><C-w>s", { noremap = true, silent = true })
+    map("n", "<C-s><C-l>", ":set splitright<CR><C-w>v", { noremap = true, silent = true })
+    map("n", "<C-s><C-h>", ":set nosplitright<CR><C-w>v", { noremap = true, silent = true })
+    map("n", "<C-Up>", "<C-w>+", { noremap = true, silent = true })
+    map("n", "<C-Down>", "<C-w>-", { noremap = true, silent = true })
+    map("n", "<C-Left>", "<C-w><", { noremap = true, silent = true })
+    map("n", "<C-Right>", "<C-w>>", { noremap = true, silent = true })
 
     -- 保存和退出
-    map("n", "<C-s>", "<Esc>:w<CR>", opt)
-    map("n", "<C-w>", "<Esc>:q!<CR>", opt)
+    map("n", "<C-s>", "<Esc>:w<CR>", { noremap = true, silent = true })
+    map("n", "<C-w>", "<Esc>:q!<CR>", { noremap = true, silent = true })
 
     vim.cmd [[
         " Markdown快捷输入
@@ -154,24 +144,26 @@ else
         " 替换操作
         autocmd Filetype markdown inoremap .f <Esc>/<++><CR>:nohlsearch<CR>c4l
         autocmd Filetype markdown inoremap 。f <Esc>/<++><CR>:nohlsearch<CR>c4l
+
         " 一级标题
-        autocmd Filetype markdown inoremap .t1 #<Space><Enter><Enter><++><Esc>2kA
-        autocmd Filetype markdown inoremap 。t1 #<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap .1 #<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap 。1 #<Space><Enter><Enter><++><Esc>2kA
         " 二级标题
-        autocmd Filetype markdown inoremap .t2 ##<Space><Enter><Enter><++><Esc>2kA
-        autocmd Filetype markdown inoremap 。t2 ##<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap .2 ##<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap 。2 ##<Space><Enter><Enter><++><Esc>2kA
         " 三级标题
-        autocmd Filetype markdown inoremap .t3 ###<Space><Enter><Enter><++><Esc>2kA
-        autocmd Filetype markdown inoremap 。t3 ###<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap .3 ###<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap 。3 ###<Space><Enter><Enter><++><Esc>2kA
         " 四级标题
-        autocmd Filetype markdown inoremap .t4 ####<Space><Enter><Enter><++><Esc>2kA
-        autocmd Filetype markdown inoremap 。t4 ####<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap .4 ####<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap 。4 ####<Space><Enter><Enter><++><Esc>2kA
         " 五级标题
-        autocmd Filetype markdown inoremap .t5 #####<Space><Enter><Enter><++><Esc>2kA
-        autocmd Filetype markdown inoremap 。t5 #####<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap .5 #####<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap 。5 #####<Space><Enter><Enter><++><Esc>2kA
         " 六级标题
-        autocmd Filetype markdown inoremap .t6 ######<Space><Enter><Enter><++><Esc>2kA
-        autocmd Filetype markdown inoremap 。t6 ######<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap .6 ######<Space><Enter><Enter><++><Esc>2kA
+        autocmd Filetype markdown inoremap 。6 ######<Space><Enter><Enter><++><Esc>2kA
+
         " 粗体文本
         autocmd Filetype markdown inoremap .b ****<++><Esc>F*hi
         autocmd Filetype markdown inoremap 。b ****<++><Esc>F*hi
@@ -181,15 +173,14 @@ else
         " 粗斜体文本
         autocmd Filetype markdown inoremap .e ******<++><Esc>F*hhi
         autocmd Filetype markdown inoremap 。e ******<++><Esc>F*hhi
-        " 高亮
-        autocmd Filetype markdown inoremap .h ====<++><Esc>F=hi
-        autocmd Filetype markdown inoremap 。h ====<++><Esc>F=hi
         " 下划线
         autocmd Filetype markdown inoremap .s ~~~~<++><Esc>F~hi
         autocmd Filetype markdown inoremap 。s ~~~~<++><Esc>F~hi
+
         " 引用
-        autocmd Filetype markdown inoremap .q >
-        autocmd Filetype markdown inoremap 。q >
+        autocmd Filetype markdown inoremap .q ><Space>
+        autocmd Filetype markdown inoremap 。q ><Space>
+
         " 标注
         autocmd Filetype markdown inoremap .c ``<++><Esc>F`i
         autocmd Filetype markdown inoremap 。c ``<++><Esc>F`i
@@ -202,15 +193,30 @@ else
         " 行间公式
         autocmd Filetype markdown inoremap ..m $$<Enter><Enter>$$<Enter><Enter><++><Esc>3ki
         autocmd Filetype markdown inoremap 。。m $$<Enter><Enter>$$<Enter><Enter><++><Esc>3ki
+
         " 插入分隔线
         autocmd Filetype markdown inoremap .n ---<Enter><Enter>
         autocmd Filetype markdown inoremap 。n ---<Enter><Enter>
+
         " 插入图片
         autocmd Filetype markdown inoremap .p ![](<++>)<++><Esc>F[a
         autocmd Filetype markdown inoremap 。p ![](<++>)<++><Esc>F[a
         " 插入链接
         autocmd Filetype markdown inoremap .l [](<++>)<++><Esc>F[a
         autocmd Filetype markdown inoremap 。l [](<++>)<++><Esc>F[a
+
+        " 插入 html 的 center
+        autocmd Filetype markdown inoremap .hc <center><Enter><Enter><Enter><Enter></center><Enter><Enter><++><Esc>4ki
+        autocmd Filetype markdown inoremap 。hc <center><Enter><Enter><Enter><Enter></center><Enter><Enter><++><Esc>4ki
+        " 插入 html 的 font color
+        autocmd Filetype markdown inoremap .hf <font color=></font><++><Esc>F=a
+        autocmd Filetype markdown inoremap 。hf <font color=></font><++><Esc>F=a
+        " 插入 html 的 mark
+        autocmd Filetype markdown inoremap .hm <mark></mark><++><Esc>2F<i
+        autocmd Filetype markdown inoremap 。hm <mark></mark><++><Esc>2F<i
+        " 插入 html 的 underline
+        autocmd Filetype markdown inoremap .hu <u></u><++><Esc>2F<i
+        autocmd Filetype markdown inoremap 。hu <u></u><++><Esc>2F<i
 
         function! Run()
             execute "w"
@@ -262,46 +268,4 @@ else
         endfunction
         noremap <Leader>r :call Run()<CR>
     ]]
-end
-
-
-
--- 插件快捷键
-
--- hop.nvim
-map("n", "s", "<cmd>lua require'hop'.hint_char1()<cr>", opt)
-map("v", "s", "<cmd>lua require'hop'.hint_char1()<cr>", opt)
-map("n", "S", "<cmd>lua require'hop'.hint_words()<cr>", opt)
-
--- nvim-hlslens
-map("n", "n", [[<Cmd>execute("normal! " . v:count1 . "n")<CR><Cmd>lua require("hlslens").start()<CR>zz]], { noremap = false, silent = true })
-map("n", "N", [[<Cmd>execute("normal! " . v:count1 . "N")<CR><Cmd>lua require("hlslens").start()<CR>zz]], { noremap = false, silent = true })
-map("n", "*", [[*<Cmd>lua require("hlslens").start()<CR>zz]], { noremap = false, silent = true })
-map("n", "#", [[#<Cmd>lua require("hlslens").start()<CR>zz]], { noremap = false, silent = true })
-map("n", "g*", [[g*<Cmd>lua require("hlslens").start()<CR>zz]], { noremap = false, silent = true })
-map("n", "g#", [[g#<Cmd>lua require("hlslens").start()<CR>zz]], { noremap = false, silent = true })
-
--- substitute.nvim
-map("n", "gr", "<cmd>lua require('substitute').operator()<cr>", { noremap = true })
-map("n", "grr", "<cmd>lua require('substitute').line()<cr>", { noremap = true })
-map("v", "gr", "<cmd>lua require('substitute').visual()<cr>", { noremap = true })
-map("n", "cx", "<cmd>lua require('substitute.exchange').operator()<cr>", { noremap = true })
-map("n", "cxx", "<cmd>lua require('substitute.exchange').line()<cr>", { noremap = true })
-map("x", "X", "<cmd>lua require('substitute.exchange').visual()<cr>", { noremap = true })
-map("n", "cxc", "<cmd>lua require('substitute.exchange').cancel()<cr>", { noremap = true })
-
--- vim-easy-align
-map("n", "ga", "<Plug>(EasyAlign)", { noremap = false })
-map("v", "ga", ":EasyAlign ", { noremap = false })
-
-if not global.is_vscode then
-    -- bufferline.nvim
-    map("n", "<C-h>", ":BufferLineCyclePrev<CR>", opt)
-    map("n", "<C-l>", ":BufferLineCycleNext<CR>", opt)
-
-    -- clipboard-image.nvim
-    map("n", "<leader>p", ":PasteImg<CR>", opt)
-
-    -- nvim-tree
-    map("n", "<leader>n", ":NvimTreeToggle<CR>", opt)
 end

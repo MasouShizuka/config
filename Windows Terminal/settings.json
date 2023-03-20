@@ -443,7 +443,7 @@
             {
                 "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
                 "hidden": false,
-                "icon": "D:/Tools/ArchWSL/Arch.png",
+                "icon": "C:\\Program Files\\WindowsApps\\22955VineelSai.ArchWSL_1.0.1.0_x64__qz230bc1wsk9j\\Assets\\LargeTile.scale-200.png",
                 "name": "Arch",
                 "source": "Windows.Terminal.Wsl"
             },

@@ -1,12 +1,11 @@
 local autocmd = vim.api.nvim_create_autocmd
-
-local myAutoGroup = vim.api.nvim_create_augroup("myAutoGroup", {
+local my_group = vim.api.nvim_create_augroup("my_group", {
     clear = true,
 })
 
 -- 用o换行不要延续注释
 autocmd("BufEnter", {
-    group = myAutoGroup,
+    group = my_group,
     pattern = "*",
     callback = function()
         vim.opt.formatoptions = vim.opt.formatoptions
@@ -17,22 +16,10 @@ autocmd("BufEnter", {
 })
 
 -- Highlight on yank
-autocmd("TextYankPost", {
-    group = myAutoGroup,
-    pattern = "*",
-    callback = function()
-        vim.highlight.on_yank({ timeout = 500 })
-    end,
-})
-
--- 修改lua/plugins.lua 自动更新插件
-autocmd("BufWritePost", {
-    group = myAutoGroup,
-    -- autocmd BufWritePost plugins.lua source <afile> | PackerSync
-    callback = function()
-        if vim.fn.expand("<afile>") == "lua/plugins.lua" then
-            vim.api.nvim_command("source lua/plugins.lua")
-            vim.api.nvim_command("PackerSync")
-        end
-    end,
-})
+-- autocmd("TextYankPost", {
+--     group = my_group,
+--     pattern = "*",
+--     callback = function()
+--         vim.highlight.on_yank({ timeout = 500 })
+--     end,
+-- })

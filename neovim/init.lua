@@ -1,7 +1,5 @@
 require("options")
 require("keymaps")
 require("plugins")
-require("plugin-conf")
 require("colorscheme")
 require("autocmds")
-require("neovide")

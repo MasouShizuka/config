@@ -1,3 +1,5 @@
+vim.api.nvim_set_keymap("n", "<leader>p", ":PasteImg<CR>", { noremap = true, silent = true })
+
 require("clipboard-image").setup(
     {
         -- Default configuration for all filetype

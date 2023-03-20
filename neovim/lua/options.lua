@@ -44,6 +44,10 @@ vim.opt.smartcase = true
 -- 关键字
 vim.opt.iskeyword:append("-")
 
+-- 显示字符
+vim.opt.list = true
+vim.opt.listchars:append "tab:··,trail:·"
+
 -- 鼠标支持
 vim.opt.mouse = "a"
 

@@ -15,48 +15,48 @@
 
     "Insert heading level 1": {
         "prefix": [
-            ".t1",
-            "。t1"
+            ".1",
+            "。1"
         ],
         "body": "# ${TM_SELECTED_TEXT}",
         "description": "Insert heading level 1"
     },
     "Insert heading level 2": {
         "prefix": [
-            ".t2",
-            "。t2"
+            ".2",
+            "。2"
         ],
         "body": "## ${TM_SELECTED_TEXT}",
         "description": "Insert heading level 2"
     },
     "Insert heading level 3": {
         "prefix": [
-            ".t3",
-            "。t3"
+            ".3",
+            "。3"
         ],
         "body": "### ${TM_SELECTED_TEXT}",
         "description": "Insert heading level 3"
     },
     "Insert heading level 4": {
         "prefix": [
-            ".t4",
-            "。t4"
+            ".4",
+            "。4"
         ],
         "body": "#### ${TM_SELECTED_TEXT}",
         "description": "Insert heading level 4"
     },
     "Insert heading level 5": {
         "prefix": [
-            ".t5",
-            "。t5"
+            ".5",
+            "。5"
         ],
         "body": "##### ${TM_SELECTED_TEXT}",
         "description": "Insert heading level 5"
     },
     "Insert heading level 6": {
         "prefix": [
-            ".t6",
-            "。t6"
+            ".6",
+            "。6"
         ],
         "body": "###### ${TM_SELECTED_TEXT}",
         "description": "Insert heading level 6"
@@ -85,14 +85,6 @@
         ],
         "body": "***${1:${TM_SELECTED_TEXT}}***$0",
         "description": "Insert bold italic text"
-    },
-    "Insert highlight text": {
-        "prefix": [
-            ".h",
-            "。h"
-        ],
-        "body": "==${1:${TM_SELECTED_TEXT}}==$0",
-        "description": "Insert highlight text"
     },
     "Insert strikethrough": {
         "prefix": [
@@ -180,5 +172,44 @@
         ],
         "body": "![${TM_SELECTED_TEXT:${1:alt}}](${2:https://})$0",
         "description": "Insert image"
+    },
+
+    "Insert html center block": {
+        "prefix": [
+            ".hc",
+            "。hc"
+        ],
+        "body": [
+            "<center>",
+            "",
+            "${TM_SELECTED_TEXT}$0",
+            "",
+            "</center>"
+        ],
+        "description": "Insert html center block"
+    },
+    "Insert html font color block": {
+        "prefix": [
+            ".hf",
+            "。hf"
+        ],
+        "body": "<font color=${1|red,yellow,blue,green|}>${2:${TM_SELECTED_TEXT}}</mark>$0",
+        "description": "Insert html font block"
+    },
+    "Insert html mark block": {
+        "prefix": [
+            ".hm",
+            "。hm"
+        ],
+        "body": "<mark>${1:${TM_SELECTED_TEXT}}</mark>$0",
+        "description": "Insert html mark block"
+    },
+    "Insert html underline block": {
+        "prefix": [
+            ".hu",
+            "。hu"
+        ],
+        "body": "<u>${1:${TM_SELECTED_TEXT}}</u>$0",
+        "description": "Insert html underline block"
     }
 }

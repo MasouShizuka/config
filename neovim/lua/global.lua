@@ -8,9 +8,9 @@ function global:load_variables()
 
     self.is_vscode = vim.g.vscode
 
-    self.home_path = self.is_windows and os.getenv("USERPROFILE") or os.getenv("HOME")
     self.config_path = vim.fn.stdpath("config")
     self.data_path = vim.fn.stdpath("data")
+    self.home_path = self.is_windows and os.getenv("USERPROFILE") or os.getenv("HOME")
 end
 
 global:load_variables()

@@ -57,8 +57,11 @@
     "editor.linkedEditing": true,
     "editor.minimap.renderCharacters": false,
     "editor.minimap.showSlider": "always",
+    "editor.minimap.size": "fill",
     "editor.renderLineHighlight": "all",
     "editor.renderWhitespace": "trailing",
+    "editor.scrollbar.vertical": "hidden",
+    "editor.scrollbar.verticalScrollbarSize": 0,
     "editor.showFoldingControls": "always",
     "editor.stickyScroll.enabled": true,
     "editor.suggest.preview": true,
@@ -184,6 +187,7 @@
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 14,
+    "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
     "markdownlint.config": {
         "MD001": false,
@@ -194,6 +198,7 @@
         "MD026": false,
         "MD032": false,
         "MD033": false,
+        "MD034": false,
         "MD037": false,
         "MD040": false,
         "MD051": false
@@ -253,7 +258,7 @@
     "window.menuBarVisibility": "compact",
     "window.zoomLevel": 2,
     "wordcount_cjk.statusBarTextTemplate": "共 ${cjk} 字 ${en_words} 单词",
-    "wordcount_cjk.statusBarTooltipTemplate": "中文字数：\\t\\t${cjk}\\n英文单词数：\\t\\t${en_words}\\nASCII 字符数：\\t${ascii}\\n非 ASCII 字符数：\\t${total - ascii}\\n空白字符数：\\t\\t${whitespace}\\n非空白字符数：\\t\\t${total - whitespace}\\n总字符数：\\t\\t${total}",
+    "wordcount_cjk.statusBarTooltipTemplate": "中文字数：\\t\\t${cjk}\\n英文单词数：\\t\\t${en_words}\\nASCII 字符数：\\t${ascii}\\n非 ASCII 字符数：\\t${total - ascii}\\n空白字符数：\\t\\t${whitespace}\\n非空白字符数：\\t${total - whitespace}\\n总字符数：\\t\\t${total}",
     "workbench.colorCustomizations": {
         "editor.lineHighlightBackground": "#1073cf2d",
         "editor.lineHighlightBorder": "#9fced11f",
@@ -261,6 +266,7 @@
         "editor.selectionHighlightBorder": "#dddddd",
         "editorCursor.foreground": "#528bff",
         "minimap.background": "#282c3433",
+        "minimapSlider.background": "#9fced11f",
         "notebook.cellEditorBackground": "#21252b",
         "tab.activeBorder": "#d19a66",
         "titleBar.inactiveBackground": "#282c34"

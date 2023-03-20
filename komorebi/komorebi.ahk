@@ -151,6 +151,7 @@ WorkspaceRule("exe", "Thunder.exe", main_monitor, 5)
 ; Run, komorebic.exe float-rule class TaskManagerWindow, , Hide
 FloatRule("class", "ExplorerBrowserControl")
 FloatRule("class", "jsplitter_panel_container")
+FloatRule("class", "OperationStatusWindow")
 FloatRule("class", "SessionDragWnd")
 FloatRule("class", "TApplication")
 ; Always float, matching on title

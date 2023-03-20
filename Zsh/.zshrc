@@ -95,17 +95,57 @@ key[Shift-Right]="${terminfo[kRIT]}"
 # 命令补全
 autoload -Uz compinit && compinit
 
-# 历史文件
+# 历史文件和大小
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
-# 历史去重
-setopt HIST_FIND_NO_DUPS
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_REDUCE_BLANKS
-setopt HIST_SAVE_NO_DUPS
-# 设置执行命令后立即添加到历史
-setopt INC_APPEND_HISTORY
+
+# 历史设置
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY_TIME   # Write to the history file immediately, not when the shell exits.
+setopt HIST_BEEP                 # Beep when accessing nonexistent history.
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+# setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
+# setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
+
+# 只将成功执行的命令写入历史文件
+# precmd() {
+#     # Write the last command if successful (or closed with signal 2), using
+#     # the history buffered by my_zshaddhistory().
+#     if [[ ($? == 0 || $? == 130) && -n ${LASTHIST//[[:space:]]/} ]] ; then
+#         print -sr -- ${=${LASTHIST%%'\n'}}
+#     fi
+# }
+
+# 执行命令后删除历史文件中的重复命令
+zshaddhistory() {
+    LASTHIST=$1
+
+    # 添加命令到历史文件前删除相同的历史命令
+    if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
+        LASTHIST_SED="$(<<< ${LASTHIST%%$'\n'} sed -e 's`[][\\/.*^$]`\\&`g')"
+        sed -i "/${LASTHIST_SED}/d" ~/.zsh_history
+    fi
+
+    # Return value 2: "... the history line will be saved on the internal
+    # history list, but not written to the history file".
+    # return 2
+}
+
+# 退出 zsh 后清除重复命令
+zshexit() {
+    # 只保留所有的重复命令的最后一条
+    if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
+        tac ~/.zsh_history | awk -F ';' '!a[$2]++' | tac > ~/tmpfile
+        mv ~/tmpfile ~/.zsh_history
+    fi
+}
 
 # 自动补全大小写不敏感
 zstyle ":completion:*" matcher-list "" "m:{a-zA-Z}={A-Za-z}" "r:|[._-]=* r:|=*" "l:|=* r:|=*"
@@ -130,17 +170,3 @@ eval "$(oh-my-posh init zsh --config $POSH_THEMES_PATH/negligible.omp.json)"
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-
-
-#########
-# Conda #
-#########
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-# if [ -f '/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' ]; then
-#     eval "$('/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' 'shell.zsh' 'hook')"
-# fi
-. /c/Users/MasouShizuka/miniconda3/etc/profile.d/conda_fixed.sh
-# <<< conda initialize <<<
