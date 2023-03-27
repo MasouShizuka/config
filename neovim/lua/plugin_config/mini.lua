@@ -1,4 +1,4 @@
-local global = require("global")
+local variables = require("variables")
 
 require("mini.ai").setup(
     {
@@ -26,7 +26,7 @@ require("mini.ai").setup(
                     "^()()[%l%d]+()()%u",
                 },
             },
-        }
+        },
     }
 )
 
@@ -35,25 +35,6 @@ require("mini.align").setup(
         mappings = {
             start = "ga",
             start_with_preview = "gA",
-        },
-    }
-)
-
-vim.api.nvim_command("highlight MiniJump2dSpot guibg=black guifg=#ff007c gui=bold ctermfg=198 cterm=bold")
-vim.api.nvim_set_keymap("n", ";",
-    "<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("v", ";",
-    "<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-    { noremap = true, silent = true }
-)
-require("mini.jump2d").setup(
-    {
-        -- labels = "abcdefghijklmnopqrstuvwxyz",
-        labels = "qwertyuioplkjhgfdsazxcvbnm",
-        mappings = {
-            start_jumping = "",
         },
     }
 )
@@ -74,6 +55,21 @@ require("mini.surround").setup(
                 input = { "%{().-()%}" },
                 output = { left = "{", right = "}" },
             },
+            L = {
+                input = { "\\begin%{%w*%}\n().-()\n\\end%{%w*%}" },
+                output = function()
+                    local latex_name = require("mini.surround").user_input("Latex object name")
+                    return { left = ("\\begin{%s}\n"):format(latex_name), right = ("\n\\end{%s}"):format(latex_name) }
+                end,
+            },
+            l = {
+                input = { "\\%w+%{().-()%}" },
+                output = function()
+                    local cmd_name = require("mini.surround").user_input("Latex command name")
+                    if cmd_name == nil then return nil end
+                    return { left = ("\\%s{"):format(cmd_name), right = "}" }
+                end,
+            },
             r = {
                 input = { "%[().-()%]" },
                 output = { left = "[", right = "]" },
@@ -87,13 +83,14 @@ require("mini.surround").setup(
             highlight = "sh",      -- Highlight surrounding
             replace = "sr",        -- Replace surrounding
             update_n_lines = "sn", -- Update `n_lines`
-            suffix_last = "l",     -- Suffix to search with "prev" method
+            -- suffix_last = "l",     -- Suffix to search with "prev" method
+            suffix_last = "p",     -- Suffix to search with "prev" method
             suffix_next = "n",     -- Suffix to search with "next" method
         },
     }
 )
 
-if not global.is_vscode then
+if not variables.is_vscode then
     require("mini.comment").setup(
         {
             mappings = {
@@ -119,4 +116,12 @@ if not global.is_vscode then
     )
 
     require("mini.pairs").setup()
+
+    require("mini.trailspace").setup()
+    vim.api.nvim_create_autocmd("InsertLeave", {
+        callback = function()
+            require("mini.trailspace").trim()
+        end,
+        pattern = "*",
+    })
 end

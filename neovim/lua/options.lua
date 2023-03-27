@@ -1,87 +1,82 @@
--- 新行对齐当前行
-vim.opt.autoindent = true
-vim.opt.smartindent = true
+-- Char
+vim.opt.list = true                                         -- show <Tab> and <EOL>
+vim.opt.listchars:append({
+    extends = "…",
+    nbsp = "␣",
+    precedes = "…",
+    tab = ">~",
+    trail = "·",
+})                                                          -- characters for displaying in list mode
 
--- 禁止创建备份文件
-vim.opt.backup = false
-vim.opt.writebackup = false
-vim.opt.shada = ""
-vim.opt.swapfile = false
-vim.opt.undofile = false
+-- Clipboard
+vim.opt.clipboard = "unnamedplus"                           -- use the clipboard as the unnamed register
 
--- 剪切板
-vim.opt.clipboard = "unnamedplus"
+-- Column
+vim.opt.fillchars:append({ eob = " " })                     -- characters to use for displaying special items
+vim.opt.number = true                                       -- print the line number in front of each line
+vim.opt.relativenumber = true                               -- show relative line number in front of each line
+vim.opt.signcolumn = "yes"                                  -- when and how to display the sign column
 
--- 命令行高
-vim.opt.cmdheight = 1
+-- Completion
+vim.opt.completeopt = { "menuone", "noinsert", "noselect" } -- options for Insert mode completion
+vim.opt.infercase = true                                    -- adjust case of match for keyword completion
+vim.opt.pumblend = 10                                       -- enables pseudo-transparency for the popup-menu
+vim.opt.pumheight = 10                                      -- maximum number of items to show in the popup menu
+vim.opt.shortmess:append("cW")                              -- list of flags, reduce length of messages
 
--- 自动补全不自动选中
-vim.opt.completeopt = { "menuone", "noselect" }
--- 补全最多显示10行
-vim.opt.pumheight = 10
+-- Cursor
+vim.opt.cursorline = true                                   -- highlight the screen line of the cursor
 
--- 高亮所在行
-vim.opt.cursorline = true
+-- File
+vim.opt.writebackup = false                                 -- make a backup before overwriting a file
+vim.opt.shada = ""                                          -- use .shada file upon startup and exiting
+vim.opt.swapfile = false                                    -- whether to use a swapfile for a buffer
 
--- 编码
-vim.opt.fileencoding = "utf-8"
+-- Edit
+vim.opt.virtualedit = "block"                               -- when to use virtual editing
 
--- 4个空格等于一个Tab
-vim.opt.expandtab = true
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftround = true
-vim.opt.shiftwidth = 4
+-- Format
+vim.opt.formatoptions = "qjl1"                              -- how automatic formatting is to be done
 
--- 搜索高亮，边输入边搜索
-vim.opt.hlsearch = true
-vim.opt.incsearch = true
+-- Gui
+vim.opt.termguicolors = true                                -- enables 24-bit RGB color in the TUI
+vim.opt.winblend = 10                                       -- enables pseudo-transparency for a floating window
 
--- 搜索大小写不敏感，除非包含大写
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
+-- Indent
+vim.opt.breakindent = true                                  -- wrapped line repeats indent
+vim.opt.linebreak = true                                    -- wrap long lines at a blank
+vim.opt.smartindent = true                                  -- smart autoindenting for C programs
 
--- 关键字
-vim.opt.iskeyword:append("-")
+-- Mouse
+vim.opt.mouse = "a"                                         -- enable the use of mouse clicks
 
--- 显示字符
-vim.opt.list = true
-vim.opt.listchars:append "tab:··,trail:·"
+-- Search
+vim.opt.ignorecase = true                                   -- ignore case in search patterns
+vim.opt.smartcase = true                                    -- no ignore case when pattern has uppercase
 
--- 鼠标支持
-vim.opt.mouse = "a"
+-- Tab
+vim.opt.expandtab = true                                    -- use spaces when <Tab> is inserted
+vim.opt.shiftround = true                                   -- round indent to multiple of shiftwidth
+vim.opt.shiftwidth = 4                                      -- number of spaces to use for (auto)indent step
+vim.opt.softtabstop = 4                                     -- number of spaces that <Tab> uses while editing
+vim.opt.tabstop = 4                                         -- number of spaces that <Tab> in file uses
 
--- 相对行号
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.numberwidth = 4
+-- Keyword
+vim.opt.iskeyword:append("-")                               -- characters included in keywords
 
--- 光标周围保留5行
-vim.opt.scrolloff = 5
-vim.opt.sidescrolloff = 5
+-- Scrolloff
+vim.opt.scrolloff = 5                                       -- minimum nr. of lines above and below cursor
+vim.opt.sidescrolloff = 5                                   -- min. nr. of columns to left and right of cursor
 
--- 显示左侧图标指示列
-vim.opt.signcolumn = "yes"
+-- Split window
+vim.opt.splitbelow = true                                   -- new window from split is below the current one
+vim.opt.splitright = true                                   -- new window is put right of the current one
 
--- Dont' pass messages to ins-completin menu
-vim.opt.shortmess:append("c")
+-- Status line
+vim.opt.ruler = false                                       -- show cursor line and column in the status line
+vim.opt.showtabline = 2                                     -- tells when the tab pages line is displayed
+vim.opt.showmode = false                                    -- message on status line to show current mode
 
--- 永远显示 tabline
-vim.opt.showtabline = 2
--- 使用增强状态栏插件后不再需要 vim 的模式提示
-vim.opt.showmode = false
-
--- split window 从下边和右边出现
-vim.opt.splitbelow = true
-vim.opt.splitright = true
-
--- 样式
-vim.opt.termguicolors = true
-
--- 等待键盘快捷键连击时间
-vim.opt.timeoutlen = 1000
--- updatetime
-vim.opt.updatetime = 1000
-
--- 超过屏幕长度换行
-vim.opt.wrap = true
+-- Time
+vim.opt.timeoutlen = 1000                                   -- time out time in milliseconds
+vim.opt.updatetime = 1000                                   -- after this many milliseconds flush swap file

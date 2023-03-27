@@ -1,17 +1,32 @@
-local global = require("global")
+local variables = require("variables")
 
 local plugin_list = {
-    {
-        "otavioschwanck/cool-substitute.nvim",
-        config = function()
-            require("plugin_config.cool-substitute")
-        end,
-    },
-
     {
         "echasnovski/mini.nvim",
         config = function()
             require("plugin_config.mini")
+        end,
+        version = false,
+    },
+
+    {
+        "gbprod/cutlass.nvim",
+        config = function()
+            require("plugin_config.cutlass")
+        end,
+    },
+
+    {
+        "gbprod/substitute.nvim",
+        config = function()
+            require("plugin_config.substitute")
+        end,
+    },
+
+    {
+        "gbprod/yanky.nvim",
+        config = function()
+            require("plugin_config.yanky")
         end,
     },
 
@@ -30,21 +45,29 @@ local plugin_list = {
     },
 
     {
-        "gbprod/substitute.nvim",
+        "monaqa/dial.nvim",
         config = function()
-            require("plugin_config.substitute")
+            require("plugin_config.dial")
         end,
     },
 
     {
-        "gbprod/yanky.nvim",
+        "otavioschwanck/cool-substitute.nvim",
         config = function()
-            require("plugin_config.yanky")
+            require("plugin_config.cool-substitute")
         end,
-    }
+    },
+
+    {
+        "phaazon/hop.nvim",
+        branch = "v2",
+        config = function()
+            require("plugin_config.hop")
+        end,
+    },
 }
 
-if global.is_windows then
+if variables.is_windows then
     local plugin_windows = {
         {
             "keaising/im-select.nvim",
@@ -59,14 +82,16 @@ if global.is_windows then
     end
 end
 
-if not global.is_vscode then
+if not variables.is_vscode then
     local plugin_terminal = {
         {
             "akinsho/bufferline.nvim",
             config = function()
                 require("plugin_config.bufferline")
             end,
-            dependencies = "nvim-tree/nvim-web-devicons",
+            dependencies = {
+                "nvim-tree/nvim-web-devicons",
+            },
             version = "v3.*",
         },
 
@@ -78,32 +103,29 @@ if not global.is_vscode then
         },
 
         {
-            "nvim-lualine/lualine.nvim",
-            config = function()
-                require("plugin_config.lualine")
-            end,
-            dependencies = {
-                {
-                    "nvim-tree/nvim-web-devicons",
-                    lazy = true,
-                },
-            },
-        },
-
-        {
             "iamcco/markdown-preview.nvim",
             build = function() vim.fn["mkdp#util#install"]() end,
         },
 
         {
-            "kyazdani42/nvim-tree.lua",
+            "nvim-lualine/lualine.nvim",
+            config = function()
+                require("plugin_config.lualine")
+            end,
+            dependencies = {
+                "nvim-tree/nvim-web-devicons",
+            },
+        },
+
+        {
+            "nvim-tree/nvim-tree.lua",
             config = function()
                 require("plugin_config.nvim-tree")
             end,
             dependencies = {
                 "nvim-tree/nvim-web-devicons",
             },
-            version = "nightly",
+            version = "*",
         },
 
         {

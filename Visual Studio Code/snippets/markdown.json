@@ -193,7 +193,7 @@
             ".hf",
             "。hf"
         ],
-        "body": "<font color=${1|red,yellow,blue,green|}>${2:${TM_SELECTED_TEXT}}</mark>$0",
+        "body": "<font color=${1|red,yellow,blue,green|}>${2:${TM_SELECTED_TEXT}}</font>$0",
         "description": "Insert html font block"
     },
     "Insert html mark block": {

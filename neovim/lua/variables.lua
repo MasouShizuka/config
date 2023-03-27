@@ -1,6 +1,6 @@
-local global = {}
+local variables = {}
 
-function global:load_variables()
+function variables:load_variables()
     local os_name = vim.loop.os_uname().sysname
     self.is_windows = os_name == "Windows_NT"
     self.is_mac = os_name == "Darwin"
@@ -13,6 +13,6 @@ function global:load_variables()
     self.home_path = self.is_windows and os.getenv("USERPROFILE") or os.getenv("HOME")
 end
 
-global:load_variables()
+variables:load_variables()
 
-return global
+return variables

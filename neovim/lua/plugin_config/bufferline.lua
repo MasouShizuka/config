@@ -1,5 +1,9 @@
-vim.api.nvim_set_keymap("n", "<C-h>", ":BufferLineCyclePrev<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-l>", ":BufferLineCycleNext<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-h>", function ()
+    vim.api.nvim_command("BufferLineCyclePrev")
+end, { silent = true })
+vim.keymap.set("n", "<C-l>", function ()
+    vim.api.nvim_command("BufferLineCycleNext")
+end, { silent = true })
 
 require("bufferline").setup(
     {

@@ -1,13 +1,8 @@
-vim.api.nvim_set_keymap("n", "y", "<Plug>(YankyYank)", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("v", "y", "<Plug>(YankyYank)", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "p", "<Plug>(YankyPutAfter)", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("v", "p", "<Plug>(YankyPutAfter)", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "P", "<Plug>(YankyPutBefore)", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("v", "P", "<Plug>(YankyPutBefore)", { noremap = true, silent = true })
--- vim.api.nvim_set_keymap("n", "gp", "<Plug>(YankyGPutAfter)", { noremap = true, silent = true })
--- vim.api.nvim_set_keymap("v", "gp", "<Plug>(YankyGPutAfter)", { noremap = true, silent = true })
--- vim.api.nvim_set_keymap("n", "gP", "<Plug>(YankyGPutBefore)", { noremap = true, silent = true })
--- vim.api.nvim_set_keymap("v", "gP", "<Plug>(YankyGPutBefore)", { noremap = true, silent = true })
+vim.keymap.set({"n", "x"}, "y", "<Plug>(YankyYank)", { silent = true })
+vim.keymap.set({"n", "x"}, "p", "<Plug>(YankyPutAfter)", { silent = true })
+vim.keymap.set({"n", "x"}, "P", "<Plug>(YankyPutBefore)", { silent = true })
+-- vim.keymap.set({"n", "x"}, "gp", "<Plug>(YankyGPutAfter)", { silent = true })
+-- vim.keymap.set({"n", "x"}, "gP", "<Plug>(YankyGPutBefore)", { silent = true })
 
 require("yanky").setup(
     {

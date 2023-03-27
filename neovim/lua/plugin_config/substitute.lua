@@ -1,30 +1,31 @@
-vim.api.nvim_set_keymap("n", "gr",
-    "<cmd>lua require('substitute').operator()<cr>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("n", "grr",
-    "<cmd>lua require('substitute').line()<cr>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("v", "gr",
-    "<cmd>lua require('substitute').visual()<cr>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("n", "cx",
-    "<cmd>lua require('substitute.exchange').operator()<cr>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("n", "cxx",
-    "<cmd>lua require('substitute.exchange').line()<cr>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("x", "X",
-    "<cmd>lua require('substitute.exchange').visual()<cr>",
-    { noremap = true, silent = true }
-)
-vim.api.nvim_set_keymap("n", "cxc",
-    "<cmd>lua require('substitute.exchange').cancel()<cr>",
-    { noremap = true, silent = true }
-)
+vim.keymap.set("n", "gr", require("substitute").operator, { silent = true })
+vim.keymap.set("n", "grr", require("substitute").line, { silent = true })
+vim.keymap.set("x", "gr", require("substitute").visual, { silent = true })
+vim.keymap.set("n", "cx", require("substitute.exchange").operator, { silent = true })
+vim.keymap.set("n", "cxx", require("substitute.exchange").line, { silent = true })
+vim.keymap.set("x", "X", require("substitute.exchange").visual, { silent = true })
+vim.keymap.set("n", "cxc", require("substitute.exchange").cancel, { silent = true })
 
-require("substitute").setup()
+require("substitute").setup(
+    {
+        on_substitute = nil,
+        yank_substituted_text = false,
+        highlight_substituted_text = {
+            enabled = true,
+            timer = 500,
+        },
+        range = {
+            prefix = "s",
+            prompt_current_text = false,
+            confirm = false,
+            complete_word = false,
+            motion1 = false,
+            motion2 = false,
+            suffix = "",
+        },
+        exchange = {
+            motion = false,
+            use_esc_to_cancel = true,
+        },
+    }
+)

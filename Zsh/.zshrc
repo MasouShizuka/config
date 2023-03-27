@@ -20,9 +20,8 @@ alias vim=nvim
 
 export EDITOR=nvim
 
-export LANG=en_US.utf8
+export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-export LC_CTYPE=en_US.utf8
 
 export MSYS=winsymlinks:nativestrict
 
@@ -102,7 +101,7 @@ SAVEHIST=10000
 
 # 历史设置
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
-setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+# setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
 setopt INC_APPEND_HISTORY_TIME   # Write to the history file immediately, not when the shell exits.
 setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
@@ -114,36 +113,42 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
 setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
 
-# 只将成功执行的命令写入历史文件
-# precmd() {
-#     # Write the last command if successful (or closed with signal 2), using
-#     # the history buffered by my_zshaddhistory().
-#     if [[ ($? == 0 || $? == 130) && -n ${LASTHIST//[[:space:]]/} ]] ; then
-#         print -sr -- ${=${LASTHIST%%'\n'}}
-#     fi
-# }
+precmd() {
+    # Write the last command if successful (or closed with signal 2), using
+    # the history buffered by my_zshaddhistory().
+    # if [[ ($? == 0 || $? == 130) && -n ${LASTHIST//[[:space:]]/} ]] ; then
+    #     print -sr -- ${LASTHIST%%$'\n'}
+    # fi
 
-# 执行命令后删除历史文件中的重复命令
+    # 添加命令到历史文件后删除之前相同的历史命令
+    # if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
+    #     LASTHIST_SED="$(<<< ${LASTHIST%%$'\n'} sed -e 's`[][\\/.*^$]`\\&`g')"
+    #     sed -i "\$!{/${LASTHIST_SED}/d;}" "$HISTFILE"
+    # fi
+
+    # 添加命令到历史文件前删除相同的历史命令，并手动追加到历史文件中，防止文件乱码
+    if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
+        LASTHIST_TRIM=${LASTHIST%%$'\n'}
+        LASTHIST_SED="$(<<< $LASTHIST_TRIM sed -e 's`[][\\/.*^$]`\\&`g')"
+        sed -i "{/${LASTHIST_SED}/d;}" "$HISTFILE"
+        echo "$LASTHIST_TRIM" >> "$HISTFILE"
+    fi
+}
+
 zshaddhistory() {
     LASTHIST=$1
 
-    # 添加命令到历史文件前删除相同的历史命令
-    if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
-        LASTHIST_SED="$(<<< ${LASTHIST%%$'\n'} sed -e 's`[][\\/.*^$]`\\&`g')"
-        sed -i "/${LASTHIST_SED}/d" ~/.zsh_history
-    fi
-
     # Return value 2: "... the history line will be saved on the internal
     # history list, but not written to the history file".
-    # return 2
+    return 2
 }
 
-# 退出 zsh 后清除重复命令
+# 退出后删除最后一条以外的重复命令
 zshexit() {
-    # 只保留所有的重复命令的最后一条
     if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
-        tac ~/.zsh_history | awk -F ';' '!a[$2]++' | tac > ~/tmpfile
-        mv ~/tmpfile ~/.zsh_history
+        tac "$HISTFILE" | awk '!a[$0]++' | tac > ~/tmpfile
+        # tac "$HISTFILE" | awk -F ';' '!a[$2]++' | tac > ~/tmpfile
+        mv ~/tmpfile "$HISTFILE"
     fi
 }
 

@@ -559,6 +559,10 @@
         "command": "workbench.action.compareEditor.focusOtherSide",
         "when": "inDiffEditor"
     },
+    {
+        "key": "ctrl+e",
+        "command": "-workbench.action.quickOpen"
+    },
     // 差异编辑器中，交换两边
     {
         "key": "ctrl+e",
@@ -607,6 +611,17 @@
         "key": "ctrl+shift+n",
         "command": "workbench.action.compareEditor.previousChange",
         "when": "textCompareEditorVisible"
+    },
+
+    {
+        "key": "ctrl+t",
+        "command": "-workbench.action.showAllSymbols"
+    },
+    // 在新窗口打开当前文件
+    {
+        "key": "ctrl+t",
+        "command": "workbench.action.files.showOpenedFileInNewWindow",
+        "when": "emptyWorkspaceSupport"
     },
 
     {
