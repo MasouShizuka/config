@@ -53,7 +53,7 @@ function Controls:init()
 		deband             = 'cycle:texture:deband:no/yes!?去色带',
 		deint              = 'cycle:clear_all:deinterlace:no/yes!?反交错',
 		['shot-vid']       = 'command:screenshot:screenshot video?截屏',
-		['script-stats']   = 'command:info_outline:script-binding stats/display-stats-toggle?统计数据',
+		['script-stats']   = 'command:info_outline:script-binding display-stats-toggle?统计数据',
 
 	}
 

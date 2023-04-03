@@ -137,7 +137,6 @@ WorkspaceRule("exe", "QQ.exe", main_monitor, 2)
 WorkspaceRule("exe", "WeChat.exe", main_monitor, 2)
 WorkspaceRule("exe", "cloudmusic.exe", main_monitor, 3)
 WorkspaceRule("exe", "foobar2000.exe", main_monitor, 3)
-WorkspaceRule("exe", "mpv.exe", main_monitor, 4)
 WorkspaceRule("exe", "Thunder.exe", main_monitor, 5)
 
 
@@ -170,8 +169,6 @@ FloatRule("exe", "Flow.Launcher.exe")
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, komorebic.exe manage-rule exe TIM.exe, , Hide
-ManageRule("exe", "foobar2000.exe")
-ManageRule("exe", "mpv.exe")
 ManageRule("exe", "QQ.exe")
 ManageRule("exe", "TE64.exe")
 ManageRule("exe", "WeChat.exe")

@@ -20,8 +20,6 @@ vim.opt.signcolumn = "yes"                                  -- when and how to d
 -- Completion
 vim.opt.completeopt = { "menuone", "noinsert", "noselect" } -- options for Insert mode completion
 vim.opt.infercase = true                                    -- adjust case of match for keyword completion
-vim.opt.pumblend = 10                                       -- enables pseudo-transparency for the popup-menu
-vim.opt.pumheight = 10                                      -- maximum number of items to show in the popup menu
 vim.opt.shortmess:append("cW")                              -- list of flags, reduce length of messages
 
 -- Cursor
@@ -39,6 +37,9 @@ vim.opt.virtualedit = "block"                               -- when to use virtu
 vim.opt.formatoptions = "qjl1"                              -- how automatic formatting is to be done
 
 -- Gui
+vim.opt.cmdheight = 0                                       -- number of lines to use for the command-line
+vim.opt.pumblend = 10                                       -- enables pseudo-transparency for the popup-menu
+vim.opt.pumheight = 10                                      -- maximum number of items to show in the popup menu
 vim.opt.termguicolors = true                                -- enables 24-bit RGB color in the TUI
 vim.opt.winblend = 10                                       -- enables pseudo-transparency for a floating window
 

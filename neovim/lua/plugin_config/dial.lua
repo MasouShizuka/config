@@ -29,6 +29,7 @@ require("dial.config").augends:register_group {
             cyclic = true,
         },
 
+        augend.date.alias["%Y/%m/%d"],
         augend.date.alias["%-m/%-d"],
         augend.date.alias["%Y-%m-%d"],
         augend.date.alias["%Y年%-m月%-d日"],

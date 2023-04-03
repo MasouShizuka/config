@@ -2,18 +2,18 @@ local variables = require("variables")
 
 local plugin_list = {
     {
+        "chrisgrieser/nvim-spider",
+        config = function()
+            require("plugin_config.nvim-spider")
+        end,
+    },
+
+    {
         "echasnovski/mini.nvim",
         config = function()
             require("plugin_config.mini")
         end,
         version = false,
-    },
-
-    {
-        "gbprod/cutlass.nvim",
-        config = function()
-            require("plugin_config.cutlass")
-        end,
     },
 
     {
@@ -27,6 +27,13 @@ local plugin_list = {
         "gbprod/yanky.nvim",
         config = function()
             require("plugin_config.yanky")
+        end,
+    },
+
+    {
+        "jinh0/eyeliner.nvim",
+        config = function()
+            require("plugin_config.eyeliner")
         end,
     },
 

@@ -1,9 +1,9 @@
 vim.keymap.set("n", "gr", require("substitute").operator, { silent = true })
 vim.keymap.set("n", "grr", require("substitute").line, { silent = true })
-vim.keymap.set("x", "gr", require("substitute").visual, { silent = true })
+vim.keymap.set("x", "R", require("substitute").visual, { silent = true })
 vim.keymap.set("n", "cx", require("substitute.exchange").operator, { silent = true })
 vim.keymap.set("n", "cxx", require("substitute.exchange").line, { silent = true })
-vim.keymap.set("x", "X", require("substitute.exchange").visual, { silent = true })
+vim.keymap.set("x", "C", require("substitute.exchange").visual, { silent = true })
 vim.keymap.set("n", "cxc", require("substitute.exchange").cancel, { silent = true })
 
 require("substitute").setup(

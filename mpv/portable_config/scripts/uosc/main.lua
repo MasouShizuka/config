@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts
-COMMIT_ 94ec120923cfdc973cb30a5acdb192c8ae005c19
+COMMIT_ 5fbfac3ecac7f23a773f3e25fc819e234f64bf83
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
 ]]--
@@ -13,8 +13,8 @@ opt = require('mp.options')
 utils = require('mp.utils')
 msg = require('mp.msg')
 osd = mp.create_osd_overlay('ass-events')
-infinity = 1e309
-quarter_pi_sin = math.sin(math.pi / 4)
+INFINITY = 1e309
+QUARTER_PI_SIN = math.sin(math.pi / 4)
 
 --[[ OPTIONS ]]
 
@@ -79,7 +79,7 @@ defaults = {
 	autoload_types = 'video',
 	shuffle = false,
 
-	ui_scale = 1,
+	ui_scale = 0,                             -- UI缩放倍率
 	font_scale = 1,
 	font_bold = false,
 	text_border = 1.2,
@@ -101,7 +101,7 @@ defaults = {
 	curtain_opacity = 0.5,
 	stream_quality_options = '4320,2160,1440,1080,720,480,360,240,144',
 	video_types= '3g2,3gp,asf,avi,f4v,flv,h264,h265,m2ts,m4v,mkv,mov,mp4,mp4v,mpeg,mpg,ogm,ogv,rm,rmvb,ts,vob,webm,wmv,y4m',
-	audio_types= 'aac,aiff,ape,au,dsf,dts,flac,m4a,mid,midi,mka,mp3,mp4a,oga,ogg,opus,spx,tak,tta,wav,weba,wma,wv',
+	audio_types= 'aac,ac3,aiff,ape,au,dsf,dts,flac,m4a,mid,midi,mka,mp3,mp4a,oga,ogg,opus,spx,tak,tta,wav,weba,wma,wv',
 	image_types= 'apng,avif,bmp,gif,j2k,jp2,jfif,jpeg,jpg,jxl,mj2,png,svg,tga,tif,tiff,webp',
 	subtitle_types = 'aqt,ass,gsub,idx,jss,lrc,mks,pgs,pjs,psb,rt,slt,smi,sub,sup,srt,ssa,ssf,ttxt,txt,usf,vt,vtt',
 	default_directory = '~/',
@@ -122,6 +122,26 @@ if options.autoload then mp.commandv('set', 'keep-open-pause', 'no') end
 -- Color shorthands
 fg, bg = serialize_rgba(options.foreground).color, serialize_rgba(options.background).color
 fgt, bgt = serialize_rgba(options.foreground_text).color, serialize_rgba(options.background_text).color
+-- 禁用DPI探测时的UI倍率自动计算
+function auto_ui_scale()
+	local display_w, display_h = mp.get_property_number('display-width', 0), mp.get_property_number('display-height', 0)
+	local display_aspect = display_w / display_h or 0
+	if display_aspect <= 1 then
+		options.ui_scale = 1
+		msg.warn('检测到异常的显示器分辨率，回退选项 ui_scale 为1')
+		return
+	end
+	if display_aspect >=2 then
+		options.ui_scale = tonumber(string.format('%.2f', display_h / 1080))
+		msg.info('检测到超宽显示器，建议手动指定选项 ui_scale')
+		return
+	end
+	if display_w * display_h > 2304000 then
+		options.ui_scale = tonumber(string.format('%.2f', math.sqrt(display_w * display_h / 2073600)))
+	else
+		options.ui_scale = 1
+	end
+end
 
 --[[ CONFIG ]]
 
@@ -150,7 +170,7 @@ local function create_default_menu()
 			{title = '切换 时间码解析模式', value = 'cycle correct-pts'},
 		},},
 		{title = '工具', items = {
-			{title = '开关 常驻统计信息', value = 'script-binding stats/display-stats-toggle'},
+			{title = '开关 常驻统计信息', value = 'script-binding display-stats-toggle'},
 			{title = '显示控制台', value = 'script-binding console/enable'},
 			{title = '切换 窗口边框', value = 'cycle border'},
 			{title = '切换 窗口置顶', value = 'cycle ontop'},
@@ -296,12 +316,49 @@ end
 --[[ STATE ]]
 
 display = {width = 1280, height = 720, scale_x = 1, scale_y = 1, initialized = false}
-cursor = {hidden = true, hover_raw = false, x = 0, y = 0}
+cursor = {
+	x = 0,
+	y = 0,
+	hidden = true,
+	hover_raw = false,
+	-- Event handlers that are only fired on cursor, bound during render loop. Guidelines:
+	-- - element activations (clicks) go to `mbtn_left_down` handler
+	-- - `mbtn_button_up` is only for clearing dragging/swiping
+	on_primary_down = nil,
+	on_primary_up = nil,
+	on_wheel_down = nil,
+	on_wheel_up = nil,
+	-- Called at the beginning of each render
+	reset_handlers = function()
+		cursor.on_primary_down, cursor.on_primary_up = nil, nil
+		cursor.on_wheel_down, cursor.on_wheel_up = nil, nil
+	end,
+	mbtn_left_enabled = nil,
+	wheel_enabled = nil,
+	-- Enables pointer key group captures needed by handlers (called at the end of each render)
+	decide_keybinds = function()
+		local enable_mbtn_left = (cursor.on_primary_down or cursor.on_primary_up) ~= nil
+		local enable_wheel = (cursor.on_wheel_down or cursor.on_wheel_up) ~= nil
+		if enable_mbtn_left ~= cursor.mbtn_left_enabled then
+			mp[(enable_mbtn_left and 'enable' or 'disable') .. '_key_bindings']('mbtn_left')
+			cursor.mbtn_left_enabled = enable_mbtn_left
+		end
+		if enable_wheel ~= cursor.wheel_enabled then
+			mp[(enable_wheel and 'enable' or 'disable') .. '_key_bindings']('wheel')
+			cursor.wheel_enabled = enable_wheel
+		end
+	end
+}
 state = {
-	os = (function()
-		if os.getenv('windir') ~= nil then return 'windows' end
-		local homedir = os.getenv('HOME')
-		if homedir ~= nil and string.sub(homedir, 1, 6) == '/Users' then return 'macos' end
+	platform = (function()
+		local platform = mp.get_property_native('platform')
+		if platform then
+			if itable_index_of({'windows', 'darwin'}, platform) then return platform end
+		else
+			if os.getenv('windir') ~= nil then return 'windows' end
+			local homedir = os.getenv('HOME')
+			if homedir ~= nil and string.sub(homedir, 1, 6) == '/Users' then return 'darwin' end
+		end
 		return 'linux'
 	end)(),
 	cwd = mp.get_property('working-directory'),
@@ -355,7 +412,7 @@ state = {
 	margin_bottom = 0,
 	hidpi_scale = 1,
 }
-thumbnail = {width = 0, height = 0, disabled = false, pause = false}
+thumbnail = {width = 0, height = 0, disabled = false}
 external = {} -- Properties set by external scripts
 key_binding_overwrites = {} -- Table of key_binding:mpv_command
 Elements = require('elements/Elements')
@@ -370,9 +427,19 @@ require('lib/menus')
 --[[ STATE UPDATERS ]]
 
 function update_display_dimensions()
-	local scale = (state.hidpi_scale or 1) * options.ui_scale
 	local real_width, real_height = mp.get_osd_size()
 	if real_width <= 0 then return end
+
+	-- 此处起才能获取到显示分辨率的信息
+	if options.ui_scale <= 0 then
+		if mp.get_property_native('hidpi-window-scale') then
+			options.ui_scale = 1
+		else
+			auto_ui_scale()
+		end
+	end
+
+	local scale = (state.hidpi_scale or 1) * options.ui_scale
 	local scaled_width, scaled_height = round(real_width / scale), round(real_height / scale)
 	display.width, display.height = scaled_width, scaled_height
 	display.scale_x, display.scale_y = real_width / scaled_width, real_height / scaled_height
@@ -390,6 +457,7 @@ function update_fullormaxed()
 	state.fullormaxed = state.fullscreen or state.maximized
 	update_display_dimensions()
 	Elements:trigger('prop_fullormaxed', state.fullormaxed)
+	handle_mouse_move(INFINITY, INFINITY)
 end
 
 function update_human_times()
@@ -431,6 +499,7 @@ function update_margins()
 	state.margin_bottom = bottom
 
 	utils.shared_script_property_set('osc-margins', string.format('%f,%f,%f,%f', 0, 0, top, bottom))
+	mp.set_property_native('user-data/osc/margins', { l = 0, r = 0, t = top, b = bottom })
 end
 function create_state_setter(name, callback)
 	return function(_, value)
@@ -451,7 +520,7 @@ function update_cursor_position(x, y)
 	-- we receive a first real mouse move event with coordinates other than 0,0.
 	if not state.first_real_mouse_move_received then
 		if x > 0 and y > 0 then state.first_real_mouse_move_received = true
-		else x, y = infinity, infinity end
+		else x, y = INFINITY, INFINITY end
 	end
 
 	-- add 0.5 to be in the middle of the pixel
@@ -656,16 +725,15 @@ mp.observe_property('duration', 'number', create_state_setter('duration', update
 mp.observe_property('speed', 'number', create_state_setter('speed', update_human_times))
 mp.observe_property('track-list', 'native', function(name, value)
 	-- checks the file dispositions
-	local is_image = false
-	local types = {sub = 0, audio = 0, video = 0}
+	local types = {sub = 0, image = 0, audio = 0, video = 0}
 	for _, track in ipairs(value) do
 		if track.type == 'video' then
-			is_image = track.image
-			if not is_image and not track.albumart then types.video = types.video + 1 end
+			if track.image or track.albumart then types.image = types.image + 1
+			else types.video = types.video + 1 end
 		elseif types[track.type] then types[track.type] = types[track.type] + 1 end
 	end
 	set_state('is_audio', types.video == 0 and types.audio > 0)
-	set_state('is_image', is_image)
+	set_state('is_image', types.image > 0 and types.video == 0 and types.audio == 0)
 	set_state('has_audio', types.audio > 0)
 	set_state('has_many_audio', types.audio > 1)
 	set_state('has_sub', types.sub > 0)
@@ -769,6 +837,23 @@ mp.observe_property('core-idle', 'native', create_state_setter('core_idle'))
 
 --[[ KEY BINDS ]]
 
+-- Pointer related binding groups
+mp.set_key_bindings({
+	{
+		'mbtn_left',
+		function(...) call_maybe(cursor.on_primary_up, ...) end,
+		function(...)
+			update_mouse_pos(nil, mp.get_property_native('mouse-pos'))
+			call_maybe(cursor.on_primary_down, ...)
+		end,
+	},
+	{'mbtn_left_dbl', 'ignore'},
+}, 'mbtn_left', 'force')
+mp.set_key_bindings({
+	{'wheel_up', function(...) call_maybe(cursor.on_wheel_up, ...) end},
+	{'wheel_down', function(...) call_maybe(cursor.on_wheel_down, ...) end},
+}, 'wheel', 'force')
+
 -- Adds a key binding that respects rerouting set by `key_binding_overwrites` table.
 ---@param name string
 ---@param callback fun(event: table)
@@ -858,6 +943,10 @@ bind_command('playlist', create_self_updating_menu_opener({
 		return items
 	end,
 	on_select = function(index) mp.commandv('set', 'playlist-pos-1', tostring(index)) end,
+	on_move_item = function(from, to)
+		mp.commandv('playlist-move', tostring(math.max(from, to) - 1), tostring(math.min(from, to) - 1))
+	end,
+	on_delete_item = function(index) mp.commandv('playlist-remove', tostring(index - 1)) end,
 }))
 bind_command('chapters', create_self_updating_menu_opener({
 	title = '章节列表',
@@ -902,11 +991,11 @@ bind_command('show-in-directory', function()
 	-- Ignore URLs
 	if not state.path or is_protocol(state.path) then return end
 
-	if state.os == 'windows' then
+	if state.platform == 'windows' then
 		utils.subprocess_detached({args = {'explorer', '/select,', state.path}, cancellable = false})
-	elseif state.os == 'macos' then
+	elseif state.platform == 'macos' then
 		utils.subprocess_detached({args = {'open', '-R', state.path}, cancellable = false})
-	elseif state.os == 'linux' then
+	elseif state.platform == 'linux' then
 		local result = utils.subprocess({args = {'nautilus', state.path}, cancellable = false})
 
 		-- Fallback opens the folder with xdg-open instead
@@ -1087,11 +1176,11 @@ bind_command('open-config-directory', function()
 	if config then
 		local args
 
-		if state.os == 'windows' then
+		if state.platform == 'windows' then
 			args = {'explorer', '/select,', config.path}
-		elseif state.os == 'macos' then
+		elseif state.platform == 'macos' then
 			args = {'open', '-R', config.path}
-		elseif state.os == 'linux' then
+		elseif state.platform == 'linux' then
 			args = {'xdg-open', config.dirname}
 		end
 

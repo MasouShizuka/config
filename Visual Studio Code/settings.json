@@ -187,7 +187,6 @@
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 14,
-    "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
     "markdownlint.config": {
         "MD001": false,
@@ -235,7 +234,7 @@
         "text/plain"
     ],
     "notebook.lineNumbers": "on",
-    "notebook.output.textLineLimit": 500,
+    "notebook.output.scrolling": true,
     "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
     "python.analysis.inlayHints.pytestParameters": true,

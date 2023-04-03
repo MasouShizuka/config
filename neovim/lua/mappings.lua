@@ -25,16 +25,8 @@ vim.keymap.set("n", "zk", "zb", { remap = true, silent = true })
 
 if variables.is_vscode then
     -- 插入新行
-    vim.keymap.set("n", "o", function()
-        local keys = vim.api.nvim_replace_termcodes("i", true, false, true)
-        vim.api.nvim_feedkeys(keys, "n", false)
-        vim.api.nvim_call_function("VSCodeNotify", { "editor.action.insertLineAfter" })
-    end, { silent = true })
-    vim.keymap.set("n", "O", function()
-        local keys = vim.api.nvim_replace_termcodes("i", true, false, true)
-        vim.api.nvim_feedkeys(keys, "n", false)
-        vim.api.nvim_call_function("VSCodeNotify", { "editor.action.insertLineBefore" })
-    end, { silent = true })
+    vim.keymap.set("n", "o", "i<Cmd>call VSCodeNotify('editor.action.insertLineAfter')<CR>", { silent = true })
+    vim.keymap.set("n", "O", "i<Cmd>call VSCodeNotify('editor.action.insertLineBefore')<CR>", { silent = true })
 
     -- 注释
     vim.keymap.set({ "n", "x", "o" }, "gc", "<Plug>VSCodeCommentary", { silent = true })

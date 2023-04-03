@@ -11,26 +11,29 @@ COMMIT_ 04fe818fc703d8c5dcc3a6aabe1caeed8286bdbb
   自定义快捷键 在mpv中唤起一个打开文件的窗口用于快速加载文件/网址
 
 示例：在 input.conf 中另起写入下列内容
-w        script-binding    load_plus/import_files   # 打开文件
-W        script-binding    load_plus/import_url     # 打开地址
-CTRL+w   script-binding    load_plus/append_aid     # 追加其它音轨（不切换）
-ALT+w    script-binding    load_plus/append_sid     # 追加其它字幕（切换）
-e        script-binding    load_plus/append_vfSub   # 装载次字幕（滤镜型）
-E        script-binding    load_plus/toggle_vfSub   # 隐藏/显示 当前的次字幕（滤镜型）
-CTRL+e   script-binding    load_plus/remove_vfSub   # 移除次字幕（滤镜型）
-]]--
+ w        script-binding load_plus/import_files   # 打开文件
+ W        script-binding load_plus/import_url     # 打开地址
+ CTRL+w   script-binding load_plus/append_aid     # 追加其它音轨（不切换）
+ ALT+w    script-binding load_plus/append_sid     # 追加其它字幕（切换）
+ e        script-binding load_plus/append_vfSub   # 装载次字幕（滤镜型）
+ E        script-binding load_plus/toggle_vfSub   # 隐藏/显示 当前的次字幕（滤镜型）
+ CTRL+e   script-binding load_plus/remove_vfSub   # 移除次字幕（滤镜型）
+]]
 
 local msg = require 'mp.msg'
 local options = require 'mp.options'
 local utils = require 'mp.utils'
 
 opt = {
-    level = -1,                  -- <-1/0/1> 自动填充的等级，分别对应 按预设条件/始终阻止/仅近似名文件
-    video = true,                -- <yes/no> 是否填充视频
-    audio = false,               -- <yes/no> 是否填充音频
-    image = false,               -- <yes/no> 是否填充图片
-    skip_hidden = true,          -- <yes/no> 跳过隐藏文件（当资源管理器内勾选“显示隐藏的文件”时无效）
-    max_entries = "unlimited"    -- <unlimited/大于0的整数> 当前条目前后各追加的文件数
+	level = -1,                      -- <-1|0|1> 自动填充的等级，分别对应 按预设条件/始终阻止/仅近似名文件
+	video = true,                    -- 是否填充视频
+	video_ext = "default",           -- 允许的视频扩展名列表
+	audio = false,                   -- 是否填充音频
+	audio_ext = "default",           -- 允许的视频扩展名列表
+	image = false,                   -- 是否填充图片
+	image_ext = "default",           -- 允许的视频扩展名列表
+	skip_hidden = true,              -- 跳过隐藏文件（当资源管理器内勾选“显示隐藏的文件”时无效）
+	max_entries = "unlimited"        -- 当前条目前后各追加的文件数
 }
 options.read_options(opt)
 
@@ -39,52 +42,73 @@ options.read_options(opt)
 --
 
 function Set (t)
-    local set = {}
-    for _, v in pairs(t) do set[v] = true end
-    return set
+	local set = {}
+	for _, v in pairs(t) do set[v] = true end
+	return set
 end
 
 function SetUnion (a,b)
-    local res = {}
-    for k in pairs(a) do res[k] = true end
-    for k in pairs(b) do res[k] = true end
-    return res
+	local res = {}
+	for k in pairs(a) do res[k] = true end
+	for k in pairs(b) do res[k] = true end
+	return res
 end
 
-EXTENSIONS_VIDEO = Set {
-    '3g2','3gp',
-    'amv','asf','avi',
-    'f4v','flv',
-    'm2ts','m4v','mkv','mov','mp4','mpeg','mpg',
-    'ogv',
-    'rm','rmvb',
-    'ts',
-    'vob',
-    'webm','wmv',
-    'y4m',
-}
+if opt.video_ext ~= "default" then
+	local video_ext_tab = {}
+	for x in opt.video_ext:gmatch("[^,]+") do
+		table.insert(video_ext_tab, x)
+	end
+	EXTENSIONS_VIDEO = Set (video_ext_tab)
+else
+	EXTENSIONS_VIDEO = Set {
+		'3g2','3gp',
+		'amv','asf','avi',
+		'f4v','flv',
+		'm2ts','m4v','mkv','mov','mp4','mpeg','mpg',
+		'ogv',
+		'rm','rmvb',
+		'ts',
+		'vob',
+		'webm','wmv',
+		'y4m', }
+end
 
-EXTENSIONS_AUDIO = Set {
-    'aac','aiff','alac','ape','au',
-    'dsf',
-    'flac',
-    'm4a','mp3',
-    'oga','ogg','ogm','opus',
-    'tak','tta',
-    'wav','wma','wv',
-}
+if opt.audio_ext ~= "default" then
+	local audio_ext_tab = {}
+	for x in opt.audio_ext:gmatch("[^,]+") do
+		table.insert(audio_ext_tab, x)
+	end
+	EXTENSIONS_AUDIO = Set (audio_ext_tab)
+else
+	EXTENSIONS_AUDIO = Set {
+		'aac','aiff','alac','ape','au',
+		'dsf',
+		'flac',
+		'm4a','mp3',
+		'oga','ogg','ogm','opus',
+		'tak','tta',
+		'wav','wma','wv', }
+end
 
-EXTENSIONS_IMAGE = Set {
-    'apng','avif',
-    'bmp',
-    'gif',
-    'j2k', 'jfif','jp2','jpeg','jpg',
-    'png',
-    'svg',
-    'tga','tif','tiff',
-    'uci',
-    'webp',
-}
+if opt.image_ext ~= "default" then
+	local image_ext_tab = {}
+	for x in opt.image_ext:gmatch("[^,]+") do
+		table.insert(image_ext_tab, x)
+	end
+	EXTENSIONS_IMAGE = Set (image_ext_tab)
+else
+	EXTENSIONS_IMAGE = Set {
+		'apng','avif',
+		'bmp',
+		'gif',
+		'j2k', 'jfif','jp2','jpeg','jpg',
+		'png',
+		'svg',
+		'tga','tif','tiff',
+		'uci',
+		'webp', }
+end
 
 EXTENSIONS = Set {}
 if opt.video then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_VIDEO) end
@@ -92,165 +116,165 @@ if opt.audio then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_AUDIO) end
 if opt.image then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_IMAGE) end
 
 function add_files_at(index, files)
-    index = index - 1
-    local oldcount = mp.get_property_number("playlist-count", 1)
-    for i = 1, #files do
-        mp.commandv("loadfile", files[i], "append")
-        mp.commandv("playlist-move", oldcount + i - 1, index + i - 1)
-    end
+	index = index - 1
+	local oldcount = mp.get_property_number("playlist-count", 1)
+	for i = 1, #files do
+		mp.commandv("loadfile", files[i], "append")
+		mp.commandv("playlist-move", oldcount + i - 1, index + i - 1)
+	end
 end
 
 function get_extension(path)
-    match = string.match(path, "%.([^%.]+)$" )
-    if match == nil then
-        return "nomatch"
-    else
-        return match
-    end
+	match = string.match(path, "%.([^%.]+)$" )
+	if match == nil then
+		return "nomatch"
+	else
+		return match
+	end
 end
 
 table.filter = function(t, iter)
-    for i = #t, 1, -1 do
-        if not iter(t[i]) then
-            table.remove(t, i)
-        end
-    end
+	for i = #t, 1, -1 do
+		if not iter(t[i]) then
+			table.remove(t, i)
+		end
+	end
 end
 
 -- alphanum sorting for humans in Lua
 -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
 function alphanumsort(filenames)
-    local function padnum(n, d)
-        return #d > 0 and ("%03d%s%.12f"):format(#n, n, tonumber(d) / (10 ^ #d))
-            or ("%03d%s"):format(#n, n)
-    end
+	local function padnum(n, d)
+		return #d > 0 and ("%03d%s%.12f"):format(#n, n, tonumber(d) / (10 ^ #d))
+			or ("%03d%s"):format(#n, n)
+	end
 
-    local tuples = {}
-    for i, f in ipairs(filenames) do
-        tuples[i] = {f:lower():gsub("0*(%d+)%.?(%d*)", padnum), f}
-    end
-    table.sort(tuples, function(a, b)
-        return a[1] == b[1] and #b[2] < #a[2] or a[1] < b[1]
-    end)
-    for i, tuple in ipairs(tuples) do filenames[i] = tuple[2] end
-    return filenames
+	local tuples = {}
+	for i, f in ipairs(filenames) do
+		tuples[i] = {f:lower():gsub("0*(%d+)%.?(%d*)", padnum), f}
+	end
+	table.sort(tuples, function(a, b)
+		return a[1] == b[1] and #b[2] < #a[2] or a[1] < b[1]
+	end)
+	for i, tuple in ipairs(tuples) do filenames[i] = tuple[2] end
+	return filenames
 end
 
 function get_playlist_filenames()
-    local filenames = {}
-    for n = 0, pl_count - 1, 1 do
-        local filename = mp.get_property('playlist/'..n..'/filename')
-        local _, file = utils.split_path(filename)
-        filenames[file] = true
-    end
-    return filenames
+	local filenames = {}
+	for n = 0, pl_count - 1, 1 do
+		local filename = mp.get_property('playlist/'..n..'/filename')
+		local _, file = utils.split_path(filename)
+		filenames[file] = true
+	end
+	return filenames
 end
 
 function find_and_add_entries()
-    local path = mp.get_property("path", "")
-    local dir, filename = utils.split_path(path)
-    msg.trace(("dir: %s, filename: %s"):format(dir, filename))
-    if opt.level == 0 then
-        msg.verbose("自动队列中止：功能已禁用")
-        return
-    elseif #dir == 0 then
-        msg.warn("自动队列中止：非本地路径")
-        return
-    end
+	local path = mp.get_property("path", "")
+	local dir, filename = utils.split_path(path)
+	msg.trace(("dir: %s, filename: %s"):format(dir, filename))
+	if opt.level == 0 then
+		msg.verbose("自动队列中止：功能已禁用")
+		return
+	elseif #dir == 0 then
+		msg.warn("自动队列中止：非本地路径")
+		return
+	end
 
-    pl_count = mp.get_property_number("playlist-count", 1)
-    if pl_count > 1 then
-        msg.warn("自动队列中止：已手动创建/修改播放列表")
-        return
-    end
+	pl_count = mp.get_property_number("playlist-count", 1)
+	if pl_count > 1 then
+		msg.warn("自动队列中止：已手动创建/修改播放列表")
+		return
+	end
 
-    local pl = mp.get_property_native("playlist", {})
-    local pl_current = mp.get_property_number("playlist-pos-1", 1)
-    msg.trace(("playlist-pos-1: %s, playlist: %s"):format(pl_current,
-        utils.to_string(pl)))
+	local pl = mp.get_property_native("playlist", {})
+	local pl_current = mp.get_property_number("playlist-pos-1", 1)
+	msg.trace(("playlist-pos-1: %s, playlist: %s"):format(pl_current,
+		utils.to_string(pl)))
 
-    local files = utils.readdir(dir, "files")
-    if files == nil then
-        msg.info("自动队列：当前目录无其它文件")
-        return
-    end
-    table.filter(files, function (v, k)
-        -- The current file could be a hidden file, ignoring it doesn't load other
-        -- files from the current directory.
-        if (opt.skip_hidden and not (v == filename) and string.match(v, "^%.")) then
-            return false
-        end
-        local ext = get_extension(v)
-        if ext == nil then
-            return false
-        end
-    if opt.level == 1 then
-        local name = mp.get_property("filename")
-        local namepre = string.sub(name, 1, 6)
-        local namepre0 = string.gsub(namepre, "%p", "%%%1")
-        for ext, _ in pairs(EXTENSIONS) do
-            if string.match(name, ext.."$") ~= nil then
-                if string.match(v, "^"..namepre0) == nil then
-                return false
-                end
-            end
-        end
-    end
-        return EXTENSIONS[string.lower(ext)]
-    end)
-    alphanumsort(files)
+	local files = utils.readdir(dir, "files")
+	if files == nil then
+		msg.info("自动队列：当前目录无其它文件")
+		return
+	end
+	table.filter(files, function (v, k)
+		-- The current file could be a hidden file, ignoring it doesn't load other
+		-- files from the current directory.
+		if (opt.skip_hidden and not (v == filename) and string.match(v, "^%.")) then
+			return false
+		end
+		local ext = get_extension(v)
+		if ext == nil then
+			return false
+		end
+	if opt.level == 1 then
+		local name = mp.get_property("filename")
+		local namepre = string.sub(name, 1, 6)
+		local namepre0 = string.gsub(namepre, "%p", "%%%1")
+		for ext, _ in pairs(EXTENSIONS) do
+			if string.match(name, ext.."$") ~= nil then
+				if string.match(v, "^"..namepre0) == nil then
+				return false
+				end
+			end
+		end
+	end
+		return EXTENSIONS[string.lower(ext)]
+	end)
+	alphanumsort(files)
 
-    if dir == "." then
-        dir = ""
-    end
+	if dir == "." then
+		dir = ""
+	end
 
-    -- Find the current pl entry (dir+"/"+filename) in the sorted dir list
-    local current
-    for i = 1, #files do
-        if files[i] == filename then
-            current = i
-            break
-        end
-    end
-    if current == nil then
-        return
-    end
-    msg.trace("自动队列：当前文件所处序列 "..current)
+	-- Find the current pl entry (dir+"/"+filename) in the sorted dir list
+	local current
+	for i = 1, #files do
+		if files[i] == filename then
+			current = i
+			break
+		end
+	end
+	if current == nil then
+		return
+	end
+	msg.trace("自动队列：当前文件所处序列 "..current)
 
-    local append = {[-1] = {}, [1] = {}}
-    local filenames = get_playlist_filenames()
-    for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
+	local append = {[-1] = {}, [1] = {}}
+	local filenames = get_playlist_filenames()
+	for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
         local max_entries
         if opt.max_entries == "unlimited" then
             max_entries = #files
         else
             max_entries = opt.max_entries
         end
-        for i = 1, max_entries do
-            local file = files[current + i * direction]
-            if file == nil or file[1] == "." then
-                break
-            end
+		for i = 1, max_entries do
+			local file = files[current + i * direction]
+			if file == nil or file[1] == "." then
+				break
+			end
 
-            local filepath = dir .. file
-            -- skip files already in playlist
-            if filenames[file] then break end
+			local filepath = dir .. file
+			-- skip files already in playlist
+			if filenames[file] then break end
 
-            if direction == -1 then
-                if pl_current == 1 then -- never add additional entries in the middle
-                    msg.info("自动队列 追加（前）" .. file)
-                    table.insert(append[-1], 1, filepath)
-                end
-            else
-                msg.info("自动队列 追加（后）" .. file)
-                table.insert(append[1], filepath)
-            end
-        end
-    end
+			if direction == -1 then
+				if pl_current == 1 then -- never add additional entries in the middle
+					msg.info("自动队列 追加（前）" .. file)
+					table.insert(append[-1], 1, filepath)
+				end
+			else
+				msg.info("自动队列 追加（后）" .. file)
+				table.insert(append[1], filepath)
+			end
+		end
+	end
 
-    add_files_at(pl_current + 1, append[1])
-    add_files_at(pl_current, append[-1])
+	add_files_at(pl_current + 1, append[1])
+	add_files_at(pl_current, append[-1])
 end
 
 
@@ -302,9 +326,9 @@ function import_url()
 			Add-Type -AssemblyName Microsoft.VisualBasic
 			$u8 = [System.Text.Encoding]::UTF8
 			$out = [Console]::OpenStandardOutput()
-            $urlname = [Microsoft.VisualBasic.Interaction]::InputBox("输入地址", "打开", "https://")
-            $u8urlname = $u8.GetBytes("$urlname")
-            $out.Write($u8urlname, 0, $u8urlname.Length)
+			$urlname = [Microsoft.VisualBasic.Interaction]::InputBox("输入地址", "打开", "https://")
+			$u8urlname = $u8.GetBytes("$urlname")
+			$out.Write($u8urlname, 0, $u8urlname.Length)
 		}]]},
 		cancellable = false,
 	})
@@ -405,11 +429,11 @@ function append_vfSub()
 end
 
 local function filter_state(label, key, value)
-    local filters = mp.get_property_native("vf")
-    for _, filter in pairs(filters) do
-        if filter["label"] == label and (not key or key and filter[key] == value) then return true end
-    end
-    return false
+	local filters = mp.get_property_native("vf")
+	for _, filter in pairs(filters) do
+		if filter["label"] == label and (not key or key and filter[key] == value) then return true end
+	end
+	return false
 end
 
 function toggle_vfSub()

@@ -45,6 +45,7 @@ njpwerner.autodocstring
 njqdev.vscode-python-typehint
 oderwat.indent-rainbow
 PKief.material-icon-theme
+rebornix.toggle
 Remisa.shellman
 richie5um2.vscode-sort-json
 rust-lang.rust-analyzer
