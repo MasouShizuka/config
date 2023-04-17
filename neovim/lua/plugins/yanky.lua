@@ -1,11 +1,13 @@
-vim.keymap.set({"n", "x"}, "y", "<Plug>(YankyYank)", { silent = true })
-vim.keymap.set({"n", "x"}, "p", "<Plug>(YankyPutAfter)", { silent = true })
-vim.keymap.set({"n", "x"}, "P", "<Plug>(YankyPutBefore)", { silent = true })
--- vim.keymap.set({"n", "x"}, "gp", "<Plug>(YankyGPutAfter)", { silent = true })
--- vim.keymap.set({"n", "x"}, "gP", "<Plug>(YankyGPutBefore)", { silent = true })
-
-require("yanky").setup(
-    {
+return {
+    "gbprod/yanky.nvim",
+    keys = {
+        { "y", "<Plug>(YankyYank)",      mode = { "n", "x" } },
+        { "p", "<Plug>(YankyPutAfter)",  mode = { "n", "x" } },
+        { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" } },
+        -- { "gp", "<Plug>(YankyGPutAfter)",  mode = { "n", "x" } },
+        -- { "gP", "<Plug>(YankyGPutBefore)", mode = { "n", "x" } },
+    },
+    opts = {
         ring = {
             -- history_length = 100,
             history_length = 0,
@@ -33,5 +35,5 @@ require("yanky").setup(
         preserve_cursor_position = {
             enabled = true,
         },
-    }
-)
+    },
+}

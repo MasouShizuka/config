@@ -1,9 +1,72 @@
 local variables = require("variables")
 
 if not variables.is_vscode then
-    local markdown = vim.api.nvim_create_augroup("markdown", {
-        clear = true,
+    -- Auto create dir when saving a file, in case some intermediate directory does not exist
+    vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+        callback = function(event)
+            local file = vim.loop.fs_realpath(event.match) or event.match
+            vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+        end,
+        group = vim.api.nvim_create_augroup("auto_create_dir", { clear = true }),
     })
+
+    -- Check if we need to reload the file when it changed
+    vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+        command = "checktime",
+        group = vim.api.nvim_create_augroup("checktime", { clear = true }),
+    })
+
+    -- go to last loc when opening a buffer
+    vim.api.nvim_create_autocmd("BufReadPost", {
+        callback = function()
+            local mark = vim.api.nvim_buf_get_mark(0, '"')
+            local lcount = vim.api.nvim_buf_line_count(0)
+            if mark[1] > 0 and mark[1] <= lcount then
+                pcall(vim.api.nvim_win_set_cursor, 0, mark)
+            end
+        end,
+        group = vim.api.nvim_create_augroup("last_loc", { clear = true }),
+    })
+
+    -- resize splits if window got resized
+    vim.api.nvim_create_autocmd({ "VimResized" }, {
+        callback = function()
+            vim.cmd("tabdo wincmd =")
+        end,
+        group = vim.api.nvim_create_augroup("resize_splits", { clear = true }),
+    })
+
+
+
+    -- 只在活动窗口显示 cursor line
+    local cursor_line_only_in_active_window = vim.api.nvim_create_augroup("cursor_line_only_in_active_window", { clear = true })
+
+    vim.api.nvim_create_autocmd({ "InsertLeave", "WinEnter" }, {
+        callback = function()
+            local ok, cl = pcall(vim.api.nvim_win_get_var, 0, "auto-cursorline")
+            if ok and cl then
+                vim.opt.cursorline = true
+                vim.api.nvim_win_del_var(0, "auto-cursorline")
+            end
+        end,
+        group = cursor_line_only_in_active_window,
+    })
+
+    vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave" }, {
+        callback = function()
+            local cl = vim.wo.cursorline
+            if cl then
+                vim.api.nvim_win_set_var(0, "auto-cursorline", cl)
+                vim.opt.cursorline = false
+            end
+        end,
+        group = cursor_line_only_in_active_window,
+    })
+
+
+
+    -- Markdown 编辑
+    local markdown = vim.api.nvim_create_augroup("markdown", { clear = true })
 
     -- 替换占位符
     vim.api.nvim_create_autocmd("FileType", {
@@ -24,14 +87,14 @@ if not variables.is_vscode then
     -- 一级标题
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", ".1", "#<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", ".1", "#<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
     })
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", "。1", "#<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", "。1", "#<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
@@ -39,14 +102,14 @@ if not variables.is_vscode then
     -- 二级标题
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", ".2", "##<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", ".2", "##<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
     })
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", "。2", "##<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", "。2", "##<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
@@ -54,14 +117,14 @@ if not variables.is_vscode then
     -- 三级标题
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", ".3", "###<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", ".3", "###<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
     })
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", "。3", "###<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", "。3", "###<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
@@ -69,14 +132,14 @@ if not variables.is_vscode then
     -- 四级标题
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", ".4", "####<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", ".4", "####<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
     })
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", "。4", "####<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", "。4", "####<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
@@ -84,14 +147,14 @@ if not variables.is_vscode then
     -- 五级标题
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", ".5", "#####<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", ".5", "#####<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
     })
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", "。5", "#####<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", "。5", "#####<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
@@ -99,14 +162,14 @@ if not variables.is_vscode then
     -- 六级标题
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", ".6", "######<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", ".6", "######<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
     })
     vim.api.nvim_create_autocmd("FileType", {
         callback = function()
-            vim.keymap.set("i", "。6", "######<Space><Enter><Enter><++><Esc>2kA", { silent = true })
+            vim.keymap.set("i", "。6", "######<Enter><Enter><++><Esc>2kA<Space>", { silent = true })
         end,
         group = markdown,
         pattern = "markdown",
@@ -359,5 +422,26 @@ if not variables.is_vscode then
         end,
         group = markdown,
         pattern = "markdown",
+    })
+
+
+
+    -- 使用宏时显示信息
+    local recording = vim.api.nvim_create_augroup("recording", { clear = true })
+
+    vim.api.nvim_create_autocmd("RecordingEnter", {
+        callback = function()
+            vim.api.nvim_command("set cmdheight=1")
+        end,
+        group = recording,
+        pattern = "*",
+    })
+
+    vim.api.nvim_create_autocmd("RecordingLeave", {
+        callback = function()
+            vim.api.nvim_command("set cmdheight=0")
+        end,
+        group = recording,
+        pattern = "*",
     })
 end

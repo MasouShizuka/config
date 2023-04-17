@@ -20,7 +20,7 @@ vim.opt.signcolumn = "yes"                                  -- when and how to d
 -- Completion
 vim.opt.completeopt = { "menuone", "noinsert", "noselect" } -- options for Insert mode completion
 vim.opt.infercase = true                                    -- adjust case of match for keyword completion
-vim.opt.shortmess:append("cW")                              -- list of flags, reduce length of messages
+vim.opt.shortmess:append("cCIW")                            -- list of flags, reduce length of messages
 
 -- Cursor
 vim.opt.cursorline = true                                   -- highlight the screen line of the cursor
@@ -41,7 +41,6 @@ vim.opt.cmdheight = 0                                       -- number of lines t
 vim.opt.pumblend = 10                                       -- enables pseudo-transparency for the popup-menu
 vim.opt.pumheight = 10                                      -- maximum number of items to show in the popup menu
 vim.opt.termguicolors = true                                -- enables 24-bit RGB color in the TUI
-vim.opt.winblend = 10                                       -- enables pseudo-transparency for a floating window
 
 -- Indent
 vim.opt.breakindent = true                                  -- wrapped line repeats indent
@@ -71,6 +70,7 @@ vim.opt.sidescrolloff = 5                                   -- min. nr. of colum
 
 -- Split window
 vim.opt.splitbelow = true                                   -- new window from split is below the current one
+vim.opt.splitkeep = "screen"                                -- determines scroll behavior for split windows
 vim.opt.splitright = true                                   -- new window is put right of the current one
 
 -- Status line

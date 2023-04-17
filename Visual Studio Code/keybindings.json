@@ -164,8 +164,8 @@
     {
         "key": "ctrl+d",
         "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
-        "args": "<c-d>"
+        "args": "<c-d>",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
     },
     {
         "key": "ctrl+u",
@@ -175,14 +175,14 @@
     {
         "key": "ctrl+u",
         "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
-        "args": "<c-u>"
+        "args": "<c-u>",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
     },
     {
         "key": "ctrl+q",
         "command": "vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert",
-        "args": "<c-q>"
+        "args": "<c-q>",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
     },
 
     // 去除 Neovim 的接收键位
@@ -483,6 +483,26 @@
         "command": "workbench.action.focusPreviousGroup",
         "when": "!sideBarFocus && !terminalFocus && neovim.mode != 'cmdline_normal'"
     },
+    // 分屏到左侧
+    {
+        "key": "ctrl+s h",
+        "command": "workbench.action.splitEditorLeft"
+    },
+    // 分屏到右侧
+    {
+        "key": "ctrl+s l",
+        "command": "workbench.action.splitEditorRight"
+    },
+    // 分屏到下侧
+    {
+        "key": "ctrl+s j",
+        "command": "workbench.action.splitEditorDown"
+    },
+    // 分屏到上侧
+    {
+        "key": "ctrl+s k",
+        "command": "workbench.action.splitEditorUp"
+    },
     // 移动当前编辑器到左侧编辑器组
     {
         "key": "ctrl+s ctrl+h",
@@ -502,26 +522,6 @@
     {
         "key": "ctrl+s ctrl+k",
         "command": "workbench.action.moveEditorToAboveGroup"
-    },
-    // 分屏到左侧
-    {
-        "key": "ctrl+shift+s ctrl+shift+h",
-        "command": "workbench.action.splitEditorLeft"
-    },
-    // 分屏到右侧
-    {
-        "key": "ctrl+shift+s ctrl+shift+l",
-        "command": "workbench.action.splitEditorRight"
-    },
-    // 分屏到下侧
-    {
-        "key": "ctrl+shift+s ctrl+shift+j",
-        "command": "workbench.action.splitEditorDown"
-    },
-    // 分屏到上侧
-    {
-        "key": "ctrl+shift+s ctrl+shift+k",
-        "command": "workbench.action.splitEditorUp"
     },
     {
         "key": "ctrl+shift+w",
@@ -579,7 +579,7 @@
     {
         "key": "ctrl+n",
         "command": "workbench.action.editor.nextChange",
-        "when": "editorTextFocus && !textCompareEditorActive"
+        "when": "editorTextFocus && workbench.scm.repositories.active"
     },
     {
         "key": "alt+f5",
@@ -600,7 +600,7 @@
     {
         "key": "ctrl+shift+n",
         "command": "workbench.action.editor.previousChange",
-        "when": "editorTextFocus && !textCompareEditorActive"
+        "when": "editorTextFocus && workbench.scm.repositories.active"
     },
     {
         "key": "shift+alt+f5",
@@ -620,7 +620,13 @@
     // 在新窗口打开当前文件
     {
         "key": "ctrl+t",
-        "command": "workbench.action.files.showOpenedFileInNewWindow",
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "workbench.action.files.showOpenedFileInNewWindow",
+                "workbench.action.closeActiveEditor"
+            ]
+        },
         "when": "emptyWorkspaceSupport"
     },
 
@@ -674,7 +680,7 @@
     {
         "key": "ctrl+3",
         "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active && terminalFocus"
+        "when": "terminalFocus"
     },
     // 面板 Jupyter:Variables 页面时，则关闭面板
     {
@@ -707,25 +713,23 @@
         "command": "workbench.action.terminal.focusPrevious",
         "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
     },
+    // 创建新的终端
+    {
+        "key": "ctrl+n",
+        "command": "workbench.action.terminal.new",
+        "when": "terminalFocus"
+    },
     // 搜索最近运行的命令
     {
         "key": "ctrl+r",
         "command": "workbench.action.terminal.runRecentCommand",
-        "when": "terminalFocus"
-    },
-    {
-        "key": "ctrl+alt+r",
-        "command": "workbench.action.terminal.sendSequence",
-        "args": {
-            "text": "\u0012" /*^R*/
-        },
-        "when": "terminalFocus"
+        "when": "terminalFocus && terminalHasBeenCreated && !accessibilityModeEnabled || terminalFocus && terminalProcessSupported && !accessibilityModeEnabled"
     },
     // 面板终端页面且聚焦时，则终止终端
     {
         "key": "ctrl+w",
         "command": "workbench.action.terminal.kill",
-        "when": "terminal.active && terminalFocus"
+        "when": "terminalFocus"
     },
     // 面板终端中重定义命令，否则失效
     {

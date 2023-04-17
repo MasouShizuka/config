@@ -166,6 +166,7 @@ FloatRule("exe", "ApplicationFrameHost.exe")
 FloatRule("exe", "Clash Verge.exe")
 FloatRule("exe", "copyq.exe")
 FloatRule("exe", "Flow.Launcher.exe")
+FloatRule("exe", "yasb.exe")
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
 ; Run, komorebic.exe manage-rule exe TIM.exe, , Hide
@@ -205,7 +206,8 @@ IdentifyLayeredApplication("exe", "WINWORD.EXE")
 ; Allow komorebi to start managing windows
 CompleteConfiguration()
 
-Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+; Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+Run, %A_ScriptDir%/yasb.exe, , Hide
 
 
 
@@ -483,5 +485,6 @@ Return
 ; return
 
 !+b::
-    Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+    ; Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+    Run, %A_ScriptDir%/yasb.exe, , Hide
 Return

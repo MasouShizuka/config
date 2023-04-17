@@ -192,15 +192,18 @@
         "MD001": false,
         "MD007": false,
         "MD009": false,
+        "MD011": false,
         "MD024": false,
         "MD025": false,
         "MD026": false,
+        "MD029": false,
         "MD032": false,
         "MD033": false,
         "MD034": false,
         "MD037": false,
         "MD040": false,
-        "MD051": false
+        "MD051": false,
+        "MD052": false
     },
     "mdtableeditor.commandViews": {
         "context": [
@@ -241,6 +244,7 @@
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.languageServer": "Pylance",
     "search.defaultViewMode": "tree",
+    "search.followSymlinks": false,
     "search.showLineNumbers": true,
     "search.smartCase": true,
     "security.workspace.trust.enabled": false,

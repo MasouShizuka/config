@@ -1,12 +1,17 @@
-vim.keymap.set("n", "<C-h>", function ()
-    vim.api.nvim_command("BufferLineCyclePrev")
-end, { silent = true })
-vim.keymap.set("n", "<C-l>", function ()
-    vim.api.nvim_command("BufferLineCycleNext")
-end, { silent = true })
+local variables = require("variables")
 
-require("bufferline").setup(
-    {
+return {
+    "akinsho/bufferline.nvim",
+    cond = not variables.is_vscode,
+    dependencies = {
+        "nvim-tree/nvim-web-devicons",
+    },
+    keys = {
+        { "<C-h>", function() vim.api.nvim_command("BufferLineCyclePrev") end, mode = "n" },
+        { "<C-l>", function() vim.api.nvim_command("BufferLineCycleNext") end, mode = "n" },
+    },
+    lazy = false,
+    opts = {
         options = {
             -- mode = "buffers" | "tabs", -- set to "tabs" to only show tabpages instead
             mode = "tabs",
@@ -18,6 +23,7 @@ require("bufferline").setup(
             offsets = {
                 {
                     filetype = "NvimTree",
+                    highlight = "Directory",
                     text = "File Explorer",
                     text_align = "center",
                 },
@@ -30,5 +36,6 @@ require("bufferline").setup(
             -- end
             sort_by = "tabs",
         }
-    }
-)
+    },
+    version = "v3.*",
+}

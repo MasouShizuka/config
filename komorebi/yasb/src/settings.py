@@ -9,7 +9,7 @@ GITHUB_URL = "https://github.com/denBot/yasb"
 DEBUG = True
 
 # Configuration Settings
-DEFAULT_CONFIG_DIRECTORY = ".yasb"
+DEFAULT_CONFIG_DIRECTORY = ".config/yasb"
 DEFAULT_STYLES_FILENAME = "styles.css"
 DEFAULT_CONFIG_FILENAME = "config.yaml"
 DEFAULT_LOG_FILENAME = "yasb.log"

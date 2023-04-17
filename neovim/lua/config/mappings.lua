@@ -3,6 +3,7 @@ local variables = require("variables")
 -- 设置 leader 为空格
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+vim.keymap.set({ "n", "x" }, "<Space>", "<Nop>", { silent = true })
 
 -- 选中上次粘贴的文本
 vim.keymap.set("n", "gp", "`[v`]", { silent = true })
@@ -12,8 +13,8 @@ vim.keymap.set({ "n", "x", "o" }, "H", "^", { silent = true })
 vim.keymap.set({ "n", "x", "o" }, "L", "g_", { silent = true })
 
 -- 折行时小步上下移动
-vim.keymap.set({ "n", "x" }, "j", "v:count == 0 ? 'gjzz' : 'j'", { expr = true, remap = true, silent = true })
-vim.keymap.set({ "n", "x" }, "k", "v:count == 0 ? 'gkzz' : 'k'", { expr = true, remap = true, silent = true })
+vim.keymap.set({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, remap = true, silent = true })
+vim.keymap.set({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, remap = true, silent = true })
 
 -- 上下移动选中文本
 vim.keymap.set("x", "J", ":move '>+1<CR>gv-gv", { silent = true })
@@ -90,15 +91,13 @@ if variables.is_vscode then
     end, { silent = true })
 
     -- 格式化
-    function Format()
+    vim.keymap.set("n", "<Leader>f", function()
         vim.api.nvim_call_function("VSCodeNotify", { "editor.action.formatDocument" })
         vim.api.nvim_call_function("VSCodeNotify", { "notebook.formatCell" })
-    end
-
-    vim.keymap.set("n", "<Leader>f", Format, { silent = true })
+    end, { silent = true })
 
     -- 运行
-    function Run()
+    vim.keymap.set("n", "<Leader>r", function()
         local filetype = vim.bo.filetype
 
         if filetype == "html" or filetype == "xhtml" then
@@ -110,9 +109,7 @@ if variables.is_vscode then
         else
             vim.api.nvim_call_function("VSCodeNotify", { "code-runner.run" })
         end
-    end
-
-    vim.keymap.set("n", "<Leader>r", Run, { silent = true })
+    end, { silent = true })
 
     -- vscode 扩展
     vim.keymap.set("n", "<Leader>b", function()
@@ -131,10 +128,14 @@ else
     -- 分屏
     vim.keymap.set("n", "<C-j>", "<C-w>w", { silent = true })
     vim.keymap.set("n", "<C-k>", "<C-w>W", { silent = true })
-    vim.keymap.set("n", "<C-s><C-j>", ":set splitbelow<CR><C-w>s", { silent = true })
-    vim.keymap.set("n", "<C-s><C-k>", ":set nosplitbelow<CR><C-w>s", { silent = true })
-    vim.keymap.set("n", "<C-s><C-l>", ":set splitright<CR><C-w>v", { silent = true })
-    vim.keymap.set("n", "<C-s><C-h>", ":set nosplitright<CR><C-w>v", { silent = true })
+    vim.keymap.set("n", "<C-s>h", ":set nosplitright<CR><C-w>v", { silent = true })
+    vim.keymap.set("n", "<C-s>l", ":set splitright<CR><C-w>v", { silent = true })
+    vim.keymap.set("n", "<C-s>j", ":set splitbelow<CR><C-w>s", { silent = true })
+    vim.keymap.set("n", "<C-s>k", ":set nosplitbelow<CR><C-w>s", { silent = true })
+    vim.keymap.set("n", "<C-s><C-h>", "<C-w>H", { silent = true })
+    vim.keymap.set("n", "<C-s><C-l>", "<C-w>L", { silent = true })
+    vim.keymap.set("n", "<C-s><C-j>", "<C-w>J", { silent = true })
+    vim.keymap.set("n", "<C-s><C-k>", "<C-w>K", { silent = true })
     vim.keymap.set("n", "<C-Up>", "<C-w>+", { silent = true })
     vim.keymap.set("n", "<C-Down>", "<C-w>-", { silent = true })
     vim.keymap.set("n", "<C-Left>", "<C-w><", { silent = true })
@@ -145,7 +146,7 @@ else
     vim.keymap.set("n", "<C-w>", "<Esc>:q!<CR>", { silent = true })
 
     -- 运行
-    function Run()
+    vim.keymap.set("n", "<Leader>r", function()
         local filetype = vim.bo.filetype
 
         if filetype == "markdown" then
@@ -153,7 +154,8 @@ else
         elseif filetype == "sh" then
             vim.api.nvim_command("!time bash %")
         end
-    end
+    end, { silent = true })
 
-    vim.keymap.set("n", "<Leader>r", Run, { silent = true })
+    -- 打开终端
+    vim.keymap.set("n", "<leader>t", function() require("lazy.util").float_term() end, { desc = "Terminal (cwd)" })
 end

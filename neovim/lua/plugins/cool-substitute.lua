@@ -1,5 +1,12 @@
-require("cool-substitute").setup(
-    {
+return {
+    "otavioschwanck/cool-substitute.nvim",
+    keys = {
+        { "g!m", mode = "n" },
+        { "g!M", mode = "n" },
+        { "gM",  mode = "n" },
+        { "gm",  mode = "n" },
+    },
+    opts = {
         setup_keybindings = true,
         mappings = {
             --   start = "gm",                             -- Mark word / region
@@ -30,4 +37,4 @@ require("cool-substitute").setup(
         applying_substitution_color = "#98be65",           -- for status line
         edit_word_when_starting_with_substitute_key = true -- (press M to mark and edit when not executing anything anything)
     }
-)
+}

@@ -1,12 +1,19 @@
-vim.keymap.set("n", "<leader>n", function ()
-    vim.api.nvim_command("NvimTreeToggle")
-end, { silent = true })
+local variables = require("variables")
 
-require("nvim-tree").setup(
-    {
+return {
+    "nvim-tree/nvim-tree.lua",
+    cond = not variables.is_vscode,
+    dependencies = {
+        "nvim-tree/nvim-web-devicons",
+    },
+    keys = {
+        { "<Leader>n", function() vim.api.nvim_command("NvimTreeToggle") end, mode = "n" },
+    },
+    opts = {
         disable_netrw = true,
-        sync_root_with_cwd = true,
         view = {
+            number = true,
+            relativenumber = true,
             mappings = {
                 custom_only = true,
                 list = {
@@ -69,9 +76,6 @@ require("nvim-tree").setup(
                 },
             },
         },
-        update_focused_file = {
-            enable = true,
-            update_root = true,
-        },
-    }
-)
+    },
+    version = "*",
+}

@@ -27,6 +27,10 @@ input.conf 示例：
 #                     script-binding input_plus/ostime_display      # 临时显示系统时间
 #                     script-binding input_plus/ostime_toggle       # 启用/禁用显示系统时间
 
+ Ctrl+p               script-binding input_plus/pip_dummy           # 画中画（伪）/小窗化
+#                     script-binding input_plus/pip_dummy_p05       # ...（5%的尺寸占比）
+#                     script-binding input_plus/pip_dummy_p20       # ...（20%...）
+
  Alt+p                script-binding input_plus/playlist_order_0    # 播放列表的洗牌与撤销
 #                     script-binding input_plus/playlist_order_0r   # ...（重定向至首个文件）
 #                     script-binding input_plus/playlist_order_1    # 播放列表连续洗牌（可用上两项命令恢复）
@@ -67,7 +71,7 @@ input.conf 示例：
 local utils = require("mp.utils")
 
 function check_plat()
-	if os.getenv("windir") ~= nil then
+	if mp.get_property_native("platform") == "windows" then
 		return "windows"
 	elseif string.sub((os.getenv("HOME")), 1, 6) == "/Users" then
 		return "macos"
@@ -81,11 +85,57 @@ local plat = check_plat()
 
 
 --
--- 函数设定
+-- 变量预设
 --
 
 local adevicelist = {}
 local target_ao = nil
+
+local chap_skip = false
+local chap_keywords = {
+	"OP$", "opening$", "オープニング$",
+	"ED$", "ending$", "エンディング$",
+}
+
+local cmds_sqnum = {}
+
+local osm = mp.create_osd_overlay("ass-events")
+local osm_showing = false
+local style_generic = "{\\rDefault\\fnConsolas\\fs20\\blur1\\bord2\\1c&HFFFFFF\\3c&H000000}"
+
+local text_pasted = nil
+
+local marked_aid_A = nil
+local marked_aid_B = nil
+local mark_aid_reg = false
+local merged_aid = false
+
+local ostime_msg = mp.create_osd_overlay("ass-events")
+local ostime_showing = false
+local ostime_style = "{\\rDefault\\fnmpv-osd-symbols\\fs30\\bord2\\an9\\alpha&H80\\1c&H01DBF1\\3c&H000000}"
+
+local scale_target = 0
+
+local shuffled = false
+local shuffling = false
+local save_path = mp.command_native({"expand-path", "~~/"}) .. "/playlist_temp.mpl"
+
+local pre_quit = false
+
+local bak_speed = nil
+local spd_adapt = false
+local spd_iters_max = 10
+local spd_delta_max = 0.5
+local spd_delta_min = 0.0005
+
+local show_page = 0
+
+
+
+--
+-- 函数设定
+--
+
 function adevicelist_pre(start)
 	mp.set_property("audio-device", adevicelist[start].name)
 	adevicelist[start].description = "■ " .. adevicelist[start].description
@@ -129,34 +179,31 @@ function adevicelist_fin(start, fin, step, dynamic)
 end
 
 
-local chap_skip = false
-local chap_keywords = {
-	"OP$", "opening$", "オープニング$",
-	"ED$", "ending$", "エンディング$",
-}
-function chap_skip_toggle()
-	if chap_skip then
-		chap_skip = false
-		mp.osd_message("已禁用跳过片头片尾", 1)
-		return
-	end
-	chap_skip = true
-	mp.osd_message("已启用跳过片头片尾", 1)
-end
-function chapter_change(_, value)
+function chap_skip_check(_, value)
 	if not value then
 		return
 	end
 	for _, words in pairs(chap_keywords) do
 		if string.match(value, words) and chap_skip then
 			mp.commandv("add", "chapter", 1)
+			mp.msg.info("chap_skip_check 跳过章节")
 		end
 	end
 end
+function chap_skip_toggle()
+	if chap_skip then
+		mp.unobserve_property(chap_skip_check)
+		chap_skip = false
+		mp.osd_message("已禁用跳过片头片尾", 1)
+		return
+	end
+	mp.observe_property("chapter-metadata/TITLE", "string", chap_skip_check)
+	chap_skip = true
+	mp.osd_message("已启用跳过片头片尾", 1)
+end
 
 
-local cmds_sqnum = {}
-local function cycle_cmds(...)
+function cycle_cmds(...)
 	local cmds_list = {...}
 	local cur_cmd = table.concat(cmds_list, "|")
 	cmds_sqnum[cur_cmd] = (cmds_sqnum[cur_cmd] or 0) % #cmds_list + 1
@@ -164,9 +211,6 @@ local function cycle_cmds(...)
 end
 
 
-local osm = mp.create_osd_overlay("ass-events")
-local osm_showing = false
-local style_generic = "{\\rDefault\\fnConsolas\\fs20\\blur1\\bord2\\1c&HFFFFFF\\3c&H000000}"
 function info_get()
 	local conf_dir = mp.get_property_bool("config") and mp.command_native({"expand-path", "~~/"}) or "no"
 	local osd_dims = mp.get_property_native("osd-dimensions")
@@ -264,7 +308,6 @@ function copy_clipboard(clip)
 	end
 	return ""
 end
-local text_pasted = nil
 function load_clipboard(action, clip)
 	if not clip and (plat == "windows" or plat == "macos") then
 		return
@@ -279,9 +322,22 @@ function load_clipboard(action, clip)
 end
 
 
-local marked_aid_A = nil
-local marked_aid_B = nil
-local merged_aid = false
+function mark_aid_reset()
+	mp.command("no-osd set lavfi-complex \"\"")
+	merged_aid = false
+	marked_aid_A, marked_aid_B = nil, nil
+	mp.osd_message("已取消并轨和标记", 1)
+	if mark_aid_reg then
+		mp.unregister_event(mark_aid_check)
+		mark_aid_reg = false
+	end
+end
+function mark_aid_check()
+	if marked_aid_A ~= nil or marked_aid_B ~= nil then
+		mark_aid_reset()
+	end
+	mp.msg.info("mark_aid_check 重置并轨和标记", 1)
+end
 function mark_aid_A()
 	marked_aid_A = mp.get_property_number("aid", 0)
 	if marked_aid_A == 0
@@ -290,6 +346,12 @@ function mark_aid_A()
 		marked_aid_A = nil
 	else
 		mp.osd_message("预标记当前音轨序列 " .. marked_aid_A .. " 为并行轨A", 1)
+	end
+	if mark_aid_reg then
+		return
+	else
+		mp.register_event("end-file", mark_aid_check)
+		mark_aid_reg = true
 	end
 end
 function mark_aid_B()
@@ -300,6 +362,12 @@ function mark_aid_B()
 		marked_aid_B = nil
 	else
 		mp.osd_message("预标记当前音轨序列 " .. marked_aid_B .. " 为并行轨B", 1)
+	end
+	if mark_aid_reg then
+		return
+	else
+		mp.register_event("end-file", mark_aid_check)
+		mark_aid_reg = true
 	end
 end
 function mark_aid_merge()
@@ -313,15 +381,9 @@ function mark_aid_merge()
 		merged_aid = true
 	end
 end
-function mark_aid_reset()
-	mp.command("set lavfi-complex \"\"")
-	merged_aid = false
-	marked_aid_A, marked_aid_B = nil, nil
-end
 function mark_aid_fin()
 	if merged_aid then
 		mark_aid_reset()
-		mp.osd_message("已取消并轨和标记", 1)
 		mp.commandv("set", "aid", "auto")
 		return
 	end
@@ -337,9 +399,6 @@ function mark_aid_fin()
 end
 
 
-local ostime_msg = mp.create_osd_overlay("ass-events")
-local ostime_showing = false
-local ostime_style = "{\\rDefault\\fnmpv-osd-symbols\\fs30\\bord2\\an9\\alpha&H80\\1c&H01DBF1\\3c&H000000}"
 function draw_ostime()
 	local ostime = os.date("*t")
 	ostime_msg.data = ostime_style .. "\238\128\134 " .. string.format("%02d:%02d:%02d", ostime.hour, ostime.min, ostime.sec)
@@ -370,9 +429,44 @@ function ostime_display()
 end
 
 
-local shuffled = false
-local shuffling = false
-local save_path = mp.command_native({"expand-path", "~~/"}) .. "/playlist_temp.mpl"
+function scale_recal(pct)
+	local w_dp, h_dp = mp.get_property_number("display-width", 0), mp.get_property_number("display-height", 0)
+	local w_vf, h_vf = mp.get_property_number("dwidth", 0), mp.get_property_number("dheight", 0)
+	local scale_win = mp.get_property_number("current-window-scale", 0)
+	local scale_shift = mp.get_property_number("display-hidpi-scale", 1)
+	if w_dp == 0 or w_vf == 0 or scale_win == 0 then
+		mp.msg.warn("scale_recal 缺乏必要条件")
+		scale_target = 0
+		return
+	end
+	scale_target = tonumber(string.format("%.3f", math.sqrt((w_dp * h_dp * pct * 0.01) / (w_vf * h_vf)) / scale_shift))
+end
+function window_mini(alt1, alt2)
+	mp.set_property_bool("fullscreen", false)
+	if alt1 then
+		mp.set_property_bool("border", false)
+	end
+	mp.set_property_number("current-window-scale", scale_target)
+	mp.set_property_bool("auto-window-resize", false)
+	mp.set_property_bool("keepaspect-window", false)
+	if alt2 then
+		mp.set_property_bool("ontop", true)
+	end
+end
+function pip_dummy(pct)
+	if mp.get_property_native("idle-active") or not mp.get_property_native("vid") then
+		mp.msg.warn("pip_dummy 无法在当前状态使用")
+		return
+	end
+	scale_recal(pct)
+	if scale_target == 0 then
+		return
+	end
+	window_mini(1, 2)
+	mp.msg.info("pip_dummy 已尝试应用")
+end
+
+
 function show_playlist_shuffle()
 	mp.add_timeout(0.1, function()
 		local shuffle_msg = mp.command_native({"expand-text", "${playlist}"})
@@ -453,7 +547,6 @@ function playlist_tmp_load()
 end
 
 
-local pre_quit = false
 function quit_real()
 	if pre_quit then
 		mp.command("quit")
@@ -498,11 +591,6 @@ function sids_sec_swap()
 end
 
 
-local bak_speed = nil
-local spd_adapt = false
-local spd_iters_max = 10
-local spd_delta_max = 0.5
-local spd_delta_min = 0.0005
 function speed_auto(tab)
 	if tab.event == "down" then
 		mp.set_property_number("speed", 2)
@@ -571,16 +659,18 @@ end
 function speed_sync_toggle()
 	spd_adapt = not spd_adapt
 	if spd_adapt then
-		mp.osd_message("已启用速度自适应", 1)
 		speed_adaptive()
+		mp.osd_message("已启用速度自适应", 1)
+		mp.register_event("playback-restart", speed_adaptive)
 	else
+		mp.unregister_event(speed_adaptive)
+		mp.set_property_number("speed", 1)
 		mp.osd_message("已禁用速度自适应", 1)
 		return
 	end
 end
 
 
-local show_page = 0
 function stats_cycle(num_init, num_end)
 	if show_page < num_init then
 		show_page = num_init - 1
@@ -617,19 +707,6 @@ end
 
 
 --
--- 其它处理
---
-
-mp.register_event("file-loaded", function() if chap_skip then mp.msg.info("chap_skip_toggle 当前文件正在使用") end end)
-mp.observe_property("chapter-metadata/TITLE", "string", chapter_change)
-
-mp.register_event("end-file", function() if marked_aid_A ~= nil or marked_aid_B ~= nil then mark_aid_reset() end end)
-
-mp.register_event("playback-restart", function() if spd_adapt then speed_adaptive() end end)
-
-
-
---
 -- 键位绑定
 --
 
@@ -650,11 +727,15 @@ mp.add_key_binding(nil, "load_cbd_alt_add", function() load_clipboard("append-pl
 mp.add_key_binding(nil, "mark_aid_A", mark_aid_A)
 mp.add_key_binding(nil, "mark_aid_B", mark_aid_B)
 mp.add_key_binding(nil, "mark_aid_merge", mark_aid_merge)
-mp.add_key_binding(nil, "mark_aid_reset", function() mark_aid_reset() mp.osd_message("已取消并轨和标记", 1) end)
+mp.add_key_binding(nil, "mark_aid_reset", mark_aid_reset)
 mp.add_key_binding(nil, "mark_aid_fin", mark_aid_fin)
 
 mp.add_key_binding(nil, "ostime_display", ostime_display)
 mp.add_key_binding(nil, "ostime_toggle", ostime_toggle)
+
+mp.add_key_binding(nil, "pip_dummy", function() pip_dummy(10) end)
+mp.add_key_binding(nil, "pip_dummy_p05", function() pip_dummy(5) end)
+mp.add_key_binding(nil, "pip_dummy_p20", function() pip_dummy(20) end)
 
 mp.add_key_binding(nil, "playlist_order_0", function() playlist_order(0) end)
 mp.add_key_binding(nil, "playlist_order_0r", function() playlist_order(0, true) end)

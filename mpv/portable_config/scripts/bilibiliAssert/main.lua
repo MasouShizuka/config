@@ -24,11 +24,18 @@ function assprocess()
 
     -- get script directory
     local directory = mp.get_script_directory()
-    -- local py_path = '' .. directory .. '/Danmu2Ass.py'
+    -- local py_path = ''..directory..'/Danmu2Ass.py'
+
+	-- under windows platform, convert path format
+	-- if string.find(directory, "\\")
+	-- then
+	-- 	string.gsub(directory, "/", "\\")
+	-- 	py_path = ''..directory..'\\Danmu2Ass.py'
+	-- end
 
     -- choose to use python or .exe
     -- local arg = { 'python', py_path, '-d', directory,
-    --     -- 设置屏幕分辨率 （默认 1920x1080)
+    --     -- 设置屏幕分辨率 (默认 1920x1080)
     --     '-s', '1920x1080',
     --     -- 设置字体大小    (默认 37.0)
     --     '-fs', '37.0',
@@ -38,8 +45,9 @@ function assprocess()
     --     '-dm', '10.0',
     --     -- 静止弹幕显示的持续时间 (默认 5秒)
     --     '-ds', '5.0',
-    --     -- 保留底部多少高度的空白区域 (默认　０, 取值0.0-1.0)
+    --     -- 保留底部多少高度的空白区域 (默认0, 取值0.0-1.0)
     --     '-p', '0',
+    --     '-r',
     --     cid,
     -- }
 

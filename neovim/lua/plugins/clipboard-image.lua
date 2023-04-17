@@ -1,9 +1,12 @@
-vim.keymap.set("n", "<leader>p", function()
-    vim.api.nvim_command("PasteImg")
-end, { silent = true })
+local variables = require("variables")
 
-require("clipboard-image").setup(
-    {
+return {
+    "ekickx/clipboard-image.nvim",
+    cond = not variables.is_vscode,
+    keys = {
+        { "<Leader>p", function() vim.api.nvim_command("PasteImg") end, mode = "n" },
+    },
+    opts = {
         default = {
             -- img_dir = "img",
             img_dir = "_images",
@@ -12,7 +15,8 @@ require("clipboard-image").setup(
             img_name = function()
                 return os.date "%Y-%m-%d-%H-%M-%S"
             end,
-            img_handler = function(img) end,
+            img_handler = function(img)
+            end,
             affix = "%s",
         },
         asciidoc = {
@@ -21,5 +25,5 @@ require("clipboard-image").setup(
         markdown = {
             affix = "![](%s)",
         },
-    }
-)
+    },
+}
