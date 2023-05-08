@@ -1,6 +1,8 @@
 patch:
   # 特定App默认中/英文输入
   app_options:
+    alacritty.exe:
+      ascii_mode: true
     code.exe:
       ascii_mode: true
     te64.exe:

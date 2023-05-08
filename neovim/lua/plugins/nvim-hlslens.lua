@@ -7,18 +7,18 @@ return {
             function()
                 vim.api.nvim_command("normal! " .. vim.api.nvim_get_vvar("count1") .. "n")
                 require("hlslens").start()
-                vim.cmd("normal zz")
+                vim.api.nvim_command("normal zz")
             end,
-            mode = "n"
+            mode = "n",
         },
         {
             "N",
             function()
                 vim.api.nvim_command("normal! " .. vim.api.nvim_get_vvar("count1") .. "N")
                 require("hlslens").start()
-                vim.cmd("normal zz")
+                vim.api.nvim_command("normal zz")
             end,
-            mode = "n"
+            mode = "n",
         },
         {
             "*",
@@ -26,9 +26,9 @@ return {
                 local keys = vim.api.nvim_replace_termcodes("*", true, false, true)
                 vim.api.nvim_feedkeys(keys, "n", false)
                 require("hlslens").start()
-                vim.cmd("normal zz")
+                vim.api.nvim_command("normal zz")
             end,
-            mode = "n"
+            mode = "n",
         },
         {
             "#",
@@ -36,9 +36,9 @@ return {
                 local keys = vim.api.nvim_replace_termcodes("#", true, false, true)
                 vim.api.nvim_feedkeys(keys, "n", false)
                 require("hlslens").start()
-                vim.cmd("normal zz")
+                vim.api.nvim_command("normal zz")
             end,
-            mode = "n"
+            mode = "n",
         },
         {
             "g*",
@@ -46,9 +46,9 @@ return {
                 local keys = vim.api.nvim_replace_termcodes("g*", true, false, true)
                 vim.api.nvim_feedkeys(keys, "n", false)
                 require("hlslens").start()
-                vim.cmd("normal zz")
+                vim.api.nvim_command("normal zz")
             end,
-            mode = "n"
+            mode = "n",
         },
         {
             "g#",
@@ -56,9 +56,9 @@ return {
                 local keys = vim.api.nvim_replace_termcodes("g#", true, false, true)
                 vim.api.nvim_feedkeys(keys, "n", false)
                 require("hlslens").start()
-                vim.cmd("normal zz")
+                vim.api.nvim_command("normal zz")
             end,
-            mode = "n"
+            mode = "n",
         },
     },
     opts = {

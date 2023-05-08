@@ -11,13 +11,13 @@
 
 | 文件                 | 路径                                         | 说明                                                       |
 | -------------------- | -------------------------------------------- | ---------------------------------------------------------- |
-| opencc               | `C:/Users/User/AppData/Roaming/Rime/`        | emoji 相关文件夹                                           |
-| default.custom.yaml  | `C:/Users/User/AppData/Roaming/Rime/`        | 全局设置文件，包含输入方案、候选词个数、中英文切换、快捷键 |
-| weasel.custom.yaml   | `C:/Users/User/AppData/Roaming/Rime/`        | 外观设置文件                                               |
-| <输入法>.custom.yaml | `C:/Users/User/AppData/Roaming/Rime/`        | 输入法配置文件                                             |
-| <输入法>.schema.yaml | `C:/Users/User/AppData/Roaming/Rime/`        | 输入法文件                                                 |
-| <词库>.dict.yaml     | `C:/Users/User/AppData/Roaming/Rime/`        | 词库文件                                                   |
-| custom_phrase.txt    | `C:/Users/User/AppData/Roaming/Rime/`        | 自定义短语文件                                             |
-| Rime.lua             | `C:/Users/User/AppData/Roaming/Rime/`        | 日期脚本文件                                               |
-| wordninja.dll        | `C:/Users/User/AppData/Roaming/Rime/`        | 分词文件                                                   |
+| opencc               | `$APPDATA/Rime/`                             | emoji 相关文件夹                                           |
+| default.custom.yaml  | `$APPDATA/Rime/`                             | 全局设置文件，包含输入方案、候选词个数、中英文切换、快捷键 |
+| weasel.custom.yaml   | `$APPDATA/Rime/`                             | 外观设置文件                                               |
+| <输入法>.custom.yaml | `$APPDATA/Rime/`                             | 输入法配置文件                                             |
+| <输入法>.schema.yaml | `$APPDATA/Rime/`                             | 输入法文件                                                 |
+| <词库>.dict.yaml     | `$APPDATA/Rime/`                             | 词库文件                                                   |
+| custom_phrase.txt    | `$APPDATA/Rime/`                             | 自定义短语文件                                             |
+| Rime.lua             | `$APPDATA/Rime/`                             | 日期脚本文件                                               |
+| wordninja.dll        | `$APPDATA/Rime/`                             | 分词文件                                                   |
 | lua53.dll            | `C:/Program Files (x86)/Rime/weasel-0.14.3/` | lua 链接库                                                 |

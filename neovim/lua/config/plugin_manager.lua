@@ -1,3 +1,5 @@
+local variables = require("variables")
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
     vim.fn.system({
@@ -11,19 +13,22 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-return require("lazy").setup("plugins",
-    {
-        change_detection = {
-            notify = false,
-        },
-        checker = {
-            enabled = true,
-        },
-        install = {
-            colorscheme = { "onedark" },
-        },
-        ui = {
-            border = "rounded",
-        }
-    }
-)
+local checker = true
+if variables.is_vscode then
+    checker = false
+end
+
+return require("lazy").setup("plugins", {
+    change_detection = {
+        notify = false,
+    },
+    checker = {
+        enabled = checker,
+    },
+    install = {
+        colorscheme = { "onedark" },
+    },
+    ui = {
+        border = "rounded",
+    },
+})

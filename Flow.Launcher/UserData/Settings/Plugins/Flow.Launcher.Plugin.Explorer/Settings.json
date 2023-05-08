@@ -7,6 +7,7 @@
   "ShellPath": "cmd",
   "UseLocationAsWorkingDir": true,
   "ShowWindowsContextMenu": true,
+  "DefaultOpenFolderInFileManager": false,
   "SearchActionKeyword": "*",
   "SearchActionKeywordEnabled": true,
   "FileContentSearchActionKeyword": "doc:",

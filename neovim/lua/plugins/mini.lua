@@ -6,7 +6,7 @@ return {
         config = function(_, opts)
             require("mini.ai").setup(opts)
         end,
-        event = "VeryLazy",
+        event = { "VeryLazy" },
         opts = {
             custom_textobjects = {
                 a = { "<().-()>" },
@@ -98,18 +98,20 @@ return {
                     output = { left = "{", right = "}" },
                 },
                 L = {
-                    input = { "\\begin%{.-%}().-()\\end%{.-%}" },
+                    input = { [[\begin%{.-%}().-()\end%{.-%}]] },
                     output = function()
                         local latex_name = require("mini.surround").user_input("Latex object name")
-                        return { left = ("\\begin{%s}"):format(latex_name), right = ("\\end{%s}"):format(latex_name) }
+                        return { left = ([[\begin{%s}]]):format(latex_name), right = ([[\end{%s}]]):format(latex_name) }
                     end,
                 },
                 l = {
-                    input = { "\\.*%{().-()%}" },
+                    input = { [[\.*%{().-()%}]] },
                     output = function()
                         local cmd_name = require("mini.surround").user_input("Latex command name")
-                        if cmd_name == nil then return nil end
-                        return { left = ("\\%s{"):format(cmd_name), right = "}" }
+                        if cmd_name == nil then
+                            return nil
+                        end
+                        return { left = ([[\%s{]]):format(cmd_name), right = "}" }
                     end,
                 },
                 r = {
@@ -129,20 +131,9 @@ return {
                 suffix_last = "p",     -- Suffix to search with "prev" method
                 suffix_next = "n",     -- Suffix to search with "next" method
             },
+            n_lines = 500,
             respect_selection_type = true,
         },
-        version = false,
-    },
-
-
-
-    {
-        "echasnovski/mini.pairs",
-        cond = not variables.is_vscode,
-        config = function(_, opts)
-            require("mini.pairs").setup(opts)
-        end,
-        event = "InsertEnter",
         version = false,
     },
 
@@ -152,14 +143,17 @@ return {
         config = function(_, opts)
             require("mini.trailspace").setup(opts)
 
-            vim.api.nvim_create_autocmd("InsertLeave", {
+            vim.api.nvim_create_autocmd("BufWritePre", {
                 callback = function()
-                    require("mini.trailspace").trim()
+                    if vim.bo.filetype ~= "NvimTree" then
+                        require("mini.trailspace").trim()
+                    end
                 end,
+                group = vim.api.nvim_create_augroup("trailspace", { clear = true }),
                 pattern = "*",
             })
         end,
-        event = "InsertLeave",
+        event = { "InsertLeave" },
         version = false,
     },
 }

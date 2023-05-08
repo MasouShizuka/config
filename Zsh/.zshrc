@@ -123,14 +123,20 @@ precmd() {
     # 添加命令到历史文件后删除之前相同的历史命令
     # if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
     #     LASTHIST_SED="$(<<< ${LASTHIST%%$'\n'} sed -e 's`[][\\/.*^$]`\\&`g')"
-    #     sed -i "\$!{/${LASTHIST_SED}/d;}" "$HISTFILE"
+    #     sed -i "\$!{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
     # fi
 
     # 添加命令到历史文件前删除相同的历史命令，并手动追加到历史文件中，防止文件乱码
     if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
-        LASTHIST_TRIM=${LASTHIST%%$'\n'}
+        LASTHIST_SLASH=${LASTHIST//\\//}
+
+        LASTHIST_TRIM=${LASTHIST_SLASH%%$'\n'}
+        LASTHIST_TRIM="${LASTHIST_TRIM#"${LASTHIST_TRIM%%[![:space:]]*}"}"
+        LASTHIST_TRIM="${LASTHIST_TRIM%"${LASTHIST_TRIM##*[![:space:]]}"}"
+
         LASTHIST_SED="$(<<< $LASTHIST_TRIM sed -e 's`[][\\/.*^$]`\\&`g')"
-        sed -i "{/${LASTHIST_SED}/d;}" "$HISTFILE"
+        sed -i "{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
+
         echo "$LASTHIST_TRIM" >> "$HISTFILE"
     fi
 }
@@ -175,3 +181,17 @@ eval "$(oh-my-posh init zsh --config $POSH_THEMES_PATH/negligible.omp.json)"
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+
+
+#########
+# Conda #
+#########
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+if [ -f '/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' ]; then
+    # eval "$('/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe' 'shell.zsh' 'hook')"
+    eval "$(/c/Users/MasouShizuka/miniconda3/Scripts/conda.exe 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')"
+fi
+# <<< conda initialize <<<

@@ -4,6 +4,10 @@
     "actions": 
     [
         {
+            "command": "find",
+            "keys": "ctrl+shift+f"
+        },
+        {
             "command": 
             {
                 "action": "resizePane",
@@ -12,19 +16,13 @@
             "keys": "ctrl+shift+left"
         },
         {
-            "command": "find",
-            "keys": "ctrl+f"
+            "command": "paste"
+        },
+        {
+            "command": "duplicateTab"
         },
         {
             "command": "openSystemMenu"
-        },
-        {
-            "command": "duplicateTab",
-            "keys": "ctrl+shift+t"
-        },
-        {
-            "command": "paste",
-            "keys": "ctrl+v"
         },
         {
             "command": 
@@ -38,8 +36,7 @@
             {
                 "action": "copy",
                 "singleLine": false
-            },
-            "keys": "ctrl+c"
+            }
         },
         {
             "command": 
@@ -47,8 +44,7 @@
                 "action": "splitPane",
                 "split": "left",
                 "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+h"
+            }
         },
         {
             "command": 
@@ -102,10 +98,6 @@
         {
             "command": "unbound",
             "keys": "ctrl+shift+space"
-        },
-        {
-            "command": "unbound",
-            "keys": "ctrl+shift+f"
         },
         {
             "command": "unbound",
@@ -312,6 +304,38 @@
             "keys": "ctrl+shift+q"
         },
         {
+            "command": "unbound",
+            "keys": "ctrl+shift+t"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+c"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+alt+j"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+alt+h"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+alt+l"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+alt+k"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+f"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+v"
+        },
+        {
             "command": 
             {
                 "action": "splitPane",
@@ -333,8 +357,7 @@
                 "action": "splitPane",
                 "split": "right",
                 "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+l"
+            }
         },
         {
             "command": 
@@ -349,8 +372,7 @@
                 "action": "splitPane",
                 "split": "down",
                 "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+j"
+            }
         },
         {
             "command": "openNewTabDropdown"
@@ -423,8 +445,7 @@
                 "action": "splitPane",
                 "split": "up",
                 "splitMode": "duplicate"
-            },
-            "keys": "ctrl+alt+k"
+            }
         },
         {
             "command": "scrollDownPage"
@@ -457,7 +478,7 @@
     ],
     "copyFormatting": "none",
     "copyOnSelect": false,
-    "defaultProfile": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
+    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
     "experimental.rendering.forceFullRepaint": false,
     "experimental.rendering.software": false,
     "language": "zh-Hans-CN",
@@ -480,7 +501,14 @@
         "list": 
         [
             {
-                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -shell zsh -ucrt64 -use-full-path",
+                "commandline": "C:/Program Files/PowerShell/7/pwsh.exe -nologo",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "commandline": "C:/msys64/msys2_shell.cmd -ucrt64 -defterm -here -use-full-path -no-start -shell zsh",
                 "guid": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
                 "hidden": false,
                 "icon": "C:/msys64/ucrt64.ico",
@@ -490,16 +518,9 @@
             {
                 "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
                 "hidden": false,
-                "icon": "C:\\Program Files\\WindowsApps\\22955VineelSai.ArchWSL_1.0.1.0_x64__qz230bc1wsk9j\\Assets\\LargeTile.scale-200.png",
+                "icon": "C:\\Program Files\\WindowsApps\\22955VineelSai.ArchWSL_1.0.3.0_x64__qz230bc1wsk9j\\Assets\\LargeTile.scale-200.png",
                 "name": "Arch",
                 "source": "Windows.Terminal.Wsl"
-            },
-            {
-                "commandline": "C:/Program Files/PowerShell/7/pwsh.exe -nologo",
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-                "hidden": false,
-                "name": "PowerShell",
-                "source": "Windows.Terminal.PowershellCore"
             },
             {
                 "commandline": "C:/Program Files/Git/bin/bash.exe -li",

@@ -41,6 +41,7 @@
     "code-runner.runInTerminal": true,
     "debug.console.fontSize": 14,
     "debug.showBreakpointsInOverviewRuler": true,
+    "diffEditor.diffAlgorithm": "advanced",
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.accessibilitySupport": "off",
     "editor.cursorBlinking": "solid",
@@ -179,6 +180,9 @@
         "mp",
         "vim"
     ],
+    "Lua.format.defaultConfig": {
+        "trailing_table_separator": "smart"
+    },
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.enableHtml": true,
     "markdown.marp.themes": [

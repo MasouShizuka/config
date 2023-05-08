@@ -3,7 +3,7 @@ local variables = require("variables")
 return {
     "numToStr/Comment.nvim",
     cond = not variables.is_vscode,
-    event = "VeryLazy",
+    event = { "VeryLazy" },
     opts = {
         ---Add a space b/w comment and the line
         padding = true,

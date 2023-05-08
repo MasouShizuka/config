@@ -475,7 +475,7 @@
     {
         "key": "ctrl+j",
         "command": "workbench.action.focusNextGroup",
-        "when": "!sideBarFocus && !terminalFocus && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && neovim.mode != 'cmdline_normal'"
     },
     // 侧边栏未聚焦且终端未聚焦且 neovim.mode != cmdline_normal 时，则切换焦点到上一个编辑器组
     {
@@ -568,6 +568,13 @@
         "key": "ctrl+e",
         "command": "swapdiff.swapdiff",
         "when": "inDiffEditor"
+    },
+
+    // 切换 peek 焦点
+    {
+        "key": "ctrl+j",
+        "command": "togglePeekWidgetFocus",
+        "when": "referenceSearchVisible"
     },
 
     // 转到下一个更改
