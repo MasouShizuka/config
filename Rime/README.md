@@ -4,6 +4,7 @@
 
 - [https://github.com/rime/home](https://github.com/rime/home)
 - [https://github.com/rime/weasel](https://github.com/rime/weasel)
+- [https://github.com/fxliang/weasel](https://github.com/fxliang/weasel)
 - [https://github.com/ssnhd/rime](https://github.com/ssnhd/rime)
 - [https://github.com/BlindingDark/rime-easy-en](https://github.com/BlindingDark/rime-easy-en)
 
@@ -21,3 +22,7 @@
 | Rime.lua             | `$APPDATA/Rime/`                             | 日期脚本文件                                               |
 | wordninja.dll        | `$APPDATA/Rime/`                             | 分词文件                                                   |
 | lua53.dll            | `C:/Program Files (x86)/Rime/weasel-0.14.3/` | lua 链接库                                                 |
+
+## 注意
+
+`windows` 的最新构建版本可在 [fxliang/weasel](https://github.com/fxliang/weasel) 仓库下载

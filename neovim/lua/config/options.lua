@@ -1,4 +1,4 @@
-local variables = require("variables")
+local variables = require("config.variables")
 
 -- Char
 vim.opt.list = true                                                                -- show <Tab> and <EOL>
@@ -30,6 +30,9 @@ vim.opt.confirm = true                                                          
 -- Cursor
 vim.opt.cursorline = true                                                          -- highlight the screen line of the cursor
 
+-- Encoding
+vim.opt.fileencodings = "ucs-bom,utf-8,cp936,gb18030,big5,cp932,cp949,latin1"      -- automatically detected character encodings
+
 -- File
 vim.opt.writebackup = false                                                        -- make a backup before overwriting a file
 vim.opt.shada = ""                                                                 -- use .shada file upon startup and exiting
@@ -43,10 +46,8 @@ vim.opt.formatoptions = "qjl1"                                                  
 
 -- Gui
 vim.opt.cmdheight = 0                                                              -- number of lines to use for the command-line
-vim.opt.pumblend = 0                                                               -- enables pseudo-transparency for the popup-menu
 vim.opt.pumheight = 10                                                             -- maximum number of items to show in the popup menu
 vim.opt.termguicolors = true                                                       -- enables 24-bit RGB color in the TUI
-vim.opt.winblend = 0                                                               -- enables pseudo-transparency for a floating window.
 
 -- Indent
 vim.opt.breakindent = true                                                         -- wrapped line repeats indent
@@ -99,7 +100,7 @@ vim.opt.showtabline = 2                                                         
 vim.opt.showmode = false                                                           -- message on status line to show current mode
 
 -- Time
-vim.opt.timeoutlen = 1000                                                          -- time out time in milliseconds
+vim.opt.timeoutlen = 500                                                           -- time out time in milliseconds
 vim.opt.updatetime = 1000                                                          -- after this many milliseconds flush swap file
 
 -- Wildmenu

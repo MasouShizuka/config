@@ -8,10 +8,10 @@
 
 ## 配置文件
 
-| 文件     | 路径                                | 说明     |
-| -------- | ----------------------------------- | -------- |
-| lua      | `C:/Users/User/AppData/Local/nvim/` | 配置文件 |
-| init.lua | `C:/Users/User/AppData/Local/nvim/` | 配置文件 |
+| 文件     | 路径                   | 说明     |
+| -------- | ---------------------- | -------- |
+| lua      | `$APPDATA/Local/nvim/` | 配置文件 |
+| init.lua | `$APPDATA/Local/nvim/` | 配置文件 |
 
 ## 注意
 

@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts
-COMMIT_ ec52252380f896ca709216307e3bf021fbee914b
+COMMIT_ 5e2c93055155bc9aec7534d13804d4f0d7f8a72d
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -112,6 +112,8 @@ defaults = {
 	chapter_ranges = 'openings:30abf964,endings:30abf964,ads:c54e4e80',
 	chapter_range_patterns = 'openings:オープニング;endings:エンディング',
 
+	idlescreen = true,
+	idlemsg = 'default',
 	idle_call_menu = 0,                       -- 空闲自动弹出上下文菜单
 	custom_font = 'default',                  -- 自定义界面字体
 }
@@ -145,45 +147,47 @@ function auto_ui_scale()
 		options.ui_scale = 1
 	end
 end
+-- 设置脚本属性
+mp.set_property_native('user-data/osc', { idlescreen = options.idlescreen })
 
 --[[ CONFIG ]]
 
 -- 上下文菜单的默认内容
 local function create_default_menu()
 	return {
-		{title = lang._load, items = {
-			{title = lang._file_browser, value = 'script-binding uosc/open-file'},
-			{title = lang._import_sid, value = 'script-binding uosc/load-subtitles'},
+		{title = lang._cm_load, items = {
+			{title = lang._cm_file_browser, value = 'script-binding uosc/open-file'},
+			{title = lang._cm_import_sid, value = 'script-binding uosc/load-subtitles'},
 		},},
-		{title = lang._navigation, items = {
-			{title = lang._playlist, value = 'script-binding uosc/playlist'},
-			{title = lang._edition_list, value = 'script-binding uosc/editions'},
-			{title = lang._chapter_list, value = 'script-binding uosc/chapters'},
-			{title = lang._vid_list, value = 'script-binding uosc/video'},
-			{title = lang._aid_list, value = 'script-binding uosc/audio'},
-			{title = lang._sid_list, value = 'script-binding uosc/subtitles'},
-			{title = lang._playlist_shuffle, value = 'playlist-shuffle'},
+		{title = lang._cm_navigation, items = {
+			{title = lang._cm_playlist, value = 'script-binding uosc/playlist'},
+			{title = lang._cm_edition_list, value = 'script-binding uosc/editions'},
+			{title = lang._cm_chapter_list, value = 'script-binding uosc/chapters'},
+			{title = lang._cm_vid_list, value = 'script-binding uosc/video'},
+			{title = lang._cm_aid_list, value = 'script-binding uosc/audio'},
+			{title = lang._cm_sid_list, value = 'script-binding uosc/subtitles'},
+			{title = lang._cm_playlist_shuffle, value = 'playlist-shuffle'},
 		},},
-		{title = lang._ushot, value = 'script-binding uosc/shot'},
-		{title = lang._VIDEO, items = {
-			{title = lang._decoding_api, value = 'cycle-values hwdec no auto auto-copy'},
-			{title = lang._deband_toggle, value = 'cycle deband'},
-			{title = lang._deint_toggle, value = 'cycle deinterlace'},
-			{title = lang._icc_toggle, value = 'cycle icc-profile-auto'},
-			{title = lang._corpts_toggle, value = 'cycle correct-pts'},
+		{title = lang._cm_ushot, value = 'script-binding uosc/shot'},
+		{title = lang._cm_video, items = {
+			{title = lang._cm_decoding_api, value = 'cycle-values hwdec no auto auto-copy'},
+			{title = lang._cm_deband_toggle, value = 'cycle deband'},
+			{title = lang._cm_deint_toggle, value = 'cycle deinterlace'},
+			{title = lang._cm_icc_toggle, value = 'cycle icc-profile-auto'},
+			{title = lang._cm_corpts_toggle, value = 'cycle correct-pts'},
 		},},
-		{title = lang._TOOLS, items = {
-			{title = lang._stats_toggle, value = 'script-binding display-stats-toggle'},
-			{title = lang._console_on, value = 'script-binding console/enable'},
-			{title = lang._border_toggle, value = 'cycle border'},
-			{title = lang._ontop_toggle, value = 'cycle ontop'},
-			{title = lang._audio_device, value = 'script-binding uosc/audio-device'},
-			{title = lang._stream_quality, value = 'script-binding uosc/stream-quality'},
-			{title = lang._show_file_dir, value = 'script-binding uosc/show-in-directory'},
-			{title = lang._show_config_dir, value = 'script-binding uosc/open-config-directory'},
+		{title = lang._cm_tools, items = {
+			{title = lang._cm_stats_toggle, value = 'script-binding display-stats-toggle'},
+			{title = lang._cm_console_on, value = 'script-binding console/enable'},
+			{title = lang._cm_border_toggle, value = 'cycle border'},
+			{title = lang._cm_ontop_toggle, value = 'cycle ontop'},
+			{title = lang._cm_audio_device, value = 'script-binding uosc/audio-device'},
+			{title = lang._cm_stream_quality, value = 'script-binding uosc/stream-quality'},
+			{title = lang._cm_show_file_dir, value = 'script-binding uosc/show-in-directory'},
+			{title = lang._cm_show_config_dir, value = 'script-binding uosc/open-config-directory'},
 		},},
-		{title = lang._stop, value = 'stop'},
-		{title = lang._quit, value = 'quit'},
+		{title = lang._cm_stop, value = 'stop'},
+		{title = lang._cm_quit, value = 'quit'},
 	}
 end
 
@@ -439,6 +443,8 @@ state = {
 	margin_left = 0,
 	margin_right = 0,
 	hidpi_scale = 1,
+	idlescreen = options.idlescreen,
+	idlemsg = options.idlemsg,
 }
 thumbnail = {width = 0, height = 0, disabled = false}
 external = {} -- Properties set by external scripts
@@ -512,17 +518,19 @@ end
 function update_margins()
 	if display.height == 0 then return end
 
-	local function is_persistent(element) return element and element.enabled and element:is_persistent() end
+	local function causes_margin(element)
+		return element and element.enabled and (element:is_persistent() or element.min_visibility > 0.5)
+	end
 	local timeline, top_bar, controls, volume = Elements.timeline, Elements.top_bar, Elements.controls, Elements.volume
 	-- margins are normalized to window size
 	local left, right, top, bottom = 0, 0, 0, 0
 
-	if is_persistent(controls) then bottom = (display.height - controls.ay) / display.height
-	elseif is_persistent(timeline) then bottom = (display.height - timeline.ay) / display.height end
+	if causes_margin(controls) then bottom = (display.height - controls.ay) / display.height
+	elseif causes_margin(timeline) then bottom = (display.height - timeline.ay) / display.height end
 
-	if is_persistent(top_bar) then top = top_bar.title_by / display.height end
+	if causes_margin(top_bar) then top = top_bar.title_by / display.height end
 
-	if is_persistent(volume) then
+	if causes_margin(volume) then
 		if options.volume == 'left' then left = volume.bx / display.width
 		elseif options.volume == 'right' then right = volume.ax / display.width end
 	end
@@ -1041,7 +1049,7 @@ bind_command('show-in-directory', function()
 
 	if state.platform == 'windows' then
 		utils.subprocess_detached({args = {'explorer', '/select,', state.path}, cancellable = false})
-	elseif state.platform == 'macos' then
+	elseif state.platform == 'darwin' then
 		utils.subprocess_detached({args = {'open', '-R', state.path}, cancellable = false})
 	elseif state.platform == 'linux' then
 		local result = utils.subprocess({args = {'nautilus', state.path}, cancellable = false})
@@ -1203,10 +1211,14 @@ bind_command('audio-device', create_self_updating_menu_opener({
 		local items = {}
 		for _, device in ipairs(audio_device_list) do
 			if device.name == 'auto' or string.match(device.name, '^' .. ao) then
+				local title = device.description
+				if title == 'Autoselect device' then
+					title = lang._audio_device_submenu_item_title
+				end
 				local hint = string.match(device.name, ao .. '/(.+)')
 				if not hint then hint = device.name end
 				items[#items + 1] = {
-					title = device.description,
+					title = title,
 					hint = hint,
 					active = device.name == current_device,
 					value = device.name,
@@ -1226,7 +1238,7 @@ bind_command('open-config-directory', function()
 
 		if state.platform == 'windows' then
 			args = {'explorer', '/select,', config.path}
-		elseif state.platform == 'macos' then
+		elseif state.platform == 'darwin' then
 			args = {'open', '-R', config.path}
 		elseif state.platform == 'linux' then
 			args = {'xdg-open', config.dirname}
@@ -1324,9 +1336,24 @@ mp.register_script_message('set-min-visibility', function(visibility, elements)
 end)
 mp.register_script_message('flash-elements', function(elements) Elements:flash(split(elements, ' *, *')) end)
 mp.register_script_message('overwrite-binding', function(name, command) key_binding_overwrites[name] = command end)
+if options.idlescreen then
+	mp.register_script_message('osc-idlescreen', function(mode, no_osd)
+		if mode == 'cycle' then mode = state.idlescreen and 'no' or 'yes' end
+		set_state('idlescreen', mode == 'yes')
+		utils.shared_script_property_set('osc-idlescreen', mode)
+		mp.set_property_native('user-data/osc', { idlescreen = state.idlescreen })
+
+		if not no_osd and mp.get_property_number('osd-level', 1) >= 1 then
+			mp.osd_message('LOGO的可见性：' .. tostring(mode))
+		end
+	end)
+end
 
 --[[ ELEMENTS ]]
 
+if options.idlescreen then
+	require('elements/Logo'):new()
+end
 require('elements/WindowBorder'):new()
 require('elements/BufferingIndicator'):new()
 require('elements/PauseIndicator'):new()

@@ -87,7 +87,9 @@ local function utf8_to_unicode(str, i)
 		unicode = char_byte * (2 ^ 6) ^ (byte_count - 1)
 	end
 	for j = 2, byte_count do
-		char_byte = str:byte(i + j - 1) - 0x80
+		if i + j - 1 <= #str then -- 临时修复 https://github.com/tomasklaen/uosc/issues/515
+			char_byte = str:byte(i + j - 1) - 0x80
+		end
 		unicode = unicode + char_byte * (2 ^ 6) ^ (byte_count - j)
 	end
 	return round(unicode)

@@ -4,10 +4,6 @@
     "actions": 
     [
         {
-            "command": "find",
-            "keys": "ctrl+shift+f"
-        },
-        {
             "command": 
             {
                 "action": "resizePane",
@@ -16,13 +12,17 @@
             "keys": "ctrl+shift+left"
         },
         {
-            "command": "paste"
+            "command": "find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "command": "openSystemMenu"
         },
         {
             "command": "duplicateTab"
         },
         {
-            "command": "openSystemMenu"
+            "command": "paste"
         },
         {
             "command": 
@@ -501,7 +501,7 @@
         "list": 
         [
             {
-                "commandline": "C:/Program Files/PowerShell/7/pwsh.exe -nologo",
+                "commandline": "C:/Program Files/PowerShell/7/pwsh.exe -NoLogo",
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
                 "name": "PowerShell",

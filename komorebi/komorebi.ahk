@@ -174,6 +174,7 @@ RunWait, komorebic.exe float-rule exe "yasb.exe", , Hide
 RunWait, komorebic.exe manage-rule exe "QQ.exe", , Hide
 RunWait, komorebic.exe manage-rule exe "TE64.exe", , Hide
 RunWait, komorebic.exe manage-rule exe "WeChat.exe", , Hide
+RunWait, komorebic.exe manage-rule exe "wezterm-gui.exe", , Hide
 
 ; Identify applications that close to the tray
 ; RunWait, komorebic.exe identify-tray-application exe Discord.exe, , Hide
@@ -192,6 +193,7 @@ RunWait, komorebic.exe identify-border-overflow-application exe "Code.exe", , Hi
 RunWait, komorebic.exe identify-border-overflow-application exe "QQ.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "vivaldi.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "WeChat.exe", , Hide
+RunWait, komorebic.exe identify-border-overflow-application exe "wezterm-gui.exe", , Hide
 
 ; Office
 RunWait, komorebic.exe float-rule class "_WwB", , Hide

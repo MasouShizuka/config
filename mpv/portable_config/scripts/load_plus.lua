@@ -210,18 +210,18 @@ function find_and_add_entries()
 		if ext == nil then
 			return false
 		end
-	if opt.level == 1 then
-		local name = mp.get_property("filename")
-		local namepre = string.sub(name, 1, 6)
-		local namepre0 = string.gsub(namepre, "%p", "%%%1")
-		for ext, _ in pairs(EXTENSIONS) do
-			if string.match(name, ext.."$") ~= nil then
-				if string.match(v, "^"..namepre0) == nil then
-				return false
-				end
-			end
-		end
-	end
+        if opt.level == 1 then
+            local name = mp.get_property("filename")
+            local namepre = string.sub(name, 1, 6)
+            local namepre0 = string.gsub(namepre, "%p", "%%%1")
+            for ext, _ in pairs(EXTENSIONS) do
+                if string.match(name, ext.."$") ~= nil then
+                    if string.match(v, "^"..namepre0) == nil then
+                    return false
+                    end
+                end
+            end
+        end
 		return EXTENSIONS[string.lower(ext)]
 	end)
 	alphanumsort(files)

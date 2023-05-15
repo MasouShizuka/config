@@ -1,0 +1,215 @@
+# Configure the format of the prompt
+format = '$os$all$fill$battery$time$line_break$character'
+
+# Right prompt which renders on the same line as the input
+right_format = ''
+
+# Timeout for starship to scan files (in milliseconds)
+scan_timeout = 30
+
+# Timeout for commands executed by starship (in milliseconds)
+command_timeout = 1000
+
+# Inserts blank line between shell prompts
+add_newline = false
+
+# Sets which color palette from palettes to use.
+# palette = ''
+
+# Collection of color palettes that assign colors to user-defined names. Note that color palettes cannot reference their own color definitions
+# palettes = {}
+
+
+
+[battery]
+full_symbol = '  '
+charging_symbol = ' '
+discharging_symbol = '󰚦 '
+
+[[battery.display]]
+threshold = 20
+style = 'bold red'
+
+[[battery.display]]
+threshold = 50
+style = 'bold yellow'
+
+[[battery.display]]
+threshold = 100
+style = 'bold green'
+
+
+
+[character]
+success_symbol = '[➜](bold green) '
+error_symbol = '[✗](bold red) '
+
+
+
+[directory]
+truncation_length = 0
+read_only = " "
+use_os_path_sep = false
+
+
+
+[fill]
+symbol = ' '
+
+
+
+[os]
+style = 'blue'
+disabled = false
+
+
+
+[time]
+format = '󰥔 [$time]($style)'
+disabled = false
+
+
+
+[username]
+disabled = true
+
+
+
+# preset nerd-font-symbols
+
+[aws]
+symbol = "  "
+
+[buf]
+symbol = " "
+
+[c]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[dart]
+symbol = " "
+
+[docker_context]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[fossil_branch]
+symbol = " "
+
+[git_branch]
+symbol = " "
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[haxe]
+symbol = "⌘ "
+
+[hg_branch]
+symbol = " "
+
+[hostname]
+ssh_symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[memory_usage]
+symbol = " "
+
+[meson]
+symbol = "喝 "
+
+[nim]
+symbol = " "
+
+[nix_shell]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[os.symbols]
+Alpaquita = " "
+Alpine = " "
+Amazon = " "
+Android = " "
+Arch = " "
+Artix = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = "﯑ "
+Gentoo = " "
+HardenedBSD = "ﲊ "
+Illumos = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+OpenBSD = " "
+openSUSE = " "
+OracleLinux = " "
+Pop = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+Redox = " "
+Solus = "ﴱ "
+SUSE = " "
+Ubuntu = " "
+Unknown = " "
+Windows = " "
+
+[package]
+symbol = " "
+
+[pijul_channel]
+symbol = "🪺 "
+
+[python]
+symbol = " "
+
+[rlang]
+symbol = "ﳒ "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = " "
+
+[scala]
+symbol = " "
+
+[spack]
+symbol = "🅢 "

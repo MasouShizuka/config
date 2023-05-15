@@ -122,7 +122,7 @@
   "HideNotifyIcon": false,
   "LeaveCmdOpen": false,
   "HideWhenDeactivated": true,
-  "SearchWindowScreen": "Focus",
+  "SearchWindowScreen": "Cursor",
   "SearchWindowAlign": "Center",
   "CustomScreenNumber": 1,
   "IgnoreHotkeysOnFullscreen": false,
@@ -135,7 +135,7 @@
   },
   "LastQueryMode": "Selected",
   "PluginSettings": {
-    "PythonExecutablePath": "",
+    "PythonExecutablePath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "NodeExecutablePath": "",
     "PythonDirectory": "C:\\Users\\MasouShizuka\\miniconda3",
     "Plugins": {
@@ -342,6 +342,16 @@
         "Version": "2.2.3",
         "ActionKeywords": [
           "r"
+        ],
+        "Priority": 0,
+        "Disabled": false
+      },
+      "edf72277-8b2b-3377-8975-3ccf4820078f": {
+        "ID": "edf72277-8b2b-3377-8975-3ccf4820078f",
+        "Name": "Neovim Session Manager",
+        "Version": "1.0.0",
+        "ActionKeywords": [
+          "["
         ],
         "Priority": 0,
         "Disabled": false

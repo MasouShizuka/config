@@ -181,6 +181,7 @@
         "vim"
     ],
     "Lua.format.defaultConfig": {
+        "max_line_length": "10000",
         "trailing_table_separator": "smart"
     },
     "markdown.extension.list.indentationSize": "inherit",

@@ -94,4 +94,5 @@ Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 # Theme #
 #########
 
-oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/negligible.omp.json" | Invoke-Expression
+$ENV:STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml"
+Invoke-Expression (&starship init powershell)

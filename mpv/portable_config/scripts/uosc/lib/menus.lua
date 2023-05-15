@@ -106,7 +106,7 @@ function create_select_tracklist_type_menu_opener(menu_title, track_type, track_
 				end
 				if track['demux-fps'] then h(string.format('%.5gfps', track['demux-fps'])) end
 				h(track.codec)
-				if track['audio-channels'] then h(track['audio-channels'] .. ' channels') end
+				if track['audio-channels'] then h(track['audio-channels'] .. lang._submenu_id_hint) end
 				if track['demux-samplerate'] then h(string.format('%.3gkHz', track['demux-samplerate'] / 1000)) end
 				if track.forced then h(lang._submenu_id_forced) end
 				if track.default then h(lang._submenu_id_default) end
@@ -181,10 +181,10 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 
 	if is_root then
 		if state.platform == 'windows' then
-			items[#items + 1] = {title = '..', hint = lang._submenu_file_browser_title, value = '{drives}', separator = true}
+			items[#items + 1] = {title = '..', hint = lang._submenu_file_browser_item_hint, value = '{drives}', separator = true}
 		end
 	else
-		items[#items + 1] = {title = '..', hint = lang._submenu_file_browser_item_title, value = directory.dirname, separator = true}
+		items[#items + 1] = {title = '..', hint = lang._submenu_file_browser_item_hint2, value = directory.dirname, separator = true}
 	end
 
 	local back_path = items[#items] and items[#items].value
@@ -276,7 +276,7 @@ function open_drives_menu(handle_select, opts)
 			if drive then
 				local drive_path = normalize_path(drive)
 				items[#items + 1] = {
-					title = drive, hint = lang._submenu_file_browser_item2_title, value = drive_path, active = opts.active_path == drive_path,
+					title = drive, hint = lang._submenu_file_browser_item2_hint, value = drive_path, active = opts.active_path == drive_path,
 				}
 				if opts.selected_path == drive_path then selected_index = #items end
 			end
@@ -286,7 +286,7 @@ function open_drives_menu(handle_select, opts)
 	end
 
 	return Menu:open(
-		{type = opts.type, title = opts.title or lang._submenu_file_browser_item3_title, items = items, selected_index = selected_index},
+		{type = opts.type, title = opts.title or lang._submenu_file_browser_title, items = items, selected_index = selected_index},
 		handle_select
 	)
 end

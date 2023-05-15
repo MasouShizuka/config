@@ -1,31 +1,22 @@
-local variables = require("variables")
+local variables = require("config.variables")
 
 return {
     {
         "amrbashir/nvim-docs-view",
-        cmd = { "DocsViewToggle", "DocsViewUpdate" },
-        cond = not variables.is_vscode,
+        cmd = {
+            "DocsViewToggle",
+            "DocsViewUpdate",
+        },
         dependencies = {
             "neovim/nvim-lspconfig",
         },
-        keys = {
-            {
-                variables.alacritty_keymap["<C-4>"],
-                function()
-                    vim.api.nvim_command("DocsViewToggle")
-                end,
-                mode = "n",
-            },
-        },
+        enabled = not variables.is_vscode,
+        lazy = true,
         opts = {
             position = "right",
             -- 修改过源码
-            height = function()
-                return math.floor((vim.o.lines - vim.o.cmdheight) * 0.8)
-            end,
-            width = function()
-                return math.floor(vim.o.columns * 0.2)
-            end,
+            height = function() return math.floor((vim.o.lines - vim.o.cmdheight) * 0.8) end,
+            width = function() return math.floor(vim.o.columns * 0.2) end,
             update_mode = "auto",
         },
     },
@@ -38,7 +29,6 @@ return {
             "Glance type_definitions",
             "Glance implementations",
         },
-        cond = not variables.is_vscode,
         config = function(_, opts)
             local glance = require("glance")
             local actions = glance.actions
@@ -52,39 +42,39 @@ return {
                     list = {
                         ["j"] = actions.next,     -- Bring the cursor to the next item in the list
                         ["k"] = actions.previous, -- Bring the cursor to the previous item in the list
-                        ["<Down>"] = actions.next,
-                        ["<Up>"] = actions.previous,
-                        ["<Tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
-                        ["<S-Tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
-                        ["<C-u>"] = actions.preview_scroll_win(5),
-                        ["<C-d>"] = actions.preview_scroll_win(-5),
+                        ["<down>"] = actions.next,
+                        ["<up>"] = actions.previous,
+                        ["<tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
+                        ["<s-tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
+                        ["<c-u>"] = actions.preview_scroll_win(5),
+                        ["<c-d>"] = actions.preview_scroll_win(-5),
                         -- ["v"] = actions.jump_vsplit,
                         -- ["s"] = actions.jump_split,
                         ["v"] = false,
                         ["s"] = actions.jump_vsplit,
                         ["S"] = actions.jump_split,
                         ["t"] = actions.jump_tab,
-                        ["<CR>"] = actions.jump,
+                        ["<cr>"] = actions.jump,
                         ["o"] = actions.jump,
                         ["l"] = actions.jump,
                         -- ["<leader>l"] = actions.enter_win("preview"), -- Focus preview window
                         ["<leader>l"] = false,
-                        ["<C-j>"] = actions.enter_win("preview"),
+                        ["<c-j>"] = actions.enter_win("preview"),
                         ["q"] = actions.close,
                         ["Q"] = actions.close,
-                        ["<Esc>"] = actions.close,
-                        ["<C-q>"] = actions.quickfix,
-                        -- ["<Esc>"] = false -- disable a mapping
+                        ["<esc>"] = actions.close,
+                        ["<c-q>"] = actions.quickfix,
+                        -- ["<esc>"] = false -- disable a mapping
                     },
                     preview = {
                         ["Q"] = actions.close,
-                        ["<Tab>"] = actions.next_location,
-                        ["<S-Tab>"] = actions.previous_location,
-                        ["<F4>"] = actions.next_location,
-                        ["<S-F4>"] = actions.previous_location,
+                        ["<tab>"] = actions.next_location,
+                        ["<s-tab>"] = actions.previous_location,
+                        ["<f4>"] = actions.next_location,
+                        ["<s-f4>"] = actions.previous_location,
                         -- ["<leader>l"] = actions.enter_win("list"), -- Focus list window
                         ["<leader>l"] = false,
-                        ["<C-j>"] = actions.enter_win("list"),
+                        ["<c-j>"] = actions.enter_win("list"),
                     },
                 },
                 hooks = {
@@ -102,29 +92,21 @@ return {
                     folded = false, -- Automatically fold list on startup
                 },
             })
-
-            vim.keymap.set("n", "gd", function()
-                vim.api.nvim_command("Glance definitions")
-            end, { silent = true })
-            vim.keymap.set("n", "ge", function()
-                vim.api.nvim_command("Glance references")
-            end, { silent = true })
-            vim.keymap.set("n", "gi", function()
-                vim.api.nvim_command("Glance implementations")
-            end, { silent = true })
-            vim.keymap.set("n", "gy", function()
-                vim.api.nvim_command("Glance type_definitions")
-            end, { silent = true })
         end,
         dependencies = {
             "neovim/nvim-lspconfig",
         },
-        event = { "BufReadPre", "BufNewFile" },
+        enabled = not variables.is_vscode,
+        keys = {
+            { "gd", function() vim.api.nvim_command("Glance definitions") end,      desc = "Glance definitions",      mode = "n" },
+            { "ge", function() vim.api.nvim_command("Glance references") end,       desc = "Glance references",       mode = "n" },
+            { "gi", function() vim.api.nvim_command("Glance implementations") end,  desc = "Glance implementations",  mode = "n" },
+            { "gy", function() vim.api.nvim_command("Glance type_definitions") end, desc = "Glance type_definitions", mode = "n" },
+        },
     },
 
     {
         "folke/trouble.nvim",
-        cond = not variables.is_vscode,
         cmd = {
             "Trouble",
             "TroubleClose",
@@ -135,60 +117,44 @@ return {
             "neovim/nvim-lspconfig",
             "nvim-tree/nvim-web-devicons",
         },
+        enabled = not variables.is_vscode,
+        init = function()
+            local ok, wk = pcall(require, "which-key")
+            if ok then
+                wk.register({
+                    mode = "n",
+                    ["<leader>x"] = {
+                        name = "+trouble",
+                    },
+                })
+            end
+        end,
         keys = {
+            { "<leader>xx", function() vim.api.nvim_command("TroubleToggle") end,                       desc = "Trouble",               mode = "n" },
+            { "<leader>xw", function() vim.api.nvim_command("TroubleToggle workspace_diagnostics") end, desc = "Workspace diagnostics", mode = "n" },
+            { "<leader>xd", function() vim.api.nvim_command("TroubleToggle document_diagnostics") end,  desc = "Document diagnostics",  mode = "n" },
+            { "<leader>xl", function() vim.api.nvim_command("TroubleToggle loclist") end,               desc = "Loclist",               mode = "n" },
+            { "<leader>xq", function() vim.api.nvim_command("TroubleToggle quickfix") end,              desc = "Quickfix",              mode = "n" },
             {
-                "<leader>xx",
-                function()
-                    vim.api.nvim_command("TroubleToggle")
-                end,
-                mode = "n",
-            },
-            {
-                "<leader>xw",
-                function()
-                    vim.api.nvim_command("TroubleToggle workspace_diagnostics")
-                end,
-                mode = "n",
-            },
-            {
-                "<leader>xd",
-                function()
-                    vim.api.nvim_command("TroubleToggle document_diagnostics")
-                end,
-                mode = "n",
-            },
-            {
-                "<leader>xl",
-                function()
-                    vim.api.nvim_command("TroubleToggle loclist")
-                end,
-                mode = "n",
-            },
-            {
-                "<leader>xq",
-                function()
-                    vim.api.nvim_command("TroubleToggle quickfix")
-                end,
-                mode = "n",
-            },
-            {
-                "<F8>",
+                "<f8>",
                 function(...)
                     if not require("trouble").is_open() then
                         require("trouble").open(...)
                     end
                     require("trouble").next({ skip_groups = true, jump = true })
                 end,
+                desc = "Next",
                 mode = "n",
             },
             {
-                "<S-F8>",
+                "<s-f8>",
                 function(...)
                     if not require("trouble").is_open() then
                         require("trouble").open(...)
                     end
                     require("trouble").previous({ skip_groups = true, jump = true })
                 end,
+                desc = "Previous",
                 mode = "n",
             },
         },
@@ -225,11 +191,13 @@ return {
 
     {
         "jose-elias-alvarez/null-ls.nvim",
-        cond = not variables.is_vscode,
         dependencies = {
             {
                 "jay-babu/mason-null-ls.nvim",
-                cmd = { "NullLsInstall", "NullLsUninstall" },
+                cmd = {
+                    "NullLsInstall",
+                    "NullLsUninstall",
+                },
                 config = function(_, opts)
                     local handlers = {
                         function()
@@ -252,7 +220,11 @@ return {
             },
             "nvim-lua/plenary.nvim",
         },
-        event = { "BufReadPre", "BufNewFile" },
+        enabled = not variables.is_vscode,
+        event = {
+            "BufReadPost",
+            "BufNewFile",
+        },
         opts = function()
             -- local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
             require("null-ls").setup({
@@ -274,11 +246,14 @@ return {
 
     {
         "kosayoda/nvim-lightbulb",
-        cond = not variables.is_vscode,
         dependencies = {
             "neovim/nvim-lspconfig",
         },
-        event = { "BufReadPre", "BufNewFile" },
+        enabled = not variables.is_vscode,
+        event = {
+            "BufReadPost",
+            "BufNewFile",
+        },
         opts = {
             autocmd = {
                 enabled = true,
@@ -288,7 +263,6 @@ return {
 
     {
         "neovim/nvim-lspconfig",
-        cond = not variables.is_vscode,
         config = function(_, opts)
             local icons = variables.icons.diagnostics
             for type, icon in pairs(icons) do
@@ -304,6 +278,8 @@ return {
                 return orig_util_open_floating_preview(contents, syntax, opts, ...)
             end
 
+            vim.lsp.set_log_level("OFF")
+
             local format = function()
                 local bufnr = vim.api.nvim_get_current_buf()
                 vim.lsp.buf.format({
@@ -318,8 +294,8 @@ return {
             -- Global mappings.
             -- See `:help vim.diagnostic.*` for documentation on any of the below functions
             -- vim.keymap.set("n", "<space>e", vim.diagnostic.open_float)
-            -- vim.keymap.set("n", "<F8>", vim.diagnostic.goto_prev)
-            -- vim.keymap.set("n", "<S-F8>", vim.diagnostic.goto_next)
+            -- vim.keymap.set("n", "<s-f8>", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic", silent = true })
+            -- vim.keymap.set("n", "<f8>", vim.diagnostic.goto_next, { desc = "Go to next diagnostic", silent = true }))
             -- vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist)
 
             -- Use LspAttach autocommand to only map the following keys
@@ -332,22 +308,23 @@ return {
 
                     -- Buffer local mappings.
                     -- See `:help vim.lsp.*` for documentation on any of the below functions
-                    local opts = { buffer = ev.buf, silent = true }
-                    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-                    -- vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-                    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-                    -- vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-                    vim.keymap.set("n", "gS", vim.lsp.buf.signature_help, opts)
+                    -- local opts = { buffer = ev.buf, silent = true }
+                    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration", silent = true })
+                    -- vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = ev.buf, desc = "Go to definition", silent = true })
+                    -- 由 nvim-ufo 设置
+                    -- vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover", silent = true })
+                    -- vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = ev.buf, desc = "Go to implementation", silent = true })
+                    vim.keymap.set("n", "gS", vim.lsp.buf.signature_help, { buffer = ev.buf, desc = "Signature help", silent = true })
                     -- vim.keymap.set("n", "<space>wa", vim.lsp.buf.add_workspace_folder, opts)
                     -- vim.keymap.set("n", "<space>wr", vim.lsp.buf.remove_workspace_folder, opts)
                     -- vim.keymap.set("n", "<space>wl", function()
                     --     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
                     -- end, opts)
-                    -- vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, opts)
-                    vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
-                    -- vim.keymap.set({ "n", "x" }, variables.alacritty_keymap["<C-;>"], vim.lsp.buf.code_action, opts)
-                    -- vim.keymap.set("n", "ge", vim.lsp.buf.references, opts)
-                    vim.keymap.set({ "n", "x" }, "<Leader>f", format, opts)
+                    -- vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, { buffer = ev.buf, desc = "Go to type definition", silent = true })
+                    vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename", silent = true })
+                    -- vim.keymap.set({ "n", "x" }, variables.alacritty_keymap["<c-;>"], vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code action", silent = true })
+                    -- vim.keymap.set("n", "ge", vim.lsp.buf.references, { buffer = ev.buf, desc = "Go to references", silent = true })
+                    vim.keymap.set({ "n", "x" }, "<leader>f", format, { buffer = ev.buf, desc = "Format", silent = true })
                 end,
             })
         end,
@@ -355,17 +332,28 @@ return {
             {
                 "folke/neodev.nvim",
                 cond = function()
-                    if vim.fn.getcwd() == variables.config_path then
-                        return true
-                    else
+                    if variables.is_vscode then
                         return false
                     end
+
+                    local cwd = vim.fn.getcwd()
+                    if variables.is_windows then
+                        cwd = string.gsub(cwd, "\\", "/")
+                    end
+                    if cwd == variables.config_path then
+                        return true
+                    end
+
+                    return false
                 end,
                 opts = {},
             },
             {
                 "williamboman/mason-lspconfig.nvim",
-                cmd = { "LspInstall", "LspUninstall" },
+                cmd = {
+                    "LspInstall",
+                    "LspUninstall",
+                },
                 config = function(_, opts)
                     local default_config = {
                         capabilities = require("cmp_nvim_lsp").default_capabilities(),
@@ -405,43 +393,96 @@ return {
                 },
             },
         },
-        event = { "BufReadPre", "BufNewFile" },
-    },
-
-    {
-        "utilyre/barbecue.nvim",
-        cond = not variables.is_vscode,
-        dependencies = {
-            "neovim/nvim-lspconfig",
-            "nvim-tree/nvim-web-devicons",
-            "SmiteshP/nvim-navic",
+        enabled = not variables.is_vscode,
+        event = {
+            "BufReadPost",
+            "BufNewFile",
         },
-        event = { "BufReadPre", "BufNewFile" },
-        name = "barbecue",
-        opts = {
-            attach_navic = false,
-        },
-        version = "*",
     },
 
     {
         "weilbith/nvim-code-action-menu",
-        cmd = { "CodeActionMenu" },
-        cond = not variables.is_vscode,
+        cmd = {
+            "CodeActionMenu",
+        },
         dependencies = {
             "neovim/nvim-lspconfig",
         },
+        enabled = not variables.is_vscode,
         keys = {
-            {
-                variables.alacritty_keymap["<C-;>"],
-                function()
-                    vim.api.nvim_command("CodeActionMenu")
-                end,
-                mode = { "n", "x" },
-            },
+            { variables.keymap["<c-;>"], function() vim.api.nvim_command("CodeActionMenu") end, desc = "Code action menu", mode = { "n", "x" } },
         },
         init = function()
             vim.g.code_action_menu_window_border = "rounded"
         end,
+    },
+
+    {
+        "williamboman/mason.nvim",
+        build = function()
+            vim.api.nvim_command("MasonUpdate")
+
+            -- 更新所有已经安装的 mason package
+            local registry_avail, registry = pcall(require, "mason-registry")
+            if not registry_avail then
+                vim.api.nvim_err_writeln("Unable to access mason registry")
+                return
+            end
+            vim.notify("Mason: Checking for package updates...")
+            registry.update(vim.schedule_wrap(function(success, updated_registries)
+                if success then
+                    local installed_pkgs = registry.get_installed_packages()
+                    local running = #installed_pkgs
+                    local no_pkgs = running == 0
+
+                    if no_pkgs then
+                        vim.notify("Mason: No updates available")
+                    else
+                        local updated = false
+                        for _, pkg in ipairs(installed_pkgs) do
+                            pkg:check_new_version(function(update_available, version)
+                                if update_available then
+                                    updated = true
+                                    vim.notify(("Mason: Updating %s to %s"):format(pkg.name, version.latest_version))
+                                    pkg:install():on("closed", function()
+                                        running = running - 1
+                                        if running == 0 then
+                                            vim.notify("Mason: Update Complete")
+                                        end
+                                    end)
+                                else
+                                    running = running - 1
+                                    if running == 0 then
+                                        if updated then
+                                            vim.notify("Mason: Update Complete")
+                                        else
+                                            vim.notify("Mason: No updates available")
+                                        end
+                                    end
+                                end
+                            end)
+                        end
+                    end
+                else
+                    vim.notify(("Failed to update registries: %s"):format(updated_registries), vim.log.levels.ERROR)
+                end
+            end))
+        end,
+        cmd = {
+            "Mason",
+            "MasonUpdate",
+            "MasonInstall",
+            "MasonUninstall",
+            "MasonUninstallAll",
+            "MasonLog",
+        },
+        enabled = not variables.is_vscode,
+        opts = {
+            install_root_dir = variables.mason_install_root_path,
+            log_level = vim.log.levels.OFF,
+            ui = {
+                border = "rounded",
+            },
+        },
     },
 }
