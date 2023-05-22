@@ -5,13 +5,15 @@ return {
         "hrsh7th/nvim-cmp",
         config = function()
             local cmp = require("cmp")
+            local luasnip = require("luasnip")
 
             cmp.setup({
+                preselect = cmp.PreselectMode.None,
                 mapping = cmp.mapping.preset.insert({
-                    ["<c-j>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "c" }),
-                    ["<c-k>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "c" }),
-                    ["<down>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "c" }),
-                    ["<up>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "c" }),
+                    ["<c-j>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }), { "i", "c" }),
+                    ["<c-k>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }), { "i", "c" }),
+                    ["<down>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }), { "i", "c" }),
+                    ["<up>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), { "i", "c" }),
                     ["<c-d>"] = cmp.mapping.scroll_docs(4),
                     ["<c-u>"] = cmp.mapping.scroll_docs(-4),
                     [variables.keymap["<c-space>"]] = cmp.mapping(function(fallback)
@@ -21,23 +23,21 @@ return {
                             cmp.complete()
                         end
                     end),
-                    ["<cr>"] = cmp.mapping.confirm({ select = true }),
+                    ["<cr>"] = cmp.mapping.confirm({ select = false }),
                     ["<tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
                             cmp.confirm({ select = true })
-                        elseif vim.fn["vsnip#available"](1) == 1 then
-                            local keys = vim.api.nvim_replace_termcodes("<plug>(vsnip-expand-or-jump)", true, false, true)
-                            vim.api.nvim_feedkeys(keys, "n", false)
+                        elseif luasnip.expand_or_jumpable() then
+                            luasnip.expand_or_jump()
                         else
                             fallback()
                         end
                     end, { "i", "s" }),
                     ["<s-tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
-                            cmp.confirm({ select = true })
-                        elseif vim.fn["vsnip#jumpable"](-1) == 1 then
-                            local keys = vim.api.nvim_replace_termcodes("<plug>(vsnip-jump-prev)", true, false, true)
-                            vim.api.nvim_feedkeys(keys, "n", false)
+                            cmp.select_prev_item()
+                        elseif luasnip.jumpable(-1) then
+                            luasnip.jump(-1)
                         else
                             fallback()
                         end
@@ -45,7 +45,7 @@ return {
                 }),
                 snippet = {
                     expand = function(args)
-                        vim.fn["vsnip#anonymous"](args.body)
+                        luasnip.lsp_expand(args.body)
                     end,
                 },
                 formatting = {
@@ -60,9 +60,10 @@ return {
                 sources = cmp.config.sources({
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
-                    { name = "vsnip" },
-                    { name = "path" },
+                    { name = "luasnip" },
+                    { name = "luasnip_choice" },
                     { name = "buffer" },
+                    { name = "path" },
                 }),
                 window = {
                     completion = cmp.config.window.bordered(),
@@ -78,19 +79,21 @@ return {
 
             cmp.setup.cmdline(":", {
                 mapping = cmp.mapping.preset.cmdline(),
-                sources = cmp.config.sources({
-                    {
-                        name = "cmdline",
-                        option = {
-                            ignore_cmds = { "Man", "!" },
+                sources = cmp.config.sources(
+                    { { name = "path" } }, {
+                        {
+                            name = "cmdline",
+                            option = {
+                                ignore_cmds = { "Man", "!" },
+                            },
                         },
-                    },
-                }, { { name = "path" } }),
+                    }),
             })
 
             require("cmp").setup.filetype(variables.tex_filetype, {
                 sources = cmp.config.sources({
-                    { name = "vsnip" },
+                    { name = "luasnip" },
+                    { name = "luasnip_choice" },
                     {
                         name = "latex_symbols",
                         option = {
@@ -99,8 +102,8 @@ return {
                     },
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
-                    { name = "path" },
                     { name = "buffer" },
+                    { name = "path" },
                 }),
             })
         end,
@@ -110,15 +113,19 @@ return {
             "hrsh7th/cmp-nvim-lsp",
             "hrsh7th/cmp-nvim-lsp-signature-help",
             "hrsh7th/cmp-path",
-            "hrsh7th/cmp-vsnip",
-            {
-                "hrsh7th/vim-vsnip",
-                init = function()
-                    vim.g.vsnip_snippet_dir = variables.vscode_snippet_path
-                end,
-            },
             "kdheepak/cmp-latex-symbols",
-            "rafamadriz/friendly-snippets",
+            {
+                "saadparwaiz1/cmp_luasnip",
+                dependencies = {
+                    {
+                        "L3MON4D3/cmp-luasnip-choice",
+                        opts = {
+                            auto_open = true,
+                        },
+                    },
+                    "L3MON4D3/LuaSnip",
+                },
+            },
         },
         enabled = not variables.is_vscode,
         event = {
@@ -126,5 +133,23 @@ return {
             "InsertEnter",
         },
         version = false,
+    },
+
+    {
+        "L3MON4D3/LuaSnip",
+        config = function(_, opts)
+            require("luasnip").setup(opts)
+            require("luasnip.loaders.from_vscode").lazy_load()
+            require("luasnip.loaders.from_vscode").lazy_load({
+                paths = { variables.vscode_snippet_path },
+            })
+        end,
+        dependencies = {
+            "rafamadriz/friendly-snippets",
+        },
+        lazy = false,
+        opts = {
+            enable_autosnippets = true,
+        },
     },
 }

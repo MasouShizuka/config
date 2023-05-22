@@ -393,7 +393,7 @@ widgets:
         critical: 10
         low: 25
         medium: 75
-        high: 95
+        high: 90
         full: 100
       status_icons:
         icon_charging: "\uf0e7"
@@ -435,7 +435,7 @@ widgets:
   cpu:
     type: "yasb.cpu.CpuWidget"
     options:
-      label: "\uf200 {info[percent][total]}%"
+      label: "\uf4bc {info[percent][total]}%"
       label_alt: "\uf200 {info[histograms][cpu_percent]} | freq: {info[freq][current]:.2f} Mhz"
       update_interval: 1000
       histogram_icons:
@@ -457,8 +457,8 @@ widgets:
   memory:
     type: "yasb.memory.MemoryWidget"
     options:
-      label: "\uf538 {virtual_mem_percent}%"
-      label_alt: "\uf538 {virtual_mem_free}"
+      label: "\uf200 {virtual_mem_percent}%"
+      label_alt: "\uf200 {virtual_mem_free}"
       update_interval: 5000
       memory_thresholds:
         low: 25

@@ -193,7 +193,6 @@ RunWait, komorebic.exe identify-border-overflow-application exe "Code.exe", , Hi
 RunWait, komorebic.exe identify-border-overflow-application exe "QQ.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "vivaldi.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "WeChat.exe", , Hide
-RunWait, komorebic.exe identify-border-overflow-application exe "wezterm-gui.exe", , Hide
 
 ; Office
 RunWait, komorebic.exe float-rule class "_WwB", , Hide

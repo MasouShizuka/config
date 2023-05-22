@@ -85,16 +85,22 @@ return {
 
                 -- Navigation
                 map("n", "<c-n>", function()
-                    if vim.wo.diff then return "]c" end
+                    if vim.wo.diff then
+                        vim.cmd.normal("]c")
+                        vim.cmd.normal("zz")
+                        return
+                    end
                     vim.schedule(function() gs.next_hunk() end)
-                    return "<ignore>"
-                end, { desc = "Navigation next", expr = true })
+                end, { desc = "Navigation next", silent = true })
 
                 map("n", variables.keymap["<c-s-n>"], function()
-                    if vim.wo.diff then return "[c" end
+                    if vim.wo.diff then
+                        vim.cmd.normal("[c")
+                        vim.cmd.normal("zz")
+                        return
+                    end
                     vim.schedule(function() gs.prev_hunk() end)
-                    return "<ignore>"
-                end, { desc = "Navigation previous", expr = true })
+                end, { desc = "Navigation previous", silent = true })
 
                 -- Actions
                 map("n", "<leader>gs", gs.stage_hunk, { desc = "Stage hunk", silent = true })

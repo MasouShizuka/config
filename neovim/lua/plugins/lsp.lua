@@ -11,7 +11,6 @@ return {
             "neovim/nvim-lspconfig",
         },
         enabled = not variables.is_vscode,
-        lazy = true,
         opts = {
             position = "right",
             -- 修改过源码

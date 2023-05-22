@@ -64,18 +64,18 @@ config.initial_rows = 30
 
 config.keys = {
     -- 间接映射，以便 neovim 能够接收原本不接收的 keymap
-    { key = "1",          mods = "CTRL",           action = act.SendKey { key = "F1", mods = "CTRL" } },
-    { key = "2",          mods = "CTRL",           action = act.SendKey { key = "F2", mods = "CTRL" } },
-    { key = "3",          mods = "CTRL",           action = act.SendKey { key = "F3", mods = "CTRL" } },
-    { key = "4",          mods = "CTRL",           action = act.SendKey { key = "F4", mods = "CTRL" } },
-    { key = "Space",      mods = "CTRL",           action = act.SendKey { key = "F5", mods = "CTRL" } },
-    { key = "Comma",      mods = "CTRL",           action = act.SendKey { key = "F6", mods = "CTRL" } },
-    { key = "Period",     mods = "CTRL",           action = act.SendKey { key = "F7", mods = "CTRL" } },
-    { key = "Semicolon",  mods = "CTRL",           action = act.SendKey { key = "F8", mods = "CTRL" } },
-    { key = "n",          mods = "CTRL|SHIFT",     action = act.SendKey { key = "F9", mods = "CTRL" } },
-    { key = "t",          mods = "CTRL|SHIFT",     action = act.SendKey { key = "F10", mods = "CTRL" } },
+    { key = "1",          mods = "CTRL",           action = act.SendKey({ key = "F1", mods = "CTRL" }) },
+    { key = "2",          mods = "CTRL",           action = act.SendKey({ key = "F2", mods = "CTRL" }) },
+    { key = "3",          mods = "CTRL",           action = act.SendKey({ key = "F3", mods = "CTRL" }) },
+    { key = "4",          mods = "CTRL",           action = act.SendKey({ key = "F4", mods = "CTRL" }) },
+    { key = "Space",      mods = "CTRL",           action = act.SendKey({ key = "F5", mods = "CTRL" }) },
+    { key = "Comma",      mods = "CTRL",           action = act.SendKey({ key = "F6", mods = "CTRL" }) },
+    { key = "Period",     mods = "CTRL",           action = act.SendKey({ key = "F7", mods = "CTRL" }) },
+    { key = "Semicolon",  mods = "CTRL",           action = act.SendKey({ key = "F8", mods = "CTRL" }) },
+    { key = "n",          mods = "CTRL|SHIFT",     action = act.SendKey({ key = "F9", mods = "CTRL" }) },
+    { key = "t",          mods = "CTRL|SHIFT",     action = act.SendKey({ key = "F10", mods = "CTRL" }) },
 
-    -- { key = "s",          mods = "CTRL|SHIFT",     action = act.ShowLauncher },
+    { key = "Grave",      mods = "CTRL|SHIFT",     action = act.ShowLauncher },
     { key = "phys:1",     mods = "CTRL|SHIFT",     action = act.SpawnCommandInNewTab(zsh) },
     { key = "phys:2",     mods = "CTRL|SHIFT",     action = act.SpawnCommandInNewTab(powershell) },
     { key = "phys:3",     mods = "CTRL|SHIFT",     action = act.SpawnCommandInNewTab(arch) },
@@ -89,10 +89,10 @@ config.keys = {
     -- { key = "!",          mods = "SHIFT|CTRL",     action = act.ActivateTab(0) },
     -- { key = "\"",         mods = "ALT|CTRL",       action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
     -- { key = "\"",         mods = "SHIFT|ALT|CTRL", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-    { key = "h",          mods = "LEADER",         action = wezterm.action.SplitPane { direction = "Left" } },
-    { key = "l",          mods = "LEADER",         action = wezterm.action.SplitPane { direction = "Right" } },
-    { key = "j",          mods = "LEADER",         action = wezterm.action.SplitPane { direction = "Down" } },
-    { key = "k",          mods = "LEADER",         action = wezterm.action.SplitPane { direction = "Up" } },
+    { key = "h",          mods = "LEADER",         action = act.SplitPane({ direction = "Left" }) },
+    { key = "l",          mods = "LEADER",         action = act.SplitPane({ direction = "Right" }) },
+    { key = "j",          mods = "LEADER",         action = act.SplitPane({ direction = "Down" }) },
+    { key = "k",          mods = "LEADER",         action = act.SplitPane({ direction = "Up" }) },
     -- { key = "#",          mods = "CTRL",           action = act.ActivateTab(2) },
     -- { key = "#",          mods = "SHIFT|CTRL",     action = act.ActivateTab(2) },
     -- { key = "$",          mods = "CTRL",           action = act.ActivateTab(3) },
@@ -290,7 +290,7 @@ config.key_tables = {
         { key = "v",          mods = "NONE",  action = act.CopyMode({ SetSelectionMode = "Cell" }) },
         { key = "v",          mods = "CTRL",  action = act.CopyMode({ SetSelectionMode = "Block" }) },
         { key = "w",          mods = "NONE",  action = act.CopyMode("MoveForwardWord") },
-        { key = "y",          mods = "NONE",  action = act.Multiple { { CopyTo = "ClipboardAndPrimarySelection" }, { CopyMode = "Close" } } },
+        { key = "y",          mods = "NONE",  action = act.Multiple({ { CopyTo = "ClipboardAndPrimarySelection" }, { CopyMode = "Close" } }) },
         { key = "PageUp",     mods = "NONE",  action = act.CopyMode("PageUp") },
         { key = "PageDown",   mods = "NONE",  action = act.CopyMode("PageDown") },
         { key = "End",        mods = "NONE",  action = act.CopyMode("MoveToEndOfLineContent") },
@@ -323,6 +323,10 @@ config.leader = { key = "phys:s", mods = "CTRL|SHIFT", timeout_milliseconds = 10
 
 config.max_fps = 60
 
+config.tab_max_width = 100
+
+config.use_fancy_tab_bar = false
+
 config.warn_about_missing_glyphs = false
 
 config.win32_system_backdrop = "Acrylic"
@@ -337,5 +341,95 @@ config.window_frame = {
     font = wezterm.font("Sarasa Mono SC Nerd Font", { weight = "Bold" }),
     font_size = 14.0,
 }
+
+config.window_padding = {
+    left = 2,
+    right = 2,
+    top = 6,
+    bottom = 0,
+}
+
+function tab_title(tab_info, options)
+    -- if the tab title is explicitly set, take that
+    -- Otherwise, use the title from the active pane
+    -- in that tab
+    local title = tab_info.tab_title
+    if not (title and #title > 0) then
+        title = tab_info.active_pane.title
+    end
+
+    title = string.gsub(title, "\\", "/")
+
+    if options["only_exe"] then
+        local index = string.match(title, ".*()/")
+        if index then
+            title = string.sub(title, index + 1, #title)
+        end
+    end
+
+    if options["remove_ext"] then
+        local index = string.match(title, ".*()%.")
+        if index then
+            title = string.sub(title, 1, index - 1)
+        end
+    end
+
+    if options["add_index"] then
+        title = tostring(tab_info.tab_index + 1) .. "." .. title
+    end
+
+    return title
+end
+
+wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
+    local title = tab_title(tab, {
+        only_exe = true,
+        remove_ext = true,
+        add_index = true,
+    })
+
+    -- ensure that the titles fit in the available space,
+    -- and that we have room for the edges.
+    local left = "  "
+    local right = "  "
+    title = wezterm.truncate_right(title, max_width - (#left + #right))
+
+    return {
+        { Text = left },
+        { Text = title },
+        { Text = right },
+    }
+end)
+
+wezterm.on("format-window-title", function(tab, pane, tabs, panes, config)
+    local zoomed = ""
+    if tab.active_pane.is_zoomed then
+        zoomed = "[Z] "
+    end
+
+    local index = ""
+    if #tabs > 1 then
+        index = string.format("[%d/%d] ", tab.tab_index + 1, #tabs)
+    end
+
+    local title = tab_title(tab, {
+        only_exe = true,
+        remove_ext = true,
+        add_index = false,
+    })
+
+    return zoomed .. index .. title
+end)
+
+
+-- rime 输入法只能在 config.window_decorations = "NONE" 的情况下正常运行
+-- 启动时切换到 "RESIZE"，使 rime 能够在 "RESIZE" 下正常运行
+wezterm.on("gui-startup", function(cmd)
+    local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
+    local gui_window = window:gui_window()
+    local overrides = gui_window:get_config_overrides() or {}
+    overrides.window_decorations = "RESIZE"
+    gui_window:set_config_overrides(overrides)
+end)
 
 return config

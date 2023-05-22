@@ -6,9 +6,6 @@ return {
         cmd = {
             "PasteImg",
         },
-        config = function(_, opts)
-            require("clipboard-image").setup(opts)
-        end,
         enabled = not variables.is_vscode,
         keys = {
             { "<leader>p", function() vim.api.nvim_command("PasteImg") end, desc = "Paste img", mode = "n" },
@@ -42,30 +39,103 @@ return {
     },
 
     {
-        "gaoDean/autolist.nvim",
-        config = function(_, opts)
-            local autolist = require("autolist")
-            autolist.setup()
-            -- autolist.create_mapping_hook("i", "<cr>", autolist.new)
-            autolist.create_mapping_hook("i", "<tab>", autolist.indent)
-            autolist.create_mapping_hook("i", "<s-tab>", autolist.indent, "<c-D>")
-            autolist.create_mapping_hook("n", "o", autolist.new)
-            autolist.create_mapping_hook("n", "O", autolist.new_before)
-            autolist.create_mapping_hook("n", ">>", autolist.indent)
-            autolist.create_mapping_hook("n", "<<", autolist.indent)
-            -- autolist.create_mapping_hook("n", "<c-r>", autolist.force_recalculate)
-            -- autolist.create_mapping_hook("n", "<leader>x", autolist.invert_entry, "")
-        end,
-        enabled = not variables.is_vscode,
-        ft = variables.tex_filetype,
-    },
-
-    {
         "iamcco/markdown-preview.nvim",
         build = function()
             vim.fn["mkdp#util#install"]()
         end,
+        cmd = {
+            "MarkdownPreview",
+            "MarkdownPreviewStop",
+            "MarkdownPreviewToggle",
+        },
         enabled = not variables.is_vscode,
         ft = "markdown",
+    },
+
+    {
+        "jakewvincent/mkdnflow.nvim",
+        enabled = not variables.is_vscode,
+        ft = "markdown",
+        -- keys = {
+        --     { variables.keymap["<c-space>"], function() vim.api.nvim_command("MkdnToggleToDo") end,             desc = "Toggle todo",                mode = { "n", "x" } },
+        --     { "<cr>",                        function() vim.api.nvim_command("MkdnNewListItem") end,            desc = "New list item",              mode = "i" },
+        --     { "o",                           function() vim.api.nvim_command("MkdnNewListItemBelowInsert") end, desc = "New list item below insert", mode = "n" },
+        --     { "O",                           function() vim.api.nvim_command("MkdnNewListItemAboveInsert") end, desc = "New list item above insert", mode = "n" },
+        --     { "<tab>",                       function() vim.api.nvim_command("MkdnTableNextCell") end,          desc = "Table next cell",            mode = { "n", "i" } },
+        --     { "<s-tab>",                     function() vim.api.nvim_command("MkdnTablePrevCell") end,          desc = "Table previous cell",        mode = { "n", "i" } },
+        --     { "<s-down>",                    function() vim.api.nvim_command("MkdnTableNewRowBelow") end,       desc = "Table new row below",        mode = { "n", "i" } },
+        --     { "<s-up>",                      function() vim.api.nvim_command("MkdnTableNewRowAbove") end,       desc = "Table new row above",        mode = { "n", "i" } },
+        --     { "<s-right>",                   function() vim.api.nvim_command("MkdnTableNewColAfter") end,       desc = "Table new column after",     mode = { "n", "i" } },
+        --     { "<s-left>",                    function() vim.api.nvim_command("MkdnTableNewColBefore") end,      desc = "Table new column before",    mode = { "n", "i" } },
+        -- },
+        opts = {
+            modules = {
+                bib = false,
+                buffers = false,
+                conceal = false,
+                cursor = false,
+                folds = false,
+                links = false,
+                lists = true,
+                maps = true,
+                paths = false,
+                tables = true,
+                yaml = false,
+            },
+            silent = true,
+            to_do = {
+                symbols = { " ", "-", "X" },
+                update_parents = true,
+                not_started = " ",
+                in_progress = "-",
+                complete = "X",
+            },
+            tables = {
+                trim_whitespace = true,
+                format_on_move = true,
+                auto_extend_rows = false,
+                auto_extend_cols = false,
+            },
+            mappings = {
+                Mkdnflow = false,
+                MkdnEnter = false,
+                MkdnTab = { { "n", "i" }, "<tab>" },
+                MkdnSTab = { { "n", "i" }, "<s-tab>" },
+                MkdnGoBack = false,
+                MkdnGoForward = false,
+                MkdnMoveSource = false,
+                MkdnNextLink = false,
+                MkdnPrevLink = false,
+                MkdnFollowLink = false,
+                MkdnCreateLink = false,
+                MkdnCreateLinkFromClipboard = false,
+                MkdnDestroyLink = false,
+                MkdnTagSpan = false,
+                MkdnYankAnchorLink = false,
+                MkdnYankFileAnchorLink = false,
+                MkdnNextHeading = false,
+                MkdnPrevHeading = false,
+                MkdnIncreaseHeading = false,
+                MkdnDecreaseHeading = false,
+                MkdnToggleToDo = { { "n", "x" }, variables.keymap["<c-space>"] },
+                MkdnNewListItem = { "i", "<cr>" },
+                MkdnNewListItemBelowInsert = { "n", "o" },
+                MkdnNewListItemAboveInsert = { "n", "O" },
+                MkdnExtendList = false,
+                MkdnUpdateNumbering = false,
+                MkdnTable = false,
+                MkdnTableFormat = false,
+                MkdnTableNextCell = false,
+                MkdnTablePrevCell = false,
+                MkdnTableNextRow = false,
+                MkdnTablePrevRow = false,
+                MkdnTableNewRowBelow = { { "n", "i" }, "<s-down>" },
+                MkdnTableNewRowAbove = { { "n", "i" }, "<s-up>" },
+                MkdnTableNewColAfter = { { "n", "i" }, "<s-right>" },
+                MkdnTableNewColBefore = { { "n", "i" }, "<s-left>" },
+                MkdnFoldSection = false,
+                MkdnUnfoldSection = false,
+            },
+        },
     },
 }

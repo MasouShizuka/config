@@ -20,7 +20,7 @@ vim.opt.relativenumber = true                                                   
 vim.opt.signcolumn = "yes"                                                         -- when and how to display the sign column
 
 -- Completion
-vim.opt.completeopt = { "menuone", "noinsert", "noinsert" }                        -- options for Insert mode completion
+vim.opt.completeopt = { "menuone", "noinsert", "noselect" }                        -- options for Insert mode completion
 vim.opt.infercase = true                                                           -- adjust case of match for keyword completion
 vim.opt.shortmess:append("cCIW")                                                   -- list of flags, reduce length of messages
 

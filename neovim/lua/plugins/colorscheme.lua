@@ -22,6 +22,7 @@ return {
                 },
             },
             options = {
+                cursorline = true,
                 transparency = true,
             },
         },

@@ -192,6 +192,7 @@
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 14,
+    "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
     "markdownlint.config": {
         "MD001": false,

@@ -16,3 +16,4 @@
 
 - 需要将 `komorebi路径` 添加到 `系统Path` 环境变量
 - `yasb` 项目可用命令 `pyinstaller main.spec` 生成 `yasb.exe`
+    - `yasb` 的配置文件 `config.yaml` 和 `styles.css` 可位于 `yasb.exe` 同目录或 `$HOME/.config/yasb`

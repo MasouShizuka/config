@@ -13,9 +13,6 @@ return {
             "ToggleTermSetName",
         },
         enabled = not variables.is_vscode,
-        keys = {
-            { variables.keymap["<c-3>"], desc = "Toggle terminal", mode = { "n", "t" } },
-        },
         opts = {
             size = function(term)
                 if term.direction == "horizontal" then
@@ -24,10 +21,9 @@ return {
                     return math.floor(vim.o.columns * 0.3)
                 end
             end,
-            open_mapping = variables.keymap["<c-3>"],
             persist_size = false,
             direction = "horizontal",
-            shell = "pwsh -nologo",
+            shell = "pwsh -NoLogo",
             float_opts = {
                 border = "curved",
                 height = function()

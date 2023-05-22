@@ -5,7 +5,10 @@
             "。1"
         ],
         "body": "# ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 1"
+        "description": "Insert heading level 1",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert heading level 2": {
         "prefix": [
@@ -13,7 +16,10 @@
             "。2"
         ],
         "body": "## ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 2"
+        "description": "Insert heading level 2",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert heading level 3": {
         "prefix": [
@@ -21,7 +27,10 @@
             "。3"
         ],
         "body": "### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 3"
+        "description": "Insert heading level 3",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert heading level 4": {
         "prefix": [
@@ -29,7 +38,10 @@
             "。4"
         ],
         "body": "#### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 4"
+        "description": "Insert heading level 4",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert heading level 5": {
         "prefix": [
@@ -37,7 +49,10 @@
             "。5"
         ],
         "body": "##### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 5"
+        "description": "Insert heading level 5",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert heading level 6": {
         "prefix": [
@@ -45,7 +60,10 @@
             "。6"
         ],
         "body": "###### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 6"
+        "description": "Insert heading level 6",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
 
     "Insert bold text": {
@@ -54,7 +72,10 @@
             "。b"
         ],
         "body": "**${1:${TM_SELECTED_TEXT}}**$0",
-        "description": "Insert bold text"
+        "description": "Insert bold text",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert italic text": {
         "prefix": [
@@ -62,7 +83,10 @@
             "。i"
         ],
         "body": "*${1:${TM_SELECTED_TEXT}}*$0",
-        "description": "Insert italic text"
+        "description": "Insert italic text",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert bold italic text": {
         "prefix": [
@@ -70,7 +94,10 @@
             "。e"
         ],
         "body": "***${1:${TM_SELECTED_TEXT}}***$0",
-        "description": "Insert bold italic text"
+        "description": "Insert bold italic text",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert strikethrough": {
         "prefix": [
@@ -78,7 +105,10 @@
             "。s"
         ],
         "body": "~~${1:${TM_SELECTED_TEXT}}~~$0",
-        "description": "Insert strikethrough"
+        "description": "Insert strikethrough",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
 
     "Insert quoted text": {
@@ -87,7 +117,10 @@
             "。q"
         ],
         "body": "> ${TM_SELECTED_TEXT}",
-        "description": "Insert quoted text"
+        "description": "Insert quoted text",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
 
     "Insert inline code": {
@@ -96,7 +129,10 @@
             "。c"
         ],
         "body": "`${1:${TM_SELECTED_TEXT}}`$0",
-        "description": "Insert inline code"
+        "description": "Insert inline code",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert fenced code block": {
         "prefix": [
@@ -108,7 +144,11 @@
             "${TM_SELECTED_TEXT}$0",
             "```"
         ],
-        "description": "Insert fenced code block"
+        "description": "Insert fenced code block",
+        "luasnip": {
+            "priority": 2000,
+            "autotrigger": true
+        }
     },
     "Insert inline math": {
         "prefix": [
@@ -116,7 +156,10 @@
             "。m"
         ],
         "body": "\\$${1:${TM_SELECTED_TEXT}}\\$$0",
-        "description": "Insert inline math"
+        "description": "Insert inline math",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert fenced math": {
         "prefix": [
@@ -128,7 +171,11 @@
             "${TM_SELECTED_TEXT}$0",
             "\\$\\$"
         ],
-        "description": "Insert fenced math"
+        "description": "Insert fenced math",
+        "luasnip": {
+            "priority": 2000,
+            "autotrigger": true
+        }
     },
 
     "Insert horizontal rule": {
@@ -140,7 +187,10 @@
             "---",
             "$0"
         ],
-        "description": "Insert horizontal rule"
+        "description": "Insert horizontal rule",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
 
     "Insert link": {
@@ -149,7 +199,10 @@
             "。l"
         ],
         "body": "[${1:text}](${2:https://})$0",
-        "description": "Insert link"
+        "description": "Insert link",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert image": {
         "prefix": [
@@ -157,7 +210,10 @@
             "。p"
         ],
         "body": "![${1:text}](${2:https://})$0",
-        "description": "Insert image"
+        "description": "Insert image",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
 
     "Insert html center block": {
@@ -172,7 +228,10 @@
             "",
             "</center>"
         ],
-        "description": "Insert html center block"
+        "description": "Insert html center block",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert html font color block": {
         "prefix": [
@@ -180,7 +239,10 @@
             "。hf"
         ],
         "body": "<font color=${1|red,yellow,blue,green|}>${2:${TM_SELECTED_TEXT}}</font>$0",
-        "description": "Insert html font block"
+        "description": "Insert html font block",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert html mark block": {
         "prefix": [
@@ -188,7 +250,10 @@
             "。hm"
         ],
         "body": "<mark>${1:${TM_SELECTED_TEXT}}</mark>$0",
-        "description": "Insert html mark block"
+        "description": "Insert html mark block",
+        "luasnip": {
+            "autotrigger": true
+        }
     },
     "Insert html underline block": {
         "prefix": [
@@ -196,6 +261,9 @@
             "。hu"
         ],
         "body": "<u>${1:${TM_SELECTED_TEXT}}</u>$0",
-        "description": "Insert html underline block"
+        "description": "Insert html underline block",
+        "luasnip": {
+            "autotrigger": true
+        }
     }
 }

@@ -3,6 +3,20 @@ local variables = require("config.variables")
 return {
     {
         "nvim-tree/nvim-tree.lua",
+        cmd = {
+            "NvimTreeOpen",
+            "NvimTreeClose",
+            "NvimTreeToggle",
+            "NvimTreeFocus",
+            "NvimTreeRefresh",
+            "NvimTreeFindFile",
+            "NvimTreeFindFileToggle",
+            "NvimTreeClipboard",
+            "NvimTreeResize",
+            "NvimTreeCollapse",
+            "NvimTreeCollapseKeepBuffers",
+            "NvimTreeGenerateOnAttach",
+        },
         config = function(_, opts)
             require("nvim-tree").setup(opts)
 
@@ -37,7 +51,6 @@ return {
             vim.g.loaded_netrw = 1
             vim.g.loaded_netrwPlugin = 1
         end,
-        lazy = true,
         opts = function()
             local api = require("nvim-tree.api")
 
@@ -96,13 +109,7 @@ return {
                     vim.keymap.set("n", "H", api.tree.toggle_hidden_filter, opts("Toggle Dotfiles"))
                     vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
 
-                    -- vim.keymap.set("n", "a", api.fs.create, opts("Create"))
-                    vim.keymap.set("n", "a", function()
-                        api.fs.create()
-                        api.events.subscribe(api.events.Event.FileCreated, function(file)
-                            vim.cmd.tabedit(file.fname)
-                        end)
-                    end, opts("Create"))
+                    vim.keymap.set("n", "a", api.fs.create, opts("Create"))
                     -- vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
                     -- vim.keymap.set("n", "D", api.fs.trash, opts("Trash"))
                     vim.keymap.set("n", "d", function()

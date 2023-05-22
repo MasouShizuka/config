@@ -22,32 +22,43 @@ add_newline = false
 
 
 [battery]
-full_symbol = '  '
+full_symbol = ' '
 charging_symbol = ' '
-discharging_symbol = '󰚦 '
+discharging_symbol = '  '
+unknown_symbol = ' '
+empty_symbol = ' '
 
 [[battery.display]]
-threshold = 20
-style = 'bold red'
+threshold = 10
+style = '#fb4934'
 
 [[battery.display]]
-threshold = 50
-style = 'bold yellow'
+threshold = 25
+style = '#fe8019'
+
+[[battery.display]]
+threshold = 75
+style = '#fabd2f'
+
+[[battery.display]]
+threshold = 90
+style = '#b8bb26'
 
 [[battery.display]]
 threshold = 100
-style = 'bold green'
+style = '#8ec07c'
 
 
 
 [character]
-success_symbol = '[➜](bold green) '
-error_symbol = '[✗](bold red) '
+success_symbol = '[➜](green)'
+error_symbol = '[✗](red)'
 
 
 
 [directory]
 truncation_length = 0
+style = 'cyan'
 read_only = " "
 use_os_path_sep = false
 
@@ -65,7 +76,8 @@ disabled = false
 
 
 [time]
-format = '󰥔 [$time]($style)'
+format = '[ $time]($style)'
+style = '#d6acff'
 disabled = false
 
 

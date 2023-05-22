@@ -25,11 +25,11 @@ vim.keymap.set("x", "K", ":move '<-2<cr>gv-gv", { desc = "Move selected text dow
 vim.keymap.set("n", "M", "m", { desc = "Mark", silent = true })
 
 -- 选中上次粘贴的文本
-vim.keymap.set("n", "gp", "`[v`]", { desc = "select last pasted text", silent = true })
+vim.keymap.set("n", "gp", "`[v`]", { desc = "Select last pasted text", silent = true })
 
 -- 调整光标所在行到屏幕的位置
-vim.keymap.set("n", "zj", "zt", { desc = "Top this line", remap = true, silent = true })
-vim.keymap.set("n", "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
+vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
+vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
 
 if variables.is_vscode then
     -- 插入新行
@@ -44,7 +44,7 @@ if variables.is_vscode then
         function! s:Vscode_Block_Commentary(...) abort
             if !a:0
                 let &operatorfunc = matchstr(expand("<sfile>"), "[^. ]*$")
-                return 'g@'
+                return "g@"
             elseif a:0 > 1
                 let [line1, line2] = [a:1, a:2]
             else
@@ -112,6 +112,10 @@ else
     vim.keymap.set("c", "<c-j>", "<c-n>", { desc = "Down", silent = true })
     vim.keymap.set("c", "<c-k>", "<c-p>", { desc = "Up", silent = true })
 
+    -- 折行时小步上下移动
+    vim.keymap.set("i", "<down>", "<c-o>gj", { desc = "Down", silent = true })
+    vim.keymap.set("i", "<up>", "<c-o>gk", { desc = "Up", silent = true })
+
     -- 终端
     vim.keymap.set("t", "<esc>", [[<c-\><c-n>]], { desc = "Enter normal mode", silent = true })
 
@@ -120,22 +124,36 @@ else
         if not variables.toggle_filetype(variables.toggle_filetype_list1) then
             require("nvim-tree.api").tree.open()
         end
-    end, { desc = "Focus left sidebar", silent = true })
+    end, { desc = "Focus left panel", silent = true })
 
     -- 聚焦编辑文件
     vim.keymap.set("n", variables.keymap["<c-2>"], function()
         variables.skip_filetype(variables.skip_filetype_list1, "W")
     end, { desc = "Focus editor", silent = true })
 
+    -- 聚焦底栏
+    vim.keymap.set("n", variables.keymap["<c-3>"], function()
+        local count = vim.v.count
+        if count > 0 then
+            vim.api.nvim_command(tostring(count) .. "ToggleTerm")
+            return
+        end
+
+        if not variables.toggle_filetype(variables.toggle_filetype_list2) then
+            vim.api.nvim_command("ToggleTerm")
+        end
+    end, { desc = "Focus bottom panel", silent = true })
+
     -- 聚焦右侧边栏
     vim.keymap.set("n", variables.keymap["<c-4>"], function()
-        if not variables.toggle_filetype(variables.toggle_filetype_list2) then
+        if not variables.toggle_filetype(variables.toggle_filetype_list3) then
             vim.api.nvim_command("DocsViewToggle")
         end
-    end, { desc = "Focus right sidebar", silent = true })
+    end, { desc = "Focus right panel", silent = true })
 
     -- 搜索并替换
-    vim.keymap.set("n", "<c-f>", ":%s///gI<left><left><left><left>", { desc = "Search and replace in file" })
+    -- 由 nvim-alt-substitute 设置
+    -- vim.keymap.set("n", "<c-f>", ":%s///gI<left><left><left><left>", { desc = "Search and replace in file" })
 
     -- 窗口
     vim.keymap.set("n", "<c-e>", function() vim.cmd.wincmd("r") end, { desc = "Exchange window", silent = true })
@@ -191,8 +209,14 @@ else
     end, { desc = "Move buffer to next tab", silent = true })
 
     -- Diff
-    vim.keymap.set("n", "<c-n>", "]c", { desc = "Next diff", silent = true })
-    vim.keymap.set("n", variables.keymap["<c-s-n>"], "[c", { desc = "Previous diff", silent = true })
+    vim.keymap.set("n", "<c-n>", function()
+        vim.cmd.normal("]c")
+        vim.cmd.normal("zz")
+    end, { desc = "Next diff", silent = true })
+    vim.keymap.set("n", variables.keymap["<c-s-n>"], function()
+        vim.cmd.normal("[c")
+        vim.cmd.normal("zz")
+    end, { desc = "Previous diff", silent = true })
 
     -- 退出
     vim.keymap.set({ "n", "x" }, "<c-w>", "<cmd>q!<cr><esc>", { desc = "Quit", silent = true })

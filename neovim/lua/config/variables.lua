@@ -3,10 +3,13 @@ local variables = {}
 function variables:load_variables()
     -- running environment
 
-    local os_name = vim.loop.os_uname().sysname
-    self.is_windows = os_name == "Windows_NT"
-    self.is_mac = os_name == "Darwin"
-    self.is_linux = os_name == "Linux"
+    local sysname = vim.loop.os_uname().sysname:lower()
+    local release = vim.loop.os_uname().release:lower()
+
+    self.is_windows = sysname == "windows_nt"
+    self.is_mac = sysname == "darwin"
+    self.is_linux = sysname == "linux"
+    self.is_wsl = self.is_linux and release:find("wsl") and true or false
     self.is_vscode = vim.g.vscode
 
 
@@ -131,6 +134,7 @@ function variables:load_variables()
         "nvim-docs-view",
         "NvimTree",
         "toggleterm",
+        "Trouble",
     }
     -- skip when <c-j>, <c-k>
     self.skip_filetype_list2 = {
@@ -139,6 +143,7 @@ function variables:load_variables()
         "nvim-docs-view",
         "NvimTree",
         "toggleterm",
+        "Trouble",
     }
     self.is_start_with_skip_filetype = function(filetype, skip_filetye_list)
         for _, skip_filetype in ipairs(skip_filetye_list) do
@@ -158,14 +163,19 @@ function variables:load_variables()
         end
     end
 
-    -- toggle left bar
+    -- toggle left panel
     self.toggle_filetype_list1 = {
         "DiffviewFiles",
         "DiffviewFileHistory",
         "NvimTree",
     }
-    -- toggle right bar
+    -- toggle bottom panel
     self.toggle_filetype_list2 = {
+        "toggleterm",
+        "Trouble",
+    }
+    -- toggle right panel
+    self.toggle_filetype_list3 = {
         "nvim-docs-view",
     }
     self.is_start_with_toggle_filetype = function(filetype, toggle_filetype_list)
@@ -242,7 +252,7 @@ function variables:load_variables()
                 lspconfig.pyright.setup(default_config)
             end,
             rust_analyzer = function()
-                -- 由 rust-tools 来设置
+                -- 由 rust-tools 设置
                 -- lspconfig.rust_analyzer.setup(default_config)
             end,
         }
@@ -259,7 +269,7 @@ function variables:load_variables()
 
     self.dap = function()
         return {
-            -- 由 rust-tools 来设置
+            -- 由 rust-tools 设置
             codelldb = function(config)
                 -- config.adapters = {
                 --     type = "server",

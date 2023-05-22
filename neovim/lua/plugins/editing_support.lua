@@ -19,6 +19,10 @@ return {
             "InsertLeave",
             "TextChanged",
         },
+        init = function()
+            vim.g.trailspace_interval = 3
+            vim.g.prev_trailspace_time = os.time()
+        end,
         opts = {
             -- The name of the augroup.
             augroup_name = "AutoSavePlug",
@@ -31,7 +35,11 @@ return {
             save_cmd = nil,
             -- What to do after checking if auto save conditions have been met.
             save_fn = function()
-                require("mini.trailspace").trim()
+                local trailspace_time = os.time()
+                if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
+                    require("mini.trailspace").trim()
+                    vim.g.prev_trailspace_time = trailspace_time
+                end
 
                 -- 保存文件前保存上次复制的范围
                 local last_paste_start = vim.fn.getpos("'[")
@@ -53,8 +61,7 @@ return {
             -- May define a timeout, or a duration to defer the save for - this allows
             -- for formatters to run, for example if they're configured via an autocmd
             -- that listens for `BufWritePre` event.
-            -- 设置 timeout 确保能产生 BufWrite Event
-            timeout = 1,
+            timeout = nil,
             -- Define some filetypes to explicitly not save, in case our existing conditions
             -- don't quite catch all the buffers we'd prefer not to write to.
             exclude_ft = {},
@@ -72,6 +79,20 @@ return {
             space = {
                 enable = false,
             },
+        },
+    },
+
+    {
+        "chrisgrieser/nvim-alt-substitute",
+        enabled = not variables.is_vscode,
+        event = {
+            "CmdlineEnter",
+        },
+        keys = {
+            { "<c-f>", ":S ///g<left><left><left>", desc = "AltSubstitute", mode = { "n", "x" } },
+        },
+        opts = {
+            showNotification = true, -- whether to show the "x replacements made" notification
         },
     },
 
