@@ -59,8 +59,8 @@ return {
                 },
             },
             mappings = {
-                add = "sa",            -- Add surrounding in Normal and Visual modes
-                delete = "sd",         -- Delete surrounding
+                add = "sa",    -- Add surrounding in Normal and Visual modes
+                delete = "sd", -- Delete surrounding
                 -- find = "sf",           -- Find surrounding (to the right)
                 -- find_left = "sF",      -- Find surrounding (to the left)
                 find = "sF",
@@ -86,7 +86,7 @@ return {
         config = function(_, opts)
             require("nvim-treesitter.configs").setup(opts)
         end,
-        enabled = not variables.is_vscode,
+        enabled = not variables.is_vscode and not variables.is_wsl,
         event = {
             "BufReadPost",
             "BufNewFile",

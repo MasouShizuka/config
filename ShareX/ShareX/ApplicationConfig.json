@@ -138,7 +138,7 @@
         "DetectWindows": true,
         "DetectControls": true,
         "UseDimming": true,
-        "UseCustomInfoText": false,
+        "UseCustomInfoText": true,
         "CustomInfoText": "X: $x, Y: $y$nR: $r, G: $g, B: $b$nHex: $hex",
         "SnapSizes": [
           {

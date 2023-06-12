@@ -84,11 +84,65 @@ return {
     },
 
     {
-        "nvim-lualine/lualine.nvim",
+        "Bekaboo/dropbar.nvim",
         enabled = not variables.is_vscode,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
+        keys = {
+            { "<leader><tab>", function() require("dropbar.api").pick() end, desc = "Pick mode", mode = "n" },
+        },
+        lazy = false,
+        opts = {
+            icons = {
+                kinds = {
+                    symbols = variables.icons.kinds,
+                },
+            },
+            menu = {
+                entry = {
+                    padding = {
+                        left = 0,
+                        right = 0,
+                    },
+                },
+                keymaps = {
+                    ["h"] = "<cmd>q!<cr><esc>",
+                    ["l"] = function()
+                        local menu = require("dropbar.api").get_current_dropbar_menu()
+                        if not menu then
+                            return
+                        end
+                        vim.cmd.normal("w")
+                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                        if component then
+                            menu:click_on(component, nil, 1, "l")
+                        end
+                    end,
+                    ["o"] = function()
+                        local menu = require("dropbar.api").get_current_dropbar_menu()
+                        if not menu then
+                            return
+                        end
+                        vim.cmd.normal("0")
+                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                        if component then
+                            menu:click_on(component, nil, 1, "l")
+                        end
+                    end,
+                },
+            },
+        },
+    },
+
+    {
+        "nvim-lualine/lualine.nvim",
+        dependencies = {
+            "nvim-tree/nvim-web-devicons",
+        },
+        enabled = not variables.is_vscode,
         opts = {
             options = {
                 section_separators = { left = "", right = "" },
@@ -140,24 +194,5 @@ return {
             { "<f7>",   function() require("illuminate").goto_next_reference(false) end, desc = "Go to next reference",     mode = "n" },
             { "<s-f7>", function() require("illuminate").goto_prev_reference(false) end, desc = "Go to previous reference", mode = "n" },
         },
-    },
-
-    {
-        "utilyre/barbecue.nvim",
-        enabled = not variables.is_vscode,
-        dependencies = {
-            "neovim/nvim-lspconfig",
-            "nvim-tree/nvim-web-devicons",
-            "SmiteshP/nvim-navic",
-        },
-        event = {
-            "BufReadPost",
-            "BufNewFile",
-        },
-        name = "barbecue",
-        opts = {
-            attach_navic = false,
-        },
-        version = "*",
     },
 }

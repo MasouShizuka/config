@@ -20,7 +20,7 @@ vim.opt.relativenumber = true                                                   
 vim.opt.signcolumn = "yes"                                                         -- when and how to display the sign column
 
 -- Completion
-vim.opt.completeopt = { "menuone", "noinsert", "noselect" }                        -- options for Insert mode completion
+vim.opt.completeopt = { "menu", "menuone", "noinsert", "noselect" }                -- options for Insert mode completion
 vim.opt.infercase = true                                                           -- adjust case of match for keyword completion
 vim.opt.shortmess:append("cCIW")                                                   -- list of flags, reduce length of messages
 
@@ -86,12 +86,12 @@ if variables.is_windows then
     vim.opt.shell = "pwsh -nologo"                                                 -- name of shell to use for external commands
     vim.opt.shellcmdflag = "-c"                                                    -- flag to shell to execute one command
     vim.opt.shellquote = ""                                                        -- quote character(s) for around shell command
+    vim.opt.shellslash = true                                                      -- use forward slash for shell file names
     vim.opt.shellxquote = ""                                                       -- like 'shellquote', but include redirection
 end
 
 -- Split window
 vim.opt.splitbelow = true                                                          -- new window from split is below the current one
-vim.opt.splitkeep = "screen"                                                       -- determines scroll behavior for split windows
 vim.opt.splitright = true                                                          -- new window is put right of the current one
 
 -- Status line

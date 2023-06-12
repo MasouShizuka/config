@@ -2,21 +2,21 @@ local variables = require("config.variables")
 
 if not variables.is_vscode then
     -- 使用宏时显示信息
-    local recording = vim.api.nvim_create_augroup("recording", { clear = true })
+    local show_recording_info = vim.api.nvim_create_augroup("show_recording_info", { clear = true })
     vim.api.nvim_create_autocmd("RecordingEnter", {
         callback = function()
             vim.api.nvim_set_option("cmdheight", 1)
         end,
-        desc = "Set cmdheight=1 when starting record",
-        group = recording,
+        desc = "Set cmdheight=1 when start recording",
+        group = show_recording_info,
         pattern = "*",
     })
     vim.api.nvim_create_autocmd("RecordingLeave", {
         callback = function()
             vim.api.nvim_set_option("cmdheight", 0)
         end,
-        desc = "Set cmdheight=0 when starting record",
-        group = recording,
+        desc = "Set cmdheight=0 when finished recording",
+        group = show_recording_info,
         pattern = "*",
     })
 
@@ -34,7 +34,7 @@ if not variables.is_vscode then
             prev_tabpage = tabpage
         end,
         desc = "Go to left tab after closing tab",
-        group = vim.api.nvim_create_augroup("tab_enter", { clear = true }),
+        group = vim.api.nvim_create_augroup("go_to_left_tab_after_closing_tab", { clear = true }),
         pattern = "*",
     })
 end

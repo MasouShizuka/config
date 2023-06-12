@@ -1,8 +1,6 @@
 local variables = {}
 
-function variables:load_variables()
-    -- running environment
-
+function variables:load_running_environment()
     local sysname = vim.loop.os_uname().sysname:lower()
     local release = vim.loop.os_uname().release:lower()
 
@@ -11,28 +9,37 @@ function variables:load_variables()
     self.is_linux = sysname == "linux"
     self.is_wsl = self.is_linux and release:find("wsl") and true or false
     self.is_vscode = vim.g.vscode
+end
 
+function variables:load_path()
+    self.config_path = vim.fn.stdpath("config")
+    if self.is_windows then
+        self.config_path = self.config_path:format("\\", "/")
+    end
+    self.data_path = vim.fn.stdpath("data")
+    if self.is_windows then
+        self.data_path = self.data_path:format("\\", "/")
+    end
+    self.home_path = vim.env.HOME
+    if self.is_windows then
+        self.home_path = self.home_path:format("\\", "/")
+    end
 
+    self.mason_install_root_path = self.data_path .. "/lazy/mason.nvim/mason"
 
-    -- keymap
+    self.vscode_path = nil
+    if self.is_windows then
+        self.vscode_path = vim.env.APPDATA:format("\\", "/") .. "/Code"
+    elseif self.is_mac then
+        self.vscode_path = vim.env.HOME .. "/Library/Application\\ Support/Code"
+    elseif self.is_linux then
+        self.vscode_path = vim.env.HOME .. "/.config/Code"
+    end
+    self.vscode_snippet_path = self.vscode_path .. "/User/snippets"
+    self.vscode_extension_path = self.home_path .. "/.vscode/extensions"
+end
 
-    self.keymap = {
-        ["<c-1>"] = "<c-f1>",
-        ["<c-2>"] = "<c-f2>",
-        ["<c-3>"] = "<c-f3>",
-        ["<c-4>"] = "<c-f4>",
-        ["<c-space>"] = "<c-f5>",
-        ["<c-,>"] = "<c-f6>",
-        ["<c-.>"] = "<c-f7>",
-        ["<c-;>"] = "<c-f8>",
-        ["<c-s-n>"] = "<c-f9>",
-        ["<c-s-t>"] = "<c-f10>",
-    }
-
-
-
-    -- icons
-
+function variables:load_icons()
     self.icons = {
         dap = {
             Breakpoint = " ",
@@ -90,41 +97,24 @@ function variables:load_variables()
             Variable = " ",
         },
     }
+end
 
+function variables:load_keymap()
+    self.keymap = {
+        ["<c-1>"] = "<c-f1>",
+        ["<c-2>"] = "<c-f2>",
+        ["<c-3>"] = "<c-f3>",
+        ["<c-4>"] = "<c-f4>",
+        ["<c-space>"] = "<c-f5>",
+        ["<c-,>"] = "<c-f6>",
+        ["<c-.>"] = "<c-f7>",
+        ["<c-;>"] = "<c-f8>",
+        ["<c-s-n>"] = "<c-f9>",
+        ["<c-s-t>"] = "<c-f10>",
+    }
+end
 
-
-    -- path
-
-    self.config_path = vim.fn.stdpath("config")
-    if self.is_windows then
-        self.config_path = string.gsub(self.config_path, "\\", "/")
-    end
-    self.data_path = vim.fn.stdpath("data")
-    if self.is_windows then
-        self.data_path = string.gsub(self.data_path, "\\", "/")
-    end
-    self.home_path = vim.env.HOME
-    if self.is_windows then
-        self.home_path = string.gsub(self.home_path, "\\", "/")
-    end
-
-    self.mason_install_root_path = self.data_path .. "/lazy/mason.nvim/mason"
-
-    self.vscode_path = nil
-    if self.is_windows then
-        self.vscode_path = string.gsub(vim.env.APPDATA, "\\", "/") .. "/Code"
-    elseif self.is_mac then
-        self.vscode_path = vim.env.HOME .. "/Library/Application\\ Support/Code"
-    elseif self.is_linux then
-        self.vscode_path = vim.env.HOME .. "/.config/Code"
-    end
-    self.vscode_snippet_path = self.vscode_path .. "/User/snippets"
-    self.vscode_extension_path = self.home_path .. "/.vscode/extensions"
-
-
-
-    -- list
-
+function variables:load_filtyppe_list()
     -- skip when <c-2>
     self.skip_filetype_list1 = {
         "dap",
@@ -165,34 +155,35 @@ function variables:load_variables()
 
     -- toggle left panel
     self.toggle_filetype_list1 = {
-        "DiffviewFiles",
-        "DiffviewFileHistory",
-        "NvimTree",
+        ["DiffviewFiles"] = function() vim.api.nvim_command("DiffviewClose") end,
+        ["DiffviewFileHistory"] = function() vim.api.nvim_command("DiffviewClose") end,
+        ["NvimTree"] = function() require("nvim-tree.api").tree.close() end,
     }
     -- toggle bottom panel
     self.toggle_filetype_list2 = {
-        "toggleterm",
-        "Trouble",
+        ["toggleterm"] = function() vim.api.nvim_command("ToggleTerm") end,
+        ["Trouble"] = function() vim.api.nvim_command("TroubleClose") end,
     }
     -- toggle right panel
     self.toggle_filetype_list3 = {
-        "nvim-docs-view",
+        ["nvim-docs-view"] = function() vim.api.nvim_command("DocsViewToggle") end,
     }
     self.is_start_with_toggle_filetype = function(filetype, toggle_filetype_list)
-        for _, toggle_filetype in ipairs(toggle_filetype_list) do
+        for toggle_filetype, close_function in pairs(toggle_filetype_list) do
             if filetype:find(toggle_filetype, 1, true) == 1 then
-                return true
+                return true, close_function
             end
         end
-        return false
+        return false, nil
     end
     self.toggle_filetype = function(toggle_filetype_list)
         local win = vim.api.nvim_get_current_win()
         local buf = vim.api.nvim_win_get_buf(win)
         local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-        if self.is_start_with_toggle_filetype(filetype, toggle_filetype_list) then
-            if filetype == "NvimTree" then
-                require("nvim-tree.api").tree.close()
+        local ok, close_function = self.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+        if ok then
+            if type(close_function) == "function" then
+                close_function()
             else
                 vim.api.nvim_win_close(win, false)
             end
@@ -202,7 +193,8 @@ function variables:load_variables()
         for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
             buf = vim.api.nvim_win_get_buf(win)
             filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-            if self.is_start_with_toggle_filetype(filetype, toggle_filetype_list) then
+            ok, close_function = self.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+            if ok then
                 vim.api.nvim_set_current_win(win)
                 return true
             end
@@ -210,22 +202,19 @@ function variables:load_variables()
 
         return false
     end
+end
 
-
-
+function variables:load_language_filetype()
     -- tex like filetype
-
     self.tex_filetype = {
         "markdown",
         "plaintex",
         "tex",
         "text",
     }
+end
 
-
-
-    -- lsp
-
+function variables:load_lsp()
     self.lsp = function(lspconfig, default_config)
         return {
             bashls = function()
@@ -251,10 +240,10 @@ function variables:load_variables()
             pyright = function()
                 lspconfig.pyright.setup(default_config)
             end,
-            rust_analyzer = function()
-                -- 由 rust-tools 设置
-                -- lspconfig.rust_analyzer.setup(default_config)
-            end,
+            -- 由 rust-tools 设置
+            -- rust_analyzer = function()
+            --     lspconfig.rust_analyzer.setup(default_config)
+            -- end,
         }
     end
 
@@ -262,12 +251,10 @@ function variables:load_variables()
     for lsp, _ in pairs(self.lsp(nil, nil)) do
         self.lsp_list[#self.lsp_list + 1] = lsp
     end
+end
 
-
-
-    -- dap
-
-    self.dap = function()
+function variables:load_dap()
+    self.dap = function(mason_nvim_dap)
         return {
             -- 由 rust-tools 设置
             codelldb = function(config)
@@ -296,7 +283,7 @@ function variables:load_variables()
                 --     },
                 -- }
 
-                -- require("mason-nvim-dap").default_setup(config)
+                -- mason_nvim_dap.default_setup(config)
             end,
             python = function(config)
                 config.adapters = {
@@ -333,7 +320,7 @@ function variables:load_variables()
                     },
                 }
 
-                require("mason-nvim-dap").default_setup(config)
+                mason_nvim_dap.default_setup(config)
             end,
         }
     end
@@ -342,11 +329,9 @@ function variables:load_variables()
     for dap, _ in pairs(self.dap()) do
         self.dap_list[#self.dap_list + 1] = dap
     end
+end
 
-
-
-    -- null-ls
-
+function variables:load_null_ls()
     self.null_ls_builtins = function(null_ls)
         return {
             black = function(source_name, methods)
@@ -354,6 +339,15 @@ function variables:load_variables()
             end,
             gitsigns = function(source_name, methods)
                 null_ls.register(null_ls.builtins.code_actions.gitsigns)
+            end,
+            isort = function(source_name, methods)
+                null_ls.register(null_ls.builtins.formatting.isort.with({
+                    extra_args = {
+                        "--multi-line", "3",
+                        "--trailing-comma",
+                        "--profile", "black"
+                    },
+                }))
             end,
             rustfmt = function(source_name, methods)
                 null_ls.register(null_ls.builtins.formatting.rustfmt)
@@ -374,6 +368,7 @@ function variables:load_variables()
                 if variables.is_windows then
                     line_endings = "Windows"
                 end
+
                 null_ls.register(null_ls.builtins.formatting.stylua.with({
                     extra_args = {
                         "--line-endings", line_endings,
@@ -391,6 +386,17 @@ function variables:load_variables()
     end
 end
 
-variables:load_variables()
+variables:load_running_environment()
+variables:load_path()
+
+variables:load_icons()
+variables:load_keymap()
+
+variables:load_filtyppe_list()
+variables:load_language_filetype()
+
+variables:load_lsp()
+variables:load_dap()
+variables:load_null_ls()
 
 return variables

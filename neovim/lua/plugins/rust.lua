@@ -26,7 +26,7 @@ return {
             "neovim/nvim-lspconfig",
             "nvim-lua/plenary.nvim",
         },
-        enabled = not variables.is_vscode,
+        enabled = not variables.is_vscode and not variables.is_wsl,
         ft = "rust",
     },
 }

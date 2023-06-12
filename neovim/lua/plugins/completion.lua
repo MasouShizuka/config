@@ -8,12 +8,31 @@ return {
             local luasnip = require("luasnip")
 
             cmp.setup({
-                preselect = cmp.PreselectMode.None,
                 mapping = cmp.mapping.preset.insert({
+                    ["<down>"] = cmp.mapping({
+                        i = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+                        c = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
+                    }),
+                    ["<up>"] = cmp.mapping({
+                        i = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+                        c = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
+                    }),
+                    ["<right>"] = cmp.mapping(function(fallback)
+                        if luasnip.jumpable(1) then
+                            luasnip.jump(1)
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
+                    ["<left>"] = cmp.mapping(function(fallback)
+                        if luasnip.jumpable(-1) then
+                            luasnip.jump(-1)
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
                     ["<c-j>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }), { "i", "c" }),
                     ["<c-k>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }), { "i", "c" }),
-                    ["<down>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }), { "i", "c" }),
-                    ["<up>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), { "i", "c" }),
                     ["<c-d>"] = cmp.mapping.scroll_docs(4),
                     ["<c-u>"] = cmp.mapping.scroll_docs(-4),
                     [variables.keymap["<c-space>"]] = cmp.mapping(function(fallback)
@@ -23,30 +42,16 @@ return {
                             cmp.complete()
                         end
                     end),
-                    ["<cr>"] = cmp.mapping.confirm({ select = false }),
-                    ["<tab>"] = cmp.mapping(function(fallback)
-                        if cmp.visible() then
-                            cmp.confirm({ select = true })
-                        elseif luasnip.expand_or_jumpable() then
-                            luasnip.expand_or_jump()
-                        else
-                            fallback()
-                        end
-                    end, { "i", "s" }),
-                    ["<s-tab>"] = cmp.mapping(function(fallback)
-                        if cmp.visible() then
-                            cmp.select_prev_item()
-                        elseif luasnip.jumpable(-1) then
-                            luasnip.jump(-1)
-                        else
-                            fallback()
-                        end
-                    end, { "i", "s" }),
+                    ["<cr>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false }),
+                    ["<tab>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
                 }),
                 snippet = {
                     expand = function(args)
                         luasnip.lsp_expand(args.body)
                     end,
+                },
+                completion = {
+                    completeopt = "menu,menuone,noinsert",
                 },
                 formatting = {
                     format = function(_, item)
@@ -74,11 +79,17 @@ return {
 
             cmp.setup.cmdline({ "/", "?" }, {
                 mapping = cmp.mapping.preset.cmdline(),
+                completion = {
+                    completeopt = "menu,menuone,noinsert,noselect",
+                },
                 sources = { { name = "buffer" } },
             })
 
             cmp.setup.cmdline(":", {
                 mapping = cmp.mapping.preset.cmdline(),
+                completion = {
+                    completeopt = "menu,menuone,noinsert,noselect",
+                },
                 sources = cmp.config.sources(
                     { { name = "path" } }, {
                         {
@@ -114,6 +125,7 @@ return {
             "hrsh7th/cmp-nvim-lsp-signature-help",
             "hrsh7th/cmp-path",
             "kdheepak/cmp-latex-symbols",
+
             {
                 "saadparwaiz1/cmp_luasnip",
                 dependencies = {
@@ -123,6 +135,7 @@ return {
                             auto_open = true,
                         },
                     },
+
                     "L3MON4D3/LuaSnip",
                 },
             },
@@ -147,6 +160,7 @@ return {
         dependencies = {
             "rafamadriz/friendly-snippets",
         },
+        enabled = not variables.is_vscode,
         lazy = false,
         opts = {
             enable_autosnippets = true,

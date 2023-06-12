@@ -3,6 +3,13 @@ local variables = require("config.variables")
 return {
     {
         "Shatur/neovim-session-manager",
+        cmd = {
+            "SessionManager load_session",
+            "SessionManager load_last_session",
+            "SessionManager load_current_dir_session",
+            "SessionManager save_current_session",
+            "SessionManager delete_session",
+        },
         config = function(_, opts)
             require("session_manager").setup({
                 sessions_dir = variables.data_path .. "/lazy/neovim-session-manager/sessions", -- The directory where the session files will be saved.

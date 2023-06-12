@@ -2,6 +2,26 @@ local variables = require("config.variables")
 
 return {
     {
+        "Aasim-A/scrollEOF.nvim",
+        enabled = not variables.is_vscode,
+        event = {
+            "BufReadPost",
+            "BufNewFile",
+        },
+        opts = {
+            -- The pattern used for the internal autocmd to determine
+            -- where to run scrollEOF. See https://neovim.io/doc/user/autocmd.html#autocmd-pattern
+            pattern = "*",
+            -- Whether or not scrollEOF should be enabled in insert mode
+            insert_mode = false,
+            -- List of filetypes to disable scrollEOF for.
+            disabled_filetypes = {},
+            -- List of modes to disable scrollEOF for. see https://neovim.io/doc/user/builtin.html#mode() for available modes.
+            disabled_modes = {},
+        },
+    },
+
+    {
         "AndrewRadev/undoquit.vim",
         enabled = not variables.is_vscode,
         event = {
@@ -12,7 +32,7 @@ return {
             vim.g.undoquit_tab_mapping = "<leader>" .. variables.keymap["<c-s-t>"]
         end,
         keys = {
-            { variables.keymap["<c-s-t>"], desc = "Undo quit", mode = "n" },
+            { variables.keymap["<c-s-t>"],               desc = "Undo quit",     mode = "n" },
             { "<leader>" .. variables.keymap["<c-s-t>"], desc = "Undo quit tab", mode = "n" },
         },
     },
@@ -42,8 +62,8 @@ return {
                     local builtin = require("statuscol.builtin")
                     require("statuscol").setup({
                         segments = {
-                            { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
-                            { text = { "%s" }, click = "v:lua.ScSa" },
+                            { text = { builtin.foldfunc },      click = "v:lua.ScFa" },
+                            { text = { "%s" },                  click = "v:lua.ScSa" },
                             { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
                         },
                     })
@@ -51,55 +71,16 @@ return {
             },
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not variables.is_vscode,
+        enabled = not variables.is_vscode and not variables.is_wsl,
         event = {
             "BufReadPost",
             "BufNewFile",
         },
         keys = {
-            {
-                "zR",
-                function(...)
-                    require("ufo").openAllFolds(...)
-                end,
-                desc = "Open all folds",
-                mode = "n",
-            },
-            {
-                "zM",
-                function(...)
-                    require("ufo").closeAllFolds(...)
-                end,
-                desc = "Close all folds",
-                mode = "n",
-            },
-            {
-                "zr",
-                function(...)
-                    require("ufo").openFoldsExceptKinds(...)
-                end,
-                desc = "Open folds except kinds",
-                mode = "n",
-            },
-            {
-                "zm",
-                function(...)
-                    require("ufo").closeFoldsWith(...)
-                end,
-                desc = "Close folds with",
-                mode = "n",
-            },
-            {
-                "K",
-                function()
-                    local winid = require("ufo").peekFoldedLinesUnderCursor()
-                    if not winid then
-                        vim.lsp.buf.hover()
-                    end
-                end,
-                desc = "Hover",
-                mode = "n",
-            },
+            { "zR", function(...) require("ufo").openAllFolds(...) end,         desc = "Open all folds",          mode = "n" },
+            { "zM", function(...) require("ufo").closeAllFolds(...) end,        desc = "Close all folds",         mode = "n" },
+            { "zr", function(...) require("ufo").openFoldsExceptKinds(...) end, desc = "Open folds except kinds", mode = "n" },
+            { "zm", function(...) require("ufo").closeFoldsWith(...) end,       desc = "Close folds with",        mode = "n" },
         },
         opts = {
             provider_selector = function(bufnr, filetype, buftype)
@@ -143,7 +124,14 @@ return {
         config = function(_, opts)
             require("notify").setup(opts)
 
-            vim.notify = require("notify")
+            -- vim.notify = require("notify")
+            vim.notify = function(message, ...)
+                if message:match("warning: multiple different client offset_encodings detected for buffer, this is not supported yet") then
+                    return
+                end
+
+                require("notify")(message, ...)
+            end
         end,
         enabled = not variables.is_vscode,
         lazy = false,

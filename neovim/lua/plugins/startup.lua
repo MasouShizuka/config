@@ -18,6 +18,9 @@ return {
                     opts.section.footer.opts.hl = "DashboardFooter"
                     pcall(vim.cmd.AlphaRedraw)
                 end,
+                desc = "Add Alpha dashboard footer",
+                group = vim.api.nvim_create_augroup("alpha_add_footer", { clear = true }),
+                once = true,
                 pattern = "LazyVimStarted",
             })
         end,
@@ -28,7 +31,6 @@ return {
         init = function()
             -- 判断是否启动 alpha
             vim.api.nvim_create_autocmd("VimEnter", {
-                group = vim.api.nvim_create_augroup("alpha", { clear = true }),
                 callback = function()
                     local should_skip = false
                     if vim.fn.argc() > 0 or vim.fn.line2byte("$") ~= -1 or not vim.o.modifiable then
@@ -45,6 +47,8 @@ return {
                         require("alpha").start()
                     end
                 end,
+                desc = "Start Alpha when vim is opened with no arguments",
+                group = vim.api.nvim_create_augroup("alpha_start", { clear = true }),
             })
         end,
         opts = function()
@@ -62,14 +66,14 @@ return {
             }
 
             dashboard.section.buttons.val = {
-                dashboard.button("n", " " .. " New File", ":ene <bar> startinsert<cr>"),
-                dashboard.button("f", " " .. " Find File", ":Telescope find_files<cr>"),
-                dashboard.button("o", " " .. " Recent Files", ":Telescope oldfiles<cr>"),
-                dashboard.button("c", " " .. " Config", ":e $MYVIMRC<cr>:cd %:h<cr>"),
-                dashboard.button("s", " " .. " Restore Session", ":SessionManager load_session<cr>"),
-                dashboard.button("S", " " .. " Restore Last Session", ":SessionManager load_last_session<cr>"),
-                dashboard.button("l", " " .. " Lazy", ":Lazy<cr>"),
-                dashboard.button("q", " " .. " Quit", ":qa<cr>"),
+                dashboard.button("n", "  New File", ":ene <bar> startinsert<cr>"),
+                dashboard.button("f", "  Find File", ":Telescope find_files<cr>"),
+                dashboard.button("o", "  Recent Files", ":Telescope oldfiles<cr>"),
+                dashboard.button("c", "  Config", ":execute 'cd ' . fnamemodify($MYVIMRC, ':p:h')<cr>:SessionManager load_current_dir_session<cr>"),
+                dashboard.button("s", "  Load Session", ":SessionManager load_session<cr>"),
+                dashboard.button("S", "  Load Last Session", ":SessionManager load_last_session<cr>"),
+                dashboard.button("l", "  Lazy", ":Lazy<cr>"),
+                dashboard.button("q", "  Quit", ":qa<cr>"),
             }
 
             return dashboard

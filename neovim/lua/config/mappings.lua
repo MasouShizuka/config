@@ -192,8 +192,8 @@ else
 
     -- Tab
     -- 由 bufferline 设置
-    -- vim.keymap.set("n", "<c-h>", "gt", { silent = true })
-    -- vim.keymap.set("n", "<c-l>", "gT", { silent = true })
+    -- vim.keymap.set("n", "<c-h>", function() vim.cmd.tabnext() end, { desc = "Cycle next tab", silent = true })
+    -- vim.keymap.set("n", "<c-l>", function() vim.cmd.tabprevious() end,, { desc = "Cycle previous tab", silent = true })
     vim.keymap.set("n", variables.keymap["<c-,>"], function() vim.cmd.tabmove("-") end, { desc = "Move tab left", silent = true })
     vim.keymap.set("n", variables.keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
     vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
@@ -207,6 +207,10 @@ else
         vim.cmd.tabnext()
         vim.api.nvim_command("vertical sbuffer " .. buffer)
     end, { desc = "Move buffer to next tab", silent = true })
+
+    -- Jump
+    vim.keymap.set("n", "<c-i>", "<c-i>zz", { desc = "Jump to next location", silent = true })
+    vim.keymap.set("n", "<c-o>", "<c-o>zz", { desc = "Jump to previous location", silent = true })
 
     -- Diff
     vim.keymap.set("n", "<c-n>", function()
@@ -224,21 +228,26 @@ else
 
     -- 运行
     vim.keymap.set("n", "<leader>r", function()
+        local path = vim.fn.expand("%:~:.")
+        if variables.is_windows then
+            path = path:format("\\", "/")
+        end
+
         local filetype = vim.bo.filetype
         if filetype == "lua" then
             -- vim.api.nvim_command("lua %")
-            vim.api.nvim_command([[TermExec cmd="lua %"]])
+            require("toggleterm").exec_command(([[TermExec cmd='lua "%s"']]):format(path))
         elseif filetype == "markdown" then
             vim.api.nvim_command("MarkdownPreviewToggle")
         elseif filetype == "python" then
             -- vim.api.nvim_command("python -u %")
-            vim.api.nvim_command([[TermExec cmd="python -u %"]])
+            require("toggleterm").exec_command(([[TermExec cmd='python -u "%s"']]):format(path))
         elseif filetype == "rust" then
             -- vim.api.nvim_command("cargo run")
-            vim.api.nvim_command([[TermExec cmd="cargo run"]])
+            require("toggleterm").exec_command([[TermExec cmd='cargo run']])
         elseif filetype == "sh" then
             -- vim.api.nvim_command("bash %")
-            vim.api.nvim_command([[TermExec cmd="bash %"]])
+            require("toggleterm").exec_command(([[TermExec cmd='bash "%s"']]):format(path))
         end
     end, { desc = "Run", silent = true })
 end

@@ -25,4 +25,4 @@
 
 ## 注意
 
-`windows` 的最新构建版本可在 [fxliang/weasel](https://github.com/fxliang/weasel) 仓库下载
+`Windows` 的最新构建版本可在 [fxliang/weasel](https://github.com/fxliang/weasel) 仓库下载

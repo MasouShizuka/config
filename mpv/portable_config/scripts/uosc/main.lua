@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts
-COMMIT_ 5e2c93055155bc9aec7534d13804d4f0d7f8a72d
+COMMIT_ 442fe6b2e566dbf1e60f97e722bd3917c0c80156
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -347,10 +347,14 @@ cursor = {
 	on_primary_up = nil,
 	on_wheel_down = nil,
 	on_wheel_up = nil,
+	allow_dragging = false,
+	history = {}, -- {x, y}[] history
+	history_size = 10,
 	-- Called at the beginning of each render
 	reset_handlers = function()
 		cursor.on_primary_down, cursor.on_primary_up = nil, nil
 		cursor.on_wheel_down, cursor.on_wheel_up = nil, nil
+		cursor.allow_dragging = false
 	end,
 	mbtn_left_enabled = nil,
 	wheel_enabled = nil,
@@ -359,7 +363,8 @@ cursor = {
 		local enable_mbtn_left = (cursor.on_primary_down or cursor.on_primary_up) ~= nil
 		local enable_wheel = (cursor.on_wheel_down or cursor.on_wheel_up) ~= nil
 		if enable_mbtn_left ~= cursor.mbtn_left_enabled then
-			mp[(enable_mbtn_left and 'enable' or 'disable') .. '_key_bindings']('mbtn_left')
+			local flags = cursor.allow_dragging and 'allow-vo-dragging' or nil
+			mp[(enable_mbtn_left and 'enable' or 'disable') .. '_key_bindings']('mbtn_left', flags)
 			cursor.mbtn_left_enabled = enable_mbtn_left
 		end
 		if enable_wheel ~= cursor.wheel_enabled then
@@ -381,6 +386,17 @@ cursor = {
 			cursor.autohide_timer:kill()
 			cursor.autohide_timer:resume()
 		end
+	end,
+	-- Calculates distance in which cursor reaches rectangle if it continues moving in the same path.
+	-- Returns `nil` if cursor is not moving towards the rectangle.
+	direction_to_rectangle_distance = function(rect)
+		if cursor.hidden or not cursor.history[1] then
+			return false
+		end
+
+		local prev_x, prev_y = cursor.history[1][1], cursor.history[1][2]
+		local end_x, end_y = cursor.x + (cursor.x - prev_x) * 1e10, cursor.y + (cursor.y - prev_y) * 1e10
+		return get_ray_to_rectangle_distance(cursor.x, cursor.y, end_x, end_y, rect)
 	end
 }
 state = {
@@ -397,6 +413,7 @@ state = {
 	end)(),
 	cwd = mp.get_property('working-directory'),
 	path = nil, -- current file path or URL
+	history = {}, -- history of last played files stored as full paths
 	title = nil,
 	alt_title = nil,
 	time = nil, -- current media playback time
@@ -579,18 +596,24 @@ function update_cursor_position(x, y)
 		else x, y = INFINITY, INFINITY end
 	end
 
-	-- add 0.5 to be in the middle of the pixel
+	-- Add 0.5 to be in the middle of the pixel
 	cursor.x, cursor.y = (x + 0.5) / display.scale_x, (y + 0.5) / display.scale_y
 
 	if old_x ~= cursor.x or old_y ~= cursor.y then
 		Elements:update_proximities()
 
 		if cursor.x == INFINITY or cursor.y == INFINITY then
-			cursor.hidden = true
+			cursor.hidden, cursor.history = true, {}
 			Elements:trigger('global_mouse_leave')
 		elseif cursor.hidden then
-			cursor.hidden = false
+			cursor.hidden, cursor.history = false, {}
 			Elements:trigger('global_mouse_enter')
+		else
+			-- Update cursor history
+			for i = 1, cursor.history_size - 1, 1 do
+				cursor.history[i] = cursor.history[i + 1]
+			end
+			cursor.history[cursor.history_size] = {x, y}
 		end
 
 		Elements:proximity_trigger('mouse_move')
@@ -658,7 +681,7 @@ end
 function select_current_chapter()
 	local current_chapter
 	if state.time and state.chapters then
-		_, current_chapter = itable_find(state.chapters, function(c) return state.time >= c.time end, true)
+		_, current_chapter = itable_find(state.chapters, function(c) return state.time >= c.time end, #state.chapters, 1)
 	end
 	set_state('current_chapter', current_chapter)
 end
@@ -699,7 +722,10 @@ end
 mp.observe_property('mouse-pos', 'native', handle_mouse_pos)
 mp.observe_property('osc', 'bool', function(name, value) if value == true then mp.set_property('osc', 'no') end end)
 mp.register_event('file-loaded', function()
-	set_state('path', normalize_path(mp.get_property_native('path')))
+	local path = normalize_path(mp.get_property_native('path'))
+	itable_delete_value(state.history, path)
+	state.history[#state.history + 1] = path
+	set_state('path', path)
 	Elements:flash({'top_bar'})
 end)
 mp.register_event('end-file', function(event)

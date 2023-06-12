@@ -82,10 +82,9 @@
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.theme": "Kennedy",
     "isort.args": [
-        "--profile",
-        "black",
-        "--multi-line=3",
-        "--trailing-comma"
+        "--multi-line", "3",
+        "--trailing-comma",
+        "--profile", "black"
     ],
     "isort.check": true,
     "isort.severity": {

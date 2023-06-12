@@ -14,7 +14,7 @@ class NeovimSessionManager(FlowLauncher):
         self.colon_replacer = "++"
 
         self.cmd = "wezterm start --cwd"
-        self.args = "-- nvim"
+        self.args = "-- nvim +"
 
         self.session_list = os.listdir(self.session_dir)
 

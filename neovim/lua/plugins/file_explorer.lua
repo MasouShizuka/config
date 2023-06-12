@@ -29,8 +29,6 @@ return {
 
             -- 最后的窗口为 NvimTree 时自动关闭
             vim.api.nvim_create_autocmd("BufEnter", {
-                group = vim.api.nvim_create_augroup("NvimTreeClose", { clear = true }),
-                pattern = "NvimTree_*",
                 callback = function()
                     local layout = vim.api.nvim_call_function("winlayout", {})
                     if
@@ -41,6 +39,9 @@ return {
                         vim.api.nvim_command("confirm quit")
                     end
                 end,
+                desc = "Auto close when nvim-tree is the last window",
+                group = vim.api.nvim_create_augroup("NvimTreeClose", { clear = true }),
+                pattern = "NvimTree_*",
             })
         end,
         dependencies = {
@@ -69,7 +70,7 @@ return {
                     sort_current = sort_current + 1
                 end
                 api.tree.reload()
-                vim.notify(string.format("Sort by %s", SORT_METHODS[sort_current]))
+                vim.notify(("Sort by %s"):format(SORT_METHODS[sort_current]))
             end
 
             local sort_by = function()
@@ -114,7 +115,7 @@ return {
                     -- vim.keymap.set("n", "D", api.fs.trash, opts("Trash"))
                     vim.keymap.set("n", "d", function()
                         local node = api.tree.get_node_under_cursor()
-                        vim.ui.input({ prompt = string.format("Remove %s? [y/N]", node.name) }, function(input)
+                        vim.ui.input({ prompt = ("Remove %s? [y/N]"):format(node.name) }, function(input)
                             if input == "y" then
                                 api.fs.remove()
                                 api.tree.reload()
@@ -205,7 +206,7 @@ return {
                         if #marks == 0 then
                             table.insert(marks, api.tree.get_node_under_cursor())
                         end
-                        vim.ui.input({ prompt = string.format("Remove %s files? [y/N]", #marks) }, function(input)
+                        vim.ui.input({ prompt = ("Remove %s files? [y/N]"):format(#marks) }, function(input)
                             if input == "y" then
                                 for _, node in ipairs(marks) do
                                     api.fs.remove(node)

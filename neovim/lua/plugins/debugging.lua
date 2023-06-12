@@ -21,19 +21,21 @@ return {
                 "DapUninstall",
             },
             config = function(_, opts)
+                local mason_nvim_dap = require("mason-nvim-dap")
+
                 local handlers = {
                     function(config)
                         -- all sources with no handler get passed here
 
                         -- Keep original functionality
-                        require("mason-nvim-dap").default_setup(config)
+                        mason_nvim_dap.default_setup(config)
                     end,
                 }
-                for dap, setup in pairs(variables.dap()) do
+                for dap, setup in pairs(variables.dap(mason_nvim_dap)) do
                     handlers[dap] = setup
                 end
 
-                require("mason-nvim-dap").setup({
+                mason_nvim_dap.setup({
                     ensure_installed = variables.dap_list,
                     automatic_installation = true,
                     handlers = handlers,
@@ -78,7 +80,7 @@ return {
             opts = {},
         },
     },
-    enabled = not variables.is_vscode,
+    enabled = not variables.is_vscode and not variables.is_wsl,
     init = function()
         local ok, wk = pcall(require, "which-key")
         if ok then

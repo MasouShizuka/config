@@ -32,6 +32,68 @@
         "when": "editorTextFocus && inSnippetMode"
     },
 
+    // 去除 Neovim 的接收键位
+    {
+        "key": "ctrl+c",
+        "command": "-vscode-neovim.escape",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && !dirtyDiffVisible && !findWidgetVisible && !inReferenceSearchEditor && !markersNavigationVisible && !notebookCellFocused && !notificationCenterVisible && !parameterHintsVisible && !referenceSearchVisible && neovim.mode == 'normal'"
+    },
+    {
+        "key": "ctrl+c",
+        "command": "-vscode-neovim.escape",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != 'normal'"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "-vscode-neovim.ctrl-f",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "-vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+o",
+        "command": "-vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+w",
+        "command": "-vscode-neovim.send",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+
+    // 增加 Neovim 的接收键位
+    {
+        "key": "ctrl+d",
+        "command": "-vscode-neovim.ctrl-d",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+d",
+        "command": "vscode-neovim.send",
+        "args": "<c-d>",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
+    },
+    {
+        "key": "ctrl+u",
+        "command": "-vscode-neovim.ctrl-u",
+        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+u",
+        "command": "vscode-neovim.send",
+        "args": "<c-u>",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
+    },
+    {
+        "key": "ctrl+q",
+        "command": "vscode-neovim.send",
+        "args": "<c-q>",
+        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
+    },
+
     // 设置 ctrl+j 向下移动条目
     {
         "key": "ctrl+n",
@@ -155,68 +217,6 @@
         "when": "inQuickOpen"
     },
 
-    // 增加 Neovim 的接收键位
-    {
-        "key": "ctrl+d",
-        "command": "-vscode-neovim.ctrl-d",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+d",
-        "command": "vscode-neovim.send",
-        "args": "<c-d>",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
-    },
-    {
-        "key": "ctrl+u",
-        "command": "-vscode-neovim.ctrl-u",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+u",
-        "command": "vscode-neovim.send",
-        "args": "<c-u>",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
-    },
-    {
-        "key": "ctrl+q",
-        "command": "vscode-neovim.send",
-        "args": "<c-q>",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
-    },
-
-    // 去除 Neovim 的接收键位
-    {
-        "key": "ctrl+c",
-        "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && !dirtyDiffVisible && !findWidgetVisible && !inReferenceSearchEditor && !markersNavigationVisible && !notebookCellFocused && !notificationCenterVisible && !parameterHintsVisible && !referenceSearchVisible && neovim.mode == 'normal'"
-    },
-    {
-        "key": "ctrl+c",
-        "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != 'normal'"
-    },
-    {
-        "key": "ctrl+f",
-        "command": "-vscode-neovim.ctrl-f",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+i",
-        "command": "-vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+o",
-        "command": "-vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+w",
-        "command": "-vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-
 
 
     //////////////
@@ -228,6 +228,18 @@
         "key": "i",
         "command": "notebook.cell.edit",
         "when": "notebookCellListFocused && notebookEditable && !inputFocus"
+    },
+
+    {
+        "key": "v",
+        "command": "-notebook.cell.paste",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
+    // 粘贴
+    {
+        "key": "p",
+        "command": "notebook.cell.paste",
+        "when": "notebookEditorFocused && !inputFocus"
     },
 
     {
@@ -251,18 +263,6 @@
     {
         "key": "shift+k",
         "command": "notebook.cell.moveUp",
-        "when": "notebookEditorFocused && !inputFocus"
-    },
-
-    {
-        "key": "v",
-        "command": "-notebook.cell.paste",
-        "when": "notebookEditorFocused && !inputFocus"
-    },
-    // 粘贴
-    {
-        "key": "p",
-        "command": "notebook.cell.paste",
         "when": "notebookEditorFocused && !inputFocus"
     },
 
@@ -398,6 +398,30 @@
     {
         "key": "ctrl+2",
         "command": "workbench.action.focusActiveEditorGroup"
+    },
+
+
+    {
+        "key": "tab",
+        "command": "-jumpToNextSnippetPlaceholder",
+        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
+    },
+    // 转到下一个 snippet placeholder
+    {
+        "key": "right",
+        "command": "jumpToNextSnippetPlaceholder",
+        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
+    },
+    {
+        "key": "shift+tab",
+        "command": "-jumpToPrevSnippetPlaceholder",
+        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
+    },
+    // 转到上一个 snippet placeholder
+    {
+        "key": "left",
+        "command": "jumpToPrevSnippetPlaceholder",
+        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
     },
 
     {
