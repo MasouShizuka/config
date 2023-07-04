@@ -1,10 +1,6 @@
 patch:
   app_options:
-    alacritty.exe:
-      ascii_mode: true
     code.exe:
-      ascii_mode: true
-    te64.exe:
       ascii_mode: true
     wezterm-gui.exe:
       ascii_mode: true

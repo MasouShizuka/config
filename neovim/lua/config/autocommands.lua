@@ -5,7 +5,7 @@ if not variables.is_vscode then
     local show_recording_info = vim.api.nvim_create_augroup("show_recording_info", { clear = true })
     vim.api.nvim_create_autocmd("RecordingEnter", {
         callback = function()
-            vim.api.nvim_set_option("cmdheight", 1)
+            vim.api.nvim_set_option_value("cmdheight", 1, {})
         end,
         desc = "Set cmdheight=1 when start recording",
         group = show_recording_info,
@@ -13,7 +13,7 @@ if not variables.is_vscode then
     })
     vim.api.nvim_create_autocmd("RecordingLeave", {
         callback = function()
-            vim.api.nvim_set_option("cmdheight", 0)
+            vim.api.nvim_set_option_value("cmdheight", 0, {})
         end,
         desc = "Set cmdheight=0 when finished recording",
         group = show_recording_info,

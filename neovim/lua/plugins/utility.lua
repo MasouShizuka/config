@@ -52,6 +52,18 @@ return {
             vim.opt.foldlevel = 99
             vim.opt.foldlevelstart = 99
 
+            -- 启用 resession 时取消注释
+            -- https://github.com/kevinhwang91/nvim-ufo/issues/57
+            -- Folds close automatically when leaving insert mode by pressing <esc>
+            -- vim.api.nvim_create_autocmd("BufEnter", {
+            --     callback = function()
+            --         vim.api.nvim_set_option_value("foldlevel", 99, { scope = "local" })
+            --     end,
+            --     desc = "Set foldlevel=99 when enter buffer",
+            --     group = vim.api.nvim_create_augroup("nvim-ufo", { clear = true }),
+            --     pattern = "*",
+            -- })
+
             require("ufo").setup(opts)
         end,
         dependencies = {

@@ -402,29 +402,6 @@
 
 
     {
-        "key": "tab",
-        "command": "-jumpToNextSnippetPlaceholder",
-        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
-    },
-    // 转到下一个 snippet placeholder
-    {
-        "key": "right",
-        "command": "jumpToNextSnippetPlaceholder",
-        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
-    },
-    {
-        "key": "shift+tab",
-        "command": "-jumpToPrevSnippetPlaceholder",
-        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
-    },
-    // 转到上一个 snippet placeholder
-    {
-        "key": "left",
-        "command": "jumpToPrevSnippetPlaceholder",
-        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
-    },
-
-    {
         "key": "ctrl+h",
         "command": "-editor.action.startFindReplaceAction",
         "when": "editorFocus || editorIsOpen"
@@ -671,6 +648,29 @@
         "key": "ctrl+;",
         "command": "editor.action.quickFix",
         "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+    },
+
+    {
+        "key": "tab",
+        "command": "-jumpToNextSnippetPlaceholder",
+        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
+    },
+    // 转到下一个 snippet placeholder
+    {
+        "key": "shift+right",
+        "command": "jumpToNextSnippetPlaceholder",
+        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
+    },
+    {
+        "key": "shift+tab",
+        "command": "-jumpToPrevSnippetPlaceholder",
+        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
+    },
+    // 转到上一个 snippet placeholder
+    {
+        "key": "shift+left",
+        "command": "jumpToPrevSnippetPlaceholder",
+        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
     },
 
 

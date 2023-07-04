@@ -33,7 +33,7 @@ return {
                     local layout = vim.api.nvim_call_function("winlayout", {})
                     if
                         layout[1] == "leaf"
-                        and vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(layout[2]), "filetype") == "NvimTree"
+                        and vim.api.nvim_get_option_value("filetype", { buf = vim.api.nvim_win_get_buf(layout[2]) }) == "NvimTree"
                         and layout[3] == nil
                     then
                         vim.api.nvim_command("confirm quit")
@@ -63,7 +63,7 @@ return {
             }
             local sort_current = 1
 
-            local cycle_sort = function()
+            local function cycle_sort()
                 if sort_current >= #SORT_METHODS then
                     sort_current = 1
                 else
@@ -73,7 +73,7 @@ return {
                 vim.notify(("Sort by %s"):format(SORT_METHODS[sort_current]))
             end
 
-            local sort_by = function()
+            local function sort_by()
                 return SORT_METHODS[sort_current]
             end
 
@@ -225,6 +225,7 @@ return {
                 renderer = {
                     highlight_opened_files = "all",
                     highlight_modified = "all",
+                    root_folder_label = false,
                 },
                 update_focused_file = {
                     enable = true,
@@ -240,6 +241,7 @@ return {
                 },
                 git = {
                     ignore = false,
+                    timeout = 4000,
                 },
                 modified = {
                     enable = true,

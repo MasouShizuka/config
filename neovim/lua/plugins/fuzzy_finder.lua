@@ -33,6 +33,12 @@ return {
         },
         opts = {
             defaults = {
+                sorting_strategy = "ascending",
+                layout_config = {
+                    horizontal = {
+                        prompt_position = "top",
+                    },
+                },
                 mappings = {
                     i = {
                         ["<c-j>"] = function(...) require("telescope.actions").move_selection_next(...) end,

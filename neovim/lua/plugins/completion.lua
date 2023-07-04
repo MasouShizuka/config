@@ -17,14 +17,14 @@ return {
                         i = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
                         c = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
                     }),
-                    ["<right>"] = cmp.mapping(function(fallback)
+                    ["<s-right>"] = cmp.mapping(function(fallback)
                         if luasnip.jumpable(1) then
                             luasnip.jump(1)
                         else
                             fallback()
                         end
                     end, { "i", "s" }),
-                    ["<left>"] = cmp.mapping(function(fallback)
+                    ["<s-left>"] = cmp.mapping(function(fallback)
                         if luasnip.jumpable(-1) then
                             luasnip.jump(-1)
                         else
@@ -42,8 +42,8 @@ return {
                             cmp.complete()
                         end
                     end),
-                    ["<cr>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false }),
-                    ["<tab>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+                    ["<cr>"] = cmp.mapping.confirm({ select = false }),
+                    ["<tab>"] = cmp.mapping.confirm({ select = true }),
                 }),
                 snippet = {
                     expand = function(args)

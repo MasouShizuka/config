@@ -13,7 +13,7 @@ return {
             "ToggleTermSetName",
         },
         enabled = not variables.is_vscode,
-        opts = function ()
+        opts = function()
             local config = {
                 size = function(term)
                     if term.direction == "horizontal" then

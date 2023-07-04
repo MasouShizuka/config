@@ -1,3 +1,33 @@
+#######################
+# Running Environment #
+#######################
+
+is_windows=0
+is_mac=0
+is_linux=0
+is_wsl=0
+uname=$(echo "$(uname -a)" | tr '[:upper:]' '[:lower:]')
+case "${uname}" in
+    mingw*)
+        is_windows=1
+    ;;
+    *msys)
+        is_windows=1
+    ;;
+    darwin*)
+        is_mac=1
+    ;;
+    *wsl*)
+        is_linux=1
+        is_wsl=1
+    ;;
+    linux*)
+        is_linux=1
+    ;;
+esac
+
+
+
 #########
 # Alias #
 #########
@@ -12,6 +42,11 @@ autoload -Uz run-help-git run-help-ip run-help-openssl run-help-p4 run-help-sudo
 alias vi=nvim
 alias vim=nvim
 
+# wsl 调用 windows 的代理
+if (( is_wsl )); then
+    alias proxy="source ~/scripts/proxy.sh"
+fi
+
 
 
 ########################
@@ -23,7 +58,14 @@ export EDITOR=nvim
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-export MSYS=winsymlinks:nativestrict
+# msys2 的 ln 功能
+if (( is_windows )); then
+    export MSYS=winsymlinks:nativestrict
+fi
+# wsl 使用 windows 的 neovim 配置
+if (( is_wsl )); then
+    export XDG_CONFIG_HOME=/mnt/c/Users/MasouShizuka/AppData/Local
+fi
 
 
 
@@ -111,7 +153,12 @@ zstyle ":completion:*" rehash true
 # Theme #
 #########
 
-export STARSHIP_CONFIG=$HOME/.config/starship/starship.toml
+if (( is_windows )); then
+    export STARSHIP_CONFIG=$HOME/.config/starship/starship.toml
+elif (( is_wsl )); then
+    export STARSHIP_CONFIG=/mnt/c/Users/MasouShizuka/.config/starship/starship.toml
+fi
+
 eval "$(starship init zsh)"
 
 
@@ -183,7 +230,10 @@ function zvm_after_lazy_keybindings() {
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 if [[ -f "$HOME/miniconda3/Scripts/conda" ]]; then
-    # eval "$('$HOME/miniconda3/Scripts/conda.exe' 'shell.zsh' 'hook')"
-    eval "$($HOME/miniconda3/Scripts/conda 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2>/dev/null
+    if (( is_windows )); then
+        eval "$($HOME/miniconda3/Scripts/conda 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2>/dev/null
+    else
+        eval "$($HOME/miniconda3/Scripts/conda 'shell.zsh' 'hook')"
+    fi
 fi
 # <<< conda initialize <<<

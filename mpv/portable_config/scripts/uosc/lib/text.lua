@@ -51,11 +51,12 @@ local osd_width, osd_height = 100, 100
 ---@return integer
 local function utf8_char_bytes(str, i)
 	local char_byte = str:byte(i)
-	if char_byte < 0xC0 then return 1
-	elseif char_byte < 0xE0 then return 2
-	elseif char_byte < 0xF0 then return 3
-	elseif char_byte < 0xF8 then return 4
-	else return 1 end
+	local max_bytes = #str - i + 1
+	if char_byte < 0xC0 then return math.min(max_bytes, 1)
+	elseif char_byte < 0xE0 then return math.min(max_bytes, 2)
+	elseif char_byte < 0xF0 then return math.min(max_bytes, 3)
+	elseif char_byte < 0xF8 then return math.min(max_bytes, 4)
+	else return math.min(max_bytes, 1) end
 end
 
 ---Creates an iterator for an utf-8 encoded string
@@ -87,9 +88,7 @@ local function utf8_to_unicode(str, i)
 		unicode = char_byte * (2 ^ 6) ^ (byte_count - 1)
 	end
 	for j = 2, byte_count do
-		if i + j - 1 <= #str then -- 临时修复 https://github.com/tomasklaen/uosc/issues/515
-			char_byte = str:byte(i + j - 1) - 0x80
-		end
+		char_byte = str:byte(i + j - 1) - 0x80
 		unicode = unicode + char_byte * (2 ^ 6) ^ (byte_count - j)
 	end
 	return round(unicode)

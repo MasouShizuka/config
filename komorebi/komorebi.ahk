@@ -188,7 +188,7 @@ RunWait, komorebic.exe identify-tray-application exe "WeChat.exe", , Hide
 
 ; Identify applications that have overflowing borders
 ; RunWait, komorebic.exe identify-border-overflow-application exe Discord.exe, , Hide
-RunWait, komorebic.exe identify-border-overflow-application exe "alacritty.exe", , Hide
+RunWait, komorebic.exe identify-border-overflow-application exe "cloudmusic.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "Code.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "QQ.exe", , Hide
 RunWait, komorebic.exe identify-border-overflow-application exe "vivaldi.exe", , Hide

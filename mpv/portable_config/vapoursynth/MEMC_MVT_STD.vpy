@@ -14,7 +14,7 @@ clip = video_in
 H_Pre = 1440
 Fps_Out = 60.0
 Lk_Fmt = False
-## 整数，预降低处理源高度
+## 整数，预降低处理源高度（填你的显示器高度）
 ## 浮点，目标帧率，示例即约60fps。特殊值比如 display_fps/2 即目标为显示器刷新率的一半帧率；填 container_fps*2 即倍帧（越高的帧率增加耗能，产生更多伪影，通常是不必要的。例如对于144hz的显示器来说，最多只需要补到72fps，剩下的可让 --interpolation 帧混成补偿）
 ## <True|False> 锁定像素格式为yuv420p8
 

@@ -2,7 +2,7 @@
     "ID": "edf72277-8b2b-3377-8975-3ccf4820078f",
     "ActionKeyword": "[",
     "Name": "Neovim Session Manager",
-    "Decription": "Opens session managed by Neovim Session Manager in neovim",
+    "Decription": "Open neovim session",
     "Author": "MasouShizuka",
     "Version": "1.0.0",
     "Language": "python",

@@ -4,7 +4,6 @@ bierner.docs-view
 clover.md-table-editor
 cweijan.epub-reader
 cweijan.vscode-office
-DavidAnson.vscode-markdownlint
 DotJoshJohnson.xml
 eamodio.gitlens
 foam.foam-vscode
@@ -22,6 +21,7 @@ Kelvin.vscode-sshfs
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
 manasxx.background-cover
+manuth.markdown-converter
 mark-wiemer.vscode-autohotkey-plus-plus
 marp-team.marp-vscode
 mechatroner.rainbow-csv

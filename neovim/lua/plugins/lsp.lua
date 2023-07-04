@@ -4,16 +4,6 @@ return {
     {
         "jose-elias-alvarez/null-ls.nvim",
         config = function(_, opts)
-            -- local format = function()
-            --     local bufnr = vim.api.nvim_get_current_buf()
-            --     vim.lsp.buf.format({
-            --         async = false,
-            --         bufnr = bufnr,
-            --         filter = function(client)
-            --             return client.name == "null-ls"
-            --         end,
-            --     })
-            -- end
             -- local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
             require("null-ls").setup({
                 -- 保存时自动格式化
@@ -22,7 +12,7 @@ return {
                 --         vim.api.nvim_clear_autocmds({ buffer = bufnr, group = augroup })
                 --         vim.api.nvim_create_autocmd("BufWritePre", {
                 --             buffer = bufnr,
-                --             callback = format,
+                --             callback = variables.format,
                 --             desc = "Auto format when saving",
                 --             group = augroup,
                 --         })
@@ -87,17 +77,6 @@ return {
 
             vim.lsp.set_log_level("OFF")
 
-            local format = function()
-                local bufnr = vim.api.nvim_get_current_buf()
-                vim.lsp.buf.format({
-                    async = true,
-                    bufnr = bufnr,
-                    filter = function(client)
-                        return client.name == "null-ls"
-                    end,
-                })
-            end
-
             -- Global mappings.
             -- See `:help vim.diagnostic.*` for documentation on any of the below functions
             -- vim.keymap.set("n", "<space>e", vim.diagnostic.open_float)
@@ -113,7 +92,7 @@ return {
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(ev)
                     -- Enable completion triggered by <c-x><c-o>
-                    vim.api.nvim_buf_set_option(ev.buf, "omnifunc", "v:lua.vim.lsp.omnifunc")
+                    vim.api.nvim_set_option_value("omnifunc", "v:lua.vim.lsp.omnifunc", { buf = ev.buf })
 
                     -- Buffer local mappings.
                     -- See `:help vim.lsp.*` for documentation on any of the below functions
@@ -136,7 +115,7 @@ return {
                     vim.keymap.set({ "n", "x" }, variables.keymap["<c-;>"], vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code action", silent = true })
                     -- 由 glance 设置
                     -- vim.keymap.set("n", "ge", vim.lsp.buf.references, { buffer = ev.buf, desc = "Go to references", silent = true })
-                    vim.keymap.set({ "n", "x" }, "<leader>f", format, { buffer = ev.buf, desc = "Format", silent = true })
+                    vim.keymap.set({ "n", "x" }, "<leader>f", variables.format, { buffer = ev.buf, desc = "Format", silent = true })
                 end,
                 desc = "Lsp keymap",
                 group = vim.api.nvim_create_augroup("UserLspConfig", {}),

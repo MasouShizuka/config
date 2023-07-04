@@ -44,6 +44,13 @@ return {
                 },
                 -- diagnostics = false | "nvim_lsp" | "coc",
                 diagnostics = "nvim_lsp",
+                -- The diagnostics indicator can be set to nil to keep the buffer name highlight but delete the highlighting
+                diagnostics_indicator = function(count, level, diagnostics_dict, context)
+                    local icons = variables.icons.diagnostics
+                    local ret = (diagnostics_dict.error and icons.Error .. diagnostics_dict.error .. " " or "")
+                        .. (diagnostics_dict.warning and icons.Warn .. diagnostics_dict.warning or "")
+                    return vim.trim(ret)
+                end,
                 -- offsets = {
                 --     {
                 --         filetype = "NvimTree",
@@ -52,19 +59,12 @@ return {
                 --         separator = true
                 --     }
                 -- },
-                -- The diagnostics indicator can be set to nil to keep the buffer name highlight but delete the highlighting
-                diagnostics_indicator = function(count, level, diagnostics_dict, context)
-                    local icons = variables.icons.diagnostics
-                    local ret = (diagnostics_dict.error and icons.Error .. diagnostics_dict.error .. " " or "")
-                        .. (diagnostics_dict.warning and icons.Warn .. diagnostics_dict.warning or "")
-                    return vim.trim(ret)
-                end,
                 offsets = {
                     {
                         filetype = "NvimTree",
                         highlight = "Directory",
                         text = function()
-                            return vim.fn.getcwd()
+                            return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
                         end,
                         text_align = "center",
                     },

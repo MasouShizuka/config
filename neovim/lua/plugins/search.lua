@@ -2,7 +2,8 @@ return {
     {
         "kevinhwang91/nvim-hlslens",
         keys = {
-            { "/", desc = "Search", mode = "n" },
+            { "/", desc = "Search forward",  mode = { "n", "x" } },
+            { "?", desc = "Search backward", mode = { "n", "x" } },
             {
                 "n",
                 function()

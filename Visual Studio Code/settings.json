@@ -82,9 +82,11 @@
     "hediet.vscode-drawio.codeLinkActivated": true,
     "hediet.vscode-drawio.theme": "Kennedy",
     "isort.args": [
-        "--multi-line", "3",
+        "--multi-line",
+        "3",
         "--trailing-comma",
-        "--profile", "black"
+        "--profile",
+        "black"
     ],
     "isort.check": true,
     "isort.severity": {
@@ -181,6 +183,7 @@
     ],
     "Lua.format.defaultConfig": {
         "max_line_length": "10000",
+        "quote_style": "double",
         "trailing_table_separator": "smart"
     },
     "markdown.extension.list.indentationSize": "inherit",
@@ -193,22 +196,15 @@
     "markdown.preview.fontSize": 14,
     "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
-    "markdownlint.config": {
-        "MD001": false,
-        "MD007": false,
-        "MD009": false,
-        "MD011": false,
-        "MD024": false,
-        "MD025": false,
-        "MD026": false,
-        "MD029": false,
-        "MD032": false,
-        "MD033": false,
-        "MD034": false,
-        "MD037": false,
-        "MD040": false,
-        "MD051": false,
-        "MD052": false
+    "markdownConverter.ChromiumExecutablePath": "C:\\Users\\MasouShizuka\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
+    "markdownConverter.ConversionType": [
+        "PDF",
+        "HTML"
+    ],
+    "markdownConverter.Document.HeaderContent": {
+        "Center": "",
+        "Left": "",
+        "Right": ""
     },
     "mdtableeditor.commandViews": {
         "context": [

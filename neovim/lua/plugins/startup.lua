@@ -65,13 +65,18 @@ return {
                 "                                                        ",
             }
 
+            -- local config_session = variables.config_path:gsub("/", vim.g.path_replacer):gsub(":", vim.g.colon_replacer)
             dashboard.section.buttons.val = {
                 dashboard.button("n", "  New File", ":ene <bar> startinsert<cr>"),
                 dashboard.button("f", "  Find File", ":Telescope find_files<cr>"),
                 dashboard.button("o", "  Recent Files", ":Telescope oldfiles<cr>"),
-                dashboard.button("c", "  Config", ":execute 'cd ' . fnamemodify($MYVIMRC, ':p:h')<cr>:SessionManager load_current_dir_session<cr>"),
+                dashboard.button("c", "  Config", [[:execute "cd " . fnamemodify($MYVIMRC, ":p:h")<cr>:SessionManager load_current_dir_session<cr>]]),
                 dashboard.button("s", "  Load Session", ":SessionManager load_session<cr>"),
                 dashboard.button("S", "  Load Last Session", ":SessionManager load_last_session<cr>"),
+                -- 启用 resession 时取消注释
+                -- dashboard.button("c", "  Config", [[:execute "cd " . fnamemodify($MYVIMRC, ":p:h")<cr>:lua require("resession").load("]] .. config_session .. [[")<cr>]]),
+                -- dashboard.button("s", "  Load Session", [[:lua require("resession").load()<cr>]]),
+                -- dashboard.button("S", "  Load Last Session", [[:lua require("resession").load("last")<cr>]]),
                 dashboard.button("l", "  Lazy", ":Lazy<cr>"),
                 dashboard.button("q", "  Quit", ":qa<cr>"),
             }

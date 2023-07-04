@@ -60,4 +60,125 @@ return {
             "VimEnter",
         },
     },
+
+    -- resession 目前还存在许多问题
+    -- {
+    --     "stevearc/resession.nvim",
+    --     config = function(_, opts)
+    --         local resession = require("resession")
+    --         resession.setup(opts)
+    --
+    --         local function get_saved_session_name()
+    --             local cwd = vim.fn.getcwd()
+    --             if variables.is_windows then
+    --                 cwd = cwd:gsub("\\", "/")
+    --             end
+    --             cwd = cwd:gsub("/", vim.g.path_replacer)
+    --             cwd = cwd:gsub(":", vim.g.colon_replacer)
+    --
+    --             return cwd
+    --         end
+    --
+    --         local function is_session_exist()
+    --             local cwd = get_saved_session_name()
+    --             local list = resession.list()
+    --             for _, session in ipairs(list) do
+    --                 if cwd == session then
+    --                     return true, session
+    --                 end
+    --             end
+    --             return false, nil
+    --         end
+    --
+    --         local function delete_invisiable_buffer()
+    --             local open_buffers = vim.fn.getbufinfo({ buflisted = 1 })
+    --             if #open_buffers < 1 then
+    --                 return
+    --             end
+    --
+    --             for _, buf in pairs(open_buffers) do
+    --                 local is_modified = vim.api.nvim_get_option_value("modified", { buf = buf.bufnr })
+    --                 local is_visible = buf.hidden == 0 and buf.loaded == 1
+    --                 local notification = true
+    --
+    --                 if not is_modified and not is_visible then
+    --                     if is_modified then
+    --                         vim.cmd.write()
+    --                     end
+    --
+    --                     vim.api.nvim_buf_delete(buf.bufnr, { force = false, unload = false })
+    --
+    --                     if notification then
+    --                         vim.notify("Auto Closed Buffer: " .. vim.fs.basename(buf.name))
+    --                     end
+    --                 end
+    --             end
+    --         end
+    --
+    --         vim.keymap.set("n", "<leader>ss", function()
+    --             delete_invisiable_buffer()
+    --             resession.save(get_saved_session_name(), { notify = true })
+    --         end, { desc = "Session save", silent = true })
+    --         vim.keymap.set("n", "<leader>sl", function() resession.load() end, { desc = "Session load", silent = true })
+    --         vim.keymap.set("n", "<leader>sd", function() resession.delete() end, { desc = "Session delete", silent = true })
+    --
+    --         vim.api.nvim_create_autocmd("VimEnter", {
+    --             callback = function()
+    --                 local is_exist, session = is_session_exist()
+    --                 if is_exist then
+    --                     resession.load(session)
+    --                 end
+    --             end,
+    --         })
+    --         vim.api.nvim_create_autocmd("VimLeavePre", {
+    --             callback = function()
+    --                 local is_exist, session = is_session_exist()
+    --                 if is_exist then
+    --                     delete_invisiable_buffer()
+    --                     resession.save(session)
+    --                     resession.save("last")
+    --                 end
+    --             end,
+    --         })
+    --     end,
+    --     enabled = not variables.is_vscode,
+    --     init = function()
+    --         vim.g.path_replacer = "__"
+    --         vim.g.colon_replacer = "++"
+    --
+    --         local ok, wk = pcall(require, "which-key")
+    --         if ok then
+    --             wk.register({
+    --                 mode = "n",
+    --                 ["<leader>s"] = {
+    --                     name = "+resession",
+    --                 },
+    --             })
+    --         end
+    --     end,
+    --     keys = {
+    --         { "<leader>ss", desc = "Session save",   mode = "n" },
+    --         { "<leader>sl", desc = "Session load",   mode = "n" },
+    --         { "<leader>sd", desc = "Session delete", mode = "n" },
+    --     },
+    --     lazy = false,
+    --     opts = {
+    --         options = {
+    --             "binary",
+    --             "bufhidden",
+    --             "buflisted",
+    --             "cmdheight",
+    --             "diff",
+    --             "filetype",
+    --             "modifiable",
+    --             "previewwindow",
+    --             "readonly",
+    --             "scrollbind",
+    --             "winfixheight",
+    --             "winfixwidth",
+    --             "wrap",
+    --         },
+    --         dir = "lazy/resession.nvim/session",
+    --     },
+    -- },
 }

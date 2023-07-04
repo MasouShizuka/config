@@ -15,7 +15,7 @@ H_Pre = 1440
 Recal = True
 Block = True
 Lk_Fmt = False
-## 整数，预降低处理源高度
+## 整数，预降低处理源高度（填你的显示器高度）
 ## <True|False> 是否使用二次分析
 ## <True|False> 是否使用Block模式
 ## <True|False> 锁定像素格式为yuv420p8

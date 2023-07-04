@@ -51,7 +51,6 @@ vim.opt.termguicolors = true                                                    
 
 -- Indent
 vim.opt.breakindent = true                                                         -- wrapped line repeats indent
-vim.opt.linebreak = true                                                           -- wrap long lines at a blank
 vim.opt.smartindent = true                                                         -- smart autoindenting for C programs
 
 -- Location list
@@ -83,7 +82,7 @@ vim.opt.sessionoptions = "curdir,folds,globals,help,localoptions,tabpages,winsiz
 
 -- Shell
 if variables.is_windows then
-    vim.opt.shell = "pwsh -nologo"                                                 -- name of shell to use for external commands
+    vim.opt.shell = "pwsh -NoLogo"                                                 -- name of shell to use for external commands
     vim.opt.shellcmdflag = "-c"                                                    -- flag to shell to execute one command
     vim.opt.shellquote = ""                                                        -- quote character(s) for around shell command
     vim.opt.shellslash = true                                                      -- use forward slash for shell file names
@@ -101,7 +100,7 @@ vim.opt.showmode = false                                                        
 
 -- Time
 vim.opt.timeoutlen = 500                                                           -- time out time in milliseconds
-vim.opt.updatetime = 1000                                                          -- after this many milliseconds flush swap file
+vim.opt.updatetime = 300                                                           -- after this many milliseconds flush swap file
 
 -- Wildmenu
 vim.opt.wildmode = "longest:list,full"                                             -- mode for 'wildchar' command-line expansion

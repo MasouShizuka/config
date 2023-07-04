@@ -10,6 +10,7 @@ from flowlauncher import FlowLauncherAPI
 class NeovimSessionManager(FlowLauncher):
     def __init__(self):
         self.session_dir = "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions"
+        # self.session_dir = "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/resession.nvim/session"
         self.path_replacer = "__"
         self.colon_replacer = "++"
 
@@ -25,6 +26,10 @@ class NeovimSessionManager(FlowLauncher):
         for session in self.session_list:
             working_dir = session.replace(self.path_replacer, "/")
             working_dir = working_dir.replace(self.colon_replacer, ":")
+            if working_dir.endswith(".json"):
+                working_dir = working_dir[:-5]
+            elif working_dir.endswith(".vim"):
+                working_dir = working_dir[:-4]
             name = working_dir.split("/")[-1]
             if query.lower() in working_dir.lower():
                 results.append(

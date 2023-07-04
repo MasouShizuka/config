@@ -235,7 +235,7 @@ return {
             -- IM will be set to `default_im_select` in `normal` mode
             -- For Windows/WSL, default: "1033", aka: English US Keyboard
             -- For macOS, default: "com.apple.keylayout.ABC", aka: US
-            -- For Linux, default: "keyboard-us" for Fcitx5 or "1" for Fcitx
+            -- For Linux, default: "keyboard-us" for Fcitx5 or "1" for Fcitx or "xkb:us::eng" for ibus
             -- You can use `im-select` or `fcitx5-remote -n` to get the IM's name you preferred
             default_im_select = "1033",
 
@@ -243,7 +243,7 @@ return {
             -- e.g. 'im-select' or '/usr/local/bin/im-select'
             -- For Windows/WSL, default: "im-select.exe"
             -- For macOS, default: "im-select"
-            -- For Linux, default: "fcitx5-remote" or "fcitx-remote"
+            -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
             default_command = vim.fn.stdpath("config") .. "/im-select",
 
             -- Restore the default input method state when the following events are triggered

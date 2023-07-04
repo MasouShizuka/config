@@ -21,7 +21,7 @@ vim.keymap.set({ "n", "x" }, "k", "v:count == 0 && mode() !=# 'V' ? 'gk' : 'k'",
 vim.keymap.set("x", "J", ":move '>+1<cr>gv-gv", { desc = "Move selected text up", silent = true })
 vim.keymap.set("x", "K", ":move '<-2<cr>gv-gv", { desc = "Move selected text down", silent = true })
 
--- Mark
+-- mark
 vim.keymap.set("n", "M", "m", { desc = "Mark", silent = true })
 
 -- 选中上次粘贴的文本
@@ -120,36 +120,40 @@ else
     vim.keymap.set("t", "<esc>", [[<c-\><c-n>]], { desc = "Enter normal mode", silent = true })
 
     -- 聚焦左侧边栏
-    vim.keymap.set("n", variables.keymap["<c-1>"], function()
-        if not variables.toggle_filetype(variables.toggle_filetype_list1) then
-            require("nvim-tree.api").tree.open()
-        end
-    end, { desc = "Focus left panel", silent = true })
+    -- 由 edgy 设置
+    -- vim.keymap.set("n", variables.keymap["<c-1>"], function()
+    --     if not variables.toggle_filetype(variables.toggle_filetype_list1) then
+    --         require("nvim-tree.api").tree.open()
+    --     end
+    -- end, { desc = "Focus left panel", silent = true })
 
     -- 聚焦编辑文件
-    vim.keymap.set("n", variables.keymap["<c-2>"], function()
-        variables.skip_filetype(variables.skip_filetype_list1, "W")
-    end, { desc = "Focus editor", silent = true })
+    -- 由 edgy 设置
+    -- vim.keymap.set("n", variables.keymap["<c-2>"], function()
+    --     variables.skip_filetype(variables.skip_filetype_list1, "W")
+    -- end, { desc = "Focus editor", silent = true })
 
     -- 聚焦底栏
-    vim.keymap.set("n", variables.keymap["<c-3>"], function()
-        local count = vim.v.count
-        if count > 0 then
-            vim.api.nvim_command(tostring(count) .. "ToggleTerm")
-            return
-        end
+    -- 由 edgy 设置
+    -- vim.keymap.set("n", variables.keymap["<c-3>"], function()
+    --     local count = vim.v.count
+    --     if count > 0 then
+    --         vim.api.nvim_command(tostring(count) .. "ToggleTerm")
+    --         return
+    --     end
 
-        if not variables.toggle_filetype(variables.toggle_filetype_list2) then
-            vim.api.nvim_command("ToggleTerm")
-        end
-    end, { desc = "Focus bottom panel", silent = true })
+    --     if not variables.toggle_filetype(variables.toggle_filetype_list2) then
+    --         vim.api.nvim_command("ToggleTerm")
+    --     end
+    -- end, { desc = "Focus bottom panel", silent = true })
 
     -- 聚焦右侧边栏
-    vim.keymap.set("n", variables.keymap["<c-4>"], function()
-        if not variables.toggle_filetype(variables.toggle_filetype_list3) then
-            vim.api.nvim_command("DocsViewToggle")
-        end
-    end, { desc = "Focus right panel", silent = true })
+    -- 由 edgy 设置
+    -- vim.keymap.set("n", variables.keymap["<c-4>"], function()
+    --     if not variables.toggle_filetype(variables.toggle_filetype_list3) then
+    --         vim.api.nvim_command("DocsViewToggle")
+    --     end
+    -- end, { desc = "Focus right panel", silent = true })
 
     -- 搜索并替换
     -- 由 nvim-alt-substitute 设置
@@ -166,19 +170,19 @@ else
         variables.skip_filetype(variables.skip_filetype_list2, "W")
     end, { desc = "Move to previous window", silent = true })
     vim.keymap.set("n", "<c-s>h", function()
-        vim.api.nvim_set_option("splitright", false)
+        vim.api.nvim_set_option_value("splitright", false, {})
         vim.cmd.wincmd("v")
     end, { desc = "Move window to left", silent = true })
     vim.keymap.set("n", "<c-s>l", function()
-        vim.api.nvim_set_option("splitright", true)
+        vim.api.nvim_set_option_value("splitright", true, {})
         vim.cmd.wincmd("v")
     end, { desc = "Move window to right", silent = true })
     vim.keymap.set("n", "<c-s>j", function()
-        vim.api.nvim_set_option("splitbelow", true)
+        vim.api.nvim_set_option_value("splitbelow", true, {})
         vim.cmd.wincmd("s")
     end, { desc = "Move window to down", silent = true })
     vim.keymap.set("n", "<c-s>k", function()
-        vim.api.nvim_set_option("splitbelow", false)
+        vim.api.nvim_set_option_value("splitbelow", false, {})
         vim.cmd.wincmd("s")
     end, { desc = "Move window to up", silent = true })
     vim.keymap.set("n", "<c-s><c-h>", function() vim.cmd.wincmd("H") end, { desc = "Split window to left", silent = true })
@@ -190,7 +194,7 @@ else
     vim.keymap.set("n", "<c-up>", function() vim.cmd.wincmd("+") end, { desc = "Increase window height", silent = true })
     vim.keymap.set("n", "<c-down>", function() vim.cmd.wincmd("-") end, { desc = "Decrease window height", silent = true })
 
-    -- Tab
+    -- tab
     -- 由 bufferline 设置
     -- vim.keymap.set("n", "<c-h>", function() vim.cmd.tabnext() end, { desc = "Cycle next tab", silent = true })
     -- vim.keymap.set("n", "<c-l>", function() vim.cmd.tabprevious() end,, { desc = "Cycle previous tab", silent = true })
@@ -208,11 +212,11 @@ else
         vim.api.nvim_command("vertical sbuffer " .. buffer)
     end, { desc = "Move buffer to next tab", silent = true })
 
-    -- Jump
+    -- 跳转居中
     vim.keymap.set("n", "<c-i>", "<c-i>zz", { desc = "Jump to next location", silent = true })
     vim.keymap.set("n", "<c-o>", "<c-o>zz", { desc = "Jump to previous location", silent = true })
 
-    -- Diff
+    -- diff
     vim.keymap.set("n", "<c-n>", function()
         vim.cmd.normal("]c")
         vim.cmd.normal("zz")
@@ -230,24 +234,35 @@ else
     vim.keymap.set("n", "<leader>r", function()
         local path = vim.fn.expand("%:~:.")
         if variables.is_windows then
-            path = path:format("\\", "/")
+            path = path:gsub("\\", "/")
         end
 
+        local ok, toggleterm = pcall(require, "toggleterm")
         local filetype = vim.bo.filetype
-        if filetype == "lua" then
-            -- vim.api.nvim_command("lua %")
-            require("toggleterm").exec_command(([[TermExec cmd='lua "%s"']]):format(path))
-        elseif filetype == "markdown" then
-            vim.api.nvim_command("MarkdownPreviewToggle")
-        elseif filetype == "python" then
-            -- vim.api.nvim_command("python -u %")
-            require("toggleterm").exec_command(([[TermExec cmd='python -u "%s"']]):format(path))
-        elseif filetype == "rust" then
-            -- vim.api.nvim_command("cargo run")
-            require("toggleterm").exec_command([[TermExec cmd='cargo run']])
-        elseif filetype == "sh" then
-            -- vim.api.nvim_command("bash %")
-            require("toggleterm").exec_command(([[TermExec cmd='bash "%s"']]):format(path))
+        if ok then
+            if filetype == "lua" then
+                toggleterm.exec_command(([[TermExec cmd='lua "%s"']]):format(path))
+            elseif filetype == "markdown" then
+                vim.api.nvim_command("MarkdownPreviewToggle")
+            elseif filetype == "python" then
+                toggleterm.exec_command(([[TermExec cmd='python -u "%s"']]):format(path))
+            elseif filetype == "rust" then
+                toggleterm.exec_command([[TermExec cmd='cargo run']])
+            elseif filetype == "sh" then
+                toggleterm.exec_command(([[TermExec cmd='bash "%s"']]):format(path))
+            end
+        else
+            if filetype == "lua" then
+                vim.api.nvim_command("lua %")
+            elseif filetype == "markdown" then
+                vim.api.nvim_command("MarkdownPreviewToggle")
+            elseif filetype == "python" then
+                vim.api.nvim_command("python -u %")
+            elseif filetype == "rust" then
+                vim.api.nvim_command("cargo run")
+            elseif filetype == "sh" then
+                vim.api.nvim_command("bash %")
+            end
         end
     end, { desc = "Run", silent = true })
 end

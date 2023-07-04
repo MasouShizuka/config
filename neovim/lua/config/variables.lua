@@ -1,46 +1,48 @@
-local variables = {}
+local M = {}
 
-function variables:load_running_environment()
+function M.load_running_environment()
     local sysname = vim.loop.os_uname().sysname:lower()
     local release = vim.loop.os_uname().release:lower()
 
-    self.is_windows = sysname == "windows_nt"
-    self.is_mac = sysname == "darwin"
-    self.is_linux = sysname == "linux"
-    self.is_wsl = self.is_linux and release:find("wsl") and true or false
-    self.is_vscode = vim.g.vscode
+    M.is_windows = sysname == "windows_nt"
+    M.is_mac = sysname == "darwin"
+    M.is_linux = sysname == "linux"
+    M.is_wsl = M.is_linux and release:find("wsl") and true or false
+    M.is_vscode = vim.g.vscode
 end
 
-function variables:load_path()
-    self.config_path = vim.fn.stdpath("config")
-    if self.is_windows then
-        self.config_path = self.config_path:format("\\", "/")
+function M.load_path()
+    M.config_path = vim.fn.stdpath("config")
+    if M.is_windows then
+        M.config_path = M.config_path:gsub("\\", "/")
     end
-    self.data_path = vim.fn.stdpath("data")
-    if self.is_windows then
-        self.data_path = self.data_path:format("\\", "/")
+    M.data_path = vim.fn.stdpath("data")
+    if M.is_windows then
+        M.data_path = M.data_path:gsub("\\", "/")
     end
-    self.home_path = vim.env.HOME
-    if self.is_windows then
-        self.home_path = self.home_path:format("\\", "/")
+    M.home_path = vim.env.HOME
+    if M.is_windows then
+        M.home_path = M.home_path:gsub("\\", "/")
     end
 
-    self.mason_install_root_path = self.data_path .. "/lazy/mason.nvim/mason"
+    M.conda_path = M.home_path .. "/miniconda3"
 
-    self.vscode_path = nil
-    if self.is_windows then
-        self.vscode_path = vim.env.APPDATA:format("\\", "/") .. "/Code"
-    elseif self.is_mac then
-        self.vscode_path = vim.env.HOME .. "/Library/Application\\ Support/Code"
-    elseif self.is_linux then
-        self.vscode_path = vim.env.HOME .. "/.config/Code"
+    M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
+
+    M.vscode_path = nil
+    if M.is_windows then
+        M.vscode_path = vim.env.APPDATA:gsub("\\", "/") .. "/Code"
+    elseif M.is_mac then
+        M.vscode_path = vim.env.HOME .. "/Library/Application\\ Support/Code"
+    elseif M.is_linux then
+        M.vscode_path = vim.env.HOME .. "/.config/Code"
     end
-    self.vscode_snippet_path = self.vscode_path .. "/User/snippets"
-    self.vscode_extension_path = self.home_path .. "/.vscode/extensions"
+    M.vscode_snippet_path = M.vscode_path .. "/User/snippets"
+    M.vscode_extension_path = M.home_path .. "/.vscode/extensions"
 end
 
-function variables:load_icons()
-    self.icons = {
+function M.load_icons()
+    M.icons = {
         dap = {
             Breakpoint = " ",
             BreakpointCondition = " ",
@@ -99,27 +101,43 @@ function variables:load_icons()
     }
 end
 
-function variables:load_keymap()
-    self.keymap = {
-        ["<c-1>"] = "<c-f1>",
-        ["<c-2>"] = "<c-f2>",
-        ["<c-3>"] = "<c-f3>",
-        ["<c-4>"] = "<c-f4>",
-        ["<c-space>"] = "<c-f5>",
-        ["<c-,>"] = "<c-f6>",
-        ["<c-.>"] = "<c-f7>",
-        ["<c-;>"] = "<c-f8>",
-        ["<c-s-n>"] = "<c-f9>",
-        ["<c-s-t>"] = "<c-f10>",
-    }
+function M.load_keymap()
+    if not M.is_wsl then
+        M.keymap = {
+            ["<c-1>"] = "<c-f1>",
+            ["<c-2>"] = "<c-f2>",
+            ["<c-3>"] = "<c-f3>",
+            ["<c-4>"] = "<c-f4>",
+            ["<c-space>"] = "<c-f5>",
+            ["<c-,>"] = "<c-f6>",
+            ["<c-.>"] = "<c-f7>",
+            ["<c-;>"] = "<c-f8>",
+            ["<c-s-n>"] = "<c-f9>",
+            ["<c-s-t>"] = "<c-f10>",
+        }
+    else
+        M.keymap = {
+            ["<c-1>"] = "<f25>",
+            ["<c-2>"] = "<f26>",
+            ["<c-3>"] = "<f27>",
+            ["<c-4>"] = "<f28>",
+            ["<c-space>"] = "<f29>",
+            ["<c-,>"] = "<f30>",
+            ["<c-.>"] = "<f31>",
+            ["<c-;>"] = "<f32>",
+            ["<c-s-n>"] = "<f33>",
+            ["<c-s-t>"] = "<f34>",
+        }
+    end
 end
 
-function variables:load_filtyppe_list()
+function M.load_filtyppe_list()
     -- skip when <c-2>
-    self.skip_filetype_list1 = {
+    M.skip_filetype_list1 = {
         "dap",
         "DiffviewFiles",
         "DiffviewFileHistory",
+        "help",
         "notify",
         "nvim-docs-view",
         "NvimTree",
@@ -127,15 +145,17 @@ function variables:load_filtyppe_list()
         "Trouble",
     }
     -- skip when <c-j>, <c-k>
-    self.skip_filetype_list2 = {
+    M.skip_filetype_list2 = {
+        "dap",
         "DiffviewFiles",
         "DiffviewFileHistory",
+        "help",
         "nvim-docs-view",
         "NvimTree",
         "toggleterm",
         "Trouble",
     }
-    self.is_start_with_skip_filetype = function(filetype, skip_filetye_list)
+    M.is_start_with_skip_filetype = function(filetype, skip_filetye_list)
         for _, skip_filetype in ipairs(skip_filetye_list) do
             if filetype:find(skip_filetype, 1, true) == 1 then
                 return true
@@ -143,10 +163,10 @@ function variables:load_filtyppe_list()
         end
         return false
     end
-    self.skip_filetype = function(skip_filetype_list, param)
+    M.skip_filetype = function(skip_filetype_list, param)
         local filetype = vim.bo.filetype
         local max_skip = 20
-        while self.is_start_with_skip_filetype(filetype, skip_filetype_list) and max_skip > 0 do
+        while M.is_start_with_skip_filetype(filetype, skip_filetype_list) and max_skip > 0 do
             vim.cmd.wincmd(param)
             filetype = vim.bo.filetype
             max_skip = max_skip - 1
@@ -154,21 +174,28 @@ function variables:load_filtyppe_list()
     end
 
     -- toggle left panel
-    self.toggle_filetype_list1 = {
+    M.toggle_filetype_list1 = {
+        ["dapui_scopes"] = false,
+        ["dapui_breakpoints"] = false,
+        ["dapui_stacks"] = false,
+        ["dapui_watches"] = false,
         ["DiffviewFiles"] = function() vim.api.nvim_command("DiffviewClose") end,
         ["DiffviewFileHistory"] = function() vim.api.nvim_command("DiffviewClose") end,
         ["NvimTree"] = function() require("nvim-tree.api").tree.close() end,
     }
     -- toggle bottom panel
-    self.toggle_filetype_list2 = {
+    M.toggle_filetype_list2 = {
+        ["dap-repl"] = false,
+        ["dapui_console"] = false,
         ["toggleterm"] = function() vim.api.nvim_command("ToggleTerm") end,
         ["Trouble"] = function() vim.api.nvim_command("TroubleClose") end,
     }
     -- toggle right panel
-    self.toggle_filetype_list3 = {
+    M.toggle_filetype_list3 = {
+        ["help"] = false,
         ["nvim-docs-view"] = function() vim.api.nvim_command("DocsViewToggle") end,
     }
-    self.is_start_with_toggle_filetype = function(filetype, toggle_filetype_list)
+    M.is_start_with_toggle_filetype = function(filetype, toggle_filetype_list)
         for toggle_filetype, close_function in pairs(toggle_filetype_list) do
             if filetype:find(toggle_filetype, 1, true) == 1 then
                 return true, close_function
@@ -176,11 +203,11 @@ function variables:load_filtyppe_list()
         end
         return false, nil
     end
-    self.toggle_filetype = function(toggle_filetype_list)
+    M.toggle_filetype = function(toggle_filetype_list)
         local win = vim.api.nvim_get_current_win()
         local buf = vim.api.nvim_win_get_buf(win)
-        local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-        local ok, close_function = self.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+        local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
+        local ok, close_function = M.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
         if ok then
             if type(close_function) == "function" then
                 close_function()
@@ -192,8 +219,8 @@ function variables:load_filtyppe_list()
 
         for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
             buf = vim.api.nvim_win_get_buf(win)
-            filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-            ok, close_function = self.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+            filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
+            ok, close_function = M.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
             if ok then
                 vim.api.nvim_set_current_win(win)
                 return true
@@ -204,9 +231,9 @@ function variables:load_filtyppe_list()
     end
 end
 
-function variables:load_language_filetype()
+function M.load_language_filetype()
     -- tex like filetype
-    self.tex_filetype = {
+    M.tex_filetype = {
         "markdown",
         "plaintex",
         "tex",
@@ -214,21 +241,80 @@ function variables:load_language_filetype()
     }
 end
 
-function variables:load_lsp()
-    self.lsp = function(lspconfig, default_config)
+function M.load_lsp()
+    M.lsp = function(lspconfig, default_config)
         return {
             bashls = function()
                 lspconfig.bashls.setup(default_config)
+            end,
+            jedi_language_server = function()
+                local environment_path = M.conda_path .. "/python.exe"
+
+                local function exists(path)
+                    local ok, err, code = os.rename(path, path)
+                    if not ok then
+                        if code == 13 then
+                            -- Permission denied, but it exists
+                            return true
+                        end
+                    end
+                    return ok
+                end
+                local conda_envs_path = M.conda_path .. "/envs"
+                local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+                local envs_path = conda_envs_path .. "/" .. envs
+                if exists(envs_path) then
+                    environment_path = envs_path .. "/python.exe"
+                    vim.notify(("Activate conda envs: %s"):format(envs), vim.log.levels.INFO, { title = "jedi-language-server" })
+                end
+
+                local config = vim.tbl_deep_extend("keep", {
+                    root_dir = lspconfig.util.root_pattern("*"),
+                    init_options = {
+                        diagnostics = {
+                            enable = true,
+                        },
+                        workspace = {
+                            environmentPath = environment_path,
+                        },
+                    },
+                }, default_config)
+
+                lspconfig.jedi_language_server.setup(config)
             end,
             lua_ls = function()
                 lspconfig.lua_ls.setup(vim.tbl_deep_extend("keep", {
                     settings = {
                         Lua = {
+                            runtime = {
+                                -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+                                version = "LuaJIT",
+                            },
+                            diagnostics = {
+                                -- Get the language server to recognize the `vim` global
+                                globals = {
+                                    "mp",
+                                    "vim",
+                                },
+                            },
+                            workspace = {
+                                -- Make the server aware of Neovim runtime files
+                                library = vim.api.nvim_get_runtime_file("", true),
+                                checkThirdParty = false,
+                            },
                             completion = {
                                 callSnippet = "Replace",
                             },
-                            workspace = {
-                                checkThirdParty = false,
+                            format = {
+                                enable = true,
+                                defaultConfig = {
+                                    quote_style = "double",
+                                    max_line_length = "10000",
+                                    trailing_table_separator = "smart",
+                                },
+                            },
+                            telemetry = {
+                                enable = false,
                             },
                         },
                     },
@@ -237,9 +323,6 @@ function variables:load_lsp()
             marksman = function()
                 lspconfig.marksman.setup(default_config)
             end,
-            pyright = function()
-                lspconfig.pyright.setup(default_config)
-            end,
             -- 由 rust-tools 设置
             -- rust_analyzer = function()
             --     lspconfig.rust_analyzer.setup(default_config)
@@ -247,14 +330,81 @@ function variables:load_lsp()
         }
     end
 
-    self.lsp_list = {}
-    for lsp, _ in pairs(self.lsp(nil, nil)) do
-        self.lsp_list[#self.lsp_list + 1] = lsp
+    M.lsp_list = {}
+    for lsp, _ in pairs(M.lsp(nil, nil)) do
+        M.lsp_list[#M.lsp_list + 1] = lsp
+    end
+
+    M.format = function()
+        -- Gets all lsp clients that support formatting
+        -- and have not disabled it in their client config
+        ---@param client lsp.Client
+        local function supports_format(client)
+            if
+                client.config
+                and client.config.capabilities
+                and client.config.capabilities.documentFormattingProvider == false
+            then
+                return false
+            end
+            return client.supports_method("textDocument/formatting") or client.supports_method("textDocument/rangeFormatting")
+        end
+
+        -- Gets all lsp clients that support formatting.
+        -- When a null-ls formatter is available for the current filetype,
+        -- only null-ls formatters are returned.
+        local function get_formatters(bufnr)
+            local ft = vim.bo[bufnr].filetype
+            -- check if we have any null-ls formatters for the current filetype
+            local null_ls = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
+
+            ---@class LazyVimFormatters
+            local ret = {
+                ---@type lsp.Client[]
+                active = {},
+                ---@type lsp.Client[]
+                available = {},
+                null_ls = null_ls,
+            }
+
+            ---@type lsp.Client[]
+            local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
+            for _, client in ipairs(clients) do
+                if supports_format(client) then
+                    if (#null_ls > 0 and client.name == "null-ls") or #null_ls == 0 then
+                        table.insert(ret.active, client)
+                    else
+                        table.insert(ret.available, client)
+                    end
+                end
+            end
+
+            return ret
+        end
+
+        local buf = vim.api.nvim_get_current_buf()
+
+        local formatters = get_formatters(buf)
+        local client_ids = vim.tbl_map(function(client)
+            return client.id
+        end, formatters.active)
+
+        if #client_ids == 0 then
+            return
+        end
+
+        vim.lsp.buf.format({
+            async = true,
+            bufnr = buf,
+            filter = function(client)
+                return vim.tbl_contains(client_ids, client.id)
+            end,
+        })
     end
 end
 
-function variables:load_dap()
-    self.dap = function(mason_nvim_dap)
+function M.load_dap()
+    M.dap = function(mason_nvim_dap)
         return {
             -- 由 rust-tools 设置
             codelldb = function(config)
@@ -263,7 +413,7 @@ function variables:load_dap()
                 --     port = "${port}",
                 --     executable = {
                 --         -- CHANGE THIS to your path!
-                --         command = self.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb",
+                --         command = M.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb",
                 --         args = { "--port", "${port}" },
                 --         -- On windows you may have to uncomment this:
                 --         detached = false,
@@ -288,7 +438,7 @@ function variables:load_dap()
             python = function(config)
                 config.adapters = {
                     type = "executable",
-                    command = self.home_path .. "/miniconda3/python",
+                    command = M.conda_path .. "/python",
                     args = { "-m", "debugpy.adapter" },
                     options = {
                         source_filetype = "python",
@@ -305,7 +455,7 @@ function variables:load_dap()
 
                         program = "${file}", -- This configuration will launch the current file if used.
                         pythonPath = function()
-                            -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+                            -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itM.
                             -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
                             -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
                             local cwd = vim.fn.getcwd()
@@ -314,7 +464,7 @@ function variables:load_dap()
                             elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
                                 return cwd .. "/.venv/bin/python"
                             else
-                                return self.home_path .. "/miniconda3/python"
+                                return M.conda_path .. "/python"
                             end
                         end,
                     },
@@ -325,14 +475,14 @@ function variables:load_dap()
         }
     end
 
-    self.dap_list = {}
-    for dap, _ in pairs(self.dap()) do
-        self.dap_list[#self.dap_list + 1] = dap
+    M.dap_list = {}
+    for dap, _ in pairs(M.dap()) do
+        M.dap_list[#M.dap_list + 1] = dap
     end
 end
 
-function variables:load_null_ls()
-    self.null_ls_builtins = function(null_ls)
+function M.load_null_ls()
+    M.null_ls_builtins = function(null_ls)
         return {
             black = function(source_name, methods)
                 null_ls.register(null_ls.builtins.formatting.black)
@@ -345,7 +495,7 @@ function variables:load_null_ls()
                     extra_args = {
                         "--multi-line", "3",
                         "--trailing-comma",
-                        "--profile", "black"
+                        "--profile", "black",
                     },
                 }))
             end,
@@ -363,40 +513,26 @@ function variables:load_null_ls()
                     },
                 }))
             end,
-            stylua = function(source_name, methods)
-                local line_endings = "Unix"
-                if variables.is_windows then
-                    line_endings = "Windows"
-                end
-
-                null_ls.register(null_ls.builtins.formatting.stylua.with({
-                    extra_args = {
-                        "--line-endings", line_endings,
-                        "--indent-type", "Spaces",
-                        "--quote-style", "ForceDouble",
-                    },
-                }))
-            end,
         }
     end
 
-    self.null_ls_builtins_list = {}
-    for null_ls_builtin, _ in pairs(self.null_ls_builtins(nil)) do
-        self.null_ls_builtins_list[#self.null_ls_builtins_list + 1] = null_ls_builtin
+    M.null_ls_builtins_list = {}
+    for null_ls_builtin, _ in pairs(M.null_ls_builtins(nil)) do
+        M.null_ls_builtins_list[#M.null_ls_builtins_list + 1] = null_ls_builtin
     end
 end
 
-variables:load_running_environment()
-variables:load_path()
+M.load_running_environment()
+M.load_path()
 
-variables:load_icons()
-variables:load_keymap()
+M.load_icons()
+M.load_keymap()
 
-variables:load_filtyppe_list()
-variables:load_language_filetype()
+M.load_filtyppe_list()
+M.load_language_filetype()
 
-variables:load_lsp()
-variables:load_dap()
-variables:load_null_ls()
+M.load_lsp()
+M.load_dap()
+M.load_null_ls()
 
-return variables
+return M

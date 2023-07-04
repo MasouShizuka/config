@@ -4,12 +4,8 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         cond = function()
-            local cmd = "git -C \"" .. vim.fn.expand("%:p:h") .. '" rev-parse'
-            local wind32_cmd
-            if variables.is_windows then
-                wind32_cmd = { "cmd.exe", "/C", cmd }
-            end
-            local result = vim.fn.system(wind32_cmd or cmd)
+            local cmd = "git -C \"" .. vim.fn.getcwd() .. '" rev-parse'
+            local result = vim.fn.system(cmd)
             local success = vim.api.nvim_get_vvar("shell_error") == 0
             if success and result:gsub("[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]", "") or nil then
                 return true
@@ -92,7 +88,6 @@ return {
                     end
                     vim.schedule(function() gs.next_hunk() end)
                 end, { desc = "Navigation next", silent = true })
-
                 map("n", variables.keymap["<c-s-n>"], function()
                     if vim.wo.diff then
                         vim.cmd.normal("[c")
