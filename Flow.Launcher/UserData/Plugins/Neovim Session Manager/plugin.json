@@ -6,6 +6,6 @@
     "Author": "MasouShizuka",
     "Version": "1.0.0",
     "Language": "python",
-    "IcoPath": "Images\\neovim.png",
+    "IcoPath": "neovim.png",
     "ExecuteFileName": "main.py"
 }

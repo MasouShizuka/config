@@ -23,7 +23,7 @@ return {
             end
         end,
         keys = {
-            { "<leader>t/", function(...) require("telescope.builtin").live_grep(...) end,       desc = "Live grep",       mode = "n" },
+            { "<leader>/", function(...) require("telescope.builtin").live_grep(...) end,       desc = "Live grep",       mode = "n" },
             { "<c-p>",      function(...) require("telescope.builtin").find_files(...) end,      desc = "Find files",      mode = "n" },
             { "<leader>to", function(...) require("telescope.builtin").oldfiles(...) end,        desc = "Old files",       mode = "n" },
             { "<leader>t:", function(...) require("telescope.builtin").command_history(...) end, desc = "Command history", mode = "n" },
@@ -43,10 +43,17 @@ return {
                     i = {
                         ["<c-j>"] = function(...) require("telescope.actions").move_selection_next(...) end,
                         ["<c-k>"] = function(...) require("telescope.actions").move_selection_previous(...) end,
+                        ["<c-x>"] = function(...) require("telescope.actions").select_horizontal(...) end,
+                        ["<c-s>"] = function(...) require("telescope.actions").select_vertical(...) end,
+                        ["<c-t>"] = function(...) require("telescope.actions").select_tab(...) end,
                         ["<c-w>"] = function(...) require("telescope.actions").close(...) end,
+                        ["<c-n>"] = function(...) require("telescope.actions").cycle_history_next(...) end,
+                        ["<c-p>"] = function(...) require("telescope.actions").cycle_history_prev(...) end,
                     },
                 },
-                history = false,
+                history = {
+                    path = variables.data_path .. "/lazy/telescope.nvim/telescope_history",
+                },
                 file_ignore_patterns = {
                     "%.git",
                     "node_modules",

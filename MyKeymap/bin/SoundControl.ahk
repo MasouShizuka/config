@@ -230,6 +230,7 @@ WM_KEYDOWN(wParam, lParam)
             SoundGet, val, MASTER, MUTE
             layout.mute(val)
         case "x": ExitApp
+        case "Escape": ExitApp
         default:
             ; sleep 500
         return 0

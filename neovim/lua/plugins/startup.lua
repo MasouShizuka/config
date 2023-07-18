@@ -14,12 +14,12 @@ return {
                 callback = function()
                     local stats = require("lazy").stats()
                     local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
-                    opts.section.footer.val = { "󱐋 Neovim loaded " .. stats.count .. " plugins   in " .. ms .. " ms 󱐋" }
+                    opts.section.footer.val = { ("󱐋 Neovim loaded %s plugins   in %s ms 󱐋"):format(stats.count, ms) }
                     opts.section.footer.opts.hl = "DashboardFooter"
                     pcall(vim.cmd.AlphaRedraw)
                 end,
                 desc = "Add Alpha dashboard footer",
-                group = vim.api.nvim_create_augroup("alpha_add_footer", { clear = true }),
+                group = vim.api.nvim_create_augroup("AlphaFooter", { clear = true }),
                 once = true,
                 pattern = "LazyVimStarted",
             })
@@ -48,7 +48,7 @@ return {
                     end
                 end,
                 desc = "Start Alpha when vim is opened with no arguments",
-                group = vim.api.nvim_create_augroup("alpha_start", { clear = true }),
+                group = vim.api.nvim_create_augroup("AlphaStart", { clear = true }),
             })
         end,
         opts = function()

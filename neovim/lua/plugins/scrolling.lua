@@ -44,17 +44,17 @@ return {
 
     {
         "lewis6991/satellite.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not variables.is_vscode and vim.fn.has("nvim-0.10") == 1,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
         opts = {
             current_only = false,
             -- winblend = 50,
             winblend = 0,
             zindex = 40,
-            excluded_filetypes = {},
+            excluded_filetypes = variables.skip_filetype_list3,
             width = 2,
             handlers = {
                 search = {

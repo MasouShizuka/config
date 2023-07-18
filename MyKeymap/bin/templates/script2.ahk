@@ -4,7 +4,6 @@
 #NoTrayIcon
 #WinActivateForce               ; 解决「 winactivate 最小化的窗口时不会把窗口放到顶层(被其他窗口遮住) 」
 #InstallKeybdHook               ; 可能是 ahk 自动卸载 hook 导致的丢失 hook,  如果用这行指令, ahk 是否就不会卸载 hook 了呢?
-#MenuMaskKey vkFF
 #include bin/functions.ahk
 #include bin/actions.ahk
 
@@ -308,41 +307,20 @@ RButton::
 enterRButtonMode()
 {
 	global RButtonMode
+    start_tick := A_TickCount
     thisHotkey := A_ThisHotkey
     RButtonMode := true
-	timeOut = T0.01
-	movedMouse := false
-	MouseGetPos, initialX, initialY
-
-	; 当按下右键时跑一个循环,  移动鼠标 / 弹起鼠标右键才能跳出这个循环
-	keywait, RButton, %timeOut%
-    while (errorlevel != 0)
-    {
-		MouseGetPos, x, y
-		if (Abs(x - initialX) > 20 || Abs(y - initialY) > 20) {
-			movedMouse := true
-			break
-		}
-		keywait, RButton, %timeOut%
-    }
-
+	keywait, RButton
     RButtonMode := false
-	triggerOtherHotkey := thisHotkey != A_ThisHotkey
-	Hotkey, %thisHotkey%, Off
-
-	; 如果移动了鼠标,  那么按下鼠标右键,  以兼容其他软件的鼠标手势,  需要等待 RButton 弹起后才能重新启用热键
-	if (!triggerOtherHotkey && movedMouse) {
-		SendInput, {Blind}{RButton down}
-		keywait, RButton
-	}
-	else if (!triggerOtherHotkey) {
-		SendInput, {Blind}{RButton}
-	}
-    ; 这里睡眠很重要, 否则会触发无限循环的 bug, 因为发送 RButton 触发 RButton 热键
-    sleep, 70
-	Hotkey, %thisHotkey%, On
-    return
-
+    if (A_PriorKey = "RButton" && (A_TickCount - start_tick < 350)) {
+        ; 如果在系统设置中交换了左右键,  那么需要发送左键才能打开右键菜单
+        SysGet, swapMouseButton, 23
+        if swapMouseButton {
+            send, {blind}{LButton}
+        } else {
+            send, {blind}{RButton}
+        }
+    }
 }
 {{ end }}
 
@@ -482,7 +460,7 @@ Esc::exit_mouse_mode()
     CapslockMode := true
     keywait capslock
     CapslockMode := false
-    if (A_ThisHotkey == "*capslock up" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
+    if (A_ThisHotkey = "*capslock up" && A_PriorKey = "CapsLock" && A_TimeSinceThisHotkey < 450) {
         exit_mouse_mode()
     }
     enableOtherHotkey(thisHotkey)
@@ -514,7 +492,7 @@ Esc::exit_mouse_mode()
     CapslockMode := true
     keywait capslock
     CapslockMode := false
-    if (A_ThisHotkey == "*capslock up" && A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 450) {
+    if (A_ThisHotkey = "*capslock up" && A_PriorKey = "CapsLock" && A_TimeSinceThisHotkey < 450) {
         exit_mouse_mode()
     }
     enableOtherHotkey(thisHotkey)

@@ -64,7 +64,9 @@ if (( is_windows )); then
 fi
 # wsl 使用 windows 的 neovim 配置
 if (( is_wsl )); then
-    export XDG_CONFIG_HOME=/mnt/c/Users/MasouShizuka/AppData/Local
+    if [[ ! -d "$HOME/.config/nvim" ]]; then
+        ln -s "/mnt/c/Users/MasouShizuka/AppData/Local/nvim" $HOME/.config/nvim
+    fi
 fi
 
 
@@ -227,13 +229,26 @@ function zvm_after_lazy_keybindings() {
 # Conda #
 #########
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-if [[ -f "$HOME/miniconda3/Scripts/conda" ]]; then
-    if (( is_windows )); then
-        eval "$($HOME/miniconda3/Scripts/conda 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2>/dev/null
+if (( is_windows )); then
+    if [[ -f "$HOME/miniconda3/Scripts/conda" ]]; then
+        eval "$($HOME/miniconda3/Scripts/conda 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2> /dev/null
+    fi
+elif (( is_linux )); then
+    __conda_setup="$($HOME/miniconda3/bin/conda 'shell.zsh' 'hook' 2> /dev/null)"
+    if [[ $? = 0 ]]; then
+        eval "$__conda_setup"
     else
-        eval "$($HOME/miniconda3/Scripts/conda 'shell.zsh' 'hook')"
+        if [[ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]]; then
+            . "$HOME/miniconda3/etc/profile.d/conda.sh"
+        else
+            export PATH="$HOME/miniconda3/bin:$PATH"
+        fi
+    fi
+    unset __conda_setup
+
+    if (( is_wsl )); then
+        if [[ ! -f "$HOME/.condarc" ]]; then
+            ln -s "/mnt/c/Users/MasouShizuka/.condarc" $HOME/.condarc
+        fi
     fi
 fi
-# <<< conda initialize <<<

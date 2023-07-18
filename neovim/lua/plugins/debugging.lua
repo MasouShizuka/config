@@ -10,8 +10,6 @@ return {
         end
 
         vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
-
-        require("dap").set_log_level("ERROR")
     end,
     dependencies = {
         {
@@ -49,18 +47,11 @@ return {
         {
             "rcarriga/nvim-dap-ui",
             config = function(_, opts)
-                local dap = require("dap")
-                local dapui = require("dapui")
+                local dap, dapui = require("dap"), require("dapui")
+                dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open({}) end
+                dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close({}) end
+                dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
                 dapui.setup(opts)
-                dap.listeners.after.event_initialized["dapui_config"] = function()
-                    dapui.open({})
-                end
-                dap.listeners.before.event_terminated["dapui_config"] = function()
-                    dapui.close({})
-                end
-                dap.listeners.before.event_exited["dapui_config"] = function()
-                    dapui.close({})
-                end
             end,
             keys = {
                 { "<leader>du", function() require("dapui").toggle({}) end, desc = "Toggle ui", mode = "n" },
@@ -80,7 +71,7 @@ return {
             opts = {},
         },
     },
-    enabled = not variables.is_vscode and not variables.is_wsl,
+    enabled = not variables.is_vscode,
     init = function()
         local ok, wk = pcall(require, "which-key")
         if ok then

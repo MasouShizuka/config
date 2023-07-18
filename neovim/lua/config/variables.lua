@@ -1,13 +1,10 @@
 local M = {}
 
 function M.load_running_environment()
-    local sysname = vim.loop.os_uname().sysname:lower()
-    local release = vim.loop.os_uname().release:lower()
-
-    M.is_windows = sysname == "windows_nt"
-    M.is_mac = sysname == "darwin"
-    M.is_linux = sysname == "linux"
-    M.is_wsl = M.is_linux and release:find("wsl") and true or false
+    M.is_windows = vim.fn.has("win32") == 1
+    M.is_mac = vim.fn.has("mac") == 1
+    M.is_linux = vim.fn.has("linux") == 1
+    M.is_wsl = vim.fn.has("wsl") == 1
     M.is_vscode = vim.g.vscode
 end
 
@@ -16,16 +13,23 @@ function M.load_path()
     if M.is_windows then
         M.config_path = M.config_path:gsub("\\", "/")
     end
+
     M.data_path = vim.fn.stdpath("data")
     if M.is_windows then
         M.data_path = M.data_path:gsub("\\", "/")
     end
+    M.wsl_data_path = "/mnt/c/Users/MasouShizuka/AppData/Local/nvim-data"
+
     M.home_path = vim.env.HOME
     if M.is_windows then
         M.home_path = M.home_path:gsub("\\", "/")
     end
 
     M.conda_path = M.home_path .. "/miniconda3"
+    M.python_path = M.conda_path .. "/bin/python"
+    if M.is_windows then
+        M.python_path = M.conda_path .. "/python.exe"
+    end
 
     M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
 
@@ -48,18 +52,24 @@ function M.load_icons()
             BreakpointCondition = " ",
             BreakpointRejected = { " ", "DiagnosticError" },
             LogPoint = ".>",
-            Stopped = { " ", "DiagnosticWarn", "DapStoppedLine" },
+            Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
         },
         diagnostics = {
-            Error = " ",
-            Hint = " ",
-            Info = " ",
-            Warn = " ",
+            error = " ",
+            hint = " ",
+            info = " ",
+            warn = " ",
         },
         git = {
-            added = " ",
-            modified = " ",
-            removed = " ",
+            added     = " ",
+            conflict  = " ",
+            deleted   = " ",
+            ignored   = "◌ ",
+            modified  = " ",
+            renamed   = "➜ ",
+            staged    = " ",
+            unstaged  = "✓ ",
+            untracked = "★ ",
         },
         kinds = {
             Array = " ",
@@ -134,11 +144,13 @@ end
 function M.load_filtyppe_list()
     -- skip when <c-2>
     M.skip_filetype_list1 = {
+        "aerial",
         "dap",
         "DiffviewFiles",
         "DiffviewFileHistory",
         "help",
         "notify",
+        "neo-tree",
         "nvim-docs-view",
         "NvimTree",
         "toggleterm",
@@ -146,11 +158,23 @@ function M.load_filtyppe_list()
     }
     -- skip when <c-j>, <c-k>
     M.skip_filetype_list2 = {
+        "aerial",
         "dap",
         "DiffviewFiles",
         "DiffviewFileHistory",
         "help",
+        "neo-tree",
         "nvim-docs-view",
+        "NvimTree",
+        "toggleterm",
+        "Trouble",
+    }
+    -- plugins skip these
+    M.skip_filetype_list3 = {
+        "aerial",
+        "DiffviewFiles",
+        "DiffviewFileHistory",
+        "neo-tree",
         "NvimTree",
         "toggleterm",
         "Trouble",
@@ -175,12 +199,14 @@ function M.load_filtyppe_list()
 
     -- toggle left panel
     M.toggle_filetype_list1 = {
+        ["aerial"] = function() vim.api.nvim_command("AerialClose") end,
         ["dapui_scopes"] = false,
         ["dapui_breakpoints"] = false,
         ["dapui_stacks"] = false,
         ["dapui_watches"] = false,
         ["DiffviewFiles"] = function() vim.api.nvim_command("DiffviewClose") end,
         ["DiffviewFileHistory"] = function() vim.api.nvim_command("DiffviewClose") end,
+        ["neo-tree"] = function() require("neo-tree.command").execute({ action = "close" }) end,
         ["NvimTree"] = function() require("nvim-tree.api").tree.close() end,
     }
     -- toggle bottom panel
@@ -203,28 +229,50 @@ function M.load_filtyppe_list()
         end
         return false, nil
     end
-    M.toggle_filetype = function(toggle_filetype_list)
-        local win = vim.api.nvim_get_current_win()
-        local buf = vim.api.nvim_win_get_buf(win)
-        local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
-        local ok, close_function = M.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+    M.is_toggle_filetype_focused = function(toggle_filetype_list, close)
+        local ok, close_function = M.is_start_with_toggle_filetype(vim.bo.filetype, toggle_filetype_list)
         if ok then
-            if type(close_function) == "function" then
-                close_function()
-            else
-                vim.api.nvim_win_close(win, false)
+            if type(close_function) ~= "function" then
+                close_function = function()
+                    vim.api.nvim_win_close(vim.api.nvim_get_current_win(), false)
+                end
             end
+
+            if close then
+                close_function()
+            end
+
+            return true, close_function
+        end
+
+        return false, nil
+    end
+    M.is_toggle_filetype_opened = function(toggle_filetype_list, focus)
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            local buf = vim.api.nvim_win_get_buf(win)
+            local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
+
+            local ok, _ = M.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+            if ok then
+                if focus then
+                    vim.api.nvim_set_current_win(win)
+                end
+
+                return true, win
+            end
+        end
+
+        return false, nil
+    end
+    M.toggle_filetype = function(toggle_filetype_list)
+        local is_focused, close_function = M.is_toggle_filetype_focused(toggle_filetype_list, true)
+        if is_focused then
             return true
         end
 
-        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-            buf = vim.api.nvim_win_get_buf(win)
-            filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
-            ok, close_function = M.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
-            if ok then
-                vim.api.nvim_set_current_win(win)
-                return true
-            end
+        local is_opened, win = M.is_toggle_filetype_opened(toggle_filetype_list, true)
+        if is_opened then
+            return true
         end
 
         return false
@@ -245,10 +293,13 @@ function M.load_lsp()
     M.lsp = function(lspconfig, default_config)
         return {
             bashls = function()
+                -- https://github.com/williamboman/mason.nvim/issues/1315
+                -- wsl 下安装后 mason.nvim/mason/bin/bash-language-server 中的路径错误
+                -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
                 lspconfig.bashls.setup(default_config)
             end,
             jedi_language_server = function()
-                local environment_path = M.conda_path .. "/python.exe"
+                local environment_path = M.python_path
 
                 local function exists(path)
                     local ok, err, code = os.rename(path, path)
@@ -264,7 +315,11 @@ function M.load_lsp()
                 local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
                 local envs_path = conda_envs_path .. "/" .. envs
                 if exists(envs_path) then
-                    environment_path = envs_path .. "/python.exe"
+                    environment_path = envs_path .. "/bin/python"
+                    if M.is_windows then
+                        environment_path = envs_path .. "/python.exe"
+                    end
+
                     vim.notify(("Activate conda envs: %s"):format(envs), vim.log.levels.INFO, { title = "jedi-language-server" })
                 end
 
@@ -281,6 +336,9 @@ function M.load_lsp()
                 }, default_config)
 
                 lspconfig.jedi_language_server.setup(config)
+            end,
+            jsonls = function()
+                lspconfig.jsonls.setup(default_config)
             end,
             lua_ls = function()
                 lspconfig.lua_ls.setup(vim.tbl_deep_extend("keep", {
@@ -438,7 +496,7 @@ function M.load_dap()
             python = function(config)
                 config.adapters = {
                     type = "executable",
-                    command = M.conda_path .. "/python",
+                    command = M.python_path,
                     args = { "-m", "debugpy.adapter" },
                     options = {
                         source_filetype = "python",
@@ -464,7 +522,7 @@ function M.load_dap()
                             elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
                                 return cwd .. "/.venv/bin/python"
                             else
-                                return M.conda_path .. "/python"
+                                return M.python_path
                             end
                         end,
                     },
@@ -498,9 +556,6 @@ function M.load_null_ls()
                         "--profile", "black",
                     },
                 }))
-            end,
-            rustfmt = function(source_name, methods)
-                null_ls.register(null_ls.builtins.formatting.rustfmt)
             end,
             shellcheck = function(source_name, methods)
                 null_ls.register(null_ls.builtins.code_actions.shellcheck)

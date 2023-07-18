@@ -27,18 +27,17 @@ ind := 1
 while (ind < monCount + 1)
 {
     brightness := ""
-    ; 笔记本的内置显示器应该是 1 号显示器(我猜的),  笔记本内置显示器要用 wmi 操作亮度
-    ; 只有 1 号显示器会尝试两种获取亮度的方式
-    if (ind == 1) {
+
+    ; 优先通过ddcci获取屏幕亮度，当ddcci获取不到时再尝试用wmi获取
+    brightness := Monitor.GetBrightness(ind)["Current"]
+
+    if (brightness == "") {
         brightness := GetCurrentBrightNess()
         if (brightness != "") {
             layout.setUseWmi(ind, true)
         }
     }
 
-    if (brightness == "") {
-        brightness := Monitor.GetBrightness(ind)["Current"]
-    }
     layout.setBrightnessText(ind, brightness)
     ind += 1
 }
@@ -73,7 +72,7 @@ class CLayout
         Gui MyGui:+LabelMyGui_On
         Gui, Font, s12, 等线
         ; modified
-        ; Gui Add, Text, x10 y280 w290 h20 +0x200, EDSF调节亮度、WR切换显示器、X退出
+        ; Gui Add, Text, x10 y280 w290 h20 +0x200, EDSF调节亮度、WR切换显示器、C退出
         Gui Add, Text, x10 y280 w290 h20 +0x200, WSAD调节亮度、QE切换显示器、X退出
         Gui Add, Text, x10 y300 w490 h20 +0x200, 如果不起作用, 用 Win+P 断开并重连该显示器, 然后重启本程序试试
 
@@ -234,7 +233,9 @@ WM_KEYDOWN(wParam, lParam)
         ; case "r": layout.next()
         case "q": layout.prev()
         case "e": layout.next()
+        ; case "c": ExitApp
         case "x": ExitApp
+        case "Escape": ExitApp
         default:
             ; sleep 500
         return 0

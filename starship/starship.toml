@@ -1,5 +1,5 @@
 # Configure the format of the prompt
-format = '$os$all$fill$battery$time$line_break$character'
+format = '$os $all$fill$battery$time$line_break$character'
 
 # Right prompt which renders on the same line as the input
 right_format = ''
@@ -30,35 +30,38 @@ empty_symbol = ' '
 
 [[battery.display]]
 threshold = 10
-style = '#fb4934'
+style = 'bold #fb4934'
 
 [[battery.display]]
 threshold = 25
-style = '#fe8019'
+style = 'bold #fe8019'
 
 [[battery.display]]
 threshold = 75
-style = '#fabd2f'
+style = 'bold #fabd2f'
 
 [[battery.display]]
 threshold = 90
-style = '#b8bb26'
+style = 'bold #b8bb26'
 
 [[battery.display]]
 threshold = 100
-style = '#8ec07c'
+style = 'bold #8ec07c'
 
 
 
 [character]
-success_symbol = '[➜](green)'
-error_symbol = '[✗](red)'
+success_symbol = '[>>](bold green)'
+error_symbol = '[xx](bold red)'
+vimcmd_symbol = '[<<](bold green)'
+vimcmd_replace_one_symbol = '[<<](bold purple)'
+vimcmd_replace_symbol = '[<<](bold purple)'
+vimcmd_visual_symbol = '[<<](bold yellow)'
 
 
 
 [directory]
 truncation_length = 0
-style = 'cyan'
 read_only = ' 󰌾'
 use_os_path_sep = false
 
@@ -80,7 +83,7 @@ Windows = " "
 
 
 [time]
-style = '#d6acff'
+style = 'bold #d6acff'
 disabled = false
 
 

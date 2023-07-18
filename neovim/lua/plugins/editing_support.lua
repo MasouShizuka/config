@@ -85,9 +85,6 @@ return {
     {
         "chrisgrieser/nvim-alt-substitute",
         enabled = not variables.is_vscode,
-        event = {
-            "CmdlineEnter",
-        },
         keys = {
             { "<c-f>", ":S ///g<left><left><left>", desc = "AltSubstitute", mode = { "n", "x" } },
         },
@@ -102,8 +99,8 @@ return {
             require("mini.ai").setup(opts)
         end,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
         opts = {
             custom_textobjects = {
@@ -155,13 +152,13 @@ return {
     {
         "gbprod/substitute.nvim",
         keys = {
-            { "gr",  function(...) require("substitute").operator(...) end,          desc = "Substitute",        mode = "n" },
-            { "grr", function(...) require("substitute").line(...) end,              desc = "Substitute line",   mode = "n" },
-            { "R",   function(...) require("substitute").visual(...) end,            desc = "Substitute visual", mode = "x" },
-            { "cx",  function(...) require("substitute.exchange").operator(...) end, desc = "Exchange",          mode = "n" },
-            { "cxx", function(...) require("substitute.exchange").line(...) end,     desc = "Exchange line",     mode = "n" },
-            { "C",   function(...) require("substitute.exchange").visual(...) end,   desc = "Exchange visual",   mode = "x" },
-            { "cxc", function(...) require("substitute.exchange").cancel(...) end,   desc = "Exchange cancel",   mode = "n" },
+            { "ss",  function(...) require("substitute").operator(...) end,          desc = "Substitute",        mode = "n" },
+            { "sss", function(...) require("substitute").line(...) end,              desc = "Substitute line",   mode = "n" },
+            { "S",   function(...) require("substitute").visual(...) end,            desc = "Substitute visual", mode = "x" },
+            { "sx",  function(...) require("substitute.exchange").operator(...) end, desc = "Exchange",          mode = "n" },
+            { "sxx", function(...) require("substitute.exchange").line(...) end,     desc = "Exchange line",     mode = "n" },
+            { "X",   function(...) require("substitute.exchange").visual(...) end,   desc = "Exchange visual",   mode = "x" },
+            { "sxs", function(...) require("substitute.exchange").cancel(...) end,   desc = "Exchange cancel",   mode = "n" },
         },
         opts = {
             on_substitute = nil,

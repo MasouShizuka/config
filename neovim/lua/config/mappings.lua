@@ -237,23 +237,29 @@ else
             path = path:gsub("\\", "/")
         end
 
-        local ok, toggleterm = pcall(require, "toggleterm")
+        local ok, _ = pcall(require, "toggleterm")
         local filetype = vim.bo.filetype
         if ok then
+            if variables.is_windows then
+                vim.opt.shellslash = true
+            end
             if filetype == "lua" then
-                toggleterm.exec_command(([[TermExec cmd='lua "%s"']]):format(path))
+                vim.api.nvim_command(([[TermExec cmd='lua "%s"']]):format(path))
             elseif filetype == "markdown" then
                 vim.api.nvim_command("MarkdownPreviewToggle")
             elseif filetype == "python" then
-                toggleterm.exec_command(([[TermExec cmd='python -u "%s"']]):format(path))
+                vim.api.nvim_command(([[TermExec cmd='python -u "%s"']]):format(path))
             elseif filetype == "rust" then
-                toggleterm.exec_command([[TermExec cmd='cargo run']])
+                vim.api.nvim_command([[TermExec cmd='cargo run']])
             elseif filetype == "sh" then
-                toggleterm.exec_command(([[TermExec cmd='bash "%s"']]):format(path))
+                vim.api.nvim_command(([[TermExec cmd='bash "%s"']]):format(path))
+            end
+            if variables.is_windows then
+                vim.opt.shellslash = false
             end
         else
             if filetype == "lua" then
-                vim.api.nvim_command("lua %")
+                vim.api.nvim_command("luafile %")
             elseif filetype == "markdown" then
                 vim.api.nvim_command("MarkdownPreviewToggle")
             elseif filetype == "python" then

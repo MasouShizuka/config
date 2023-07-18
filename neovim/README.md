@@ -3,7 +3,6 @@
 ## 仓库
 
 - [https://github.com/neovim/neovim](https://github.com/neovim/neovim)
-- [https://github.com/neovide/neovide](https://github.com/neovide/neovide)
 - [https://github.com/vscode-neovim/vscode-neovim](https://github.com/vscode-neovim/vscode-neovim)
 
 ## 配置文件

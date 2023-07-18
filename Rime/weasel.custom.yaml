@@ -8,6 +8,8 @@ patch:
       ascii_mode: true
 
   style:
+    antialias_mode: default
+    ascii_tip_follow_cursor: false
     color_scheme: win11dark
     font_face: Sarasa Mono SC Nerd Font
     label_font_face: Sarasa Mono SC Nerd Font

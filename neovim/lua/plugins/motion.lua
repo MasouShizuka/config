@@ -35,7 +35,9 @@ return {
             modes = {
                 char = {
                     autohide = vim.fn.mode(true):find("no") and (vim.v.operator == "y" or vim.v.operator == "d"),
-                    keys = { "f", "F", "t", "T" },
+                    highlight = {
+                        backdrop = false,
+                    },
                 },
             },
         },

@@ -1,45 +1,69 @@
 # -*- coding: utf-8 -*-
 
-import os
-from subprocess import Popen, PIPE
+from os import listdir, remove, startfile
+from os.path import isfile, join
+from subprocess import PIPE, Popen
 
-from flowlauncher import FlowLauncher
-from flowlauncher import FlowLauncherAPI
+from flowlauncher import FlowLauncher, FlowLauncherAPI
 
 
 class NeovimSessionManager(FlowLauncher):
     def __init__(self):
-        self.session_dir = "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions"
-        # self.session_dir = "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/resession.nvim/session"
+        self.platforms = {
+            "Windows": {
+                "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions",
+                "cmd": "wezterm start --cwd",
+                "args": "-- nvim +",
+                "icon": "💻",
+            },
+            "WSL": {
+                "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions/wsl",
+                "cmd": "wezterm start -- wsl --cd",
+                "args": "-e nvim +",
+                "icon": "🐧",
+            },
+        }
+
         self.path_replacer = "__"
         self.colon_replacer = "++"
-
-        self.cmd = "wezterm start --cwd"
-        self.args = "-- nvim +"
-
-        self.session_list = os.listdir(self.session_dir)
 
         super().__init__()
 
     def query(self, query):
         results = []
-        for session in self.session_list:
-            working_dir = session.replace(self.path_replacer, "/")
-            working_dir = working_dir.replace(self.colon_replacer, ":")
-            if working_dir.endswith(".json"):
-                working_dir = working_dir[:-5]
-            elif working_dir.endswith(".vim"):
-                working_dir = working_dir[:-4]
-            name = working_dir.split("/")[-1]
-            if query.lower() in working_dir.lower():
+        for platform, info in self.platforms.items():
+            for session in listdir(info["session_dir"]):
+                if not isfile(join(info["session_dir"], session)):
+                    continue
+
+                working_dir = session.replace(self.path_replacer, "/")
+                working_dir = working_dir.replace(self.colon_replacer, ":")
+                if working_dir.endswith(".json"):
+                    working_dir = working_dir[:-5]
+                elif working_dir.endswith(".vim"):
+                    working_dir = working_dir[:-4]
+
+                title = info["icon"] + ": " + working_dir.split("/")[-1]
+                sub_title = "Session" + ": " + working_dir
+
+                flag = True
+                query_lower = query.lower()
+                session_lower = platform.lower() + working_dir.lower()
+                for s in query_lower.split():
+                    if s not in session_lower:
+                        flag = False
+                        break
+                if not flag:
+                    continue
+
                 results.append(
                     {
-                        "Title": name,
-                        "SubTitle": "Session: " + working_dir,
-                        "IcoPath": "Images/neovim.png",
+                        "Title": title,
+                        "SubTitle": sub_title,
+                        "IcoPath": "neovim.png",
                         "JsonRPCAction": {
                             "method": "open_session",
-                            "parameters": [working_dir],
+                            "parameters": [working_dir, info["cmd"], info["args"]],
                         },
                         "ContextData": [session, working_dir],
                     }
@@ -53,7 +77,7 @@ class NeovimSessionManager(FlowLauncher):
             {
                 "Title": "Open Directory",
                 "SubTitle": working_dir,
-                "IcoPath": "Images/neovim.png",
+                "IcoPath": "neovim.png",
                 "JsonRPCAction": {
                     "method": "open_directory",
                     "parameters": [working_dir],
@@ -62,35 +86,37 @@ class NeovimSessionManager(FlowLauncher):
             {
                 "Title": "Delete Session",
                 "SubTitle": working_dir,
-                "IcoPath": "Images/neovim.png",
+                "IcoPath": "neovim.png",
                 "JsonRPCAction": {
                     "method": "delete_session",
-                    "parameters": [session],
+                    "parameters": [session, working_dir],
                 },
             },
         ]
 
-    def open_session(self, working_dir):
+    def open_session(self, working_dir, cmd, args):
         try:
             Popen(
-                self.cmd + ' "' + working_dir + '" ' + self.args,
+                cmd + ' "' + working_dir + '" ' + args,
                 stdout=PIPE,
                 stderr=PIPE,
             )
         except:
             pass
-        FlowLauncherAPI.hide_app()
+        finally:
+            FlowLauncherAPI.hide_app()
 
     def open_directory(self, working_dir):
         try:
-            os.startfile(working_dir)
+            startfile(working_dir)
         except:
             pass
-        FlowLauncherAPI.hide_app()
+        finally:
+            FlowLauncherAPI.hide_app()
 
-    def delete_session(self, session):
+    def delete_session(self, session, working_dir):
         try:
-            os.remove(os.path.join(self.session_dir, session))
+            remove(join(working_dir, session))
         except:
             pass
 

@@ -23,8 +23,8 @@ return {
         "lukas-reineke/indent-blankline.nvim",
         enabled = not variables.is_vscode,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
     },
 }

@@ -47,8 +47,8 @@ return {
                 -- The diagnostics indicator can be set to nil to keep the buffer name highlight but delete the highlighting
                 diagnostics_indicator = function(count, level, diagnostics_dict, context)
                     local icons = variables.icons.diagnostics
-                    local ret = (diagnostics_dict.error and icons.Error .. diagnostics_dict.error .. " " or "")
-                        .. (diagnostics_dict.warning and icons.Warn .. diagnostics_dict.warning or "")
+                    local ret = (diagnostics_dict.error and icons.error .. diagnostics_dict.error .. " " or "")
+                        .. (diagnostics_dict.warning and icons.warn .. diagnostics_dict.warning or "")
                     return vim.trim(ret)
                 end,
                 -- offsets = {
@@ -60,6 +60,14 @@ return {
                 --     }
                 -- },
                 offsets = {
+                    {
+                        filetype = "neo-tree",
+                        highlight = "Directory",
+                        text = function()
+                            return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+                        end,
+                        text_align = "center",
+                    },
                     {
                         filetype = "NvimTree",
                         highlight = "Directory",
@@ -83,59 +91,61 @@ return {
         version = "v3.*",
     },
 
-    {
-        "Bekaboo/dropbar.nvim",
-        enabled = not variables.is_vscode,
-        dependencies = {
-            "nvim-tree/nvim-web-devicons",
-        },
-        keys = {
-            { "<leader><tab>", function() require("dropbar.api").pick() end, desc = "Pick mode", mode = "n" },
-        },
-        lazy = false,
-        opts = {
-            icons = {
-                kinds = {
-                    symbols = variables.icons.kinds,
-                },
-            },
-            menu = {
-                entry = {
-                    padding = {
-                        left = 0,
-                        right = 0,
-                    },
-                },
-                keymaps = {
-                    ["h"] = "<cmd>q!<cr><esc>",
-                    ["l"] = function()
-                        local menu = require("dropbar.api").get_current_dropbar_menu()
-                        if not menu then
-                            return
-                        end
-                        vim.cmd.normal("w")
-                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
-                        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
-                        if component then
-                            menu:click_on(component, nil, 1, "l")
-                        end
-                    end,
-                    ["o"] = function()
-                        local menu = require("dropbar.api").get_current_dropbar_menu()
-                        if not menu then
-                            return
-                        end
-                        vim.cmd.normal("0")
-                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
-                        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
-                        if component then
-                            menu:click_on(component, nil, 1, "l")
-                        end
-                    end,
-                },
-            },
-        },
-    },
+    -- 会使得 lsp 跳转到未打开的文件时卡死
+    -- {
+    --     "Bekaboo/dropbar.nvim",
+    --     enabled = not variables.is_vscode,
+    --     dependencies = {
+    --         "nvim-tree/nvim-web-devicons",
+    --     },
+    --     keys = {
+    --         { "<leader><tab>", function() require("dropbar.api").pick() end, desc = "Pick mode", mode = "n" },
+    --     },
+    --     lazy = false,
+    --     opts = {
+    --         icons = {
+    --             kinds = {
+    --                 symbols = variables.icons.kinds,
+    --             },
+    --         },
+    --         menu = {
+    --             entry = {
+    --                 padding = {
+    --                     left = 0,
+    --                     right = 0,
+    --                 },
+    --             },
+    --             keymaps = {
+    --                 ["h"] = "<cmd>q!<cr><esc>",
+    --                 ["q"] = "<cmd>q!<cr><esc>",
+    --                 ["l"] = function()
+    --                     local menu = require("dropbar.api").get_current_dropbar_menu()
+    --                     if not menu then
+    --                         return
+    --                     end
+    --                     vim.cmd.normal("w")
+    --                     local cursor = vim.api.nvim_win_get_cursor(menu.win)
+    --                     local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+    --                     if component then
+    --                         menu:click_on(component, nil, 1, "l")
+    --                     end
+    --                 end,
+    --                 ["o"] = function()
+    --                     local menu = require("dropbar.api").get_current_dropbar_menu()
+    --                     if not menu then
+    --                         return
+    --                     end
+    --                     vim.cmd.normal("0")
+    --                     local cursor = vim.api.nvim_win_get_cursor(menu.win)
+    --                     local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+    --                     if component then
+    --                         menu:click_on(component, nil, 1, "l")
+    --                     end
+    --                 end,
+    --             },
+    --         },
+    --     },
+    -- },
 
     {
         "nvim-lualine/lualine.nvim",
@@ -143,6 +153,9 @@ return {
             "nvim-tree/nvim-web-devicons",
         },
         enabled = not variables.is_vscode,
+        event = {
+            "UIEnter",
+        },
         opts = {
             options = {
                 section_separators = { left = "", right = "" },
@@ -150,18 +163,20 @@ return {
             },
             sections = {
                 lualine_a = { "mode" },
-                lualine_b = { "branch", {
-                    "diff",
-                    symbols = variables.icons.git,
-                }, {
-                    "diagnostics",
-                    symbols = {
-                        error = variables.icons.diagnostics.Error,
-                        hint = variables.icons.diagnostics.Hint,
-                        info = variables.icons.diagnostics.Info,
-                        warn = variables.icons.diagnostics.Warn,
+                lualine_b = {
+                    "branch",
+                    {
+                        "diff",
+                        symbols = {
+                            added = variables.icons.git.added,
+                            modified = variables.icons.git.modified,
+                            removed = variables.icons.git.deleted,
+                        },
                     },
-                }, },
+                    {
+                        "diagnostics",
+                        symbols = variables.icons.diagnostics,
+                    }, },
                 lualine_c = { "filename", "filesize" },
                 lualine_x = {
                     {
@@ -173,26 +188,47 @@ return {
                     "fileformat",
                     "filetype",
                 },
+                lualine_z = {
+                    {
+                        function()
+                            if vim.fn.mode():find("v") then
+                                return ("chars: %s"):format(vim.fn.wordcount().visual_chars)
+                            elseif vim.fn.mode():find("V") then
+                                local visual_start = vim.fn.line("v")
+                                local visual_end = vim.fn.line(".")
+                                local lines = visual_start <= visual_end and visual_end - visual_start + 1 or visual_start - visual_end + 1
+
+                                return ("lines: %s"):format(lines)
+                            end
+
+                            return ""
+                        end,
+                    },
+                    "location",
+                },
             },
             inactive_sections = {
                 lualine_c = { "filename", "filesize" },
             },
         },
-        event = {
-            "UIEnter",
-        },
     },
 
     {
         "RRethy/vim-illuminate",
+        config = function(_, opts)
+            require("illuminate").configure(opts)
+        end,
         enabled = not variables.is_vscode,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
         keys = {
             { "<f7>",   function() require("illuminate").goto_next_reference(false) end, desc = "Go to next reference",     mode = "n" },
             { "<s-f7>", function() require("illuminate").goto_prev_reference(false) end, desc = "Go to previous reference", mode = "n" },
+        },
+        opts = {
+            filetypes_denylist = variables.skip_filetype_list3,
         },
     },
 }

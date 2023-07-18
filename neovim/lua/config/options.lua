@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 -- Char
@@ -9,6 +10,9 @@ vim.opt.listchars:append({
     tab = ">~",
     trail = "·",
 })                                                                                 -- characters for displaying in list mode
+if not variables.is_vscode then
+    utils.fix_cellwidths()
+end
 
 -- Clipboard
 vim.opt.clipboard = "unnamedplus"                                                  -- use the clipboard as the unnamed register
@@ -83,9 +87,10 @@ vim.opt.sessionoptions = "curdir,folds,globals,help,localoptions,tabpages,winsiz
 -- Shell
 if variables.is_windows then
     vim.opt.shell = "pwsh -NoLogo"                                                 -- name of shell to use for external commands
-    vim.opt.shellcmdflag = "-c"                                                    -- flag to shell to execute one command
+    vim.opt.shellcmdflag = "-Command"                                              -- flag to shell to execute one command
+    vim.opt.shellpipe  = "2>&1 | %%{ '$_' } | tee %s; exit $LastExitCode"          -- string to put output of ":make" in error file
     vim.opt.shellquote = ""                                                        -- quote character(s) for around shell command
-    vim.opt.shellslash = true                                                      -- use forward slash for shell file names
+    vim.opt.shellredir = "2>&1 | %%{ '$_' } | Out-File %s; exit $LastExitCode"     -- string to put output of filter in a temp file
     vim.opt.shellxquote = ""                                                       -- like 'shellquote', but include redirection
 end
 

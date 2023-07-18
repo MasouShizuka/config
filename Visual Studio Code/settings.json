@@ -80,7 +80,6 @@
     "files.autoGuessEncoding": true,
     "files.autoSave": "afterDelay",
     "hediet.vscode-drawio.codeLinkActivated": true,
-    "hediet.vscode-drawio.theme": "Kennedy",
     "isort.args": [
         "--multi-line",
         "3",

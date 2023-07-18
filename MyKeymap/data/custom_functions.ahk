@@ -30,7 +30,7 @@ center_window() {
 
 
 
-close_or_run_script(path) {
+close_or_run_script(path, args:= "") {
     StringReplace, path, path, /, \, All
     SplitPath, path, name
 
@@ -41,7 +41,8 @@ close_or_run_script(path) {
         WinClose
         WinWaitClose, running_script, , 2
     } Else {
-        Run, bin/ahk.exe %path%
+        cmd := path . " " . args
+        Run, bin/ahk.exe %cmd%
     }
     DetectHiddenWindows Off
 }

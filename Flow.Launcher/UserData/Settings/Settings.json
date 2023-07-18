@@ -134,10 +134,11 @@
     "Password": null
   },
   "LastQueryMode": "Selected",
+  "AnimationSpeed": "Medium",
+  "CustomAnimationLength": 360,
   "PluginSettings": {
     "PythonExecutablePath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "NodeExecutablePath": "",
-    "PythonDirectory": "C:\\Users\\MasouShizuka\\miniconda3",
     "Plugins": {
       "0ECADE17459B49F587BF81DC3A125110": {
         "ID": "0ECADE17459B49F587BF81DC3A125110",

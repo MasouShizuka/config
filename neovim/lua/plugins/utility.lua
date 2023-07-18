@@ -5,8 +5,8 @@ return {
         "Aasim-A/scrollEOF.nvim",
         enabled = not variables.is_vscode,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
         opts = {
             -- The pattern used for the internal autocmd to determine
@@ -18,22 +18,6 @@ return {
             disabled_filetypes = {},
             -- List of modes to disable scrollEOF for. see https://neovim.io/doc/user/builtin.html#mode() for available modes.
             disabled_modes = {},
-        },
-    },
-
-    {
-        "AndrewRadev/undoquit.vim",
-        enabled = not variables.is_vscode,
-        event = {
-            "BufEnter",
-        },
-        init = function()
-            vim.g.undoquit_mapping = variables.keymap["<c-s-t>"]
-            vim.g.undoquit_tab_mapping = "<leader>" .. variables.keymap["<c-s-t>"]
-        end,
-        keys = {
-            { variables.keymap["<c-s-t>"],               desc = "Undo quit",     mode = "n" },
-            { "<leader>" .. variables.keymap["<c-s-t>"], desc = "Undo quit tab", mode = "n" },
         },
     },
 
@@ -68,11 +52,13 @@ return {
         end,
         dependencies = {
             "kevinhwang91/promise-async",
+
             {
                 "luukvbaal/statuscol.nvim",
                 config = function(_, opts)
                     local builtin = require("statuscol.builtin")
                     require("statuscol").setup({
+                        ft_ignore = variables.skip_filetype_list3,
                         segments = {
                             { text = { builtin.foldfunc },      click = "v:lua.ScFa" },
                             { text = { "%s" },                  click = "v:lua.ScSa" },
@@ -81,12 +67,13 @@ return {
                     })
                 end,
             },
+
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not variables.is_vscode and not variables.is_wsl,
+        enabled = not variables.is_vscode,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
         keys = {
             { "zR", function(...) require("ufo").openAllFolds(...) end,         desc = "Open all folds",          mode = "n" },
@@ -138,7 +125,7 @@ return {
 
             -- vim.notify = require("notify")
             vim.notify = function(message, ...)
-                if message:match("warning: multiple different client offset_encodings detected for buffer, this is not supported yet") then
+                if message == "warning: multiple different client offset_encodings detected for buffer, this is not supported yet" then
                     return
                 end
 
@@ -164,5 +151,21 @@ return {
         enabled = not variables.is_vscode,
         lazy = false,
         opts = {},
+    },
+
+    {
+        "vigoux/notifier.nvim",
+        cmd = {
+            "NotifierClear",
+            "NotifierReplay",
+        },
+        enabled = not variables.is_vscode,
+        lazy = false,
+        opts = {
+            components = { -- Order of the components to draw from top to bottom (first nvim notifications, then lsp)
+                -- "nvim",    -- Nvim notifications (vim.notify and such)
+                "lsp",     -- LSP status updates
+            },
+        },
     },
 }

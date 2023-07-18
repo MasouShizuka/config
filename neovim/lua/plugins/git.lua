@@ -1,22 +1,12 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
     {
         "lewis6991/gitsigns.nvim",
-        cond = function()
-            local cmd = "git -C \"" .. vim.fn.getcwd() .. '" rev-parse'
-            local result = vim.fn.system(cmd)
-            local success = vim.api.nvim_get_vvar("shell_error") == 0
-            if success and result:gsub("[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]", "") or nil then
-                return true
-            end
-
-            return false
-        end,
         enabled = not variables.is_vscode,
         event = {
-            "BufReadPost",
-            "BufNewFile",
+            "User GitFile",
         },
         init = function()
             local ok, wk = pcall(require, "which-key")
@@ -28,6 +18,19 @@ return {
                     },
                 })
             end
+
+            vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+                callback = function(args)
+                    if not (vim.fn.expand "%" == "" or vim.api.nvim_get_option_value("buftype", { buf = args.buf }) == "nofile") then
+                        if utils.cmd({ "git", "-C", vim.fn.expand "%:p:h", "rev-parse" }, false) then
+                            utils.event("GitFile")
+                            vim.api.nvim_del_augroup_by_name("GitFile")
+                        end
+                    end
+                end,
+                desc = "Git file detection",
+                group = vim.api.nvim_create_augroup("GitFile", { clear = true }),
+            })
         end,
         opts = {
             signs = {
@@ -108,8 +111,9 @@ return {
                 map("n", "<leader>gp", gs.preview_hunk, { desc = "Preview hunk", silent = true })
                 map("n", "<leader>gb", function() gs.blame_line({ full = true }) end, { desc = "Blame line", silent = true })
                 -- map("n", "<leader>tb", gs.toggle_current_line_blame, { desc = "Toggle current line blame", silent = true })
-                map("n", "<leader>gd", gs.diffthis, { desc = "Diffthis", silent = true })
-                map("n", "<leader>gD", function() gs.diffthis("~") end, { desc = "Diffthis ~", silent = true })
+                -- map("n", "<leader>gd", gs.diffthis, { desc = "Diffthis", silent = true })
+                -- map("n", "<leader>gD", function() gs.diffthis("~") end, { desc = "Diffthis ~", silent = true })
+                map("n", "<leader>gd", function() gs.diffthis("~") end, { desc = "Diffthis ~", silent = true })
                 -- map("n", "<leader>td", gs.toggle_deleted, { desc = "Toggle deleted", silent = true })
 
                 -- Text object

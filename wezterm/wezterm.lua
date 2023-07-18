@@ -335,7 +335,7 @@ config.window_background_opacity = 0.6
 
 config.window_close_confirmation = "NeverPrompt"
 
-config.window_decorations = "NONE"
+config.window_decorations = "RESIZE"
 
 config.window_frame = {
     font = wezterm.font("Sarasa Mono SC Nerd Font", { weight = "Bold" }),
@@ -349,7 +349,7 @@ config.window_padding = {
     bottom = 0,
 }
 
-function tab_title(tab_info, options)
+local function tab_title(tab_info, options)
     -- if the tab title is explicitly set, take that
     -- Otherwise, use the title from the active pane
     -- in that tab
@@ -422,14 +422,15 @@ wezterm.on("format-window-title", function(tab, pane, tabs, panes, config)
 end)
 
 
+-- WezTerm 20230712-072601-f4abf8fd 版本后失效，必须更新最新的 rime 构建版本才能输入
 -- rime 输入法只能在 config.window_decorations = "NONE" 的情况下正常运行
 -- 启动时切换到 "RESIZE"，使 rime 能够在 "RESIZE" 下正常运行
-wezterm.on("gui-startup", function(cmd)
-    local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
-    local gui_window = window:gui_window()
-    local overrides = gui_window:get_config_overrides() or {}
-    overrides.window_decorations = "RESIZE"
-    gui_window:set_config_overrides(overrides)
-end)
+-- wezterm.on("gui-startup", function(cmd)
+--     local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
+--     local gui_window = window:gui_window()
+--     local overrides = gui_window:get_config_overrides() or {}
+--     overrides.window_decorations = "RESIZE"
+--     gui_window:set_config_overrides(overrides)
+-- end)
 
 return config

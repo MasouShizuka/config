@@ -136,7 +136,22 @@ return {
                         },
                     },
 
-                    "L3MON4D3/LuaSnip",
+                    {
+                        "L3MON4D3/LuaSnip",
+                        config = function(_, opts)
+                            require("luasnip").setup(opts)
+                            require("luasnip.loaders.from_vscode").lazy_load()
+                            require("luasnip.loaders.from_vscode").lazy_load({
+                                paths = { variables.vscode_snippet_path },
+                            })
+                        end,
+                        dependencies = {
+                            "rafamadriz/friendly-snippets",
+                        },
+                        opts = {
+                            enable_autosnippets = true,
+                        },
+                    },
                 },
             },
         },
@@ -146,24 +161,5 @@ return {
             "InsertEnter",
         },
         version = false,
-    },
-
-    {
-        "L3MON4D3/LuaSnip",
-        config = function(_, opts)
-            require("luasnip").setup(opts)
-            require("luasnip.loaders.from_vscode").lazy_load()
-            require("luasnip.loaders.from_vscode").lazy_load({
-                paths = { variables.vscode_snippet_path },
-            })
-        end,
-        dependencies = {
-            "rafamadriz/friendly-snippets",
-        },
-        enabled = not variables.is_vscode,
-        lazy = false,
-        opts = {
-            enable_autosnippets = true,
-        },
     },
 }

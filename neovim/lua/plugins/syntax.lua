@@ -86,10 +86,10 @@ return {
         config = function(_, opts)
             require("nvim-treesitter.configs").setup(opts)
         end,
-        enabled = not variables.is_vscode and not variables.is_wsl,
+        enabled = not variables.is_vscode,
         event = {
-            "BufReadPost",
             "BufNewFile",
+            "BufReadPost",
         },
         keys = {
             { "<cr>", desc = "Treesitter incremental", mode = "n" },
