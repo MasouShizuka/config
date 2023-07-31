@@ -23,13 +23,16 @@ return {
             end
         end,
         keys = {
-            { "<leader>/", function(...) require("telescope.builtin").live_grep(...) end,       desc = "Live grep",       mode = "n" },
             { "<c-p>",      function(...) require("telescope.builtin").find_files(...) end,      desc = "Find files",      mode = "n" },
+            { "<leader>/",  function(...) require("telescope.builtin").live_grep(...) end,       desc = "Live grep",       mode = "n" },
+            { "<leader>tb", function(...) require("telescope.builtin").buffers(...) end,         desc = "Buffers",         mode = "n" },
             { "<leader>to", function(...) require("telescope.builtin").oldfiles(...) end,        desc = "Old files",       mode = "n" },
             { "<leader>t:", function(...) require("telescope.builtin").command_history(...) end, desc = "Command history", mode = "n" },
+            { "<leader>t/", function(...) require("telescope.builtin").search_history(...) end,  desc = "Search history",  mode = "n" },
             { "<leader>th", function(...) require("telescope.builtin").help_tags(...) end,       desc = "Help tags",       mode = "n" },
-            { "<leader>tb", function(...) require("telescope.builtin").buffers(...) end,         desc = "Buffers",         mode = "n" },
+            { "<leader>tv", function(...) require("telescope.builtin").vim_options(...) end,     desc = "Vim options",     mode = "n" },
             { "<leader>tr", function(...) require("telescope.builtin").registers(...) end,       desc = "Registers",       mode = "n" },
+            { "<leader>tn", function(...) require("telescope").extensions.notify.notify() end,   desc = "Notify",          mode = "n" },
         },
         opts = {
             defaults = {

@@ -43,42 +43,21 @@ return {
     },
 
     {
-        "lewis6991/satellite.nvim",
-        enabled = not variables.is_vscode and vim.fn.has("nvim-0.10") == 1,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
-        },
+        "petertriho/nvim-scrollbar",
+        enabled = not variables.is_vscode,
+        lazy = false,
         opts = {
-            current_only = false,
-            -- winblend = 50,
-            winblend = 0,
-            zindex = 40,
+            handle = {
+                blend = 0,
+            },
             excluded_filetypes = variables.skip_filetype_list3,
-            width = 2,
             handlers = {
-                search = {
-                    enable = true,
-                },
-                diagnostic = {
-                    enable = true,
-                    signs = { "-", "=", "≡" },
-                    min_severity = vim.diagnostic.severity.HINT,
-                },
-                gitsigns = {
-                    enable = true,
-                    signs = {
-                        -- can only be a single character (multibyte is okay)
-                        add = "│",
-                        change = "│",
-                        delete = "-",
-                    },
-                },
-                marks = {
-                    -- enable = true,
-                    enable = false,
-                    show_builtins = false, -- shows the builtin marks like [ ] < >
-                },
+                cursor = false,
+                diagnostic = true,
+                gitsigns = false,
+                handle = true,
+                search = true,
+                ale = false,
             },
         },
     },

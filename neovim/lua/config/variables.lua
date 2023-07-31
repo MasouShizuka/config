@@ -30,6 +30,32 @@ function M.load_path()
     if M.is_windows then
         M.python_path = M.conda_path .. "/python.exe"
     end
+    M.get_python_envs_path = function()
+        local function exists(path)
+            local ok, err, code = os.rename(path, path)
+            if not ok then
+                if code == 13 then
+                    -- Permission denied, but it exists
+                    return true
+                end
+            end
+            return ok
+        end
+
+        local python_envs_path = nil
+
+        local conda_envs_path = M.conda_path .. "/envs"
+        local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+        local envs_path = conda_envs_path .. "/" .. envs
+        if exists(envs_path) then
+            python_envs_path = envs_path .. "/bin/python"
+            if M.is_windows then
+                python_envs_path = envs_path .. "/python.exe"
+            end
+        end
+
+        return python_envs_path
+    end
 
     M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
 
@@ -298,45 +324,26 @@ function M.load_lsp()
                 -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
                 lspconfig.bashls.setup(default_config)
             end,
-            jedi_language_server = function()
-                local environment_path = M.python_path
-
-                local function exists(path)
-                    local ok, err, code = os.rename(path, path)
-                    if not ok then
-                        if code == 13 then
-                            -- Permission denied, but it exists
-                            return true
-                        end
-                    end
-                    return ok
-                end
-                local conda_envs_path = M.conda_path .. "/envs"
-                local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-                local envs_path = conda_envs_path .. "/" .. envs
-                if exists(envs_path) then
-                    environment_path = envs_path .. "/bin/python"
-                    if M.is_windows then
-                        environment_path = envs_path .. "/python.exe"
-                    end
-
-                    vim.notify(("Activate conda envs: %s"):format(envs), vim.log.levels.INFO, { title = "jedi-language-server" })
-                end
-
-                local config = vim.tbl_deep_extend("keep", {
-                    root_dir = lspconfig.util.root_pattern("*"),
-                    init_options = {
-                        diagnostics = {
-                            enable = true,
-                        },
-                        workspace = {
-                            environmentPath = environment_path,
-                        },
-                    },
-                }, default_config)
-
-                lspconfig.jedi_language_server.setup(config)
-            end,
+            -- jedi_language_server = function()
+            --     local python_envs_path = M.get_python_envs_path()
+            --     if python_envs_path then
+            --         vim.notify(("Activated:\n%s"):format(python_envs_path), vim.log.levels.INFO, { title = "jedi-language-server" })
+            --     else
+            --         python_envs_path = M.python_path
+            --     end
+            --
+            --     lspconfig.jedi_language_server.setup(vim.tbl_deep_extend("keep", {
+            --         root_dir = lspconfig.util.root_pattern("*"),
+            --         init_options = {
+            --             diagnostics = {
+            --                 enable = true,
+            --             },
+            --             workspace = {
+            --                 environmentPath = python_envs_path,
+            --             },
+            --         },
+            --     }, default_config))
+            -- end,
             jsonls = function()
                 lspconfig.jsonls.setup(default_config)
             end,
@@ -380,6 +387,26 @@ function M.load_lsp()
             end,
             marksman = function()
                 lspconfig.marksman.setup(default_config)
+            end,
+            pyright = function()
+                local python_envs_path = M.get_python_envs_path()
+                if python_envs_path then
+                    vim.notify(("Activated:\n%s"):format(python_envs_path), vim.log.levels.INFO, { title = "pyright" })
+                else
+                    python_envs_path = M.python_path
+                end
+
+                lspconfig.pyright.setup(vim.tbl_deep_extend("keep", {
+                    root_dir = lspconfig.util.root_pattern("*"),
+                    settings = {
+                        python = {
+                            analysis = {
+                                diagnosticMode = "openFilesOnly",
+                            },
+                            pythonPath = python_envs_path,
+                        },
+                    },
+                }, default_config))
             end,
             -- 由 rust-tools 设置
             -- rust_analyzer = function()

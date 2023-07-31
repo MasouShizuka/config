@@ -1,7 +1,175 @@
-local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
+    {
+        "dnlhc/glance.nvim",
+        cmd = {
+            "Glance references",
+            "Glance definitions",
+            "Glance type_definitions",
+            "Glance implementations",
+        },
+        enabled = not variables.is_vscode,
+        keys = {
+            { "gd", function() vim.api.nvim_command("Glance definitions") end,      desc = "Glance definitions",      mode = "n" },
+            { "ge", function() vim.api.nvim_command("Glance references") end,       desc = "Glance references",       mode = "n" },
+            { "gi", function() vim.api.nvim_command("Glance implementations") end,  desc = "Glance implementations",  mode = "n" },
+            { "gy", function() vim.api.nvim_command("Glance type_definitions") end, desc = "Glance type_definitions", mode = "n" },
+        },
+        opts = function()
+            local actions = require("glance").actions
+
+            return {
+                border = {
+                    enable = true, -- Show window borders. Only horizontal borders allowed
+                },
+                mappings = {
+                    list = {
+                        ["j"] = actions.next,     -- Bring the cursor to the next item in the list
+                        ["k"] = actions.previous, -- Bring the cursor to the previous item in the list
+                        ["<down>"] = actions.next,
+                        ["<up>"] = actions.previous,
+                        ["<tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
+                        ["<s-tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
+                        ["<c-u>"] = actions.preview_scroll_win(5),
+                        ["<c-d>"] = actions.preview_scroll_win(-5),
+                        -- ["v"] = actions.jump_vsplit,
+                        -- ["s"] = actions.jump_split,
+                        ["v"] = false,
+                        ["s"] = actions.jump_vsplit,
+                        ["S"] = actions.jump_split,
+                        ["t"] = actions.jump_tab,
+                        ["<cr>"] = actions.jump,
+                        ["o"] = actions.jump,
+                        ["l"] = actions.jump,
+                        -- ["<leader>l"] = actions.enter_win("preview"), -- Focus preview window
+                        ["<leader>l"] = false,
+                        ["<c-j>"] = actions.enter_win("preview"),
+                        ["q"] = actions.close,
+                        ["Q"] = actions.close,
+                        ["<esc>"] = actions.close,
+                        ["<c-q>"] = actions.quickfix,
+                        -- ["<esc>"] = false -- disable a mapping
+                    },
+                    preview = {
+                        ["Q"] = actions.close,
+                        ["<tab>"] = actions.next_location,
+                        ["<s-tab>"] = actions.previous_location,
+                        ["<f4>"] = actions.next_location,
+                        ["<s-f4>"] = actions.previous_location,
+                        -- ["<leader>l"] = actions.enter_win("list"), -- Focus list window
+                        ["<leader>l"] = false,
+                        ["<c-j>"] = actions.enter_win("list"),
+                    },
+                },
+                hooks = {
+                    before_open = function(results, open, jump, method)
+                        if #results == 1 then
+                            local target_uri = results[1].uri or results[1].targetUri
+                            target_uri = target_uri:gsub("%%3A", ":"):lower()
+
+                            if target_uri == vim.uri_from_bufnr(0):lower() then
+                                jump(results[1])
+                            else
+                                vim.api.nvim_command("tab sbuffer")
+                                jump(results[1])
+                            end
+                        else
+                            open(results)
+                        end
+                    end,
+                },
+                folds = {
+                    folded = false, -- Automatically fold list on startup
+                },
+            }
+        end,
+    },
+
+    {
+        "folke/trouble.nvim",
+        cmd = {
+            "Trouble",
+            "TroubleClose",
+            "TroubleRefresh",
+            "TroubleToggle",
+        },
+        dependencies = {
+            "nvim-tree/nvim-web-devicons",
+        },
+        enabled = not variables.is_vscode,
+        init = function()
+            local ok, wk = pcall(require, "which-key")
+            if ok then
+                wk.register({
+                    mode = "n",
+                    ["<leader>x"] = {
+                        name = "+trouble",
+                    },
+                })
+            end
+        end,
+        keys = {
+            { "<leader>xx", function() vim.api.nvim_command("TroubleToggle") end,                       desc = "Trouble",               mode = "n" },
+            { "<leader>xw", function() vim.api.nvim_command("TroubleToggle workspace_diagnostics") end, desc = "Workspace diagnostics", mode = "n" },
+            { "<leader>xd", function() vim.api.nvim_command("TroubleToggle document_diagnostics") end,  desc = "Document diagnostics",  mode = "n" },
+            { "<leader>xl", function() vim.api.nvim_command("TroubleToggle loclist") end,               desc = "Loclist",               mode = "n" },
+            { "<leader>xq", function() vim.api.nvim_command("TroubleToggle quickfix") end,              desc = "Quickfix",              mode = "n" },
+            {
+                "<f8>",
+                function(...)
+                    if not require("trouble").is_open() then
+                        require("trouble").open(...)
+                    end
+                    require("trouble").next({ skip_groups = true, jump = true })
+                end,
+                desc = "Next",
+                mode = "n",
+            },
+            {
+                "<s-f8>",
+                function(...)
+                    if not require("trouble").is_open() then
+                        require("trouble").open(...)
+                    end
+                    require("trouble").previous({ skip_groups = true, jump = true })
+                end,
+                desc = "Previous",
+                mode = "n",
+            },
+        },
+        opts = {
+            mode = "document_diagnostics", -- "workspace_diagnostics", "document_diagnostics", "quickfix", "lsp_references", "loclist"
+            action_keys = {
+                -- key mappings for actions in the trouble list
+                -- map to {} to remove a mapping, for example:
+                -- close = {},
+                close = "q",                     -- close the list
+                cancel = "<esc>",                -- cancel the preview and get back to your last window / buffer / cursor
+                refresh = "r",                   -- manually refresh
+                -- jump = { "<cr>", "<tab>" },   -- jump to the diagnostic or open / close folds
+                jump = { "l", "<cr>", "<tab>" }, -- jump to the diagnostic or open / close folds
+                -- open_split = { "<c-x>" },     -- open buffer in new split
+                -- open_vsplit = { "<c-v>" },    -- open buffer in new vsplit
+                -- open_tab = { "<c-t>" },       -- open buffer in new tab
+                open_split = { "S", "<c-x>" },  -- open buffer in new split
+                open_vsplit = { "s", "<c-v>" }, -- open buffer in new vsplit
+                open_tab = { "t", "<c-t>" },    -- open buffer in new tab
+                jump_close = { "o" },           -- jump to the diagnostic and close the list
+                toggle_mode = "m",              -- toggle between "workspace" and "document" diagnostics mode
+                toggle_preview = "P",           -- toggle auto_preview
+                hover = "K",                    -- opens a small popup with the full multiline message
+                preview = "p",                  -- preview the diagnostic location
+                close_folds = { "zM", "zm" },   -- close all folds
+                open_folds = { "zR", "zr" },    -- open all folds
+                toggle_fold = { "zA", "za" },   -- toggle fold of current file
+                previous = "k",                 -- previous item
+                next = "j",                     -- next item
+            },
+            use_diagnostic_signs = true,
+        },
+    },
+
     {
         "jose-elias-alvarez/null-ls.nvim",
         config = function(_, opts)
@@ -164,191 +332,8 @@ return {
         end,
         dependencies = {
             {
-                "dnlhc/glance.nvim",
-                cmd = {
-                    "Glance references",
-                    "Glance definitions",
-                    "Glance type_definitions",
-                    "Glance implementations",
-                },
-                keys = {
-                    { "gd", function() vim.api.nvim_command("Glance definitions") end,      desc = "Glance definitions",      mode = "n" },
-                    { "ge", function() vim.api.nvim_command("Glance references") end,       desc = "Glance references",       mode = "n" },
-                    { "gi", function() vim.api.nvim_command("Glance implementations") end,  desc = "Glance implementations",  mode = "n" },
-                    { "gy", function() vim.api.nvim_command("Glance type_definitions") end, desc = "Glance type_definitions", mode = "n" },
-                },
-                opts = function()
-                    local glance = require("glance")
-                    local actions = glance.actions
-
-                    return {
-                        border = {
-                            enable = true, -- Show window borders. Only horizontal borders allowed
-                            top_char = "―",
-                            bottom_char = "―",
-                        },
-                        mappings = {
-                            list = {
-                                ["j"] = actions.next,     -- Bring the cursor to the next item in the list
-                                ["k"] = actions.previous, -- Bring the cursor to the previous item in the list
-                                ["<down>"] = actions.next,
-                                ["<up>"] = actions.previous,
-                                ["<tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
-                                ["<s-tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
-                                ["<c-u>"] = actions.preview_scroll_win(5),
-                                ["<c-d>"] = actions.preview_scroll_win(-5),
-                                -- ["v"] = actions.jump_vsplit,
-                                -- ["s"] = actions.jump_split,
-                                ["v"] = false,
-                                ["s"] = actions.jump_vsplit,
-                                ["S"] = actions.jump_split,
-                                ["t"] = actions.jump_tab,
-                                ["<cr>"] = actions.jump,
-                                ["o"] = actions.jump,
-                                ["l"] = actions.jump,
-                                -- ["<leader>l"] = actions.enter_win("preview"), -- Focus preview window
-                                ["<leader>l"] = false,
-                                ["<c-j>"] = actions.enter_win("preview"),
-                                ["q"] = actions.close,
-                                ["Q"] = actions.close,
-                                ["<esc>"] = actions.close,
-                                ["<c-q>"] = actions.quickfix,
-                                -- ["<esc>"] = false -- disable a mapping
-                            },
-                            preview = {
-                                ["Q"] = actions.close,
-                                ["<tab>"] = actions.next_location,
-                                ["<s-tab>"] = actions.previous_location,
-                                ["<f4>"] = actions.next_location,
-                                ["<s-f4>"] = actions.previous_location,
-                                -- ["<leader>l"] = actions.enter_win("list"), -- Focus list window
-                                ["<leader>l"] = false,
-                                ["<c-j>"] = actions.enter_win("list"),
-                            },
-                        },
-                        hooks = {
-                            before_open = function(results, open, jump, method)
-                                if #results == 1 then
-                                    jump(results[1]) -- argument is optional
-                                else
-                                    open(results)    -- argument is optional
-                                end
-                            end,
-                        },
-                        folds = {
-                            fold_closed = "",
-                            fold_open = "",
-                            folded = false, -- Automatically fold list on startup
-                        },
-                    }
-                end,
-            },
-
-            {
                 "folke/neodev.nvim",
-                enabled = not variables.is_vscode,
-                event = {
-                    "User ConfigFile",
-                },
-                init = function()
-                    vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
-                        callback = function()
-                            local cwd = vim.fn.getcwd()
-                            if variables.is_windows then
-                                cwd = cwd:gsub("\\", "/")
-                            end
-
-                            if cwd == variables.config_path then
-                                utils.event("ConfigFile")
-                                vim.api.nvim_del_augroup_by_name("ConfigFile")
-                            end
-                        end,
-                        desc = "Config file detection",
-                        group = vim.api.nvim_create_augroup("ConfigFile", { clear = true }),
-                    })
-                end,
                 opts = {},
-            },
-            {
-                "folke/trouble.nvim",
-                cmd = {
-                    "Trouble",
-                    "TroubleClose",
-                    "TroubleRefresh",
-                    "TroubleToggle",
-                },
-                dependencies = {
-                    "nvim-tree/nvim-web-devicons",
-                },
-                init = function()
-                    local ok, wk = pcall(require, "which-key")
-                    if ok then
-                        wk.register({
-                            mode = "n",
-                            ["<leader>x"] = {
-                                name = "+trouble",
-                            },
-                        })
-                    end
-                end,
-                keys = {
-                    { "<leader>xx", function() vim.api.nvim_command("TroubleToggle") end,                       desc = "Trouble",               mode = "n" },
-                    { "<leader>xw", function() vim.api.nvim_command("TroubleToggle workspace_diagnostics") end, desc = "Workspace diagnostics", mode = "n" },
-                    { "<leader>xd", function() vim.api.nvim_command("TroubleToggle document_diagnostics") end,  desc = "Document diagnostics",  mode = "n" },
-                    { "<leader>xl", function() vim.api.nvim_command("TroubleToggle loclist") end,               desc = "Loclist",               mode = "n" },
-                    { "<leader>xq", function() vim.api.nvim_command("TroubleToggle quickfix") end,              desc = "Quickfix",              mode = "n" },
-                    {
-                        "<f8>",
-                        function(...)
-                            if not require("trouble").is_open() then
-                                require("trouble").open(...)
-                            end
-                            require("trouble").next({ skip_groups = true, jump = true })
-                        end,
-                        desc = "Next",
-                        mode = "n",
-                    },
-                    {
-                        "<s-f8>",
-                        function(...)
-                            if not require("trouble").is_open() then
-                                require("trouble").open(...)
-                            end
-                            require("trouble").previous({ skip_groups = true, jump = true })
-                        end,
-                        desc = "Previous",
-                        mode = "n",
-                    },
-                },
-                opts = {
-                    action_keys = {
-                        -- key mappings for actions in the trouble list
-                        -- map to {} to remove a mapping, for example:
-                        -- close = {},
-                        close = "q",                     -- close the list
-                        cancel = "<esc>",                -- cancel the preview and get back to your last window / buffer / cursor
-                        refresh = "r",                   -- manually refresh
-                        -- jump = { "<cr>", "<tab>" },   -- jump to the diagnostic or open / close folds
-                        jump = { "l", "<cr>", "<tab>" }, -- jump to the diagnostic or open / close folds
-                        -- open_split = { "<c-x>" },     -- open buffer in new split
-                        -- open_vsplit = { "<c-v>" },    -- open buffer in new vsplit
-                        -- open_tab = { "<c-t>" },       -- open buffer in new tab
-                        open_split = { "S", "<c-x>" },  -- open buffer in new split
-                        open_vsplit = { "s", "<c-v>" }, -- open buffer in new vsplit
-                        open_tab = { "t", "<c-t>" },    -- open buffer in new tab
-                        jump_close = { "o" },           -- jump to the diagnostic and close the list
-                        toggle_mode = "m",              -- toggle between "workspace" and "document" diagnostics mode
-                        toggle_preview = "P",           -- toggle auto_preview
-                        hover = "K",                    -- opens a small popup with the full multiline message
-                        preview = "p",                  -- preview the diagnostic location
-                        close_folds = { "zM", "zm" },   -- close all folds
-                        open_folds = { "zR", "zr" },    -- open all folds
-                        toggle_fold = { "zA", "za" },   -- toggle fold of current file
-                        previous = "k",                 -- previous item
-                        next = "j",                     -- next item
-                    },
-                    use_diagnostic_signs = true,
-                },
             },
 
             {
@@ -383,7 +368,10 @@ return {
                         ),
                         on_attach = function(client, bufnr)
                             if client.server_capabilities["documentSymbolProvider"] then
-                                require("nvim-navic").attach(client, bufnr)
+                                local ok, navic = pcall(require, "nvim-navic")
+                                if ok then
+                                    navic.attach(client, bufnr)
+                                end
                             end
                         end,
                     }
@@ -433,72 +421,72 @@ return {
         },
     },
 
-    {
-        "stevearc/aerial.nvim",
-        cmd = {
-            "AerialToggle",
-            "AerialOpen",
-            "AerialOpenAll",
-            "AerialClose",
-            "AerialCloseAll",
-            "AerialNext",
-            "AerialPrev",
-            "AerialGo",
-            "AerialInfo",
-            "AerialNavToggle",
-            "AerialNavOpen",
-            "AerialNavClose",
-        },
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter",
-            "nvim-tree/nvim-web-devicons",
-        },
-        enabled = not variables.is_vscode,
-        opts = {
-            keymaps = {
-                ["?"] = "actions.show_help",
-                ["g?"] = "actions.show_help",
-                ["<CR>"] = "actions.jump",
-                ["l"] = "actions.jump",
-                ["<2-LeftMouse>"] = "actions.jump",
-                ["<C-v>"] = false,
-                ["<C-s>"] = false,
-                ["S"] = "actions.jump_vsplit",
-                ["s"] = "actions.jump_split",
-                ["p"] = "actions.scroll",
-                ["<C-j>"] = false,
-                ["<C-k>"] = false,
-                ["J"] = "actions.down_and_scroll",
-                ["K"] = "actions.up_and_scroll",
-                ["{"] = "actions.prev",
-                ["}"] = "actions.next",
-                ["[["] = "actions.prev_up",
-                ["h"] = "actions.prev_up",
-                ["]]"] = "actions.next_up",
-                ["q"] = "actions.close",
-                ["o"] = "actions.tree_toggle",
-                ["za"] = "actions.tree_toggle",
-                ["O"] = "actions.tree_toggle_recursive",
-                ["zA"] = "actions.tree_toggle_recursive",
-                -- ["l"] = "actions.tree_open",
-                ["zo"] = "actions.tree_open",
-                ["L"] = false,
-                ["zO"] = "actions.tree_open_recursive",
-                -- ["h"] = "actions.tree_close",
-                ["zc"] = "actions.tree_close",
-                ["H"] = false,
-                ["zC"] = "actions.tree_close_recursive",
-                ["zr"] = "actions.tree_increase_fold_level",
-                ["zR"] = "actions.tree_open_all",
-                ["zm"] = "actions.tree_decrease_fold_level",
-                ["zM"] = "actions.tree_close_all",
-                ["zx"] = "actions.tree_sync_folds",
-                ["zX"] = "actions.tree_sync_folds",
-            },
-            highlight_on_hover = true,
-            show_guides = true,
-        },
-    },
+    -- {
+    --     "stevearc/aerial.nvim",
+    --     cmd = {
+    --         "AerialToggle",
+    --         "AerialOpen",
+    --         "AerialOpenAll",
+    --         "AerialClose",
+    --         "AerialCloseAll",
+    --         "AerialNext",
+    --         "AerialPrev",
+    --         "AerialGo",
+    --         "AerialInfo",
+    --         "AerialNavToggle",
+    --         "AerialNavOpen",
+    --         "AerialNavClose",
+    --     },
+    --     dependencies = {
+    --         "nvim-treesitter/nvim-treesitter",
+    --         "nvim-tree/nvim-web-devicons",
+    --     },
+    --     enabled = not variables.is_vscode,
+    --     opts = {
+    --         keymaps = {
+    --             ["?"] = "actions.show_help",
+    --             ["g?"] = "actions.show_help",
+    --             ["<CR>"] = "actions.jump",
+    --             ["l"] = "actions.jump",
+    --             ["<2-LeftMouse>"] = "actions.jump",
+    --             ["<C-v>"] = false,
+    --             ["<C-s>"] = false,
+    --             ["S"] = "actions.jump_vsplit",
+    --             ["s"] = "actions.jump_split",
+    --             ["p"] = "actions.scroll",
+    --             ["<C-j>"] = false,
+    --             ["<C-k>"] = false,
+    --             ["J"] = "actions.down_and_scroll",
+    --             ["K"] = "actions.up_and_scroll",
+    --             ["{"] = "actions.prev",
+    --             ["}"] = "actions.next",
+    --             ["[["] = "actions.prev_up",
+    --             ["h"] = "actions.prev_up",
+    --             ["]]"] = "actions.next_up",
+    --             ["q"] = "actions.close",
+    --             ["o"] = "actions.tree_toggle",
+    --             ["za"] = "actions.tree_toggle",
+    --             ["O"] = "actions.tree_toggle_recursive",
+    --             ["zA"] = "actions.tree_toggle_recursive",
+    --             -- ["l"] = "actions.tree_open",
+    --             ["zo"] = "actions.tree_open",
+    --             ["L"] = false,
+    --             ["zO"] = "actions.tree_open_recursive",
+    --             -- ["h"] = "actions.tree_close",
+    --             ["zc"] = "actions.tree_close",
+    --             ["H"] = false,
+    --             ["zC"] = "actions.tree_close_recursive",
+    --             ["zr"] = "actions.tree_increase_fold_level",
+    --             ["zR"] = "actions.tree_open_all",
+    --             ["zm"] = "actions.tree_decrease_fold_level",
+    --             ["zM"] = "actions.tree_close_all",
+    --             ["zx"] = "actions.tree_sync_folds",
+    --             ["zX"] = "actions.tree_sync_folds",
+    --         },
+    --         highlight_on_hover = true,
+    --         show_guides = true,
+    --     },
+    -- },
 
     {
         "williamboman/mason.nvim",

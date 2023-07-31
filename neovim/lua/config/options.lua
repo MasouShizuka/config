@@ -4,9 +4,7 @@ local variables = require("config.variables")
 -- Char
 vim.opt.list = true                                                                -- show <Tab> and <EOL>
 vim.opt.listchars:append({
-    extends = "…",
     nbsp = "␣",
-    precedes = "…",
     tab = ">~",
     trail = "·",
 })                                                                                 -- characters for displaying in list mode

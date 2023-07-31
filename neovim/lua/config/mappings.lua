@@ -39,7 +39,6 @@ if variables.is_vscode then
     -- 注释
     vim.keymap.set({ "n", "x", "o" }, "gc", "<plug>VSCodeCommentary", { silent = true })
     vim.keymap.set("n", "gcc", "<plug>VSCodeCommentaryLine", { silent = true })
-    -- 块注释
     vim.cmd([[
         function! s:Vscode_Block_Commentary(...) abort
             if !a:0
@@ -202,14 +201,14 @@ else
     vim.keymap.set("n", variables.keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
     vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
     vim.keymap.set("n", "<c-s>" .. variables.keymap["<c-,>"], function()
-        local buffer = vim.api.nvim_get_current_buf()
+        local buf = vim.api.nvim_get_current_buf()
         vim.cmd.tabprevious()
-        vim.api.nvim_command("vertical sbuffer " .. buffer)
+        vim.api.nvim_command("vertical sbuffer " .. buf)
     end, { desc = "Move buffer to previous tab", silent = true })
     vim.keymap.set("n", "<c-s>" .. variables.keymap["<c-.>"], function()
-        local buffer = vim.api.nvim_get_current_buf()
+        local buf = vim.api.nvim_get_current_buf()
         vim.cmd.tabnext()
-        vim.api.nvim_command("vertical sbuffer " .. buffer)
+        vim.api.nvim_command("vertical sbuffer " .. buf)
     end, { desc = "Move buffer to next tab", silent = true })
 
     -- 跳转居中

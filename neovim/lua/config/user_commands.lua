@@ -82,8 +82,9 @@ if not variables.is_vscode then
 
     -- diff with next tab
     local function diff_with_next_tab()
+        local buf = vim.api.nvim_get_current_buf()
         vim.cmd.tabnext()
-        vim.api.nvim_command("vertical sbuffer " .. vim.api.nvim_get_current_buf())
+        vim.api.nvim_command("vertical sbuffer " .. buf)
         utils.diffthis()
     end
     vim.api.nvim_create_user_command("DiffWithNextTab", diff_with_next_tab, { desc = "Diff with next tab" })
@@ -91,8 +92,9 @@ if not variables.is_vscode then
 
     -- diff with previous tab
     local function diff_with_previous_tab()
+        local buf = vim.api.nvim_get_current_buf()
         vim.cmd.tabprevious()
-        vim.api.nvim_command("vertical sbuffer " .. vim.api.nvim_get_current_buf())
+        vim.api.nvim_command("vertical sbuffer " .. buf)
         utils.diffthis()
     end
     vim.api.nvim_create_user_command("DiffWithPrevTab", diff_with_previous_tab, { desc = "Diff with previous tab" })

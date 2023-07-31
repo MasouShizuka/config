@@ -1,6 +1,14 @@
 return {
     {
         "kevinhwang91/nvim-hlslens",
+        config = function(_, opts)
+            local ok, _ = pcall(require, "scrollbar")
+            if ok then
+                require("scrollbar.handlers.search").setup(opts)
+            else
+                require("hlslens").setup(opts)
+            end
+        end,
         keys = {
             { "/", desc = "Search forward",  mode = { "n", "x" } },
             { "?", desc = "Search backward", mode = { "n", "x" } },

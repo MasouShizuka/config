@@ -61,7 +61,7 @@ return {
             -- May define a timeout, or a duration to defer the save for - this allows
             -- for formatters to run, for example if they're configured via an autocmd
             -- that listens for `BufWritePre` event.
-            timeout = nil,
+            timeout = 1,
             -- Define some filetypes to explicitly not save, in case our existing conditions
             -- don't quite catch all the buffers we'd prefer not to write to.
             exclude_ft = {},

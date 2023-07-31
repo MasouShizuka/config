@@ -272,15 +272,17 @@ function M.undoquit()
         local current_winnr = vim.api.nvim_get_current_win()
         local result = false
 
-        vim.cmd.wincmd(direction)
-        local bufnr = vim.api.nvim_get_current_buf()
-        if is_storable(bufnr) and bufnr ~= current_bufnr then
-            window_data.neighbour_buffer = vim.fn.expand("%")
-            window_data.open_command = ("tabnext %s | %s"):format(window_data.tabpagenr, split_command)
-            result = true
+        local function try()
+            vim.cmd.wincmd(direction)
+            local bufnr = vim.api.nvim_get_current_buf()
+            if is_storable(bufnr) and bufnr ~= current_bufnr then
+                window_data.neighbour_buffer = vim.fn.expand("%")
+                window_data.open_command = ("tabnext %s | %s"):format(window_data.tabpagenr, split_command)
+                result = true
+            end
+            vim.cmd(("%swincmd w"):format(current_winnr))
         end
-
-        vim.cmd(("%swincmd w"):format(current_winnr))
+        pcall(try)
 
         return result, window_data
     end

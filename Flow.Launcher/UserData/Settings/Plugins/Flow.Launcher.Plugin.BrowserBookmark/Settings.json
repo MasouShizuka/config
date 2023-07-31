@@ -1,13 +1,13 @@
 {
   "OpenInNewBrowserWindow": true,
   "BrowserPath": null,
-  "LoadChromeBookmark": true,
-  "LoadFirefoxBookmark": true,
-  "LoadEdgeBookmark": true,
+  "LoadChromeBookmark": false,
+  "LoadFirefoxBookmark": false,
+  "LoadEdgeBookmark": false,
   "CustomChromiumBrowsers": [
     {
-      "Name": "Vivaldi",
-      "DataDirectoryPath": "C:\\Users\\MasouShizuka\\AppData\\Local\\Vivaldi\\User Data",
+      "Name": "Brave",
+      "DataDirectoryPath": "C:\\Users\\MasouShizuka\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data",
       "BrowserType": 0
     }
   ]

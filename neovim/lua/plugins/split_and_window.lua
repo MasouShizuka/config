@@ -160,13 +160,13 @@ return {
                     pinned = true,
                     open = function() require("nvim-tree.api").tree.open() end,
                 },
-                {
-                    ft = "aerial",
-                    title = "Aerial",
-                    size = { width = 0.2 },
-                    pinned = true,
-                    open = function() vim.api.nvim_command("AerialOpen") end,
-                },
+                -- {
+                --     ft = "aerial",
+                --     title = "Aerial",
+                --     size = { width = 0.2 },
+                --     pinned = true,
+                --     open = function() vim.api.nvim_command("AerialOpen") end,
+                -- },
             },
             bottom = {
                 {
@@ -211,7 +211,6 @@ return {
             animate = {
                 enabled = false,
             },
-            exit_when_last = true,
             keys = {
                 -- close window
                 ["q"] = function(win)
