@@ -7,18 +7,18 @@ return {
         config = function(_, opts)
             require("onedarkpro").setup(opts)
 
+            local colors = require("onedarkpro.helpers").get_preloaded_colors()
+            for color, value in pairs(colors) do
+                vim.api.nvim_set_hl(0, color, { fg = value })
+            end
+
             vim.cmd.colorscheme("onedark")
         end,
         lazy = false,
         opts = {
             highlights = {
-                BufferLineBufferSelected = {
-                    fg = "#c678dd",
-                    style = "bold",
-                },
-                BufferLineNumbersSelected = {
-                    fg = "#c678dd",
-                    style = "bold",
+                MatchParen = {
+                    bg = "${gray}"
                 },
             },
             options = {

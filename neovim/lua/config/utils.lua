@@ -222,6 +222,12 @@ function M.fix_cellwidths(cica)
     vim.fn.setcellwidths(cellwidths)
 end
 
+function M.get_highlight_color(name, val)
+    local hl = vim.api.nvim_get_hl(0, { name = name })
+
+    return string.format("#%06x", hl[val])
+end
+
 --- Open a URL under the cursor with the current operating system
 ---@param path string The path of the file to open with the system opener
 function M.system_open(path)

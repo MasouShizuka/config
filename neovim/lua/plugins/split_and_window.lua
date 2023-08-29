@@ -2,6 +2,43 @@ local variables = require("config.variables")
 
 return {
     {
+        "anuvyklack/windows.nvim",
+        cmd = {
+            "WindowsMaximize",
+            "WindowsMaximizeVertical",
+            "WindowsMaximizeHorizont",
+            "WindowsEqualize",
+            "WindowsToggleAutowidth",
+        },
+        dependencies = {
+            "anuvyklack/middleclass",
+        },
+        enabled = not variables.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        keys = {
+            { "<c-s><c-m>", function() vim.api.nvim_command("WindowsMaximize") end,             desc = "Maximize current window",                 mode = "n" },
+            { "<c-s><c-c>", function() vim.api.nvim_command("WindowsMaximizeVertically") end,   desc = "Maximize width of the current window",    mode = "n" },
+            { "<c-s><c-r>", function() vim.api.nvim_command("WindowsMaximizeHorizontally") end, desc = "Maximize height of the current window",   mode = "n" },
+            { "<c-s><c-e>", function() vim.api.nvim_command("WindowsEqualize") end,             desc = "Equalize all windows heights and widths", mode = "n" },
+            { "<c-s><c-a>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
+        },
+        opts = {
+            autowidth = {
+                enable = true,
+            },
+            ignore = {
+                filetype = variables.skip_filetype_list3,
+            },
+            animation = {
+                enable = false,
+            },
+        },
+    },
+
+    {
         "folke/edgy.nvim",
         config = function(_, opts)
             require("edgy").setup(opts)
@@ -21,9 +58,12 @@ return {
                                 local close_function = toggle_filetype_list[filetype]
                                 if close_function and type(close_function) == "function" then
                                     close_function()
+                                else
+                                    win:close()
                                 end
                             end
                         end
+
                         break
                     end
                 end
@@ -38,6 +78,7 @@ return {
                             edgebar.wins[n]:focus()
                             return true
                         end
+
                         break
                     end
                 end
@@ -45,6 +86,8 @@ return {
                 return false
             end
 
+            local prev_tabpage
+            local prev_win
             local function toggle(pos, toggle_filetype_list)
                 local is_focused, close_function = variables.is_toggle_filetype_focused(toggle_filetype_list, false)
                 if is_focused then
@@ -52,18 +95,23 @@ return {
                         close_function()
                     end
                     require("edgy").close(pos)
-
                     return
                 end
 
                 local is_opened, win = variables.is_toggle_filetype_opened(toggle_filetype_list, false)
                 if is_opened then
-                    if not focus_nth_win(pos, 1) then
-                        vim.api.nvim_set_current_win(win)
-                    end
+                    prev_tabpage = vim.api.nvim_get_current_tabpage()
+                    prev_win = vim.api.nvim_get_current_win()
+
+                    -- if not focus_nth_win(pos, 1) then
+                    --     vim.api.nvim_set_current_win(win)
+                    -- end
+                    vim.api.nvim_set_current_win(win)
                     return
                 end
 
+                prev_tabpage = vim.api.nvim_get_current_tabpage()
+                prev_win = vim.api.nvim_get_current_win()
                 require("edgy").open(pos)
             end
 
@@ -71,14 +119,18 @@ return {
                 toggle("left", variables.toggle_filetype_list1)
             end, { desc = "Focus left panel", silent = true })
             vim.keymap.set("n", variables.keymap["<c-2>"], function()
-                for _, edgebar in pairs(require("edgy.config").layout) do
-                    if #edgebar.wins > 0 then
-                        require("edgy").goto_main()
-                        return
-                    end
-                end
+                -- for _, edgebar in pairs(require("edgy.config").layout) do
+                --     if #edgebar.wins > 0 then
+                --         require("edgy").goto_main()
+                --         return
+                --     end
+                -- end
 
-                variables.skip_filetype(variables.skip_filetype_list1, "W")
+                if vim.api.nvim_get_current_tabpage() == prev_tabpage and prev_win then
+                    vim.api.nvim_set_current_win(prev_win)
+                else
+                    variables.skip_filetype(variables.skip_filetype_list1, "W")
+                end
             end, { desc = "Focus main editor", silent = true })
             vim.keymap.set("n", variables.keymap["<c-3>"], function()
                 local count = vim.v.count
@@ -293,6 +345,68 @@ return {
                 -- reset all custom sizing
                 ["<c-w>="] = false,
             },
+        },
+    },
+
+    {
+        "sindrets/winshift.nvim",
+        cmd = {
+            "WinShift",
+            "WinShift left",
+            "WinShift right",
+            "WinShift up",
+            "WinShift down",
+            "WinShift far_left",
+            "WinShift far_right",
+            "WinShift far_up",
+            "WinShift far_down",
+            "WinShift swap",
+        },
+        enabled = not variables.is_vscode,
+        keys = {
+            { "<c-s><c-h>", function() vim.api.nvim_command("WinShift left") end,      desc = "Move window to left",                  mode = "n" },
+            { "<c-s><c-l>", function() vim.api.nvim_command("WinShift right") end,     desc = "Move window to right",                 mode = "n" },
+            { "<c-s><c-j>", function() vim.api.nvim_command("WinShift down") end,      desc = "Move window to down",                  mode = "n" },
+            { "<c-s><c-k>", function() vim.api.nvim_command("WinShift up") end,        desc = "Move window to up",                    mode = "n" },
+            { "<c-s>H",     function() vim.api.nvim_command("WinShift far_left") end,  desc = "Move window to far left",              mode = "n" },
+            { "<c-s>L",     function() vim.api.nvim_command("WinShift far_right") end, desc = "Move window to far right",             mode = "n" },
+            { "<c-s>J",     function() vim.api.nvim_command("WinShift far_down") end,  desc = "Move window to far down",              mode = "n" },
+            { "<c-s>K",     function() vim.api.nvim_command("WinShift far_up") end,    desc = "Move window to far up",                mode = "n" },
+            { "<c-s><c-s>", function() vim.api.nvim_command("WinShift swap") end,      desc = "Swap the current window with another", mode = "n" },
+        },
+        opts = {
+            ---A function that should prompt the user to select a window.
+            ---
+            ---The window picker is used to select a window while swapping windows with
+            ---`:WinShift swap`.
+            ---@return integer? winid # Either the selected window ID, or `nil` to
+            ---   indicate that the user cancelled / gave an invalid selection.
+            window_picker = function()
+                local cmdheight = vim.opt.cmdheight
+                vim.opt.cmdheight = 1
+
+                local winid = require("winshift.lib").pick_window({
+                    -- A string of chars used as identifiers by the window picker.
+                    picker_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                    filter_rules = {
+                        -- This table allows you to indicate to the window picker that a window
+                        -- should be ignored if its buffer matches any of the following criteria.
+                        cur_win = true, -- Filter out the current window
+                        floats = true,  -- Filter out floating windows
+                        filetype = {},  -- List of ignored file types
+                        buftype = {},   -- List of ignored buftypes
+                        bufname = {},   -- List of vim regex patterns matching ignored buffer names
+                    },
+                    ---A function used to filter the list of selectable windows.
+                    ---@param winids integer[] # The list of selectable window IDs.
+                    ---@return integer[] filtered # The filtered list of window IDs.
+                    filter_func = nil,
+                })
+
+                vim.opt.cmdheight = cmdheight
+
+                return winid
+            end,
         },
     },
 }

@@ -60,6 +60,11 @@ vimcmd_visual_symbol = '[<<](bold yellow)'
 
 
 
+[conda]
+symbol = ' '
+
+
+
 [directory]
 truncation_length = 0
 read_only = ' 󰌾'

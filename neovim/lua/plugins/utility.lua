@@ -160,7 +160,9 @@ return {
             "NotifierReplay",
         },
         enabled = not variables.is_vscode,
-        lazy = false,
+        event = {
+            "LspAttach",
+        },
         opts = {
             components = { -- Order of the components to draw from top to bottom (first nvim notifications, then lsp)
                 -- "nvim",    -- Nvim notifications (vim.notify and such)

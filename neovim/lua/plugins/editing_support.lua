@@ -133,6 +133,51 @@ return {
         version = false,
     },
     {
+        "echasnovski/mini.operators",
+        config = function(_, opts)
+            require("mini.operators").setup(opts)
+        end,
+        keys = {
+            { "s=", desc = "Evaluate text and replace with output", mode = { "n", "x" } },
+            { "sx", desc = "Exchange text regions",                 mode = { "n", "x" } },
+            { "sm", desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
+            { "ss", desc = "Replace text with register",            mode = { "n", "x" } },
+            { "sS", desc = "Sort text",                             mode = { "n", "x" } },
+        },
+        opts = {
+            -- Evaluate text and replace with output
+            evaluate = {
+                -- prefix = "g=",
+                prefix = "s=",
+            },
+
+            -- Exchange text regions
+            exchange = {
+                -- prefix = "gx",
+                prefix = "sx",
+            },
+
+            -- Multiply (duplicate) text
+            multiply = {
+                -- prefix = "gm",
+                prefix = "sm",
+            },
+
+            -- Replace text with register
+            replace = {
+                -- prefix = "gr",
+                prefix = "ss",
+            },
+
+            -- Sort text
+            sort = {
+                -- prefix = "gs",
+                prefix = "sS",
+            },
+        },
+        version = false,
+    },
+    {
         "echasnovski/mini.splitjoin",
         config = function(_, opts)
             require("mini.splitjoin").setup(opts)
@@ -149,39 +194,6 @@ return {
         version = false,
     },
 
-    {
-        "gbprod/substitute.nvim",
-        keys = {
-            { "ss",  function(...) require("substitute").operator(...) end,          desc = "Substitute",        mode = "n" },
-            { "sss", function(...) require("substitute").line(...) end,              desc = "Substitute line",   mode = "n" },
-            { "S",   function(...) require("substitute").visual(...) end,            desc = "Substitute visual", mode = "x" },
-            { "sx",  function(...) require("substitute.exchange").operator(...) end, desc = "Exchange",          mode = "n" },
-            { "sxx", function(...) require("substitute.exchange").line(...) end,     desc = "Exchange line",     mode = "n" },
-            { "X",   function(...) require("substitute.exchange").visual(...) end,   desc = "Exchange visual",   mode = "x" },
-            { "sxs", function(...) require("substitute.exchange").cancel(...) end,   desc = "Exchange cancel",   mode = "n" },
-        },
-        opts = {
-            on_substitute = nil,
-            yank_substituted_text = false,
-            highlight_substituted_text = {
-                enabled = true,
-                timer = 500,
-            },
-            range = {
-                prefix = "s",
-                prompt_current_text = false,
-                confirm = false,
-                complete_word = false,
-                motion1 = false,
-                motion2 = false,
-                suffix = "",
-            },
-            exchange = {
-                motion = false,
-                use_esc_to_cancel = true,
-            },
-        },
-    },
     {
         "gbprod/yanky.nvim",
         keys = {
@@ -368,5 +380,20 @@ return {
             ---Function to call after (un)comment
             post_hook = nil,
         },
+    },
+
+    {
+        "utilyre/sentiment.nvim",
+        enabled = not variables.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        init = function()
+            -- `matchparen.vim` needs to be disabled manually in case of lazy loading
+            vim.g.loaded_matchparen = 1
+        end,
+        opts = {},
+        version = "*",
     },
 }

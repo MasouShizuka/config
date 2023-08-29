@@ -195,7 +195,7 @@
     "markdown.preview.fontSize": 14,
     "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
-    "markdownConverter.ChromiumExecutablePath": "C:\\Users\\MasouShizuka\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+    "markdownConverter.ChromiumExecutablePath": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
     "markdownConverter.ConversionType": [
         "PDF",
         "HTML"

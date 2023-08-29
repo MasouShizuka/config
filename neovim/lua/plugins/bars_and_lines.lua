@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
@@ -21,6 +22,13 @@ return {
             "BufferLineGroupClose",
             "BufferLineGroupToggle",
         },
+        config = function(_, opts)
+            require("bufferline").setup(opts)
+
+            local purple = utils.get_highlight_color("purple", "fg")
+            vim.api.nvim_set_hl(0, "BufferLineBufferSelected", { bold = true, fg = purple })
+            vim.api.nvim_set_hl(0, "BufferLineNumbersSelected", { bold = true, fg = purple })
+        end,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
@@ -158,7 +166,7 @@ return {
         },
         opts = {
             options = {
-                section_separators = { left = "", right = "" },
+                section_separators = { left = "", right = "" },
                 component_separators = { left = "|", right = "|" },
             },
             sections = {
@@ -176,7 +184,8 @@ return {
                     {
                         "diagnostics",
                         symbols = variables.icons.diagnostics,
-                    }, },
+                    },
+                },
                 lualine_c = { "filename", "filesize" },
                 lualine_x = {
                     {

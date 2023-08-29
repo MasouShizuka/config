@@ -155,10 +155,10 @@ zstyle ":completion:*" rehash true
 # Theme #
 #########
 
-if (( is_windows )); then
-    export STARSHIP_CONFIG=$HOME/.config/starship/starship.toml
-elif (( is_wsl )); then
+if (( is_wsl )); then
     export STARSHIP_CONFIG=/mnt/c/Users/MasouShizuka/.config/starship/starship.toml
+else
+    export STARSHIP_CONFIG=$HOME/.config/starship/starship.toml
 fi
 
 eval "$(starship init zsh)"

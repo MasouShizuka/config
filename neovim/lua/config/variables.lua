@@ -291,12 +291,12 @@ function M.load_filtyppe_list()
         return false, nil
     end
     M.toggle_filetype = function(toggle_filetype_list)
-        local is_focused, close_function = M.is_toggle_filetype_focused(toggle_filetype_list, true)
+        local is_focused, _ = M.is_toggle_filetype_focused(toggle_filetype_list, true)
         if is_focused then
             return true
         end
 
-        local is_opened, win = M.is_toggle_filetype_opened(toggle_filetype_list, true)
+        local is_opened, _ = M.is_toggle_filetype_opened(toggle_filetype_list, true)
         if is_opened then
             return true
         end

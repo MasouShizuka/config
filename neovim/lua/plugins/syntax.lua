@@ -80,12 +80,38 @@ return {
 
     {
         "nvim-treesitter/nvim-treesitter",
-        build = function()
-            require("nvim-treesitter.install").update({ with_sync = true })
-        end,
+        build = {
+            ":TSUpdate",
+        },
         config = function(_, opts)
             require("nvim-treesitter.configs").setup(opts)
         end,
+        dependencies = {
+            {
+                "HiPhish/rainbow-delimiters.nvim",
+                config = function(_, opts)
+                    require("rainbow-delimiters.setup")(opts)
+                end,
+                opts = {
+                    highlight = {
+                        -- "RainbowDelimiterRed",
+                        -- "RainbowDelimiterYellow",
+                        -- "RainbowDelimiterBlue",
+                        -- "RainbowDelimiterOrange",
+                        -- "RainbowDelimiterGreen",
+                        -- "RainbowDelimiterViolet",
+                        -- "RainbowDelimiterCyan",
+                        "red",
+                        "yellow",
+                        "blue",
+                        "orange",
+                        "green",
+                        "purple",
+                        "cyan",
+                    },
+                },
+            },
+        },
         enabled = not variables.is_vscode,
         event = {
             "BufNewFile",

@@ -1,6 +1,6 @@
 --[[
-SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts
-COMMIT_ c8ad77a1a92d0667e1e66f11e84692cd03796ec8
+SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts/uosc
+COMMIT_ e783ad1f133e06a50d424291143d25497fbecfdd
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -8,7 +8,6 @@ COMMIT_ c8ad77a1a92d0667e1e66f11e84692cd03796ec8
 
 local uosc_version = '4.7.0'
 
-require('lib/std')
 assdraw = require('mp.assdraw')
 opt = require('mp.options')
 utils = require('mp.utils')
@@ -16,6 +15,7 @@ msg = require('mp.msg')
 osd = mp.create_osd_overlay('ass-events')
 INFINITY = 1e309
 QUARTER_PI_SIN = math.sin(math.pi / 4)
+require('lib/std')
 require('lib/lang')
 
 --[[ OPTIONS ]]

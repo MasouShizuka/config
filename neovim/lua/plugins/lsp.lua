@@ -74,9 +74,14 @@ return {
                                 vim.api.nvim_command("tab sbuffer")
                                 jump(results[1])
                             end
+
+                            vim.cmd.normal("zt")
                         else
                             open(results)
                         end
+                    end,
+                    after_close = function()
+                        vim.cmd.normal("zt")
                     end,
                 },
                 folds = {
@@ -338,10 +343,6 @@ return {
 
             {
                 "kosayoda/nvim-lightbulb",
-                event = {
-                    "BufNewFile",
-                    "BufReadPost",
-                },
                 opts = {
                     autocmd = {
                         enabled = true,
