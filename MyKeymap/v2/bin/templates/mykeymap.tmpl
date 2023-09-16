@@ -1,0 +1,102 @@
+﻿#Requires AutoHotkey v2.0
+#SingleInstance Force
+#UseHook true
+
+#Include lib/Functions.ahk
+#Include lib/Actions.ahk
+#Include lib/KeymapManager.ahk
+#Include lib/InputTipWindow.ahk
+#Include lib/Utils.ahk
+
+; #WinActivateForce   ; 先关了遇到相关问题再打开试试
+; InstallKeybdHook    ; 这个可以重装 keyboard hook, 提高自己的 hook 优先级, 以后可能会用到
+; ListLines False     ; 也许能提升一点点性能 ( 别抱期待 ), 当有这个需求时再打开试试
+; #Warn All, Off      ; 也许能提升一点点性能 ( 别抱期待 ), 当有这个需求时再打开试试
+
+DllCall("SetThreadDpiAwarenessContext", "ptr", -3, "ptr") ; 多显示器不同缩放比例会导致问题: https://www.autohotkey.com/boards/viewtopic.php?f=14&t=13810
+SetMouseDelay 0                                           ; SendInput 可能会降级为 SendEvent, 此时会有 10ms 的默认 delay
+SetWinDelay 0                                             ; 默认会在 activate, maximize, move 等窗口操作后睡眠 100ms
+ProcessSetPriority "High"
+SetWorkingDir("../")
+InitTrayMenu()
+InitKeymap()
+OnExit(MyExit)
+#include ../data/custom_functions.ahk
+
+InitKeymap()
+{
+  ; modified
+  ; taskSwitch := TaskSwitchKeymap("e", "d", "s", "f", "x", "space")
+  taskSwitch := TaskSwitchKeymap("w", "s", "a", "d", "x", "space")
+  mouseTip := {{ if .Options.Mouse.ShowTip }}InputTipWindow("{{ .Options.Mouse.TipSymbol }}"){{ else }}false{{ end }}
+  slow := MouseKeymap("slow mouse", {{ .Options.Mouse.KeepMouseMode }}, mouseTip, {{ .Options.Mouse.SlowSingle }}, {{ .Options.Mouse.SlowRepeat }}, "T{{ .Options.Mouse.Delay1 }}", "T{{ .Options.Mouse.Delay2 }}", {{ .Options.Scroll.OnceLineCount }}, "T{{ .Options.Scroll.Delay1 }}", "T{{ .Options.Scroll.Delay2 }}")
+  fast := MouseKeymap("fast mouse", {{ .Options.Mouse.KeepMouseMode }}, mouseTip, {{ .Options.Mouse.FastSingle }}, {{ .Options.Mouse.FastRepeat }}, "T{{ .Options.Mouse.Delay1 }}", "T{{ .Options.Mouse.Delay2 }}", {{ .Options.Scroll.OnceLineCount }}, "T{{ .Options.Scroll.Delay1 }}", "T{{ .Options.Scroll.Delay2 }}", slow)
+  slow.Map("*space", slow.LButtonUp())
+{{ if .CapslockAbbrEnabled }}
+  capsHook := InputHook("", "{CapsLock}{BackSpace}{Esc}", "{{ .CapslockAbbrKeys }}")
+  capsHook.KeyOpt("{CapsLock}", "S")
+  capsHook.OnChar := PostCharToCaspAbbr
+  Run("bin\MyKeymap-CommandInput.exe")
+{{ end }}
+{{- if .SemicolonAbbrEnabled }}
+  semiHook := InputHook("", "{CapsLock}{BackSpace}{Esc}{;}", "{{ .SemicolonAbbrKeys }}")
+  semiHook.KeyOpt("{CapsLock}", "S")
+  semiHook.OnChar := (ih, char) => semiHookAbbrWindow.Show(char, , , true)
+  semiHookAbbrWindow := InputTipWindow()
+{{ end }}
+
+  ; 路径变量
+{{ .PathVariables }}
+  ; 窗口组
+{{ .WindowGroups -}}
+
+{{range .EnabledKeymaps}}{{template "renderKeymap" .}}{{end}}
+
+  KeymapManager.GlobalKeymap.Enable()
+}
+
+{{define "renderKeymap"}}
+  ; {{.Name}}
+  {{ if not .ParentID }}km{{ .ID }} := KeymapManager.NewKeymap("{{ .Hotkey }}", {{ ahkString .Name }}, "{{ divide .Delay 1000 }}"){{ else }}km{{ .ID }} := KeymapManager.AddSubKeymap(km{{ .ParentID }}, "{{ .Hotkey }}", {{ ahkString .Name }}){{ end }}
+  km := km{{ .ID -}}
+{{ range $index, $action := sortHotkeys .Hotkeys }}
+  {{ actionToHotkey $action }}
+{{- end }}
+{{ end }}
+
+{{- if .CapslockAbbrEnabled -}}
+ExecCapslockAbbr(command) {
+  switch command {
+{{ abbrToCode .CapslockAbbr }}  }
+}
+{{- else -}}
+ExecCapslockAbbr(command) {
+}
+{{- end }}
+
+{{ if .SemicolonAbbrEnabled -}}
+ExecSemicolonAbbr(command) {
+  switch command {
+{{ abbrToCode .SemicolonAbbr }}  }
+}
+{{- else -}}
+ExecSemicolonAbbr(command) {
+}
+{{- end }}
+
+InitTrayMenu() {
+  A_TrayMenu.Delete()
+  A_TrayMenu.Add("暂停", TrayMenuHandler)
+  A_TrayMenu.Add("退出", TrayMenuHandler)
+  A_TrayMenu.Add("重启程序", TrayMenuHandler)
+  A_TrayMenu.Add("打开设置", TrayMenuHandler)
+  A_TrayMenu.Add("帮助文档", TrayMenuHandler)
+  A_TrayMenu.Add("查看窗口标识符", TrayMenuHandler)
+  A_TrayMenu.Default := "暂停"
+  A_TrayMenu.ClickCount := 1
+
+  A_IconTip := "MyKeymap {{ .Options.MykeymapVersion }} created by 咸鱼阿康"
+  TraySetIcon("./bin/icons/logo.ico", , true)
+}
+
+{{ .KeyMapping }}

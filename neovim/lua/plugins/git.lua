@@ -21,8 +21,8 @@ return {
 
             vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
                 callback = function(args)
-                    if not (vim.fn.expand "%" == "" or vim.api.nvim_get_option_value("buftype", { buf = args.buf }) == "nofile") then
-                        if utils.cmd({ "git", "-C", vim.fn.expand "%:p:h", "rev-parse" }, false) then
+                    if not (vim.fn.expand("%") == "" or vim.api.nvim_get_option_value("buftype", { buf = args.buf }) == "nofile") then
+                        if utils.cmd({ "git", "-C", vim.fn.expand("%:p:h"), "rev-parse" }, false) then
                             utils.event("GitFile")
                             vim.api.nvim_del_augroup_by_name("GitFile")
                         end

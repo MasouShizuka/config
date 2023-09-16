@@ -8,7 +8,7 @@ return {
         },
         enabled = not variables.is_vscode,
         keys = {
-            { "<leader>p", function() vim.api.nvim_command("PasteImg") end, desc = "Paste img", mode = "n" },
+            { "<leader>p", function() vim.api.nvim_command("PasteImg") end, desc = "Paste image", mode = "n" },
         },
         opts = {
             default = {

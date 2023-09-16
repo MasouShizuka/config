@@ -56,6 +56,8 @@ config.font = wezterm.font("Sarasa Mono SC Nerd Font")
 
 config.font_size = 16.0
 
+config.front_end = "WebGpu"
+
 config.hide_tab_bar_if_only_one_tab = true
 
 config.initial_cols = 120
@@ -329,6 +331,8 @@ config.use_fancy_tab_bar = false
 
 config.warn_about_missing_glyphs = false
 
+config.webgpu_power_preference = "HighPerformance"
+
 config.win32_system_backdrop = "Acrylic"
 
 config.window_background_opacity = 0.6
@@ -420,17 +424,5 @@ wezterm.on("format-window-title", function(tab, pane, tabs, panes, config)
 
     return zoomed .. index .. title
 end)
-
-
--- WezTerm 20230712-072601-f4abf8fd 版本后失效，必须更新最新的 rime 构建版本才能输入
--- rime 输入法只能在 config.window_decorations = "NONE" 的情况下正常运行
--- 启动时切换到 "RESIZE"，使 rime 能够在 "RESIZE" 下正常运行
--- wezterm.on("gui-startup", function(cmd)
---     local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
---     local gui_window = window:gui_window()
---     local overrides = gui_window:get_config_overrides() or {}
---     overrides.window_decorations = "RESIZE"
---     gui_window:set_config_overrides(overrides)
--- end)
 
 return config

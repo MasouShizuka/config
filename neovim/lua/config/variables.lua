@@ -1,3 +1,5 @@
+local utils = require("config.utils")
+
 local M = {}
 
 function M.load_running_environment()
@@ -31,23 +33,12 @@ function M.load_path()
         M.python_path = M.conda_path .. "/python.exe"
     end
     M.get_python_envs_path = function()
-        local function exists(path)
-            local ok, err, code = os.rename(path, path)
-            if not ok then
-                if code == 13 then
-                    -- Permission denied, but it exists
-                    return true
-                end
-            end
-            return ok
-        end
-
         local python_envs_path = nil
 
         local conda_envs_path = M.conda_path .. "/envs"
         local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
         local envs_path = conda_envs_path .. "/" .. envs
-        if exists(envs_path) then
+        if utils.exists(envs_path) then
             python_envs_path = envs_path .. "/bin/python"
             if M.is_windows then
                 python_envs_path = envs_path .. "/python.exe"
@@ -138,36 +129,52 @@ function M.load_icons()
 end
 
 function M.load_keymap()
-    if not M.is_wsl then
-        M.keymap = {
-            ["<c-1>"] = "<c-f1>",
-            ["<c-2>"] = "<c-f2>",
-            ["<c-3>"] = "<c-f3>",
-            ["<c-4>"] = "<c-f4>",
-            ["<c-space>"] = "<c-f5>",
-            ["<c-,>"] = "<c-f6>",
-            ["<c-.>"] = "<c-f7>",
-            ["<c-;>"] = "<c-f8>",
-            ["<c-s-n>"] = "<c-f9>",
-            ["<c-s-t>"] = "<c-f10>",
-        }
-    else
-        M.keymap = {
-            ["<c-1>"] = "<f25>",
-            ["<c-2>"] = "<f26>",
-            ["<c-3>"] = "<f27>",
-            ["<c-4>"] = "<f28>",
-            ["<c-space>"] = "<f29>",
-            ["<c-,>"] = "<f30>",
-            ["<c-.>"] = "<f31>",
-            ["<c-;>"] = "<f32>",
-            ["<c-s-n>"] = "<f33>",
-            ["<c-s-t>"] = "<f34>",
-        }
+    M.keymap = {
+        ["<c-1>"] = "<c-1>",
+        ["<c-2>"] = "<c-2>",
+        ["<c-3>"] = "<c-3>",
+        ["<c-4>"] = "<c-4>",
+        ["<c-space>"] = "<c-space>",
+        ["<c-,>"] = "<c-,>",
+        ["<c-.>"] = "<c-.>",
+        ["<c-;>"] = "<c-;>",
+        ["<c-s-n>"] = "<c-s-n>",
+        ["<c-s-t>"] = "<c-s-t>",
+    }
+
+    local terminal_simulator = "wezterm"
+    if terminal_simulator == "wezterm" then
+        if M.is_wsl then
+            M.keymap = {
+                ["<c-1>"] = "<f25>",
+                ["<c-2>"] = "<f26>",
+                ["<c-3>"] = "<f27>",
+                ["<c-4>"] = "<f28>",
+                ["<c-space>"] = "<f29>",
+                ["<c-,>"] = "<f30>",
+                ["<c-.>"] = "<f31>",
+                ["<c-;>"] = "<f32>",
+                ["<c-s-n>"] = "<f33>",
+                ["<c-s-t>"] = "<f34>",
+            }
+        else
+            M.keymap = {
+                ["<c-1>"] = "<c-f1>",
+                ["<c-2>"] = "<c-f2>",
+                ["<c-3>"] = "<c-f3>",
+                ["<c-4>"] = "<c-f4>",
+                ["<c-space>"] = "<c-f5>",
+                ["<c-,>"] = "<c-f6>",
+                ["<c-.>"] = "<c-f7>",
+                ["<c-;>"] = "<c-f8>",
+                ["<c-s-n>"] = "<c-f9>",
+                ["<c-s-t>"] = "<c-f10>",
+            }
+        end
     end
 end
 
-function M.load_filtyppe_list()
+function M.load_filetype_list()
     -- skip when <c-2>
     M.skip_filetype_list1 = {
         "aerial",
@@ -206,18 +213,39 @@ function M.load_filtyppe_list()
         "Trouble",
     }
     M.is_start_with_skip_filetype = function(filetype, skip_filetye_list)
-        for _, skip_filetype in ipairs(skip_filetye_list) do
-            if filetype:find(skip_filetype, 1, true) == 1 then
-                return true
+        if skip_filetye_list then
+            for _, skip_filetype in ipairs(skip_filetye_list) do
+                if filetype:find(skip_filetype, 1, true) == 1 then
+                    return true
+                end
+            end
+        else
+            for _, skip_filetype in ipairs(M.skip_filetype_list1) do
+                if filetype:find(skip_filetype, 1, true) == 1 then
+                    return true
+                end
+            end
+
+            for _, skip_filetype in ipairs(M.skip_filetype_list2) do
+                if filetype:find(skip_filetype, 1, true) == 1 then
+                    return true
+                end
+            end
+
+            for _, skip_filetype in ipairs(M.skip_filetype_list3) do
+                if filetype:find(skip_filetype, 1, true) == 1 then
+                    return true
+                end
             end
         end
+
         return false
     end
-    M.skip_filetype = function(skip_filetype_list, param)
+    M.skip_filetype = function(skip_filetype_list, wincmd)
         local filetype = vim.bo.filetype
         local max_skip = 20
         while M.is_start_with_skip_filetype(filetype, skip_filetype_list) and max_skip > 0 do
-            vim.cmd.wincmd(param)
+            vim.cmd.wincmd(wincmd)
             filetype = vim.bo.filetype
             max_skip = max_skip - 1
         end
@@ -248,12 +276,41 @@ function M.load_filtyppe_list()
         ["nvim-docs-view"] = function() vim.api.nvim_command("DocsViewToggle") end,
     }
     M.is_start_with_toggle_filetype = function(filetype, toggle_filetype_list)
-        for toggle_filetype, close_function in pairs(toggle_filetype_list) do
-            if filetype:find(toggle_filetype, 1, true) == 1 then
-                return true, close_function
+        if toggle_filetype_list then
+            for toggle_filetype, close_function in pairs(toggle_filetype_list) do
+                if filetype:find(toggle_filetype, 1, true) == 1 then
+                    return true, close_function
+                end
+            end
+        else
+            for toggle_filetype, close_function in pairs(M.toggle_filetype_list1) do
+                if filetype:find(toggle_filetype, 1, true) == 1 then
+                    return true, close_function
+                end
+            end
+
+            for toggle_filetype, close_function in pairs(M.toggle_filetype_list2) do
+                if filetype:find(toggle_filetype, 1, true) == 1 then
+                    return true, close_function
+                end
+            end
+
+            for toggle_filetype, close_function in pairs(M.toggle_filetype_list3) do
+                if filetype:find(toggle_filetype, 1, true) == 1 then
+                    return true, close_function
+                end
             end
         end
+
         return false, nil
+    end
+    M.is_in_toggle_filetype_list = function(filetype, toggle_filetype_list)
+        local is_in_toggle_filetype_list, _ = M.is_start_with_toggle_filetype(filetype, toggle_filetype_list)
+        if is_in_toggle_filetype_list then
+            return true
+        end
+
+        return false
     end
     M.is_toggle_filetype_focused = function(toggle_filetype_list, close)
         local ok, close_function = M.is_start_with_toggle_filetype(vim.bo.filetype, toggle_filetype_list)
@@ -305,16 +362,6 @@ function M.load_filtyppe_list()
     end
 end
 
-function M.load_language_filetype()
-    -- tex like filetype
-    M.tex_filetype = {
-        "markdown",
-        "plaintex",
-        "tex",
-        "text",
-    }
-end
-
 function M.load_lsp()
     M.lsp = function(lspconfig, default_config)
         return {
@@ -322,8 +369,9 @@ function M.load_lsp()
                 -- https://github.com/williamboman/mason.nvim/issues/1315
                 -- wsl 下安装后 mason.nvim/mason/bin/bash-language-server 中的路径错误
                 -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
-                lspconfig.bashls.setup(default_config)
+                lspconfig.bashls.setup(vim.tbl_deep_extend("keep", {}, default_config))
             end,
+            -- jedi 速度明显快于 pyright
             -- jedi_language_server = function()
             --     local python_envs_path = M.get_python_envs_path()
             --     if python_envs_path then
@@ -345,7 +393,7 @@ function M.load_lsp()
             --     }, default_config))
             -- end,
             jsonls = function()
-                lspconfig.jsonls.setup(default_config)
+                lspconfig.jsonls.setup(vim.tbl_deep_extend("keep", {}, default_config))
             end,
             lua_ls = function()
                 lspconfig.lua_ls.setup(vim.tbl_deep_extend("keep", {
@@ -386,7 +434,7 @@ function M.load_lsp()
                 }, default_config))
             end,
             marksman = function()
-                lspconfig.marksman.setup(default_config)
+                lspconfig.marksman.setup(vim.tbl_deep_extend("keep", {}, default_config))
             end,
             pyright = function()
                 local python_envs_path = M.get_python_envs_path()
@@ -410,8 +458,45 @@ function M.load_lsp()
             end,
             -- 由 rust-tools 设置
             -- rust_analyzer = function()
-            --     lspconfig.rust_analyzer.setup(default_config)
+            --     lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("keep", {}, default_config))
             -- end,
+            texlab = function()
+                local executable = "sioyek"
+                local args = {
+                    "--nofocus",
+                    "--reuse-window",
+                    "--forward-search-file",
+                    "%f",
+                    "--forward-search-line",
+                    "%l",
+                    "%p",
+                }
+
+                lspconfig.texlab.setup(vim.tbl_deep_extend("keep", {
+                    root_dir = lspconfig.util.root_pattern("*"),
+                    settings = {
+                        texlab = {
+                            build = {
+                                forwardSearchAfter = true,
+                            },
+                            forwardSearch = {
+                                executable = executable,
+                                args = args,
+                            },
+                        },
+                    },
+                }, default_config))
+
+                vim.api.nvim_create_user_command("TexlabCleanAuxiliary", function()
+                    vim.lsp.buf.execute_command({ command = "texlab.cleanAuxiliary", arguments = { { uri = vim.uri_from_bufnr(0) } } })
+                end, { desc = "Clean Auxiliary" })
+                vim.api.nvim_create_user_command("TexlabCleanArtifacts", function()
+                    vim.lsp.buf.execute_command({ command = "texlab.cleanArtifacts", arguments = { { uri = vim.uri_from_bufnr(0) } } })
+                end, { desc = "Clean Artifacts" })
+                vim.api.nvim_create_user_command("TexlabCancelBuild", function()
+                    vim.lsp.buf.execute_command({ command = "texlab.cancelBuild", arguments = {} })
+                end, { desc = "Cancel Build" })
+            end,
         }
     end
 
@@ -610,8 +695,7 @@ M.load_path()
 M.load_icons()
 M.load_keymap()
 
-M.load_filtyppe_list()
-M.load_language_filetype()
+M.load_filetype_list()
 
 M.load_lsp()
 M.load_dap()

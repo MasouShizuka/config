@@ -8,7 +8,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 Menu, Tray, Icon, logo.ico
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 
-#include %A_ScriptDir%/custom/monitor_center.ahk
+#include %A_ScriptDir%/../data/monitor_center.ahk
 #Include %A_ScriptDir%/Monitor.ahk
 
 Gui, +LastFound

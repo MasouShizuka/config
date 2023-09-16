@@ -80,6 +80,7 @@
     "files.autoGuessEncoding": true,
     "files.autoSave": "afterDelay",
     "hediet.vscode-drawio.codeLinkActivated": true,
+    "hediet.vscode-drawio.theme": "Kennedy",
     "isort.args": [
         "--multi-line",
         "3",
@@ -94,29 +95,10 @@
     "json.format.keepLines": true,
     "jupyter.askForKernelRestart": false,
     "latex-workshop.latex.autoBuild.run": "never",
-    "latex-workshop.latex.autoClean.run": "onFailed",
     "latex-workshop.latex.recipe.default": "lastUsed",
     "latex-workshop.latex.recipes": [
         {
-            "name": "XeLaTeX",
-            "tools": [
-                "xelatexmk"
-            ]
-        },
-        {
-            "name": "PDFLaTeX",
-            "tools": [
-                "pdflatex"
-            ]
-        },
-        {
-            "name": "BibTeX",
-            "tools": [
-                "bibtex"
-            ]
-        },
-        {
-            "name": "latexmk 🔃",
+            "name": "latexmk",
             "tools": [
                 "latexmk"
             ]
@@ -134,7 +116,25 @@
             ]
         },
         {
-            "name": "xelatexmk -> bibtex -> xelatexmk × 2",
+            "name": "latexmk (xelatex)",
+            "tools": [
+                "xelatexmk"
+            ]
+        },
+        {
+            "name": "latexmk (pdflatex)",
+            "tools": [
+                "pdflatex"
+            ]
+        },
+        {
+            "name": "latexmk (bibtex)",
+            "tools": [
+                "bibtex"
+            ]
+        },
+        {
+            "name": "xelatex -> bibtex -> xelatex * 2",
             "tools": [
                 "xelatexmk",
                 "bibtex",
@@ -143,7 +143,7 @@
             ]
         },
         {
-            "name": "pdflatex ➞ bibtex ➞ pdflatex × 2",
+            "name": "pdflatex -> bibtex -> pdflatex * 2",
             "tools": [
                 "pdflatex",
                 "bibtex",
@@ -166,15 +166,19 @@
             ]
         },
         {
+            "name": "Compile Pnw files",
+            "tools": [
+                "pnw2tex",
+                "latexmk"
+            ]
+        },
+        {
             "name": "tectonic",
             "tools": [
                 "tectonic"
             ]
         }
     ],
-    "latex-workshop.message.error.show": false,
-    "latex-workshop.message.warning.show": false,
-    "latex-workshop.showContextMenu": true,
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
     "Lua.diagnostics.globals": [
         "mp",
@@ -277,6 +281,7 @@
     "workbench.colorTheme": "One Dark Pro Flat",
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
+        "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
         "*.md": "default"

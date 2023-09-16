@@ -1,3 +1,4 @@
+#NoTrayIcon
 #Persistent
 OnExit("unhide_mouse")
 

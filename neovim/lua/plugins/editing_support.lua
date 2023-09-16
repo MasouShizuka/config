@@ -138,7 +138,7 @@ return {
             require("mini.operators").setup(opts)
         end,
         keys = {
-            { "s=", desc = "Evaluate text and replace with output", mode = { "n", "x" } },
+            { "se", desc = "Evaluate text and replace with output", mode = { "n", "x" } },
             { "sx", desc = "Exchange text regions",                 mode = { "n", "x" } },
             { "sm", desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
             { "ss", desc = "Replace text with register",            mode = { "n", "x" } },
@@ -148,7 +148,7 @@ return {
             -- Evaluate text and replace with output
             evaluate = {
                 -- prefix = "g=",
-                prefix = "s=",
+                prefix = "se",
             },
 
             -- Exchange text regions
@@ -253,7 +253,8 @@ return {
             -- For Windows/WSL, default: "im-select.exe"
             -- For macOS, default: "im-select"
             -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
-            default_command = vim.fn.stdpath("config") .. "/im-select",
+            -- default_command = vim.fn.stdpath("config") .. "/im-select",
+            default_command = "im-select",
 
             -- Restore the default input method state when the following events are triggered
             -- set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },

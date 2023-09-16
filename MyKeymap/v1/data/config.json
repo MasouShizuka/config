@@ -587,13 +587,13 @@
         "1": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"bin/custom/hide_mouse_cursor_when_idle.ahk\")"
+                "value": "close_or_run_script(\"data/hide_mouse_cursor_when_idle.ahk\")"
             }
         },
         "2": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"D:/Tools/komorebi/komorebi.ahk\")"
+                "value": "close_or_run_script(\"D:/Tools/komorebi/komorebi_v1.ahk\")"
             }
         },
         "3": {
@@ -718,25 +718,25 @@
         "I": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "fast_move_mouse(\"I\", 0, -1)"
+                "value": "move_mouse(\"I\", \"up\", \"fast\")"
             }
         },
         "J": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "fast_move_mouse(\"J\", -1, 0)"
+                "value": "move_mouse(\"J\", \"left\", \"fast\")"
             }
         },
         "K": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "fast_move_mouse(\"K\", 0, 1)"
+                "value": "move_mouse(\"K\", \"down\", \"fast\")"
             }
         },
         "L": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "fast_move_mouse(\"L\", 1, 0)"
+                "value": "move_mouse(\"L\", \"right\", \"fast\")"
             }
         },
         "M": {
@@ -780,7 +780,7 @@
         "S": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "close_or_run_script(\"bin/soundControl.ahk\")"
+                "value": "close_or_run_script(\"bin/SoundControl.ahk\")"
             }
         },
         "Space": {
@@ -1339,25 +1339,25 @@
         "I": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "very_slow_move_mouse(\"I\", 0, -1)"
+                "value": "move_mouse(\"I\", \"up\", \"veryslow\")"
             }
         },
         "J": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "very_slow_move_mouse(\"J\", -1, 0)"
+                "value": "move_mouse(\"J\", \"left\", \"veryslow\")"
             }
         },
         "K": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "very_slow_move_mouse(\"K\", 0, 1)"
+                "value": "move_mouse(\"K\", \"down\", \"veryslow\")"
             }
         },
         "L": {
             "2": {
                 "type": "可能会用到的内置函数",
-                "value": "very_slow_move_mouse(\"L\", 1, 0)"
+                "value": "move_mouse(\"L\", \"right\", \"veryslow\")"
             }
         },
         "M": {
@@ -3839,8 +3839,10 @@
         },
         ",": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "keysToSend": "`;",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, {blind}`;"
             }
         },
         "-": {
@@ -4357,8 +4359,9 @@
         },
         "C": {
             "2": {
-                "type": "什么也不做",
-                "value": ""
+                "prefix": "*",
+                "type": "文字处理",
+                "value": "send, {blind}{space}"
             }
         },
         "D": {
@@ -4516,9 +4519,8 @@
         },
         "V": {
             "2": {
-                "prefix": "*",
-                "type": "文字处理",
-                "value": "send, {blind}{space}"
+                "type": "什么也不做",
+                "value": ""
             }
         },
         "W": {

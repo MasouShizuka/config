@@ -95,24 +95,32 @@ return {
                         close_function()
                     end
                     require("edgy").close(pos)
+
                     return
                 end
+
+                local callback
 
                 local is_opened, win = variables.is_toggle_filetype_opened(toggle_filetype_list, false)
                 if is_opened then
-                    prev_tabpage = vim.api.nvim_get_current_tabpage()
-                    prev_win = vim.api.nvim_get_current_win()
-
-                    -- if not focus_nth_win(pos, 1) then
-                    --     vim.api.nvim_set_current_win(win)
-                    -- end
-                    vim.api.nvim_set_current_win(win)
-                    return
+                    callback = function()
+                        -- if not focus_nth_win(pos, 1) then
+                        --     vim.api.nvim_set_current_win(win)
+                        -- end
+                        vim.api.nvim_set_current_win(win)
+                    end
+                else
+                    callback = function()
+                        require("edgy").open(pos)
+                    end
                 end
 
-                prev_tabpage = vim.api.nvim_get_current_tabpage()
-                prev_win = vim.api.nvim_get_current_win()
-                require("edgy").open(pos)
+                if not variables.is_in_toggle_filetype_list(vim.bo.filetype) then
+                    prev_tabpage = vim.api.nvim_get_current_tabpage()
+                    prev_win = vim.api.nvim_get_current_win()
+                end
+
+                callback()
             end
 
             vim.keymap.set("n", variables.keymap["<c-1>"], function()

@@ -114,7 +114,7 @@ if not variables.is_vscode then
                 return
             end
 
-            vim.lsp.buf_request(0, "textDocument/hover", vim.lsp.util.make_position_params(), function(err, result, ctx, config)
+            vim.lsp.buf_request(0, "textDocument/hover", vim.lsp.util.make_position_params(), function(err, result, context, config)
                 if win and vim.api.nvim_win_is_valid(win) and result and result.contents then
                     local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
                     markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)

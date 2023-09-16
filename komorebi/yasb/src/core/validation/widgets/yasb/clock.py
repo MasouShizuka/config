@@ -2,7 +2,7 @@ DEFAULTS = {
     'label': '\uf017 {%H:%M:%S}',
     'label_alt': '\uf017 {%d-%m-%y %H:%M:%S}',
     'update_interval': 1000,
-    'language': 'zh_CN',
+    'language': 'zh_CN.UTF-8',
     'timezones': [],
     'status_icons': {
         'icon_0': '\ue381',

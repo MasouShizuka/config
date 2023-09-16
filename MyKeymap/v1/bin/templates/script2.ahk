@@ -436,10 +436,10 @@ space::
 
 #if SLOWMODE
 ; modified
-*I::slow_move_mouse("I", 0, -1)
-*J::slow_move_mouse("J", -1, 0)
-*K::slow_move_mouse("K", 0, 1)
-*L::slow_move_mouse("L", 1, 0)
+*I:: move_mouse("I", "up", "slow")
+*J:: move_mouse("J", "left", "slow")
+*K:: move_mouse("K", "down", "slow")
+*L:: move_mouse("L", "right", "slow")
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -452,26 +452,26 @@ space::
 *.::middle_click_down()
 *. Up::middle_click_up_without_hide_mouse_move_prompt()
 */::moveCurrentWindow()
-Esc::exit_mouse_mode()
-*Space::exit_mouse_mode()
-*capslock up::
+*Esc::exit_mouse_mode_with_left_click_up()
+*Space::exit_mouse_mode_with_left_click_up()
+*CapsLock Up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CapslockMode := true
     keywait capslock
     CapslockMode := false
-    if (A_ThisHotkey = "*capslock up" && A_PriorKey = "CapsLock" && A_TimeSinceThisHotkey < 450) {
-        exit_mouse_mode()
+    if (A_ThisHotkey = "*CapsLock Up" && A_PriorKey = "CapsLock" && A_TimeSinceThisHotkey < 450) {
+        exit_mouse_mode_with_left_click_up()
     }
     enableOtherHotkey(thisHotkey)
     return
 
 #if VERYSLOWMODE
 
-*I::very_slow_move_mouse("I", 0, -1)
-*J::very_slow_move_mouse("J", -1, 0)
-*K::very_slow_move_mouse("K", 0, 1)
-*L::very_slow_move_mouse("L", 1, 0)
+*I:: move_mouse("I", "up", "veryslow")
+*J:: move_mouse("J", "left", "veryslow")
+*K:: move_mouse("K", "down", "veryslow")
+*L:: move_mouse("L", "right", "veryslow")
 *`;::scrollWheel(";", 4)
 *H::scrollWheel("H", 3)
 *O::scrollWheel("O", 2)
@@ -484,16 +484,16 @@ Esc::exit_mouse_mode()
 *.::middle_click_down()
 *. Up::middle_click_up_without_hide_mouse_move_prompt()
 */::moveCurrentWindow()
-Esc::exit_mouse_mode()
-*Space::exit_mouse_mode()
-*capslock up::
+*Esc::exit_mouse_mode_with_left_click_up()
+*Space::exit_mouse_mode_with_left_click_up()
+*CapsLock Up::
     thisHotkey := A_ThisHotkey
     disableOtherHotkey(thisHotkey)
     CapslockMode := true
     keywait capslock
     CapslockMode := false
-    if (A_ThisHotkey = "*capslock up" && A_PriorKey = "CapsLock" && A_TimeSinceThisHotkey < 450) {
-        exit_mouse_mode()
+    if (A_ThisHotkey = "*CapsLock Up" && A_PriorKey = "CapsLock" && A_TimeSinceThisHotkey < 450) {
+        exit_mouse_mode_with_left_click_up()
     }
     enableOtherHotkey(thisHotkey)
     return

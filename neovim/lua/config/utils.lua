@@ -26,6 +26,17 @@ function M.diffthis()
     vim.cmd.normal("]c")
 end
 
+function M.exists(path)
+    local ok, err, code = os.rename(path, path)
+    if not ok then
+        if code == 13 then
+            -- Permission denied, but it exists
+            return true
+        end
+    end
+    return ok
+end
+
 function M.extra_view_toggle(update, opt)
     local default_config = {
         filetype = "extra-view",

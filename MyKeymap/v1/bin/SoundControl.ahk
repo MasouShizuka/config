@@ -6,19 +6,9 @@ SetWorkingDir %A_ScriptDir%
 Menu, Tray, Icon, logo.ico
 SendMode Input
 
-#include %A_ScriptDir%/custom/monitor_center.ahk
+#include %A_ScriptDir%/../data/monitor_center.ahk
 
 layout := new CLayout()
-
-ind := 1
-while (ind < 2)
-{
-    layout.addItem(ind)
-    SoundGet, master_volume
-    layout.setBrightnessText(ind, Format("{:.0f}", master_volume))
-    ind += 1
-}
-
 
 OnMessage(0x100, "WM_KEYDOWN")
 layout.show()
@@ -43,7 +33,7 @@ class CLayout
         this.margin := 30
         SysGet, c, MonitorCount
         this.count := c
-        this.mon := []
+        this.Sound := []
         this.curr := 1
         Gui MyGui:New,  +HwndGuiHwnd
         Gui MyGui:+LabelMyGui_On
@@ -52,6 +42,16 @@ class CLayout
         ; modified
         ; Gui Add, Text, x6 y296 w590 h20 +0x200, EDSF调节音量、AG上一首下一首、空格切换静音、C暂停/播放、V设置、X退出
         Gui Add, Text, x6 y296 w590 h20 +0x200, WSAD调节音量、QE上一首下一首、空格切换静音、C暂停/播放、V设置、X退出
+
+        this.initSound()
+    }
+    initSound()
+    {
+        ind := 1
+        this.addItem(ind)
+        SoundGet, master_volume
+        this.setVolumeText(1, Format("{:.0f}", master_volume))
+        ind += 1
     }
     show()
     {
@@ -67,88 +67,84 @@ class CLayout
 
     addItem(i)
     {
-        m := new Mon(i, this.X, this.Y, this.W, this.H)
-        this.mon.push(m)
+        m := new Sound(i, this.X, this.Y, this.W, this.H)
+        this.Sound.push(m)
         this.X += this.W + this.margin
     }
 
     mute(val) {
-        this.mon[this.curr].mute(val)
+        this.Sound[this.curr].mute(val)
     }
     deactivate(i) {
-        this.mon[i].deactivate()
+        this.Sound[i].deactivate()
     }
     next() {
         if (this.curr >= this.count)
             return
-        this.mon[this.curr].deactivate()
+        this.Sound[this.curr].deactivate()
         this.curr += 1
-        this.mon[this.curr].activate()
+        this.Sound[this.curr].activate()
     }
     prev() {
         if (this.curr <= 1)
             return
-        this.mon[this.curr].deactivate()
+        this.Sound[this.curr].deactivate()
         this.curr -= 1
-        this.mon[this.curr].activate()
+        this.Sound[this.curr].activate()
     }
-    setBrightnessText(i, brightness) {
-        this.mon[i].setBrightnessText(brightness)
+    setVolumeText(i, brightness) {
+        this.Sound[i].setVolumeText(brightness)
     }
-    incBrightness(num) {
+    incVolume(num) {
         local master_volume
         SoundGet, master_volume
-        layout.setBrightnessText(this.curr, Format("{:.0f}", master_volume))
-        this.mon[this.curr].incBrightness(num)
+        layout.setVolumeText(this.curr, Format("{:.0f}", master_volume))
+        this.Sound[this.curr].incVolume(num)
     }
-    decBrightness(num) {
+    decVolume(num) {
         local master_volume
         SoundGet, master_volume
-        layout.setBrightnessText(this.curr, Format("{:.0f}", master_volume))
-        this.mon[this.curr].decBrightness(num)
-    }
-    setUseWmi(i, useWmi) {
-        this.mon[i].setUseWmi(useWmi)
+        layout.setVolumeText(this.curr, Format("{:.0f}", master_volume))
+        this.Sound[this.curr].decVolume(num)
     }
 
 }
 
-class Mon
+class Sound
 {
 
     __New(i, X, Y, W, H)
     {
         global muteText1
-        global monitorText1
-        global monitorText2
-        global monitorText3
-        global monitorText4
-        global monitorIcon1
-        global monitorIcon2
-        global monitorIcon3
-        global monitorIcon4
+        global soundText1
+        global soundText2
+        global soundText3
+        global soundText4
+        global soundIcon1
+        global soundIcon2
+        global soundIcon3
+        global soundIcon4
 
         Gui, Font, s128 c0
-        Gui Add, Text, x%X% y%Y% w%W% h%H% +0x200 vMonitorIcon%i%, 🔊
+        Gui Add, Text, x%X% y%Y% w%W% h%H% +0x200 vSoundIcon%i%, 🔊
         X += 62
         Y += 190
         W := 120
         H := 40
         this.i := i
-        this.useWmi := false
 
         Gui, Font, s32 c0
-        Gui Add, Text, x%X% y%Y% w%W% h%H% +0x200 vMonitorText%i%, 100
-        GuiControl +BackgroundTrans, MonitorText%i%
+        Gui Add, Text, x%X% y%Y% w%W% h%H% +0x200 vSoundText%i%, 100
+        GuiControl +BackgroundTrans, soundText%i%
     }
 
     mute(mute)
     {
+        i := this.i
         if (mute == "On") {
-            this.setBrightnessText(this.brightness, "🔇")
-        }
-        if (mute == "Off") {
-            this.setBrightnessText(this.brightness, "")
+            GuiControl, Text, soundIcon%i%, 🔇
+        } else if (mute == "Off") {
+            GuiControl, Text, soundIcon%i%, 🔊
         }
     }
 
@@ -156,37 +152,34 @@ class Mon
     {
         i := this.i
         Gui, Font, s128 cFF6688
-        GuiControl, Font, monitorIcon%i%
+        GuiControl, Font, soundIcon%i%
         Gui, Font, s32 c0
-        GuiControl, Font, monitorText%i%
+        GuiControl, Font, soundText%i%
     }
 
     deactivate()
     {
         i := this.i
         Gui, Font, s128 c0
-        GuiControl, Font, monitorIcon%i%
+        GuiControl, Font, soundIcon%i%
         Gui, Font, s32 c0
-        GuiControl, Font, monitorText%i%
+        GuiControl, Font, soundText%i%
     }
-    setBrightnessText(brightness, mute := "") {
+    setVolumeText(brightness, mute := "") {
         i := this.i
         this.brightness := brightness
         t := brightness . mute
-        GuiControl, Text, monitorText%i%, %t%
+        GuiControl, Text, soundText%i%, %t%
     }
-    incBrightness(num) {
+    incVolume(num) {
         this.brightness := this.limitBrightness(this.brightness + num)
         SoundSet, this.brightness
-        this.setBrightnessText(this.brightness)
+        this.setVolumeText(this.brightness)
     }
-    decBrightness(num) {
+    decVolume(num) {
         this.brightness := this.limitBrightness(this.brightness - num)
         SoundSet, this.brightness
-        this.setBrightnessText(this.brightness)
-    }
-    setUseWmi(useWmi) {
-        this.useWmi := useWmi
+        this.setVolumeText(this.brightness)
     }
 	limitBrightness(b) {
 		if (b <= 0) {
@@ -215,14 +208,14 @@ WM_KEYDOWN(wParam, lParam)
             run, ms-settings:apps-volume
             ExitApp
         case "c": send {Media_Play_Pause}
-        ; case "s": layout.decBrightness(1)
-        ; case "f": layout.incBrightness(1)
-        ; case "d": layout.decBrightness(5)
-        ; case "e": layout.incBrightness(5)
-        case "a": layout.decBrightness(1)
-        case "d": layout.incBrightness(1)
-        case "s": layout.decBrightness(5)
-        case "w": layout.incBrightness(5)
+        ; case "s": layout.decVolume(1)
+        ; case "f": layout.incVolume(1)
+        ; case "d": layout.decVolume(5)
+        ; case "e": layout.incVolume(5)
+        case "a": layout.decVolume(1)
+        case "d": layout.incVolume(1)
+        case "s": layout.decVolume(5)
+        case "w": layout.incVolume(5)
         ; case "w": layout.prev()
         ; case "r": layout.next()
         case "Space":

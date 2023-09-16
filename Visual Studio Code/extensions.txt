@@ -22,7 +22,6 @@ KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
 manasxx.background-cover
 manuth.markdown-converter
-mark-wiemer.vscode-autohotkey-plus-plus
 marp-team.marp-vscode
 mechatroner.rainbow-csv
 mehyaa.workspace-storage-cleanup
@@ -55,6 +54,7 @@ shalimski.swapdiff
 sumneko.lua
 tamasfe.even-better-toml
 techer.open-in-browser
+thqby.vscode-autohotkey2-lsp
 timonwong.shellcheck
 usernamehw.errorlens
 vadimcn.vscode-lldb

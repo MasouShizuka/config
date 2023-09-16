@@ -5,7 +5,6 @@ sendSomeChinese() {
 }
 
 
-
 center_window() {
     If (!WinExist("A")) {
         Return
@@ -29,7 +28,6 @@ center_window() {
 }
 
 
-
 close_or_run_script(path, args:= "") {
     StringReplace, path, path, /, \, All
     SplitPath, path, name
@@ -41,12 +39,11 @@ close_or_run_script(path, args:= "") {
         WinClose
         WinWaitClose, running_script, , 2
     } Else {
-        cmd := path . " " . args
-        Run, bin/ahk.exe %cmd%
+        cmd := "bin/ahk.exe " . path . " " . args
+        Run, %cmd%
     }
     DetectHiddenWindows Off
 }
-
 
 
 show_mouse_move_prompt() {
@@ -57,9 +54,6 @@ show_mouse_move_prompt() {
 }
 
 hide_mouse_move_prompt() {
-    global SLOWMODE := false
-    global VERYSLOWMODE := false
-
     If (MouseMovePrompt) {
         MouseMovePrompt.hide()
     }
@@ -71,8 +65,13 @@ enter_mouse_mode() {
 }
 
 exit_mouse_mode() {
-    Send, {Blind}{LButton Up}
+    global SLOWMODE := false, VERYSLOWMODE := false
     hide_mouse_move_prompt()
+}
+
+exit_mouse_mode_with_left_click_up() {
+    exit_mouse_mode()
+    Send, {Blind}{LButton Up}
 }
 
 left_click_down() {
@@ -85,7 +84,7 @@ left_click_up_without_hide_mouse_move_prompt() {
 
 left_click_up() {
     left_click_up_without_hide_mouse_move_prompt()
-    hide_mouse_move_prompt()
+    exit_mouse_mode()
 }
 
 right_click_down(tempDisableRButton := false) {
@@ -112,7 +111,7 @@ right_click_up_without_hide_mouse_move_prompt(tempDisableRButton := false) {
 
 right_click_up(tempDisableRButton := false) {
     right_click_up_without_hide_mouse_move_prompt()
-    hide_mouse_move_prompt()
+    exit_mouse_mode()
 }
 
 middle_click_down() {
@@ -125,58 +124,48 @@ middle_click_up_without_hide_mouse_move_prompt() {
 
 middle_click_up() {
     middle_click_up_without_hide_mouse_move_prompt()
-    hide_mouse_move_prompt()
+    exit_mouse_mode()
 }
 
-fast_move_mouse(key, direction_x, direction_y) {
-    global fastMoveSingle, fastMoveRepeat, moveDelay1, moveDelay2, SLOWMODE
-    SLOWMODE := true
+move_mouse(key, direction := "left", mode := "fast") {
+    global moveDelay1, moveDelay2
 
-    one_x := direction_x *fastMoveSingle
-    one_y := direction_y *fastMoveSingle
-    MouseMove, %one_x% , %one_y%, 0, R
-    show_mouse_move_prompt()
-    KeyWait, %key%, %moveDelay1%
-
-    repeat_x := direction_x *fastMoveRepeat
-    repeat_y := direction_y *fastMoveRepeat
-    While, errorlevel != 0 {
-        MouseMove, %repeat_x%, %repeat_y%, 0, R
-        show_mouse_move_prompt()
-        KeyWait, %key%, %moveDelay2%
+    direction_x := 0
+    direction_y := 0
+    If (direction == "up") {
+        direction_y := -1
+    } Else If (direction == "down") {
+        direction_y := 1
+    } Else If (direction == "left") {
+        direction_x := -1
+    } Else If (direction == "right") {
+        direction_x := 1
     }
-}
 
-slow_move_mouse(key, direction_x, direction_y) {
-    global slowMoveSingle, slowMoveRepeat, moveDelay1, moveDelay2
-
-    one_x := direction_x * slowMoveSingle
-    one_y := direction_y * slowMoveSingle
-    MouseMove, %one_x% , %one_y%, 0, R
-    show_mouse_move_prompt()
-    KeyWait, %key%, %moveDelay1%
-
-    repeat_x := direction_x * slowMoveRepeat
-    repeat_y := direction_y * slowMoveRepeat
-    While, errorlevel != 0 {
-        MouseMove, %repeat_x%, %repeat_y%, 0, R
-        show_mouse_move_prompt()
-        KeyWait, %key%, %moveDelay2%
+    move_single := 0
+    move_repeat := 0
+    If (mode == "fast") {
+        global fastMoveSingle, fastMoveRepeat, SLOWMODE := true
+        move_single := fastMoveSingle
+        move_repeat := fastMoveRepeat
+    } Else If (mode == "slow") {
+        global slowMoveSingle, slowMoveRepeat, VERYSLOWMODE := false
+        move_single := slowMoveSingle
+        move_repeat := slowMoveRepeat
+    } Else If (mode == "veryslow") {
+        global SLOWMODE := false, VERYSLOWMODE := true
+        move_single := 1
+        move_repeat := 1
     }
-}
 
-very_slow_move_mouse(key, direction_x, direction_y) {
-    global moveDelay1, moveDelay2, VERYSLOWMODE
-    VERYSLOWMODE := true
-
-    one_x := direction_x
-    one_y := direction_y
-    MouseMove, %one_x% , %one_y%, 0, R
+    single_x := direction_x * move_single
+    single_y := direction_y * move_single
+    MouseMove, %single_x% , %single_y%, 0, R
     show_mouse_move_prompt()
     KeyWait, %key%, %moveDelay1%
 
-    repeat_x := direction_x
-    repeat_y := direction_y
+    repeat_x := direction_x * move_repeat
+    repeat_y := direction_y * move_repeat
     While, errorlevel != 0 {
         MouseMove, %repeat_x%, %repeat_y%, 0, R
         show_mouse_move_prompt()
@@ -185,10 +174,10 @@ very_slow_move_mouse(key, direction_x, direction_y) {
 }
 
 
-
-global is_taskbar_hide := false
+is_taskbar_hide := false
 
 hide_taskbar() {
+    global is_taskbar_hide
     If (is_taskbar_hide) {
         WinSet, Transparent, 255, ahk_class Shell_TrayWnd
         WinSet, Transparent, OFF, ahk_class Shell_TrayWnd
@@ -199,8 +188,9 @@ hide_taskbar() {
 }
 
 
+keyboard_layout_list := [0x04090409, 0x08040804]
 
-is_EN(title:="A") {
+get_keyboard_layout(title:="A") {
     WinGet, hwnd, ID, A
 
     DetectHiddenWindows, On
@@ -208,30 +198,31 @@ is_EN(title:="A") {
     keyboard_layout := DllCall("GetKeyboardLayout", "UInt", pid, "UInt")
     DetectHiddenWindows, Off
 
-    return keyboard_layout == 0x04090409
+    return keyboard_layout
 }
 
-set_IME_language(language) {
-    If (language == "CN") {
-        keyboard_identifier := 0x08040804
-    } Else {
-        keyboard_identifier := 0x04090409
-    }
-
+set_keyboard_layout(keyboard_layout) {
     WinExist("A")
     ControlGetFocus, cgf
-    PostMessage, 0x50, 0, %keyboard_identifier%, %cgf%
+    PostMessage, 0x50, 0, %keyboard_layout%, %cgf%
 }
 
 switch_IME() {
-    is_EN := is_EN()
-    If (is_EN) {
-        set_IME_language("CN")
-    } Else {
-        set_IME_language("EN")
+    current_index := 0
+    current_keyboard_layout := get_keyboard_layout()
+    For index, keyboard_layout in keyboard_layout_list {
+        If (keyboard_layout == current_keyboard_layout) {
+            current_index = index
+            Break
+        }
     }
-}
 
+    index := current_index + 1
+    If (index > keyboard_layout_list.Length()) {
+        index := 1
+    }
+    set_keyboard_layout(keyboard_layout_list[index])
+}
 
 
 turn_off_monitor() {

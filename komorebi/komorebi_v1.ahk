@@ -1,4 +1,5 @@
 ﻿#SingleInstance Force
+#NoTrayIcon
 
 #Persistent
 OnExit("komorebic_stop")
@@ -6,8 +7,8 @@ OnExit("komorebic_stop")
 komorebic_stop() {
     RunWait, komorebic.exe stop, , Hide
 
-    Run, rm ~/komorebic.sock, , Hide
-    Run, rm -rf ~/AppData/Local/komorebi, , Hide
+    RunWait, rm ~/komorebic.sock, , Hide
+    RunWait, rm -rf ~/AppData/Local/komorebi, , Hide
 
     Return
 }
@@ -58,7 +59,9 @@ RunWait, komorebic.exe mouse-follows-focus enable, , Hide
 SysGet, monitor_count, MonitorCount
 global main_monitor := monitor_count - 1
 
-global monitor_key_value := {"u": 0, "i": 1, "o": 2}
+global monitor_key_value := { "u": 0
+                            , "i": 1
+                            , "o": 2 }
 
 global focus_monitor_prefix := "!"
 For key, value in monitor_key_value {
@@ -76,8 +79,13 @@ For key, value in monitor_key_value {
 ;# Workspace #
 ;#############
 
-global workspace_key_value := {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6}
-global workspace_icons := [""" """, """ """, """ """, """ """, """ """, """ """, """ """]
+global workspace_key_value := { 1: [0, " "]
+                              , 2: [1, " "]
+                              , 3: [2, " "]
+                              , 4: [3, " "]
+                              , 5: [4, " "]
+                              , 6: [5, " "]
+                              , 7: [6, " "] }
 global workspace_num := workspace_key_value.Length()
 
 global container_padding := 10
@@ -104,8 +112,9 @@ For key, value in workspace_key_value {
 ; RunWait, komorebic.exe workspace-name 0 3 matrix, , Hide
 ; RunWait, komorebic.exe workspace-name 0 4 floaty, , Hide
 For key, value in workspace_key_value {
-    icon := workspace_icons[value + 1]
-    RunWait, komorebic.exe workspace-name %main_monitor% %value% %icon%, , Hide
+    num := value[1]
+    icon := value[2]
+    RunWait, komorebic.exe workspace-name %main_monitor% %num% `"%icon%`", , Hide
 }
 
 ; Set the padding of the different workspaces
@@ -115,8 +124,9 @@ For key, value in workspace_key_value {
 ; RunWait, komorebic.exe container-padding 0 3 0, , Hide
 ; RunWait, komorebic.exe workspace-padding 0 3 0, , Hide
 For key, value in workspace_key_value {
-    RunWait, komorebic.exe container-padding %main_monitor% %value% %container_padding%, , Hide
-    RunWait, komorebic.exe workspace-padding %main_monitor% %value% %workspace_padding%, , Hide
+    num := value[1]
+    RunWait, komorebic.exe container-padding %main_monitor% %num% %container_padding%, , Hide
+    RunWait, komorebic.exe workspace-padding %main_monitor% %num% %workspace_padding%, , Hide
 }
 For key, value in monitor_key_value {
     If (value != main_monitor) {
@@ -167,6 +177,7 @@ RunWait, komorebic.exe float-rule exe "ApplicationFrameHost.exe", , Hide
 RunWait, komorebic.exe float-rule exe "Clash Verge.exe", , Hide
 RunWait, komorebic.exe float-rule exe "copyq.exe", , Hide
 RunWait, komorebic.exe float-rule exe "Flow.Launcher.exe", , Hide
+RunWait, komorebic.exe float-rule exe "MyKeymap.exe", , Hide
 RunWait, komorebic.exe float-rule exe "yasb.exe", , Hide
 
 ; Always manage forcibly these applications that don't automatically get picked up by komorebi
@@ -326,15 +337,15 @@ Return
 ; Switch to workspace
 focus_monitor_workspace:
     key := SubStr(A_ThisHotkey, StrLen(focus_monitor_workspace_prefix) + 1)
-    value := workspace_key_value[key]
-    RunWait, komorebic.exe focus-monitor-workspace %main_monitor% %value%, , Hide
+    num := workspace_key_value[key][1]
+    RunWait, komorebic.exe focus-monitor-workspace %main_monitor% %num%, , Hide
 Return
 
 ; Move window to workspace
 send_to_monitor_workspace:
     key := SubStr(A_ThisHotkey, StrLen(send_to_monitor_workspace_prefix) + 1)
-    value := workspace_key_value[key]
-    RunWait, komorebic.exe send-to-monitor-workspace %main_monitor% %value%, , Hide
+    num := workspace_key_value[key][1]
+    RunWait, komorebic.exe send-to-monitor-workspace %main_monitor% %num%, , Hide
 Return
 
 focus_monitor:

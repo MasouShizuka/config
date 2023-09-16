@@ -243,6 +243,7 @@ else
             if variables.is_windows then
                 vim.opt.shellslash = true
             end
+
             if filetype == "lua" then
                 vim.api.nvim_command(([[TermExec cmd='lua "%s"']]):format(path))
             elseif filetype == "markdown" then
@@ -253,7 +254,10 @@ else
                 vim.api.nvim_command([[TermExec cmd='cargo run']])
             elseif filetype == "sh" then
                 vim.api.nvim_command(([[TermExec cmd='bash "%s"']]):format(path))
+            elseif filetype == "tex" then
+                vim.api.nvim_command("TexlabBuild")
             end
+
             if variables.is_windows then
                 vim.opt.shellslash = false
             end
@@ -268,6 +272,8 @@ else
                 vim.api.nvim_command("cargo run")
             elseif filetype == "sh" then
                 vim.api.nvim_command("bash %")
+            elseif filetype == "tex" then
+                vim.api.nvim_command("TexlabBuild")
             end
         end
     end, { desc = "Run", silent = true })

@@ -101,7 +101,13 @@ return {
                     }),
             })
 
-            require("cmp").setup.filetype(variables.tex_filetype, {
+            require("cmp").setup.filetype({
+                "markdown",
+                -- 由 texlab 管理
+                -- "plaintex",
+                -- "tex",
+                "text",
+            }, {
                 sources = cmp.config.sources({
                     { name = "luasnip" },
                     { name = "luasnip_choice" },

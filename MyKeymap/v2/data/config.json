@@ -1,0 +1,936 @@
+{
+  "keymaps": [
+    {
+      "id": 5,
+      "name": "Capslock",
+      "enable": true,
+      "hotkey": "*capslock",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {
+        "*1": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"data/hide_mouse_when_idle.ahk\")"
+          }
+        ],
+        "*2": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi_v2.ahk\")"
+          }
+        ],
+        "*a": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "窗口居中 (1200x800)",
+            "actionValueID": 10
+          }
+        ],
+        "*b": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"data/ChangeBrightness.ahk\")"
+          }
+        ],
+        "*c": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "center_window()"
+          }
+        ],
+        "*d": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "窗口最小化",
+            "actionValueID": 8
+          }
+        ],
+        "*e": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "actionValueID": 4
+          }
+        ],
+        "*f": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "窗口最大化或还原",
+            "actionValueID": 9
+          }
+        ],
+        "*g": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "在当前程序的窗口间轮换",
+            "actionValueID": 3
+          }
+        ],
+        "*p": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "actionValueID": 6
+          }
+        ],
+        "*q": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "关闭窗口",
+            "actionValueID": 1
+          }
+        ],
+        "*r": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "switch_IME()"
+          }
+        ],
+        "*s": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"data/SoundControl.ahk\")"
+          }
+        ],
+        "*t": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "切换窗口置顶状态",
+            "actionValueID": 12
+          }
+        ],
+        "*v": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "hide_taskbar()"
+          }
+        ],
+        "*w": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "actionValueID": 2
+          }
+        ],
+        "*x": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "移动窗口到下一个显示器",
+            "actionValueID": 7
+          }
+        ],
+        "*y": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "actionValueID": 5
+          }
+        ],
+        "*z": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "turn_off_monitor()"
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "name": "空格模式",
+      "enable": true,
+      "hotkey": "*space",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {
+        "*/": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}\\"
+          }
+        ],
+        "*;": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}0"
+          }
+        ],
+        "*a": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}1"
+          }
+        ],
+        "*c": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{space}"
+          }
+        ],
+        "*d": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}3"
+          }
+        ],
+        "*e": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}("
+          }
+        ],
+        "*f": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}4"
+          }
+        ],
+        "*g": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}5"
+          }
+        ],
+        "*h": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}6"
+          }
+        ],
+        "*i": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}-"
+          }
+        ],
+        "*j": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}7"
+          }
+        ],
+        "*k": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}8"
+          }
+        ],
+        "*l": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}9"
+          }
+        ],
+        "*m": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}]"
+          }
+        ],
+        "*n": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}["
+          }
+        ],
+        "*o": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}="
+          }
+        ],
+        "*p": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{+}"
+          }
+        ],
+        "*q": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{backspace}"
+          }
+        ],
+        "*r": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind})"
+          }
+        ],
+        "*s": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}2"
+          }
+        ],
+        "*space": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{enter}"
+          }
+        ],
+        "*u": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}_"
+          }
+        ],
+        "*w": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}`"
+          }
+        ],
+        "singlePress": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{space}"
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "name": "分号模式",
+      "enable": true,
+      "hotkey": "*;",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {
+        "*,": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind};"
+          }
+        ],
+        "*a": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f4}"
+          }
+        ],
+        "*c": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f3}"
+          }
+        ],
+        "*d": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f6}"
+          }
+        ],
+        "*e": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f9}"
+          }
+        ],
+        "*f": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f11}"
+          }
+        ],
+        "*h": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{backspace}"
+          }
+        ],
+        "*i": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{up}"
+          }
+        ],
+        "*j": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{left}"
+          }
+        ],
+        "*k": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{down}"
+          }
+        ],
+        "*l": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{right}"
+          }
+        ],
+        "*m": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}+{f10}"
+          }
+        ],
+        "*n": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{enter}"
+          }
+        ],
+        "*o": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{pgdn}"
+          }
+        ],
+        "*p": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{end}"
+          }
+        ],
+        "*q": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f7}"
+          }
+        ],
+        "*r": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f12}"
+          }
+        ],
+        "*s": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f5}"
+          }
+        ],
+        "*space": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "enter_mouse_mode()"
+          }
+        ],
+        "*u": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{pgup}"
+          }
+        ],
+        "*v": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f10}"
+          }
+        ],
+        "*w": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f8}"
+          }
+        ],
+        "*x": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f2}"
+          }
+        ],
+        "*y": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{home}"
+          }
+        ],
+        "*z": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind}{f1}"
+          }
+        ],
+        "singlePress": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{blind};"
+          }
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "name": "自定义热键",
+      "enable": true,
+      "hotkey": "customHotkeys",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {
+        "!'": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 9,
+            "comment": "重启 MyKeymap",
+            "actionValueID": 2
+          }
+        ],
+        "!+'": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 9,
+            "comment": "暂停 MyKeymap",
+            "actionValueID": 1
+          }
+        ],
+        "+capslock": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 9,
+            "comment": "切换 Capslock 大小写",
+            "actionValueID": 7
+          }
+        ],
+        "RAlt": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 5,
+            "comment": "重映射为 LCtrl",
+            "remapToKey": "LCtrl"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Capslock 命令",
+      "enable": false,
+      "hotkey": "capslockAbbr",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {
+        "bb": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "查询选中的单词 (低配版划词翻译)",
+            "winTitle": "Bing 词典",
+            "target": "msedge.exe",
+            "args": "--app=https://www.bing.com/dict/search?q={selected}"
+          }
+        ],
+        "cc": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "用 VS Code 打开选中的文件，在新窗口中打开",
+            "target": "shortcuts\\Visual Studio Code.lnk",
+            "args": "-n {selected}"
+          }
+        ],
+        "cmd": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "位于 PATH 环境变量中的命令 (比如 cmd.exe) 可以直接启动，无需使用完整路径",
+            "winTitle": "ahk_exe cmd.exe",
+            "target": "cmd.exe",
+            "args": "/k cd %userprofile%"
+          }
+        ],
+        "dd": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "打开「 下载 」文件夹",
+            "target": "shell:downloads"
+          }
+        ],
+        "dm": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "打开「 MyKeymap 」文件夹",
+            "target": "ahk-expression: A_WorkingDir"
+          }
+        ],
+        "ex": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 9,
+            "comment": "退出 MyKeymap",
+            "actionValueID": 3
+          }
+        ],
+        "gj": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 2,
+            "comment": "关机",
+            "actionValueID": 3
+          }
+        ],
+        "ld": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 2,
+            "comment": "显示器亮度调节",
+            "actionValueID": 6
+          }
+        ],
+        "lj": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "打开「 回收站 」文件夹",
+            "target": "shell:RecycleBinFolder"
+          }
+        ],
+        "ly": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "打开蓝牙设置",
+            "target": "ms-settings:bluetooth"
+          }
+        ],
+        "mm": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "个人常用项目 - MyKeymap",
+            "winTitle": "MyKeymap2 - Visual Studio Code",
+            "target": "shortcuts\\Visual Studio Code.lnk",
+            "args": "D:\\MyFiles\\MyKeymap2"
+          }
+        ],
+        "ms": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "个人常用项目 - My Site",
+            "winTitle": "my_site - Visual Studio Code",
+            "target": "shortcuts\\Visual Studio Code.lnk",
+            "args": "D:\\project\\my_site"
+          }
+        ],
+        "no": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "winTitle": "记事本",
+            "target": "notepad.exe"
+          }
+        ],
+        "rb": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 2,
+            "comment": "重启",
+            "actionValueID": 4
+          }
+        ],
+        "rex": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 2,
+            "comment": "重启文件资源管理器",
+            "actionValueID": 7
+          }
+        ],
+        "se": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 9,
+            "comment": "打开 MyKeymap 设置",
+            "actionValueID": 4
+          }
+        ],
+        "sl": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 2,
+            "comment": "睡眠",
+            "actionValueID": 2
+          }
+        ],
+        "sp": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "Spotify 网页",
+            "winTitle": "Spotify",
+            "target": "https://open.spotify.com/"
+          }
+        ],
+        "tm": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "Ctrl + Shift + Esc 打开任务管理器",
+            "keysToSend": "^+{esc}"
+          }
+        ],
+        "we": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "winTitle": "网易云音乐",
+            "target": "shortcuts\\网易云音乐.lnk"
+          }
+        ],
+        "wf": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "查看周围 WiFi",
+            "target": "ms-availablenetworks:"
+          }
+        ],
+        "wt": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 1,
+            "comment": "用 Windows Terminal 打开选中的文件夹",
+            "target": "wt.exe",
+            "args": "-d \"{selected}\""
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "name": "缩写功能",
+      "enable": false,
+      "hotkey": "semicolonAbbr",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {
+        ",": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "因为在输入法中设置了「 中文状态下使用英文标点 」, 所以用这个输入中文逗号",
+            "keysToSend": "，"
+          }
+        ],
+        ".": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "因为在输入法中设置了「 中文状态下使用英文标点 」, 所以用这个输入中文句号",
+            "keysToSend": "。"
+          }
+        ],
+        "/": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "因为在输入法中设置了「 中文状态下使用英文标点 」, 所以用这个输入中文顿号",
+            "keysToSend": "、"
+          }
+        ],
+        "dk": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "输入一对 {} 并把光标移动中间",
+            "keysToSend": "{text}{}\n{left}"
+          }
+        ],
+        "gg": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "一键 Git 提交",
+            "keysToSend": "{text}git add -A; git commit -a -m \"\"; git push origin (git branch --show-current);\n{left 47}"
+          }
+        ],
+        "i love nia": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "没错，缩写中可以包含空格，用del i love nia删掉这个示例",
+            "keysToSend": "{text}我爱尼娅! \n{text}( 还 有 大 家 )"
+          }
+        ],
+        "sj": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "输入当前时间",
+            "keysToSend": "ahk-expression: Format(\"{}年{}月{}日 {}:{}\", A_YYYY, A_MM, A_DD, A_Hour, A_Min)"
+          }
+        ],
+        "sk": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "输入一对「」并把光标移动中间",
+            "keysToSend": "「  」\n{left 2}"
+          }
+        ],
+        "sz": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "搜索时加上这个 site: 选项，能让搜索引擎只搜某网站的内容",
+            "keysToSend": "{text}site:zhihu.com"
+          }
+        ],
+        "xk": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "输入一对 () 并把光标移到中间",
+            "keysToSend": "(){left}"
+          }
+        ],
+        "zk": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "comment": "输入一对 [] 并把光标移到中间",
+            "keysToSend": "[]{left}"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "name": "设置",
+      "enable": true,
+      "hotkey": "settings",
+      "parentID": 0,
+      "delay": 0,
+      "hotkeys": {}
+    }
+  ],
+  "options": {
+    "mykeymapVersion": "2.0-beta13",
+    "windowGroups": [
+      {
+        "id": 0,
+        "name": "🌎 全局生效"
+      },
+      {
+        "id": 1,
+        "name": "🌐 浏览器",
+        "value": "ahk_exe chrome.exe\nahk_exe msedge.exe\nahk_exe firefox.exe",
+        "conditionType": 1
+      },
+      {
+        "id": 3,
+        "name": "📁 文件资源管理器",
+        "value": "ahk_exe explorer.exe",
+        "conditionType": 1
+      }
+    ],
+    "mouse": {
+      "keepMouseMode": false,
+      "showTip": false,
+      "tipSymbol": "🐶",
+      "delay1": "0.10",
+      "delay2": "0.01",
+      "fastSingle": "60",
+      "fastRepeat": "60",
+      "slowSingle": "10",
+      "slowRepeat": "10"
+    },
+    "scroll": {
+      "delay1": "0.2",
+      "delay2": "0.03",
+      "onceLineCount": "1"
+    },
+    "commandInputSkin": {
+      "backgroundColor": "#FFFFFF",
+      "backgroundOpacity": "0.9",
+      "borderWidth": "3",
+      "borderColor": "#FFFFFF",
+      "borderOpacity": "1.0",
+      "borderRadius": "10",
+      "cornerColor": "#000000",
+      "cornerOpacity": "0.0",
+      "gridlineColor": "#2843AD",
+      "gridlineOpacity": "0.04",
+      "keyColor": "#000000",
+      "keyOpacity": "1.0",
+      "hideAnimationDuration": "0.34",
+      "windowYPos": "0.25",
+      "windowWidth": "700",
+      "windowShadowColor": "#000000",
+      "windowShadowOpacity": "0.5",
+      "windowShadowSize": "3.0"
+    },
+    "pathVariables": [
+      {
+        "name": "programs",
+        "value": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\"
+      }
+    ],
+    "startup": false,
+    "keyMapping": "",
+    "keyboardLayout": "1 2 3 4 5 6 7 8 9 0\nq w e r t y u i o p\na s d f g h j k l ;\nz x c v b n m , . /\nspace enter backspace - [ ' singlePress"
+  }
+}
