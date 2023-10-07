@@ -20,7 +20,7 @@ ProcessSetPriority "High"
 SetWorkingDir("../")
 InitTrayMenu()
 InitKeymap()
-OnExit(MyExit)
+OnExit(MyKeymapExit)
 #include ../data/custom_functions.ahk
 
 InitKeymap()
@@ -50,21 +50,12 @@ InitKeymap()
   ; 窗口组
 {{ .WindowGroups -}}
 
-{{range .EnabledKeymaps}}{{template "renderKeymap" .}}{{end}}
+{{range .EnabledKeymaps}}{{renderKeymap .}}{{end}}
 
   KeymapManager.GlobalKeymap.Enable()
 }
 
-{{define "renderKeymap"}}
-  ; {{.Name}}
-  {{ if not .ParentID }}km{{ .ID }} := KeymapManager.NewKeymap("{{ .Hotkey }}", {{ ahkString .Name }}, "{{ divide .Delay 1000 }}"){{ else }}km{{ .ID }} := KeymapManager.AddSubKeymap(km{{ .ParentID }}, "{{ .Hotkey }}", {{ ahkString .Name }}){{ end }}
-  km := km{{ .ID -}}
-{{ range $index, $action := sortHotkeys .Hotkeys }}
-  {{ actionToHotkey $action }}
-{{- end }}
-{{ end }}
-
-{{- if .CapslockAbbrEnabled -}}
+{{ if .CapslockAbbrEnabled -}}
 ExecCapslockAbbr(command) {
   switch command {
 {{ abbrToCode .CapslockAbbr }}  }

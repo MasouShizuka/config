@@ -154,6 +154,7 @@ RunWait("komorebic.exe identify-tray-application exe `"WeChat.exe`"", , "Hide")
 
 RunWait("komorebic.exe identify-border-overflow-application exe `"cloudmusic.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"Code.exe`"", , "Hide")
+RunWait("komorebic.exe identify-border-overflow-application exe `"neovide.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"QQ.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"vivaldi.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"WeChat.exe`"", , "Hide")

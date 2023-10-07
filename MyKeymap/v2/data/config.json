@@ -122,8 +122,8 @@
         "*w": [
           {
             "windowGroupID": 0,
-            "actionTypeID": 3,
-            "actionValueID": 2
+            "actionTypeID": 6,
+            "keysToSend": "!{tab down}{tab up}"
           }
         ],
         "*x": [
@@ -868,7 +868,7 @@
     }
   ],
   "options": {
-    "mykeymapVersion": "2.0-beta13",
+    "mykeymapVersion": "2.0-beta16",
     "windowGroups": [
       {
         "id": 0,

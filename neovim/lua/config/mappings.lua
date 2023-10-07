@@ -32,10 +32,6 @@ vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true,
 vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
 
 if variables.is_vscode then
-    -- 插入新行
-    vim.keymap.set("n", "o", "i<cmd>call VSCodeNotify('editor.action.insertLineAfter')<cr>", { silent = true })
-    vim.keymap.set("n", "O", "i<cmd>call VSCodeNotify('editor.action.insertLineBefore')<cr>", { silent = true })
-
     -- 注释
     vim.keymap.set({ "n", "x", "o" }, "gc", "<plug>VSCodeCommentary", { silent = true })
     vim.keymap.set("n", "gcc", "<plug>VSCodeCommentaryLine", { silent = true })

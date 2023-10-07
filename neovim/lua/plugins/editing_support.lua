@@ -4,13 +4,7 @@ return {
     {
         "https://git.sr.ht/~nedia/auto-save.nvim",
         dependencies = {
-            {
-                "echasnovski/mini.trailspace",
-                config = function(_, opts)
-                    require("mini.trailspace").setup(opts)
-                end,
-                version = false,
-            },
+            "echasnovski/mini.trailspace",
         },
         enabled = not variables.is_vscode,
         event = {
@@ -35,15 +29,19 @@ return {
             save_cmd = nil,
             -- What to do after checking if auto save conditions have been met.
             save_fn = function()
-                local trailspace_time = os.time()
-                if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
-                    require("mini.trailspace").trim()
-                    vim.g.prev_trailspace_time = trailspace_time
+                -- 新行不清空空格
+                if string.match(vim.api.nvim_get_current_line(), "^%s*$") == nil then
+                    local trailspace_time = os.time()
+                    if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
+                        require("mini.trailspace").trim()
+                        vim.g.prev_trailspace_time = trailspace_time
+                    end
                 end
 
                 -- 保存文件前保存上次复制的范围
                 local last_paste_start = vim.fn.getpos("'[")
                 local last_paste_end = vim.fn.getpos("']")
+
 
                 local config = require("auto-save.config")
                 if config.save_cmd ~= nil then
@@ -70,6 +68,14 @@ return {
 
     {
         "altermo/ultimate-autopair.nvim",
+        config = function(_, opts)
+            require("ultimate-autopair").setup(opts)
+
+            -- 新行保持缩进
+            vim.keymap.set("i", "<cr>", function()
+                return require("ultimate-autopair.core").run("<cr>x<bs>")
+            end, { desc = "Enter", expr = true, replace_keycodes = false })
+        end,
         enabled = not variables.is_vscode,
         event = {
             "InsertEnter",
@@ -191,6 +197,27 @@ return {
                 toggle = "gs",
             },
         },
+        version = false,
+    },
+    {
+        "echasnovski/mini.trailspace",
+        config = function(_, opts)
+            require("mini.trailspace").setup(opts)
+
+            if variables.is_vscode then
+                vim.api.nvim_create_autocmd("InsertLeave", {
+                    callback = function()
+                        -- 新行不清空空格
+                        if string.match(vim.api.nvim_get_current_line(), "^%s*$") == nil then
+                            require("mini.trailspace").trim()
+                        end
+                    end,
+                    desc = "Trail space when insert leave",
+                    group = vim.api.nvim_create_augroup("TrailSpace", { clear = true }),
+                    pattern = "*",
+                })
+            end
+        end,
         version = false,
     },
 

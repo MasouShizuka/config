@@ -811,8 +811,10 @@
         },
         "W": {
             "2": {
-                "type": "窗口操作",
-                "value": "send, !{tab}"
+                "keysToSend": "!{tab down}{tab up}",
+                "prefix": "*",
+                "type": "输入文本或按键",
+                "value": "send, {blind}!{tab down}{tab up}"
             }
         },
         "X": {

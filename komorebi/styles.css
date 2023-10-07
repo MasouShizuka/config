@@ -79,6 +79,7 @@
 .custom-widget,
 .network-widget .label,
 .input-method-widget .label,
+.wifi-widget .label,
 .cpu-widget .label,
 .memory-widget .label,
 .gpu-widget .label,
@@ -123,6 +124,10 @@
 
 .input-method-widget .label {
     background: #ffb86c;
+}
+
+.wifi-widget .label {
+  background: #b8bb26;
 }
 
 .cpu-widget .label {

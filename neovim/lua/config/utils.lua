@@ -37,7 +37,7 @@ function M.exists(path)
     return ok
 end
 
-function M.extra_view_toggle(update, opt)
+function M.extra_view_toggle(update, opts)
     local default_config = {
         filetype = "extra-view",
         focus = false,
@@ -45,7 +45,7 @@ function M.extra_view_toggle(update, opt)
         width = 60,
         position = "right",
     }
-    local config = vim.tbl_deep_extend("force", default_config, opt)
+    local config = vim.tbl_deep_extend("force", default_config, opts)
 
     for group in vim.fn.execute("augroup"):gmatch("%S+") do
         if group == config.filetype then

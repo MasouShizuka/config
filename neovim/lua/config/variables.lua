@@ -8,6 +8,7 @@ function M.load_running_environment()
     M.is_linux = vim.fn.has("linux") == 1
     M.is_wsl = vim.fn.has("wsl") == 1
     M.is_vscode = vim.g.vscode
+    M.is_neovide = vim.g.neovide
 end
 
 function M.load_path()
@@ -143,6 +144,10 @@ function M.load_keymap()
     }
 
     local terminal_simulator = "wezterm"
+    if M.is_neovide then
+        terminal_simulator = "neovide"
+    end
+
     if terminal_simulator == "wezterm" then
         if M.is_wsl then
             M.keymap = {

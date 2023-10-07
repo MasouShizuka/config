@@ -36,8 +36,12 @@ return {
                 char = {
                     config = function(opts)
                         if vim.fn.mode(true):find("o") then
-                            if vim.v.operator == "y" or vim.v.operator == "d" then
-                                opts.autohide = true
+                            local autohide_operator_list = { "y", "d", "g@" }
+                            for _, operator in ipairs(autohide_operator_list) do
+                                if vim.v.operator == operator then
+                                    opts.autohide = true
+                                    break
+                                end
                             end
                         else
                             if vim.v.count == 0 then

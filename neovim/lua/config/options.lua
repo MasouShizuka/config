@@ -107,3 +107,6 @@ vim.opt.updatetime = 300                                                        
 
 -- Wildmenu
 vim.opt.wildmode = "longest:list,full"                                             -- mode for 'wildchar' command-line expansion
+
+-- Wrap
+vim.opt.linebreak = true                                                           -- wrap long lines at a blank

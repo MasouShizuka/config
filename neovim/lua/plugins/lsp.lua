@@ -176,7 +176,7 @@ return {
     },
 
     {
-        "jose-elias-alvarez/null-ls.nvim",
+        "nvimtools/none-ls.nvim",
         config = function(_, opts)
             -- local augroup = vim.api.nvim_create_augroup("LspAutoFormat", {})
             require("null-ls").setup({

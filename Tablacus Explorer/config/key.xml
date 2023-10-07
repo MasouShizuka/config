@@ -34,10 +34,12 @@ if (Count) {
 const path = (FV.FocusedItem || FV.FolderItem).Path;
 if (api.PathIsDirectory(path)) {
     // cmd = "alacritty --working-directory \"" + path + "\" -e nvim";
-    cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
+    // cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
+    cmd = "neovide --frame none -- --cmd " + "\"cd " + path + "\"";
 } else {
     // cmd = "alacritty --working-directory \"" + current_dir + "\" -e \"nvim \\\"" + path + "\\\"\"";
-    cmd = "wezterm start --cwd \"" + current_dir + "\" -- nvim " + "\"" + path + "\"";
+    // cmd = "wezterm start --cwd \"" + current_dir + "\" -- nvim " + "\"" + path + "\"";
+    cmd = "neovide --frame none " + "\"" + path + "\"";
 }
 api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">VSCode</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
 	FV.SelectItem(0, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);

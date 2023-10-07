@@ -2,6 +2,8 @@ patch:
   app_options:
     code.exe:
       ascii_mode: true
+    neovide.exe:
+      ascii_mode: true
     wezterm-gui.exe:
       ascii_mode: true
     windowsterminal.exe:
@@ -24,6 +26,8 @@ patch:
     display_tray_icon: false
     label_format: "%s."
     mark_text: ""
+    mouse_hover_ms: 0
+    paging_on_scroll: false
     vertical_auto_reverse: false
     vertical_text: false
     vertical_text_left_to_right: false
@@ -60,7 +64,7 @@ patch:
       hilited_label_color:            0xf9f9f9
       hilited_candidate_text_color:   0xf9f9f9
       hilited_comment_text_color:     0xf9f9f9
-      hilited_mark_color:             0x212fe6
+      # hilited_mark_color:             0x212fe6
       text_color:                     0xc9c9c9
       label_color:                    0xc9c9c9
       candidate_text_color:           0xc9c9c9

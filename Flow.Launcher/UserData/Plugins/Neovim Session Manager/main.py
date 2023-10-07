@@ -12,14 +12,14 @@ class NeovimSessionManager(FlowLauncher):
         self.platforms = {
             "Windows": {
                 "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions",
-                "cmd": "wezterm start --cwd",
-                "args": "-- nvim +",
+                # "cmd": "wezterm start --cwd \"{}\" -- nvim +",
+                "cmd": "neovide --frame none",
                 "icon": "💻",
             },
             "WSL": {
-                "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions/wsl",
-                "cmd": "wezterm start -- wsl --cd",
-                "args": "-e nvim +",
+                "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions_wsl",
+                # "cmd": "wezterm start -- wsl --cd \"{}\" -e nvim +",
+                "cmd": "neovide --frame none --wsl",
                 "icon": "🐧",
             },
         }
@@ -63,7 +63,7 @@ class NeovimSessionManager(FlowLauncher):
                         "IcoPath": "neovim.png",
                         "JsonRPCAction": {
                             "method": "open_session",
-                            "parameters": [working_dir, info["cmd"], info["args"]],
+                            "parameters": [info["cmd"], working_dir],
                         },
                         "ContextData": [session, working_dir],
                     }
@@ -94,12 +94,16 @@ class NeovimSessionManager(FlowLauncher):
             },
         ]
 
-    def open_session(self, working_dir, cmd, args):
+    def open_session(self, cmd, working_dir):
         try:
+            if working_dir.startswith("/mnt/"):
+                working_dir = f"{working_dir[5]}:{working_dir[6:]}"
+
             Popen(
-                cmd + ' "' + working_dir + '" ' + args,
+                str.format(cmd, working_dir),
                 stdout=PIPE,
                 stderr=PIPE,
+                cwd=working_dir,
             )
         except:
             pass

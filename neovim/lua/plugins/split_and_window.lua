@@ -23,7 +23,7 @@ return {
             { "<c-s><c-c>", function() vim.api.nvim_command("WindowsMaximizeVertically") end,   desc = "Maximize width of the current window",    mode = "n" },
             { "<c-s><c-r>", function() vim.api.nvim_command("WindowsMaximizeHorizontally") end, desc = "Maximize height of the current window",   mode = "n" },
             { "<c-s><c-e>", function() vim.api.nvim_command("WindowsEqualize") end,             desc = "Equalize all windows heights and widths", mode = "n" },
-            { "<c-s><c-a>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
+            { "<c-s><c-t>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
         },
         opts = {
             autowidth = {
@@ -186,19 +186,19 @@ return {
                     ft = "dapui_watches",
                     size = { width = 0.2 },
                 },
-                -- {
-                --     ft = "neo-tree",
-                --     filter = function(buf)
-                --         return vim.b[buf].neo_tree_source == "filesystem"
-                --     end,
-                --     title = "Neo-Tree",
-                --     size = { width = 0.2, height = 0.7 },
-                --     pinned = true,
-                --     open = function()
-                --         require("neo-tree.sources.manager").close_all()
-                --         require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
-                --     end,
-                -- },
+                {
+                    ft = "neo-tree",
+                    filter = function(buf)
+                        return vim.b[buf].neo_tree_source == "filesystem"
+                    end,
+                    title = "Neo-Tree",
+                    size = { width = 0.2, height = 0.7 },
+                    pinned = true,
+                    open = function()
+                        require("neo-tree.sources.manager").close_all()
+                        require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
+                    end,
+                },
                 -- {
                 --     ft = "neo-tree",
                 --     filter = function(buf)
@@ -214,12 +214,12 @@ return {
                 --         })
                 --     end,
                 -- },
-                {
-                    ft = "NvimTree",
-                    size = { width = 0.2, height = 0.7 },
-                    pinned = true,
-                    open = function() require("nvim-tree.api").tree.open() end,
-                },
+                -- {
+                --     ft = "NvimTree",
+                --     size = { width = 0.2, height = 0.7 },
+                --     pinned = true,
+                --     open = function() require("nvim-tree.api").tree.open() end,
+                -- },
                 -- {
                 --     ft = "aerial",
                 --     title = "Aerial",

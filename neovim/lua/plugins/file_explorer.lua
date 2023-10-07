@@ -1,535 +1,538 @@
 local variables = require("config.variables")
 
 return {
-    -- {
-    --     "nvim-neo-tree/neo-tree.nvim",
-    --     cmd = {
-    --         "Neotree",
-    --     },
-    --     dependencies = {
-    --         "MunifTanjim/nui.nvim",
-    --         "nvim-lua/plenary.nvim",
-    --         "nvim-tree/nvim-web-devicons",
-    --     },
-    --     enabled = not variables.is_vscode,
-    --     init = function()
-    --         vim.g.neo_tree_remove_legacy_commands = true
-    --     end,
-    --     opts = {
-    --         -- If a user has a sources list it will replace this one.
-    --         -- Only sources listed here will be loaded.
-    --         -- You can also add an external source by adding it's name to this list.
-    --         -- The name used here must be the same name you would use in a require() call.
-    --         sources = {
-    --             "filesystem",
-    --             -- "buffers",
-    --             -- "git_status",
-    --             "document_symbols",
-    --         },
-    --         auto_clean_after_session_restore = true, -- Automatically clean up broken neo-tree buffers saved in sessions
-    --         close_if_last_window = true,             -- Close Neo-tree if it is the last window left in the tab
-    --         hide_root_node = true,                   -- Hide the root node.
-    --         retain_hidden_root_indent = true,        -- IF the root node is hidden, keep the indentation anyhow.
-    --         -- This is needed if you use expanders because they render in the indent.
-    --         popup_border_style = "rounded",          -- "double", "none", "rounded", "shadow", "single" or "solid"
-    --         sort_case_insensitive = true,            -- used when sorting files and directories in the tree
-    --         default_component_configs = {
-    --             diagnostics = {
-    --                 symbols = variables.icons.diagnostics,
-    --             },
-    --             indent = {
-    --                 with_expanders = true, -- if nil and file nesting is enabled, will enable expanders
-    --             },
-    --             name = {
-    --                 highlight_opened_files = true, -- Requires `enable_opened_markers = true`.
-    --             },
-    --             git_status = {
-    --                 symbols = variables.icons.git,
-    --             },
-    --         },
-    --         commands = {
-    --             system_open = function(state)
-    --                 utils.system_open(state.tree:get_node():get_id())
-    --             end,
-    --             diff_files = function(state)
-    --                 local node = state.tree:get_node()
-    --                 local log = require("neo-tree.log")
-    --                 state.clipboard = state.clipboard or {}
-    --                 if diff_Node and diff_Node ~= tostring(node.id) then
-    --                     local current_Diff = node.id
-    --                     require("neo-tree.utils").open_file(state, diff_Node, open)
-    --                     vim.cmd("vert diffs " .. current_Diff)
-    --                     log.info("Diffing " .. diff_Name .. " against " .. node.name)
-    --                     diff_Node = nil
-    --                     current_Diff = nil
-    --                     state.clipboard = {}
-    --                     require("neo-tree.ui.renderer").redraw(state)
-    --                 else
-    --                     local existing = state.clipboard[node.id]
-    --                     if existing and existing.action == "diff" then
-    --                         state.clipboard[node.id] = nil
-    --                         diff_Node = nil
-    --                         require("neo-tree.ui.renderer").redraw(state)
-    --                     else
-    --                         state.clipboard[node.id] = { action = "diff", node = node }
-    --                         diff_Name = state.clipboard[node.id].node.name
-    --                         diff_Node = tostring(state.clipboard[node.id].node.id)
-    --                         log.info("Diff source file " .. diff_Name)
-    --                         require("neo-tree.ui.renderer").redraw(state)
-    --                     end
-    --                 end
-    --             end,
-    --             parent = function(state)
-    --                 require("neo-tree.ui.renderer").focus_node(state, state.tree:get_node():get_parent_id())
-    --             end,
-    --             copy_selector = function(state)
-    --                 local node = state.tree:get_node()
-    --                 local filepath = node:get_id()
-    --                 local filename = node.name
-    --                 local modify = vim.fn.fnamemodify
-    --
-    --                 local results = {
-    --                     e = { val = modify(filename, ":e"), msg = "Extension only" },
-    --                     f = { val = filename, msg = "Filename" },
-    --                     F = { val = modify(filename, ":r"), msg = "Filename w/o extension" },
-    --                     h = { val = modify(filepath, ":~"), msg = "Path relative to Home" },
-    --                     p = { val = modify(filepath, ":."), msg = "Path relative to CWD" },
-    --                     P = { val = filepath, msg = "Absolute path" },
-    --                 }
-    --
-    --                 local messages = {
-    --                     { "\nChoose to copy to clipboard:\n", "Normal" },
-    --                 }
-    --                 for i, result in pairs(results) do
-    --                     if result.val and result.val ~= "" then
-    --                         vim.list_extend(messages, {
-    --                             { ("%s."):format(i),           "Identifier" },
-    --                             { (" %s: "):format(result.msg) },
-    --                             { result.val,                  "String" },
-    --                             { "\n" },
-    --                         })
-    --                     end
-    --                 end
-    --                 vim.api.nvim_echo(messages, false, {})
-    --                 local result = results[vim.fn.getcharstr()]
-    --                 if result and result.val and result.val ~= "" then
-    --                     vim.notify(("Copied: `%s`"):format(result.val))
-    --                     vim.fn.setreg("+", result.val)
-    --                 end
-    --             end,
-    --         },
-    --         window = {
-    --             mappings = {
-    --                 ["<space>"] = "none",
-    --                 -- ["<2-LeftMouse>"] = "open",
-    --                 -- ["<cr>"] = "open",
-    --                 ["l"] = "open",
-    --                 -- ["<esc>"] = "revert_preview",
-    --                 -- ["P"] = { "toggle_preview", config = { use_float = true } },
-    --                 -- ["S"] = "open_split",
-    --                 -- ["s"] = "open_vsplit",
-    --                 -- ["t"] = "open_tabnew",
-    --                 -- ["w"] = "open_with_window_picker",
-    --                 ["<bs>"] = "close_node",
-    --                 ["C"] = "close_all_subnodes",
-    --                 ["W"] = "close_all_nodes",
-    --                 ["E"] = "expand_all_nodes",
-    --                 -- ["a"] = {
-    --                 --     "add",
-    --                 --     -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
-    --                 --     -- some commands may take optional config options, see `:h neo-tree-mappings` for details
-    --                 --     config = {
-    --                 --         show_path = "none", -- "none", "relative", "absolute"
-    --                 --     },
-    --                 -- },
-    --                 -- ["A"] = "add_directory", -- also accepts the optional config.show_path option like "add". this also supports BASH style brace expansion.
-    --                 -- ["d"] = "delete",
-    --                 -- ["r"] = "rename",
-    --                 -- ["y"] = "copy_to_clipboard",
-    --                 -- ["x"] = "cut_to_clipboard",
-    --                 -- ["p"] = "paste_from_clipboard",
-    --                 ["c"] = "none",
-    --                 -- ["m"] = "move", -- takes text input for destination, also accepts the optional config.show_path option like "add".
-    --                 -- ["q"] = "close_window",
-    --                 -- ["R"] = "refresh",
-    --                 -- ["?"] = "show_help",
-    --                 -- ["<"] = "prev_source",
-    --                 -- [">"] = "next_source",
-    --
-    --                 ["o"] = "system_open",
-    --                 ["D"] = "diff_files",
-    --                 ["h"] = "parent",
-    --                 ["y"] = "copy_selector",
-    --             },
-    --         },
-    --         filesystem = {
-    --             window = {
-    --                 mappings = {
-    --                     -- ["<bs>"] = "navigate_up",
-    --                     ["H"] = "navigate_up",
-    --                     -- ["."] = "set_root",
-    --                     ["L"] = "set_root",
-    --                     -- ["H"] = "toggle_hidden",
-    --                     -- ["/"] = "fuzzy_finder",
-    --                     -- ["D"] = "fuzzy_finder_directory",
-    --                     -- ["#"] = "fuzzy_sorter", -- fuzzy sorting using the fzy algorithm
-    --                     -- -- ["D"] = "fuzzy_sorter_directory",
-    --                     -- ["f"] = "filter_on_submit",
-    --                     -- ["<c-x>"] = "clear_filter",
-    --                     -- ["[g"] = "prev_git_modified",
-    --                     -- ["]g"] = "next_git_modified",
-    --
-    --                     ["c"] = "copy_to_clipboard",
-    --                 },
-    --                 fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
-    --                     ["<down>"] = "move_cursor_down",
-    --                     ["<C-j>"] = "move_cursor_down",
-    --                     ["<up>"] = "move_cursor_up",
-    --                     ["<C-k>"] = "move_cursor_up",
-    --                 },
-    --             },
-    --             bind_to_cwd = true, -- true creates a 2-way binding between vim's cwd and neo-tree's root
-    --             filtered_items = {
-    --                 visible = true, -- when true, they will just be displayed differently than normal items
-    --                 hide_dotfiles = true,
-    --                 hide_gitignored = true,
-    --                 hide_hidden = true, -- only works on Windows for hidden files/directories
-    --                 hide_by_name = {
-    --                     ".DS_Store",
-    --                     "thumbs.db",
-    --                     --"node_modules",
-    --                 },
-    --                 hide_by_pattern = { -- uses glob style patterns
-    --                     --"*.meta",
-    --                     --"*/src/*/tsconfig.json"
-    --                 },
-    --                 always_show = { -- remains visible even if other settings would normally hide it
-    --                     --".gitignored",
-    --                 },
-    --                 never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
-    --                     --".DS_Store",
-    --                     --"thumbs.db"
-    --                 },
-    --                 never_show_by_pattern = { -- uses glob style patterns
-    --                     --".null-ls_*",
-    --                 },
-    --             },
-    --             follow_current_file = true,    -- This will find and focus the file in the active buffer every time
-    --             -- the current file is changed while the tree is open.
-    --             use_libuv_file_watcher = true, -- This will use the OS level file watchers to detect changes
-    --             -- instead of relying on nvim autocmd events.
-    --         },
-    --     },
-    -- },
-
     {
-        "nvim-tree/nvim-tree.lua",
+        "nvim-neo-tree/neo-tree.nvim",
         cmd = {
-            "NvimTreeOpen",
-            "NvimTreeClose",
-            "NvimTreeToggle",
-            "NvimTreeFocus",
-            "NvimTreeRefresh",
-            "NvimTreeFindFile",
-            "NvimTreeFindFileToggle",
-            "NvimTreeClipboard",
-            "NvimTreeResize",
-            "NvimTreeCollapse",
-            "NvimTreeCollapseKeepBuffers",
-            "NvimTreeGenerateOnAttach",
+            "Neotree",
         },
-        config = function(_, opts)
-            require("nvim-tree").setup(opts)
-
-            -- 确保 git 命令能够成功执行
-            if variables.is_windows then
-                vim.opt.shell = "cmd"
-                vim.opt.shellcmdflag = "/s /c"
-                vim.opt.shellxescape = "("
-            end
-
-            -- 最后的窗口为 NvimTree 时自动关闭
-            vim.api.nvim_create_autocmd("BufEnter", {
-                callback = function()
-                    local layout = vim.api.nvim_call_function("winlayout", {})
-                    if
-                        layout[1] == "leaf"
-                        and vim.api.nvim_get_option_value("filetype", { buf = vim.api.nvim_win_get_buf(layout[2]) }) == "NvimTree"
-                        and layout[3] == nil
-                    then
-                        vim.api.nvim_command("confirm quit")
-                    end
-                end,
-                desc = "Auto close when nvim-tree is the last window",
-                group = vim.api.nvim_create_augroup("NvimTreeClose", { clear = true }),
-                pattern = "NvimTree_*",
-            })
-        end,
         dependencies = {
+            "MunifTanjim/nui.nvim",
+            "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons",
         },
         enabled = not variables.is_vscode,
         init = function()
-            vim.g.loaded_netrw = 1
-            vim.g.loaded_netrwPlugin = 1
+            vim.g.neo_tree_remove_legacy_commands = true
         end,
-        opts = function()
-            local api = require("nvim-tree.api")
-
-            local SORT_METHODS = {
-                "name",
-                "case_sensitive",
-                "modification_time",
-                "extension",
-            }
-            local sort_current = 1
-
-            local function cycle_sort()
-                if sort_current >= #SORT_METHODS then
-                    sort_current = 1
-                else
-                    sort_current = sort_current + 1
-                end
-                api.tree.reload()
-                vim.notify(("Sort by %s"):format(SORT_METHODS[sort_current]))
-            end
-
-            local function sort_by()
-                return SORT_METHODS[sort_current]
-            end
-
-            return {
-                sort_by = sort_by,
-                sync_root_with_cwd = true,
-                update_focused_file = {
-                    enable = true,
-                },
+        opts = {
+            -- If a user has a sources list it will replace this one.
+            -- Only sources listed here will be loaded.
+            -- You can also add an external source by adding it's name to this list.
+            -- The name used here must be the same name you would use in a require() call.
+            sources = {
+                "filesystem",
+                -- "buffers",
+                -- "git_status",
+                "document_symbols",
+            },
+            auto_clean_after_session_restore = true, -- Automatically clean up broken neo-tree buffers saved in sessions
+            close_if_last_window = true,             -- Close Neo-tree if it is the last window left in the tab
+            hide_root_node = true,                   -- Hide the root node.
+            retain_hidden_root_indent = true,        -- IF the root node is hidden, keep the indentation anyhow.
+            -- This is needed if you use expanders because they render in the indent.
+            popup_border_style = "rounded",          -- "double", "none", "rounded", "shadow", "single" or "solid"
+            sort_case_insensitive = true,            -- used when sorting files and directories in the tree
+            default_component_configs = {
                 diagnostics = {
-                    enable = true,
-                    icons = {
-                        error = variables.icons.diagnostics.Error,
-                        hint = variables.icons.diagnostics.Hint,
-                        info = variables.icons.diagnostics.Info,
-                        warning = variables.icons.diagnostics.Warn,
-                    },
+                    symbols = variables.icons.diagnostics,
                 },
-                git = {
-                    ignore = false,
-                    timeout = 4000,
+                indent = {
+                    with_expanders = true, -- if nil and file nesting is enabled, will enable expanders
                 },
-                modified = {
-                    enable = true,
+                name = {
+                    highlight_opened_files = true, -- Requires `enable_opened_markers = true`.
                 },
-                on_attach = function(bufnr)
-                    local function opts(desc)
-                        return { desc = "nvim-tree: " .. desc, buffer = bufnr, silent = true, nowait = true }
-                    end
-
-                    vim.keymap.set("n", "q", api.tree.close, opts("Close"))
-                    vim.keymap.set("n", "<c-r>", api.tree.reload, opts("Refresh"))
-                    vim.keymap.set("n", "L", function()
-                        local node = api.tree.get_node_under_cursor()
-                        if node.type ~= "directory" then
-                            api.node.navigate.parent()
-                            api.tree.change_root_to_node()
-                        else
-                            api.tree.change_root_to_node()
-                        end
-                    end, opts("CD"))
-                    vim.keymap.set("n", "<2-RightMouse>", api.tree.change_root_to_node, opts("CD"))
-                    vim.keymap.set("n", "H", api.tree.change_root_to_parent, opts("Up"))
-                    vim.keymap.set("n", "<c-f>", api.tree.search_node, opts("Search"))
-                    vim.keymap.set("n", "W", api.tree.collapse_all, opts("Collapse"))
-                    vim.keymap.set("n", "E", api.tree.expand_all, opts("Expand All"))
-                    vim.keymap.set("n", "Ti", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
-                    vim.keymap.set("n", "Tc", api.tree.toggle_git_clean_filter, opts("Toggle Git Clean"))
-                    vim.keymap.set("n", "Tb", api.tree.toggle_no_buffer_filter, opts("Toggle No Buffer"))
-                    vim.keymap.set("n", "Tu", api.tree.toggle_custom_filter, opts("Toggle Custom"))
-                    vim.keymap.set("n", "Th", api.tree.toggle_hidden_filter, opts("Toggle Dotfiles"))
-                    vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
-
-                    vim.keymap.set("n", "Ts", cycle_sort, opts("Cycle Sort"))
-
-                    vim.keymap.set("n", "a", api.fs.create, opts("Create"))
-                    -- vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
-                    -- vim.keymap.set("n", "D", api.fs.trash, opts("Trash"))
-                    -- vim.keymap.set("n", "d", function()
-                    --     local node = api.tree.get_node_under_cursor()
-                    --     vim.ui.input({ prompt = ("Remove %s? [y/N]"):format(node.name) }, function(input)
-                    --         if input == "y" then
-                    --             api.fs.remove()
-                    --             api.tree.reload()
-                    --         end
-                    --     end)
-                    -- end, opts("Delete"))
-                    vim.keymap.set("n", "d", function()
-                        local marks = api.marks.list()
-                        if #marks == 0 then
-                            table.insert(marks, api.tree.get_node_under_cursor())
-                        end
-                        vim.ui.input({ prompt = ("Remove %s files? [y/N]"):format(#marks) }, function(input)
-                            if input == "y" then
-                                for _, node in ipairs(marks) do
-                                    api.fs.remove(node)
-                                end
-                                api.marks.clear()
-                                api.tree.reload()
-                            end
-                        end)
-                    end, opts("Remove File(s)"))
-                    vim.keymap.set("n", "r", api.fs.rename, opts("Rename"))
-                    vim.keymap.set("n", "e", api.fs.rename_basename, opts("Rename: Basename"))
-                    vim.keymap.set("n", "R", api.fs.rename_sub, opts("Rename: Omit Filename"))
-                    -- vim.keymap.set("n", "x", api.fs.cut, opts("Cut"))
-                    vim.keymap.set("n", "x", function()
-                        local marks = api.marks.list()
-                        if #marks == 0 then
-                            table.insert(marks, api.tree.get_node_under_cursor())
-                        end
-                        for _, node in pairs(marks) do
-                            api.fs.cut(node)
-                        end
-                        api.marks.clear()
-                        api.tree.reload()
-                    end, opts("Cut File(s)"))
-                    vim.keymap.set("n", "p", api.fs.paste, opts("Paste"))
-                    -- vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
-                    vim.keymap.set("n", "c", function()
-                        local marks = api.marks.list()
-                        if #marks == 0 then
-                            table.insert(marks, api.tree.get_node_under_cursor())
-                        end
-                        for _, node in pairs(marks) do
-                            api.fs.copy.node(node)
-                        end
-                        api.marks.clear()
-                        api.tree.reload()
-                    end, opts("Copy File(s)"))
-                    vim.keymap.set("n", "y", function()
-                        local node = api.tree.get_node_under_cursor()
-                        local absolute_path = node.absolute_path
-                        local extension = node.extension
-                        local name = node.name
-                        local modify = vim.fn.fnamemodify
-
-                        local results = {
-                            e = { val = extension, msg = "Extension only" },
-                            f = { val = name, msg = "Filename" },
-                            F = { val = modify(name, ":r"), msg = "Filename w/o extension" },
-                            h = { val = modify(absolute_path, ":~"), msg = "Path relative to Home" },
-                            p = { val = modify(absolute_path, ":."), msg = "Path relative to CWD" },
-                            P = { val = absolute_path, msg = "Absolute path" },
-                        }
-
-                        local messages = {
-                            { "\nChoose to copy to clipboard:\n", "Normal" },
-                        }
-                        for i, result in pairs(results) do
-                            if result.val and result.val ~= "" then
-                                vim.list_extend(messages, {
-                                    { ("%s."):format(i),           "Identifier" },
-                                    { (" %s: "):format(result.msg) },
-                                    { result.val,                  "String" },
-                                    { "\n" },
-                                })
-                            end
-                        end
-                        vim.api.nvim_echo(messages, false, {})
-                        local result = results[vim.fn.getcharstr()]
-                        if result and result.val and result.val ~= "" then
-                            vim.notify(("Copied: `%s`"):format(result.val))
-                            vim.fn.setreg("+", result.val)
-                        end
-                    end, opts("Copy Info"))
-
-                    vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "<cr>", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "O", api.node.open.no_window_picker, opts("Open: No Window Picker"))
-                    vim.keymap.set("n", "s", api.node.open.vertical, opts("Open: Vertical Split"))
-                    vim.keymap.set("n", "S", api.node.open.horizontal, opts("Open: Horizontal Split"))
-                    -- vim.keymap.set("n", "t", api.node.open.tab, opts("Open: New Tab"))
-                    vim.keymap.set("n", "t", function()
-                        local node = api.tree.get_node_under_cursor()
-                        api.node.open.tab(node)
-                        vim.cmd.tabprev()
-                    end, opts("Open: New Tab"))
-                    vim.keymap.set("n", "<tab>", api.node.open.preview, opts("Open Preview"))
-                    vim.keymap.set("n", "]c", api.node.navigate.git.next, opts("Next Git"))
-                    vim.keymap.set("n", "[c", api.node.navigate.git.prev, opts("Prev Git"))
-                    vim.keymap.set("n", "]e", api.node.navigate.diagnostics.next, opts("Next Diagnostic"))
-                    vim.keymap.set("n", "[e", api.node.navigate.diagnostics.prev, opts("Prev Diagnostic"))
-                    vim.keymap.set("n", ">", api.node.navigate.sibling.next, opts("Next Sibling"))
-                    vim.keymap.set("n", "<", api.node.navigate.sibling.prev, opts("Previous Sibling"))
-                    vim.keymap.set("n", "h", api.node.navigate.parent, opts("Parent Directory"))
-                    vim.keymap.set("n", "<bs>", api.node.navigate.parent_close, opts("Close Directory"))
-                    vim.keymap.set("n", "i", api.node.show_info_popup, opts("Info"))
-                    vim.keymap.set("n", ".", api.node.run.cmd, opts("Run Command"))
-                    vim.keymap.set("n", "o", api.node.run.system, opts("Run System"))
-
-                    vim.keymap.set("n", "f", function(...)
-                        api.tree.expand_all(...)
-                        api.live_filter.start(...)
-                    end, opts("Filter"))
-                    vim.keymap.set("n", "F", function(...)
-                        api.live_filter.clear(...)
-                        api.tree.collapse_all(...)
-                    end, opts("Clean Filter"))
-
-                    vim.keymap.set("n", "m", api.marks.toggle, opts("Toggle Bookmark"))
-                    vim.keymap.set("n", "J", function()
-                        api.marks.toggle()
-                        vim.cmd.normal("j")
-                    end, opts("Toggle Bookmark Down"))
-                    vim.keymap.set("n", "K", function()
-                        api.marks.toggle()
-                        vim.cmd.normal("k")
-                    end, opts("Toggle Bookmark Up"))
+                git_status = {
+                    symbols = variables.icons.git,
+                },
+            },
+            commands = {
+                system_open = function(state)
+                    utils.system_open(state.tree:get_node():get_id())
                 end,
-                select_prompts = true,
-                view = {
-                    centralize_selection = true,
-                    width = "20%",
+                diff_files = function(state)
+                    local node = state.tree:get_node()
+                    local log = require("neo-tree.log")
+                    state.clipboard = state.clipboard or {}
+                    if diff_Node and diff_Node ~= tostring(node.id) then
+                        local current_Diff = node.id
+                        require("neo-tree.utils").open_file(state, diff_Node, open)
+                        vim.cmd("vert diffs " .. current_Diff)
+                        log.info("Diffing " .. diff_Name .. " against " .. node.name)
+                        diff_Node = nil
+                        current_Diff = nil
+                        state.clipboard = {}
+                        require("neo-tree.ui.renderer").redraw(state)
+                    else
+                        local existing = state.clipboard[node.id]
+                        if existing and existing.action == "diff" then
+                            state.clipboard[node.id] = nil
+                            diff_Node = nil
+                            require("neo-tree.ui.renderer").redraw(state)
+                        else
+                            state.clipboard[node.id] = { action = "diff", node = node }
+                            diff_Name = state.clipboard[node.id].node.name
+                            diff_Node = tostring(state.clipboard[node.id].node.id)
+                            log.info("Diff source file " .. diff_Name)
+                            require("neo-tree.ui.renderer").redraw(state)
+                        end
+                    end
+                end,
+                parent = function(state)
+                    require("neo-tree.ui.renderer").focus_node(state, state.tree:get_node():get_parent_id())
+                end,
+                copy_selector = function(state)
+                    local node = state.tree:get_node()
+                    local filepath = node:get_id()
+                    local filename = node.name
+                    local modify = vim.fn.fnamemodify
+
+                    local results = {
+                        e = { val = modify(filename, ":e"), msg = "Extension only" },
+                        f = { val = filename, msg = "Filename" },
+                        F = { val = modify(filename, ":r"), msg = "Filename w/o extension" },
+                        h = { val = modify(filepath, ":~"), msg = "Path relative to Home" },
+                        p = { val = modify(filepath, ":."), msg = "Path relative to CWD" },
+                        P = { val = filepath, msg = "Absolute path" },
+                    }
+
+                    local messages = {
+                        { "\nChoose to copy to clipboard:\n", "Normal" },
+                    }
+                    for i, result in pairs(results) do
+                        if result.val and result.val ~= "" then
+                            vim.list_extend(messages, {
+                                { ("%s."):format(i),           "Identifier" },
+                                { (" %s: "):format(result.msg) },
+                                { result.val,                  "String" },
+                                { "\n" },
+                            })
+                        end
+                    end
+                    vim.api.nvim_echo(messages, false, {})
+                    local result = results[vim.fn.getcharstr()]
+                    if result and result.val and result.val ~= "" then
+                        vim.notify(("Copied: `%s`"):format(result.val))
+                        vim.fn.setreg("+", result.val)
+                    end
+                end,
+            },
+            window = {
+                mappings = {
+                    ["<space>"] = "none",
+                    -- ["<2-LeftMouse>"] = "open",
+                    -- ["<cr>"] = "open",
+                    ["l"] = "open",
+                    -- ["<esc>"] = "revert_preview",
+                    -- ["P"] = { "toggle_preview", config = { use_float = true } },
+                    -- ["S"] = "open_split",
+                    -- ["s"] = "open_vsplit",
+                    -- ["t"] = "open_tabnew",
+                    -- ["w"] = "open_with_window_picker",
+                    ["<bs>"] = "close_node",
+                    ["C"] = "close_all_subnodes",
+                    ["W"] = "close_all_nodes",
+                    ["E"] = "expand_all_nodes",
+                    -- ["a"] = {
+                    --     "add",
+                    --     -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
+                    --     -- some commands may take optional config options, see `:h neo-tree-mappings` for details
+                    --     config = {
+                    --         show_path = "none", -- "none", "relative", "absolute"
+                    --     },
+                    -- },
+                    -- ["A"] = "add_directory", -- also accepts the optional config.show_path option like "add". this also supports BASH style brace expansion.
+                    -- ["d"] = "delete",
+                    -- ["r"] = "rename",
+                    -- ["y"] = "copy_to_clipboard",
+                    -- ["x"] = "cut_to_clipboard",
+                    -- ["p"] = "paste_from_clipboard",
+                    ["c"] = "none",
+                    -- ["m"] = "move", -- takes text input for destination, also accepts the optional config.show_path option like "add".
+                    -- ["q"] = "close_window",
+                    -- ["R"] = "refresh",
+                    -- ["?"] = "show_help",
+                    -- ["<"] = "prev_source",
+                    -- [">"] = "next_source",
+
+                    ["o"] = "system_open",
+                    ["D"] = "diff_files",
+                    ["h"] = "parent",
+                    ["y"] = "copy_selector",
                 },
-                renderer = {
-                    highlight_opened_files = "all",
-                    highlight_modified = "all",
-                    root_folder_label = false,
-                    indent_markers = {
-                        enable = true,
+            },
+            filesystem = {
+                window = {
+                    mappings = {
+                        -- ["<bs>"] = "navigate_up",
+                        ["H"] = "navigate_up",
+                        -- ["."] = "set_root",
+                        ["L"] = "set_root",
+                        -- ["H"] = "toggle_hidden",
+                        -- ["/"] = "fuzzy_finder",
+                        -- ["D"] = "fuzzy_finder_directory",
+                        -- ["#"] = "fuzzy_sorter", -- fuzzy sorting using the fzy algorithm
+                        -- -- ["D"] = "fuzzy_sorter_directory",
+                        -- ["f"] = "filter_on_submit",
+                        -- ["<c-x>"] = "clear_filter",
+                        -- ["[g"] = "prev_git_modified",
+                        -- ["]g"] = "next_git_modified",
+
+                        ["c"] = "copy_to_clipboard",
                     },
-                    icons = {
-                        git_placement = "after",
-                        glyphs = {
-                            git = {
-                                unstaged = variables.icons.git.unstaged,
-                                staged = variables.icons.git.staged,
-                                unmerged = variables.icons.git.conflict,
-                                renamed = variables.icons.git.renamed,
-                                untracked = variables.icons.git.untracked,
-                                deleted = variables.icons.git.deleted,
-                                ignored = variables.icons.git.ignored,
-                            },
-                        },
+                    fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
+                        ["<down>"] = "move_cursor_down",
+                        ["<C-j>"] = "move_cursor_down",
+                        ["<up>"] = "move_cursor_up",
+                        ["<C-k>"] = "move_cursor_up",
                     },
                 },
-                live_filter = {
-                    always_show_folders = false,
-                },
-                tab = {
-                    sync = {
-                        open = true,
-                        close = true,
+                bind_to_cwd = true, -- true creates a 2-way binding between vim's cwd and neo-tree's root
+                filtered_items = {
+                    visible = true, -- when true, they will just be displayed differently than normal items
+                    hide_dotfiles = true,
+                    hide_gitignored = true,
+                    hide_hidden = true, -- only works on Windows for hidden files/directories
+                    hide_by_name = {
+                        ".DS_Store",
+                        "thumbs.db",
+                        --"node_modules",
+                    },
+                    hide_by_pattern = { -- uses glob style patterns
+                        --"*.meta",
+                        --"*/src/*/tsconfig.json"
+                    },
+                    always_show = { -- remains visible even if other settings would normally hide it
+                        --".gitignored",
+                    },
+                    never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
+                        --".DS_Store",
+                        --"thumbs.db"
+                    },
+                    never_show_by_pattern = { -- uses glob style patterns
+                        --".null-ls_*",
                     },
                 },
-                ui = {
-                    confirm = {
-                        remove = false,
-                        trash = false,
-                    },
+                follow_current_file = {
+                    enabled = true,            -- This will find and focus the file in the active buffer every time
+                    --               -- the current file is changed while the tree is open.
+                    leave_dirs_open = true,    -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
                 },
-            }
-        end,
-        version = "*",
+                use_libuv_file_watcher = true, -- This will use the OS level file watchers to detect changes
+                -- instead of relying on nvim autocmd events.
+            },
+        },
     },
+
+    -- {
+    --     "nvim-tree/nvim-tree.lua",
+    --     cmd = {
+    --         "NvimTreeOpen",
+    --         "NvimTreeClose",
+    --         "NvimTreeToggle",
+    --         "NvimTreeFocus",
+    --         "NvimTreeRefresh",
+    --         "NvimTreeFindFile",
+    --         "NvimTreeFindFileToggle",
+    --         "NvimTreeClipboard",
+    --         "NvimTreeResize",
+    --         "NvimTreeCollapse",
+    --         "NvimTreeCollapseKeepBuffers",
+    --         "NvimTreeGenerateOnAttach",
+    --     },
+    --     config = function(_, opts)
+    --         require("nvim-tree").setup(opts)
+    --
+    --         -- 确保 git 命令能够成功执行
+    --         if variables.is_windows then
+    --             vim.opt.shell = "cmd"
+    --             vim.opt.shellcmdflag = "/s /c"
+    --             vim.opt.shellxescape = "("
+    --         end
+    --
+    --         -- 最后的窗口为 NvimTree 时自动关闭
+    --         vim.api.nvim_create_autocmd("BufEnter", {
+    --             callback = function()
+    --                 local layout = vim.api.nvim_call_function("winlayout", {})
+    --                 if
+    --                     layout[1] == "leaf"
+    --                     and vim.api.nvim_get_option_value("filetype", { buf = vim.api.nvim_win_get_buf(layout[2]) }) == "NvimTree"
+    --                     and layout[3] == nil
+    --                 then
+    --                     vim.api.nvim_command("confirm quit")
+    --                 end
+    --             end,
+    --             desc = "Auto close when nvim-tree is the last window",
+    --             group = vim.api.nvim_create_augroup("NvimTreeClose", { clear = true }),
+    --             pattern = "NvimTree_*",
+    --         })
+    --     end,
+    --     dependencies = {
+    --         "nvim-tree/nvim-web-devicons",
+    --     },
+    --     enabled = not variables.is_vscode,
+    --     init = function()
+    --         vim.g.loaded_netrw = 1
+    --         vim.g.loaded_netrwPlugin = 1
+    --     end,
+    --     opts = function()
+    --         local api = require("nvim-tree.api")
+    --
+    --         local SORT_METHODS = {
+    --             "name",
+    --             "case_sensitive",
+    --             "modification_time",
+    --             "extension",
+    --         }
+    --         local sort_current = 1
+    --
+    --         local function cycle_sort()
+    --             if sort_current >= #SORT_METHODS then
+    --                 sort_current = 1
+    --             else
+    --                 sort_current = sort_current + 1
+    --             end
+    --             api.tree.reload()
+    --             vim.notify(("Sort by %s"):format(SORT_METHODS[sort_current]))
+    --         end
+    --
+    --         local function sort_by()
+    --             return SORT_METHODS[sort_current]
+    --         end
+    --
+    --         return {
+    --             sort_by = sort_by,
+    --             sync_root_with_cwd = true,
+    --             update_focused_file = {
+    --                 enable = true,
+    --             },
+    --             diagnostics = {
+    --                 enable = true,
+    --                 icons = {
+    --                     error = variables.icons.diagnostics.Error,
+    --                     hint = variables.icons.diagnostics.Hint,
+    --                     info = variables.icons.diagnostics.Info,
+    --                     warning = variables.icons.diagnostics.Warn,
+    --                 },
+    --             },
+    --             git = {
+    --                 ignore = false,
+    --                 timeout = 4000,
+    --             },
+    --             modified = {
+    --                 enable = true,
+    --             },
+    --             on_attach = function(bufnr)
+    --                 local function opts(desc)
+    --                     return { desc = "nvim-tree: " .. desc, buffer = bufnr, silent = true, nowait = true }
+    --                 end
+    --
+    --                 vim.keymap.set("n", "q", api.tree.close, opts("Close"))
+    --                 vim.keymap.set("n", "<c-r>", api.tree.reload, opts("Refresh"))
+    --                 vim.keymap.set("n", "L", function()
+    --                     local node = api.tree.get_node_under_cursor()
+    --                     if node.type ~= "directory" then
+    --                         api.node.navigate.parent()
+    --                         api.tree.change_root_to_node()
+    --                     else
+    --                         api.tree.change_root_to_node()
+    --                     end
+    --                 end, opts("CD"))
+    --                 vim.keymap.set("n", "<2-RightMouse>", api.tree.change_root_to_node, opts("CD"))
+    --                 vim.keymap.set("n", "H", api.tree.change_root_to_parent, opts("Up"))
+    --                 vim.keymap.set("n", "<c-f>", api.tree.search_node, opts("Search"))
+    --                 vim.keymap.set("n", "W", api.tree.collapse_all, opts("Collapse"))
+    --                 vim.keymap.set("n", "E", api.tree.expand_all, opts("Expand All"))
+    --                 vim.keymap.set("n", "Ti", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
+    --                 vim.keymap.set("n", "Tc", api.tree.toggle_git_clean_filter, opts("Toggle Git Clean"))
+    --                 vim.keymap.set("n", "Tb", api.tree.toggle_no_buffer_filter, opts("Toggle No Buffer"))
+    --                 vim.keymap.set("n", "Tu", api.tree.toggle_custom_filter, opts("Toggle Custom"))
+    --                 vim.keymap.set("n", "Th", api.tree.toggle_hidden_filter, opts("Toggle Dotfiles"))
+    --                 vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
+    --
+    --                 vim.keymap.set("n", "Ts", cycle_sort, opts("Cycle Sort"))
+    --
+    --                 vim.keymap.set("n", "a", api.fs.create, opts("Create"))
+    --                 -- vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
+    --                 -- vim.keymap.set("n", "D", api.fs.trash, opts("Trash"))
+    --                 -- vim.keymap.set("n", "d", function()
+    --                 --     local node = api.tree.get_node_under_cursor()
+    --                 --     vim.ui.input({ prompt = ("Remove %s? [y/N]"):format(node.name) }, function(input)
+    --                 --         if input == "y" then
+    --                 --             api.fs.remove()
+    --                 --             api.tree.reload()
+    --                 --         end
+    --                 --     end)
+    --                 -- end, opts("Delete"))
+    --                 vim.keymap.set("n", "d", function()
+    --                     local marks = api.marks.list()
+    --                     if #marks == 0 then
+    --                         table.insert(marks, api.tree.get_node_under_cursor())
+    --                     end
+    --                     vim.ui.input({ prompt = ("Remove %s files? [y/N]"):format(#marks) }, function(input)
+    --                         if input == "y" then
+    --                             for _, node in ipairs(marks) do
+    --                                 api.fs.remove(node)
+    --                             end
+    --                             api.marks.clear()
+    --                             api.tree.reload()
+    --                         end
+    --                     end)
+    --                 end, opts("Remove File(s)"))
+    --                 vim.keymap.set("n", "r", api.fs.rename, opts("Rename"))
+    --                 vim.keymap.set("n", "e", api.fs.rename_basename, opts("Rename: Basename"))
+    --                 vim.keymap.set("n", "R", api.fs.rename_sub, opts("Rename: Omit Filename"))
+    --                 -- vim.keymap.set("n", "x", api.fs.cut, opts("Cut"))
+    --                 vim.keymap.set("n", "x", function()
+    --                     local marks = api.marks.list()
+    --                     if #marks == 0 then
+    --                         table.insert(marks, api.tree.get_node_under_cursor())
+    --                     end
+    --                     for _, node in pairs(marks) do
+    --                         api.fs.cut(node)
+    --                     end
+    --                     api.marks.clear()
+    --                     api.tree.reload()
+    --                 end, opts("Cut File(s)"))
+    --                 vim.keymap.set("n", "p", api.fs.paste, opts("Paste"))
+    --                 -- vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
+    --                 vim.keymap.set("n", "c", function()
+    --                     local marks = api.marks.list()
+    --                     if #marks == 0 then
+    --                         table.insert(marks, api.tree.get_node_under_cursor())
+    --                     end
+    --                     for _, node in pairs(marks) do
+    --                         api.fs.copy.node(node)
+    --                     end
+    --                     api.marks.clear()
+    --                     api.tree.reload()
+    --                 end, opts("Copy File(s)"))
+    --                 vim.keymap.set("n", "y", function()
+    --                     local node = api.tree.get_node_under_cursor()
+    --                     local absolute_path = node.absolute_path
+    --                     local extension = node.extension
+    --                     local name = node.name
+    --                     local modify = vim.fn.fnamemodify
+    --
+    --                     local results = {
+    --                         e = { val = extension, msg = "Extension only" },
+    --                         f = { val = name, msg = "Filename" },
+    --                         F = { val = modify(name, ":r"), msg = "Filename w/o extension" },
+    --                         h = { val = modify(absolute_path, ":~"), msg = "Path relative to Home" },
+    --                         p = { val = modify(absolute_path, ":."), msg = "Path relative to CWD" },
+    --                         P = { val = absolute_path, msg = "Absolute path" },
+    --                     }
+    --
+    --                     local messages = {
+    --                         { "\nChoose to copy to clipboard:\n", "Normal" },
+    --                     }
+    --                     for i, result in pairs(results) do
+    --                         if result.val and result.val ~= "" then
+    --                             vim.list_extend(messages, {
+    --                                 { ("%s."):format(i),           "Identifier" },
+    --                                 { (" %s: "):format(result.msg) },
+    --                                 { result.val,                  "String" },
+    --                                 { "\n" },
+    --                             })
+    --                         end
+    --                     end
+    --                     vim.api.nvim_echo(messages, false, {})
+    --                     local result = results[vim.fn.getcharstr()]
+    --                     if result and result.val and result.val ~= "" then
+    --                         vim.notify(("Copied: `%s`"):format(result.val))
+    --                         vim.fn.setreg("+", result.val)
+    --                     end
+    --                 end, opts("Copy Info"))
+    --
+    --                 vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+    --                 vim.keymap.set("n", "<cr>", api.node.open.edit, opts("Open"))
+    --                 vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
+    --                 vim.keymap.set("n", "O", api.node.open.no_window_picker, opts("Open: No Window Picker"))
+    --                 vim.keymap.set("n", "s", api.node.open.vertical, opts("Open: Vertical Split"))
+    --                 vim.keymap.set("n", "S", api.node.open.horizontal, opts("Open: Horizontal Split"))
+    --                 -- vim.keymap.set("n", "t", api.node.open.tab, opts("Open: New Tab"))
+    --                 vim.keymap.set("n", "t", function()
+    --                     local node = api.tree.get_node_under_cursor()
+    --                     api.node.open.tab(node)
+    --                     vim.cmd.tabprev()
+    --                 end, opts("Open: New Tab"))
+    --                 vim.keymap.set("n", "<tab>", api.node.open.preview, opts("Open Preview"))
+    --                 vim.keymap.set("n", "]c", api.node.navigate.git.next, opts("Next Git"))
+    --                 vim.keymap.set("n", "[c", api.node.navigate.git.prev, opts("Prev Git"))
+    --                 vim.keymap.set("n", "]e", api.node.navigate.diagnostics.next, opts("Next Diagnostic"))
+    --                 vim.keymap.set("n", "[e", api.node.navigate.diagnostics.prev, opts("Prev Diagnostic"))
+    --                 vim.keymap.set("n", ">", api.node.navigate.sibling.next, opts("Next Sibling"))
+    --                 vim.keymap.set("n", "<", api.node.navigate.sibling.prev, opts("Previous Sibling"))
+    --                 vim.keymap.set("n", "h", api.node.navigate.parent, opts("Parent Directory"))
+    --                 vim.keymap.set("n", "<bs>", api.node.navigate.parent_close, opts("Close Directory"))
+    --                 vim.keymap.set("n", "i", api.node.show_info_popup, opts("Info"))
+    --                 vim.keymap.set("n", ".", api.node.run.cmd, opts("Run Command"))
+    --                 vim.keymap.set("n", "o", api.node.run.system, opts("Run System"))
+    --
+    --                 vim.keymap.set("n", "f", function(...)
+    --                     api.tree.expand_all(...)
+    --                     api.live_filter.start(...)
+    --                 end, opts("Filter"))
+    --                 vim.keymap.set("n", "F", function(...)
+    --                     api.live_filter.clear(...)
+    --                     api.tree.collapse_all(...)
+    --                 end, opts("Clean Filter"))
+    --
+    --                 vim.keymap.set("n", "m", api.marks.toggle, opts("Toggle Bookmark"))
+    --                 vim.keymap.set("n", "J", function()
+    --                     api.marks.toggle()
+    --                     vim.cmd.normal("j")
+    --                 end, opts("Toggle Bookmark Down"))
+    --                 vim.keymap.set("n", "K", function()
+    --                     api.marks.toggle()
+    --                     vim.cmd.normal("k")
+    --                 end, opts("Toggle Bookmark Up"))
+    --             end,
+    --             select_prompts = true,
+    --             view = {
+    --                 centralize_selection = true,
+    --                 width = "20%",
+    --             },
+    --             renderer = {
+    --                 highlight_opened_files = "all",
+    --                 highlight_modified = "all",
+    --                 root_folder_label = false,
+    --                 indent_markers = {
+    --                     enable = true,
+    --                 },
+    --                 icons = {
+    --                     git_placement = "after",
+    --                     glyphs = {
+    --                         git = {
+    --                             unstaged = variables.icons.git.unstaged,
+    --                             staged = variables.icons.git.staged,
+    --                             unmerged = variables.icons.git.conflict,
+    --                             renamed = variables.icons.git.renamed,
+    --                             untracked = variables.icons.git.untracked,
+    --                             deleted = variables.icons.git.deleted,
+    --                             ignored = variables.icons.git.ignored,
+    --                         },
+    --                     },
+    --                 },
+    --             },
+    --             live_filter = {
+    --                 always_show_folders = false,
+    --             },
+    --             tab = {
+    --                 sync = {
+    --                     open = true,
+    --                     close = true,
+    --                 },
+    --             },
+    --             ui = {
+    --                 confirm = {
+    --                     remove = false,
+    --                     trash = false,
+    --                 },
+    --             },
+    --         }
+    --     end,
+    --     version = "*",
+    -- },
 }

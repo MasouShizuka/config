@@ -261,6 +261,7 @@
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.tabs.location": "left",
     "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
+    "window.density.editorTabHeight": "compact",
     "window.dialogStyle": "custom",
     "window.menuBarVisibility": "compact",
     "window.zoomLevel": 2,

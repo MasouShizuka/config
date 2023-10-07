@@ -69,13 +69,13 @@ class NetworkWidget(BaseWidget):
         try:
             upload_speed, download_speed = self._get_speed()
             label_options = [
-                ("{upload_speed}", naturalsize(upload_speed, gnu=True)),
-                ("{download_speed}", naturalsize(download_speed, gnu=True)),
+                ("{upload_speed}", str(naturalsize(upload_speed, gnu=True))),
+                ("{download_speed}", str(naturalsize(download_speed, gnu=True))),
             ]
             for fmt_str, value in label_options:
                 active_label_formatted = active_label_formatted.replace(
                     fmt_str,
-                    str(value),
+                    value,
                 )
 
             active_label.setText(active_label_formatted)

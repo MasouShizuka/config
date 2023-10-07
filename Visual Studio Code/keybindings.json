@@ -4,22 +4,6 @@
     // Neovim //
     ////////////
 
-    {
-        "key": "escape",
-        "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.init && !dirtyDiffVisible && !findWidgetVisible && !inReferenceSearchEditor && !markersNavigationVisible && !notebookCellFocused && !notificationCenterVisible && !parameterHintsVisible && !referenceSearchVisible && neovim.mode == 'normal'"
-    },
-    {
-        "key": "escape",
-        "command": "extension.multiCommand.execute",
-        "args": {
-            "sequence": [
-                "vscode-neovim.escape",
-                "editor.action.trimTrailingWhitespace"
-            ]
-        },
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'insert' && !inSnippetMode"
-    },
     // 提高 leaveSnippet 优先级
     {
         "key": "escape",
@@ -33,16 +17,6 @@
     },
 
     // 去除 Neovim 的接收键位
-    {
-        "key": "ctrl+c",
-        "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && !dirtyDiffVisible && !findWidgetVisible && !inReferenceSearchEditor && !markersNavigationVisible && !notebookCellFocused && !notificationCenterVisible && !parameterHintsVisible && !referenceSearchVisible && neovim.mode == 'normal'"
-    },
-    {
-        "key": "ctrl+c",
-        "command": "-vscode-neovim.escape",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != 'normal'"
-    },
     {
         "key": "ctrl+f",
         "command": "-vscode-neovim.ctrl-f",
