@@ -79,8 +79,11 @@ if variables.is_vscode then
 
     -- 格式化
     vim.keymap.set("n", "<leader>f", function()
-        vim.api.nvim_call_function("VSCodeNotify", { "editor.action.formatDocument" })
-        vim.api.nvim_call_function("VSCodeNotify", { "notebook.formatCell" })
+        if vim.fn.expand("%:e"):sub(1, 5) == "ipynb" then
+            vim.api.nvim_call_function("VSCodeNotify", { "notebook.formatCell" })
+        else
+            vim.api.nvim_call_function("VSCodeNotify", { "editor.action.formatDocument" })
+        end
     end, { silent = true })
 
     -- 运行
@@ -191,9 +194,8 @@ else
     vim.keymap.set("n", "<c-down>", function() vim.cmd.wincmd("-") end, { desc = "Decrease window height", silent = true })
 
     -- tab
-    -- 由 bufferline 设置
-    -- vim.keymap.set("n", "<c-h>", function() vim.cmd.tabnext() end, { desc = "Cycle next tab", silent = true })
-    -- vim.keymap.set("n", "<c-l>", function() vim.cmd.tabprevious() end,, { desc = "Cycle previous tab", silent = true })
+    vim.keymap.set("n", "<c-h>", function() vim.cmd.tabprevious() end, { desc = "Cycle next tab", silent = true })
+    vim.keymap.set("n", "<c-l>", function() vim.cmd.tabnext() end, { desc = "Cycle previous tab", silent = true })
     vim.keymap.set("n", variables.keymap["<c-,>"], function() vim.cmd.tabmove("-") end, { desc = "Move tab left", silent = true })
     vim.keymap.set("n", variables.keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
     vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })

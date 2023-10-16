@@ -356,6 +356,96 @@ return {
         },
     },
 
+    -- {
+    --     "nvim-focus/focus.nvim",
+    --     cmd = {
+    --         "FocusDisable",
+    --         "FocusEnable",
+    --         "FocusToggle",
+    --         "FocusSplitNicely",
+    --         "FocusSplitCycle",
+    --         "FocusDisableWindow",
+    --         "FocusEnableWindow",
+    --         "FocusToggleWindow",
+    --         "FocusGetDisabledWindows",
+    --         "FocusSplitLeft",
+    --         "FocusSplitDown",
+    --         "FocusSplitUp",
+    --         "FocusSplitRight",
+    --         "FocusEqualise",
+    --         "FocusMaximise",
+    --         "FocusMaxOrEqual",
+    --     },
+    --     config = function(_, opts)
+    --         local focus = require("focus")
+    --         focus.setup(opts)
+
+    --         local ignore_buftypes = { "nofile", "prompt", "popup" }
+    --         local ignore_filetypes = variables.skip_filetype_list3
+    --         local augroup = vim.api.nvim_create_augroup("FocusDisable", { clear = true })
+    --         vim.api.nvim_create_autocmd("WinEnter", {
+    --             callback = function(_)
+    --                 if vim.tbl_contains(ignore_buftypes, vim.bo.buftype) then
+    --                     vim.w.focus_disable = true
+    --                 else
+    --                     vim.w.focus_disable = false
+    --                 end
+    --             end,
+    --             desc = "Disable focus autoresize for BufType",
+    --             group = augroup,
+    --         })
+    --         vim.api.nvim_create_autocmd("FileType", {
+    --             callback = function(_)
+    --                 if vim.tbl_contains(ignore_filetypes, vim.bo.filetype) then
+    --                     vim.b.focus_disable = true
+    --                 else
+    --                     vim.b.focus_disable = false
+    --                 end
+    --             end,
+    --             desc = "Disable focus autoresize for FileType",
+    --             group = augroup,
+    --         })
+
+    --         local is_equalised = false
+    --         local is_maximised = false
+    --         vim.keymap.set("n", "<c-s><c-t>", function() focus.focus_toggle() end, { desc = "Toggle focus on and off again", silent = true })
+    --         vim.keymap.set("n", "<c-s><c-e>", function()
+    --             if is_equalised then
+    --                 focus.focus_autoresize()
+    --             else
+    --                 focus.focus_equalise()
+    --             end
+    --             is_equalised = not is_equalised
+    --         end, { desc = "Equalise the splits", silent = true })
+    --         vim.keymap.set("n", "<c-s><c-m>", function()
+    --             if is_maximised then
+    --                 focus.focus_equalise()
+    --                 focus.focus_autoresize()
+    --             else
+    --                 focus.focus_maximise()
+    --             end
+    --             is_maximised = not is_maximised
+    --         end, { desc = "Maximise the focussed window", silent = true })
+    --     end,
+    --     enabled = not variables.is_vscode,
+    --     event = {
+    --         "BufNewFile",
+    --         "BufReadPost",
+    --     },
+    --     keys = {
+    --         { "<c-s><c-t>", desc = "Toggle focus on and off again", mode = "n" },
+    --         { "<c-s><c-e>", desc = "Equalise the splits",           mode = "n" },
+    --         { "<c-s><c-m>", desc = "Maximise the focussed window",  mode = "n" },
+    --     },
+    --     opts = {
+    --         ui = {
+    --             cursorline = false,
+    --             signcolumn = false,
+    --         },
+    --     },
+    --     version = false,
+    -- },
+
     {
         "sindrets/winshift.nvim",
         cmd = {

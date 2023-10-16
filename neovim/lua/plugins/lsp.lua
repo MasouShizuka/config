@@ -177,9 +177,44 @@ return {
 
     {
         "nvimtools/none-ls.nvim",
-        config = function(_, opts)
+        dependencies = {
+            {
+                "jay-babu/mason-null-ls.nvim",
+                cmd = {
+                    "NullLsInstall",
+                    "NullLsUninstall",
+                },
+                dependencies = {
+                    "williamboman/mason.nvim",
+                },
+                opts = function()
+                    local handlers = {
+                        function()
+                            -- disables automatic setup of all null-ls sources
+                        end,
+                    }
+                    for null_ls_builtin, setup in pairs(variables.null_ls_builtins(require("null-ls"))) do
+                        handlers[null_ls_builtin] = setup
+                    end
+
+                    return {
+                        ensure_installed = variables.null_ls_builtins_list,
+                        automatic_installation = true,
+                        handlers = handlers,
+                    }
+                end,
+            },
+
+            "nvim-lua/plenary.nvim",
+        },
+        enabled = not variables.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        opts = function()
             -- local augroup = vim.api.nvim_create_augroup("LspAutoFormat", {})
-            require("null-ls").setup({
+            return {
                 -- 保存时自动格式化
                 -- on_attach = function(client, bufnr)
                 --     if client.supports_method("textDocument/formatting") then
@@ -193,43 +228,8 @@ return {
                 --     end
                 -- end,
                 sources = {},
-            })
+            }
         end,
-        dependencies = {
-            {
-                "jay-babu/mason-null-ls.nvim",
-                cmd = {
-                    "NullLsInstall",
-                    "NullLsUninstall",
-                },
-                config = function(_, opts)
-                    local handlers = {
-                        function()
-                            -- disables automatic setup of all null-ls sources
-                        end,
-                    }
-                    for null_ls_builtin, setup in pairs(variables.null_ls_builtins(require("null-ls"))) do
-                        handlers[null_ls_builtin] = setup
-                    end
-
-                    require("mason-null-ls").setup({
-                        ensure_installed = variables.null_ls_builtins_list,
-                        automatic_installation = true,
-                        handlers = handlers,
-                    })
-                end,
-                dependencies = {
-                    "williamboman/mason.nvim",
-                },
-            },
-
-            "nvim-lua/plenary.nvim",
-        },
-        enabled = not variables.is_vscode,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
-        },
     },
 
     {
@@ -399,16 +399,11 @@ return {
                     "hrsh7th/cmp-nvim-lsp",
 
                     {
-                        "utilyre/barbecue.nvim",
-                        dependencies = {
-                            "nvim-tree/nvim-web-devicons",
-                            "SmiteshP/nvim-navic",
-                        },
-                        name = "barbecue",
+                        "SmiteshP/nvim-navic",
                         opts = {
-                            attach_navic = false, -- prevent barbecue from automatically attaching nvim-navic
+                            icons = variables.icons.kinds,
+                            separator = "  ",
                         },
-                        version = "*",
                     },
 
                     "williamboman/mason.nvim",

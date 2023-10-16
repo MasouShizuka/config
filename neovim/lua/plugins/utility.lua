@@ -27,9 +27,9 @@ return {
             vim.opt.fillchars:append({
                 eob = " ",
                 fold = " ",
-                foldopen = "",
-                foldsep = " ",
-                foldclose = "",
+                foldclose = variables.icons.fold.FoldClosed,
+                foldopen = variables.icons.fold.FoldOpened,
+                foldsep = variables.icons.fold.FoldSeparator,
             })
             vim.opt.foldcolumn = "1"
             vim.opt.foldenable = true
@@ -81,22 +81,6 @@ return {
         end,
         dependencies = {
             "kevinhwang91/promise-async",
-
-            {
-                "luukvbaal/statuscol.nvim",
-                config = function(_, opts)
-                    local builtin = require("statuscol.builtin")
-                    require("statuscol").setup({
-                        ft_ignore = variables.skip_filetype_list3,
-                        segments = {
-                            { text = { builtin.foldfunc },      click = "v:lua.ScFa" },
-                            { text = { "%s" },                  click = "v:lua.ScSa", sign = { auto = false } },
-                            { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
-                        },
-                    })
-                end,
-            },
-
             "nvim-treesitter/nvim-treesitter",
         },
         enabled = not variables.is_vscode,

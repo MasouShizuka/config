@@ -5,7 +5,9 @@ local M = {}
 ---@param show_error? boolean Whether or not to show an unsuccessful command as an error to the user
 ---@return string|nil # The result of a successfully executed command or nil
 function M.cmd(cmd, show_error)
-    if type(cmd) == "string" then cmd = { cmd } end
+    if type(cmd) == "string" then
+        cmd = { cmd }
+    end
     local result = vim.fn.system(cmd)
     local success = vim.api.nvim_get_vvar("shell_error") == 0
     if not success and (show_error == nil or show_error) then
@@ -17,7 +19,9 @@ end
 --- Trigger an AstroNvim user event
 ---@param event string The event name to be appended to Astro
 function M.event(event)
-    vim.schedule(function() vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false }) end)
+    vim.schedule(function()
+        vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false })
+    end)
 end
 
 function M.diffthis()
@@ -67,7 +71,6 @@ function M.extra_view_toggle(update, opts)
     if type(height) == "function" then
         height = config.height()
     end
-
     local width = config.width
     if type(width) == "function" then
         width = config.width()
@@ -98,7 +101,7 @@ function M.extra_view_toggle(update, opts)
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
     vim.api.nvim_set_option_value("buflisted", false, { buf = buf })
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
-    vim.api.nvim_set_option_value("filetype", "nvim-docs-view", { buf = buf })
+    vim.api.nvim_set_option_value("filetype", config.filetype, { buf = buf })
     vim.api.nvim_set_option_value("swapfile", false, { buf = buf })
 
     if not config.focus then
@@ -231,12 +234,6 @@ function M.fix_cellwidths(cica)
     end
 
     vim.fn.setcellwidths(cellwidths)
-end
-
-function M.get_highlight_color(name, val)
-    local hl = vim.api.nvim_get_hl(0, { name = name })
-
-    return string.format("#%06x", hl[val])
 end
 
 --- Open a URL under the cursor with the current operating system

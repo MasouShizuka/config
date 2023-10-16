@@ -149,14 +149,12 @@ RunWait("komorebic.exe identify-tray-application exe `"copyq.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"QQ.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"RemindMe.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"ShareX.exe`"", , "Hide")
-RunWait("komorebic.exe identify-tray-application exe `"Steam++.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"WeChat.exe`"", , "Hide")
 
 RunWait("komorebic.exe identify-border-overflow-application exe `"cloudmusic.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"Code.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"neovide.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"QQ.exe`"", , "Hide")
-RunWait("komorebic.exe identify-border-overflow-application exe `"vivaldi.exe`"", , "Hide")
 RunWait("komorebic.exe identify-border-overflow-application exe `"WeChat.exe`"", , "Hide")
 
 RunWait("komorebic.exe float-rule class `"_WwB`"", , "Hide")
@@ -362,6 +360,6 @@ send_to_monitor(ThisHotkey) {
 }
 
 !+b:: {
-    ; Run("pythonw %A_ScriptDir%/yasb/src/main.py",  , "Hide")
+    ; Run(Format("pythonw {}/yasb/src/main.py", A_ScriptDir),  , "Hide")
     Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
 }

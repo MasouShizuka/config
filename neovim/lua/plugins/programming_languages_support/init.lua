@@ -1,13 +1,9 @@
-local variables = require("config.variables")
-
 local M = {}
 
-local current_path = variables.config_path .. "/lua/plugins/programming_languages_support"
-for file in io.popen(("ls -pa %s | grep -v /"):format(current_path)):lines() do
-    local file_without_ext = file:match("^(.+).lua$")
-    if file_without_ext and file_without_ext ~= "init" then
-        local current_module = "plugins.programming_languages_support"
-        for _, plugin in ipairs(require(current_module .. "." .. file_without_ext)) do
+for _, path in ipairs(vim.api.nvim_get_runtime_file("lua/plugins/programming_languages_support/*.lua", true)) do
+    local file = vim.fn.fnamemodify(path, ":t:r")
+    if file ~= "init" then
+        for _, plugin in ipairs(require("plugins.programming_languages_support" .. "." .. file)) do
             table.insert(M, plugin)
         end
     end

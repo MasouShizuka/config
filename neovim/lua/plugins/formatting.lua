@@ -20,11 +20,14 @@ return {
     },
 
     {
-        "lukas-reineke/indent-blankline.nvim",
+        "nvimdev/indentmini.nvim",
         enabled = not variables.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
+        },
+        opts = {
+            char = "│",
         },
     },
 }

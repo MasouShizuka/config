@@ -78,6 +78,11 @@ function M.load_icons()
             info = " ",
             warn = " ",
         },
+        fold = {
+            FoldClosed = "",
+            FoldOpened = "",
+            FoldSeparator = " ",
+        },
         git = {
             added     = " ",
             conflict  = " ",
