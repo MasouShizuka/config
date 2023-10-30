@@ -2,15 +2,15 @@ local utils = require("config.utils")
 local variables = require("config.variables")
 
 -- toggle
-local ok, wk = pcall(require, "which-key")
-if ok then
-    wk.register({
+local is_which_key_available, which_key = pcall(require, "which-key")
+if is_which_key_available then
+    which_key.register({
         mode = "n",
         ["<leader>c"] = {
             name = "+user commands",
         },
     })
-    wk.register({
+    which_key.register({
         mode = "n",
         ["<leader>ct"] = {
             name = "+toggle",
@@ -57,13 +57,11 @@ if not variables.is_vscode then
     end
     vim.api.nvim_create_user_command("ToggleWrap", toggle_wrap, { desc = "Toggle wrap" })
     vim.keymap.set("n", "<leader>ctw", toggle_wrap, { desc = "Toggle wrap", silent = true })
-end
 
-if not variables.is_vscode then
     -- diff
-    local ok, wk = pcall(require, "which-key")
-    if ok then
-        wk.register({
+    is_which_key_available, which_key = pcall(require, "which-key")
+    if is_which_key_available then
+        which_key.register({
             mode = "n",
             ["<leader>cd"] = {
                 name = "+diff",

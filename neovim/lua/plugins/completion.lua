@@ -43,7 +43,7 @@ return {
                         end
                     end),
                     ["<cr>"] = cmp.mapping.confirm({ select = false }),
-                    ["<tab>"] = cmp.mapping.confirm({ select = true }),
+                    -- ["<tab>"] = cmp.mapping.confirm({ select = true }),
                 }),
                 snippet = {
                     expand = function(args)
@@ -82,7 +82,10 @@ return {
                 completion = {
                     completeopt = "menu,menuone,noinsert,noselect",
                 },
-                sources = { { name = "buffer" } },
+                sources = {
+                    { name = "cmdline_history" },
+                    { name = "buffer" },
+                },
             })
 
             cmp.setup.cmdline(":", {
@@ -90,15 +93,16 @@ return {
                 completion = {
                     completeopt = "menu,menuone,noinsert,noselect",
                 },
-                sources = cmp.config.sources(
-                    { { name = "path" } }, {
-                        {
-                            name = "cmdline",
-                            option = {
-                                ignore_cmds = { "Man", "!" },
-                            },
+                sources = {
+                    { name = "path" },
+                    { name = "cmdline_history" },
+                    {
+                        name = "cmdline",
+                        option = {
+                            ignore_cmds = { "Man", "!" },
                         },
-                    }),
+                    },
+                },
             })
 
             require("cmp").setup.filetype({
@@ -125,6 +129,7 @@ return {
             })
         end,
         dependencies = {
+            "dmitmel/cmp-cmdline-history",
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-nvim-lsp",

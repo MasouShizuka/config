@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
@@ -82,6 +83,42 @@ return {
                 parent = function(state)
                     require("neo-tree.ui.renderer").focus_node(state, state.tree:get_node():get_parent_id())
                 end,
+                next_sibling = function(state)
+                    local function index_of(array, value)
+                        for i, v in ipairs(array) do
+                            if v == value then
+                                return i
+                            end
+                        end
+                        return nil
+                    end
+
+                    local node = state.tree:get_node()
+                    local siblings = state.tree:get_node(node:get_parent_id()):get_child_ids()
+                    if not node.is_last_child then
+                        local current_index = index_of(siblings, node.id)
+                        local next_index = siblings[current_index + 1]
+                        require("neo-tree.ui.renderer").focus_node(state, next_index)
+                    end
+                end,
+                prev_sibling = function(state)
+                    local function index_of(array, value)
+                        for i, v in ipairs(array) do
+                            if v == value then
+                                return i
+                            end
+                        end
+                        return nil
+                    end
+
+                    local node = state.tree:get_node()
+                    local siblings = state.tree:get_node(node:get_parent_id()):get_child_ids()
+                    local current_index = index_of(siblings, node.id)
+                    if current_index > 1 then
+                        local next_index = siblings[current_index - 1]
+                        require("neo-tree.ui.renderer").focus_node(state, next_index)
+                    end
+                end,
                 copy_selector = function(state)
                     local node = state.tree:get_node()
                     local filepath = node:get_id()
@@ -159,6 +196,8 @@ return {
                     ["o"] = "system_open",
                     ["D"] = "diff_files",
                     ["h"] = "parent",
+                    ["J"] = "next_sibling",
+                    ["K"] = "prev_sibling",
                     ["y"] = "copy_selector",
                 },
             },

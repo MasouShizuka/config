@@ -73,9 +73,9 @@ return {
     },
     enabled = not variables.is_vscode,
     init = function()
-        local ok, wk = pcall(require, "which-key")
-        if ok then
-            wk.register({
+        local is_which_key_available, which_key = pcall(require, "which-key")
+        if is_which_key_available then
+            which_key.register({
                 mode = "n",
                 ["<leader>d"] = {
                     name = "+dap",

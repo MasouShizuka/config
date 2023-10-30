@@ -19,7 +19,6 @@ vim.opt.clipboard = "unnamedplus"                                               
 vim.opt.fillchars:append({ eob = " " })                                            -- characters to use for displaying special items
 vim.opt.number = true                                                              -- print the line number in front of each line
 vim.opt.relativenumber = true                                                      -- show relative line number in front of each line
-vim.opt.signcolumn = "yes"                                                         -- when and how to display the sign column
 
 -- Completion
 vim.opt.completeopt = { "menu", "menuone", "noinsert", "noselect" }                -- options for Insert mode completion

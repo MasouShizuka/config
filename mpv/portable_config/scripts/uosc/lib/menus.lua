@@ -22,14 +22,20 @@ end
 
 ---@param opts? {submenu?: string; mouse_nav?: boolean; on_close?: string | string[]}
 function toggle_menu_with_items(opts)
-	if Menu:is_open('menu') then Menu:close()
-	else open_command_menu({type = 'menu', items = config.menu_items}, opts) end
+	if Menu:is_open('menu') then
+		Menu:close()
+	else
+		open_command_menu({type = 'menu', items = get_menu_items(), search_submenus = true}, opts)
+	end
 end
 
 ---@param options {type: string; title: string; list_prop: string; active_prop?: string; serializer: fun(list: any, active: any): MenuDataItem[]; on_select: fun(value: any); on_move_item?: fun(from_index: integer, to_index: integer, submenu_path: integer[]); on_delete_item?: fun(index: integer, submenu_path: integer[])}
 function create_self_updating_menu_opener(options)
 	return function()
-		if Menu:is_open(options.type) then Menu:close() return end
+		if Menu:is_open(options.type) then
+			Menu:close()
+			return
+		end
 		local list = mp.get_property_native(options.list_prop)
 		local active = options.active_prop and mp.get_property_native(options.active_prop) or nil
 		local menu
@@ -38,14 +44,22 @@ function create_self_updating_menu_opener(options)
 
 		local ignore_initial_list = true
 		local function handle_list_prop_change(name, value)
-			if ignore_initial_list then ignore_initial_list = false
-			else list = value update() end
+			if ignore_initial_list then
+				ignore_initial_list = false
+			else
+				list = value
+				update()
+			end
 		end
 
 		local ignore_initial_active = true
 		local function handle_active_prop_change(name, value)
-			if ignore_initial_active then ignore_initial_active = false
-			else active = value update() end
+			if ignore_initial_active then
+				ignore_initial_active = false
+			else
+				active = value
+				update()
+			end
 		end
 
 		local initial_items, selected_index = options.serializer(list, active)
@@ -55,19 +69,19 @@ function create_self_updating_menu_opener(options)
 		menu = Menu:open(
 			{type = options.type, title = options.title, items = initial_items, selected_index = selected_index},
 			options.on_select, {
-			on_open = function()
-				mp.observe_property(options.list_prop, 'native', handle_list_prop_change)
-				if options.active_prop then
-					mp.observe_property(options.active_prop, 'native', handle_active_prop_change)
-				end
-			end,
-			on_close = function()
-				mp.unobserve_property(handle_list_prop_change)
-				mp.unobserve_property(handle_active_prop_change)
-			end,
-			on_move_item = options.on_move_item,
-			on_delete_item = options.on_delete_item,
-		})
+				on_open = function()
+					mp.observe_property(options.list_prop, 'native', handle_list_prop_change)
+					if options.active_prop then
+						mp.observe_property(options.active_prop, 'native', handle_active_prop_change)
+					end
+				end,
+				on_close = function()
+					mp.unobserve_property(handle_list_prop_change)
+					mp.unobserve_property(handle_active_prop_change)
+				end,
+				on_move_item = options.on_move_item,
+				on_delete_item = options.on_delete_item,
+			})
 	end
 end
 
@@ -166,7 +180,10 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 		return
 	end
 
-	local files, directories = read_directory(directory.path, opts.allowed_types)
+	local files, directories = read_directory(directory.path, {
+		types = opts.allowed_types,
+		hidden = options.show_hidden_files,
+	})
 	local is_root = not directory.dirname
 	local path_separator = path_separator(directory.path)
 
@@ -219,8 +236,11 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 			open_drives_menu(function(drive_path)
 				open_file_navigation_menu(drive_path, handle_select, inheritable_options)
 			end, {
-				type = inheritable_options.type, title = inheritable_options.title, selected_path = directory.path,
-				on_open = opts.on_open, on_close = opts.on_close,
+				type = inheritable_options.type,
+				title = inheritable_options.title,
+				selected_path = directory.path,
+				on_open = opts.on_open,
+				on_close = opts.on_close,
 			})
 			return
 		end
@@ -232,7 +252,7 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 			return
 		end
 
-		if info.is_dir and not meta.modifiers.ctrl then
+		if info.is_dir and not meta.modifiers.alt then
 			--  Preselect directory we are coming from
 			if is_to_parent then
 				inheritable_options.selected_path = directory.path
@@ -249,7 +269,9 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 	end
 
 	local menu_data = {
-		type = opts.type, title = opts.title or directory.basename .. path_separator, items = items,
+		type = opts.type,
+		title = opts.title or directory.basename .. path_separator,
+		items = items,
 		selected_index = selected_index,
 	}
 	local menu_options = {on_open = opts.on_open, on_close = opts.on_close, on_back = handle_back}
@@ -289,4 +311,233 @@ function open_drives_menu(handle_select, opts)
 		{type = opts.type, title = opts.title or lang._submenu_file_browser_title, items = items, selected_index = selected_index},
 		handle_select
 	)
+end
+
+-- On demand menu items loading
+do
+	local items = nil
+	function get_menu_items()
+		if items then return items end
+
+		local input_conf_property = mp.get_property_native('input-conf')
+		local input_conf = input_conf_property == '' and '~~/input.conf' or input_conf_property
+		local input_conf_path = mp.command_native({'expand-path', input_conf})
+		local input_conf_meta, meta_error = utils.file_info(input_conf_path)
+
+		-- File doesn't exist
+		if not input_conf_meta or not input_conf_meta.is_file then
+			items = create_default_menu_items()
+			return items
+		end
+
+		local main_menu = {items = {}, items_by_command = {}}
+		local by_id = {}
+
+		for line in io.lines(input_conf_path) do
+			local key, command, comment = string.match(line, '%s*([%S]+)%s+(.-)%s+#%s*(.-)%s*$')
+			local title = ''
+
+			if comment then
+				local comments = split(comment, '#')
+				local titles = itable_filter(comments, function(v, i) return v:match('^!') or v:match('^menu:') end)
+				if titles and #titles > 0 then
+					title = titles[1]:match('^!%s*(.*)%s*') or titles[1]:match('^menu:%s*(.*)%s*')
+				end
+			end
+
+			if title ~= '' then
+				local is_dummy = key:sub(1, 1) == '#'
+				local submenu_id = ''
+				local target_menu = main_menu
+				local title_parts = split(title or '', ' *> *')
+
+				for index, title_part in ipairs(#title_parts > 0 and title_parts or {''}) do
+					if index < #title_parts then
+						submenu_id = submenu_id .. title_part
+
+						if not by_id[submenu_id] then
+							local items = {}
+							by_id[submenu_id] = {items = items, items_by_command = {}}
+							target_menu.items[#target_menu.items + 1] = {title = title_part, items = items}
+						end
+
+						target_menu = by_id[submenu_id]
+					else
+						if command == 'ignore' then break end
+						-- If command is already in menu, just append the key to it
+						if key ~= '#' and command ~= '' and target_menu.items_by_command[command] then
+							local hint = target_menu.items_by_command[command].hint
+							target_menu.items_by_command[command].hint = hint and hint .. ', ' .. key or key
+						else
+							-- Separator
+							if title_part:sub(1, 3) == '---' then
+								local last_item = target_menu.items[#target_menu.items]
+								if last_item then last_item.separator = true end
+							else
+								local item = {
+									title = title_part,
+									hint = not is_dummy and key or nil,
+									value = command,
+								}
+								if command == '' then
+									item.selectable = false
+									item.muted = true
+									item.italic = true
+								else
+									target_menu.items_by_command[command] = item
+								end
+								target_menu.items[#target_menu.items + 1] = item
+							end
+						end
+					end
+				end
+			end
+		end
+
+		items = #main_menu.items > 0 and main_menu.items or create_default_menu_items()
+		return items
+	end
+end
+
+-- Adapted from `stats.lua`
+function get_keybinds_items()
+	local items = {}
+	local active = find_active_keybindings()
+
+	-- Convert to menu items
+	for _, bind in pairs(active) do
+		items[#items + 1] = {title = bind.cmd, hint = bind.key, value = bind.cmd}
+	end
+
+	-- Sort
+	table.sort(items, function(a, b) return a.title < b.title end)
+
+	return #items > 0 and items or {
+		{
+			title = t('%s are empty', '`input-bindings`'),
+			selectable = false,
+			align = 'center',
+			italic = true,
+			muted = true,
+		},
+	}
+end
+
+function open_stream_quality_menu()
+	if Menu:is_open('stream-quality') then
+		Menu:close()
+		return
+	end
+
+	local ytdl_format = mp.get_property_native('ytdl-format')
+	local items = {}
+
+	for _, height in ipairs(config.stream_quality_options) do
+		local format = 'bestvideo[height<=?' .. height .. ']+bestaudio/best[height<=?' .. height .. ']'
+		items[#items + 1] = {title = height .. 'p', value = format, active = format == ytdl_format}
+	end
+
+	Menu:open({type = 'stream-quality', title = lang._stream_quality_submenu_title, items = items}, function(format)
+		mp.set_property('ytdl-format', format)
+
+		-- Reload the video to apply new format
+		-- This is taken from https://github.com/jgreco/mpv-youtube-quality
+		-- which is in turn taken from https://github.com/4e6/mpv-reload/
+		local duration = mp.get_property_native('duration')
+		local time_pos = mp.get_property('time-pos')
+
+		mp.command('playlist-play-index current')
+
+		-- Tries to determine live stream vs. pre-recorded VOD. VOD has non-zero
+		-- duration property. When reloading VOD, to keep the current time position
+		-- we should provide offset from the start. Stream doesn't have fixed start.
+		-- Decent choice would be to reload stream from it's current 'live' position.
+		-- That's the reason we don't pass the offset when reloading streams.
+		if duration and duration > 0 then
+			local function seeker()
+				mp.commandv('seek', time_pos, 'absolute')
+				mp.unregister_event(seeker)
+			end
+			mp.register_event('file-loaded', seeker)
+		end
+	end)
+end
+
+function open_open_file_menu()
+	if Menu:is_open('open-file') then
+		Menu:close()
+		return
+	end
+
+	local directory
+	local active_file
+
+	if state.path == nil or is_protocol(state.path) then
+		local serialized = serialize_path(get_default_directory())
+		if serialized then
+			directory = serialized.path
+			active_file = nil
+		end
+	else
+		local serialized = serialize_path(state.path)
+		if serialized then
+			directory = serialized.dirname
+			active_file = serialized.path
+		end
+	end
+
+	if not directory then
+		msg.error('Couldn\'t serialize path "' .. state.path .. '".')
+		return
+	end
+
+	-- Update active file in directory navigation menu
+	local menu = nil
+	local function handle_file_loaded()
+		if menu and menu:is_alive() then
+			menu:activate_one_value(normalize_path(mp.get_property_native('path')))
+		end
+	end
+
+	menu = open_file_navigation_menu(
+		directory,
+		function(path) mp.commandv('loadfile', path) end,
+		{
+			type = 'open-file',
+			allowed_types = config.types.media,
+			active_path = active_file,
+			on_open = function() mp.register_event('file-loaded', handle_file_loaded) end,
+			on_close = function() mp.unregister_event(handle_file_loaded) end,
+		}
+	)
+end
+
+---@param opts {name: string; prop: string; allowed_types: string[]}
+function create_track_loader_menu_opener(opts)
+	local menu_type = 'load-' .. opts.name
+
+	return function()
+		if Menu:is_open(menu_type) then
+			Menu:close()
+			return
+		end
+
+		local path = state.path
+		if path then
+			if is_protocol(path) then
+				path = false
+			else
+				local serialized_path = serialize_path(path)
+				path = serialized_path ~= nil and serialized_path.dirname or false
+			end
+		end
+		if not path then
+			path = get_default_directory()
+		end
+		open_file_navigation_menu(
+			path,
+			function(path) mp.commandv(opts.prop .. '-add', path) end,
+			{type = menu_type, title = lang._import_id_menu .. opts.name, allowed_types = opts.allowed_types}
+		)
+	end
 end

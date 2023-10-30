@@ -216,14 +216,16 @@ hide_taskbar() {
 keyboard_layout_list := [0x04090409, 0x08040804]
 
 get_keyboard_layout(title := "A") {
-    hwnd := WinGetID("A")
+    try {
+        hwnd := WinGetID("A")
 
-    DetectHiddenWindows(true)
-    pid := DllCall("GetWindowThreadProcessId", "UInt", hwnd, "UInt", 0)
-    keyboard_layout := DllCall("GetKeyboardLayout", "UInt", pid, "UInt")
-    DetectHiddenWindows(false)
+        DetectHiddenWindows(true)
+        pid := DllCall("GetWindowThreadProcessId", "UInt", hwnd, "UInt", 0)
+        keyboard_layout := DllCall("GetKeyboardLayout", "UInt", pid, "UInt")
+        DetectHiddenWindows(false)
 
-    return keyboard_layout
+        return keyboard_layout
+    }
 }
 
 set_keyboard_layout(keyboard_layout) {

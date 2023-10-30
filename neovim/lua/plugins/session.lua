@@ -14,18 +14,20 @@ return {
             "nvim-lua/plenary.nvim",
         },
         enabled = not variables.is_vscode,
-        event = {
-            "VimEnter",
-        },
         init = function()
-            local ok, wk = pcall(require, "which-key")
-            if ok then
-                wk.register({
+            local is_which_key_available, which_key = pcall(require, "which-key")
+            if is_which_key_available then
+                which_key.register({
                     mode = "n",
                     ["<leader>s"] = {
                         name = "+neovim-session-manager",
                     },
                 })
+            end
+
+            -- 判断是否启动 neovim-session-manager
+            if vim.fn.argc() == 0 then
+                require("session_manager")
             end
         end,
         keys = {
@@ -146,12 +148,15 @@ return {
     --         })
     --     end,
     --     enabled = not variables.is_vscode,
+    --     event = {
+    --         "VimEnter",
+    --     },
     --     init = function()
     --         vim.g.path_replacer = "__"
     --         vim.g.colon_replacer = "++"
     --
-    --         local ok, wk = pcall(require, "which-key")
-    --         if ok then
+    --         local is_which_key_available, which_key = pcall(require, "which-key")
+    --         if is_which_key_available then
     --             wk.register({
     --                 mode = "n",
     --                 ["<leader>s"] = {
@@ -165,7 +170,6 @@ return {
     --         { "<leader>sl", desc = "Session load",   mode = "n" },
     --         { "<leader>sd", desc = "Session delete", mode = "n" },
     --     },
-    --     lazy = false,
     --     opts = {
     --         options = {
     --             "binary",

@@ -16,9 +16,9 @@ return {
             { "sn", desc = "Update n_lines",                             mode = { "n", "x" } },
         },
         init = function()
-            local ok, wk = pcall(require, "which-key")
-            if ok then
-                wk.register({
+            local is_which_key_available, which_key = pcall(require, "which-key")
+            if is_which_key_available then
+                which_key.register({
                     mode = "n",
                     ["s"] = {
                         name = "+mini.surround",
@@ -87,30 +87,7 @@ return {
             require("nvim-treesitter.configs").setup(opts)
         end,
         dependencies = {
-            {
-                "HiPhish/rainbow-delimiters.nvim",
-                config = function(_, opts)
-                    require("rainbow-delimiters.setup").setup(opts)
-                end,
-                opts = {
-                    highlight = {
-                        -- "RainbowDelimiterRed",
-                        -- "RainbowDelimiterYellow",
-                        -- "RainbowDelimiterBlue",
-                        -- "RainbowDelimiterOrange",
-                        -- "RainbowDelimiterGreen",
-                        -- "RainbowDelimiterViolet",
-                        -- "RainbowDelimiterCyan",
-                        "red",
-                        "yellow",
-                        "blue",
-                        "orange",
-                        "green",
-                        "purple",
-                        "cyan",
-                    },
-                },
-            },
+            "HiPhish/rainbow-delimiters.nvim",
         },
         enabled = not variables.is_vscode,
         event = {
@@ -124,6 +101,8 @@ return {
         opts = {
             ensure_installed = {
                 "bash",
+                "bibtex",
+                "latex",
                 "lua",
                 "markdown",
                 "markdown_inline",

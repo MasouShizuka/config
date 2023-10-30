@@ -41,6 +41,7 @@ function M.exists(path)
     return ok
 end
 
+-- https://github.com/amrbashir/nvim-docs-view
 function M.extra_view_toggle(update, opts)
     local default_config = {
         filetype = "extra-view",
@@ -234,6 +235,40 @@ function M.fix_cellwidths(cica)
     end
 
     vim.fn.setcellwidths(cellwidths)
+end
+
+function M.get_char_from_string(str)
+    local char_list = {}
+    local char_count = 0
+
+    local len_in_byte = #str
+    local i = 1
+    while (i <= len_in_byte) do
+        local cur_byte = string.byte(str, i)
+        local byte_count = 1;
+        if cur_byte > 0 and cur_byte <= 127 then
+            byte_count = 1
+        elseif cur_byte >= 192 and cur_byte < 223 then
+            byte_count = 2
+        elseif cur_byte >= 224 and cur_byte < 239 then
+            byte_count = 3
+        elseif cur_byte >= 240 and cur_byte <= 247 then
+            byte_count = 4
+        end
+
+        local char = string.sub(str, i, i + byte_count - 1)
+        char_list[#char_list+1] = char
+
+        i = i + byte_count
+        char_count = char_count + 1
+    end
+
+    return char_count, char_list
+end
+
+function M.get_highlight(name, val)
+    local hl = vim.api.nvim_get_hl(0, { name = name })
+    return string.format("#%06x", hl[val])
 end
 
 --- Open a URL under the cursor with the current operating system

@@ -2,8 +2,8 @@ return {
     {
         "kevinhwang91/nvim-hlslens",
         config = function(_, opts)
-            local ok, _ = pcall(require, "scrollbar")
-            if ok then
+            local is_scrollbar_available, _ = pcall(require, "scrollbar")
+            if is_scrollbar_available then
                 require("scrollbar.handlers.search").setup(opts)
             else
                 require("hlslens").setup(opts)

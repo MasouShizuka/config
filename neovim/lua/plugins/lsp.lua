@@ -12,8 +12,8 @@ return {
         enabled = not variables.is_vscode,
         keys = {
             { "gd", function() vim.api.nvim_command("Glance definitions") end,      desc = "Glance definitions",      mode = "n" },
-            { "ge", function() vim.api.nvim_command("Glance references") end,       desc = "Glance references",       mode = "n" },
             { "gi", function() vim.api.nvim_command("Glance implementations") end,  desc = "Glance implementations",  mode = "n" },
+            { "gr", function() vim.api.nvim_command("Glance references") end,       desc = "Glance references",       mode = "n" },
             { "gy", function() vim.api.nvim_command("Glance type_definitions") end, desc = "Glance type_definitions", mode = "n" },
         },
         opts = function()
@@ -104,9 +104,9 @@ return {
         },
         enabled = not variables.is_vscode,
         init = function()
-            local ok, wk = pcall(require, "which-key")
-            if ok then
-                wk.register({
+            local is_which_key_available, which_key = pcall(require, "which-key")
+            if is_which_key_available then
+                which_key.register({
                     mode = "n",
                     ["<leader>x"] = {
                         name = "+trouble",
@@ -237,7 +237,7 @@ return {
         config = function(_, opts)
             vim.lsp.set_log_level("OFF")
 
-            -- Floating windows borders
+            -- Borders
             local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
             function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
                 opts = opts or {}
@@ -247,18 +247,17 @@ return {
 
             -- Customizing how diagnostics are displayed
             vim.diagnostic.config({
+                underline = true,
+                update_in_insert = false,
                 virtual_text = {
                     spacing = 4,
                     source = "if_many",
-                    prefix = "●", -- Could be '●', '▎', 'x'
+                    prefix = "●",
                     -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
                     -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
                     -- prefix = "icons",
                 },
-                signs = true,
-                underline = true,
-                update_in_insert = false,
-                severity_sort = false,
+                severity_sort = true,
             })
 
             -- Change diagnostic symbols in the sign column (gutter)
@@ -327,7 +326,7 @@ return {
                     vim.keymap.set({ "n", "x" }, variables.keymap["<c-;>"], vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code action", silent = true })
 
                     -- 由 glance 设置
-                    -- vim.keymap.set("n", "ge", vim.lsp.buf.references, { buffer = ev.buf, desc = "Go to references", silent = true })
+                    -- vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = ev.buf, desc = "Go to references", silent = true })
 
                     vim.keymap.set({ "n", "x" }, "<leader>f", variables.format, { buffer = ev.buf, desc = "Format", silent = true })
                 end,
@@ -367,14 +366,6 @@ return {
                             require("cmp_nvim_lsp").default_capabilities(),
                             opts.capabilities or {}
                         ),
-                        on_attach = function(client, bufnr)
-                            if client.server_capabilities["documentSymbolProvider"] then
-                                local ok, navic = pcall(require, "nvim-navic")
-                                if ok then
-                                    navic.attach(client, bufnr)
-                                end
-                            end
-                        end,
                     }
 
                     local handlers = {
@@ -397,15 +388,6 @@ return {
                 end,
                 dependencies = {
                     "hrsh7th/cmp-nvim-lsp",
-
-                    {
-                        "SmiteshP/nvim-navic",
-                        opts = {
-                            icons = variables.icons.kinds,
-                            separator = "  ",
-                        },
-                    },
-
                     "williamboman/mason.nvim",
                 },
             },

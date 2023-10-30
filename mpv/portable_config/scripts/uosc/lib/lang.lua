@@ -21,6 +21,7 @@ lang = {
 	_cm_icc_toggle = '切换 自动校色',
 	_cm_corpts_toggle = '切换 时间码解析模式',
 	_cm_tools = '工具',
+	_cm_keybinding = '※ 按键绑定列表',
 	_cm_stats_toggle = '开关 常驻统计信息',
 	_cm_console_on = '显示控制台',
 	_cm_border_toggle = '切换 窗口边框',
@@ -42,6 +43,8 @@ lang = {
 	_import_id_menu = '导入 ',
 
 	-- _menu_item_empty_title = '空',
+	_menu_search = '输入并按 Ctrl+ENTER 进行搜索',
+	_menu_search2 = '输入以搜索',
 
 	_sid_submenu_title = '字幕轨列表',
 	_aid_submenu_title = '音频轨列表',

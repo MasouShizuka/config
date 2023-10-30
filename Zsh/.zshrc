@@ -98,30 +98,28 @@ setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history 
 setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
 
 precmd() {
-    # Write the last command if successful (or closed with signal 2), using
-    # the history buffered by my_zshaddhistory().
-    # if [[ ($? == 0 || $? == 130) && -n ${LASTHIST//[[:space:]]/} ]] ; then
-    #     print -sr -- ${LASTHIST%%$'\n'}
-    # fi
-
     # 添加命令到历史文件后删除之前相同的历史命令
-    # if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
+    # if [[ -n ${LASTHIST//[[:space:]]/} ]]; then
     #     LASTHIST_SED="$(<<< ${LASTHIST%%$'\n'} sed -e 's`[][\\/.*^$]`\\&`g')"
     #     sed -i "\$!{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
     # fi
 
-    # 添加命令到历史文件前删除相同的历史命令，并手动追加到历史文件中，防止文件乱码
-    if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
-        LASTHIST_SLASH=${LASTHIST//\\//}
+    # Write the last command if successful (or closed with signal 2), using
+    # the history buffered by zshaddhistory().
+    if [[ ($? == 0 || $? == 130)]]; then
+        # 添加命令到历史文件前删除相同的历史命令，并手动追加到历史文件中，防止文件乱码
+        if [[ -n ${LASTHIST//[[:space:]]/} ]]; then
+            LASTHIST_SLASH=${LASTHIST//\\//}
 
-        LASTHIST_TRIM=${LASTHIST_SLASH%%$'\n'}
-        LASTHIST_TRIM="${LASTHIST_TRIM#"${LASTHIST_TRIM%%[![:space:]]*}"}"
-        LASTHIST_TRIM="${LASTHIST_TRIM%"${LASTHIST_TRIM##*[![:space:]]}"}"
+            LASTHIST_TRIM=${LASTHIST_SLASH%%$'\n'}
+            LASTHIST_TRIM="${LASTHIST_TRIM#"${LASTHIST_TRIM%%[![:space:]]*}"}"
+            LASTHIST_TRIM="${LASTHIST_TRIM%"${LASTHIST_TRIM##*[![:space:]]}"}"
 
-        LASTHIST_SED="$(<<< $LASTHIST_TRIM sed -e 's`[][\\/.*^$]`\\&`g')"
-        sed -i "{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
+            LASTHIST_SED="$(<<< $LASTHIST_TRIM sed -e 's`[][\\/.*^$]`\\&`g')"
+            sed -i "{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
 
-        echo "$LASTHIST_TRIM" >> "$HISTFILE"
+            echo "$LASTHIST_TRIM" >> "$HISTFILE"
+        fi
     fi
 }
 

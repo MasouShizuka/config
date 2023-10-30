@@ -58,8 +58,8 @@ if variables.is_vscode then
 
     -- 转到
     vim.keymap.set("n", "gD", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.revealDeclaration" }) end, { silent = true })
-    vim.keymap.set("n", "ge", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToReferences" }) end, { silent = true })
     vim.keymap.set("n", "gi", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToImplementation" }) end, { silent = true })
+    vim.keymap.set("n", "gr", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToReferences" }) end, { silent = true })
     vim.keymap.set("n", "gy", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToTypeDefinition" }) end, { silent = true })
 
     -- 折叠
@@ -109,6 +109,10 @@ else
     vim.keymap.set("c", "<up>", "<c-p>", { desc = "Up", silent = true })
     vim.keymap.set("c", "<c-j>", "<c-n>", { desc = "Down", silent = true })
     vim.keymap.set("c", "<c-k>", "<c-p>", { desc = "Up", silent = true })
+
+    -- 新行保持缩进
+    -- 由 ultimate-autopair 设置
+    -- vim.keymap.set("i", "<cr>", "<cr>x<bs>", { desc = "Enter", silent = true })
 
     -- 折行时小步上下移动
     vim.keymap.set("i", "<down>", "<c-o>gj", { desc = "Down", silent = true })
@@ -235,9 +239,9 @@ else
             path = path:gsub("\\", "/")
         end
 
-        local ok, _ = pcall(require, "toggleterm")
+        local is_toggleterm_available, _ = pcall(require, "toggleterm")
         local filetype = vim.bo.filetype
-        if ok then
+        if is_toggleterm_available then
             if variables.is_windows then
                 vim.opt.shellslash = true
             end

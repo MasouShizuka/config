@@ -1,32 +1,31 @@
-import pytz
-from core.widgets.base import BaseWidget
-from core.validation.widgets.yasb.clock import VALIDATION_SCHEMA
-from PyQt6.QtWidgets import QLabel
 from datetime import datetime
-from tzlocal import get_localzone_name
 from itertools import cycle
-from locale import LC_TIME, setlocale
+
+import pytz
+from PyQt6.QtWidgets import QLabel
+from tzlocal import get_localzone_name
+
+from core.validation.widgets.yasb.clock import VALIDATION_SCHEMA
+from core.widgets.base import BaseWidget
 
 
 class ClockWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
 
     def __init__(
-            self,
-            label: str,
-            label_alt: str,
-            update_interval: int,
-            language: str,
-            timezones: list[str],
-            status_icons: dict[str, str],
-            callbacks: dict[str, str],
+        self,
+        label: str,
+        label_alt: str,
+        update_interval: int,
+        timezones: list[str],
+        status_icons: dict[str, str],
+        callbacks: dict[str, str],
     ):
         super().__init__(update_interval, class_name="clock-widget")
         self._status_icons = status_icons
-        setlocale(LC_TIME, language)
         self._active_tz = None
         self._timezones = cycle(timezones if timezones else [get_localzone_name()])
-        self._active_datetime_format_str = ''
+        self._active_datetime_format_str = ""
         self._active_datetime_format = None
 
         self._label_content = label
@@ -43,9 +42,9 @@ class ClockWidget(BaseWidget):
         self.register_callback("update_label", self._update_label)
         self.register_callback("next_timezone", self._next_timezone)
 
-        self.callback_left = callbacks['on_left']
-        self.callback_right = callbacks['on_right']
-        self.callback_middle = callbacks['on_middle']
+        self.callback_left = callbacks["on_left"]
+        self.callback_right = callbacks["on_right"]
+        self.callback_middle = callbacks["on_middle"]
         self.callback_timer = "update_label"
 
         self._label.show()
@@ -70,12 +69,18 @@ class ClockWidget(BaseWidget):
 
     def _update_label(self):
         active_label = self._label_alt if self._show_alt_label else self._label
-        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
+        active_label_content = (
+            self._label_alt_content if self._show_alt_label else self._label_content
+        )
 
         try:
-            datetime_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone(self._active_tz))
+            datetime_now = pytz.utc.localize(datetime.utcnow()).astimezone(
+                pytz.timezone(self._active_tz)
+            )
             active_label_content = datetime_now.strftime(active_label_content)
-            active_label_content = active_label_content.replace('{icon}', self._status_icons[f'icon_{datetime_now.hour % 12}'])
+            active_label_content = active_label_content.replace(
+                "{icon}", self._status_icons[f"icon_{datetime_now.hour % 12}"]
+            )
             active_label.setText(active_label_content)
         except Exception:
             active_label.setText(active_label_content)

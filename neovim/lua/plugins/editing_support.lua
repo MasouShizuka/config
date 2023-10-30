@@ -2,78 +2,13 @@ local variables = require("config.variables")
 
 return {
     {
-        "https://git.sr.ht/~nedia/auto-save.nvim",
-        dependencies = {
-            "echasnovski/mini.trailspace",
-        },
-        enabled = not variables.is_vscode,
-        event = {
-            "BufLeave",
-            "FocusLost",
-            "InsertLeave",
-            "TextChanged",
-        },
-        init = function()
-            vim.g.trailspace_interval = 3
-            vim.g.prev_trailspace_time = os.time()
-        end,
-        opts = {
-            -- The name of the augroup.
-            augroup_name = "AutoSavePlug",
-            -- The events in which to trigger an auto save.
-            -- events = { "InsertLeave", "TextChanged" },
-            events = { "BufLeave", "FocusLost", "InsertLeave", "TextChanged" },
-            -- If you'd prefer to silence the output of `save_fn`.
-            silent = true,
-            -- If you'd prefer to write a vim command.
-            save_cmd = nil,
-            -- What to do after checking if auto save conditions have been met.
-            save_fn = function()
-                -- 新行不清空空格
-                if string.match(vim.api.nvim_get_current_line(), "^%s*$") == nil then
-                    local trailspace_time = os.time()
-                    if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
-                        require("mini.trailspace").trim()
-                        vim.g.prev_trailspace_time = trailspace_time
-                    end
-                end
-
-                -- 保存文件前保存上次复制的范围
-                local last_paste_start = vim.fn.getpos("'[")
-                local last_paste_end = vim.fn.getpos("']")
-
-
-                local config = require("auto-save.config")
-                if config.save_cmd ~= nil then
-                    vim.api.nvim_command(config.save_cmd)
-                elseif config.silent then
-                    vim.api.nvim_command("silent! w")
-                else
-                    vim.api.nvim_command("w")
-                end
-
-                -- 读取上次复制的范围
-                vim.fn.setpos("'[", last_paste_start)
-                vim.fn.setpos("']", last_paste_end)
-            end,
-            -- May define a timeout, or a duration to defer the save for - this allows
-            -- for formatters to run, for example if they're configured via an autocmd
-            -- that listens for `BufWritePre` event.
-            timeout = 1,
-            -- Define some filetypes to explicitly not save, in case our existing conditions
-            -- don't quite catch all the buffers we'd prefer not to write to.
-            exclude_ft = {},
-        },
-    },
-
-    {
         "altermo/ultimate-autopair.nvim",
         config = function(_, opts)
             require("ultimate-autopair").setup(opts)
 
             -- 新行保持缩进
             vim.keymap.set("i", "<cr>", function()
-                return require("ultimate-autopair.core").run("<cr>x<bs>")
+                return require("ultimate-autopair.core").run("<cr>") .. require("ultimate-autopair.core").run("x<bs>")
             end, { desc = "Enter", expr = true, replace_keycodes = false })
         end,
         enabled = not variables.is_vscode,
@@ -203,7 +138,8 @@ return {
         "echasnovski/mini.trailspace",
         config = function(_, opts)
             require("mini.trailspace").setup(opts)
-
+        end,
+        init = function()
             if variables.is_vscode then
                 vim.api.nvim_create_autocmd("InsertLeave", {
                     callback = function()
@@ -218,6 +154,7 @@ return {
                 })
             end
         end,
+        lazy = true,
         version = false,
     },
 
@@ -303,16 +240,19 @@ return {
             local augend = require("dial.augend")
             require("dial.config").augends:register_group({
                 default = {
+                    augend.case.new({
+                        types = { "camelCase", "snake_case", "kebab-case" },
+                        cyclic = true,
+                    }),
+
                     augend.constant.alias.Alpha,
                     augend.constant.alias.alpha,
-
                     augend.constant.alias.bool,
                     augend.constant.new({
                         elements = { "True", "False" },
                         word = true,
                         cyclic = true,
                     }),
-
                     augend.constant.new({
                         elements = { "and", "or" },
                         word = true,
@@ -334,26 +274,38 @@ return {
                         only_valid = true,
                         word = false,
                     }),
-
                     augend.date.alias["%H:%M:%S"],
                     augend.date.alias["%H:%M"],
+
+                    augend.decimal_fraction.new({
+                        signed = true,
+                        point_char = ".",
+                    }),
+
+                    augend.hexcolor.new({
+                        case = "lower",
+                    }),
 
                     augend.integer.alias.binary,
                     augend.integer.alias.decimal_int,
                     augend.integer.alias.hex,
                     augend.integer.alias.octal,
 
+                    augend.misc.alias["markdown_header"],
+
                     augend.semver.alias.semver,
                 },
             })
         end,
         keys = {
-            { "<c-a>",  function() return require("dial.map").inc_normal() end,  desc = "Increase", expr = true, mode = "n" },
-            { "<c-x>",  function() return require("dial.map").dec_normal() end,  desc = "Decrease", expr = true, mode = "n" },
-            { "<c-a>",  function() return require("dial.map").inc_visual() end,  desc = "Increase", expr = true, mode = "x" },
-            { "<c-x>",  function() return require("dial.map").dec_visual() end,  desc = "Decrease", expr = true, mode = "x" },
-            { "g<c-a>", function() return require("dial.map").inc_gvisual() end, desc = "Increase", expr = true, mode = "x" },
-            { "g<c-x>", function() return require("dial.map").dec_gvisual() end, desc = "Decrease", expr = true, mode = "x" },
+            { "<c-a>",  function() require("dial.map").manipulate("increment", "normal") end,  desc = "Increase", mode = "n" },
+            { "<c-x>",  function() require("dial.map").manipulate("decrement", "normal") end,  desc = "Decrease", mode = "n" },
+            { "g<c-a>", function() require("dial.map").manipulate("increment", "gnormal") end, desc = "Increase", mode = "n" },
+            { "g<c-x>", function() require("dial.map").manipulate("decrement", "gnormal") end, desc = "Decrease", mode = "n" },
+            { "<c-a>",  function() require("dial.map").manipulate("increment", "visual") end,  desc = "Increase", mode = "x" },
+            { "<c-x>",  function() require("dial.map").manipulate("decrement", "visual") end,  desc = "Decrease", mode = "x" },
+            { "g<c-a>", function() require("dial.map").manipulate("increment", "gvisual") end, desc = "Increase", mode = "x" },
+            { "g<c-x>", function() require("dial.map").manipulate("decrement", "gvisual") end, desc = "Decrease", mode = "x" },
         },
     },
 
@@ -407,6 +359,77 @@ return {
             pre_hook = nil,
             ---Function to call after (un)comment
             post_hook = nil,
+        },
+    },
+
+    {
+        "okuuva/auto-save.nvim",
+        cmd = {
+            "ASToggle",
+        },
+        config = function(_, opts)
+            require("auto-save").setup(opts)
+
+            local last_paste_start = vim.fn.getpos("'[")
+            local last_paste_end = vim.fn.getpos("']")
+
+            local group = vim.api.nvim_create_augroup("autosave", {})
+            vim.api.nvim_create_autocmd("User", {
+                callback = function(opts)
+                    if opts.data.saved_buffer ~= nil then
+                        local is_mini_trailspace_available, mini_trailspace = pcall(require, "mini.trailspace")
+                        if is_mini_trailspace_available then
+                            -- 新行不清空空格
+                            if string.match(vim.api.nvim_get_current_line(), "^%s*$") == nil then
+                                local trailspace_time = os.time()
+                                if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
+                                    mini_trailspace.trim()
+                                    vim.g.prev_trailspace_time = trailspace_time
+                                end
+                            end
+                        end
+
+                        -- 保存文件前保存上次复制的范围
+                        last_paste_start = vim.fn.getpos("'[")
+                        last_paste_end = vim.fn.getpos("']")
+                    end
+                end,
+                group = group,
+                pattern = "AutoSaveWritePre",
+            })
+            vim.api.nvim_create_autocmd("User", {
+                callback = function(opts)
+                    if opts.data.saved_buffer ~= nil then
+                        -- 读取上次复制的范围
+                        vim.fn.setpos("'[", last_paste_start)
+                        vim.fn.setpos("']", last_paste_end)
+                    end
+                end,
+                group = group,
+                pattern = "AutoSaveWritePost",
+            })
+        end,
+        enabled = not variables.is_vscode,
+        event = {
+            "BufLeave",
+            "FocusLost",
+            "InsertLeave",
+            "TextChanged",
+        },
+        init = function()
+            vim.g.trailspace_interval = 3
+            vim.g.prev_trailspace_time = os.time()
+        end,
+        opts = {
+            execution_message = {
+                enabled = false,
+            },
+            trigger_events = {                                 -- See :h events
+                immediate_save = { "BufLeave", "FocusLost" },  -- vim events that trigger an immediate save
+                defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
+                cancel_defered_save = { "InsertEnter" },       -- vim events that cancel a pending deferred save
+            },
+            debounce_delay = 1,                                -- delay after which a pending save is executed
         },
     },
 

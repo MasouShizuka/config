@@ -45,7 +45,10 @@ return {
     {
         "petertriho/nvim-scrollbar",
         enabled = not variables.is_vscode,
-        lazy = false,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
         opts = {
             handle = {
                 blend = 0,

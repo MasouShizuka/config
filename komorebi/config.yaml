@@ -413,7 +413,6 @@ widgets:
       label: "{icon} %Y-%m-%d %H:%M:%S %a"
       label_alt: "{icon} %H:%M:%S"
       update_interval: 1000
-      language: zh_CN.UTF-8
       timezones: ["Asia/Shanghai"]
       status_icons:
         icon_0: "\U000f1456"

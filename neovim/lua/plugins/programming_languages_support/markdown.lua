@@ -12,12 +12,10 @@ return {
         },
         opts = {
             default = {
-                -- img_dir = "img",
                 -- img_dir = "_images",
                 img_dir = function()
                     return vim.fn.expand("%:.:h") .. "/_images_" .. vim.fn.expand("%:t:r")
                 end,
-                -- img_dir_txt = "img",
                 -- img_dir_txt = "_images",
                 img_dir_txt = function()
                     return "_images_" .. vim.fn.expand("%:t:r")
@@ -25,8 +23,7 @@ return {
                 img_name = function()
                     return os.date("%Y-%m-%d-%H-%M-%S")
                 end,
-                img_handler = function(img)
-                end,
+                img_handler = function(img) end,
                 affix = "%s",
             },
             asciidoc = {

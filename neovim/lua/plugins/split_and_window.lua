@@ -154,6 +154,9 @@ return {
             end, { desc = "Focus right panel", silent = true })
         end,
         enabled = not variables.is_vscode,
+        event = {
+            "VeryLazy",
+        },
         init = function()
             -- views can only be fully collapsed with the global statusline
             vim.opt.laststatus = 3
@@ -167,7 +170,6 @@ return {
             { variables.keymap["<c-3>"], desc = "Focus bottom panel", mode = "n" },
             { variables.keymap["<c-4>"], desc = "Focus right panel",  mode = "n" },
         },
-        lazy = false,
         opts = {
             left = {
                 {

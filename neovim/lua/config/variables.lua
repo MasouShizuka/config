@@ -8,7 +8,6 @@ function M.load_running_environment()
     M.is_linux = vim.fn.has("linux") == 1
     M.is_wsl = vim.fn.has("wsl") == 1
     M.is_vscode = vim.g.vscode
-    M.is_neovide = vim.g.neovide
 end
 
 function M.load_path()
@@ -66,21 +65,21 @@ end
 function M.load_icons()
     M.icons = {
         dap = {
-            Breakpoint = " ",
+            Breakpoint          = " ",
             BreakpointCondition = " ",
-            BreakpointRejected = { " ", "DiagnosticError" },
-            LogPoint = ".>",
-            Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
+            BreakpointRejected  = { " ", "DiagnosticError" },
+            LogPoint            = ".>",
+            Stopped             = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
         },
         diagnostics = {
             error = " ",
-            hint = " ",
-            info = " ",
-            warn = " ",
+            hint  = " ",
+            info  = " ",
+            warn  = " ",
         },
         fold = {
-            FoldClosed = "",
-            FoldOpened = "",
+            FoldClosed    = "",
+            FoldOpened    = "",
             FoldSeparator = " ",
         },
         git = {
@@ -95,65 +94,51 @@ function M.load_icons()
             untracked = "★ ",
         },
         kinds = {
-            Array = " ",
-            Boolean = " ",
-            Class = " ",
-            Color = " ",
-            Constant = " ",
-            Constructor = " ",
-            Copilot = " ",
-            Enum = " ",
-            EnumMember = " ",
-            Event = " ",
-            Field = " ",
-            File = " ",
-            Folder = " ",
-            Function = " ",
-            Interface = " ",
-            Key = " ",
-            Keyword = " ",
-            Method = " ",
-            Module = " ",
-            Namespace = " ",
-            Null = " ",
-            Number = " ",
-            Object = " ",
-            Operator = " ",
-            Package = " ",
-            Property = " ",
-            Reference = " ",
-            Snippet = " ",
-            String = " ",
-            Struct = " ",
-            Text = " ",
+            Array         = " ",
+            Boolean       = " ",
+            Class         = " ",
+            Codeium       = "󰘦 ",
+            Color         = " ",
+            Control       = " ",
+            Collapsed     = "",
+            Constant      = " ",
+            Constructor   = " ",
+            Copilot       = " ",
+            Enum          = " ",
+            EnumMember    = " ",
+            Event         = " ",
+            Field         = " ",
+            File          = " ",
+            Folder        = " ",
+            Function      = " ",
+            Interface     = " ",
+            Key           = " ",
+            Keyword       = " ",
+            Method        = " ",
+            Module        = " ",
+            Namespace     = " ",
+            Null          = " ",
+            Number        = " ",
+            Object        = " ",
+            Operator      = " ",
+            Package       = " ",
+            Property      = " ",
+            Reference     = " ",
+            Snippet       = " ",
+            String        = " ",
+            Struct        = " ",
+            TabNine       = "󰏚 ",
+            Text          = " ",
             TypeParameter = " ",
-            Unit = " ",
-            Value = " ",
-            Variable = " ",
+            Unit          = " ",
+            Value         = " ",
+            Variable      = " ",
         },
     }
 end
 
 function M.load_keymap()
-    M.keymap = {
-        ["<c-1>"] = "<c-1>",
-        ["<c-2>"] = "<c-2>",
-        ["<c-3>"] = "<c-3>",
-        ["<c-4>"] = "<c-4>",
-        ["<c-space>"] = "<c-space>",
-        ["<c-,>"] = "<c-,>",
-        ["<c-.>"] = "<c-.>",
-        ["<c-;>"] = "<c-;>",
-        ["<c-s-n>"] = "<c-s-n>",
-        ["<c-s-t>"] = "<c-s-t>",
-    }
-
-    local terminal_simulator = "wezterm"
-    if M.is_neovide then
-        terminal_simulator = "neovide"
-    end
-
-    if terminal_simulator == "wezterm" then
+    if vim.env.TERM_PROGRAM == "WezTerm" then
         if M.is_wsl then
             M.keymap = {
                 ["<c-1>"] = "<f25>",
@@ -181,6 +166,19 @@ function M.load_keymap()
                 ["<c-s-t>"] = "<c-f10>",
             }
         end
+    else
+        M.keymap = {
+            ["<c-1>"] = "<c-1>",
+            ["<c-2>"] = "<c-2>",
+            ["<c-3>"] = "<c-3>",
+            ["<c-4>"] = "<c-4>",
+            ["<c-space>"] = "<c-space>",
+            ["<c-,>"] = "<c-,>",
+            ["<c-.>"] = "<c-.>",
+            ["<c-;>"] = "<c-;>",
+            ["<c-s-n>"] = "<c-s-n>",
+            ["<c-s-t>"] = "<c-s-t>",
+        }
     end
 end
 

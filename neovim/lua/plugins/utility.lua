@@ -162,8 +162,29 @@ return {
     {
         "stevearc/dressing.nvim",
         enabled = not variables.is_vscode,
-        lazy = false,
+        init = function()
+            vim.ui.select = function(...)
+                require("lazy").load({ plugins = { "dressing.nvim" } })
+                return vim.ui.select(...)
+            end
+            vim.ui.input = function(...)
+                require("lazy").load({ plugins = { "dressing.nvim" } })
+                return vim.ui.input(...)
+            end
+        end,
+        lazy = true,
         opts = {},
+    },
+
+    {
+        "tzachar/highlight-undo.nvim",
+        keys = {
+            { "u",     desc = "Undo", mode = "n" },
+            { "<c-r>", desc = "Redo", mode = "n" },
+        },
+        opts = {
+            duration = 1000,
+        },
     },
 
     {
