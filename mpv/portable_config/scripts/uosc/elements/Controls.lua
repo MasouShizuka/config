@@ -3,10 +3,15 @@ local Button = require('elements/Button')
 local CycleButton = require('elements/CycleButton')
 local Speed = require('elements/Speed')
 
--- `scale` - `options.controls_size` scale factor.
--- `ratio` - Width/height ratio of a static or dynamic element.
--- `ratio_min` Min ratio for 'dynamic' sized element.
----@alias ControlItem {element?: Element; kind: string; sizing: 'space' | 'static' | 'dynamic'; scale: number; ratio?: number; ratio_min?: number; hide: boolean; dispositions?: table<string, boolean>}
+-- sizing:
+--   static - shrink, have highest claim on available space, disappear when there's not enough of it
+--   dynamic - shrink to make room for static elements until they reach their ratio_min, then disappear
+--   gap - shrink if there's no space left
+--   space - expands to fill available space, shrinks as needed
+-- scale - `options.controls_size` scale factor.
+-- ratio - Width/height ratio of a static or dynamic element.
+-- ratio_min Min ratio for 'dynamic' sized element.
+---@alias ControlItem {element?: Element; kind: string; sizing: 'space' | 'static' | 'dynamic' | 'gap'; scale: number; ratio?: number; ratio_min?: number; hide: boolean; dispositions?: table<string, boolean>}
 
 ---@class Controls : Element
 local Controls = class(Element)
@@ -30,41 +35,41 @@ end
 function Controls:init_options()
 	-- Serialize control elements
 	local shorthands = {
-		menu               = 'command:menu:script-binding uosc/menu-blurred?' .. lang._button01,
-		subtitles          = 'command:subtitles:script-binding uosc/subtitles#sub>0?' .. lang._button02,
-		audio              = 'command:graphic_eq:script-binding uosc/audio#audio>1?' .. lang._button03,
-		['audio-device']   = 'command:speaker:script-binding uosc/audio-device?' .. lang._button04,
-		video              = 'command:theaters:script-binding uosc/video#video>1?' .. lang._button05,
-		playlist           = 'command:list_alt:script-binding uosc/playlist?' .. lang._button06,
-		chapters           = 'command:bookmark:script-binding uosc/chapters#chapters>0?' .. lang._button07,
-		editions           = 'command:bookmarks:script-binding uosc/editions#editions>1?' .. lang._button08,
-		['stream-quality'] = 'command:high_quality:script-binding uosc/stream-quality?' .. lang._button09,
-		['open-file']      = 'command:file_open:script-binding uosc/open-file?' .. lang._button10,
-		items              = 'command:list_alt:script-binding uosc/items?' .. lang._button11,
-		prev               = 'command:arrow_back_ios:script-binding uosc/prev?' .. lang._button12,
-		['next']           = 'command:arrow_forward_ios:script-binding uosc/next?' .. lang._button13,
-		first              = 'command:first_page:script-binding uosc/first?' .. lang._button14,
-		last               = 'command:last_page:script-binding uosc/last?' .. lang._button15,
-		['loop-playlist']  = 'cycle:repeat:loop-playlist:no/inf!?' .. lang._button16,
-		['loop-file']      = 'cycle:repeat_one:loop-file:no/inf!?' .. lang._button17,
-		shuffle            = 'toggle:shuffle:shuffle?' .. lang._button18,
-		fullscreen         = 'cycle:crop_free:fullscreen:no/yes=fullscreen_exit!?' .. lang._button19,
+		menu               = 'command:menu:script-binding uosc/menu-blurred?' .. ulang._button01,
+		subtitles          = 'command:subtitles:script-binding uosc/subtitles#sub>0?' .. ulang._button02,
+		audio              = 'command:graphic_eq:script-binding uosc/audio#audio>1?' .. ulang._button03,
+		['audio-device']   = 'command:speaker:script-binding uosc/audio-device?' .. ulang._button04,
+		video              = 'command:theaters:script-binding uosc/video#video>1?' .. ulang._button05,
+		playlist           = 'command:list_alt:script-binding uosc/playlist?' .. ulang._button06,
+		chapters           = 'command:bookmark:script-binding uosc/chapters#chapters>0?' .. ulang._button07,
+		editions           = 'command:bookmarks:script-binding uosc/editions#editions>1?' .. ulang._button08,
+		['stream-quality'] = 'command:high_quality:script-binding uosc/stream-quality?' .. ulang._button09,
+		['open-file']      = 'command:file_open:script-binding uosc/open-file?' .. ulang._button10,
+		items              = 'command:list_alt:script-binding uosc/items?' .. ulang._button11,
+		prev               = 'command:arrow_back_ios:script-binding uosc/prev?' .. ulang._button12,
+		['next']           = 'command:arrow_forward_ios:script-binding uosc/next?' .. ulang._button13,
+		first              = 'command:first_page:script-binding uosc/first?' .. ulang._button14,
+		last               = 'command:last_page:script-binding uosc/last?' .. ulang._button15,
+		['loop-playlist']  = 'cycle:repeat:loop-playlist:no/inf!?' .. ulang._button16,
+		['loop-file']      = 'cycle:repeat_one:loop-file:no/inf!?' .. ulang._button17,
+		shuffle            = 'toggle:shuffle:shuffle?' .. ulang._button18,
+		fullscreen         = 'cycle:crop_free:fullscreen:no/yes=fullscreen_exit!?' .. ulang._button19,
 
 		-- 自定义的捷径
-		['play_pause']     = 'cycle:not_started:pause:no=play_circle/yes=pause_circle?' .. lang._button_ext01,
-		['pause_play']     = 'cycle:not_started:pause:no=pause_circle/yes=play_circle?' .. lang._button_ext02,
-		['pl-prev']        = 'command:navigate_before:playlist-prev?' .. lang._button_ext03,
-		['pl-next']        = 'command:navigate_next:playlist-next?' .. lang._button_ext04,
-		border             = 'toggle:border_style:border?' .. lang._button_ext05,
-		ontop              = 'cycle:move_up:ontop:no/yes!?' .. lang._button_ext06,
-		hwdec              = 'cycle:developer_board_off:hwdec:no=developer_board_off/yes=memory/auto-copy=developer_board?' .. lang._button_ext07,
-		unscaled           = 'cycle:fit_screen:video-unscaled:no/yes!?' .. lang._button_ext08,
-		deband             = 'cycle:texture:deband:no/yes!?' .. lang._button_ext09,
-		deint              = 'cycle:clear_all:deinterlace:no/yes!?' .. lang._button_ext10,
-		['shot-vid']       = 'command:screenshot:screenshot video?' .. lang._button_ext11,
+		['play_pause']     = 'cycle:not_started:pause:no=play_circle/yes=pause_circle?' .. ulang._button_ext01,
+		['pause_play']     = 'cycle:not_started:pause:no=pause_circle/yes=play_circle?' .. ulang._button_ext02,
+		['pl-prev']        = 'command:navigate_before:playlist-prev?' .. ulang._button_ext03,
+		['pl-next']        = 'command:navigate_next:playlist-next?' .. ulang._button_ext04,
+		border             = 'toggle:border_style:border?' .. ulang._button_ext05,
+		ontop              = 'cycle:move_up:ontop:no/yes!?' .. ulang._button_ext06,
+		hwdec              = 'cycle:developer_board_off:hwdec:no=developer_board_off/yes=memory/auto-copy=developer_board?' .. ulang._button_ext07,
+		unscaled           = 'cycle:fit_screen:video-unscaled:no/yes!?' .. ulang._button_ext08,
+		deband             = 'cycle:texture:deband:no/yes!?' .. ulang._button_ext09,
+		deint              = 'cycle:clear_all:deinterlace:no/yes!?' .. ulang._button_ext10,
+		['shot-vid']       = 'command:screenshot:screenshot video?' .. ulang._button_ext11,
 
-		['ST-stats_tog']   = 'command:info_outline:script-binding display-stats-toggle?' .. lang._button_ext12,
-		['ST-thumb_tog']   = 'command:panorama:script-binding thumb_toggle?' .. lang._button_ext13,
+		['ST-stats_tog']   = 'command:info_outline:script-binding display-stats-toggle?' .. ulang._button_ext12,
+		['ST-thumb_tog']   = 'command:panorama:script-binding thumb_toggle?' .. ulang._button_ext13,
 
 	}
 
@@ -125,7 +130,7 @@ function Controls:init_options()
 		if kind == 'space' then
 			control.sizing = 'space'
 		elseif kind == 'gap' then
-			table_assign(control, {sizing = 'dynamic', scale = 1, ratio = params[1] or 0.3, ratio_min = 0})
+			table_assign(control, {sizing = 'gap', scale = 1, ratio = params[1] or 0.3, ratio_min = 0})
 		elseif kind == 'command' then
 			if #params ~= 2 then
 				mp.error(string.format(
@@ -280,21 +285,24 @@ function Controls:update_dimensions()
 	self.ax, self.ay = window_border + margin, self.by - size
 
 	-- Controls
-	local available_width = self.bx - self.ax
-	local statics_width = (#self.layout - 1) * spacing
+	local available_width, statics_width = self.bx - self.ax, 0
 	local min_content_width = statics_width
-	local max_dynamics_width, dynamic_units, spaces = 0, 0, 0
+	local max_dynamics_width, dynamic_units, spaces, gaps = 0, 0, 0, 0
 
-	-- Calculate statics_width, min_content_width, and count spaces
+	-- Calculate statics_width, min_content_width, and count spaces & gaps
 	for c, control in ipairs(self.layout) do
 		if control.sizing == 'space' then
 			spaces = spaces + 1
+		elseif control.sizing == 'gap' then
+			gaps = gaps + control.scale * control.ratio
 		elseif control.sizing == 'static' then
-			local width = size * control.scale * control.ratio
+			local width = size * control.scale * control.ratio + (c ~= #self.layout and spacing or 0)
 			statics_width = statics_width + width
 			min_content_width = min_content_width + width
 		elseif control.sizing == 'dynamic' then
-			min_content_width = min_content_width + size * control.scale * control.ratio_min
+			local spacing = (c ~= #self.layout and spacing or 0)
+			statics_width = statics_width + spacing
+			min_content_width = min_content_width + size * control.scale * control.ratio_min + spacing
 			max_dynamics_width = max_dynamics_width + size * control.scale * control.ratio
 			dynamic_units = dynamic_units + control.scale * control.ratio
 		end
@@ -307,7 +315,7 @@ function Controls:update_dimensions()
 			i = i + (a * (a % 2 == 0 and 1 or -1))
 			local control = self.layout[i]
 
-			if control.kind ~= 'gap' and control.kind ~= 'space' then
+			if control.sizing ~= 'gap' and control.sizing ~= 'space' then
 				control.hide = true
 				if control.element then control.element.enabled = false end
 				if control.sizing == 'static' then
@@ -315,6 +323,7 @@ function Controls:update_dimensions()
 					min_content_width = min_content_width - width - spacing
 					statics_width = statics_width - width - spacing
 				elseif control.sizing == 'dynamic' then
+					statics_width = statics_width - spacing
 					min_content_width = min_content_width - size * control.scale * control.ratio_min - spacing
 					max_dynamics_width = max_dynamics_width - size * control.scale * control.ratio
 					dynamic_units = dynamic_units - control.scale * control.ratio
@@ -328,7 +337,9 @@ function Controls:update_dimensions()
 	-- Lay out the elements
 	local current_x = self.ax
 	local width_for_dynamics = available_width - statics_width
-	local space_width = (width_for_dynamics - max_dynamics_width) / spaces
+	local empty_space_width = width_for_dynamics - max_dynamics_width
+	local width_for_gaps = math.min(empty_space_width, size * gaps)
+	local individual_space_width = spaces > 0 and ((empty_space_width - width_for_gaps) / spaces) or 0
 
 	for c, control in ipairs(self.layout) do
 		if not control.hide then
@@ -336,7 +347,9 @@ function Controls:update_dimensions()
 			local width, height = 0, 0
 
 			if sizing == 'space' then
-				if space_width > 0 then width = space_width end
+				if individual_space_width > 0 then width = individual_space_width end
+			elseif sizing == 'gap' then
+				if width_for_gaps > 0 then width = width_for_gaps * (ratio / gaps) end
 			elseif sizing == 'static' then
 				height = size * scale
 				width = height * ratio
@@ -348,7 +361,7 @@ function Controls:update_dimensions()
 
 			local bx = current_x + width
 			if element then element:set_coordinates(round(current_x), round(self.by - height), bx, self.by) end
-			current_x = bx + spacing
+			current_x = element and bx + spacing or bx
 		end
 	end
 

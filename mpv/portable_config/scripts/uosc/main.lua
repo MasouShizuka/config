@@ -1,6 +1,6 @@
 --[[
-SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts/uosc
-COMMIT_ 6e19bee95591e3c7653ba1d887d09e7708544eac
+SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
+COMMIT_ 26d71a863015a3af45a41d17bb2f8678b8cde0d0
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -52,6 +52,7 @@ defaults = {
 
 	menu_item_height = 36,
 	menu_min_width = 260,
+	menu_padding = 4,
 	menu_type_to_search = true,
 
 	top_bar = 'no-border',
@@ -74,7 +75,7 @@ defaults = {
 	font_scale = 1,
 	font_bold = false,
 	text_border = 1.2,
-	border_radius = 2,
+	border_radius = 4,
 	color = '',
 	opacity = '',
 	animation_duration = 100,
@@ -103,6 +104,7 @@ defaults = {
 	adjust_osd_margins = false,
 	chapter_ranges = 'openings:30abf964,endings:30abf964,ads:c54e4e80',
 	chapter_range_patterns = 'openings:オープニング;endings:エンディング',
+	languages = 'slang,en',                   -- https://opensubtitles.stoplight.io/docs/opensubtitles-api/1de776d20e873-languages
 	disable_elements = '',
 
 	idlescreen = true,
@@ -164,6 +166,7 @@ local config_defaults = {
 		chapters = 0.8,
 		slider = 0.9,
 		slider_gauge = 1,
+		controls = 0,
 		speed = 0.6,
 		menu = 0.9,
 		submenu = 0.6,
@@ -179,6 +182,8 @@ local config_defaults = {
 }
 config = {
 	version = uosc_version,
+	open_subtitles_api_key = 'b0rd16N0bp7DETMpO4pYZwIqmQkZbYQr',
+	open_subtitles_agent = 'uosc v' .. uosc_version,
 	-- sets max rendering frequency in case the
 	-- native rendering frequency could not be detected
 	render_delay = 1 / 60,
@@ -279,40 +284,40 @@ update_config()
 -- 上下文菜单的默认内容
 function create_default_menu_items()
 	return {
-		{title = lang._cm_load, items = {
-			{title = lang._cm_file_browser, value = 'script-binding uosc/open-file'},
-			{title = lang._cm_import_sid, value = 'script-binding uosc/load-subtitles'},
+		{title = ulang._cm_load, items = {
+			{title = ulang._cm_file_browser, value = 'script-binding uosc/open-file'},
+			{title = ulang._cm_import_sid, value = 'script-binding uosc/load-subtitles'},
 		},},
-		{title = lang._cm_navigation, items = {
-			{title = lang._cm_playlist, value = 'script-binding uosc/playlist'},
-			{title = lang._cm_edition_list, value = 'script-binding uosc/editions'},
-			{title = lang._cm_chapter_list, value = 'script-binding uosc/chapters'},
-			{title = lang._cm_vid_list, value = 'script-binding uosc/video'},
-			{title = lang._cm_aid_list, value = 'script-binding uosc/audio'},
-			{title = lang._cm_sid_list, value = 'script-binding uosc/subtitles'},
-			{title = lang._cm_playlist_shuffle, value = 'playlist-shuffle'},
+		{title = ulang._cm_navigation, items = {
+			{title = ulang._cm_playlist, value = 'script-binding uosc/playlist'},
+			{title = ulang._cm_edition_list, value = 'script-binding uosc/editions'},
+			{title = ulang._cm_chapter_list, value = 'script-binding uosc/chapters'},
+			{title = ulang._cm_vid_list, value = 'script-binding uosc/video'},
+			{title = ulang._cm_aid_list, value = 'script-binding uosc/audio'},
+			{title = ulang._cm_sid_list, value = 'script-binding uosc/subtitles'},
+			{title = ulang._cm_playlist_shuffle, value = 'playlist-shuffle'},
 		},},
-		{title = lang._cm_ushot, value = 'script-binding uosc/shot'},
-		{title = lang._cm_video, items = {
-			{title = lang._cm_decoding_api, value = 'cycle-values hwdec no auto auto-copy'},
-			{title = lang._cm_deband_toggle, value = 'cycle deband'},
-			{title = lang._cm_deint_toggle, value = 'cycle deinterlace'},
-			{title = lang._cm_icc_toggle, value = 'cycle icc-profile-auto'},
-			{title = lang._cm_corpts_toggle, value = 'cycle correct-pts'},
+		{title = ulang._cm_ushot, value = 'script-binding uosc/shot'},
+		{title = ulang._cm_video, items = {
+			{title = ulang._cm_decoding_api, value = 'cycle-values hwdec no auto auto-copy'},
+			{title = ulang._cm_deband_toggle, value = 'cycle deband'},
+			{title = ulang._cm_deint_toggle, value = 'cycle deinterlace'},
+			{title = ulang._cm_icc_toggle, value = 'cycle icc-profile-auto'},
+			{title = ulang._cm_corpts_toggle, value = 'cycle correct-pts'},
 		},},
-		{title = lang._cm_tools, items = {
-			{title = lang._cm_keybinding, value = 'script-binding uosc/keybinds'},
-			{title = lang._cm_stats_toggle, value = 'script-binding display-stats-toggle'},
-			{title = lang._cm_console_on, value = 'script-binding console/enable'},
-			{title = lang._cm_border_toggle, value = 'cycle border'},
-			{title = lang._cm_ontop_toggle, value = 'cycle ontop'},
-			{title = lang._cm_audio_device, value = 'script-binding uosc/audio-device'},
-			{title = lang._cm_stream_quality, value = 'script-binding uosc/stream-quality'},
-			{title = lang._cm_show_file_dir, value = 'script-binding uosc/show-in-directory'},
-			{title = lang._cm_show_config_dir, value = 'script-binding uosc/open-config-directory'},
+		{title = ulang._cm_tools, items = {
+			{title = ulang._cm_keybinding, value = 'script-binding uosc/keybinds'},
+			{title = ulang._cm_stats_toggle, value = 'script-binding display-stats-toggle'},
+			{title = ulang._cm_console_on, value = 'script-binding console/enable'},
+			{title = ulang._cm_border_toggle, value = 'cycle border'},
+			{title = ulang._cm_ontop_toggle, value = 'cycle ontop'},
+			{title = ulang._cm_audio_device, value = 'script-binding uosc/audio-device'},
+			{title = ulang._cm_stream_quality, value = 'script-binding uosc/stream-quality'},
+			{title = ulang._cm_show_file_dir, value = 'script-binding uosc/show-in-directory'},
+			{title = ulang._cm_show_config_dir, value = 'script-binding uosc/open-config-directory'},
 		},},
-		{title = lang._cm_stop, value = 'stop'},
-		{title = lang._cm_quit, value = 'quit'},
+		{title = ulang._cm_stop, value = 'stop'},
+		{title = ulang._cm_quit, value = 'quit'},
 	}
 end
 
@@ -401,6 +406,12 @@ require('lib/utils')
 require('lib/text')
 require('lib/ass')
 require('lib/menus')
+
+-- Determine path to ziggy
+do
+	local bin = 'ziggy-' .. (state.platform == 'windows' and 'windows.exe' or state.platform)
+	config.ziggy_path = join_path(mp.get_script_directory(), join_path('bin', bin))
+end
 
 --[[ STATE UPDATERS ]]
 
@@ -495,9 +506,6 @@ function update_margins()
 	state.margin_left = left
 	state.margin_right = right
 
-	if utils.shared_script_property_set then
-		utils.shared_script_property_set('osc-margins', string.format('%f,%f,%f,%f', 0, 0, top, bottom))
-	end
 	mp.set_property_native('user-data/osc/margins', {l = left, r = right, t = top, b = bottom})
 
 	if not options.adjust_osd_margins then return end
@@ -852,26 +860,27 @@ bind_command('keybinds', function()
 		open_command_menu({type = 'keybinds', items = get_keybinds_items(), palette = true})
 	end
 end)
+bind_command('download-subtitles', open_subtitle_downloader)
 bind_command('load-subtitles', create_track_loader_menu_opener({
-	name = 'subtitles', hint = lang._sid_menu, prop = 'sub', allowed_types = itable_join(config.types.video, config.types.subtitle),
+	name = 'subtitles', hint = ulang._sid_menu, prop = 'sub', allowed_types = itable_join(config.types.video, config.types.subtitle),
 }))
 bind_command('load-audio', create_track_loader_menu_opener({
-	name = 'audio', hint = lang._aid_menu, prop = 'audio', allowed_types = itable_join(config.types.video, config.types.audio),
+	name = 'audio', hint = ulang._aid_menu, prop = 'audio', allowed_types = itable_join(config.types.video, config.types.audio),
 }))
 bind_command('load-video', create_track_loader_menu_opener({
-	name = 'video', hint = lang._vid_menu, prop = 'video', allowed_types = config.types.video,
+	name = 'video', hint = ulang._vid_menu, prop = 'video', allowed_types = config.types.video,
 }))
 bind_command('subtitles', create_select_tracklist_type_menu_opener(
-	lang._sid_submenu_title, 'sub', 'sid', 'script-binding uosc/load-subtitles'
+	ulang._sid_submenu_title, 'sub', 'sid', 'script-binding uosc/load-subtitles', 'script-binding uosc/download-subtitles'
 ))
 bind_command('audio', create_select_tracklist_type_menu_opener(
-	lang._aid_submenu_title, 'audio', 'aid', 'script-binding uosc/load-audio'
+	ulang._aid_submenu_title, 'audio', 'aid', 'script-binding uosc/load-audio'
 ))
 bind_command('video', create_select_tracklist_type_menu_opener(
-	lang._vid_submenu_title, 'video', 'vid', 'script-binding uosc/load-video'
+	ulang._vid_submenu_title, 'video', 'vid', 'script-binding uosc/load-video'
 ))
 bind_command('playlist', create_self_updating_menu_opener({
-	title = lang._playlist_submenu_title,
+	title = ulang._playlist_submenu_title,
 	type = 'playlist',
 	list_prop = 'playlist',
 	serializer = function(playlist)
@@ -895,7 +904,7 @@ bind_command('playlist', create_self_updating_menu_opener({
 	on_delete_item = function(index) mp.commandv('playlist-remove', tostring(index - 1)) end,
 }))
 bind_command('chapters', create_self_updating_menu_opener({
-	title = lang._chapter_list_submenu_title,
+	title = ulang._chapter_list_submenu_title,
 	type = 'chapters',
 	list_prop = 'chapter-list',
 	active_prop = 'chapter',
@@ -915,7 +924,7 @@ bind_command('chapters', create_self_updating_menu_opener({
 	on_select = function(index) mp.commandv('set', 'chapter', tostring(index - 1)) end,
 }))
 bind_command('editions', create_self_updating_menu_opener({
-	title = lang._edition_list_submenu_title,
+	title = ulang._edition_list_submenu_title,
 	type = 'editions',
 	list_prop = 'edition-list',
 	active_prop = 'current-edition',
@@ -923,7 +932,7 @@ bind_command('editions', create_self_updating_menu_opener({
 		local items = {}
 		for _, edition in ipairs(editions or {}) do
 			items[#items + 1] = {
-				title = edition.title or lang._edition_list_submenu_item_title,
+				title = edition.title or ulang._edition_list_submenu_item_title,
 				hint = tostring(edition.id + 1),
 				value = edition.id,
 				active = edition.id == current_id,
@@ -988,7 +997,7 @@ bind_command('delete-file-quit', function()
 	mp.command('quit')
 end)
 bind_command('audio-device', create_self_updating_menu_opener({
-	title = lang._audio_device_submenu_title,
+	title = ulang._audio_device_submenu_title,
 	type = 'audio-device-list',
 	list_prop = 'audio-device-list',
 	active_prop = 'audio-device',
@@ -1000,7 +1009,7 @@ bind_command('audio-device', create_self_updating_menu_opener({
 			if device.name == 'auto' or string.match(device.name, '^' .. ao) then
 				local title = device.description
 				if title == 'Autoselect device' then
-					title = lang._audio_device_submenu_item_title
+					title = ulang._audio_device_submenu_item_title
 				end
 				local hint = string.match(device.name, ao .. '/(.+)')
 				if not hint then hint = device.name end
@@ -1124,7 +1133,6 @@ if options.idlescreen then
 	mp.register_script_message('osc-idlescreen', function(mode, no_osd)
 		if mode == 'cycle' then mode = state.idlescreen and 'no' or 'yes' end
 		set_state('idlescreen', mode == 'yes')
-		utils.shared_script_property_set('osc-idlescreen', mode)
 		mp.set_property_native('user-data/osc', { idlescreen = state.idlescreen })
 
 		if not no_osd and mp.get_property_number('osd-level', 1) >= 1 then

@@ -122,7 +122,9 @@ end
 -- https://github.com/rbtnn/vim-ambiwidth
 function M.fix_cellwidths(cica)
     vim.opt.ambiwidth = "single"
+
     local cellwidths = vim.fn.getcellwidths()
+
     local base = {
         { 0x2030, 0x203f, 2 },
         { 0x2103, 0x2103, 2 },

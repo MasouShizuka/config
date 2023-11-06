@@ -36,7 +36,12 @@ return {
             sort_case_insensitive = true,            -- used when sorting files and directories in the tree
             default_component_configs = {
                 diagnostics = {
-                    symbols = variables.icons.diagnostics,
+                    symbols = {
+                        error = variables.icons.diagnostics.Error,
+                        hint = variables.icons.diagnostics.Hint,
+                        info = variables.icons.diagnostics.Info,
+                        warn = variables.icons.diagnostics.Warn,
+                    },
                 },
                 indent = {
                     with_expanders = true, -- if nil and file nesting is enabled, will enable expanders
@@ -157,20 +162,35 @@ return {
             },
             window = {
                 mappings = {
+                    -- ["<space>"] = {
+                    --     "toggle_node",
+                    --     nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use
+                    -- },
                     ["<space>"] = "none",
                     -- ["<2-LeftMouse>"] = "open",
                     -- ["<cr>"] = "open",
                     ["l"] = "open",
-                    -- ["<esc>"] = "revert_preview",
-                    -- ["P"] = { "toggle_preview", config = { use_float = true } },
+                    -- ["<esc>"] = "cancel", -- close preview or floating neo-tree window
+                    -- ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = false } },
+                    -- ["l"] = "focus_preview",
                     -- ["S"] = "open_split",
+                    ["S"] = "none",
+                    ["V"] = "open_split",
+                    -- -- ["S"] = "split_with_window_picker",
                     -- ["s"] = "open_vsplit",
+                    ["s"] = "diff_files",
+                    ["v"] = "open_vsplit",
+                    -- -- ["s"] = "vsplit_with_window_picker",
                     -- ["t"] = "open_tabnew",
+                    -- -- ["<cr>"] = "open_drop",
+                    -- -- ["t"] = "open_tab_drop",
                     -- ["w"] = "open_with_window_picker",
-                    ["<bs>"] = "close_node",
-                    ["C"] = "close_all_subnodes",
-                    ["W"] = "close_all_nodes",
-                    ["E"] = "expand_all_nodes",
+                    -- ["C"] = "close_node",
+                    ["<bs>"] = "close_all_subnodes",
+                    -- ["z"] = "close_all_nodes",
+                    -- -- ["Z"] = "expand_all_nodes",
+                    ["Z"] = "expand_all_nodes",
+                    -- ["R"] = "refresh",
                     -- ["a"] = {
                     --     "add",
                     --     -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
@@ -183,47 +203,57 @@ return {
                     -- ["d"] = "delete",
                     -- ["r"] = "rename",
                     -- ["y"] = "copy_to_clipboard",
+                    ["y"] = "copy_selector",
                     -- ["x"] = "cut_to_clipboard",
                     -- ["p"] = "paste_from_clipboard",
-                    ["c"] = "none",
+                    -- ["c"] = "copy", -- takes text input for destination, also accepts the config.show_path and config.insert_as options
+                    ["c"] = "copy_to_clipboard",
                     -- ["m"] = "move", -- takes text input for destination, also accepts the optional config.show_path option like "add".
+                    -- ["e"] = "toggle_auto_expand_width",
                     -- ["q"] = "close_window",
-                    -- ["R"] = "refresh",
                     -- ["?"] = "show_help",
                     -- ["<"] = "prev_source",
                     -- [">"] = "next_source",
 
                     ["o"] = "system_open",
-                    ["D"] = "diff_files",
                     ["h"] = "parent",
                     ["J"] = "next_sibling",
                     ["K"] = "prev_sibling",
-                    ["y"] = "copy_selector",
                 },
             },
             filesystem = {
                 window = {
                     mappings = {
-                        -- ["<bs>"] = "navigate_up",
-                        ["H"] = "navigate_up",
-                        -- ["."] = "set_root",
-                        ["L"] = "set_root",
                         -- ["H"] = "toggle_hidden",
                         -- ["/"] = "fuzzy_finder",
                         -- ["D"] = "fuzzy_finder_directory",
+                        -- --["/"] = "filter_as_you_type", -- this was the default until v1.28
                         -- ["#"] = "fuzzy_sorter", -- fuzzy sorting using the fzy algorithm
                         -- -- ["D"] = "fuzzy_sorter_directory",
                         -- ["f"] = "filter_on_submit",
                         -- ["<c-x>"] = "clear_filter",
+                        -- ["<bs>"] = "navigate_up",
+                        ["H"] = "navigate_up",
+                        -- ["."] = "set_root",
+                        ["L"] = "set_root",
                         -- ["[g"] = "prev_git_modified",
                         -- ["]g"] = "next_git_modified",
-
-                        ["c"] = "copy_to_clipboard",
+                        -- ["i"] = "show_file_details",
+                        -- ["o"] = { "show_help", nowait = false, config = { title = "Order by", prefix_key = "o" } },
+                        -- ["oc"] = { "order_by_created", nowait = false },
+                        -- ["od"] = { "order_by_diagnostics", nowait = false },
+                        -- ["og"] = { "order_by_git_status", nowait = false },
+                        -- ["om"] = { "order_by_modified", nowait = false },
+                        -- ["on"] = { "order_by_name", nowait = false },
+                        -- ["os"] = { "order_by_size", nowait = false },
+                        -- ["ot"] = { "order_by_type", nowait = false },
                     },
                     fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
-                        ["<down>"] = "move_cursor_down",
+                        -- ["<down>"] = "move_cursor_down",
+                        -- ["<C-n>"] = "move_cursor_down",
                         ["<C-j>"] = "move_cursor_down",
-                        ["<up>"] = "move_cursor_up",
+                        -- ["<up>"] = "move_cursor_up",
+                        -- ["<C-p>"] = "move_cursor_up",
                         ["<C-k>"] = "move_cursor_up",
                     },
                 },
@@ -488,8 +518,8 @@ return {
     --                 vim.keymap.set("n", "<cr>", api.node.open.edit, opts("Open"))
     --                 vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
     --                 vim.keymap.set("n", "O", api.node.open.no_window_picker, opts("Open: No Window Picker"))
-    --                 vim.keymap.set("n", "s", api.node.open.vertical, opts("Open: Vertical Split"))
-    --                 vim.keymap.set("n", "S", api.node.open.horizontal, opts("Open: Horizontal Split"))
+    --                 vim.keymap.set("n", "v", api.node.open.vertical, opts("Open: Vertical Split"))
+    --                 vim.keymap.set("n", "V", api.node.open.horizontal, opts("Open: Horizontal Split"))
     --                 -- vim.keymap.set("n", "t", api.node.open.tab, opts("Open: New Tab"))
     --                 vim.keymap.set("n", "t", function()
     --                     local node = api.tree.get_node_under_cursor()

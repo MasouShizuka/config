@@ -12,6 +12,7 @@ clip = video_in
 ############
 
 H_Pre = 1440
+Model = 9
 Fps_Num = 2
 Fps_Den = 1
 Sc_Mode = 1
@@ -21,6 +22,7 @@ Gpu = 0
 Gpu_T = 2
 Lk_Fmt = False
 ## 整数，预降低处理源高度（填你的显示器高度）
+## <9|21|24> 使用的模型
 ## 整数，Fps_Num/Fps_Den 的值即帧率倍数
 ## 整数
 ## <0|1|2> 场景切换检测的模式，0为禁用
@@ -32,6 +34,6 @@ Lk_Fmt = False
 
 ret = k7f.FPS_CTRL(clip, fps_in=container_fps, fps_ret=True)
 clip = k7f.FMT_CTRL(clip, h_max=H_Pre, fmt_pix=1 if Lk_Fmt else 0)
-clip = k7f.RIFE_STD(clip, sc_mode=Sc_Mode, skip=Skip, stat_th=Stat_Th, fps_num=2, fps_den=1, gpu=Gpu, gpu_t=Gpu_T)
+clip = k7f.RIFE_STD(clip, model=Model, sc_mode=Sc_Mode, skip=Skip, stat_th=Stat_Th, fps_num=2, fps_den=1, gpu=Gpu, gpu_t=Gpu_T)
 
 clip.set_output()

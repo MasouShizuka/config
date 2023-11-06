@@ -2,6 +2,39 @@ local variables = require("config.variables")
 
 return {
     {
+        "dstein64/nvim-scrollview",
+        enabled = not variables.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        opts = {
+            current_only = true,
+            excluded_filetypes = variables.skip_filetype_list3,
+            line_limit = -1,
+            winblend = 100,
+            signs_column = 0,
+            signs_on_startup = {
+                "conflicts",
+                -- "cursor",
+                "diagnostics",
+                "folds",
+                "loclist",
+                "marks",
+                "quickfix",
+                "search",
+                "spell",
+                -- "textwidth",
+                -- "trail",
+            },
+            diagnostics_severities = {
+                vim.diagnostic.severity.ERROR,
+                vim.diagnostic.severity.WARN,
+            },
+        },
+    },
+
+    {
         "karb94/neoscroll.nvim",
         config = function(_, opts)
             require("neoscroll").setup(opts)
@@ -39,29 +72,6 @@ return {
             pre_hook = nil,              -- Function to run before the scrolling animation starts
             post_hook = nil,             -- Function to run after the scrolling animation ends
             performance_mode = false,    -- Disable "Performance Mode" on all buffers.
-        },
-    },
-
-    {
-        "petertriho/nvim-scrollbar",
-        enabled = not variables.is_vscode,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
-        },
-        opts = {
-            handle = {
-                blend = 0,
-            },
-            excluded_filetypes = variables.skip_filetype_list3,
-            handlers = {
-                cursor = false,
-                diagnostic = true,
-                gitsigns = false,
-                handle = true,
-                search = true,
-                ale = false,
-            },
         },
     },
 }

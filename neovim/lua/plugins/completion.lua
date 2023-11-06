@@ -43,7 +43,7 @@ return {
                         end
                     end),
                     ["<cr>"] = cmp.mapping.confirm({ select = false }),
-                    -- ["<tab>"] = cmp.mapping.confirm({ select = true }),
+                    ["<tab>"] = cmp.mapping.confirm({ select = true }),
                 }),
                 snippet = {
                     expand = function(args)

@@ -533,6 +533,17 @@
         "key": "ctrl+s k",
         "command": "workbench.action.splitEditorUp"
     },
+    {
+        "key": "ctrl+k ctrl+m",
+        "command": "-workbench.action.toggleMaximizeEditorGroup",
+        "when": "maximizedEditorGroup || multipleEditorGroups"
+    },
+    // 最大化当前编辑器
+    {
+        "key": "ctrl+s ctrl+m",
+        "command": "workbench.action.toggleMaximizeEditorGroup",
+        "when": "maximizedEditorGroup || multipleEditorGroups"
+    },
     // 移动当前编辑器到左侧编辑器组
     {
         "key": "ctrl+s ctrl+h",

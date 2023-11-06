@@ -97,6 +97,20 @@ Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 $ENV:STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
 
+# OSC 7 on Windows with powershell (with starship)
+If ($env:TERM_PROGRAM -eq "WezTerm") {
+    $prompt = ""
+    function Invoke-Starship-PreCommand {
+        $current_location = $executionContext.SessionState.Path.CurrentLocation
+        if ($current_location.Provider.Name -eq "FileSystem") {
+            $ansi_escape = [char]27
+            $provider_path = $current_location.ProviderPath -replace "\\", "/"
+            $prompt = "$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
+        }
+        $host.ui.Write($prompt)
+    }
+}
+
 
 
 #########

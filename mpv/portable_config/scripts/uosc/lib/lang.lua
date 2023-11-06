@@ -1,5 +1,34 @@
+-- 导入上游 intl.lua 的部分函数
+local locale = {}
+local cache = {}
+function get_languages()
+	local languages = {}
 
-lang = {
+	for _, lang in ipairs(comma_split(options.languages)) do
+		if (lang == 'slang') then
+			local slang = mp.get_property_native('slang')
+			if slang then
+				itable_append(languages, slang)
+			end
+		else
+			languages[#languages +1] = lang
+		end
+	end
+
+	return languages
+end
+---@param text string
+function t(text, a)
+	if not text then return '' end
+	local key = text
+	if a then key = key .. '|' .. a end
+	if cache[key] then return cache[key] end
+	cache[key] = string.format(locale[text] or text, a or '')
+	return cache[key]
+end
+
+
+ulang = {
 
 	-- context_menu_default
 	_cm_load = '加载',
@@ -46,6 +75,8 @@ lang = {
 	_menu_search = '输入并按 Ctrl+ENTER 进行搜索',
 	_menu_search2 = '输入以搜索',
 
+	_input_empty = 'input-bindings 为空',
+
 	_sid_submenu_title = '字幕轨列表',
 	_aid_submenu_title = '音频轨列表',
 	_vid_submenu_title = '视频轨列表',
@@ -57,6 +88,23 @@ lang = {
 	_stream_quality_submenu_title = '流式传输品质',
 	_audio_device_submenu_title = '音频输出设备列表',
 	_audio_device_submenu_item_title = '自动',
+
+	_dlsub_download = '下载',
+	_dlsub_searchol = '在线搜索',
+	_dlsub_invalid_response = '无效的JSON响应',
+	_dlsub_process_exit = '进程退出代码',
+	_dlsub_unknown_err = '未知错误',
+	_dlsub_err = '错误',
+	_dlsub_fin = '下载完成且已加载',
+	_dlsub_remain = '今日剩余下载量',
+	_dlsub_reset = '重置',
+	_dlsub_foreign = '仅外语部分',
+	_dlsub_hearing = '听力障碍',
+	_dlsub_result0 = '无结果',
+	_dlsub_page_prev = '上一页',
+	_dlsub_page_next = '下一页',
+	_dlsub_2search = 'Ctrl+ENTER 搜索',
+	_dlsub_enter_query = '输入查询',
 
 	_submenu_import = '导入',
 	_submenu_load_file = '打开文件',
@@ -108,4 +156,4 @@ lang = {
 
 }
 
-opt.read_options(lang, "uosc_lang")
+opt.read_options(ulang, "uosc_lang")

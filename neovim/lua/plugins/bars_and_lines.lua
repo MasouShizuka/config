@@ -100,16 +100,32 @@ return {
 
             local function padding_before(component, n)
                 n = n or 1
-
                 local space = { provider = string.rep(" ", n) }
-                space.condition = component.condition
 
-                return heirline_utils.insert(space, component)
+                local condition = component.condition
+                component.condition = nil
+
+                return {
+                    condition = condition,
+
+                    space,
+                    component,
+                }
             end
 
             local function padding_after(component, n)
                 n = n or 1
-                return heirline_utils.insert(component, { provider = string.rep(" ", n) })
+                local space = { provider = string.rep(" ", n) }
+
+                local condition = component.condition
+                component.condition = nil
+
+                return {
+                    condition = condition,
+
+                    component,
+                    space,
+                }
             end
 
             local function surround(delimiters, color, component)
@@ -146,19 +162,19 @@ return {
                 return new
             end
 
-            local function get_diagnostic(severity, show_count)
+            local function get_diagnostic_severity(severity, show_count)
                 local icon, hl
                 if severity == "error" then
-                    icon = variables.icons.diagnostics.error
+                    icon = variables.icons.diagnostics.Error
                     hl = { fg = "diag_error" }
                 elseif severity == "warn" then
-                    icon = variables.icons.diagnostics.warn
+                    icon = variables.icons.diagnostics.Warn
                     hl = { fg = "diag_warn" }
                 elseif severity == "info" then
-                    icon = variables.icons.diagnostics.info
+                    icon = variables.icons.diagnostics.Info
                     hl = { fg = "diag_info" }
                 elseif severity == "hint" then
-                    icon = variables.icons.diagnostics.hint
+                    icon = variables.icons.diagnostics.Hint
                     hl = { fg = "diag_hint" }
                 end
 
@@ -178,7 +194,7 @@ return {
                 }
             end
 
-            local function get_git(status, show_count)
+            local function get_git_status(status, show_count)
                 local icon, hl
                 if status == "added" then
                     icon = variables.icons.git.added
@@ -193,6 +209,10 @@ return {
 
                 return {
                     condition = function(self)
+                        if vim.b.gitsigns_status_dict == nil then
+                            return false
+                        end
+
                         self.count = vim.b.gitsigns_status_dict[status] or 0
                         return self.count > 0
                     end,
@@ -328,11 +348,13 @@ return {
                 provider = "[+]",
                 hl = { fg = "green" },
             }
-            local file_path = {
+            local file_name = {
                 init = function(self)
                     self.max_length = 30
                     self.is_terminal = herrline_conditions.buffer_matches({ buftype = { "terminal" } })
-                    self.is_help = vim.bo.filetype == "help"
+
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    self.is_modified = self.buf and vim.api.nvim_get_option_value("modified", { buf = buf })
                 end,
                 provider = function(self)
                     local filename = self.filename or vim.api.nvim_buf_get_name(0)
@@ -340,36 +362,13 @@ return {
                         return "[No Name]"
                     end
 
-                    local filename_relative = vim.fn.fnamemodify(filename, ":.")
-                    if variables.is_windows then
-                        filename_relative = filename_relative:gsub("\\", "/")
-                    end
-                    local filename_head = vim.fn.fnamemodify(filename_relative, ":h")
-                    local filename_tail = vim.fn.fnamemodify(filename_relative, ":t")
-
+                    filename = vim.fn.fnamemodify(filename, ":t")
                     if self.is_terminal then
                         filename, _ = vim.api.nvim_buf_get_name(0):gsub(".*:", "")
-                    elseif self.tabpage or self.is_help then
-                        filename = filename_tail
-
+                    else
                         local char_count, char_list = utils.get_char_from_string(filename)
                         if char_count > self.max_length then
                             filename = "..." .. table.concat(char_list, "", char_count - self.max_length + 1)
-                        end
-                    else
-                        filename = filename_relative
-
-                        local char_count, char_list = utils.get_char_from_string(filename)
-                        if char_count > self.max_length then
-                            local head = filename_head .. "/"
-                            if head == "./" then
-                                head = ""
-                            end
-                            filename = head .. "..." .. table.concat(char_list, "", char_count - self.max_length + 1)
-                        end
-
-                        if not herrline_conditions.width_percent_below(#filename, 0.25) then
-                            filename = vim.fn.pathshorten(filename)
                         end
                     end
 
@@ -378,20 +377,25 @@ return {
                 hl = function(self)
                     local hl
 
-                    if self.tabpage then
-                        if self.is_active then
-                            local error = get_diagnostic("error")
-                            local warn = get_diagnostic("warn")
-                            if error.condition(self) then
-                                hl = error.hl
-                            elseif warn.condition(self) then
-                                hl = warn.hl
-                            else
-                                hl = { fg = heirline_utils.get_highlight("TabLineSel").bg }
-                            end
+                    if self.tabpage and not self.is_active then
+                        return hl
+                    end
 
-                            hl["bold"] = true
+                    local error = get_diagnostic_severity("error")
+                    local warn = get_diagnostic_severity("warn")
+                    if not self.is_modified then
+                        if error.condition(self) then
+                            hl = error.hl
+                        elseif warn.condition(self) then
+                            hl = warn.hl
                         end
+                    end
+
+                    if self.tabpage and self.is_active then
+                        if hl == nil then
+                            hl = { fg = heirline_utils.get_highlight("TabLineSel").bg }
+                        end
+                        hl["bold"] = true
                     end
 
                     return hl
@@ -408,7 +412,7 @@ return {
                     if vim.api.nvim_get_option_value("buftype", { buf = self.buf }) == "terminal" then
                         return " "
                     else
-                        return " "
+                        return " "
                     end
                 end,
                 hl = { fg = "orange" },
@@ -425,22 +429,6 @@ return {
                     local i = math.floor((math.log(fsize) / math.log(1024)))
                     return string.format("%.1f%s", fsize / (1024 ^ i), suffix[i + 1])
                 end,
-            }
-
-            local file_name = {
-                file_icon,
-                file_path,
-                padding_before(
-                    insert_with_child_condition({
-                            init = function(self)
-                                self.buf = vim.api.nvim_get_current_buf()
-                            end,
-                        },
-                        file_modified,
-                        file_readonly
-                    )
-                ),
-                { provider = "%<" },
             }
 
             local ruler = {
@@ -574,34 +562,41 @@ return {
             local diagnostic = insert_with_child_condition({
                     condition = function(self)
                         local modified = vim.api.nvim_get_option_value("modified", { buf = self.buf })
-                        local has_diagnostics = herrline_conditions.has_diagnostics
-                        return not modified and has_diagnostics
+                        return not modified
                     end,
                     update = { "DiagnosticChanged", "BufEnter" },
                 },
-                padding_before(get_diagnostic("error", true)),
-                padding_before(get_diagnostic("warn", true)),
-                padding_before(get_diagnostic("info", true)),
-                padding_before(get_diagnostic("hint", true))
+                padding_before(get_diagnostic_severity("error", true)),
+                padding_before(get_diagnostic_severity("warn", true)),
+                padding_before(get_diagnostic_severity("info", true)),
+                padding_before(get_diagnostic_severity("hint", true))
             )
 
             local lsp_diagnostic = insert_with_child_condition({}, lsp, diagnostic)
 
-            local git = {
-                condition = herrline_conditions.is_git_repo,
-                init = function(self)
+            local git_branch = {
+                condition = function(self)
+                    if not herrline_conditions.is_git_repo then
+                        return false
+                    end
+
                     self.status_dict = vim.b.gitsigns_status_dict
+                    return self.status_dict and true or false
                 end,
                 provider = function(self)
                     return " " .. self.status_dict.head
                 end,
                 hl = { fg = "orange" },
-
-                padding_before(get_git("added", true)),
-                padding_before(get_git("changed", true)),
-                padding_before(get_git("removed", true)),
             }
 
+            local git_status = insert_with_child_condition(
+                {},
+                padding_before(get_git_status("added", true)),
+                padding_before(get_git_status("changed", true)),
+                padding_before(get_git_status("removed", true))
+            )
+
+            local git = insert_with_child_condition({}, git_branch, git_status)
 
             local macro = {
                 condition = function(self)
@@ -610,7 +605,7 @@ return {
                 update = { "RecordingEnter", "RecordingLeave" },
 
                 {
-                    provider = " ",
+                    provider = "󰻃 ",
                     hl = { fg = "orange", bold = true },
                 },
                 surround({ "[", "]" }, nil, {
@@ -674,7 +669,29 @@ return {
                 },
 
                 file_icon,
-                file_path,
+                heirline_utils.insert(
+                    file_name,
+                    padding_before(
+                        insert_with_child_condition(
+                            {
+                                condition = function(self)
+                                    local modified = vim.api.nvim_get_option_value("modified", { buf = self.buf })
+                                    return self.is_active and not modified
+                                end,
+                                update = { "DiagnosticChanged", "BufEnter" },
+                            },
+                            {
+                                condition = function(self)
+                                    self.diagnostic_count = #vim.diagnostic.get(0, { severity = { min = vim.diagnostic.severity.WARN } })
+                                    return self.diagnostic_count > 0
+                                end,
+                                provider = function(self)
+                                    return self.diagnostic_count
+                                end,
+                            }
+                        )
+                    )
+                ),
                 padding_before(
                     insert_with_child_condition({
                             condition = function(self)
@@ -682,22 +699,11 @@ return {
                             end,
                         },
                         file_modified,
-                        file_readonly,
-                        insert_with_child_condition({
-                                condition = function(self)
-                                    local modified = vim.api.nvim_get_option_value("modified", { buf = self.buf })
-                                    local has_diagnostics = herrline_conditions.has_diagnostics
-                                    return not modified and has_diagnostics
-                                end,
-                                update = { "DiagnosticChanged", "BufEnter" },
-                            },
-                            get_diagnostic("error", false),
-                            get_diagnostic("warn", false)
-                        )
+                        file_readonly
                     )
                 ),
                 padding_before({
-                    provider = " ",
+                    provider = "",
                     hl = { fg = "gray" },
                     on_click = {
                         callback = function(_, minwid)
@@ -1018,7 +1024,6 @@ return {
                 end,
 
                 padding_after(mode, 2),
-                padding_after(file_name, 2),
                 align,
             }
 
@@ -1031,7 +1036,6 @@ return {
                 end,
 
                 padding_after(mode, 2),
-                padding_after(file_name, 2),
                 align,
                 padding_before(lazy, 2),
                 padding_before(ruler, 2),
@@ -1041,9 +1045,8 @@ return {
             local default_statusline = {
                 padding_after(mode, 2),
                 padding_after(macro, 2),
-                padding_after(git, 2),
-                padding_after(lsp_diagnostic, 2),
-                padding_after(file_name, 2),
+                padding_after(insert_with_child_condition({ flexible = 2 }, git, git_status), 2),
+                padding_after(insert_with_child_condition({ flexible = 1 }, lsp_diagnostic, diagnostic), 2),
                 padding_after(file_size, 2),
                 align,
                 padding_before(lazy, 2),
@@ -1077,7 +1080,7 @@ return {
                     disable_winbar_cb = function(args)
                         if herrline_conditions.buffer_matches({
                                 buftype = { "nofile", "prompt", "help", "quickfix" },
-                                filetype = variables.skip_filetype_list3,
+                                filetype = { "^git.*", "fugitive", "Trouble", "dashboard" },
                             }, args.buf) then
                             return true
                         end

@@ -68,7 +68,6 @@
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
     "editor.wordWrap": "on",
-    "errorLens.followCursor": "activeLine",
     "explorer.confirmDragAndDrop": false,
     "extensions.experimental.affinity": {
         "asvetliakov.vscode-neovim": 1,

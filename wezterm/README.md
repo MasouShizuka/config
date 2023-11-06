@@ -8,4 +8,5 @@
 
 | 文件        | 路径                     | 说明             |
 | ----------- | ------------------------ | ---------------- |
+| config      | `$HOME/.config/wezterm/` | 配置文件         |
 | wezterm.lua | `$HOME/.config/wezterm/` | wezterm 配置文件 |

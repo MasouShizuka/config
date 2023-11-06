@@ -3,13 +3,16 @@ local variables = require("config.variables")
 return {
     "mfussenegger/nvim-dap",
     config = function(_, opts)
-        local icons = variables.icons.dap
-        for name, sign in pairs(icons) do
-            sign = type(sign) == "table" and sign or { sign }
-            vim.fn.sign_define("Dap" .. name, { text = sign[1], texthl = sign[2] or "DiagnosticInfo", linehl = sign[3], numhl = sign[3] })
+        local signs = {
+            DapBreakpoint = { text = variables.icons.dap.Breakpoint, texthl = "DiagnosticError" },
+            DapBreakpointCondition = { text = variables.icons.dap.BreakpointCondition, texthl = "DiagnosticInfo" },
+            DapBreakpointRejected = { text = variables.icons.dap.BreakpointRejected, texthl = "DiagnosticError" },
+            DapLogPoint = { text = variables.icons.dap.LogPoint, texthl = "DiagnosticInfo" },
+            DapStopped = { text = variables.icons.dap.Stopped, texthl = "DiagnosticWarn", linehl = "Visual", numhl = "Visual" },
+        }
+        for name, sign in pairs(signs) do
+            vim.fn.sign_define(name, sign)
         end
-
-        vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
     end,
     dependencies = {
         {

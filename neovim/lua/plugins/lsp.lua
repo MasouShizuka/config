@@ -25,36 +25,35 @@ return {
                 },
                 mappings = {
                     list = {
-                        ["j"] = actions.next,     -- Bring the cursor to the next item in the list
-                        ["k"] = actions.previous, -- Bring the cursor to the previous item in the list
-                        ["<down>"] = actions.next,
-                        ["<up>"] = actions.previous,
-                        ["<tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
-                        ["<s-tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
-                        ["<c-u>"] = actions.preview_scroll_win(5),
-                        ["<c-d>"] = actions.preview_scroll_win(-5),
+                        -- ["j"] = actions.next,     -- Bring the cursor to the next item in the list
+                        -- ["k"] = actions.previous, -- Bring the cursor to the previous item in the list
+                        -- ["<down>"] = actions.next,
+                        -- ["<up>"] = actions.previous,
+                        -- ["<tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
+                        -- ["<s-tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
+                        -- ["<c-u>"] = actions.preview_scroll_win(5),
+                        -- ["<c-d>"] = actions.preview_scroll_win(-5),
                         -- ["v"] = actions.jump_vsplit,
                         -- ["s"] = actions.jump_split,
-                        ["v"] = false,
-                        ["s"] = actions.jump_vsplit,
-                        ["S"] = actions.jump_split,
-                        ["t"] = actions.jump_tab,
-                        ["<cr>"] = actions.jump,
-                        ["o"] = actions.jump,
-                        ["l"] = actions.jump,
+                        ["s"] = false,
+                        ["V"] = actions.jump_split,
+                        -- ["t"] = actions.jump_tab,
+                        -- ["<cr>"] = actions.jump,
+                        -- ["o"] = actions.jump,
+                        -- ["l"] = actions.jump,
                         -- ["<leader>l"] = actions.enter_win("preview"), -- Focus preview window
                         ["<leader>l"] = false,
                         ["<c-j>"] = actions.enter_win("preview"),
-                        ["q"] = actions.close,
-                        ["Q"] = actions.close,
-                        ["<esc>"] = actions.close,
-                        ["<c-q>"] = actions.quickfix,
+                        -- ["q"] = actions.close,
+                        -- ["Q"] = actions.close,
+                        -- ["<esc>"] = actions.close,
+                        -- ["<c-q>"] = actions.quickfix,
                         -- ["<esc>"] = false -- disable a mapping
                     },
                     preview = {
-                        ["Q"] = actions.close,
-                        ["<tab>"] = actions.next_location,
-                        ["<s-tab>"] = actions.previous_location,
+                        -- ["Q"] = actions.close,
+                        -- ["<tab>"] = actions.next_location,
+                        -- ["<s-tab>"] = actions.previous_location,
                         ["<f4>"] = actions.next_location,
                         ["<s-f4>"] = actions.previous_location,
                         -- ["<leader>l"] = actions.enter_win("list"), -- Focus list window
@@ -149,27 +148,30 @@ return {
                 -- key mappings for actions in the trouble list
                 -- map to {} to remove a mapping, for example:
                 -- close = {},
-                close = "q",                     -- close the list
-                cancel = "<esc>",                -- cancel the preview and get back to your last window / buffer / cursor
-                refresh = "r",                   -- manually refresh
-                -- jump = { "<cr>", "<tab>" },   -- jump to the diagnostic or open / close folds
-                jump = { "l", "<cr>", "<tab>" }, -- jump to the diagnostic or open / close folds
-                -- open_split = { "<c-x>" },     -- open buffer in new split
-                -- open_vsplit = { "<c-v>" },    -- open buffer in new vsplit
-                -- open_tab = { "<c-t>" },       -- open buffer in new tab
-                open_split = { "S", "<c-x>" },  -- open buffer in new split
-                open_vsplit = { "s", "<c-v>" }, -- open buffer in new vsplit
+                -- close = "q",                                      -- close the list
+                -- cancel = "<esc>",                                 -- cancel the preview and get back to your last window / buffer / cursor
+                -- refresh = "r",                                    -- manually refresh
+                -- jump = { "<cr>", "<tab>", "<2-leftmouse>" },      -- jump to the diagnostic or open / close folds
+                jump = { "<cr>", "<tab>", "<2-leftmouse>", "l" }, -- jump to the diagnostic or open / close folds
+                -- open_split = { "<c-x>" },                         -- open buffer in new split
+                -- open_vsplit = { "<c-v>" },                        -- open buffer in new vsplit
+                -- open_tab = { "<c-t>" },                           -- open buffer in new tab
+                open_split = { "V", "<c-x>" },  -- open buffer in new split
+                open_vsplit = { "v", "<c-v>" }, -- open buffer in new vsplit
                 open_tab = { "t", "<c-t>" },    -- open buffer in new tab
-                jump_close = { "o" },           -- jump to the diagnostic and close the list
-                toggle_mode = "m",              -- toggle between "workspace" and "document" diagnostics mode
-                toggle_preview = "P",           -- toggle auto_preview
-                hover = "K",                    -- opens a small popup with the full multiline message
-                preview = "p",                  -- preview the diagnostic location
-                close_folds = { "zM", "zm" },   -- close all folds
-                open_folds = { "zR", "zr" },    -- open all folds
-                toggle_fold = { "zA", "za" },   -- toggle fold of current file
-                previous = "k",                 -- previous item
-                next = "j",                     -- next item
+                -- jump_close = { "o" },                             -- jump to the diagnostic and close the list
+                -- toggle_mode = "m",                                -- toggle between "workspace" and "document" diagnostics mode
+                -- switch_severity = "s",                            -- switch "diagnostics" severity filter level to HINT / INFO / WARN / ERROR
+                -- toggle_preview = "P",                             -- toggle auto_preview
+                -- hover = "K",                                      -- opens a small popup with the full multiline message
+                -- preview = "p",                                    -- preview the diagnostic location
+                -- open_code_href = "c",                             -- if present, open a URI with more information about the diagnostic error
+                -- close_folds = { "zM", "zm" },                     -- close all folds
+                -- open_folds = { "zR", "zr" },                      -- open all folds
+                -- toggle_fold = { "zA", "za" },                     -- toggle fold of current file
+                -- previous = "k",                                   -- previous item
+                -- next = "j",                                       -- next item
+                -- help = "?",                                       -- help menu
             },
             use_diagnostic_signs = true,
         },
@@ -253,17 +255,13 @@ return {
                     spacing = 4,
                     source = "if_many",
                     prefix = "●",
-                    -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
-                    -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
-                    -- prefix = "icons",
                 },
                 severity_sort = true,
             })
 
             -- Change diagnostic symbols in the sign column (gutter)
-            local icons = variables.icons.diagnostics
-            for type, icon in pairs(icons) do
-                local hl = "DiagnosticSign" .. type:gsub("^%l", string.upper)
+            for type, icon in pairs(variables.icons.diagnostics) do
+                local hl = "DiagnosticSign" .. type
                 vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
             end
 
@@ -422,44 +420,49 @@ return {
     --     enabled = not variables.is_vscode,
     --     opts = {
     --         keymaps = {
-    --             ["?"] = "actions.show_help",
-    --             ["g?"] = "actions.show_help",
-    --             ["<CR>"] = "actions.jump",
+    --             -- ["?"] = "actions.show_help",
+    --             -- ["g?"] = "actions.show_help",
+    --             -- ["<CR>"] = "actions.jump",
     --             ["l"] = "actions.jump",
-    --             ["<2-LeftMouse>"] = "actions.jump",
+    --             -- ["<2-LeftMouse>"] = "actions.jump",
+    --             -- ["<C-v>"] = "actions.jump_vsplit",
+    --             -- ["<C-s>"] = "actions.jump_split",
     --             ["<C-v>"] = false,
     --             ["<C-s>"] = false,
-    --             ["S"] = "actions.jump_vsplit",
-    --             ["s"] = "actions.jump_split",
-    --             ["p"] = "actions.scroll",
+    --             ["V"] = "actions.jump_vsplit",
+    --             ["v"] = "actions.jump_split",
+    --             -- ["p"] = "actions.scroll",
+    --             -- ["<C-j>"] = "actions.down_and_scroll",
+    --             -- ["<C-k>"] = "actions.up_and_scroll",
     --             ["<C-j>"] = false,
     --             ["<C-k>"] = false,
     --             ["J"] = "actions.down_and_scroll",
     --             ["K"] = "actions.up_and_scroll",
-    --             ["{"] = "actions.prev",
-    --             ["}"] = "actions.next",
-    --             ["[["] = "actions.prev_up",
+    --             -- ["{"] = "actions.prev",
+    --             -- ["}"] = "actions.next",
+    --             -- ["[["] = "actions.prev_up",
     --             ["h"] = "actions.prev_up",
-    --             ["]]"] = "actions.next_up",
-    --             ["q"] = "actions.close",
-    --             ["o"] = "actions.tree_toggle",
-    --             ["za"] = "actions.tree_toggle",
-    --             ["O"] = "actions.tree_toggle_recursive",
-    --             ["zA"] = "actions.tree_toggle_recursive",
+    --             -- ["]]"] = "actions.next_up",
+    --             -- ["q"] = "actions.close",
+    --             -- ["o"] = "actions.tree_toggle",
+    --             -- ["za"] = "actions.tree_toggle",
+    --             -- ["O"] = "actions.tree_toggle_recursive",
+    --             -- ["zA"] = "actions.tree_toggle_recursive",
     --             -- ["l"] = "actions.tree_open",
-    --             ["zo"] = "actions.tree_open",
-    --             ["L"] = false,
-    --             ["zO"] = "actions.tree_open_recursive",
+    --             -- ["zo"] = "actions.tree_open",
+    --             -- ["L"] = false,
+    --             -- ["zO"] = "actions.tree_open_recursive",
     --             -- ["h"] = "actions.tree_close",
-    --             ["zc"] = "actions.tree_close",
+    --             -- ["zc"] = "actions.tree_close",
+    --             -- ["H"] = "actions.tree_close_recursive",
     --             ["H"] = false,
-    --             ["zC"] = "actions.tree_close_recursive",
-    --             ["zr"] = "actions.tree_increase_fold_level",
-    --             ["zR"] = "actions.tree_open_all",
-    --             ["zm"] = "actions.tree_decrease_fold_level",
-    --             ["zM"] = "actions.tree_close_all",
-    --             ["zx"] = "actions.tree_sync_folds",
-    --             ["zX"] = "actions.tree_sync_folds",
+    --             -- ["zC"] = "actions.tree_close_recursive",
+    --             -- ["zr"] = "actions.tree_increase_fold_level",
+    --             -- ["zR"] = "actions.tree_open_all",
+    --             -- ["zm"] = "actions.tree_decrease_fold_level",
+    --             -- ["zM"] = "actions.tree_close_all",
+    --             -- ["zx"] = "actions.tree_sync_folds",
+    --             -- ["zX"] = "actions.tree_sync_folds",
     --         },
     --         highlight_on_hover = true,
     --         show_guides = true,
