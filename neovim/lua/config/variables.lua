@@ -1,5 +1,3 @@
-local utils = require("config.utils")
-
 local M = {}
 
 function M.load_running_environment()
@@ -38,7 +36,7 @@ function M.load_path()
         local conda_envs_path = M.conda_path .. "/envs"
         local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
         local envs_path = conda_envs_path .. "/" .. envs
-        if utils.exists(envs_path) then
+        if vim.fn.isdirectory(envs_path) ~= 0 then
             python_envs_path = envs_path .. "/bin/python"
             if M.is_windows then
                 python_envs_path = envs_path .. "/python.exe"
@@ -182,7 +180,32 @@ function M.load_keymap()
     end
 end
 
-function M.load_filetype_list()
+function M.load_buftype()
+    -- plugins skip these
+    M.skip_buftype_list = {
+        "help",
+        "nofile",
+        "popup",
+        "prompt",
+        "quickfix",
+        "terminal",
+    }
+end
+
+function M.load_filetype()
+    -- plugins skip these
+    M.skip_filetype_list = {
+        "aerial",
+        "alpha",
+        "dashboard",
+        "DiffviewFiles",
+        "DiffviewFileHistory",
+        "neo-tree",
+        "notify",
+        "NvimTree",
+        "toggleterm",
+        "Trouble",
+    }
     -- skip when <c-2>
     M.skip_filetype_list1 = {
         "aerial",
@@ -210,16 +233,6 @@ function M.load_filetype_list()
         "toggleterm",
         "Trouble",
     }
-    -- plugins skip these
-    M.skip_filetype_list3 = {
-        "aerial",
-        "DiffviewFiles",
-        "DiffviewFileHistory",
-        "neo-tree",
-        "NvimTree",
-        "toggleterm",
-        "Trouble",
-    }
     M.is_start_with_skip_filetype = function(filetype, skip_filetye_list)
         if skip_filetye_list then
             for _, skip_filetype in ipairs(skip_filetye_list) do
@@ -228,6 +241,12 @@ function M.load_filetype_list()
                 end
             end
         else
+            for _, skip_filetype in ipairs(M.skip_filetype_list) do
+                if filetype:find(skip_filetype, 1, true) == 1 then
+                    return true
+                end
+            end
+
             for _, skip_filetype in ipairs(M.skip_filetype_list1) do
                 if filetype:find(skip_filetype, 1, true) == 1 then
                     return true
@@ -235,12 +254,6 @@ function M.load_filetype_list()
             end
 
             for _, skip_filetype in ipairs(M.skip_filetype_list2) do
-                if filetype:find(skip_filetype, 1, true) == 1 then
-                    return true
-                end
-            end
-
-            for _, skip_filetype in ipairs(M.skip_filetype_list3) do
                 if filetype:find(skip_filetype, 1, true) == 1 then
                     return true
                 end
@@ -371,6 +384,12 @@ function M.load_filetype_list()
 end
 
 function M.load_lsp()
+    -- Change diagnostic symbols in the sign column (gutter)
+    for type, icon in pairs(M.icons.diagnostics) do
+        local hl = "DiagnosticSign" .. type
+        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+    end
+
     M.lsp = function(lspconfig, default_config)
         return {
             bashls = function()
@@ -407,31 +426,33 @@ function M.load_lsp()
                 lspconfig.lua_ls.setup(vim.tbl_deep_extend("keep", {
                     settings = {
                         Lua = {
-                            runtime = {
-                                -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-                                version = "LuaJIT",
+                            completion = {
+                                callSnippet = "Replace",
                             },
                             diagnostics = {
-                                -- Get the language server to recognize the `vim` global
                                 globals = {
                                     "mp",
                                     "vim",
                                 },
                             },
-                            workspace = {
-                                -- Make the server aware of Neovim runtime files
-                                library = vim.api.nvim_get_runtime_file("", true),
-                                checkThirdParty = false,
-                            },
-                            completion = {
-                                callSnippet = "Replace",
-                            },
                             format = {
-                                enable = true,
                                 defaultConfig = {
                                     quote_style = "double",
                                     max_line_length = "10000",
                                     trailing_table_separator = "smart",
+                                },
+                                enable = true,
+                            },
+                            runtime = {
+                                -- Tell the language server which version of Lua you're using
+                                -- (most likely LuaJIT in the case of Neovim)
+                                version = "LuaJIT",
+                            },
+                            -- Make the server aware of Neovim runtime files
+                            workspace = {
+                                checkThirdParty = "Disable",
+                                library = {
+                                    vim.env.VIMRUNTIME,
                                 },
                             },
                             telemetry = {
@@ -457,7 +478,9 @@ function M.load_lsp()
                     settings = {
                         python = {
                             analysis = {
+                                autoSearchPaths = true,
                                 diagnosticMode = "openFilesOnly",
+                                useLibraryCodeForTypes = true,
                             },
                             pythonPath = python_envs_path,
                         },
@@ -491,6 +514,10 @@ function M.load_lsp()
                                 executable = executable,
                                 args = args,
                             },
+                            inlayHints = {
+                                labelDefinitions = true,
+                                labelReferences = false,
+                            },
                         },
                     },
                 }, default_config))
@@ -507,78 +534,16 @@ function M.load_lsp()
             end,
         }
     end
-
-    M.lsp_list = {}
-    for lsp, _ in pairs(M.lsp(nil, nil)) do
-        M.lsp_list[#M.lsp_list + 1] = lsp
-    end
-
-    M.format = function()
-        -- Gets all lsp clients that support formatting
-        -- and have not disabled it in their client config
-        ---@param client lsp.Client
-        local function supports_format(client)
-            if
-                client.config
-                and client.config.capabilities
-                and client.config.capabilities.documentFormattingProvider == false
-            then
-                return false
-            end
-            return client.supports_method("textDocument/formatting") or client.supports_method("textDocument/rangeFormatting")
-        end
-
-        -- Gets all lsp clients that support formatting.
-        -- When a null-ls formatter is available for the current filetype,
-        -- only null-ls formatters are returned.
-        local function get_formatters(bufnr)
-            local ft = vim.bo[bufnr].filetype
-            -- check if we have any null-ls formatters for the current filetype
-            local null_ls = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
-
-            ---@class LazyVimFormatters
-            local ret = {
-                ---@type lsp.Client[]
-                active = {},
-                ---@type lsp.Client[]
-                available = {},
-                null_ls = null_ls,
-            }
-
-            ---@type lsp.Client[]
-            local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
-            for _, client in ipairs(clients) do
-                if supports_format(client) then
-                    if (#null_ls > 0 and client.name == "null-ls") or #null_ls == 0 then
-                        table.insert(ret.active, client)
-                    else
-                        table.insert(ret.available, client)
-                    end
-                end
-            end
-
-            return ret
-        end
-
-        local buf = vim.api.nvim_get_current_buf()
-
-        local formatters = get_formatters(buf)
-        local client_ids = vim.tbl_map(function(client)
-            return client.id
-        end, formatters.active)
-
-        if #client_ids == 0 then
-            return
-        end
-
-        vim.lsp.buf.format({
-            async = true,
-            bufnr = buf,
-            filter = function(client)
-                return vim.tbl_contains(client_ids, client.id)
-            end,
-        })
-    end
+    M.lsp_list = vim.tbl_keys(M.lsp())
+    M.lsp_filetype_list = {
+        "json",
+        "lua",
+        "markdown",
+        "python",
+        "rust",
+        "sh",
+        "tex",
+    }
 end
 
 function M.load_dap()
@@ -652,11 +617,7 @@ function M.load_dap()
             end,
         }
     end
-
-    M.dap_list = {}
-    for dap, _ in pairs(M.dap()) do
-        M.dap_list[#M.dap_list + 1] = dap
-    end
+    M.dap_list = vim.tbl_keys(M.dap())
 end
 
 function M.load_null_ls()
@@ -690,11 +651,29 @@ function M.load_null_ls()
             end,
         }
     end
+    M.null_ls_builtins_list = vim.tbl_keys(M.null_ls_builtins())
+end
 
-    M.null_ls_builtins_list = {}
-    for null_ls_builtin, _ in pairs(M.null_ls_builtins(nil)) do
-        M.null_ls_builtins_list[#M.null_ls_builtins_list + 1] = null_ls_builtin
-    end
+function M.load_treesitter()
+    M.treesitter = {
+        "bash",
+        "bibtex",
+        "latex",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "python",
+        "rust",
+    }
+    M.treesitter_filetype_list = {
+        "bib",
+        "lua",
+        "markdown",
+        "python",
+        "rust",
+        "sh",
+        "tex",
+    }
 end
 
 M.load_running_environment()
@@ -703,10 +682,12 @@ M.load_path()
 M.load_icons()
 M.load_keymap()
 
-M.load_filetype_list()
+M.load_buftype()
+M.load_filetype()
 
 M.load_lsp()
 M.load_dap()
 M.load_null_ls()
+M.load_treesitter()
 
 return M

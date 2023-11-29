@@ -94,15 +94,15 @@ class Sound {
     __New(gui, X, Y, W, H) {
         this.gui := gui
 
-        this.gui.SetFont("s128 c0")
         this.volume_icon := this.gui.AddText(Format("x{} y{} w{} h{}", X, Y, W, H), "🔊")
+        this.volume_icon.SetFont("s128 c0")
         X += 62
         Y += 190
         W := 120
         H := 40
 
-        this.gui.SetFont("s32 c0")
         this.volume_text := this.gui.AddText(Format("x{} y{} w{} h{}", X, Y, W, H), 100)
+        this.volume_text.SetFont("s32 c0")
         this.volume_text.Opt("+Background")
     }
 

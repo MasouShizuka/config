@@ -8,6 +8,7 @@ return {
             local codelldb_path = package_path .. "/adapter/codelldb"
             local liblldb_path = package_path .. "/lldb/lib/liblldb"
             if variables.is_windows then
+                codelldb_path = codelldb_path .. ".exe"
                 liblldb_path = package_path .. "/lldb/bin/liblldb.dll"
             elseif variables.is_mac then
                 liblldb_path = liblldb_path .. ".dylib"

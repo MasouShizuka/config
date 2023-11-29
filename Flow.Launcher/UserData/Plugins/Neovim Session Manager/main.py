@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from os import listdir, remove, startfile
-from os.path import isfile, join
+from os.path import exists, isfile, join
 from subprocess import PIPE, Popen
 
 from flowlauncher import FlowLauncher, FlowLauncherAPI
@@ -12,62 +12,61 @@ class NeovimSessionManager(FlowLauncher):
         self.platforms = {
             "Windows": {
                 "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions",
-                "cmd": "wezterm start --cwd \"{}\" -- nvim +",
+                "cmd": 'wezterm start --cwd "{}" -- nvim +',
                 # "cmd": "neovide --frame none -- +",
                 "icon": "💻",
             },
             "WSL": {
                 "session_dir": "C:/Users/MasouShizuka/AppData/Local/nvim-data/lazy/neovim-session-manager/sessions_wsl",
-                "cmd": "wezterm start -- wsl --cd \"{}\" -e nvim +",
+                "cmd": 'wezterm start -- wsl --cd "{}" -e nvim +',
                 # "cmd": "neovide --frame none --wsl -- +",
                 "icon": "🐧",
             },
         }
-
-        self.path_replacer = "__"
         self.colon_replacer = "++"
+        self.path_replacer = "__"
 
         super().__init__()
 
     def query(self, query):
         results = []
         for platform, info in self.platforms.items():
-            for session in listdir(info["session_dir"]):
-                if not isfile(join(info["session_dir"], session)):
-                    continue
+            if exists(info["session_dir"]):
+                for session in listdir(info["session_dir"]):
+                    if not isfile(join(info["session_dir"], session)):
+                        continue
 
-                working_dir = session.replace(self.path_replacer, "/")
-                working_dir = working_dir.replace(self.colon_replacer, ":")
-                if working_dir.endswith(".json"):
-                    working_dir = working_dir[:-5]
-                elif working_dir.endswith(".vim"):
-                    working_dir = working_dir[:-4]
+                    working_dir = session
 
-                title = info["icon"] + ": " + working_dir.split("/")[-1]
-                sub_title = "Session" + ": " + working_dir
+                    working_dir = working_dir.replace(self.colon_replacer, ":")
+                    working_dir = working_dir.replace(self.path_replacer, "/")
 
-                flag = True
-                query_lower = query.lower()
-                session_lower = platform.lower() + working_dir.lower()
-                for s in query_lower.split():
-                    if s not in session_lower:
-                        flag = False
-                        break
-                if not flag:
-                    continue
+                    exts = [".json", ".vim"]
+                    for ext in exts:
+                        if working_dir.endswith(ext):
+                            working_dir = working_dir[: -len(ext)]
 
-                results.append(
-                    {
-                        "Title": title,
-                        "SubTitle": sub_title,
-                        "IcoPath": "neovim.png",
-                        "JsonRPCAction": {
-                            "method": "open_session",
-                            "parameters": [info["cmd"], working_dir],
-                        },
-                        "ContextData": [session, working_dir],
-                    }
-                )
+                    title = f"{info['icon']}: {working_dir.split('/')[-1]}"
+                    sub_title = f"Session: {working_dir}"
+
+                    query_lower = query.lower()
+                    session_lower = f"{platform.lower()} {working_dir.lower()}"
+                    for s in query_lower.split():
+                        if s not in session_lower:
+                            break
+                    else:
+                        results.append(
+                            {
+                                "Title": title,
+                                "SubTitle": sub_title,
+                                "IcoPath": "neovim.png",
+                                "JsonRPCAction": {
+                                    "method": "open_session",
+                                    "parameters": [info["cmd"], working_dir],
+                                },
+                                "ContextData": [session, working_dir],
+                            }
+                        )
 
         return results
 

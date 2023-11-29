@@ -30,7 +30,7 @@ return {
                 enable = true,
             },
             ignore = {
-                filetype = variables.skip_filetype_list3,
+                filetype = variables.skip_filetype_list,
             },
             animation = {
                 enable = false,
@@ -382,8 +382,8 @@ return {
     --         local focus = require("focus")
     --         focus.setup(opts)
 
-    --         local ignore_buftypes = { "nofile", "prompt", "popup" }
-    --         local ignore_filetypes = variables.skip_filetype_list3
+    --         local ignore_buftypes = variables.skip_buftype_list
+    --         local ignore_filetypes = variables.skip_filetype_list
     --         local augroup = vim.api.nvim_create_augroup("FocusDisable", { clear = true })
     --         vim.api.nvim_create_autocmd("WinEnter", {
     --             callback = function(_)

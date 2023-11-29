@@ -26,29 +26,31 @@ function assprocess()
     local directory = mp.get_script_directory()
     -- local py_path = ''..directory..'/Danmu2Ass.py'
 
-	-- under windows platform, convert path format
-	-- if string.find(directory, "\\")
+	-- -- under windows platform, convert path format
+	-- if string.find(directory, '\\')
 	-- then
-	-- 	string.gsub(directory, "/", "\\")
+	-- 	string.gsub(directory, '/', '\\')
 	-- 	py_path = ''..directory..'\\Danmu2Ass.py'
 	-- end
+	-- local dw = mp.get_property_osd('display-width')
+	-- local dh = mp.get_property_osd('display-height')
 
-    -- choose to use python or .exe
-    -- local arg = { 'python', py_path, '-d', directory,
-    --     -- 设置屏幕分辨率 (默认 1920x1080)
-    --     '-s', '1920x1080',
-    --     -- 设置字体大小    (默认 37.0)
-    --     '-fs', '37.0',
-    --     -- 设置弹幕不透明度 (默认 0.95)
-    --     '-a', '0.95',
-    --     -- 滚动弹幕显示的持续时间 (默认 10秒)
-    --     '-dm', '10.0',
-    --     -- 静止弹幕显示的持续时间 (默认 5秒)
-    --     '-ds', '5.0',
-    --     -- 保留底部多少高度的空白区域 (默认0, 取值0.0-1.0)
-    --     '-p', '0',
-    --     '-r',
-    --     cid,
+    -- -- choose to use python or .exe
+    -- local arg = { python_path, py_path, '-d', directory,
+    -- 	-- 设置屏幕分辨率 (自动取值)
+    -- 	'-s', ''..dw..'x'..dh,
+    -- 	-- 设置字体大小    (默认 37.0)
+    -- 	'-fs',  '37.0',
+    -- 	-- 设置弹幕不透明度 (默认 0.95)
+    -- 	'-a', '0.95',
+    -- 	-- 滚动弹幕显示的持续时间 (默认 10秒)
+    -- 	'-dm', '10.0',
+    -- 	-- 静止弹幕显示的持续时间 (默认 5秒)
+    -- 	'-ds', '5.0',
+    -- 	-- 保留底部多少高度的空白区域 (默认　０, 取值0.0-1.0)
+    -- 	'-p', '0',
+    -- 	'-r',
+    -- 	cid,
     -- }
 
     local arg = { '' .. directory .. '/Danmu2Ass.exe', '-d', directory, cid }
@@ -68,12 +70,35 @@ function assprocess()
             mp.command('sub-reload')
             mp.commandv('rescan_external_files', 'reselect')
             mp.set_property('sid', 1)
+
+			-- -- 挂载subtitles滤镜，注意加上@标签，这样即使多次调用也不会重复挂载，以最后一次为准
+			-- mp.commandv('vf', 'append', '@danmu:subtitles=filename="'..directory..'/bilibili.ass"')
+			-- -- 只能在软解或auto-copy硬解下生效，统一改为auto-copy硬解
+			-- mp.set_property('hwdec', 'auto-copy')
         else
             log(err)
         end
     end)
 
 end
+
+-- toggle function
+function asstoggle()
+	-- if exists @danmu filter， remove it
+	for _, f in ipairs(mp.get_property_native('vf')) do
+		if f.label == 'danmu' then
+			log('停火')
+			mp.commandv('vf', 'remove', '@danmu')
+			return
+		end
+	end
+	-- otherwise, load danmu
+	assprocess()
+end
+
+-- mp.add_key_binding('b', 'toggle', asstoggle)
+mp.register_event('file-loaded', assprocess)
+
 
 -- modified
 function delete_ass()
@@ -83,6 +108,3 @@ function delete_ass()
 end
 
 mp.register_event('end-file', delete_ass)
-
--- mp.add_key_binding('b',	assprocess)
-mp.register_event('start-file', assprocess)

@@ -2,65 +2,6 @@ local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
-    -- 会使得 lsp 跳转到未打开的文件时卡死
-    -- {
-    --     "Bekaboo/dropbar.nvim",
-    --     enabled = not variables.is_vscode,
-    --     event = {
-    --         "BufNewFile",
-    --         "BufReadPost",
-    --     },
-    --     dependencies = {
-    --         "nvim-tree/nvim-web-devicons",
-    --     },
-    --     keys = {
-    --         { "<leader><tab>", function() require("dropbar.api").pick() end, desc = "Pick mode", mode = "n" },
-    --     },
-    --     opts = {
-    --         icons = {
-    --             kinds = {
-    --                 symbols = variables.icons.kinds,
-    --             },
-    --         },
-    --         menu = {
-    --             entry = {
-    --                 padding = {
-    --                     left = 0,
-    --                     right = 0,
-    --                 },
-    --             },
-    --             keymaps = {
-    --                 ["h"] = "<cmd>q!<cr><esc>",
-    --                 ["q"] = "<cmd>q!<cr><esc>",
-    --                 ["l"] = function()
-    --                     local menu = require("dropbar.api").get_current_dropbar_menu()
-    --                     if not menu then
-    --                         return
-    --                     end
-    --                     vim.cmd.normal("w")
-    --                     local cursor = vim.api.nvim_win_get_cursor(menu.win)
-    --                     local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
-    --                     if component then
-    --                         menu:click_on(component, nil, 1, "l")
-    --                     end
-    --                 end,
-    --                 ["o"] = function()
-    --                     local menu = require("dropbar.api").get_current_dropbar_menu()
-    --                     if not menu then
-    --                         return
-    --                     end
-    --                     vim.cmd.normal("0")
-    --                     local cursor = vim.api.nvim_win_get_cursor(menu.win)
-    --                     local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
-    --                     if component then
-    --                         menu:click_on(component, nil, 1, "l")
-    --                     end
-    --                 end,
-    --             },
-    --         },
-    --     },
-    -- },
-
     {
         "rebelot/heirline.nvim",
         dependencies = {
@@ -80,12 +21,12 @@ return {
                 red = heirline_utils.get_highlight("DiagnosticError").fg,
                 dark_red = heirline_utils.get_highlight("DiffDelete").bg,
                 green = heirline_utils.get_highlight("String").fg,
-                yellow = heirline_utils.get_highlight("Type").fg,
-                blue = heirline_utils.get_highlight("Function").fg,
+                yellow = heirline_utils.get_highlight("DiagnosticWarn").fg,
+                blue = heirline_utils.get_highlight("DiagnosticInfo").fg,
                 gray = heirline_utils.get_highlight("NonText").fg,
                 orange = heirline_utils.get_highlight("Constant").fg,
                 purple = heirline_utils.get_highlight("Statement").fg,
-                cyan = heirline_utils.get_highlight("Special").fg,
+                cyan = heirline_utils.get_highlight("DiagnosticHint").fg,
                 diag_warn = heirline_utils.get_highlight("DiagnosticWarn").fg,
                 diag_error = heirline_utils.get_highlight("DiagnosticError").fg,
                 diag_hint = heirline_utils.get_highlight("DiagnosticHint").fg,
@@ -102,11 +43,8 @@ return {
                 n = n or 1
                 local space = { provider = string.rep(" ", n) }
 
-                local condition = component.condition
-                component.condition = nil
-
                 return {
-                    condition = condition,
+                    condition = component.condition,
 
                     space,
                     component,
@@ -117,11 +55,8 @@ return {
                 n = n or 1
                 local space = { provider = string.rep(" ", n) }
 
-                local condition = component.condition
-                component.condition = nil
-
                 return {
-                    condition = condition,
+                    condition = component.condition,
 
                     component,
                     space,
@@ -345,16 +280,13 @@ return {
                     local buf = self.buf or vim.api.nvim_get_current_buf()
                     return vim.api.nvim_get_option_value("modified", { buf = buf })
                 end,
-                provider = "[+]",
+                provider = " ",
                 hl = { fg = "green" },
             }
             local file_name = {
                 init = function(self)
                     self.max_length = 30
                     self.is_terminal = herrline_conditions.buffer_matches({ buftype = { "terminal" } })
-
-                    local buf = self.buf or vim.api.nvim_get_current_buf()
-                    self.is_modified = self.buf and vim.api.nvim_get_option_value("modified", { buf = buf })
                 end,
                 provider = function(self)
                     local filename = self.filename or vim.api.nvim_buf_get_name(0)
@@ -383,12 +315,10 @@ return {
 
                     local error = get_diagnostic_severity("error")
                     local warn = get_diagnostic_severity("warn")
-                    if not self.is_modified then
-                        if error.condition(self) then
-                            hl = error.hl
-                        elseif warn.condition(self) then
-                            hl = warn.hl
-                        end
+                    if error.condition(self) then
+                        hl = error.hl
+                    elseif warn.condition(self) then
+                        hl = warn.hl
                     end
 
                     if self.tabpage and self.is_active then
@@ -435,19 +365,21 @@ return {
                 padding_after({
                     condition = function(self)
                         local mode = vim.fn.mode()
-                        self.is_v = mode:find("v")
-                        self.is_V = mode:find("V")
-                        return self.is_v or self.is_V
+                        self.is_mode_v = mode:find("v")
+                        self.is_mode_V = mode:find("V")
+                        return self.is_mode_v or self.is_mode_V
                     end,
                     provider = function(self)
-                        if self.is_v then
+                        if self.is_mode_v then
                             return ("󰈍 %s"):format(vim.fn.wordcount().visual_chars)
-                        else
+                        elseif self.is_mode_V then
                             local visual_start = vim.fn.line("v")
                             local visual_end = vim.fn.line(".")
                             local lines = visual_start <= visual_end and visual_end - visual_start + 1 or visual_start - visual_end + 1
                             return (" %s"):format(lines)
                         end
+
+                        return ""
                     end,
                 }),
                 {
@@ -464,7 +396,7 @@ return {
                 end,
                 provider = function(self)
                     local i = math.floor((self.row - 1) / self.line_count * #self.sbar) + 1
-                    return string.rep(self.sbar[i], 2)
+                    return self.sbar[i]:rep(2)
                 end,
                 hl = { fg = "blue", bg = "gray" },
             }
@@ -513,6 +445,8 @@ return {
                     },
                 },
                 init = function(self)
+                    local separator = " " .. variables.icons.fold.FoldClosed .. " "
+
                     local children = { { provider = " " } }
 
                     local filename = self.filename or vim.api.nvim_buf_get_name(0)
@@ -525,7 +459,7 @@ return {
                             provider = token,
                         })
                         table.insert(children, {
-                            provider = "  ",
+                            provider = separator,
                         })
                     end
                     table.remove(children, #children)
@@ -537,7 +471,7 @@ return {
                         for _, d in ipairs(data) do
                             local child = {
                                 {
-                                    provider = "  ",
+                                    provider = separator,
                                 },
                                 {
                                     provider = d.icon,
@@ -559,13 +493,8 @@ return {
                 update = "CursorMoved",
             }
 
-            local diagnostic = insert_with_child_condition({
-                    condition = function(self)
-                        local modified = vim.api.nvim_get_option_value("modified", { buf = self.buf })
-                        return not modified
-                    end,
-                    update = { "DiagnosticChanged", "BufEnter" },
-                },
+            local diagnostic = insert_with_child_condition(
+                { update = { "DiagnosticChanged", "BufEnter" } },
                 padding_before(get_diagnostic_severity("error", true)),
                 padding_before(get_diagnostic_severity("warn", true)),
                 padding_before(get_diagnostic_severity("info", true)),
@@ -598,6 +527,33 @@ return {
 
             local git = insert_with_child_condition({}, git_branch, git_status)
 
+            local search_count = {
+                condition = function(self)
+                    if vim.v.hlsearch == 0 then
+                        return false
+                    end
+
+                    local ok, search = pcall(vim.fn.searchcount)
+                    if ok and type(search) == "table" and search.total then
+                        self.search = search
+                        return true
+                    end
+
+                    return false
+                end,
+                provider = function(self)
+                    local search = self.search
+                    return string.format(
+                        "[%s%d/%s%d]",
+                        search.current > search.maxcount and ">" or "",
+                        math.min(search.current, search.maxcount),
+                        search.incomplete == 2 and ">" or "",
+                        math.min(search.total, search.maxcount)
+                    )
+                end,
+                hl = { fg = "yellow" }
+            }
+
             local macro = {
                 condition = function(self)
                     return vim.fn.reg_recording() ~= ""
@@ -614,6 +570,14 @@ return {
                     end,
                     hl = { fg = "green", bold = true },
                 }),
+            }
+
+            vim.opt.showcmdloc = "statusline"
+            local show_cmd = {
+                condition = function()
+                    return vim.opt.showcmdloc:get() == "statusline"
+                end,
+                provider = "%0.9(%S%)",
             }
 
             local lazy = {
@@ -675,8 +639,7 @@ return {
                         insert_with_child_condition(
                             {
                                 condition = function(self)
-                                    local modified = vim.api.nvim_get_option_value("modified", { buf = self.buf })
-                                    return self.is_active and not modified
+                                    return self.is_active
                                 end,
                                 update = { "DiagnosticChanged", "BufEnter" },
                             },
@@ -693,7 +656,8 @@ return {
                     )
                 ),
                 padding_before(
-                    insert_with_child_condition({
+                    insert_with_child_condition(
+                        {
                             condition = function(self)
                                 return self.is_active
                             end,
@@ -984,7 +948,7 @@ return {
                         end
                         -- diagnostic handlers
                         local diagnostics = function(args)
-                            if args.mods:find "c" then
+                            if args.mods:find("c") then
                                 vim.schedule(vim.lsp.buf.code_action)
                             else
                                 vim.schedule(vim.diagnostic.open_float)
@@ -1030,12 +994,15 @@ return {
             local special_statusline = {
                 condition = function()
                     return herrline_conditions.buffer_matches({
-                        buftype = { "nofile", "prompt", "help", "quickfix" },
-                        filetype = { "^git.*", "fugitive" },
+                        buftype = variables.skip_buftype_list,
+                        filetype = variables.skip_filetype_list,
                     })
                 end,
 
                 padding_after(mode, 2),
+                padding_after(file_size, 2),
+                padding_after(search_count, 2),
+                padding_after(show_cmd, 2),
                 align,
                 padding_before(lazy, 2),
                 padding_before(ruler, 2),
@@ -1044,10 +1011,12 @@ return {
 
             local default_statusline = {
                 padding_after(mode, 2),
-                padding_after(macro, 2),
                 padding_after(insert_with_child_condition({ flexible = 2 }, git, git_status), 2),
                 padding_after(insert_with_child_condition({ flexible = 1 }, lsp_diagnostic, diagnostic), 2),
                 padding_after(file_size, 2),
+                padding_after(search_count, 2),
+                padding_after(macro, 2),
+                padding_after(show_cmd, 2),
                 align,
                 padding_before(lazy, 2),
                 padding_before(file_encoding, 2),
@@ -1078,39 +1047,14 @@ return {
                 },
                 opts = {
                     disable_winbar_cb = function(args)
-                        if herrline_conditions.buffer_matches({
-                                buftype = { "nofile", "prompt", "help", "quickfix" },
-                                filetype = { "^git.*", "fugitive", "Trouble", "dashboard" },
-                            }, args.buf) then
-                            return true
-                        end
-
-                        local is_navic_available, navic = pcall(require, "nvim-navic")
-                        local is_available = is_navic_available and navic.is_available()
-                        return not is_available
+                        return not vim.tbl_contains(variables.lsp_filetype_list, vim.bo[args.buf].filetype) or herrline_conditions.buffer_matches({
+                            buftype = variables.skip_buftype_list,
+                            filetype = variables.skip_filetype_list,
+                        }, args.buf)
                     end,
                 },
             }
         end,
-    },
-
-    {
-        "RRethy/vim-illuminate",
-        config = function(_, opts)
-            require("illuminate").configure(opts)
-        end,
-        enabled = not variables.is_vscode,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
-        },
-        keys = {
-            { "<f7>",   function() require("illuminate").goto_next_reference(false) end, desc = "Go to next reference",     mode = "n" },
-            { "<s-f7>", function() require("illuminate").goto_prev_reference(false) end, desc = "Go to previous reference", mode = "n" },
-        },
-        opts = {
-            filetypes_denylist = variables.skip_filetype_list3,
-        },
     },
 
     {

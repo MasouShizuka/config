@@ -1,4 +1,3 @@
-local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
@@ -21,56 +20,43 @@ return {
     },
 
     {
-        "shellRaining/hlchunk.nvim",
-        cmd = {
-            "EnableHL",
-            "DisableHL",
-            "EnableHLChunk",
-            "DisableHLChunk",
-            "EnableHLIndent",
-            "DisableHLIndent",
-            "EnableHLLineNum",
-            "DisableHLLineNum",
-            "EnableHLBlank",
-            "DisableHLBlank",
-        },
+        "lukas-reineke/indent-blankline.nvim",
+        config = function(_, opts)
+            local highlight = {
+                "RainbowDelimiterRed",
+                "RainbowDelimiterYellow",
+                "RainbowDelimiterBlue",
+                "RainbowDelimiterOrange",
+                "RainbowDelimiterGreen",
+                "RainbowDelimiterViolet",
+                "RainbowDelimiterCyan",
+            }
+            opts["scope"] = { highlight = highlight }
+            require("ibl").setup(opts)
+
+            local hooks = require("ibl.hooks")
+            hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
+        end,
         enabled = not variables.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
         },
-        opts = function()
-            return {
-                chunk = {
-                    enable = true,
-                    notify = false,
-                    use_treesitter = true,
-                    chars = {
-                        horizontal_line = "━",
-                        vertical_line = "┃",
-                        left_top = "┏",
-                        left_bottom = "┗",
-                        right_arrow = "━",
-                    },
-                    style = {
-                        { fg = utils.get_highlight("purple", "fg") },
-                        { fg = utils.get_highlight("red", "fg") }, -- this fg is used to highlight wrong chunk
-                    },
-                },
-                indent = {
-                    enable = true,
-                    use_treesitter = false,
-                    chars = {
-                        "│",
-                    },
-                },
-                line_num = {
-                    enable = false,
-                },
-                blank = {
-                    enable = false,
-                },
-            }
-        end,
+        main = "ibl",
+        opts = {
+            exclude = {
+                filetypes = variables.skip_filetype_list,
+            },
+        },
+    },
+
+    {
+        "nmac427/guess-indent.nvim",
+        enabled = not variables.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        opts = {},
     },
 }

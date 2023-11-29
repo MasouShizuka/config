@@ -6,19 +6,17 @@ COMMIT_ 04fe818fc703d8c5dcc3a6aabe1caeed8286bdbb
 文档_ https://github.com/hooke007/MPV_lazy/discussions/106
 
 功能集一：
-  列表文件数量为1时自动填充同目录下的其它文件，可使用对应的 load_plus.conf 管理脚本设置。
-
+  列表文件数量为1时自动填充同目录下的其它文件。
 功能集二：
-  自定义快捷键 在mpv中唤起一个打开文件的窗口用于快速加载文件/网址
-
-示例：在 input.conf 中另起写入下列内容
- w        script-binding load_plus/import_files   # 打开文件
- W        script-binding load_plus/import_url     # 打开地址
- CTRL+w   script-binding load_plus/append_aid     # 追加其它音轨（不切换）
- ALT+w    script-binding load_plus/append_sid     # 追加其它字幕（切换）
- e        script-binding load_plus/append_vfSub   # 装载次字幕（滤镜型）
- E        script-binding load_plus/toggle_vfSub   # 隐藏/显示 当前的次字幕（滤镜型）
- CTRL+e   script-binding load_plus/remove_vfSub   # 移除次字幕（滤镜型）
+  自定义快捷键 在mpv中唤起一个打开文件的窗口用于快速加载文件/网址。
+可用的快捷键示例（在 input.conf 中写入）：
+ <KEY>   script-binding load_plus/import_files   # 打开文件
+ <KEY>   script-binding load_plus/import_url     # 打开地址
+ <KEY>   script-binding load_plus/append_aid     # 追加其它音轨（不切换）
+ <KEY>   script-binding load_plus/append_sid     # 追加其它字幕（切换）
+ <KEY>   script-binding load_plus/append_vfSub   # 装载次字幕（滤镜型）
+ <KEY>   script-binding load_plus/toggle_vfSub   # 隐藏/显示 当前的次字幕（滤镜型）
+ <KEY>   script-binding load_plus/remove_vfSub   # 移除次字幕（滤镜型）
 ]]
 
 local msg = require "mp.msg"

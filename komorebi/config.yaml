@@ -97,7 +97,7 @@ bars:
     widgets:
       left:   ["komorebi_workspaces", "komorebi_active_layout"]
       center: ["komorebi_multi_window"]
-      right:  ["explorer_button", "wifi", "network", "input_method", "cpu", "memory", "gpu", "battery", "clock"]
+      right:  ["explorer_button", "wifi", "traffic", "input_method", "cpu", "memory", "gpu", "battery", "clock"]
 
 # widgets:
   # my-clock-widget:
@@ -391,8 +391,8 @@ widgets:
         blink_charging_icon: False
       status_thresholds:
         critical: 10
-        low: 25
-        medium: 75
+        low: 30
+        medium: 70
         high: 90
         full: 100
       status_icons:
@@ -435,8 +435,8 @@ widgets:
   cpu:
     type: "yasb.cpu.CpuWidget"
     options:
-      label: "\uf2db {info[percent][total]}%"
-      label_alt: "\uf2db {info[histograms][cpu_percent]} | freq: {info[freq][current]:.2f} Mhz"
+      label: "\uf4bc {info[percent][total]}%"
+      label_alt: "\uf4bc {info[histograms][cpu_percent]} | freq: {info[freq][current]:.2f} Mhz"
       update_interval: 1000
       histogram_icons:
         - '\u2581' # 0%
@@ -457,7 +457,7 @@ widgets:
   memory:
     type: "yasb.memory.MemoryWidget"
     options:
-      label: "\U000f035b {virtual_mem_percent}%"
+      label: "\uf51e {virtual_mem_percent}%"
       label_alt: "\U000f035b {virtual_mem_free}"
       update_interval: 5000
       memory_thresholds:
@@ -516,6 +516,16 @@ widgets:
           on_middle: "do_nothing"
           on_right: "exec cmd.exe /c start ms-settings:network"
 
+  traffic:
+    type: "yasb.traffic.TrafficWidget"
+    options:
+        label: "\uf093 {upload_speed} \uf019 {download_speed}"
+        label_alt: "\uf019 {download_speed} \uf093 {upload_speed}"
+        update_interval: 1000
+        callbacks:
+          on_left: "toggle_label"
+          on_middle: "do_nothing"
+          on_right: "exec cmd.exe /c start ms-settings:network"
 
   # Some custom widgets
 
@@ -574,21 +584,10 @@ widgets:
         on_middle: "do_nothing"
         on_right: "toggle_label"
 
-  network:
-    type: "yasb.network.NetworkWidget"
-    options:
-      label: "\uf093 {upload_speed} \uf019 {download_speed}"
-      label_alt: "\uf019 {download_speed} \uf093 {upload_speed}"
-      update_interval: 1000
-      callbacks:
-        on_left: "toggle_label"
-        on_middle: "do_nothing"
-        on_right: "do_nothing"
-
   input_method:
     type: "yasb.input_method.InputMethodWidget"
     options:
-      label: "\uf11c  {language}"
+      label: "\uea65 {language}"
       update_interval: 500
       language_dict:
         0x409: "EN"

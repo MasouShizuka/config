@@ -31,22 +31,27 @@ empty_symbol = ' '
 [[battery.display]]
 threshold = 10
 style = 'bold #fb4934'
+discharging_symbol = ' '
 
 [[battery.display]]
-threshold = 25
+threshold = 30
 style = 'bold #fe8019'
+discharging_symbol = ' '
 
 [[battery.display]]
-threshold = 75
+threshold = 70
 style = 'bold #fabd2f'
+discharging_symbol = ' '
 
 [[battery.display]]
 threshold = 90
 style = 'bold #b8bb26'
+discharging_symbol = ' '
 
 [[battery.display]]
 threshold = 100
 style = 'bold #8ec07c'
+discharging_symbol = ' '
 
 
 

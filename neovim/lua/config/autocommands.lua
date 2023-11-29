@@ -1,25 +1,64 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
+
+-- 检测到对应类型的文件时发出 event
+vim.api.nvim_create_autocmd("Filetype", {
+    callback = function()
+        utils.event("TreesitterFile")
+        if not variables.is_vscode then
+            utils.refresh_current_buf(10)
+        end
+    end,
+    desc = "Treesitter file",
+    group = vim.api.nvim_create_augroup("TreesitterFile", { clear = true }),
+    once = true,
+    pattern = variables.treesitter_filetype_list,
+})
+if not variables.is_vscode then
+    vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+        callback = function(args)
+            local current_file = vim.fn.resolve(vim.fn.expand("%"))
+            if not (current_file == "" or vim.api.nvim_get_option_value("buftype", { buf = args.buf }) == "nofile") then
+                if utils.cmd({ "git", "-C", vim.fn.fnamemodify(current_file, ":p:h"), "rev-parse" }, false) then
+                    utils.event("GitFile")
+                    vim.api.nvim_del_augroup_by_name("GitFile")
+                end
+            end
+        end,
+        desc = "Git file",
+        group = vim.api.nvim_create_augroup("GitFile", { clear = true }),
+    })
+    vim.api.nvim_create_autocmd("Filetype", {
+        callback = function()
+            utils.event("LspFile")
+            utils.refresh_current_buf(10)
+        end,
+        desc = "Lsp file",
+        group = vim.api.nvim_create_augroup("LspFile", { clear = true }),
+        once = true,
+        pattern = variables.lsp_filetype_list,
+    })
+end
 
 if not variables.is_vscode then
     -- 使用宏时显示信息
-    -- 由 heirline.nvim 设置
-    -- local show_recording_info = vim.api.nvim_create_augroup("ShowRecording", { clear = true })
-    -- vim.api.nvim_create_autocmd("RecordingEnter", {
-    --     callback = function()
-    --         vim.api.nvim_set_option_value("cmdheight", 1, {})
-    --     end,
-    --     desc = "Set cmdheight=1 when start recording",
-    --     group = show_recording_info,
-    --     pattern = "*",
-    -- })
-    -- vim.api.nvim_create_autocmd("RecordingLeave", {
-    --     callback = function()
-    --         vim.api.nvim_set_option_value("cmdheight", 0, {})
-    --     end,
-    --     desc = "Set cmdheight=0 when finished recording",
-    --     group = show_recording_info,
-    --     pattern = "*",
-    -- })
+    if not utils.is_available("heirline.nvim") then
+        local show_recording_info = vim.api.nvim_create_augroup("ShowRecording", { clear = true })
+        vim.api.nvim_create_autocmd("RecordingEnter", {
+            callback = function()
+                vim.api.nvim_set_option_value("cmdheight", 1, {})
+            end,
+            desc = "Set cmdheight=1 when start recording",
+            group = show_recording_info,
+        })
+        vim.api.nvim_create_autocmd("RecordingLeave", {
+            callback = function()
+                vim.api.nvim_set_option_value("cmdheight", 0, {})
+            end,
+            desc = "Set cmdheight=0 when finished recording",
+            group = show_recording_info,
+        })
+    end
 
     -- 关闭 tab 后转到左边的 tab
     local prev_last_tabpage = vim.fn.tabpagenr("$")
@@ -36,6 +75,5 @@ if not variables.is_vscode then
         end,
         desc = "Go to left tab after closing tab",
         group = vim.api.nvim_create_augroup("GoToLeftTab", { clear = true }),
-        pattern = "*",
     })
 end

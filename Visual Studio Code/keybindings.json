@@ -18,26 +18,6 @@
 
     // 去除 Neovim 的接收键位
     {
-        "key": "ctrl+f",
-        "command": "-vscode-neovim.ctrl-f",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+i",
-        "command": "-vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+o",
-        "command": "-vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
-        "key": "ctrl+w",
-        "command": "-vscode-neovim.send",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
-    },
-    {
         "key": "ctrl+w up",
         "command": "-workbench.action.navigateUp",
         "when": "!editorTextFocus && !terminalFocus"
@@ -92,62 +72,87 @@
         "command": "-workbench.action.focusFirstEditorGroup",
         "when": "!editorTextFocus && !filesExplorerFocus && !inSearchEditor && !replaceInputBoxFocus && !searchViewletFocus && !terminalFocus"
     },
+    {
+        "key": "ctrl+w unknown",
+        "command": "-workbench.action.toggleEditorWidths",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w s",
+        "command": "-workbench.action.splitEditorDown",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w v",
+        "command": "-workbench.action.splitEditorRight",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w =",
+        "command": "-workbench.action.evenEditorWidths",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w -",
+        "command": "-workbench.action.decreaseViewHeight",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w unknown",
+        "command": "-workbench.action.decreaseViewWidth",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w unknown",
+        "command": "-workbench.action.increaseViewHeight",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
+    {
+        "key": "ctrl+w unknown",
+        "command": "-workbench.action.increaseViewWidth",
+        "when": "!editorTextFocus && !terminalFocus"
+    },
 
     // 增加 Neovim 的接收键位
     {
         "key": "ctrl+d",
         "command": "-vscode-neovim.ctrl-d",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+        "when": "editorTextFocus && neovim.ctrlKeysNormal.d && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
     },
     {
         "key": "ctrl+d",
         "command": "vscode-neovim.send",
         "args": "<c-d>",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
+        "when": "editorTextFocus && neovim.ctrlKeysNormal.d && neovim.init && neovim.mode != insert && editorLangId not in 'neovim.editorLangIdExclusions'"
     },
     {
         "key": "ctrl+u",
         "command": "-vscode-neovim.ctrl-u",
-        "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+        "when": "editorTextFocus && neovim.ctrlKeysNormal.u && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
     },
     {
         "key": "ctrl+u",
         "command": "vscode-neovim.send",
         "args": "<c-u>",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
+        "when": "editorTextFocus && neovim.ctrlKeysNormal.u && neovim.init && neovim.mode != insert && editorLangId not in 'neovim.editorLangIdExclusions'"
     },
     {
         "key": "ctrl+q",
         "command": "vscode-neovim.send",
         "args": "<c-q>",
-        "when": "editorTextFocus && neovim.ctrlKeysInsert && neovim.init && neovim.mode != insert"
+        "when": "editorTextFocus && neovim.ctrlKeysNormal.q && neovim.init && neovim.mode != insert && editorLangId not in 'neovim.editorLangIdExclusions'"
     },
 
     // 设置 ctrl+j 向下移动条目
     {
-        "key": "ctrl+n",
-        "command": "-list.focusDown",
-        "when": "listFocus && !inputFocus"
-    },
-    {
         "key": "ctrl+j",
         "command": "list.focusDown",
         "when": "listFocus && !inputFocus"
     },
     {
-        "key": "ctrl+n",
-        "command": "-list.focusDown",
-        "when": "inReferenceSearchEditor && neovim.mode == 'normal'"
-    },
-    {
         "key": "ctrl+j",
         "command": "list.focusDown",
         "when": "inReferenceSearchEditor && neovim.mode == 'normal'"
-    },
-    {
-        "key": "ctrl+n",
-        "command": "-selectNextSuggestion",
-        "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
     },
     {
         "key": "ctrl+j",
@@ -155,29 +160,14 @@
         "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
     },
     {
-        "key": "ctrl+n",
-        "command": "-showNextParameterHint",
-        "when": "editorTextFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
-    },
-    {
         "key": "ctrl+j",
         "command": "showNextParameterHint",
         "when": "editorTextFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
     },
     {
-        "key": "ctrl+n",
-        "command": "-vscode-neovim.history-down-cmdline",
-        "when": "neovim.mode == 'cmdline_normal'"
-    },
-    {
         "key": "ctrl+j",
         "command": "vscode-neovim.history-down-cmdline",
         "when": "neovim.mode == 'cmdline_normal'"
-    },
-    {
-        "key": "ctrl+n",
-        "command": "-workbench.action.quickOpenSelectNext",
-        "when": "inQuickOpen"
     },
     {
         "key": "ctrl+j",
@@ -186,29 +176,14 @@
     },
     // 设置 ctrl+k 向上移动条目
     {
-        "key": "ctrl+p",
-        "command": "-list.focusUp",
-        "when": "listFocus && !inputFocus"
-    },
-    {
         "key": "ctrl+k",
         "command": "list.focusUp",
         "when": "listFocus && !inputFocus"
     },
     {
-        "key": "ctrl+p",
-        "command": "-list.focusUp",
-        "when": "inReferenceSearchEditor && neovim.mode == 'normal'"
-    },
-    {
         "key": "ctrl+k",
         "command": "list.focusUp",
         "when": "inReferenceSearchEditor && neovim.mode == 'normal'"
-    },
-    {
-        "key": "ctrl+p",
-        "command": "-selectPrevSuggestion",
-        "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
     },
     {
         "key": "ctrl+k",
@@ -216,29 +191,14 @@
         "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
     },
     {
-        "key": "ctrl+p",
-        "command": "-showPrevParameterHint",
-        "when": "editorTextFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
-    },
-    {
         "key": "ctrl+k",
         "command": "showPrevParameterHint",
         "when": "editorTextFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
     },
     {
-        "key": "ctrl+p",
-        "command": "-vscode-neovim.history-up-cmdline",
-        "when": "neovim.mode == 'cmdline_normal'"
-    },
-    {
         "key": "ctrl+k",
         "command": "vscode-neovim.history-up-cmdline",
         "when": "neovim.mode == 'cmdline_normal'"
-    },
-    {
-        "key": "ctrl+p",
-        "command": "-workbench.action.quickOpenSelectPrevious",
-        "when": "inQuickOpen"
     },
     {
         "key": "ctrl+k",

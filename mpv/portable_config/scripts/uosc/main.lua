@@ -1,12 +1,12 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ 26d71a863015a3af45a41d17bb2f8678b8cde0d0
+COMMIT_ 96b57b259ee6ca547564c20745531804deff0f0d
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
 ]]
 
-local uosc_version = '5.0.0'
+local uosc_version = '5.1.1'
 
 mp.commandv('script-message', 'uosc-version', uosc_version)
 
@@ -70,8 +70,8 @@ defaults = {
 	autoload_types = 'video',
 	shuffle = false,
 
-	scale = 0,                                -- UI缩放倍率
-	scale_fullscreen = 0,                     -- UI缩放倍率
+	scale = 0,
+	scale_fullscreen = 0,
 	font_scale = 1,
 	font_bold = false,
 	text_border = 1.2,
@@ -109,8 +109,8 @@ defaults = {
 
 	idlescreen = true,
 	idlemsg = 'default',
-	idle_call_menu = 0,                       -- 空闲自动弹出上下文菜单
-	custom_font = 'default',                  -- 自定义界面字体
+	idle_call_menu = 0,
+	custom_font = 'default',
 }
 options = table_copy(defaults)
 opt.read_options(options, nil, function(_)
@@ -178,6 +178,7 @@ local config_defaults = {
 		idle_indicator = 0.8,
 		audio_indicator = 0.5,
 		buffering_indicator = 0.3,
+		playlist_position = 0.8,
 	},
 }
 config = {

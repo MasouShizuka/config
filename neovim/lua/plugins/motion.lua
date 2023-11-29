@@ -51,6 +51,7 @@ return {
                             end
                         end
                     end,
+                    label = { exclude = "hjkliardcx" },
                     highlight = {
                         backdrop = false,
                     },

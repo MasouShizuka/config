@@ -1,6 +1,6 @@
 DEFAULTS = {
-    "label": "\uf093 {upload_speed} \uf019 {download_speed}",
-    "label_alt": "\uf019 {download_speed} \uf093 {upload_speed}",
+    "label": "\ueb01 \ueab4 {download_speed} | \ueab7 {upload_speed}",
+    "label_alt": "\ueb01 \ueab4 {upload_speed} | \ueab7 {download_speed}",
     "update_interval": 1000,
     "callbacks": {
         "on_left": "toggle_label",
@@ -10,14 +10,8 @@ DEFAULTS = {
 }
 
 VALIDATION_SCHEMA = {
-    "label": {
-        "type": "string",
-        "default": DEFAULTS["label"],
-    },
-    "label_alt": {
-        "type": "string",
-        "default": DEFAULTS["label_alt"],
-    },
+    "label": {"type": "string", "default": DEFAULTS["label"]},
+    "label_alt": {"type": "string", "default": DEFAULTS["label_alt"]},
     "update_interval": {
         "type": "integer",
         "default": DEFAULTS["update_interval"],
@@ -29,17 +23,14 @@ VALIDATION_SCHEMA = {
         "schema": {
             "on_left": {
                 "type": "string",
-                "nullable": True,
                 "default": DEFAULTS["callbacks"]["on_left"],
             },
             "on_middle": {
                 "type": "string",
-                "nullable": True,
                 "default": DEFAULTS["callbacks"]["on_middle"],
             },
             "on_right": {
                 "type": "string",
-                "nullable": True,
                 "default": DEFAULTS["callbacks"]["on_right"],
             },
         },

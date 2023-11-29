@@ -77,9 +77,9 @@
 }
 
 .custom-widget,
-.network-widget .label,
 .input-method-widget .label,
 .wifi-widget .label,
+.traffic-widget .label,
 .cpu-widget .label,
 .memory-widget .label,
 .gpu-widget .label,
@@ -118,16 +118,16 @@
     font-size: 14px;
 }
 
-.network-widget .label {
-    background: #7eca9c;
-}
-
 .input-method-widget .label {
     background: #ffb86c;
 }
 
 .wifi-widget .label {
   background: #b8bb26;
+}
+
+.traffic-widget .label {
+    background: #7eca9c;
 }
 
 .cpu-widget .label {

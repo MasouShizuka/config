@@ -3,6 +3,16 @@ local variables = require("config.variables")
 return {
     {
         "dstein64/nvim-scrollview",
+        cmd = {
+            "ScrollViewDisable",
+            "ScrollViewEnable",
+            "ScrollViewToggle",
+            "ScrollViewRefresh",
+            "ScrollViewNext",
+            "ScrollViewPrev",
+            "ScrollViewFirst",
+            "ScrollViewLast",
+        },
         enabled = not variables.is_vscode,
         event = {
             "BufNewFile",
@@ -10,9 +20,8 @@ return {
         },
         opts = {
             current_only = true,
-            excluded_filetypes = variables.skip_filetype_list3,
+            excluded_filetypes = variables.skip_filetype_list,
             line_limit = -1,
-            winblend = 100,
             signs_column = 0,
             signs_on_startup = {
                 "conflicts",

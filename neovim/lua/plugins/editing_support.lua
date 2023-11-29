@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
@@ -24,14 +25,23 @@ return {
     },
 
     {
-        "chrisgrieser/nvim-alt-substitute",
-        enabled = not variables.is_vscode,
+        "danymat/neogen",
+        cmd = {
+            "Neogen",
+        },
+        config = function(_, opts)
+            if not variables.is_vscode then
+                opts["snippet_engine"] = "luasnip"
+            end
+            require("neogen").setup(opts)
+        end,
+        dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+        },
         keys = {
-            { "<c-f>", ":S ///g<left><left><left>", desc = "AltSubstitute", mode = { "n", "x" } },
+            { "<leader>gcd", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
         },
-        opts = {
-            showNotification = true, -- whether to show the "x replacements made" notification
-        },
+        opts = {},
     },
 
     {
@@ -45,7 +55,8 @@ return {
         },
         opts = {
             custom_textobjects = {
-                a = { "<().-()>" },
+                [","] = { "<().-()>" },
+                ["."] = { "<().-()>" },
                 e = function(ai_type)
                     local n_lines = vim.fn.line("$")
                     local start_line, end_line = 1, n_lines
@@ -144,18 +155,75 @@ return {
                 vim.api.nvim_create_autocmd("InsertLeave", {
                     callback = function()
                         -- 新行不清空空格
-                        if string.match(vim.api.nvim_get_current_line(), "^%s*$") == nil then
+                        if vim.api.nvim_get_current_line():match("^%s*$") == nil then
                             require("mini.trailspace").trim()
                         end
                     end,
                     desc = "Trail space when insert leave",
                     group = vim.api.nvim_create_augroup("TrailSpace", { clear = true }),
-                    pattern = "*",
                 })
             end
         end,
         lazy = true,
         version = false,
+    },
+
+    {
+        "folke/todo-comments.nvim",
+        cmd = {
+            "TodoQuickFix",
+            "TodoLocList",
+            "TodoTrouble",
+            "TodoTelescope",
+        },
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+        },
+        enabled = not variables.is_vscode,
+        event = {
+            "User TreesitterFile",
+        },
+        keys = {
+            { "<leader>xt", function() vim.api.nvim_command("TodoTrouble") end, desc = "List all project todos in trouble", mode = "n" },
+        },
+        opts = function()
+            local opts = {
+                keywords = {
+                    FIX = { icon = " ", color = "red", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+                    TODO = { icon = " ", color = "green" },
+                    HACK = { icon = " ", color = "orange" },
+                    WARN = { icon = " ", color = "yellow", alt = { "WARNING", "XXX" } },
+                    PERF = { icon = " ", color = "purple", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+                    NOTE = { icon = " ", color = "blue", alt = { "INFO" } },
+                    TEST = { icon = " ", color = "cyan", alt = { "TESTING", "PASSED", "FAILED" } },
+                },
+                colors = {
+                    red = { "DiagnosticError", "ErrorMsg", "#e06c75" },
+                    green = { "String", "#98c379" },
+                    orange = { "Constant", "#d19a66" },
+                    yellow = { "DiagnosticWarn", "WarningMsg", "#e5c07b" },
+                    purple = { "Statement", "#c678dd" },
+                    blue = { "DiagnosticInfo", "#61afef" },
+                    cyan = { "DiagnosticHint", "#56b6c2" },
+                    default = { "NonText", "#5c6370" },
+                },
+                highlight = {
+                    keyword = "bg",
+                },
+            }
+
+            -- 忽略大小写
+            for key, value in pairs(opts.keywords) do
+                local alt = value.alt
+                if alt then
+                    alt = vim.tbl_map(string.lower, alt)
+                    value.alt = alt
+                end
+                opts.keywords[key:lower()] = value
+            end
+
+            return opts
+        end,
     },
 
     {
@@ -199,39 +267,54 @@ return {
     },
 
     {
-        "keaising/im-select.nvim",
-        enabled = variables.is_windows,
+        "HiPhish/rainbow-delimiters.nvim",
+        dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+        },
+        enabled = not variables.is_vscode,
         event = {
-            "InsertEnter",
+            "User TreesitterFile",
         },
-        opts = {
-            -- IM will be set to `default_im_select` in `normal` mode
-            -- For Windows/WSL, default: "1033", aka: English US Keyboard
-            -- For macOS, default: "com.apple.keylayout.ABC", aka: US
-            -- For Linux, default: "keyboard-us" for Fcitx5 or "1" for Fcitx or "xkb:us::eng" for ibus
-            -- You can use `im-select` or `fcitx5-remote -n` to get the IM's name you preferred
-            default_im_select = "1033",
+    },
 
-            -- Can be binary's name or binary's full path,
-            -- e.g. 'im-select' or '/usr/local/bin/im-select'
-            -- For Windows/WSL, default: "im-select.exe"
-            -- For macOS, default: "im-select"
-            -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
-            -- default_command = vim.fn.stdpath("config") .. "/im-select",
-            default_command = "im-select",
-
-            -- Restore the default input method state when the following events are triggered
-            -- set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
-            set_default_events = { "InsertLeave" },
-
-            -- Restore the previous used input method state when the following events are triggered
-            -- if you don't want to restore previous used im in Insert mode,
-            -- e.g. deprecated `disable_auto_restore = 1`, just let it empty `set_previous_events = {}`
-            set_previous_events = { "InsertEnter" },
-
-            -- Show notification about how to install executable binary when binary is missing
-            keep_quiet_on_no_binary = false,
+    {
+        "LudoPinelli/comment-box.nvim",
+        cmd = {
+            "CBllbox",
+            "CBlcbox",
+            "CBlrbox",
+            "CBclbox",
+            "CBccbox",
+            "CBcrbox",
+            "CBrlbox",
+            "CBrcbox",
+            "CBrrbox",
+            "CBalbox",
+            "CBacbox",
+            "CBarbox",
+            "CBline",
+            "CBcline",
+            "CBrline",
+            "CBcatalog",
         },
+        keys = {
+            { "<leader>gcll", function() require("comment-box").llbox() end, desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
+            { "<leader>gclc", function() require("comment-box").lcbox() end, desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
+            { "<leader>gclr", function() require("comment-box").lrbox() end, desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
+            { "<leader>gccl", function() require("comment-box").clbox() end, desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
+            { "<leader>gccc", function() require("comment-box").crbox() end, desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
+            { "<leader>gccr", function() require("comment-box").ccbox() end, desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
+            { "<leader>gcrl", function() require("comment-box").rlbox() end, desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
+            { "<leader>gcrc", function() require("comment-box").rcbox() end, desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
+            { "<leader>gcrr", function() require("comment-box").rrbox() end, desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
+            { "<leader>gcal", function() require("comment-box").albox() end, desc = "Left aligned adapted box",                                mode = { "n", "x" } },
+            { "<leader>gcac", function() require("comment-box").acbox() end, desc = "Centered adapted box",                                    mode = { "n", "x" } },
+            { "<leader>gcar", function() require("comment-box").arbox() end, desc = "Right aligned adapted box",                               mode = { "n", "x" } },
+            { "<leader>gbl",  function() require("comment-box").line() end,  desc = "Left aligned line",                                       mode = { "n", "x" } },
+            { "<leader>gbc",  function() require("comment-box").cline() end, desc = "Centered line",                                           mode = { "n", "x" } },
+            { "<leader>gbr",  function() require("comment-box").rline() end, desc = "Right aligned line",                                      mode = { "n", "x" } },
+        },
+        opts = {},
     },
 
     {
@@ -311,6 +394,12 @@ return {
 
     {
         "numToStr/Comment.nvim",
+        config = function(_, opts)
+            require("Comment").setup(opts)
+
+            local ft = require("Comment.ft")
+            ft.python = { "#%s", [["""%s"""]] }
+        end,
         enabled = not variables.is_vscode,
         keys = {
             { "gc", desc = "Comment toggle linewise",  mode = { "n", "x" } },
@@ -380,7 +469,7 @@ return {
                         local is_mini_trailspace_available, mini_trailspace = pcall(require, "mini.trailspace")
                         if is_mini_trailspace_available then
                             -- 新行不清空空格
-                            if string.match(vim.api.nvim_get_current_line(), "^%s*$") == nil then
+                            if vim.api.nvim_get_current_line():match("^%s*$") == nil then
                                 local trailspace_time = os.time()
                                 if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
                                     mini_trailspace.trim()
@@ -411,14 +500,26 @@ return {
         end,
         enabled = not variables.is_vscode,
         event = {
-            "BufLeave",
-            "FocusLost",
-            "InsertLeave",
-            "TextChanged",
+            "User AutoSave",
         },
         init = function()
             vim.g.trailspace_interval = 3
             vim.g.prev_trailspace_time = os.time()
+
+            vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertLeave", "TextChanged" }, {
+                callback = function(args)
+                    local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    local is_modifiable = vim.api.nvim_get_option_value("modifiable", { buf = args.buf })
+                    local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
+                    if not vim.tbl_contains(variables.skip_buftype_list, buftype) and is_modifiable and is_modified then
+                        pcall(vim.cmd.write)
+                        utils.event("AutoSave")
+                        vim.api.nvim_del_augroup_by_name("AutoSave")
+                    end
+                end,
+                desc = "Auto save buffer",
+                group = vim.api.nvim_create_augroup("AutoSave", { clear = true }),
+            })
         end,
         opts = {
             execution_message = {
@@ -446,5 +547,27 @@ return {
         end,
         opts = {},
         version = "*",
+    },
+
+    {
+        "wingforth/nvim-im-select",
+        enabled = variables.is_windows,
+        event = {
+            "InsertEnter",
+        },
+        opts = {
+            -- im-select command, maybe the path to the executable `im-select`.
+            -- default value : "im-select"
+            im_select_cmd = "im-select",
+            -- default input method for normal mode or others except insert.
+            -- default value for macOS: "com.apple.keylayout.ABC".
+            -- defalt value for Windows: "1033"
+            default_im = "1033",
+            -- enable or disable switch input method automatically on FocusLost and FocusGained events.
+            -- disable by setting this option to false/0, or any other to enable.
+            -- if you have set up other ways to switch IM among different windows/applications, you may want to set this option to false.
+            -- default value is true.
+            enable_on_focus_events = false,
+        },
     },
 }

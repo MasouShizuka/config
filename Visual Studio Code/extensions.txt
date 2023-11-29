@@ -1,4 +1,4 @@
-alefragnani.Bookmarks
+8LWXpg.vscdb-workspace-storage-cleanup
 asvetliakov.vscode-neovim
 bierner.docs-view
 clover.md-table-editor
@@ -40,20 +40,15 @@ ms-toolsai.vscode-jupyter-powertoys
 ms-toolsai.vscode-jupyter-slideshow
 ms-vscode.hexeditor
 mushan.vscode-paste-image
-njpwerner.autodocstring
 njqdev.vscode-python-typehint
-oderwat.indent-rainbow
 PKief.material-icon-theme
 rebornix.toggle
 Remisa.shellman
-richie5um2.vscode-sort-json
 rust-lang.rust-analyzer
 ryu1kn.partial-diff
 ryuta46.multi-command
 shalimski.swapdiff
 sumneko.lua
-tamasfe.even-better-toml
-techer.open-in-browser
 thqby.vscode-autohotkey2-lsp
 timonwong.shellcheck
 usernamehw.errorlens

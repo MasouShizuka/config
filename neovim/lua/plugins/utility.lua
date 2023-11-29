@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
@@ -45,7 +46,6 @@ return {
             --     end,
             --     desc = "Set foldlevel=99 when enter buffer",
             --     group = vim.api.nvim_create_augroup("nvim-ufo", { clear = true }),
-            --     pattern = "*",
             -- })
 
             local handler = function(virtText, lnum, endLnum, width, truncate)
@@ -85,8 +85,7 @@ return {
         },
         enabled = not variables.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User TreesitterFile",
         },
         keys = {
             { "zR", function(...) require("ufo").openAllFolds(...) end,         desc = "Open all folds",          mode = "n" },
@@ -123,6 +122,58 @@ return {
     },
 
     {
+        "LunarVim/bigfile.nvim",
+        event = {
+            "User BigFile",
+        },
+        init = function()
+            vim.api.nvim_create_autocmd("BufReadPre", {
+                callback = function(args)
+                    if utils.is_bigfile(args.buf) then
+                        utils.event("BigFile")
+                        vim.api.nvim_del_augroup_by_name("BigFile")
+                        utils.refresh_current_buf(10)
+                    end
+                end,
+                desc = "Big file",
+                group = vim.api.nvim_create_augroup("BigFile", { clear = true }),
+            })
+        end,
+        opts = {
+            -- 禁用 filesize 检查，只通过 pattern 判断
+            filesize = 1e10,
+            pattern = function(bufnr, filesize_mib)
+                local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+                if vim.tbl_contains(variables.skip_buftype_list, buftype) then
+                    return false
+                end
+
+                local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+                if vim.tbl_contains(variables.skip_filetype_list, filetype) then
+                    return false
+                end
+
+                if utils.is_bigfile(bufnr) then
+                    vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
+                    return true
+                end
+
+                return false
+            end,
+            features = {
+                "indent_blankline",
+                -- "illuminate",
+                "lsp",
+                "treesitter",
+                "syntax",
+                "matchparen",
+                "vimopts",
+                "filetype",
+            },
+        },
+    },
+
+    {
         "mbbill/fencview",
         cmd = {
             "FencAutoDetect",
@@ -133,10 +184,7 @@ return {
 
     {
         "rcarriga/nvim-notify",
-        config = function(_, opts)
-            require("notify").setup(opts)
-
-            -- vim.notify = require("notify")
+        init = function()
             vim.notify = function(message, ...)
                 if message == "warning: multiple different client offset_encodings detected for buffer, this is not supported yet" then
                     return
@@ -146,7 +194,7 @@ return {
             end
         end,
         enabled = not variables.is_vscode,
-        lazy = false,
+        lazy = true,
         opts = {
             timeout = 3000,
             max_width = function()
@@ -184,24 +232,6 @@ return {
         },
         opts = {
             duration = 1000,
-        },
-    },
-
-    {
-        "vigoux/notifier.nvim",
-        cmd = {
-            "NotifierClear",
-            "NotifierReplay",
-        },
-        enabled = not variables.is_vscode,
-        event = {
-            "LspAttach",
-        },
-        opts = {
-            components = { -- Order of the components to draw from top to bottom (first nvim notifications, then lsp)
-                -- "nvim",    -- Nvim notifications (vim.notify and such)
-                "lsp",     -- LSP status updates
-            },
         },
     },
 }

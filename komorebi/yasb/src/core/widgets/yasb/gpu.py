@@ -1,8 +1,9 @@
 from collections import deque
 
+from PyQt6.QtWidgets import QLabel
+
 from core.validation.widgets.yasb.gpu import VALIDATION_SCHEMA
 from core.widgets.base import BaseWidget
-from PyQt6.QtWidgets import QLabel
 
 
 class GpuWidget(BaseWidget):

@@ -1,10 +1,11 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/player/lua/stats.lua
-COMMIT_ 1382a854c9f80d6519d060a5796accaf1328c93e
+COMMIT_ 6f17a5efe3929dc1a330471382137a5fcc075f12
+文档_ stats_plus.conf
 
 mpv.conf的（可选）前置条件 --load-stats-overlay=no
 
-input.conf 示例：
+可用的快捷键示例（在 input.conf 中写入）：
 
  <KEY>   script-binding stats_plus/display-stats          # 临时显示统计信息
  <KEY>   script-binding stats_plus/display-stats-toggle   # 常驻显示统计信息
@@ -49,12 +50,12 @@ local o = {
     scroll_lines = 1,
 
     duration = 4,
-    redraw_delay = 1,                -- acts as duration in the toggling case
+    redraw_delay = 1,
     ass_formatting = true,
     persistent_overlay = true,       -- 阻止其它OSD信息覆盖自身（原版默认为否）
-    print_perfdata_passes = false,   -- when true, print the full information about all passes
-    filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
-    show_frame_info = false,         -- whether to show the current frame info
+    print_perfdata_passes = false,
+    filter_params_max_length = 100,
+    show_frame_info = false,
     debug = false,
 
     -- Graph options and style
@@ -64,14 +65,14 @@ local o = {
     plot_tonemapping_lut = false,
     skip_frames = 5,
     global_max = true,
-    flush_graph_data = true,         -- clear data buffers when toggling
+    flush_graph_data = true,
     plot_bg_border_color = "0000FF",
     plot_bg_color = "262626",
     plot_color = "FFFFFF",
 
     -- Text style
     font = "sans-serif",
-    font_mono = "monospace",   -- monospaced digits are sufficient
+    font_mono = "monospace",
     font_size = 8,
     font_color = "FFFFFF",
     border_size = 0.8,
@@ -136,9 +137,6 @@ local function init_buffers()
 end
 local cache_ahead_buf, cache_speed_buf
 local perf_buffers = {}
--- Save all properties known to this version of mpv
-local property_list = {}
-for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
 
 local function graph_add_value(graph, value)
     graph.pos = (graph.pos % graph.len) + 1
@@ -187,17 +185,19 @@ local function text_style()
     if o.custom_header and o.custom_header ~= "" then
         return o.custom_header
     else
-        return format("{\\r}{\\an7}{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}" ..
-                      "{\\1c&H%s&}{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
+        local has_shadow = mp.get_property('osd-back-color'):sub(2, 3) == '00'
+        return format("{\\r\\an7\\fs%d\\fn%s\\bord%f\\3c&H%s&" ..
+                      "\\1c&H%s&\\1a&H%s&\\3a&H%s&" ..
+                      (has_shadow and "\\4a&H%s&\\xshad%f\\yshad%f\\4c&H%s&}" or "}"),
                       o.font_size, o.font, o.border_size,
-                      o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
-                      o.shadow_y_offset, o.shadow_color)
+                      o.border_color, o.font_color, o.alpha, o.alpha, o.alpha,
+                      o.shadow_x_offset, o.shadow_y_offset, o.shadow_color)
     end
 end
 
 
 local function has_vo_window()
-    return mp.get_property("vo-configured") == "yes"
+    return mp.get_property_native("vo-configured") and mp.get_property_native("video-osd")
 end
 
 
@@ -712,10 +712,16 @@ local function append_resolution(s, r, prefix, w_prop, h_prop, video_res)
     if append(s, r[w_prop], {prefix=prefix}) then
         append(s, r[h_prop], {prefix="x", nl="", indent=" ", prefix_sep=" ",
                            no_prefix_markup=true})
-        if r["aspect"] ~= nil then
+        if r["aspect"] ~= nil and not video_res then
             append(s, format("%.2f:1", r["aspect"]), {prefix="", nl="", indent="",
                                                       no_prefix_markup=true})
             append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
+                                         prefix_sep="", no_prefix_markup=true})
+        end
+        if r["sar"] ~= nil and video_res then
+            append(s, format("%.2f:1", r["sar"]), {prefix="", nl="", indent="",
+                                                      no_prefix_markup=true})
+            append(s, r["sar-name"], {prefix="(", suffix=")", nl="", indent=" ",
                                          prefix_sep="", no_prefix_markup=true})
         end
         if r["s"] then
@@ -959,13 +965,7 @@ local function add_video(s)
     end
     append_img_params(s, r, ro)
 
-    local hdr = mp.get_property_native("hdr-metadata")
-    if not hdr then
-        local hdrpeak = r["sig-peak"] or 0
-        hdr = {["max-cll"]=math.floor(hdrpeak * 203)}
-    end
-
-    append_hdr(s, hdr)
+    append_hdr(s, ro)
     append_property(s, "packet-video-bitrate", {prefix="码率：", suffix=" kbps"})
     append_filters(s, "vf", "视频滤镜链：")
 end
@@ -1117,7 +1117,7 @@ local function cache_stats()
     append(stats, opt_time(a) .. " - " .. opt_time(b), {prefix = "数据包队列："})
 
     local r = nil
-    if (a ~= nil) and (b ~= nil) then
+    if a ~= nil and b ~= nil then
         r = b - a
     end
 
@@ -1199,7 +1199,7 @@ local function record_cache_stats()
 
     local a = info["reader-pts"]
     local b = info["cache-end"]
-    if (a ~= nil) and (b ~= nil) then
+    if a ~= nil and b ~= nil then
         graph_add_value(cache_ahead_buf, b - a)
     end
 
@@ -1299,7 +1299,7 @@ local function unbind_scroll()
     end
 end
 local function update_scroll_bindings(k)
-    if (pages[k].scroll) then
+    if pages[k].scroll then
         bind_scroll()
     else
         unbind_scroll()

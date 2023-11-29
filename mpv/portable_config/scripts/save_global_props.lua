@@ -2,12 +2,13 @@
 
 SOURCE_ https://github.com/zenwarr/mpv-config/blob/master/scripts/remember-props.lua
 COMMIT_ 20220811 03cfc0e39682a73d9d24a6e01a3c02716a019d1d
+文档_ save_global_props.conf
 
 记录全局的属性变化，支持在下次程序启动时恢复，其对应数据保存在对应文件 saved-props.json
 （选项 --save-position-on-quit 保存的是基于具体文件的属性，不要与 --watch-later-options 保存的属性相冲突）
 
-示例在 input.conf 中写入（清除已记录的数据）：
-CTRL+r script-message-to save_global_props clean_data
+可用的快捷键示例（在 input.conf 中写入）：
+ <KEY>   script-message-to save_global_props clean_data   # 清除已记录的数据
 
 ]]
 
@@ -15,17 +16,20 @@ local mp = require("mp")
 local options = require("mp.options")
 local utils = require("mp.utils")
 
-local script_options = {
-	save_mode = 1,                     -- <0|1|2> 保存属性的时机。不保存/正常退出前/基于属性变化
-	props     = "volume,mute,speed",   -- 自定义要记录的属性
-	cache_dir = "~~/"                  -- 缓存文件的路径
+local opt = {
+	save_mode = 1,                     -- <0|1|2>
+	props     = "volume,mute",
+	dup_block = false,
+	cache_dir = "~~/"
 }
-options.read_options(script_options)
+options.read_options(opt)
 
-if script_options.save_mode == 0 then
-	mp.msg.info("已禁用保存全局属性的功能")
+if opt.save_mode == 0 then
+	mp.msg.info("已手动禁用 全局属性保存恢复")
 	return
 end
+
+--opt.props = "volume,mute,speed"
 
 local function split(inputstr, sep)
 	local result = {}
@@ -35,13 +39,33 @@ local function split(inputstr, sep)
 	return result
 end
 
-script_options.props = split(script_options.props, ",")
+opt.props = split(opt.props, ",")
+local watch_later_opts = split(mp.get_property("watch-later-options"), ",")
+local dup_opts = false
+
+local function check_dup(table1, table2)
+	for _, value1 in ipairs(table1) do
+		for _, value2 in ipairs(table2) do
+			if value1 == value2 then
+				dup_opts = true
+				mp.msg.warn("存在与 --watch-later-options 重合的项目： " .. value1)
+			end
+		end
+	end
+end
+
+check_dup(opt.props, watch_later_opts)
+
+if dup_opts and opt.dup_block then
+	mp.msg.warn("已自动禁用 全局属性保存恢复")
+	return
+end
 
 local cleaned = false
-local data_file_path = (mp.command_native({'expand-path', script_options.cache_dir .. "saved-props.json"}))
+local data_file_path = (mp.command_native({"expand-path", opt.cache_dir .. "saved-props.json"}))
 
 local function read_data_file()
-	local json_file = io.open(data_file_path, 'a+')
+	local json_file = io.open(data_file_path, "a+")
 	local result = utils.parse_json(json_file:read("*all"))
 	if result == nil then
 		result = {}
@@ -57,7 +81,7 @@ local function save_data_file()
 		mp.msg.verbose("因清理属性记录而中止保存功能")
 		return
 	end
-	local file = io.open(data_file_path, 'w+')
+	local file = io.open(data_file_path, "w+")
 	if file == nil then
 		return
 	end
@@ -69,24 +93,25 @@ local function save_data_file()
 end
 
 local function clean_data_file()
-	local file = io.open(data_file_path, 'w+')
+	local file = io.open(data_file_path, "w+")
 	if file == nil then
 		return
 	end
-	local content = ''
+	local content = ""
 	file:write(content)
 	file:close()
 	cleaned = true
+	mp.msg.info("全局属性保存恢复 已清理缓存")
 	mp.osd_message("已清理记录的属性\n建议重启mpv", 2)
 end
 
 local function init()
-	for _, prop_name in ipairs(script_options.props) do
+	for _, prop_name in ipairs(opt.props) do
 		local saved_value = saved_data[prop_name]
 		if saved_value ~= nil then
 			mp.set_property_native(prop_name, saved_value)
 		end
-		if script_options.save_mode == 2 then
+		if opt.save_mode == 2 then
 			mp.observe_property(prop_name, "native", function(_, prop_value)
 				saved_data[prop_name] = mp.get_property_native(prop_name)
 				save_data_file()
@@ -96,10 +121,11 @@ local function init()
 end
 
 init()
+mp.msg.info("正在运行 全局属性保存恢复 模式" .. opt.save_mode)
 
-if script_options.save_mode == 1 then
+if opt.save_mode == 1 then
 	mp.register_event("shutdown", function()
-		for _, prop_name in ipairs(script_options.props) do
+		for _, prop_name in ipairs(opt.props) do
 			saved_data[prop_name] = mp.get_property_native(prop_name)
 			save_data_file()
 		end

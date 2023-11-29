@@ -1,9 +1,10 @@
 import logging
 from ctypes import WinDLL
 
+from PyQt6.QtWidgets import QLabel
+
 from core.validation.widgets.yasb.input_method import VALIDATION_SCHEMA
 from core.widgets.base import BaseWidget
-from PyQt6.QtWidgets import QLabel
 
 
 class InputMethodWidget(BaseWidget):

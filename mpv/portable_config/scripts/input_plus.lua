@@ -1,69 +1,78 @@
 --[[
+文档_ 无
 
 快捷指令增强
 
-input.conf 示例：
+可用的快捷键示例（在 input.conf 中写入）：
 
- Ctrl+a               script-binding input_plus/adevice_back        # 上一个音频输出设备
-#                     script-binding input_plus/adevice_next        # 下...
-#                     script-binding input_plus/adevice_all_back    # 上...（包括不属于当前 --ao 的设备）
-#                     script-binding input_plus/adevice_all_next    # 下...
+ <KEY>   script-binding input_plus/adevice_back        # 上一个音频输出设备
+ <KEY>   script-binding input_plus/adevice_next        # 下...
+ <KEY>   script-binding input_plus/adevice_all_back    # 上...（包括不属于当前 --ao 的设备）
+ <KEY>   script-binding input_plus/adevice_all_next    # 下...
 
-#                     script-binding input_plus/chap_skip_toggle    # 启用/禁用强制自动跳过章节（片头片尾）
+ <KEY>   script-binding input_plus/chap_skip_toggle    # 启用/禁用强制自动跳过章节（片头片尾）
 
-#                     script-binding input_plus/info_toggle         # 启用/禁用仿Pot的OSD常驻显示简要信息
+ <KEY>   script-binding input_plus/info_toggle         # 启用/禁用仿Pot的OSD常驻显示简要信息
 
- Ctrl+v               script-binding input_plus/load_cbd            # 加载剪贴板地址
-#                     script-binding input_plus/load_cbd_add        # ...（追加到列表）
-#                     script-binding input_plus/load_cbd_alt        # 加载主缓冲区地址（仅Linux可用）
-#                     script-binding input_plus/load_cbd_alt_add    # ...（追加到列表）
+ <KEY>   script-binding input_plus/load_cbd            # 加载剪贴板地址
+ <KEY>   script-binding input_plus/load_cbd_add        # ...（追加到列表）
+ <KEY>   script-binding input_plus/load_cbd_alt        # 加载主缓冲区地址（仅Linux可用）
+ <KEY>   script-binding input_plus/load_cbd_alt_add    # ...（追加到列表）
 
-#                     script-binding input_plus/mark_aid_A          # 标记当前音轨为A
-#                     script-binding input_plus/mark_aid_B          # 标记当前音轨为B
-#                     script-binding input_plus/mark_aid_merge      # 合并AB音轨
-#                     script-binding input_plus/mark_aid_reset      # 取消AB并轨和标记
- m                    script-binding input_plus/mark_aid_fin        # （单键实现上述四项命令）
+ <KEY>   script-binding input_plus/mark_aid_A          # 标记当前音轨为A
+ <KEY>   script-binding input_plus/mark_aid_B          # 标记当前音轨为B
+ <KEY>   script-binding input_plus/mark_aid_merge      # 合并AB音轨
+ <KEY>   script-binding input_plus/mark_aid_reset      # 取消AB并轨和标记
+ <KEY>   script-binding input_plus/mark_aid_fin        # （单键实现上述四项命令）
 
-#                     script-binding input_plus/ostime_display      # 临时显示系统时间
-#                     script-binding input_plus/ostime_toggle       # 启用/禁用显示系统时间
+ <KEY>   script-binding input_plus/ostime_display      # 临时显示系统时间
+ <KEY>   script-binding input_plus/ostime_toggle       # 启用/禁用显示系统时间
 
- Ctrl+p               script-binding input_plus/pip_dummy           # 画中画（伪）/小窗化
-#                     script-binding input_plus/pip_dummy_p05       # ...（5%的尺寸占比）
-#                     script-binding input_plus/pip_dummy_p20       # ...（20%...）
+ <KEY>   script-binding input_plus/pip_dummy           # 画中画（伪）/小窗化
+ <KEY>   script-binding input_plus/pip_dummy_p05       # ...（5%的尺寸占比）
+ <KEY>   script-binding input_plus/pip_dummy_p20       # ...（20%...）
 
- Alt+p                script-binding input_plus/playlist_order_0    # 播放列表的洗牌与撤销
-#                     script-binding input_plus/playlist_order_0r   # ...（重定向至首个文件）
-#                     script-binding input_plus/playlist_order_1    # 播放列表连续洗牌（可用上两项命令恢复）
-#                     script-binding input_plus/playlist_order_1r   # ...
-#                     script-binding input_plus/playlist_tmp_save   # 保存当前播放列表为临时列表（位于主设置目录 playlist_temp.mpl ）
-#                     script-binding input_plus/playlist_tmp_load   # 打开临时播放列表
+ <KEY>   script-binding input_plus/playlist_order_0    # 播放列表的洗牌与撤销
+ <KEY>   script-binding input_plus/playlist_order_0r   # ...（重定向至首个文件）
+ <KEY>   script-binding input_plus/playlist_order_1    # 播放列表连续洗牌（可用上两项命令恢复）
+ <KEY>   script-binding input_plus/playlist_order_1r   # ...
+ <KEY>   script-binding input_plus/playlist_tmp_save   # 保存当前播放列表为临时列表（位于主设置目录 playlist_temp.mpl ）
+ <KEY>   script-binding input_plus/playlist_tmp_load   # 打开临时播放列表
 
- CLOSE_WIN            script-binding input_plus/quit_real           # 对执行退出命令前的确认（防止误触）
-#                     script-binding input_plus/quit_wait           # 延后退出命令的执行（执行前再次触发可取消）
+ <KEY>   script-binding input_plus/quit_real           # 对执行退出命令前的确认（防止误触）
+ <KEY>   script-binding input_plus/quit_wait           # 延后退出命令的执行（执行前再次触发可取消）
 
-#                     script-binding input_plus/sids_sec_swap       # 双字幕的主次交换
+ <KEY>   script-binding input_plus/seek_acc            # [按住/松开] 非线性向前跳转（模拟流媒体平台的跳转方式）
+ <KEY>   script-binding input_plus/seek_acc_back       # [按住/松开] ......向后...
+ <KEY>   script-binding input_plus/seek_acc_alt        # [按住/松开] ...（防止关键帧异常的备用）
+ <KEY>   script-binding input_plus/seek_acc_back_alt   # [按住/松开] ...
 
- b                    script-binding input_plus/speed_auto          # [按住/松开] 两倍速/一倍速
-#                     script-binding input_plus/speed_auto_bullet   # [按住/松开] 子弹时间/一倍速
-#                     script-binding input_plus/speed_recover       # 仿Pot的速度重置与恢复
-#                     script-binding input_plus/speed_sync_toggle   # 启用/禁用自适应速度偏移（补偿显示刷新率）
+ <KEY>   script-binding input_plus/sids_sec_swap       # 双字幕的主次交换
 
-#                     script-binding input_plus/stats_1_2           # 单键浏览统计数据第1至2页
-#                     script-binding input_plus/stats_0_4           # 单键浏览统计数据第0至4页
+ <KEY>   script-binding input_plus/speed_auto          # [按住/松开] 两倍速/一倍速
+ <KEY>   script-binding input_plus/speed_auto_bullet   # [按住/松开] 子弹时间/一倍速
+ <KEY>   script-binding input_plus/speed_recover       # 仿Pot的速度重置与恢复
+ <KEY>   script-binding input_plus/speed_sync_toggle   # 启用/禁用自适应速度偏移（补偿显示刷新率）
 
-#                     script-binding input_plus/trackA_back         # 上一个音频轨道（自动跳过无轨道）
-#                     script-binding input_plus/trackA_next         # 下...
-#                     script-binding input_plus/trackS_back         # 上一个字幕轨道...
-#                     script-binding input_plus/trackS_next         # 下...
-#                     script-binding input_plus/trackV_back         # 上一个视频轨道...
-#                     script-binding input_plus/trackV_next         # 下...
+ <KEY>   script-binding input_plus/stats_1_2           # 单键浏览统计数据第1至2页
+ <KEY>   script-binding input_plus/stats_0_4           # 单键浏览统计数据第0至4页
 
-#                     script-binding input_plus/trackA_refresh      # 刷新当前轨道（音频）
-#                     script-binding input_plus/trackS_refresh      # ...（字幕）
-#                     script-binding input_plus/trackV_refresh      # ...（视频）
+ <KEY>   script-binding input_plus/trackA_back         # 上一个音频轨道（自动跳过无轨道）
+ <KEY>   script-binding input_plus/trackA_next         # 下...
+ <KEY>   script-binding input_plus/trackS_back         # 上一个字幕轨道...
+ <KEY>   script-binding input_plus/trackS_next         # 下...
+ <KEY>   script-binding input_plus/trackV_back         # 上一个视频轨道...
+ <KEY>   script-binding input_plus/trackV_next         # 下...
+
+ <KEY>   script-binding input_plus/trackA_refresh      # 刷新当前轨道（音频）
+ <KEY>   script-binding input_plus/trackS_refresh      # ............（字幕）
+ <KEY>   script-binding input_plus/trackV_refresh      # ............（视频）
+
+ <KEY>   script-binding input_plus/volume_db_dec       # 减少音量（以分贝为单位）
+ <KEY>   script-binding input_plus/volume_db_inc       # 增加...
 
 
-#                     script-message-to input_plus cycle-cmds "cmd1" "cmd2"   # 循环触发命令
+ <KEY>   script-message-to input_plus cycle-cmds "cmd1" "cmd2"   # 循环触发命令
 
 ]]
 
@@ -80,13 +89,18 @@ function check_plat()
 	end
 	return "x11"
 end
-local plat = check_plat()
+
+function round(n)
+	return n + (2^52 + 2^51) - (2^52 + 2^51)
+end
 
 
 
 --
 -- 变量预设
 --
+
+local plat = check_plat()
 
 local adevicelist = {}
 local target_ao = nil
@@ -121,6 +135,10 @@ local shuffling = false
 local save_path = mp.command_native({"expand-path", "~~/"}) .. "/playlist_temp.mpl"
 
 local pre_quit = false
+
+local seek_dur_init = 0
+local seek_dur_step = 1
+local seek_dur = seek_dur_init
 
 local bak_speed = nil
 local spd_adapt = false
@@ -578,6 +596,45 @@ function quit_wait()
 end
 
 
+-- 另一种版本 https://github.com/mpv-player/mpv/issues/11589#issuecomment-1513535980
+function acc_seeking(back, flag)
+	seek_dur = seek_dur + seek_dur_step
+	if not back then
+		mp.command("seek " .. seek_dur .. " " .. flag)
+	else
+		mp.command("seek -" .. seek_dur .. " " .. flag)
+	end
+end
+function seek_acc(evt)
+	if evt.event == "repeat" then
+		acc_seeking(false, "keyframes")
+	elseif evt.event == "up" then
+		seek_dur = seek_dur_init
+	end
+end
+function seek_acc_alt(evt)
+	if evt.event == "repeat" then
+		acc_seeking(false, "exact")
+	elseif evt.event == "up" then
+		seek_dur = seek_dur_init
+	end
+end
+function seek_acc_back(evt)
+	if evt.event == "repeat" then
+		acc_seeking(true, "keyframes")
+	elseif evt.event == "up" then
+		seek_dur = seek_dur_init
+	end
+end
+function seek_acc_back_alt(evt)
+	if evt.event == "repeat" then
+		acc_seeking(true, "exact")
+	elseif evt.event == "up" then
+		seek_dur = seek_dur_init
+	end
+end
+
+
 function sids_sec_swap()
 	local sid_main = mp.get_property_number("sid", 0)
 	local sid_sec = mp.get_property_number("secondary-sid", 0)
@@ -705,6 +762,27 @@ function track_refresh(id)
 end
 
 
+-- 另一种实现 https://github.com/mpv-player/mpv/pull/11444#issuecomment-1469229943
+function volume2db(vol)
+	return 60.0 * math.log(vol / 100.0) / math.log(10.0)
+end
+-- https://github.com/mpv-player/mpv/blob/051ba909b4107240d643e4793efa2ceb714fd1b4/player/audio.c#L175
+function db2volume(db)
+	return math.exp(math.log(10.0) * (db / 60.0 + 2))
+end
+function volume_add(diff)
+	local gain = round(volume2db(mp.get_property_number("volume"))) + diff
+	local cap = mp.get_property_number("volume-max")
+	if db2volume(gain) > cap then
+		gain = volume2db(cap)
+	elseif db2volume(gain) < 10 then
+		gain = volume2db(10)
+	end
+	mp.set_property_number("volume", db2volume(gain))
+	mp.osd_message(string.format("音量增益： %+.2f dB", gain))
+end
+
+
 
 --
 -- 键位绑定
@@ -747,6 +825,11 @@ mp.add_key_binding(nil, "playlist_tmp_load", playlist_tmp_load)
 mp.add_key_binding(nil, "quit_real", quit_real)
 mp.add_key_binding(nil, "quit_wait", quit_wait)
 
+mp.add_key_binding(nil, "seek_acc", seek_acc, {complex = true})
+mp.add_key_binding(nil, "seek_acc_back", seek_acc_back, {complex = true})
+mp.add_key_binding(nil, "seek_acc_alt", seek_acc_alt, {complex = true})
+mp.add_key_binding(nil, "seek_acc_back_alt", seek_acc_back_alt, {complex = true})
+
 mp.add_key_binding(nil, "sids_sec_swap", sids_sec_swap)
 
 mp.add_key_binding(nil, "speed_auto", speed_auto, {complex = true})
@@ -767,5 +850,9 @@ mp.add_key_binding(nil, "trackV_next", function() track_seek("vid", 1) end)
 mp.add_key_binding(nil, "trackA_refresh", function() track_refresh("aid") end)
 mp.add_key_binding(nil, "trackS_refresh", function() track_refresh("sid") end)
 mp.add_key_binding(nil, "trackV_refresh", function() track_refresh("vid") end)
+
+mp.add_key_binding(nil, "volume_db_dec", function() volume_add(-1) end, {repeatable = true})
+mp.add_key_binding(nil, "volume_db_inc", function() volume_add(1) end, {repeatable = true})
+
 
 mp.register_script_message("cycle-cmds", cycle_cmds)

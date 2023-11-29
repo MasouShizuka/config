@@ -1,18 +1,19 @@
 import logging
 from time import time
 
-from core.event_enums import KomorebiEvent
-from core.event_service import EventService
-from core.utils.komorebi.client import KomorebiClient
-from core.utils.win32.utilities import get_monitor_hwnd
-from core.validation.widgets.komorebi.multi_window import VALIDATION_SCHEMA
-from core.widgets.base import BaseWidget
 from psutil import Process
 from PyQt6.QtCore import QFileInfo, pyqtSignal
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QFileIconProvider, QHBoxLayout, QPushButton, QWidget
 from win32gui import GetWindowText, SetForegroundWindow
 from win32process import GetWindowThreadProcessId
+
+from core.event_enums import KomorebiEvent
+from core.event_service import EventService
+from core.utils.komorebi.client import KomorebiClient
+from core.utils.win32.utilities import get_monitor_hwnd
+from core.validation.widgets.komorebi.multi_window import VALIDATION_SCHEMA
+from core.widgets.base import BaseWidget
 
 try:
     from core.utils.komorebi.event_listener import KomorebiEventListener

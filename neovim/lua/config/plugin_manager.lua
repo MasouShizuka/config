@@ -13,22 +13,32 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-local checker = true
-if variables.is_vscode then
-    checker = false
-end
-
 return require("lazy").setup("plugins", {
-    change_detection = {
-        notify = false,
-    },
-    checker = {
-        enabled = checker,
-    },
+    lockfile = variables.data_path .. "/lazy/lazy-lock.json",
     install = {
         colorscheme = { "onedark" },
     },
     ui = {
         border = "rounded",
+    },
+    checker = {
+        enabled = not variables.is_vscode,
+    },
+    change_detection = {
+        notify = false,
+    },
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "gzip",
+                "matchit",
+                "matchparen",
+                "netrwPlugin",
+                "tarPlugin",
+                "tohtml",
+                "tutor",
+                "zipPlugin",
+            },
+        },
     },
 })

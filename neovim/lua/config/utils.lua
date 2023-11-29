@@ -18,27 +18,20 @@ end
 
 --- Trigger an AstroNvim user event
 ---@param event string The event name to be appended to Astro
-function M.event(event)
-    vim.schedule(function()
-        vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false })
-    end)
+---@param delay? boolean Whether or not to delay the event asynchronously (Default: true)
+function M.event(event, delay)
+    local emit_event = function() vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false }) end
+    if delay == false then
+        emit_event()
+    else
+        vim.schedule(emit_event)
+    end
 end
 
 function M.diffthis()
     vim.cmd.windo("diffthis")
     vim.cmd.normal("gg")
     vim.cmd.normal("]c")
-end
-
-function M.exists(path)
-    local ok, err, code = os.rename(path, path)
-    if not ok then
-        if code == 13 then
-            -- Permission denied, but it exists
-            return true
-        end
-    end
-    return ok
 end
 
 -- https://github.com/amrbashir/nvim-docs-view
@@ -115,7 +108,6 @@ function M.extra_view_toggle(update, opts)
         end,
         desc = config.filetype .. " auto update",
         group = vim.api.nvim_create_augroup(config.filetype, { clear = true }),
-        pattern = "*",
     })
 end
 
@@ -246,7 +238,7 @@ function M.get_char_from_string(str)
     local len_in_byte = #str
     local i = 1
     while (i <= len_in_byte) do
-        local cur_byte = string.byte(str, i)
+        local cur_byte = str:byte(i)
         local byte_count = 1;
         if cur_byte > 0 and cur_byte <= 127 then
             byte_count = 1
@@ -258,8 +250,8 @@ function M.get_char_from_string(str)
             byte_count = 4
         end
 
-        local char = string.sub(str, i, i + byte_count - 1)
-        char_list[#char_list+1] = char
+        local char = str:sub(i, i + byte_count - 1)
+        char_list[#char_list + 1] = char
 
         i = i + byte_count
         char_count = char_count + 1
@@ -268,9 +260,36 @@ function M.get_char_from_string(str)
     return char_count, char_list
 end
 
-function M.get_highlight(name, val)
+function M.get_highlight(name, key)
     local hl = vim.api.nvim_get_hl(0, { name = name })
-    return string.format("#%06x", hl[val])
+    return string.format("#%06x", hl[key])
+end
+
+--- Check if a plugin is defined in lazy. Useful with lazy loading when a plugin is not necessarily loaded yet
+---@param plugin string The plugin to search for
+---@return boolean available # Whether the plugin is available
+function M.is_available(plugin)
+    local lazy_config_avail, lazy_config = pcall(require, "lazy.core.config")
+    return lazy_config_avail and lazy_config.spec.plugins[plugin] ~= nil
+end
+
+function M.is_bigfile(buf)
+    local max_filesize = 100 * 1024
+    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+    if ok and stats and stats.size > max_filesize then
+        return true
+    end
+    return false
+end
+
+function M.refresh_current_buf(timeout)
+    if timeout then
+        vim.defer_fn(function()
+            vim.cmd.edit()
+        end, timeout)
+    else
+        vim.cmd.edit()
+    end
 end
 
 --- Open a URL under the cursor with the current operating system
@@ -436,7 +455,6 @@ function M.undoquit()
         callback = save_window_quit_history,
         desc = "Undoquit save window quit history",
         group = vim.api.nvim_create_augroup("Undoquit", { clear = true }),
-        pattern = "*",
     })
 
     return restore_window, restore_tab

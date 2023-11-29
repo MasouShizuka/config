@@ -45,7 +45,7 @@ if not variables.is_vscode then
             vim.api.nvim_set_option_value("fileformat", "dos", { scope = "local" })
         end
         vim.cmd.write()
-        vim.cmd.edit()
+        utils.refresh_current_buf()
     end
     vim.api.nvim_create_user_command("ToggleFileformat", toggle_fileformat, { desc = "Toggle fileformat" })
     vim.keymap.set("n", "<leader>ctf", toggle_fileformat, { desc = "Toggle fileformat", silent = true })
@@ -57,7 +57,9 @@ if not variables.is_vscode then
     end
     vim.api.nvim_create_user_command("ToggleWrap", toggle_wrap, { desc = "Toggle wrap" })
     vim.keymap.set("n", "<leader>ctw", toggle_wrap, { desc = "Toggle wrap", silent = true })
+end
 
+if not variables.is_vscode then
     -- diff
     is_which_key_available, which_key = pcall(require, "which-key")
     if is_which_key_available then

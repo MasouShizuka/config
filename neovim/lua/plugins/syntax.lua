@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 return {
@@ -28,7 +29,11 @@ return {
         end,
         opts = {
             custom_surroundings = {
-                a = {
+                [","] = {
+                    input = { "%<().-()%>" },
+                    output = { left = "<", right = ">" },
+                },
+                ["."] = {
                     input = { "%<().-()%>" },
                     output = { left = "<", right = ">" },
                 },
@@ -83,33 +88,43 @@ return {
         build = {
             ":TSUpdate",
         },
+        cmd = {
+            "TSBufDisable",
+            "TSBufEnable",
+            "TSBufToggle",
+            "TSDisable",
+            "TSEnable",
+            "TSToggle",
+            "TSInstall",
+            "TSInstallInfo",
+            "TSInstallSync",
+            "TSModuleInfo",
+            "TSUninstall",
+            "TSUpdate",
+            "TSUpdateSync",
+        },
         config = function(_, opts)
             require("nvim-treesitter.configs").setup(opts)
         end,
         dependencies = {
-            "HiPhish/rainbow-delimiters.nvim",
+            "nvim-treesitter/nvim-treesitter-refactor",
+            "nvim-treesitter/nvim-treesitter-textobjects",
         },
-        enabled = not variables.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User TreesitterFile",
         },
         keys = {
             { "<cr>", desc = "Treesitter incremental", mode = "n" },
             { "<bs>", desc = "Treesitter decremental", mode = "x" },
         },
         opts = {
-            ensure_installed = {
-                "bash",
-                "bibtex",
-                "latex",
-                "lua",
-                "markdown",
-                "markdown_inline",
-                "python",
-                "rust",
+            ensure_installed = variables.treesitter,
+            highlight = {
+                enable = true,
+                disable = function(lang, buf)
+                    return utils.is_bigfile(buf)
+                end,
             },
-            highlight = { enable = true },
             incremental_selection = {
                 enable = true,
                 keymaps = {
@@ -120,7 +135,97 @@ return {
                 },
             },
             indent = { enable = true },
+            refactor = {
+                highlight_definitions = {
+                    enable = true,
+                    -- Set to false if you have an `updatetime` of ~100.
+                    clear_on_cursor_move = true,
+                },
+                navigation = {
+                    enable = true,
+                    -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
+                    keymaps = {
+                        goto_definition = false,
+                        list_definitions = false,
+                        list_definitions_toc = false,
+                        goto_next_usage = "<f7>",
+                        goto_previous_usage = "<s-f7>",
+                    },
+                },
+            },
+            textobjects = {
+                select = {
+                    enable = true,
+                    -- Automatically jump forward to textobj, similar to targets.vim
+                    lookahead = true,
+                    keymaps = {
+                        -- You can use the capture groups defined in textobjects.scm
+                        ["ak"] = { query = "@block.outer", desc = "Around block" },
+                        ["ik"] = { query = "@block.inner", desc = "Inside block" },
+                        ["ac"] = { query = "@class.outer", desc = "Around class" },
+                        ["ic"] = { query = "@class.inner", desc = "Inside class" },
+                        ["af"] = { query = "@function.outer", desc = "Around function " },
+                        ["if"] = { query = "@function.inner", desc = "Inside function " },
+                        ["aa"] = { query = "@parameter.outer", desc = "around argument" },
+                        ["ia"] = { query = "@parameter.inner", desc = "inside argument" },
+                    },
+                },
+                move = {
+                    enable = true,
+                    set_jumps = true, -- whether to set jumps in the jumplist
+                    goto_next_start = {
+                        ["]k"] = { query = "@block.outer", desc = "Next block start" },
+                        ["]f"] = { query = "@function.outer", desc = "Next function start" },
+                        ["]a"] = { query = "@parameter.inner", desc = "Next argument start" },
+                    },
+                    goto_next_end = {
+                        ["]K"] = { query = "@block.outer", desc = "Next block end" },
+                        ["]F"] = { query = "@function.outer", desc = "Next function end" },
+                        ["]A"] = { query = "@parameter.inner", desc = "Next argument end" },
+                    },
+                    goto_previous_start = {
+                        ["[k"] = { query = "@block.outer", desc = "Previous block start" },
+                        ["[f"] = { query = "@function.outer", desc = "Previous function start" },
+                        ["[a"] = { query = "@parameter.inner", desc = "Previous argument start" },
+                    },
+                    goto_previous_end = {
+                        ["[K"] = { query = "@block.outer", desc = "Previous block end" },
+                        ["[F"] = { query = "@function.outer", desc = "Previous function end" },
+                        ["[A"] = { query = "@parameter.inner", desc = "Previous argument end" },
+                    },
+                },
+            },
         },
         version = false,
     },
+    {
+        "nvim-treesitter/nvim-treesitter-context",
+        cmd = {
+            "TSContextEnable",
+            "TSContextDisable",
+            "TSContextToggle",
+        },
+        dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+        },
+        enabled = not variables.is_vscode,
+        event = {
+            "User TreesitterFile",
+        },
+        opts = {
+            enable = true,            -- Enable this plugin (Can be enabled/disabled later via commands)
+            max_lines = 0,            -- How many lines the window should span. Values <= 0 mean no limit.
+            min_window_height = 0,    -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+            line_numbers = true,
+            multiline_threshold = 20, -- Maximum number of lines to show for a single context
+            trim_scope = "outer",     -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+            mode = "cursor",          -- Line used to calculate context. Choices: 'cursor', 'topline'
+            -- Separator between context and content. Should be a single character string, like '-'.
+            -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+            separator = nil,
+            zindex = 20,     -- The Z-index of the context window
+            on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+        },
+    },
+
 }

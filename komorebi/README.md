@@ -9,7 +9,8 @@
 
 | 文件            | 路径                  | 说明                                             |
 | --------------- | --------------------- | ------------------------------------------------ |
-| yasb            | `komorebi/`           | Yet Another Status Bar 源码                      |
+| komorebi        |                       | komorebi 源码，经过了**修改**                    |
+| yasb            |                       | Yet Another Status Bar 源码，经过了**修改**      |
 | config.yaml     | `$HOME/.config/yasb/` | Yet Another Status Bar 配置文件                  |
 | styles.css      | `$HOME/.config/yasb/` | Yet Another Status Bar 样式                      |
 | komorebi_v1.ahk |                       | komorebi 配置文件<br>可配合 MyKeymap 1 版本 使用 |
@@ -17,6 +18,7 @@
 
 ## 注意
 
-- 需要将 `komorebi路径` 添加到 `系统Path` 环境变量
+- 需要将 `komorebi.exe` 和 `komorebic.exe` 所在目录添加到 `系统Path` 环境变量
+- `komorebi` 项目可用命令 `cargo build --release` 生成 `komorebi.exe` 和 `komorebic.exe`
 - `yasb` 项目可用命令 `pyinstaller main.spec` 生成 `yasb.exe`
     - `yasb` 的配置文件 `config.yaml` 和 `styles.css` 可位于 `yasb.exe` 同目录或 `$HOME/.config/yasb`

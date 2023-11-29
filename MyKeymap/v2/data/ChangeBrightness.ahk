@@ -117,8 +117,12 @@ class CLayout extends Gui {
     ShowGui() {
         ; modified
         ; super.Show()
-        w := this.monCount * this.monitorIcoSize
-        h := this.monitorIcoSize + 60
+        if (this.monitorIcoSize * this.monCount < this.defaultGuiWidth) {
+            w := this.defaultGuiWidth
+        } else {
+            w := this.monitorIcoSize * this.monCount
+        }
+        h := 230
         GetCurrentMonitorCenter(&cx, &cy)
         x := cx - w / 2
         y := cy - h / 2

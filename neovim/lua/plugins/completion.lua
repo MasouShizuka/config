@@ -7,6 +7,8 @@ return {
             local cmp = require("cmp")
             local luasnip = require("luasnip")
 
+            vim.api.nvim_set_hl(0, "CmpItemMenu", { link = "purple" })
+
             cmp.setup({
                 mapping = cmp.mapping.preset.insert({
                     ["<down>"] = cmp.mapping({
@@ -54,12 +56,16 @@ return {
                     completeopt = "menu,menuone,noinsert",
                 },
                 formatting = {
-                    format = function(_, item)
-                        local icons = variables.icons.kinds
-                        if icons[item.kind] then
-                            item.kind = icons[item.kind] .. item.kind
+                    format = function(entry, vim_item)
+                        -- Kind icons
+                        local kind_icons = variables.icons.kinds
+                        local icon = kind_icons[vim_item.kind]
+                        if icon then
+                            vim_item.kind = string.format("%s%s", icon, vim_item.kind) -- This concatonates the icons with the name of the item kind
                         end
-                        return item
+                        -- Source
+                        vim_item.menu = "[" .. entry.source.name:gsub("^%l", string.upper) .. "]"
+                        return vim_item
                     end,
                 },
                 sources = cmp.config.sources({
@@ -82,10 +88,10 @@ return {
                 completion = {
                     completeopt = "menu,menuone,noinsert,noselect",
                 },
-                sources = {
+                sources = cmp.config.sources({
                     { name = "cmdline_history" },
                     { name = "buffer" },
-                },
+                }),
             })
 
             cmp.setup.cmdline(":", {
@@ -93,8 +99,7 @@ return {
                 completion = {
                     completeopt = "menu,menuone,noinsert,noselect",
                 },
-                sources = {
-                    { name = "path" },
+                sources = cmp.config.sources({
                     { name = "cmdline_history" },
                     {
                         name = "cmdline",
@@ -102,10 +107,11 @@ return {
                             ignore_cmds = { "Man", "!" },
                         },
                     },
-                },
+                    { name = "path" },
+                }),
             })
 
-            require("cmp").setup.filetype({
+            cmp.setup.filetype({
                 "markdown",
                 -- 由 texlab 管理
                 -- "plaintex",
@@ -113,6 +119,8 @@ return {
                 "text",
             }, {
                 sources = cmp.config.sources({
+                    { name = "nvim_lsp" },
+                    { name = "nvim_lsp_signature_help" },
                     { name = "luasnip" },
                     { name = "luasnip_choice" },
                     {
@@ -121,8 +129,6 @@ return {
                             strategy = 2,
                         },
                     },
-                    { name = "nvim_lsp" },
-                    { name = "nvim_lsp_signature_help" },
                     { name = "buffer" },
                     { name = "path" },
                 }),

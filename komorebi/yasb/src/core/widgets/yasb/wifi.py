@@ -104,7 +104,7 @@ class WifiWidget(BaseWidget):
 
         # Extract signal strength from the result
         for line in result.split("\n"):
-            if "Signal" in line:
+            if "Signal" in line:  # FIXME: This will break if the system language is not English
                 strength = line.split(":")[1].strip().split(" ")[0].replace("%", "")
                 return int(strength)
 

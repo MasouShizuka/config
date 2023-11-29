@@ -70,8 +70,7 @@
     "editor.wordWrap": "on",
     "explorer.confirmDragAndDrop": false,
     "extensions.experimental.affinity": {
-        "asvetliakov.vscode-neovim": 1,
-        "Gruntfuggly.todo-tree": 1
+        "asvetliakov.vscode-neovim": 1
     },
     "files.associations": {
         "*.txt": "plaintext"
@@ -190,9 +189,6 @@
     },
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.enableHtml": true,
-    "markdown.marp.themes": [
-        "./themes/academic.css"
-    ],
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 14,
@@ -259,6 +255,130 @@
     "terminal.integrated.fontSize": 14,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.tabs.location": "left",
+    "todo-tree.general.tagGroups": {
+        "FIX": [
+            "FIXME",
+            "FIXIT",
+            "FIX",
+            "BUG",
+            "ISSUE"
+        ],
+        "NOTE": [
+            "NOTE",
+            "INFO"
+        ],
+        "PREF": [
+            "PERFORMANCE",
+            "PERF",
+            "OPTIMIZE",
+            "OPTIM"
+        ],
+        "TEST": [
+            "TESTING",
+            "TEST",
+            "PASSED",
+            "FAILED"
+        ],
+        "WARN": [
+            "WARNING",
+            "WARN",
+            "XXX"
+        ]
+    },
+    "todo-tree.general.tags": [
+        "FIXME",
+        "FIXIT",
+        "FIX",
+        "BUG",
+        "ISSUE",
+        "TODO",
+        "HACK",
+        "WARNING",
+        "WARN",
+        "XXX",
+        "PERFORMANCE",
+        "PERF",
+        "OPTIMIZE",
+        "OPTIM",
+        "NOTE",
+        "INFO",
+        "TESTING",
+        "TEST",
+        "PASSED",
+        "FAILED",
+        "[ ]",
+        "[x]",
+    ],
+    "todo-tree.highlights.customHighlight": {
+        "[ ]": {
+            "icon": "issue-draft"
+        },
+        "[x]": {
+            "icon": "issue-closed"
+        },
+        "FIX": {
+            "background": "#e06c75",
+            "foreground": "black",
+            "icon": "bug"
+        },
+        "HACK": {
+            "background": "#d19a66",
+            "foreground": "black",
+            "icon": "flame"
+        },
+        "NOTE": {
+            "background": "#61afef",
+            "foreground": "black",
+            "icon": "note"
+        },
+        "PREF": {
+            "background": "#c678dd",
+            "foreground": "black",
+            "icon": "clock"
+        },
+        "TEST": {
+            "background": "#56b6c2",
+            "foreground": "black",
+            "icon": "beaker"
+        },
+        "TODO": {
+            "background": "#98c379",
+            "foreground": "black",
+            "icon": "check"
+        },
+        "WARN": {
+            "background": "#e5c07b",
+            "foreground": "black",
+            "icon": "alert"
+        }
+    },
+    "vscode-neovim.ctrlKeysForNormalMode": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "h",
+        "j",
+        "k",
+        "l",
+        "q",
+        "r",
+        "t",
+        "u",
+        "v",
+        "x",
+        "y",
+        "z",
+        "/",
+        "]",
+        "right",
+        "left",
+        "up",
+        "down",
+        "backspace",
+        "delete"
+    ],
     "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
     "window.density.editorTabHeight": "compact",
     "window.dialogStyle": "custom",

@@ -1,3 +1,4 @@
+local utils = require("config.utils")
 local variables = require("config.variables")
 
 -- 设置 leader 为空格
@@ -8,6 +9,7 @@ vim.g.maplocalleader = " "
 vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
 vim.keymap.set({ "n", "x" }, "m", "<nop>", { silent = true })
 vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
+vim.keymap.set({ "n", "x" }, "<c-c>", "<nop>", { silent = true })
 
 -- 跳到行首行尾不带空格
 vim.keymap.set({ "n", "x", "o" }, "H", "^", { desc = "Start of line (non-blank)", silent = true })
@@ -32,57 +34,65 @@ vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true,
 vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
 
 if variables.is_vscode then
+    local vscode = require("vscode-neovim")
+    vim.notify = vscode.notify
+
     -- 注释
-    vim.keymap.set({ "n", "x", "o" }, "gc", "<plug>VSCodeCommentary", { silent = true })
-    vim.keymap.set("n", "gcc", "<plug>VSCodeCommentaryLine", { silent = true })
-    vim.cmd([[
-        function! s:Vscode_Block_Commentary(...) abort
-            if !a:0
-                let &operatorfunc = matchstr(expand("<sfile>"), "[^. ]*$")
-                return "g@"
-            elseif a:0 > 1
-                let [line1, line2] = [a:1, a:2]
-            else
-                let [line1, line2] = [line("'["), line("']")]
-            endif
-
-            call VSCodeCallRange("editor.action.blockComment", line1, line2, 0)
-        endfunction
-
-        nnoremap <expr> <plug>VSCodeBlockCommentary <sid>Vscode_Block_Commentary()
-        xnoremap <expr> <plug>VSCodeBlockCommentary <sid>Vscode_Block_Commentary()
-        nnoremap <expr> <plug>VSCodeBlockCommentaryLine <sid>Vscode_Block_Commentary() . "_"
-    ]])
-    vim.keymap.set({ "n", "x", "o" }, "gb", "<plug>VSCodeBlockCommentary", { silent = true })
-    vim.keymap.set("n", "gbb", "<plug>VSCodeBlockCommentaryLine", { silent = true })
+    local function esc()
+        local key = vim.api.nvim_replace_termcodes("<esc>", true, true, true)
+        vim.api.nvim_feedkeys(key, "n", false)
+    end
+    local comment = vscode.to_op(function(ctx)
+        local cmd = "editor.action.commentLine"
+        local opts = { range = ctx.range, callback = esc }
+        if ctx.is_linewise and ctx.is_current_line then
+            opts.range = nil
+        end
+        vscode.action(cmd, opts)
+    end)
+    local comment_line = function()
+        return comment() .. "_"
+    end
+    local block_comment = vscode.to_op(function(ctx)
+        local cmd = "editor.action.blockComment"
+        local opts = { range = ctx.range, callback = esc }
+        vscode.action(cmd, opts)
+    end)
+    local block_comment_line = function()
+        return block_comment() .. "_"
+    end
+    vim.keymap.set({ "n", "x" }, "gc", comment, { expr = true, silent = true })
+    vim.keymap.set("n", "gcc", comment_line, { expr = true, silent = true })
+    vim.keymap.set({ "n", "x" }, "gb", block_comment, { expr = true, silent = true })
+    vim.keymap.set("n", "gbb", block_comment_line, { expr = true, silent = true })
 
     -- 转到
-    vim.keymap.set("n", "gD", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.revealDeclaration" }) end, { silent = true })
-    vim.keymap.set("n", "gi", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToImplementation" }) end, { silent = true })
-    vim.keymap.set("n", "gr", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToReferences" }) end, { silent = true })
-    vim.keymap.set("n", "gy", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.action.goToTypeDefinition" }) end, { silent = true })
+    vim.keymap.set("n", "gD", function() vscode.action("editor.action.revealDeclaration") end, { silent = true })
+    vim.keymap.set("n", "gi", function() vscode.action("editor.action.goToImplementation") end, { silent = true })
+    vim.keymap.set("n", "gr", function() vscode.action("editor.action.goToReferences") end, { silent = true })
+    vim.keymap.set("n", "gy", function() vscode.action("editor.action.goToTypeDefinition") end, { silent = true })
 
     -- 折叠
-    vim.keymap.set("n", "zc", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.fold" }) end, { silent = true })
-    vim.keymap.set("n", "zC", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.foldRecursively" }) end, { silent = true })
-    vim.keymap.set("n", "zo", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.unfold" }) end, { silent = true })
-    vim.keymap.set("n", "zO", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.unfoldRecursively" }) end, { silent = true })
-    vim.keymap.set("n", "za", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.toggleFold" }) end, { silent = true })
-    vim.keymap.set("n", "zm", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.foldAll" }) end, { silent = true })
-    vim.keymap.set("n", "zr", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.unfoldAll" }) end, { silent = true })
+    vim.keymap.set("n", "zc", function() vscode.action("editor.fold") end, { silent = true })
+    vim.keymap.set("n", "zC", function() vscode.action("editor.foldRecursively") end, { silent = true })
+    vim.keymap.set("n", "zo", function() vscode.action("editor.unfold") end, { silent = true })
+    vim.keymap.set("n", "zO", function() vscode.action("editor.unfoldRecursively") end, { silent = true })
+    vim.keymap.set("n", "za", function() vscode.action("editor.toggleFold") end, { silent = true })
+    vim.keymap.set("n", "zm", function() vscode.action("editor.foldAll") end, { silent = true })
+    vim.keymap.set("n", "zr", function() vscode.action("editor.unfoldAll") end, { silent = true })
 
     -- 调试
-    vim.keymap.set("n", "<leader>dr", function() vim.api.nvim_call_function("VSCodeNotify", { "workbench.action.debug.restart" }) end, { silent = true })
-    vim.keymap.set("n", "<leader>dk", function() vim.api.nvim_call_function("VSCodeNotify", { "workbench.action.debug.callStackUp" }) end, { silent = true })
-    vim.keymap.set("n", "<leader>dj", function() vim.api.nvim_call_function("VSCodeNotify", { "workbench.action.debug.callStackDown" }) end, { silent = true })
-    vim.keymap.set("n", "<leader>dh", function() vim.api.nvim_call_function("VSCodeNotify", { "editor.debug.action.showDebugHover" }) end, { silent = true })
+    vim.keymap.set("n", "<leader>dr", function() vscode.action("workbench.action.debug.restart") end, { silent = true })
+    vim.keymap.set("n", "<leader>dk", function() vscode.action("workbench.action.debug.callStackUp") end, { silent = true })
+    vim.keymap.set("n", "<leader>dj", function() vscode.action("workbench.action.debug.callStackDown") end, { silent = true })
+    vim.keymap.set("n", "<leader>dh", function() vscode.action("editor.debug.action.showDebugHover") end, { silent = true })
 
     -- 格式化
     vim.keymap.set("n", "<leader>f", function()
         if vim.fn.expand("%:e"):sub(1, 5) == "ipynb" then
-            vim.api.nvim_call_function("VSCodeNotify", { "notebook.formatCell" })
+            vscode.action("notebook.formatCell")
         else
-            vim.api.nvim_call_function("VSCodeNotify", { "editor.action.formatDocument" })
+            vscode.action("editor.action.formatDocument")
         end
     end, { silent = true })
 
@@ -90,19 +100,18 @@ if variables.is_vscode then
     vim.keymap.set("n", "<leader>r", function()
         local filetype = vim.bo.filetype
         if filetype == "html" or filetype == "xhtml" then
-            vim.api.nvim_call_function("VSCodeNotify", { "office.html.preview" })
+            vscode.action("office.html.preview")
         elseif filetype == "markdown" then
-            vim.api.nvim_call_function("VSCodeNotify", { "markdown.showPreviewToSide" })
+            vscode.action("markdown.showPreviewToSide")
         elseif filetype == "tex" then
-            vim.api.nvim_call_function("VSCodeNotify", { "latex-workshop.build" })
+            vscode.action("latex-workshop.build")
         else
-            vim.api.nvim_call_function("VSCodeNotify", { "code-runner.run" })
+            vscode.action("code-runner.run")
         end
     end, { silent = true })
 
     -- vscode 扩展
-    vim.keymap.set("n", "<leader>b", function() vim.api.nvim_call_function("VSCodeNotify", { "bookmarks.toggle" }) end, { silent = true })
-    vim.keymap.set("n", "<leader>p", function() vim.api.nvim_call_function("VSCodeNotify", { "extension.pasteImage" }) end, { silent = true })
+    vim.keymap.set("n", "<leader>p", function() vscode.action("extension.pasteImage") end, { silent = true })
 else
     -- 命令行
     vim.keymap.set("c", "<down>", "<c-n>", { desc = "Down", silent = true })
@@ -111,8 +120,9 @@ else
     vim.keymap.set("c", "<c-k>", "<c-p>", { desc = "Up", silent = true })
 
     -- 新行保持缩进
-    -- 由 ultimate-autopair 设置
-    -- vim.keymap.set("i", "<cr>", "<cr>x<bs>", { desc = "Enter", silent = true })
+    if not utils.is_available("ultimate-autopair.nvim") then
+        vim.keymap.set("i", "<cr>", "<cr>x<bs>", { desc = "Enter", silent = true })
+    end
 
     -- 折行时小步上下移动
     vim.keymap.set("i", "<down>", "<c-o>gj", { desc = "Down", silent = true })
@@ -121,45 +131,43 @@ else
     -- 终端
     vim.keymap.set("t", "<esc>", [[<c-\><c-n>]], { desc = "Enter normal mode", silent = true })
 
-    -- 聚焦左侧边栏
-    -- 由 edgy 设置
-    -- vim.keymap.set("n", variables.keymap["<c-1>"], function()
-    --     if not variables.toggle_filetype(variables.toggle_filetype_list1) then
-    --         require("nvim-tree.api").tree.open()
-    --     end
-    -- end, { desc = "Focus left panel", silent = true })
+    if not utils.is_available("edgy.nvim") then
+        -- 聚焦左侧边栏
+        vim.keymap.set("n", variables.keymap["<c-1>"], function()
+            if not variables.toggle_filetype(variables.toggle_filetype_list1) then
+                require("nvim-tree.api").tree.open()
+            end
+        end, { desc = "Focus left panel", silent = true })
 
-    -- 聚焦编辑文件
-    -- 由 edgy 设置
-    -- vim.keymap.set("n", variables.keymap["<c-2>"], function()
-    --     variables.skip_filetype(variables.skip_filetype_list1, "W")
-    -- end, { desc = "Focus editor", silent = true })
+        -- 聚焦编辑文件
+        vim.keymap.set("n", variables.keymap["<c-2>"], function()
+            variables.skip_filetype(variables.skip_filetype_list1, "W")
+        end, { desc = "Focus editor", silent = true })
 
-    -- 聚焦底栏
-    -- 由 edgy 设置
-    -- vim.keymap.set("n", variables.keymap["<c-3>"], function()
-    --     local count = vim.v.count
-    --     if count > 0 then
-    --         vim.api.nvim_command(tostring(count) .. "ToggleTerm")
-    --         return
-    --     end
+        -- 聚焦底栏
+        vim.keymap.set("n", variables.keymap["<c-3>"], function()
+            local count = vim.v.count
+            if count > 0 then
+                vim.api.nvim_command(tostring(count) .. "ToggleTerm")
+                return
+            end
 
-    --     if not variables.toggle_filetype(variables.toggle_filetype_list2) then
-    --         vim.api.nvim_command("ToggleTerm")
-    --     end
-    -- end, { desc = "Focus bottom panel", silent = true })
+            if not variables.toggle_filetype(variables.toggle_filetype_list2) then
+                vim.api.nvim_command("ToggleTerm")
+            end
+        end, { desc = "Focus bottom panel", silent = true })
 
-    -- 聚焦右侧边栏
-    -- 由 edgy 设置
-    -- vim.keymap.set("n", variables.keymap["<c-4>"], function()
-    --     if not variables.toggle_filetype(variables.toggle_filetype_list3) then
-    --         vim.api.nvim_command("DocsViewToggle")
-    --     end
-    -- end, { desc = "Focus right panel", silent = true })
+        -- 聚焦右侧边栏
+        vim.keymap.set("n", variables.keymap["<c-4>"], function()
+            if not variables.toggle_filetype(variables.toggle_filetype_list3) then
+                vim.api.nvim_command("DocsViewToggle")
+            end
+        end, { desc = "Focus right panel", silent = true })
+    end
 
     -- 搜索并替换
-    -- 由 nvim-alt-substitute 设置
-    -- vim.keymap.set("n", "<c-f>", ":%s///gI<left><left><left><left>", { desc = "Search and replace in file" })
+    vim.keymap.set("n", "<c-f>", ":1,$s///gcI<left><left><left><left><left>", { desc = "Search and replace in file" })
+    vim.keymap.set("x", "<c-f>", ":s///gcI<left><left><left><left><left>", { desc = "Search and replace in file" })
 
     -- 窗口
     vim.keymap.set("n", "<c-e>", function() vim.cmd.wincmd("r") end, { desc = "Exchange window", silent = true })
@@ -187,11 +195,12 @@ else
         vim.api.nvim_set_option_value("splitbelow", false, {})
         vim.cmd.wincmd("s")
     end, { desc = "Split window to up", silent = true })
-    -- 由 winshift 设置
-    -- vim.keymap.set("n", "<c-s><c-h>", function() vim.cmd.wincmd("H") end, { desc = "Move window to left", silent = true })
-    -- vim.keymap.set("n", "<c-s><c-l>", function() vim.cmd.wincmd("L") end, { desc = "Move window to right", silent = true })
-    -- vim.keymap.set("n", "<c-s><c-j>", function() vim.cmd.wincmd("J") end, { desc = "Move window to down", silent = true })
-    -- vim.keymap.set("n", "<c-s><c-k>", function() vim.cmd.wincmd("K") end, { desc = "Move window to up", silent = true })
+    if not utils.is_available("winshift.nvim") then
+        vim.keymap.set("n", "<c-s><c-h>", function() vim.cmd.wincmd("H") end, { desc = "Move window to left", silent = true })
+        vim.keymap.set("n", "<c-s><c-l>", function() vim.cmd.wincmd("L") end, { desc = "Move window to right", silent = true })
+        vim.keymap.set("n", "<c-s><c-j>", function() vim.cmd.wincmd("J") end, { desc = "Move window to down", silent = true })
+        vim.keymap.set("n", "<c-s><c-k>", function() vim.cmd.wincmd("K") end, { desc = "Move window to up", silent = true })
+    end
     vim.keymap.set("n", "<c-left>", function() vim.cmd.wincmd("<") end, { desc = "Decrease window width", silent = true })
     vim.keymap.set("n", "<c-right>", function() vim.cmd.wincmd(">") end, { desc = "Increase window width", silent = true })
     vim.keymap.set("n", "<c-up>", function() vim.cmd.wincmd("+") end, { desc = "Increase window height", silent = true })
@@ -239,7 +248,7 @@ else
             path = path:gsub("\\", "/")
         end
 
-        local is_toggleterm_available, _ = pcall(require, "toggleterm")
+        local is_toggleterm_available = utils.is_available("toggleterm.nvim")
         local filetype = vim.bo.filetype
         if is_toggleterm_available then
             if variables.is_windows then

@@ -8,46 +8,61 @@ sendSomeChinese() {
 }
 
 
-center_window() {
-    If (!WinExist("A")) {
-        Return
+; IME
+
+keyboard_layout_list := [0x04090409, 0x08040804]
+
+get_keyboard_layout(title := "A") {
+    try {
+        hwnd := WinGetID("A")
+
+        DetectHiddenWindows(true)
+        pid := DllCall("GetWindowThreadProcessId", "UInt", hwnd, "UInt", 0)
+        keyboard_layout := DllCall("GetKeyboardLayout", "UInt", pid, "UInt")
+        DetectHiddenWindows(false)
+
+        return keyboard_layout
     }
+}
 
-    WinGetPos(&X, &Y, &W, &H)
-    CX := X + W / 2
-    CY := Y + H / 2
-
-    MonitorCount := SysGet(80)
-    Loop (MonitorCount) {
-        MonitorGetWorkArea(A_Index, &Left, &Top, &Right, &Bottom)
-        If (CX >= Left && CX <= Right && CY >= Top && CY <= Bottom) {
-            MW := (Right - Left)
-            MH := (Bottom - Top)
-
-            WinMove(Left + (MW - W) / 2, Top + (MH - H) / 2)
-            Break
+set_keyboard_layout(keyboard_layout) {
+    If (WinExist("A")) {
+        cgf := ControlGetFocus("A")
+        If (cgf) {
+            PostMessage(0x50, 0, keyboard_layout, cgf)
+        } Else {
+            PostMessage(0x50, 0, keyboard_layout, , "A")
         }
     }
 }
 
-
-close_or_run_script(path, args := "") {
-    path := StrReplace(path, "/", "\")
-    SplitPath(path, &name)
-
-    DetectHiddenWindows(true)
-    SetTitleMatchMode("RegEx")
-    running_script := "i)" . name . ".* ahk_class AutoHotkey"
-    If (WinExist(running_script)) {
-        WinClose
-        WinWaitClose(running_script, , 2)
-    } Else {
-        cmd := "MyKeymap.exe " . path . " " . args
-        RunWait(cmd)
+switch_IME() {
+    current_index := 0
+    current_keyboard_layout := get_keyboard_layout()
+    For index, keyboard_layout in keyboard_layout_list {
+        If (keyboard_layout == current_keyboard_layout) {
+            current_index := index
+            Break
+        }
     }
-    DetectHiddenWindows(false)
+
+    index := current_index + 1
+    If (index > keyboard_layout_list.Length) {
+        index := 1
+    }
+    set_keyboard_layout(keyboard_layout_list[index])
 }
 
+
+; Monitor
+
+turn_off_monitor() {
+    Sleep(1000)
+    SendMessage(0x112, 0xF170, 2, , "Program Manager")
+}
+
+
+; Mouse
 
 MouseMovePrompt := InputTipWindow("🖱️")
 FASTMODE := false
@@ -199,6 +214,28 @@ scroll_wheel(key, direction) {
 }
 
 
+; Script
+
+close_or_run_script(path, args := "") {
+    path := StrReplace(path, "/", "\")
+    SplitPath(path, &name)
+
+    DetectHiddenWindows(true)
+    SetTitleMatchMode("RegEx")
+    running_script := "i)" . name . ".* ahk_class AutoHotkey"
+    If (WinExist(running_script)) {
+        WinClose
+        WinWaitClose(running_script, , 2)
+    } Else {
+        cmd := "MyKeymap.exe " . path . " " . args
+        RunWait(cmd)
+    }
+    DetectHiddenWindows(false)
+}
+
+
+; Taskbar
+
 is_taskbar_hide := false
 
 hide_taskbar() {
@@ -213,55 +250,46 @@ hide_taskbar() {
 }
 
 
-keyboard_layout_list := [0x04090409, 0x08040804]
+; Window
 
-get_keyboard_layout(title := "A") {
-    try {
-        hwnd := WinGetID("A")
-
-        DetectHiddenWindows(true)
-        pid := DllCall("GetWindowThreadProcessId", "UInt", hwnd, "UInt", 0)
-        keyboard_layout := DllCall("GetKeyboardLayout", "UInt", pid, "UInt")
-        DetectHiddenWindows(false)
-
-        return keyboard_layout
+center_window() {
+    If (!WinExist("A")) {
+        Return
     }
-}
 
-set_keyboard_layout(keyboard_layout) {
-    If (WinExist("A")) {
-        cgf := ControlGetFocus("A")
-        If (cgf) {
-            PostMessage(0x50, 0, keyboard_layout, cgf)
-        } Else {
-            PostMessage(0x50, 0, keyboard_layout, , "A")
-        }
-    }
-}
+    WinGetPos(&X, &Y, &W, &H)
+    CX := X + W / 2
+    CY := Y + H / 2
 
-switch_IME() {
-    current_index := 0
-    current_keyboard_layout := get_keyboard_layout()
-    For index, keyboard_layout in keyboard_layout_list {
-        If (keyboard_layout == current_keyboard_layout) {
-            current_index := index
+    MonitorCount := SysGet(80)
+    Loop (MonitorCount) {
+        MonitorGetWorkArea(A_Index, &Left, &Top, &Right, &Bottom)
+        If (CX >= Left && CX <= Right && CY >= Top && CY <= Bottom) {
+            MW := (Right - Left)
+            MH := (Bottom - Top)
+
+            WinMove(Left + (MW - W) / 2, Top + (MH - H) / 2)
             Break
         }
     }
+}
 
-    index := current_index + 1
-    If (index > keyboard_layout_list.Length) {
-        index := 1
+change_window_size(direction := "left", size := 40) {
+    WinGetPos(&x, &y, &w, &h, "A")
+    If (direction == "up") {
+        h := h - size
+    } Else If (direction == "down") {
+        h := h + size
+    } Else If (direction == "left") {
+        w := w - size
+    } Else If (direction == "right") {
+        w := w + size
     }
-    set_keyboard_layout(keyboard_layout_list[index])
+    WinMove(x, y, w, h, "A")
 }
 
 
-turn_off_monitor() {
-    Sleep(1000)
-    SendMessage(0x112, 0xF170, 2, , "Program Manager")
-}
-
+; Map
 
 *CapsLock Up:: {
     If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
@@ -277,6 +305,10 @@ turn_off_monitor() {
 #HotIf
 
 #HotIf GetKeyState("Capslock", "P") && GetKeyState("Space", "P")
+*W:: change_window_size("up", 60)
+*S:: change_window_size("down", 60)
+*A:: change_window_size("left", 60)
+*D:: change_window_size("right", 60)
 *I:: move_mouse("I", "up", "veryslow")
 *J:: move_mouse("J", "left", "veryslow")
 *K:: move_mouse("K", "down", "veryslow")
@@ -302,21 +334,11 @@ turn_off_monitor() {
 */:: MakeWindowDraggable()
 #HotIf
 
-#HotIf SLOWMODE && GetKeyState("Capslock", "P") && !GetKeyState("Space", "P")
-*I:: move_mouse("I", "up", "fast")
-*J:: move_mouse("J", "left", "fast")
-*K:: move_mouse("K", "down", "fast")
-*L:: move_mouse("L", "right", "fast")
-#HotIf
-
-#HotIf SLOWMODE && GetKeyState("CapsLock", "P") && GetKeyState("Space", "P")
-*I:: move_mouse("I", "up", "veryslow")
-*J:: move_mouse("J", "left", "veryslow")
-*K:: move_mouse("K", "down", "veryslow")
-*L:: move_mouse("L", "right", "veryslow")
-#HotIf
-
 #HotIf SLOWMODE
+*W:: change_window_size("up", 10)
+*S:: change_window_size("down", 10)
+*A:: change_window_size("left", 10)
+*D:: change_window_size("right", 10)
 *I:: move_mouse("I", "up", "slow")
 *J:: move_mouse("J", "left", "slow")
 *K:: move_mouse("K", "down", "slow")
@@ -334,6 +356,7 @@ turn_off_monitor() {
 *. Up:: middle_click_up_without_hide_mouse_move_prompt()
 */:: MakeWindowDraggable()
 *Esc:: exit_mouse_mode_with_left_click_up()
+*Space:: exit_mouse_mode_with_left_click_up()
 *CapsLock Up:: {
     If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
         exit_mouse_mode_with_left_click_up()
@@ -341,18 +364,11 @@ turn_off_monitor() {
 }
 #HotIf
 
-#HotIf SLOWMODE && !GetKeyState("Capslock", "P")
-*Space:: exit_mouse_mode_with_left_click_up()
-#HotIf
-
-#HotIf VERYSLOWMODE && GetKeyState("Capslock", "P") && !GetKeyState("Space", "P")
-*I:: move_mouse("I", "up", "fast")
-*J:: move_mouse("J", "left", "fast")
-*K:: move_mouse("K", "down", "fast")
-*L:: move_mouse("L", "right", "fast")
-#HotIf
-
 #HotIf VERYSLOWMODE
+*W:: change_window_size("up", 1)
+*S:: change_window_size("down", 1)
+*A:: change_window_size("left", 1)
+*D:: change_window_size("right", 1)
 *I:: move_mouse("I", "up", "veryslow")
 *J:: move_mouse("J", "left", "veryslow")
 *K:: move_mouse("K", "down", "veryslow")
