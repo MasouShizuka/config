@@ -1,5 +1,6 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local treesitter = require("utils.treesitter")
+local utils = require("utils")
 
 return {
     {
@@ -77,7 +78,7 @@ return {
                 suffix_last = "p",     -- Suffix to search with "prev" method
                 suffix_next = "n",     -- Suffix to search with "next" method
             },
-            n_lines = 500,
+            n_lines = math.huge,
             respect_selection_type = true,
         },
         version = false,
@@ -107,54 +108,38 @@ return {
             require("nvim-treesitter.configs").setup(opts)
         end,
         dependencies = {
-            "nvim-treesitter/nvim-treesitter-refactor",
             "nvim-treesitter/nvim-treesitter-textobjects",
         },
         event = {
             "User TreesitterFile",
         },
-        keys = {
-            { "<cr>", desc = "Treesitter incremental", mode = "n" },
-            { "<bs>", desc = "Treesitter decremental", mode = "x" },
-        },
-        opts = {
-            ensure_installed = variables.treesitter,
-            highlight = {
-                enable = true,
-                disable = function(lang, buf)
-                    return utils.is_bigfile(buf)
-                end,
-            },
-            incremental_selection = {
-                enable = true,
-                keymaps = {
-                    init_selection = "<cr>",
-                    node_decremental = "<bs>",
-                    node_incremental = "<cr>",
-                    scope_incremental = "<nop>",
+        init = function(plugin)
+            -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
+            -- This is needed because a bunch of plugins no longer `require("nvim-treesitter")`, which
+            -- no longer trigger the **nvim-treeitter** module to be loaded in time.
+            -- Luckily, the only thins that those plugins need are the custom queries, which we make available
+            -- during startup.
+            require("lazy.core.loader").add_to_rtp(plugin)
+            require("nvim-treesitter.query_predicates")
+        end,
+        opts = function()
+            local opts = {
+                ensure_installed = treesitter.treesitter,
+                highlight = {
+                    enable = not environment.is_vscode,
+                    disable = function(lang, buf)
+                        return not vim.tbl_contains(treesitter.treesitter_filetype_list, lang) and utils.is_bigfile(buf) or utils.is_longfile(buf)
+                    end,
                 },
-            },
-            indent = { enable = true },
-            refactor = {
-                highlight_definitions = {
+                indent = {
                     enable = true,
-                    -- Set to false if you have an `updatetime` of ~100.
-                    clear_on_cursor_move = true,
                 },
-                navigation = {
-                    enable = true,
-                    -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
-                    keymaps = {
-                        goto_definition = false,
-                        list_definitions = false,
-                        list_definitions_toc = false,
-                        goto_next_usage = "<f7>",
-                        goto_previous_usage = "<s-f7>",
-                    },
-                },
-            },
-            textobjects = {
-                select = {
+            }
+
+            if utils.is_available("nvim-treesitter-textobjects") then
+                local textobjects = {}
+
+                textobjects["select"] = {
                     enable = true,
                     -- Automatically jump forward to textobj, similar to targets.vim
                     lookahead = true,
@@ -166,11 +151,26 @@ return {
                         ["ic"] = { query = "@class.inner", desc = "Inside class" },
                         ["af"] = { query = "@function.outer", desc = "Around function " },
                         ["if"] = { query = "@function.inner", desc = "Inside function " },
-                        ["aa"] = { query = "@parameter.outer", desc = "around argument" },
-                        ["ia"] = { query = "@parameter.inner", desc = "inside argument" },
+                        ["aa"] = { query = "@parameter.outer", desc = "Around argument" },
+                        ["ia"] = { query = "@parameter.inner", desc = "Inside argument" },
                     },
-                },
-                move = {
+                }
+
+                textobjects["swap"] = {
+                    enable = true,
+                    swap_next = {
+                        ["sXk"] = { query = "@block.outer", desc = "Swap next block" },
+                        ["sXf"] = { query = "@function.outer", desc = "Swap next function" },
+                        ["sXa"] = { query = "@parameter.inner", desc = "Swap next argument" },
+                    },
+                    swap_previous = {
+                        ["sXK"] = { query = "@block.outer", desc = "Swap previous block" },
+                        ["sXF"] = { query = "@function.outer", desc = "Swap previous function" },
+                        ["sXA"] = { query = "@parameter.inner", desc = "Swap previous argument" },
+                    },
+                }
+
+                textobjects["move"] = {
                     enable = true,
                     set_jumps = true, -- whether to set jumps in the jumplist
                     goto_next_start = {
@@ -193,9 +193,13 @@ return {
                         ["[F"] = { query = "@function.outer", desc = "Previous function end" },
                         ["[A"] = { query = "@parameter.inner", desc = "Previous argument end" },
                     },
-                },
-            },
-        },
+                }
+
+                opts["textobjects"] = textobjects
+            end
+
+            return opts
+        end,
         version = false,
     },
     {
@@ -208,18 +212,19 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User TreesitterFile",
         },
         opts = {
-            enable = true,            -- Enable this plugin (Can be enabled/disabled later via commands)
-            max_lines = 0,            -- How many lines the window should span. Values <= 0 mean no limit.
-            min_window_height = 0,    -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+            enable = true,         -- Enable this plugin (Can be enabled/disabled later via commands)
+            max_lines = 0,         -- How many lines the window should span. Values <= 0 mean no limit.
+            min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
             line_numbers = true,
-            multiline_threshold = 20, -- Maximum number of lines to show for a single context
-            trim_scope = "outer",     -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-            mode = "cursor",          -- Line used to calculate context. Choices: 'cursor', 'topline'
+            -- multiline_threshold = 20, -- Maximum number of lines to show for a single context
+            multiline_threshold = 1, -- Maximum number of lines to show for a single context
+            trim_scope = "outer",    -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+            mode = "cursor",         -- Line used to calculate context. Choices: 'cursor', 'topline'
             -- Separator between context and content. Should be a single character string, like '-'.
             -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
             separator = nil,
@@ -227,5 +232,4 @@ return {
             on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
         },
     },
-
 }

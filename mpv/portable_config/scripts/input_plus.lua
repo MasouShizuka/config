@@ -36,6 +36,7 @@
  <KEY>   script-binding input_plus/playlist_order_0r   # ...（重定向至首个文件）
  <KEY>   script-binding input_plus/playlist_order_1    # 播放列表连续洗牌（可用上两项命令恢复）
  <KEY>   script-binding input_plus/playlist_order_1r   # ...
+ <KEY>   script-binding input_plus/playlist_random     # 随机跳转到播放列表中的任一条目
  <KEY>   script-binding input_plus/playlist_tmp_save   # 保存当前播放列表为临时列表（位于主设置目录 playlist_temp.mpl ）
  <KEY>   script-binding input_plus/playlist_tmp_load   # 打开临时播放列表
 
@@ -536,6 +537,20 @@ function playlist_order(mode, re)
 		end
 	end
 end
+function playlist_random()
+	local range = mp.get_property_number("playlist-count", 0)
+	local pos = mp.get_property_number("playlist-pos-1", 0)
+	local pos_nxt = math.random(1, range)
+	if range <=2 then
+		mp.msg.info("playlist_random 播放列表的条目数量未超过2")
+		return
+	else
+		while pos_nxt == pos do
+			pos_nxt = math.random(1, range)
+		end
+		mp.commandv("set", "playlist-pos-1", pos_nxt)
+	end
+end
 function playlist_tmp_save()
 	local item_num = mp.get_property_number("playlist-count", 0)
 	if item_num == 0 then
@@ -819,6 +834,7 @@ mp.add_key_binding(nil, "playlist_order_0", function() playlist_order(0) end)
 mp.add_key_binding(nil, "playlist_order_0r", function() playlist_order(0, true) end)
 mp.add_key_binding(nil, "playlist_order_1", function() playlist_order(1) end)
 mp.add_key_binding(nil, "playlist_order_1r", function() playlist_order(1, true) end)
+mp.add_key_binding(nil, "playlist_random", playlist_random)
 mp.add_key_binding(nil, "playlist_tmp_save", playlist_tmp_save)
 mp.add_key_binding(nil, "playlist_tmp_load", playlist_tmp_load)
 

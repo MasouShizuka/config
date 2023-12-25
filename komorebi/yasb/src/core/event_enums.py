@@ -25,6 +25,9 @@ class KomorebiEvent(Event):
     TogglePause = "TogglePause"
     ToggleTiling = "ToggleTiling"
 
+    Cloak = "Cloak"
+    Uncloak = "Uncloak"
+
     CycleFocusMonitor = "CycleFocusMonitor"
     CycleFocusWindow = "CycleFocusWindow"
     CycleFocusWorkspace = "CycleFocusWorkspace"
@@ -48,6 +51,7 @@ class KomorebiEvent(Event):
     MoveContainerToWorkspaceNumber = "MoveContainerToWorkspaceNumber"
     MoveWorkspaceToMonitorNumber = "MoveWorkspaceToMonitorNumber"
     SendContainerToMonitorNumber = "SendContainerToMonitorNumber"
+    SendContainerToMonitorWorkspaceNumber = "SendContainerToMonitorWorkspaceNumber"
     SendContainerToWorkspaceNumber = "SendContainerToWorkspaceNumber"
 
     ReloadConfiguration = "ReloadConfiguration"

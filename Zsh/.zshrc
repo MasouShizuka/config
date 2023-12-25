@@ -1,6 +1,6 @@
-#######################
-# Running Environment #
-#######################
+# ╭─────────────────────╮
+# │ Running Environment │
+# ╰─────────────────────╯
 
 is_windows=0
 is_mac=0
@@ -28,9 +28,9 @@ esac
 
 
 
-#########
-# Alias #
-#########
+# ╭───────╮
+# │ Alias │
+# ╰───────╯
 
 alias ll="ls -al --color -h --time-style=long-iso"
 
@@ -49,9 +49,9 @@ fi
 
 
 
-########################
-# Environment Variable #
-########################
+# ╭──────────────────────╮
+# │ Environment Variable │
+# ╰──────────────────────╯
 
 export EDITOR=nvim
 
@@ -71,9 +71,9 @@ fi
 
 
 
-###########
-# Setting #
-###########
+# ╭─────────╮
+# │ Setting │
+# ╰─────────╯
 
 # 命令补全
 autoload -Uz compinit && compinit
@@ -149,9 +149,9 @@ zstyle ":completion:*" rehash true
 
 
 
-#########
-# Theme #
-#########
+# ╭───────╮
+# │ Theme │
+# ╰───────╯
 
 if (( is_wsl )); then
     export STARSHIP_CONFIG=/mnt/c/Users/MasouShizuka/.config/starship/starship.toml
@@ -163,9 +163,9 @@ eval "$(starship init zsh)"
 
 
 
-##################
-# Plugin Manager #
-##################
+# ╭────────────────╮
+# │ Plugin Manager │
+# ╰────────────────╯
 
 ZINIT_HOME="$HOME/.zinit/zinit.git"
 [[ ! -d $ZINIT_HOME ]] && mkdir -p "$(dirname $ZINIT_HOME)"
@@ -178,9 +178,9 @@ autoload -Uz _zinit
 
 
 
-##########
-# Plugin #
-##########
+# ╭────────╮
+# │ Plugin │
+# ╰────────╯
 
 zinit wait lucid for \
     atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
@@ -223,9 +223,9 @@ function zvm_after_lazy_keybindings() {
 
 
 
-#########
-# Conda #
-#########
+# ╭───────╮
+# │ Conda │
+# ╰───────╯
 
 if (( is_windows )); then
     if [[ -f "$HOME/miniconda3/Scripts/conda" ]]; then

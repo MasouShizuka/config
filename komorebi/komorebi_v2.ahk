@@ -5,6 +5,9 @@ Persistent
 OnExit((*) => komorebic_stop())
 
 komorebic_stop() {
+    While (ProcessExist("yasb.exe")) {
+        ProcessClose("yasb.exe")
+    }
     RunWait("komorebic.exe stop", , "Hide")
 
     RunWait("rm ~/komorebic.sock", , "Hide")
@@ -26,8 +29,6 @@ RunWait("komorebic.exe start --await-configuration", , "Hide")
 RunWait("komorebic.exe invisible-borders 7 0 14 7", , "Hide")
 
 RunWait("komorebic.exe watch-configuration enable", , "Hide")
-
-RunWait("komorebic.exe alt-focus-hack enable", , "Hide")
 
 RunWait("komorebic.exe window-hiding-behaviour cloak", , "Hide")
 
@@ -80,23 +81,11 @@ global workspace_key_value := Map(
     "6", [5, " "],
     "7", [6, " "]
 )
-global workspace_num := workspace_key_value.Count
 
 global container_padding := 10
 global workspace_padding := 10
 
-RunWait(Format("komorebic.exe ensure-workspaces {} {}", main_monitor, workspace_num), , "Hide")
-
-global focus_monitor_workspace_prefix := "!"
-For key, value in workspace_key_value {
-    Hotkey(focus_monitor_workspace_prefix . key, focus_monitor_workspace)
-}
-
-global send_to_monitor_workspace_prefix := "!+"
-For key, value in workspace_key_value {
-    Hotkey(send_to_monitor_workspace_prefix . key, send_to_monitor_workspace)
-}
-
+RunWait(Format("komorebic.exe ensure-workspaces {} {}", main_monitor, workspace_key_value.Count), , "Hide")
 For key, value in workspace_key_value {
     RunWait(Format("komorebic.exe workspace-name {} {} `"{}`"", main_monitor, value[1], value[2]), , "Hide")
 }
@@ -110,6 +99,16 @@ For key, value in monitor_key_value {
         RunWait(Format("komorebic.exe container-padding {} 0 {}", value, container_padding), , "Hide")
         RunWait(Format("komorebic.exe workspace-padding {} 0 {}", value, workspace_padding), , "Hide")
     }
+}
+
+global focus_monitor_workspace_prefix := "!"
+For key, value in workspace_key_value {
+    Hotkey(focus_monitor_workspace_prefix . key, focus_monitor_workspace)
+}
+
+global send_to_monitor_workspace_prefix := "!+"
+For key, value in workspace_key_value {
+    Hotkey(send_to_monitor_workspace_prefix . key, send_to_monitor_workspace)
 }
 
 RunWait(Format("komorebic.exe workspace-rule exe `"QQ.exe`" {} 2", main_monitor), , "Hide")
@@ -169,6 +168,9 @@ RunWait("komorebic.exe identify-layered-application exe `"WINWORD.EXE`"", , "Hid
 
 RunWait("komorebic.exe complete-configuration", , "Hide")
 
+While (ProcessExist("yasb.exe")) {
+    ProcessClose("yasb.exe")
+}
 Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
 
 
@@ -319,15 +321,10 @@ send_to_monitor(ThisHotkey) {
 }
 
 !f:: {
-    If (WinGetMinMax("A")) {
-        WinRestore("A")
-    } Else {
-        WinMaximize("A")
-    }
+    RunWait("komorebic.exe toggle-maximize", , "Hide")
 }
 
 !d:: {
-    ; WinMinimize, A
     RunWait("komorebic.exe minimize", , "Hide")
 }
 
@@ -361,5 +358,9 @@ send_to_monitor(ThisHotkey) {
 
 !+b:: {
     ; Run(Format("pythonw {}/yasb/src/main.py", A_ScriptDir),  , "Hide")
-    Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
+    While (ProcessExist("yasb.exe")) {
+        ProcessClose("yasb.exe")
+    } Else {
+        Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
+    }
 }

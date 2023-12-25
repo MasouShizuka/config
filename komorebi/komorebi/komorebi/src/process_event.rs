@@ -151,7 +151,7 @@ impl WindowManager {
             }
             WindowManagerEvent::Destroy(_, window) | WindowManagerEvent::Unmanage(window) => {
                 self.focused_workspace_mut()?.remove_window(window.hwnd)?;
-                // FIX: 重新 focus 当前窗口
+                // NOTE: 重新 focus 当前窗口
                 self.update_focused_workspace(true)?;
 
                 let mut already_moved_window_handles = self.already_moved_window_handles.lock();
@@ -170,7 +170,7 @@ impl WindowManager {
 
                 if hide {
                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
-                    // FIX: 重新 focus 当前窗口
+                    // NOTE: 重新 focus 当前窗口
                     self.update_focused_workspace(true)?;
                 }
             }
@@ -210,7 +210,7 @@ impl WindowManager {
 
                 if hide {
                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
-                    // FIX: 重新 focus 当前窗口
+                    // NOTE: 重新 focus 当前窗口
                     self.update_focused_workspace(true)?;
                 }
 
@@ -242,11 +242,13 @@ impl WindowManager {
                 }
             }
             WindowManagerEvent::Show(_, window) | WindowManagerEvent::Manage(window) => {
+                // NOTE: 提前跳出循环
                 let mut switch_to = None;
-                for (i, monitors) in self.monitors().iter().enumerate() {
-                    for (j, workspace) in monitors.workspaces().iter().enumerate() {
+                'outer: for (i, monitor) in self.monitors().iter().enumerate() {
+                    for (j, workspace) in monitor.workspaces().iter().enumerate() {
                         if workspace.contains_window(window.hwnd) {
                             switch_to = Some((i, j));
+                            break 'outer;
                         }
                     }
                 }
@@ -284,6 +286,11 @@ impl WindowManager {
                             return Ok(());
                         }
                     }
+                }
+
+                // NOTE: 令新打开的 window 管理到 cursor 所在的 monitor
+                if let Some(i) = self.monitor_idx_from_current_pos() {
+                    self.focus_monitor(i).unwrap_or(());
                 }
 
                 let behaviour = self.window_container_behaviour;
@@ -517,8 +524,36 @@ impl WindowManager {
             }
             WindowManagerEvent::DisplayChange(..)
             | WindowManagerEvent::MouseCapture(..)
-            | WindowManagerEvent::Cloak(..)
-            | WindowManagerEvent::Uncloak(..) => {}
+            | WindowManagerEvent::Cloak(..) => {}
+            // NOTE: 当触发 uncloak 事件时，重新 focus 该窗口所在 workspace
+            WindowManagerEvent::Uncloak(_, window) => {
+                let mut switch_to = None;
+                'outer: for (i, monitor) in self.monitors().iter().enumerate() {
+                    for (j, workspace) in monitor.workspaces().iter().enumerate() {
+                        if workspace.contains_window(window.hwnd) {
+                            switch_to = Some((i, j));
+                            break 'outer;
+                        }
+                    }
+                }
+
+                if let Some((known_monitor_idx, known_workspace_idx)) = switch_to {
+                    if self.focused_monitor_idx() != known_monitor_idx
+                        || self
+                            .focused_monitor()
+                            .ok_or_else(|| anyhow!("there is no monitor"))?
+                            .focused_workspace_idx()
+                            != known_workspace_idx
+                    {
+                        self.focus_monitor(known_monitor_idx)?;
+                        self.focus_workspace(known_workspace_idx)?;
+
+                        if BORDER_ENABLED.load(Ordering::SeqCst) {
+                            self.show_border()?;
+                        };
+                    }
+                }
+            }
         };
 
         if *self.focused_workspace()?.tile() && BORDER_ENABLED.load(Ordering::SeqCst) {
@@ -572,7 +607,7 @@ impl WindowManager {
                     }
 
                     if let Some(target_window) = target_window {
-                        // FIX: 修正 border 颜色代码的位置，使之可以被执行
+                        // NOTE: 修正 border 颜色代码的位置，使之可以被执行
                         if target_window_is_monocle {
                             BORDER_COLOUR_CURRENT.store(
                                 BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst),
@@ -597,7 +632,7 @@ impl WindowManager {
                         let activate = BORDER_HIDDEN.load(Ordering::SeqCst);
 
                         WindowsApi::invalidate_border_rect()?;
-                        // FIX: 更新 border
+                        // NOTE: 更新 border
                         border.set_position(target_window, &self.invisible_borders, true)?;
 
                         if activate {

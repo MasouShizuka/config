@@ -24,6 +24,10 @@ pub struct Monitor {
     #[getset(get = "pub", set = "pub")]
     name: String,
     #[getset(get = "pub", set = "pub")]
+    device: Option<String>,
+    #[getset(get = "pub", set = "pub")]
+    device_id: Option<String>,
+    #[getset(get = "pub", set = "pub")]
     size: Rect,
     #[getset(get = "pub", set = "pub")]
     work_area_size: Rect,
@@ -44,6 +48,8 @@ pub fn new(id: isize, size: Rect, work_area_size: Rect, name: String) -> Monitor
     Monitor {
         id,
         name,
+        device: None,
+        device_id: None,
         size,
         work_area_size,
         work_area_offset: None,
@@ -54,15 +60,18 @@ pub fn new(id: isize, size: Rect, work_area_size: Rect, name: String) -> Monitor
 
 impl Monitor {
     pub fn load_focused_workspace(&mut self, mouse_follows_focus: bool) -> Result<()> {
-        // FIX: 令 focused_workspace 最后 restore
-        //      保证从 monocle workspace 切换时隐藏 monocle window
+        // NOTE: 令 focused_workspace 最后 restore
+        //       保证从 monocle workspace 切换时隐藏 monocle window
         let focused_idx = self.focused_workspace_idx();
         for (i, workspace) in self.workspaces_mut().iter_mut().enumerate() {
             if i != focused_idx {
                 workspace.hide();
             }
         }
-        let focused_workspace = self.workspaces_mut().get_mut(focused_idx).ok_or_else(|| anyhow!("there is no workspace at index {}", focused_idx))?;
+        let focused_workspace = self
+            .workspaces_mut()
+            .get_mut(focused_idx)
+            .ok_or_else(|| anyhow!("there is no workspace at index {}", focused_idx))?;
         focused_workspace.restore(mouse_follows_focus)?;
 
         Ok(())
@@ -125,6 +134,15 @@ impl Monitor {
         if workspace.maximized_window().is_some() {
             bail!("cannot move native maximized window to another monitor or workspace");
         }
+
+        // NOTE: 禁止将 monocle 窗口移动到其他 monitor 或 workspace
+        if workspace.monocle_container().is_some() {
+            bail!("cannot move monocle window to another monitor or workspace");
+        }
+
+        // NOTE: 若当前 workspace 仅剩 1 个 container，则 focus 目标 workspace
+        let is_empty = workspace.containers().len() == 1;
+        let follow = follow || is_empty;
 
         let container = workspace
             .remove_focused_container()

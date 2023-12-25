@@ -1,9 +1,9 @@
 Import-Module posh-git
 Import-Module PSReadLine
 
-#########
-# Alias #
-#########
+# ╭───────╮
+# │ Alias │
+# ╰───────╯
 
 Set-Alias ll ls
 
@@ -12,9 +12,9 @@ Set-Alias vim nvim
 
 
 
-########################
-# Environment Variable #
-########################
+# ╭──────────────────────╮
+# │ Environment Variable │
+# ╰──────────────────────╯
 
 $history=(Get-PSReadlineOption).HistorySavePath
 $is_vscode=$env:TERM_PROGRAM -eq "vscode"
@@ -22,9 +22,9 @@ $WarningPreference="SilentlyContinue"
 
 
 
-############
-# Function #
-############
+# ╭──────────╮
+# │ Function │
+# ╰──────────╯
 
 # 打开目录
 function open($path=".") {
@@ -44,9 +44,9 @@ function zsh() {
 
 
 
-####################
-# PSReadLineOption #
-####################
+# ╭──────────────────╮
+# │ PSReadLineOption │
+# ╰──────────────────╯
 
 Set-PSReadLineOption -HistoryNoDuplicates:$false
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$true
@@ -77,9 +77,9 @@ Set-PSReadLineOption -AddToHistoryHandler {
 
 
 
-########################
-# PSReadLineKeyHandler #
-########################
+# ╭──────────────────────╮
+# │ PSReadLineKeyHandler │
+# ╰──────────────────────╯
 
 Set-PSReadLineKeyHandler -Chord "Shift+RightArrow" -Function ForwardWord
 Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
@@ -90,9 +90,9 @@ Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 
 
 
-#########
-# Theme #
-#########
+# ╭───────╮
+# │ Theme │
+# ╰───────╯
 
 $ENV:STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
@@ -113,9 +113,9 @@ If ($env:TERM_PROGRAM -eq "WezTerm") {
 
 
 
-#########
-# Conda #
-#########
+# ╭───────╮
+# │ Conda │
+# ╰───────╯
 
 If (Test-Path "$HOME/miniconda3/Scripts/conda.exe") {
     (& "$HOME/miniconda3/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null

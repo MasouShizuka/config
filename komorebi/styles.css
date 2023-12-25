@@ -60,8 +60,8 @@
 }
 
 .komorebi-multi-window .window,
-.komorebi-multi-window .window-focused {
-    background: #83a598;
+.komorebi-multi-window .window-focused,
+.komorebi-multi-window .window-monocle {
     border-radius: 8px;
     margin: 2px;
     padding: 2px 5px;
@@ -74,6 +74,10 @@
 
 .komorebi-multi-window .window-focused {
     background: #f1fa8c;
+}
+
+.komorebi-multi-window .window-monocle {
+    background: #d3869b;
 }
 
 .custom-widget,
@@ -123,7 +127,7 @@
 }
 
 .wifi-widget .label {
-  background: #b8bb26;
+    background: #b8bb26;
 }
 
 .traffic-widget .label {

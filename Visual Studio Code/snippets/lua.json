@@ -1,0 +1,11 @@
+{
+    "Module template": {
+        "prefix": "module",
+        "body": [
+            "local M = {}",
+            "${TM_SELECTED_TEXT}$0",
+            "return M"
+        ],
+        "description": "Module template"
+    },
+}

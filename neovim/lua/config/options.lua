@@ -1,5 +1,5 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local utils = require("utils")
 
 -- Char
 vim.opt.list = true                                                                                     -- show <Tab> and <EOL>
@@ -8,7 +8,7 @@ vim.opt.listchars:append({
     tab = ">~",
     trail = "·",
 })                                                                                                      -- characters for displaying in list mode
-if not variables.is_vscode then
+if not environment.is_vscode then
     utils.fix_cellwidths()
 end
 
@@ -65,6 +65,7 @@ vim.opt.mouse = "a"                                                             
 
 -- Search
 vim.opt.ignorecase = true                                                                               -- ignore case in search patterns
+vim.opt.maxmempattern = 2000000                                                                         -- maximum memory (in Kbyte) used for pattern search
 vim.opt.smartcase = true                                                                                -- no ignore case when pattern has uppercase
 
 -- Tab
@@ -85,14 +86,22 @@ vim.opt.sidescrolloff = 5                                                       
 vim.opt.sessionoptions = { "curdir", "folds", "globals", "help", "localoptions", "tabpages", "winsize"} -- options for :mksession
 
 -- Shell
-if variables.is_windows then
+if environment.is_windows then
     vim.opt.shell = "pwsh -NoLogo"                                                                      -- name of shell to use for external commands
     vim.opt.shellcmdflag = "-Command"                                                                   -- flag to shell to execute one command
     vim.opt.shellpipe  = "2>&1 | %%{ '$_' } | tee %s; exit $LastExitCode"                               -- string to put output of ":make" in error file
     vim.opt.shellquote = ""                                                                             -- quote character(s) for around shell command
+    vim.opt.shellslash = true                                                                           -- use forward slash for shell file names
     vim.opt.shellredir = "2>&1 | %%{ '$_' } | Out-File %s; exit $LastExitCode"                          -- string to put output of filter in a temp file
     vim.opt.shellxquote = ""                                                                            -- like 'shellquote', but include redirection
+    -- vim.opt.shell = "C:/msys64/usr/bin/zsh.exe"                                                      -- name of shell to use for external commands
+    -- vim.opt.shellcmdflag = "-c"                                                                      -- flag to shell to execute one command
+    -- vim.opt.shellslash = true                                                                        -- use forward slash for shell file names
+    -- vim.opt.shellxquote = ""                                                                         -- like 'shellquote', but include redirection
 end
+
+-- Spell
+vim.opt.spelllang = "en,cjk"                                                                            -- language(s) to do spell checking for
 
 -- Split window
 vim.opt.splitbelow = true                                                                               -- new window from split is below the current one
@@ -104,7 +113,7 @@ vim.opt.showtabline = 2                                                         
 vim.opt.showmode = false                                                                                -- message on status line to show current mode
 
 -- Time
-if not variables.is_windows then
+if not environment.is_vscode then
     vim.opt.timeoutlen = 500                                                                            -- time out time in milliseconds
 end
 vim.opt.updatetime = 300                                                                                -- after this many milliseconds flush swap file
@@ -114,3 +123,4 @@ vim.opt.wildmode = "longest:list,full"                                          
 
 -- Wrap
 vim.opt.linebreak = true                                                                                -- wrap long lines at a blank
+vim.opt.wrap = false                                                                                    -- long lines wrap and continue on the next line

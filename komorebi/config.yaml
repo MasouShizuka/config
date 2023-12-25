@@ -97,7 +97,7 @@ bars:
     widgets:
       left:   ["komorebi_workspaces", "komorebi_active_layout"]
       center: ["komorebi_multi_window"]
-      right:  ["explorer_button", "wifi", "traffic", "input_method", "cpu", "memory", "gpu", "battery", "clock"]
+      right:  ["explorer_button", "input_method", "wifi", "traffic", "cpu", "memory", "gpu", "battery", "clock"]
 
 # widgets:
   # my-clock-widget:

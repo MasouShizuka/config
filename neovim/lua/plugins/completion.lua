@@ -1,4 +1,8 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local filetype = require("utils.filetype")
+local icons = require("utils.icons")
+local keymap = require("utils.keymap")
+local path = require("utils.path")
 
 return {
     {
@@ -33,11 +37,25 @@ return {
                             fallback()
                         end
                     end, { "i", "s" }),
+                    ["<s-down>"] = cmp.mapping(function(fallback)
+                        if luasnip.choice_active() then
+                            require("luasnip.extras.select_choice")()
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
+                    ["<s-up>"] = cmp.mapping(function(fallback)
+                        if luasnip.choice_active() then
+                            require("luasnip.extras.select_choice")()
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
                     ["<c-j>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }), { "i", "c" }),
                     ["<c-k>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }), { "i", "c" }),
                     ["<c-d>"] = cmp.mapping.scroll_docs(4),
                     ["<c-u>"] = cmp.mapping.scroll_docs(-4),
-                    [variables.keymap["<c-space>"]] = cmp.mapping(function(fallback)
+                    [keymap["<c-space>"]] = cmp.mapping(function(fallback)
                         if cmp.visible() then
                             cmp.abort()
                         else
@@ -58,7 +76,7 @@ return {
                 formatting = {
                     format = function(entry, vim_item)
                         -- Kind icons
-                        local kind_icons = variables.icons.kinds
+                        local kind_icons = icons.kinds
                         local icon = kind_icons[vim_item.kind]
                         if icon then
                             vim_item.kind = string.format("%s%s", icon, vim_item.kind) -- This concatonates the icons with the name of the item kind
@@ -72,7 +90,6 @@ return {
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
                     { name = "luasnip" },
-                    { name = "luasnip_choice" },
                     { name = "buffer" },
                     { name = "path" },
                 }),
@@ -111,18 +128,11 @@ return {
                 }),
             })
 
-            cmp.setup.filetype({
-                "markdown",
-                -- 由 texlab 管理
-                -- "plaintex",
-                -- "tex",
-                "text",
-            }, {
+            cmp.setup.filetype(filetype.text_filetype, {
                 sources = cmp.config.sources({
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
                     { name = "luasnip" },
-                    { name = "luasnip_choice" },
                     {
                         name = "latex_symbols",
                         option = {
@@ -147,19 +157,12 @@ return {
                 "saadparwaiz1/cmp_luasnip",
                 dependencies = {
                     {
-                        "L3MON4D3/cmp-luasnip-choice",
-                        opts = {
-                            auto_open = true,
-                        },
-                    },
-
-                    {
                         "L3MON4D3/LuaSnip",
                         config = function(_, opts)
                             require("luasnip").setup(opts)
                             require("luasnip.loaders.from_vscode").lazy_load()
                             require("luasnip.loaders.from_vscode").lazy_load({
-                                paths = { variables.vscode_snippet_path },
+                                paths = { path.vscode_snippet_path },
                             })
                         end,
                         dependencies = {
@@ -172,7 +175,7 @@ return {
                 },
             },
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "CmdlineEnter",
             "InsertEnter",

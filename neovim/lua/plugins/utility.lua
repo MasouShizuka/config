@@ -1,10 +1,13 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local buftype = require("utils.buftype")
+local environment = require("utils.environment")
+local filetype = require("utils.filetype")
+local icons = require("utils.icons")
+local utils = require("utils")
 
 return {
     {
         "Aasim-A/scrollEOF.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
@@ -28,9 +31,9 @@ return {
             vim.opt.fillchars:append({
                 eob = " ",
                 fold = " ",
-                foldclose = variables.icons.fold.FoldClosed,
-                foldopen = variables.icons.fold.FoldOpened,
-                foldsep = variables.icons.fold.FoldSeparator,
+                foldclose = icons.fold.FoldClosed,
+                foldopen = icons.fold.FoldOpened,
+                foldsep = icons.fold.FoldSeparator,
             })
             vim.opt.foldcolumn = "1"
             vim.opt.foldenable = true
@@ -83,7 +86,7 @@ return {
             "kevinhwang91/promise-async",
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User TreesitterFile",
         },
@@ -123,54 +126,156 @@ return {
 
     {
         "LunarVim/bigfile.nvim",
+        enabled = not environment.is_vscode,
         event = {
             "User BigFile",
         },
         init = function()
             vim.api.nvim_create_autocmd("BufReadPre", {
                 callback = function(args)
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                        return
+                    end
+
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                        return
+                    end
+
                     if utils.is_bigfile(args.buf) then
                         utils.event("BigFile")
                         vim.api.nvim_del_augroup_by_name("BigFile")
-                        utils.refresh_current_buf(10)
+
+                        vim.api.nvim_create_autocmd("BufReadPost", {
+                            buffer = args.buf,
+                            callback = function()
+                                utils.refresh_current_buf(1, true)
+                            end,
+                            desc = "Big file",
+                            group = vim.api.nvim_create_augroup("BigFileRefresh", { clear = true }),
+                            once = true,
+                        })
                     end
                 end,
                 desc = "Big file",
                 group = vim.api.nvim_create_augroup("BigFile", { clear = true }),
             })
-        end,
-        opts = {
-            -- 禁用 filesize 检查，只通过 pattern 判断
-            filesize = 1e10,
-            pattern = function(bufnr, filesize_mib)
-                local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
-                if vim.tbl_contains(variables.skip_buftype_list, buftype) then
-                    return false
-                end
 
-                local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-                if vim.tbl_contains(variables.skip_filetype_list, filetype) then
-                    return false
-                end
-
-                if utils.is_bigfile(bufnr) then
-                    vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
-                    return true
-                end
-
-                return false
-            end,
-            features = {
-                "indent_blankline",
-                -- "illuminate",
-                "lsp",
-                "treesitter",
+            local bigfile_features = {
                 "syntax",
                 "matchparen",
                 "vimopts",
                 "filetype",
-            },
-        },
+            }
+            if utils.is_available("indent-blankline.nvim") then
+                bigfile_features[#bigfile_features + 1] = "indent_blankline"
+            end
+            if utils.is_available("vim-illuminate") then
+                bigfile_features[#bigfile_features + 1] = "illuminate"
+            end
+            if utils.is_available("nvim-lspconfig") then
+                bigfile_features[#bigfile_features + 1] = "lsp"
+            end
+            if utils.is_available("nvim-treesitter") then
+                bigfile_features[#bigfile_features + 1] = "treesitter"
+            end
+
+            vim.g.bigfile_features = bigfile_features
+
+            local longfile_features = {
+                {
+                    name = "wrap",
+                    opts = {
+                        defer = false,
+                    },
+                    disable = function()
+                        vim.api.nvim_set_option_value("wrap", false, { scope = "local" })
+                    end,
+                },
+            }
+
+            vim.api.nvim_create_autocmd("BufReadPost", {
+                callback = function(args)
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                        return
+                    end
+
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                        return
+                    end
+
+                    local status_ok, _ = pcall(vim.api.nvim_buf_get_var, args.buf, "bigfile_detected")
+                    if status_ok then
+                        return
+                    end
+
+                    if not utils.is_longfile(args.buf) then
+                        vim.api.nvim_buf_set_var(args.buf, "bigfile_detected", 0)
+                        return
+                    end
+
+                    vim.notify("Long file detected!", vim.log.levels.WARN, { title = "bigfile" })
+
+                    vim.api.nvim_buf_set_var(args.buf, "bigfile_detected", 1)
+
+                    local features = bigfile_features
+                    for _, feature in ipairs(longfile_features) do
+                        features[#features + 1] = feature
+                    end
+
+                    local matched_features = vim.tbl_map(function(feature)
+                        return require("bigfile.features").get_feature(feature)
+                    end, features)
+
+                    local matched_deferred_features = {}
+                    for _, feature in ipairs(matched_features) do
+                        feature.disable(args.buf)
+                        if feature.opts.defer then
+                            table.insert(matched_deferred_features, feature)
+                        end
+                    end
+
+                    vim.api.nvim_create_autocmd("BufReadPost", {
+                        buffer = args.buf,
+                        callback = function()
+                            for _, feature in ipairs(matched_deferred_features) do
+                                feature.disable(args.buf)
+                            end
+                        end,
+                    })
+                end,
+                desc = "Long file",
+                group = vim.api.nvim_create_augroup("LongFile", { clear = true }),
+            })
+        end,
+        opts = function()
+            return {
+                -- 禁用 filesize 检查，只通过 pattern 判断
+                filesize = math.huge,
+                pattern = function(bufnr, filesize_mib)
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                        return false
+                    end
+
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                        return false
+                    end
+
+                    if utils.is_bigfile(bufnr) then
+                        vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
+                        return true
+                    end
+
+                    return false
+                end,
+                features = vim.g.bigfile_features,
+            }
+        end,
     },
 
     {
@@ -179,21 +284,17 @@ return {
             "FencAutoDetect",
             "FencView",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
     },
 
     {
         "rcarriga/nvim-notify",
         init = function()
             vim.notify = function(message, ...)
-                if message == "warning: multiple different client offset_encodings detected for buffer, this is not supported yet" then
-                    return
-                end
-
                 require("notify")(message, ...)
             end
         end,
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         lazy = true,
         opts = {
             timeout = 3000,
@@ -209,7 +310,7 @@ return {
 
     {
         "stevearc/dressing.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             vim.ui.select = function(...)
                 require("lazy").load({ plugins = { "dressing.nvim" } })

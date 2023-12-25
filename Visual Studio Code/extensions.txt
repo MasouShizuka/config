@@ -20,6 +20,7 @@ James-Yu.latex-workshop
 Kelvin.vscode-sshfs
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
+mads-hartmann.bash-ide-vscode
 manasxx.background-cover
 manuth.markdown-converter
 marp-team.marp-vscode

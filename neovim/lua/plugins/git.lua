@@ -1,9 +1,10 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local keymap = require("utils.keymap")
 
 return {
     {
         "lewis6991/gitsigns.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User GitFile",
         },
@@ -71,16 +72,16 @@ return {
                 -- Navigation
                 map("n", "<c-n>", function()
                     if vim.wo.diff then
-                        vim.cmd.normal("]c")
-                        vim.cmd.normal("zz")
+                        vim.cmd("normal! ]c")
+                        vim.cmd("normal! zz")
                         return
                     end
                     vim.schedule(function() gs.next_hunk() end)
                 end, { desc = "Navigation next", silent = true })
-                map("n", variables.keymap["<c-s-n>"], function()
+                map("n", keymap["<c-s-n>"], function()
                     if vim.wo.diff then
-                        vim.cmd.normal("[c")
-                        vim.cmd.normal("zz")
+                        vim.cmd("normal! [c")
+                        vim.cmd("normal! zz")
                         return
                     end
                     vim.schedule(function() gs.prev_hunk() end)
@@ -303,7 +304,7 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             local is_which_key_available, which_key = pcall(require, "which-key")
             if is_which_key_available then

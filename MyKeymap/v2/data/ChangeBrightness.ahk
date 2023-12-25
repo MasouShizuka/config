@@ -96,21 +96,28 @@ class CLayout extends Gui {
     ; 加亮度
     IncBrightness(mon) {
         m := this.monitors.Get(this.currentIndex)
-        val := m["brightness"].Value + mon
-        if (val <= 100) {
-            this.SetBrightness(val, this.currentIndex)
-            m["brightness"].Value := val
-        }
+        val := this.limitBrightness(m["brightness"].Value + mon)
+        this.SetBrightness(val, this.currentIndex)
+        m["brightness"].Value := val
     }
 
     ; 减亮度
     DecBrightness(mon) {
         m := this.monitors.Get(this.currentIndex)
-        val := m["brightness"].Value - mon
-        if (val >= 0) {
-            this.SetBrightness(val, this.currentIndex)
-            m["brightness"].Value := val
+        val := this.limitBrightness(m["brightness"].Value - mon)
+        this.SetBrightness(val, this.currentIndex)
+        m["brightness"].Value := val
+    }
+
+    ; 限制亮度在 0 和 100 间
+    limitBrightness(b) {
+        if (b <= 0) {
+            return 0
         }
+        if (b >= 100) {
+            return 100
+        }
+        return b
     }
 
     ; 显示GUI

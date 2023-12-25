@@ -1,6 +1,7 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local path = require("utils.path")
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = path.data_path .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
     vim.fn.system({
         "git",
@@ -13,8 +14,11 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+if vim.g.mapleader == nil then
+    vim.g.mapleader = " "
+end
 return require("lazy").setup("plugins", {
-    lockfile = variables.data_path .. "/lazy/lazy-lock.json",
+    lockfile = path.data_path .. "/lazy/lazy-lock.json",
     install = {
         colorscheme = { "onedark" },
     },
@@ -22,7 +26,7 @@ return require("lazy").setup("plugins", {
         border = "rounded",
     },
     checker = {
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
     },
     change_detection = {
         notify = false,

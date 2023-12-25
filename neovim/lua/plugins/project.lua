@@ -1,4 +1,4 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
 
 return {
     {
@@ -7,7 +7,7 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         keys = {
             { "<leader><c-f>", function() require("spectre").open() end, desc = "Search and replace in project", mode = "n" },
         },

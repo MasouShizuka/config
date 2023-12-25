@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<TablacusExplorer><Item Filter="*" Type="JScript">FV.SetViewMode(4,16);
+﻿<TablacusExplorer Format="0" XP="0"><Item Filter="*" Type="JScript">FV.SetViewMode(4,16);
 FV.Columns='"System.ItemNameDisplay" -2 "System.DateModified" -2 "System.Size" -2 "System.ItemTypeText" -2';
 FV.GroupBy='System.Null';
 FV.SortColumn='System.ItemTypeText';</Item><Item Filter="D:\Music*" Type="JScript">FV.SetViewMode(4,16);

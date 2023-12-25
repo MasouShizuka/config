@@ -6,8 +6,8 @@
 local cfg = {
   format     = "%H:%M",
   duration   = 5,
---   key        = 'c',
---   togglekey  = 'C',
+  key        = 'c',
+  togglekey  = 'C',
 }
 
 -- global clock show state variable
@@ -27,8 +27,8 @@ end
 local function osd_clock_timer()
   -- do not run if toggled off. Shouldn't be called since periodic_timer is stop()-ed but just in case.
   if is_shown then
-    -- local s = os.date(cfg.format)
-    -- -- show time for 1 second
+    local s = os.date(cfg.format)
+    -- show time for 1 second
     mp.osd_message(s, 1)
   end
   collectgarbage()
@@ -60,4 +60,4 @@ end
 mp.register_script_message("show-clock", osd_clock)
 mp.register_script_message("toggle-clock", osd_clock_toggle)
 
--- osd_clock_toggle()
+osd_clock_toggle()

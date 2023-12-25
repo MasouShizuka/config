@@ -49,6 +49,7 @@ use crate::workspace::Workspace;
 use crate::BORDER_HWND;
 use crate::BORDER_OVERFLOW_IDENTIFIERS;
 use crate::DATA_DIR;
+use crate::DISPLAY_INDEX_PREFERENCES;
 use crate::FLOAT_IDENTIFIERS;
 use crate::HOME_DIR;
 use crate::LAYERED_WHITELIST;
@@ -103,6 +104,7 @@ pub struct State {
     pub border_overflow_identifiers: Vec<IdWithIdentifier>,
     pub name_change_on_launch_identifiers: Vec<IdWithIdentifier>,
     pub monitor_index_preferences: HashMap<usize, Rect>,
+    pub display_index_preferences: HashMap<usize, String>,
 }
 
 impl AsRef<Self> for WindowManager {
@@ -132,6 +134,7 @@ impl From<&WindowManager> for State {
             border_overflow_identifiers: BORDER_OVERFLOW_IDENTIFIERS.lock().clone(),
             name_change_on_launch_identifiers: OBJECT_NAME_CHANGE_ON_LAUNCH.lock().clone(),
             monitor_index_preferences: MONITOR_INDEX_PREFERENCES.lock().clone(),
+            display_index_preferences: DISPLAY_INDEX_PREFERENCES.lock().clone(),
         }
     }
 }
@@ -834,7 +837,7 @@ impl WindowManager {
             .update_focused_workspace(offset, &invisible_borders)?;
 
         if follow_focus {
-            // FIX: 确保窗口调整完再 focus 窗口
+            // NOTE: 确保窗口调整完再 focus 窗口
             std::thread::sleep(std::time::Duration::from_millis(100));
 
             if let Some(window) = self.focused_workspace()?.maximized_window() {
@@ -1110,6 +1113,15 @@ impl WindowManager {
             bail!("cannot move native maximized window to another monitor or workspace");
         }
 
+        // NOTE: 禁止将 monocle 窗口移动到其他 monitor 或 workspace
+        if workspace.monocle_container().is_some() {
+            bail!("cannot move monocle window to another monitor or workspace");
+        }
+
+        // NOTE: 若当前 workspace 仅剩 1 个 container，则 focus 目标 monitor
+        let is_empty = workspace.containers().len() == 1;
+        let follow = follow || is_empty;
+
         let container = workspace
             .remove_focused_container()
             .ok_or_else(|| anyhow!("there is no container"))?;
@@ -1122,6 +1134,12 @@ impl WindowManager {
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
         target_monitor.add_container(container, workspace_idx)?;
+        // NOTE: 若 follow 且 workspace_idx 不为 None，则改变目标 monitor 的 focused_workspace
+        if follow {
+            if let Some(idx) = workspace_idx {
+                target_monitor.focus_workspace(idx)?;
+            }
+        }
         target_monitor.load_focused_workspace(mouse_follows_focus)?;
         target_monitor.update_focused_workspace(offset, &invisible_borders)?;
 

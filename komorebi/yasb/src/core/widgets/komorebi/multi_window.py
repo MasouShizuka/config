@@ -2,10 +2,10 @@ import logging
 from time import time
 
 from psutil import Process
-from PyQt6.QtCore import QFileInfo, pyqtSignal
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QFileIconProvider, QHBoxLayout, QPushButton, QWidget
-from win32gui import GetWindowText, SetForegroundWindow
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QIcon, QImage, QPixmap
+from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QWidget
+from win32gui import DestroyIcon, ExtractIconEx, GetWindowText, SetForegroundWindow
 from win32process import GetWindowThreadProcessId
 
 from core.event_enums import KomorebiEvent
@@ -35,8 +35,8 @@ class WindowButton(QPushButton):
         self.setProperty("class", f"window-focused")
         self.setStyleSheet("")
 
-    def update_unfocused(self):
-        self.setProperty("class", f"window")
+    def update_monocle(self):
+        self.setProperty("class", f"window-monocle")
         self.setStyleSheet("")
 
     def set_focus(self):
@@ -87,7 +87,7 @@ class MultiWindowWidget(BaseWidget):
         self._multi_window_container.setLayout(self._multi_window_container_layout)
         self._multi_window_container.setProperty(
             "class",
-            "komorebi-workspaces-container",
+            "komorebi-multiwindow-container",
         )
 
         self.widget_layout.addWidget(self._multi_window_container)
@@ -109,6 +109,8 @@ class MultiWindowWidget(BaseWidget):
     def _register_signals_and_events(self):
         window_change_event_watchlist = [
             KomorebiEvent.ToggleMonocle,
+            KomorebiEvent.Cloak,
+            KomorebiEvent.Uncloak,
             KomorebiEvent.CycleFocusMonitor,
             KomorebiEvent.CycleFocusWindow,
             KomorebiEvent.CycleFocusWorkspace,
@@ -134,6 +136,9 @@ class MultiWindowWidget(BaseWidget):
         for event_type in window_change_event_watchlist:
             self._event_service.register_event(event_type, self.k_signal_window_change)
 
+        # NOTE: 用于测试 komorebi 的 event 输出
+        # self._event_service.register_event(KomorebiEvent.KomorebiUpdate, self.k_signal_window_change)
+
     def _toggle_title_text(self):
         self._show_alt = not self._show_alt
         self._active_label = self._label_alt if self._show_alt else self._label
@@ -142,6 +147,9 @@ class MultiWindowWidget(BaseWidget):
         self._update_workspace_windows(state)
 
     def _on_komorebi_window_change_event(self, event: dict, state: dict):
+        # NOTE: 用于测试 komorebi 的 event 输出
+        # print(event)
+
         prev_last_update_time = self._last_update_time
         last_update_time = round(time() * 1000)
         if last_update_time - prev_last_update_time >= self._min_update_interval:
@@ -162,22 +170,28 @@ class MultiWindowWidget(BaseWidget):
 
                 windows = self._focused_workspace["containers"]["elements"]
                 focused_window_index = self._focused_workspace["containers"]["focused"]
-                if self._focused_workspace["monocle_container"] is not None:
-                    windows.insert(0, self._focused_workspace["monocle_container"])
-                    focused_window_index = 0
+                is_monocle = self._focused_workspace["monocle_container"] is not None
+                # NOTE: komorebi 未修改源码需要取消注释
+                # if self._focused_workspace["monocle_container"] is not None:
+                #     windows.insert(0, self._focused_workspace["monocle_container"])
+                #     focused_window_index = 0
                 for index, window in enumerate(windows):
                     window_info = window["windows"]["elements"][0]
-                    tid, pid = GetWindowThreadProcessId(window_info["hwnd"])
+                    _, pid = GetWindowThreadProcessId(window_info["hwnd"])
                     window_info["pid"] = pid
 
                     window_button = WindowButton(window_info, self._active_label)
                     if self._show_icon:
                         p = Process(pid)
-                        exe_path = p.exe()
-                        qicon = QIcon(QFileIconProvider().icon(QFileInfo(exe_path)))
+                        exe = p.exe()
+                        # qicon = QFileIconProvider().icon(QFileInfo(exe_path))
+                        qicon = self.get_exe_icon(exe)
                         window_button.setIcon(qicon)
                     if index == focused_window_index:
-                        window_button.update_focused()
+                        if is_monocle:
+                            window_button.update_monocle()
+                        else:
+                            window_button.update_focused()
 
                     self._multi_window_container_layout.addWidget(window_button)
                     self._window_buttons.append(window_button)
@@ -218,3 +232,20 @@ class MultiWindowWidget(BaseWidget):
             window_info["title"] = title
 
             window_button.setText(self._active_label.format(win=window_info))
+
+    def get_exe_icon(self, exe):
+        # NOTE: pyqt6 <= 6.6.0 有效
+        # return QFileIconProvider().icon(QFileInfo(exe))
+
+        icons = ExtractIconEx(exe, 0)
+        icon = icons[0][0]
+
+        qimage = QImage.fromHICON(icon)
+        qpixmap = QPixmap.fromImage(qimage)
+        qicon = QIcon(qpixmap)
+
+        for icon_list in icons:
+            for icon in icon_list:
+                DestroyIcon(icon)
+
+        return qicon

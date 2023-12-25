@@ -1,4 +1,5 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local path = require("utils.path")
 
 return {
     {
@@ -10,7 +11,7 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             local is_which_key_available, which_key = pcall(require, "which-key")
             if is_which_key_available then
@@ -73,7 +74,7 @@ return {
                         },
                     },
                     history = {
-                        path = variables.data_path .. "/lazy/telescope.nvim/telescope_history",
+                        path = path.data_path .. "/lazy/telescope.nvim/telescope_history",
                     },
                     file_ignore_patterns = {
                         "%.git",

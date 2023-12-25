@@ -1,5 +1,9 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local buftype = require("utils.buftype")
+local environment = require("utils.environment")
+local filetype = require("utils.filetype")
+local icons = require("utils.icons")
+local lsp = require("utils.lsp")
+local utils = require("utils")
 
 return {
     {
@@ -7,7 +11,7 @@ return {
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "UIEnter",
         },
@@ -100,16 +104,16 @@ return {
             local function get_diagnostic_severity(severity, show_count)
                 local icon, hl
                 if severity == "error" then
-                    icon = variables.icons.diagnostics.Error
+                    icon = icons.diagnostics.Error
                     hl = { fg = "diag_error" }
                 elseif severity == "warn" then
-                    icon = variables.icons.diagnostics.Warn
+                    icon = icons.diagnostics.Warn
                     hl = { fg = "diag_warn" }
                 elseif severity == "info" then
-                    icon = variables.icons.diagnostics.Info
+                    icon = icons.diagnostics.Info
                     hl = { fg = "diag_info" }
                 elseif severity == "hint" then
-                    icon = variables.icons.diagnostics.Hint
+                    icon = icons.diagnostics.Hint
                     hl = { fg = "diag_hint" }
                 end
 
@@ -132,13 +136,13 @@ return {
             local function get_git_status(status, show_count)
                 local icon, hl
                 if status == "added" then
-                    icon = variables.icons.git.added
+                    icon = icons.git.added
                     hl = { fg = "git_add" }
                 elseif status == "changed" then
-                    icon = variables.icons.git.modified
+                    icon = icons.git.modified
                     hl = { fg = "git_change" }
                 elseif status == "removed" then
-                    icon = variables.icons.git.deleted
+                    icon = icons.git.deleted
                     hl = { fg = "git_del" }
                 end
 
@@ -282,6 +286,7 @@ return {
                 end,
                 provider = " ",
                 hl = { fg = "green" },
+                update = "BufModifiedSet",
             }
             local file_name = {
                 init = function(self)
@@ -362,6 +367,8 @@ return {
             }
 
             local ruler = {
+                update = "CursorMoved",
+
                 padding_after({
                     condition = function(self)
                         local mode = vim.fn.mode()
@@ -399,21 +406,56 @@ return {
                     return self.sbar[i]:rep(2)
                 end,
                 hl = { fg = "blue", bg = "gray" },
+                update = "CursorMoved",
             }
 
-            local lsp = {
-                condition = herrline_conditions.lsp_attached,
-                provider  = function(self)
+            local python_venv = {
+                condition = function(self)
+                    return utils.is_available("venv-selector.nvim") and vim.bo.filetype == "python"
+                end,
+                provider = function(self)
+                    local venv_name = "base"
+                    local active_venv = require("venv-selector").get_active_venv()
+                    if active_venv ~= nil then
+                        if active_venv:find("envs") then
+                            venv_name = vim.fn.fnamemodify(active_venv, ":t")
+                        end
+                    end
+                    return " " .. venv_name
+                end,
+                hl = { fg = "yellow" },
+                on_click = {
+                    callback = function()
+                        require("venv-selector").open()
+                    end,
+                    name = "heirline_statusline_venv_selector",
+                },
+            }
+
+            local lsp_server = {
+                provider = function(self)
                     local names = {}
                     for _, server in pairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
                         table.insert(names, server.name)
                     end
                     return " " .. table.concat(names, ",")
                 end,
-                hl        = { fg = "green" },
-                update    = { "LspAttach", "LspDetach" },
+                hl       = { fg = "green" },
+                update   = { "LspAttach", "LspDetach" },
             }
+
+            local lsp_info = heirline_utils.insert(
+                {
+                    condition = herrline_conditions.lsp_attached,
+                },
+                padding_after(python_venv),
+                lsp_server
+            )
+
             local navic = {
+                condition = function(self)
+                    return utils.is_available("nvim-navic")
+                end,
                 static = {
                     type_hl = {
                         File = "Structure",
@@ -445,13 +487,13 @@ return {
                     },
                 },
                 init = function(self)
-                    local separator = " " .. variables.icons.fold.FoldClosed .. " "
+                    local separator = " " .. icons.fold.FoldClosed .. " "
 
                     local children = { { provider = " " } }
 
                     local filename = self.filename or vim.api.nvim_buf_get_name(0)
                     filename = vim.fn.fnamemodify(filename, ":.")
-                    if variables.is_windows then
+                    if environment.is_windows then
                         filename = filename:gsub("\\", "/")
                     end
                     for token in filename:gmatch("([^/]+)/?") do
@@ -466,7 +508,8 @@ return {
                     table.insert(children, #children, file_icon)
 
                     local is_navic_available, navic = pcall(require, "nvim-navic")
-                    if is_navic_available then
+                    local is_available = is_navic_available and navic.is_available()
+                    if is_available then
                         local data = navic.get_data() or {}
                         for _, d in ipairs(data) do
                             local child = {
@@ -494,14 +537,14 @@ return {
             }
 
             local diagnostic = insert_with_child_condition(
-                { update = { "DiagnosticChanged", "BufEnter" } },
+                { update = { "BufEnter", "DiagnosticChanged" } },
                 padding_before(get_diagnostic_severity("error", true)),
                 padding_before(get_diagnostic_severity("warn", true)),
                 padding_before(get_diagnostic_severity("info", true)),
                 padding_before(get_diagnostic_severity("hint", true))
             )
 
-            local lsp_diagnostic = insert_with_child_condition({}, lsp, diagnostic)
+            local lsp_diagnostic = insert_with_child_condition({}, lsp_info, diagnostic)
 
             local git_branch = {
                 condition = function(self)
@@ -551,7 +594,7 @@ return {
                         math.min(search.total, search.maxcount)
                     )
                 end,
-                hl = { fg = "yellow" }
+                hl = { fg = "yellow" },
             }
 
             local macro = {
@@ -600,7 +643,7 @@ return {
                     self.title = "Explorer"
                     self.win = vim.api.nvim_tabpage_list_wins(0)[1]
                     self.buf = vim.api.nvim_win_get_buf(self.win)
-                    return variables.is_in_toggle_filetype_list(vim.bo[self.buf].filetype, variables.toggle_filetype_list1)
+                    return filetype.is_in_toggle_filetype_list(vim.bo[self.buf].filetype, filetype.toggle_filetype_list_of_left)
                 end,
                 provider = function(self)
                     local width = vim.api.nvim_win_get_width(self.win)
@@ -829,9 +872,9 @@ return {
                 end,
                 provider = function(self)
                     local fillchars = vim.opt.fillchars:get()
-                    local foldopen = fillchars.foldopen or variables.icons.fold.FoldOpened
-                    local foldclosed = fillchars.foldclose or variables.icons.fold.FoldClosed
-                    local foldsep = fillchars.foldsep or variables.icons.fold.FoldSeparator
+                    local foldopen = fillchars.foldopen or icons.fold.FoldOpened
+                    local foldclosed = fillchars.foldclose or icons.fold.FoldClosed
+                    local foldsep = fillchars.foldsep or icons.fold.FoldSeparator
 
                     -- move to M.fold_indicator
                     local wp = ffi.C.find_window_by_handle(0, ffi.new("Error")) -- get window handler
@@ -871,9 +914,9 @@ return {
                     callback = function(...)
                         local char = statuscolumn_clickargs(...).char
                         local fillchars = vim.opt_local.fillchars:get()
-                        if char == (fillchars.foldopen or variables.icons.fold.FoldOpened) then
+                        if char == (fillchars.foldopen or icons.fold.FoldOpened) then
                             vim.cmd("norm! zc")
-                        elseif char == (fillchars.foldcolse or variables.icons.fold.FoldClosed) then
+                        elseif char == (fillchars.foldcolse or icons.fold.FoldClosed) then
                             vim.cmd("norm! zo")
                         end
                     end,
@@ -994,8 +1037,8 @@ return {
             local special_statusline = {
                 condition = function()
                     return herrline_conditions.buffer_matches({
-                        buftype = variables.skip_buftype_list,
-                        filetype = variables.skip_filetype_list,
+                        buftype = buftype.skip_buftype_list,
+                        filetype = filetype.skip_filetype_list,
                     })
                 end,
 
@@ -1047,9 +1090,12 @@ return {
                 },
                 opts = {
                     disable_winbar_cb = function(args)
-                        return not vim.tbl_contains(variables.lsp_filetype_list, vim.bo[args.buf].filetype) or herrline_conditions.buffer_matches({
-                            buftype = variables.skip_buftype_list,
-                            filetype = variables.skip_filetype_list,
+                        if not utils.is_available("nvim-navic") then
+                            return true
+                        end
+                        return not vim.tbl_contains(lsp.lsp_filetype_list, vim.bo[args.buf].filetype) or herrline_conditions.buffer_matches({
+                            buftype = buftype.skip_buftype_list,
+                            filetype = filetype.skip_filetype_list,
                         }, args.buf)
                     end,
                 },
@@ -1059,7 +1105,7 @@ return {
 
     {
         "SmiteshP/nvim-navic",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
@@ -1073,7 +1119,7 @@ return {
         end,
         lazy = true,
         opts = {
-            icons = variables.icons.kinds,
+            icons = icons.kinds,
             lazy_update_content = true,
         },
     },

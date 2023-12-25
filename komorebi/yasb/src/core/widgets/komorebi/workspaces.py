@@ -104,6 +104,8 @@ class WorkspaceWidget(BaseWidget):
 
     def _register_signals_and_events(self):
         workspace_focus_event_watchlist = [
+            KomorebiEvent.Cloak,
+            KomorebiEvent.Uncloak,
             KomorebiEvent.CycleFocusWorkspace,
             KomorebiEvent.CycleFocusMonitor,
             KomorebiEvent.FocusMonitorNumber,
@@ -119,6 +121,7 @@ class WorkspaceWidget(BaseWidget):
             KomorebiEvent.NewWorkspace,
             KomorebiEvent.ReloadConfiguration,
             KomorebiEvent.SendContainerToMonitorNumber,
+            KomorebiEvent.SendContainerToMonitorWorkspaceNumber,
             KomorebiEvent.SendContainerToWorkspaceNumber,
             KomorebiEvent.Unmanage,
             KomorebiEvent.WatchConfiguration,

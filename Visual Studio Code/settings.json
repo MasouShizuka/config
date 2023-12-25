@@ -12,7 +12,7 @@
     },
     "[python]": {
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
+            "source.organizeImports": "explicit"
         },
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
@@ -227,6 +227,7 @@
         ],
         "toolbar": []
     },
+    "mdtableeditor.isHighlighterEnabled": false,
     "notebook.cellToolbarLocation": {
         "default": "left",
         "jupyter-notebook": "left"
@@ -237,6 +238,7 @@
     ],
     "notebook.lineNumbers": "on",
     "notebook.output.scrolling": true,
+    "notebook.stickyScroll.enabled": true,
     "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
     "python.analysis.inlayHints.pytestParameters": true,
@@ -408,5 +410,6 @@
     },
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,
-    "workbench.startupEditor": "none"
+    "workbench.startupEditor": "none",
+    "workbench.tree.enableStickyScroll": true
 }

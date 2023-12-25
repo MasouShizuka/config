@@ -123,6 +123,8 @@ class ActiveLayoutWidget(BaseWidget):
             KomorebiEvent.ToggleTiling,
             KomorebiEvent.ToggleMonocle,
             KomorebiEvent.ToggleMaximize,
+            KomorebiEvent.Cloak,
+            KomorebiEvent.Uncloak,
             KomorebiEvent.CycleFocusMonitor,
             KomorebiEvent.CycleFocusWorkspace,
             KomorebiEvent.FocusMonitorNumber,

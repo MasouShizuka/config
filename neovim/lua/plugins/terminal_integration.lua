@@ -1,4 +1,4 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
 
 return {
     {
@@ -12,7 +12,7 @@ return {
             "ToggleTermSendVisualSelection",
             "ToggleTermSetName",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         opts = function()
             local config = {
                 size = function(term)
@@ -34,7 +34,7 @@ return {
                     end,
                 },
             }
-            if variables.is_windows then
+            if environment.is_windows then
                 config["shell"] = "pwsh -NoLogo"
             end
 

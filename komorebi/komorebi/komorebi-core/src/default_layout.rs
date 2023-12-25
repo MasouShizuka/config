@@ -34,10 +34,7 @@ impl DefaultLayout {
         sizing: Sizing,
         delta: i32,
     ) -> Option<Rect> {
-        if !matches!(self, Self::BSP) && !matches!(self, Self::UltrawideVerticalStack) {
-            return None;
-        };
-
+        // NOTE: 由于添加了所有 layout 的 resize，因此去除未添加 resize 的 layout 的检测
         let max_divisor = 1.005;
         let mut r = resize.unwrap_or_default();
 

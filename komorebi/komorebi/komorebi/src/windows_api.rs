@@ -1,15 +1,14 @@
 use std::collections::VecDeque;
 use std::convert::TryFrom;
 use std::ffi::c_void;
-use std::ffi::OsString;
-use std::os::windows::ffi::OsStringExt;
 use std::sync::atomic::Ordering;
 
 use color_eyre::eyre::anyhow;
 use color_eyre::eyre::Error;
 use color_eyre::Result;
+use widestring::U16CStr;
 use windows::core::Result as WindowsCrateResult;
-use windows::core::PCSTR;
+use windows::core::PCWSTR;
 use windows::core::PWSTR;
 use windows::Win32::Foundation::CloseHandle;
 use windows::Win32::Foundation::BOOL;
@@ -30,11 +29,13 @@ use windows::Win32::Graphics::Dwm::DWM_CLOAKED_APP;
 use windows::Win32::Graphics::Dwm::DWM_CLOAKED_INHERITED;
 use windows::Win32::Graphics::Dwm::DWM_CLOAKED_SHELL;
 use windows::Win32::Graphics::Gdi::CreateSolidBrush;
+use windows::Win32::Graphics::Gdi::EnumDisplayDevicesW;
 use windows::Win32::Graphics::Gdi::EnumDisplayMonitors;
 use windows::Win32::Graphics::Gdi::GetMonitorInfoW;
 use windows::Win32::Graphics::Gdi::InvalidateRect;
 use windows::Win32::Graphics::Gdi::MonitorFromPoint;
 use windows::Win32::Graphics::Gdi::MonitorFromWindow;
+use windows::Win32::Graphics::Gdi::DISPLAY_DEVICEW;
 use windows::Win32::Graphics::Gdi::HBRUSH;
 use windows::Win32::Graphics::Gdi::HDC;
 use windows::Win32::Graphics::Gdi::HMONITOR;
@@ -67,7 +68,7 @@ use windows::Win32::UI::Shell::Common::DEVICE_SCALE_FACTOR;
 use windows::Win32::UI::Shell::GetScaleFactorForMonitor;
 use windows::Win32::UI::WindowsAndMessaging::AllowSetForegroundWindow;
 use windows::Win32::UI::WindowsAndMessaging::BringWindowToTop;
-use windows::Win32::UI::WindowsAndMessaging::CreateWindowExA;
+use windows::Win32::UI::WindowsAndMessaging::CreateWindowExW;
 use windows::Win32::UI::WindowsAndMessaging::EnumWindows;
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 use windows::Win32::UI::WindowsAndMessaging::GetDesktopWindow;
@@ -83,7 +84,7 @@ use windows::Win32::UI::WindowsAndMessaging::IsWindow;
 use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
 use windows::Win32::UI::WindowsAndMessaging::PostMessageW;
 use windows::Win32::UI::WindowsAndMessaging::RealGetWindowClassW;
-use windows::Win32::UI::WindowsAndMessaging::RegisterClassA;
+use windows::Win32::UI::WindowsAndMessaging::RegisterClassW;
 use windows::Win32::UI::WindowsAndMessaging::SetCursorPos;
 use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
 use windows::Win32::UI::WindowsAndMessaging::SetLayeredWindowAttributes;
@@ -93,6 +94,7 @@ use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
 use windows::Win32::UI::WindowsAndMessaging::SystemParametersInfoW;
 use windows::Win32::UI::WindowsAndMessaging::WindowFromPoint;
 use windows::Win32::UI::WindowsAndMessaging::CW_USEDEFAULT;
+use windows::Win32::UI::WindowsAndMessaging::EDD_GET_DEVICE_INTERFACE_NAME;
 use windows::Win32::UI::WindowsAndMessaging::GWL_EXSTYLE;
 use windows::Win32::UI::WindowsAndMessaging::GWL_STYLE;
 use windows::Win32::UI::WindowsAndMessaging::GW_HWNDNEXT;
@@ -105,7 +107,9 @@ use windows::Win32::UI::WindowsAndMessaging::SET_WINDOW_POS_FLAGS;
 use windows::Win32::UI::WindowsAndMessaging::SHOW_WINDOW_CMD;
 use windows::Win32::UI::WindowsAndMessaging::SPIF_SENDCHANGE;
 use windows::Win32::UI::WindowsAndMessaging::SPI_GETACTIVEWINDOWTRACKING;
+use windows::Win32::UI::WindowsAndMessaging::SPI_GETFOREGROUNDLOCKTIMEOUT;
 use windows::Win32::UI::WindowsAndMessaging::SPI_SETACTIVEWINDOWTRACKING;
+use windows::Win32::UI::WindowsAndMessaging::SPI_SETFOREGROUNDLOCKTIMEOUT;
 use windows::Win32::UI::WindowsAndMessaging::SW_HIDE;
 use windows::Win32::UI::WindowsAndMessaging::SW_MAXIMIZE;
 use windows::Win32::UI::WindowsAndMessaging::SW_MINIMIZE;
@@ -115,7 +119,7 @@ use windows::Win32::UI::WindowsAndMessaging::SYSTEM_PARAMETERS_INFO_ACTION;
 use windows::Win32::UI::WindowsAndMessaging::SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS;
 use windows::Win32::UI::WindowsAndMessaging::WINDOW_LONG_PTR_INDEX;
 use windows::Win32::UI::WindowsAndMessaging::WM_CLOSE;
-use windows::Win32::UI::WindowsAndMessaging::WNDCLASSA;
+use windows::Win32::UI::WindowsAndMessaging::WNDCLASSW;
 use windows::Win32::UI::WindowsAndMessaging::WNDENUMPROC;
 use windows::Win32::UI::WindowsAndMessaging::WS_DISABLED;
 use windows::Win32::UI::WindowsAndMessaging::WS_EX_LAYERED;
@@ -162,8 +166,8 @@ impl_from_integer_for_windows_result!(usize, isize, u16, u32, i32);
 impl<T, E> From<WindowsResult<T, E>> for Result<T, E> {
     fn from(result: WindowsResult<T, E>) -> Self {
         match result {
-            WindowsResult::Err(error) => Self::Err(error),
-            WindowsResult::Ok(ok) => Self::Ok(ok),
+            WindowsResult::Err(error) => Err(error),
+            WindowsResult::Ok(ok) => Ok(ok),
         }
     }
 }
@@ -219,7 +223,7 @@ impl WindowsApi {
         let mut monitors: Vec<(String, isize)> = vec![];
         let monitors_ref: &mut Vec<(String, isize)> = monitors.as_mut();
         Self::enum_display_monitors(
-            Option::Some(windows_callbacks::valid_display_monitors),
+            Some(windows_callbacks::valid_display_monitors),
             monitors_ref as *mut Vec<(String, isize)> as isize,
         )?;
 
@@ -228,9 +232,46 @@ impl WindowsApi {
 
     pub fn load_monitor_information(monitors: &mut Ring<Monitor>) -> Result<()> {
         Self::enum_display_monitors(
-            Option::Some(windows_callbacks::enum_display_monitor),
+            Some(windows_callbacks::enum_display_monitor),
             monitors as *mut Ring<Monitor> as isize,
-        )
+        )?;
+
+        Ok(())
+    }
+
+    pub fn enum_display_devices(
+        index: u32,
+        lp_device: Option<*const u16>,
+    ) -> Result<DISPLAY_DEVICEW> {
+        #[allow(clippy::option_if_let_else)]
+        let lp_device = match lp_device {
+            None => PCWSTR::null(),
+            Some(lp_device) => PCWSTR(lp_device),
+        };
+
+        let mut display_device = DISPLAY_DEVICEW {
+            cb: u32::try_from(std::mem::size_of::<DISPLAY_DEVICEW>())?,
+            ..Default::default()
+        };
+
+        match unsafe {
+            EnumDisplayDevicesW(
+                lp_device,
+                index,
+                std::ptr::addr_of_mut!(display_device),
+                EDD_GET_DEVICE_INTERFACE_NAME,
+            )
+        }
+        .ok()
+        {
+            Ok(_) => {}
+            Err(error) => {
+                tracing::error!("enum_display_devices: {}", error);
+                return Err(error.into());
+            }
+        }
+
+        Ok(display_device)
     }
 
     pub fn enum_windows(callback: WNDENUMPROC, callback_data_address: isize) -> Result<()> {
@@ -243,7 +284,7 @@ impl WindowsApi {
             if let Some(workspace) = monitor.workspaces_mut().front_mut() {
                 // EnumWindows will enumerate through windows on all monitors
                 Self::enum_windows(
-                    Option::Some(windows_callbacks::enum_window),
+                    Some(windows_callbacks::enum_window),
                     workspace.containers_mut() as *mut VecDeque<Container> as isize,
                 )?;
 
@@ -648,10 +689,10 @@ impl WindowsApi {
 
     pub fn monitor(hmonitor: isize) -> Result<Monitor> {
         let ex_info = Self::monitor_info_w(HMONITOR(hmonitor))?;
-        let name = OsString::from_wide(&ex_info.szDevice);
-        let name = name
+        let name = U16CStr::from_slice_truncate(&ex_info.szDevice)
+            .expect("monitor name was not a valid u16 c string")
+            .to_ustring()
             .to_string_lossy()
-            .replace('\u{0000}', "")
             .trim_start_matches(r"\\.\")
             .to_string();
 
@@ -677,6 +718,42 @@ impl WindowsApi {
     ) -> Result<()> {
         unsafe { SystemParametersInfoW(action, ui_param, Option::from(pv_param), update_flags) }
             .process()
+    }
+
+    #[tracing::instrument]
+    pub fn foreground_lock_timeout() -> Result<()> {
+        let mut value: u32 = 0;
+
+        Self::system_parameters_info_w(
+            SPI_GETFOREGROUNDLOCKTIMEOUT,
+            0,
+            std::ptr::addr_of_mut!(value).cast(),
+            SPIF_SENDCHANGE,
+        )?;
+
+        tracing::info!("current value of ForegroundLockTimeout is {value}");
+
+        if value != 0 {
+            tracing::info!("updating value of ForegroundLockTimeout to {value} in order to enable keyboard-driven focus updating");
+
+            Self::system_parameters_info_w(
+                SPI_SETFOREGROUNDLOCKTIMEOUT,
+                0,
+                std::ptr::null_mut::<c_void>(),
+                SPIF_SENDCHANGE,
+            )?;
+
+            Self::system_parameters_info_w(
+                SPI_GETFOREGROUNDLOCKTIMEOUT,
+                0,
+                std::ptr::addr_of_mut!(value).cast(),
+                SPIF_SENDCHANGE,
+            )?;
+
+            tracing::info!("updated value of ForegroundLockTimeout is now {value}");
+        }
+
+        Ok(())
     }
 
     #[allow(dead_code)]
@@ -721,8 +798,8 @@ impl WindowsApi {
         unsafe { CreateSolidBrush(COLORREF(colour)) }
     }
 
-    pub fn register_class_a(window_class: &WNDCLASSA) -> Result<u16> {
-        Result::from(WindowsResult::from(unsafe { RegisterClassA(window_class) }))
+    pub fn register_class_w(window_class: &WNDCLASSW) -> Result<u16> {
+        Result::from(WindowsResult::from(unsafe { RegisterClassW(window_class) }))
     }
 
     pub fn scale_factor_for_monitor(hmonitor: isize) -> Result<DEVICE_SCALE_FACTOR> {
@@ -750,9 +827,9 @@ impl WindowsApi {
         .process()
     }
 
-    pub fn create_border_window(name: PCSTR, instance: HMODULE) -> Result<isize> {
+    pub fn create_border_window(name: PCWSTR, instance: HMODULE) -> Result<isize> {
         unsafe {
-            let hwnd = CreateWindowExA(
+            let hwnd = CreateWindowExW(
                 WS_EX_TOOLWINDOW | WS_EX_LAYERED,
                 name,
                 name,
@@ -784,9 +861,9 @@ impl WindowsApi {
         Ok(())
     }
 
-    pub fn create_hidden_window(name: PCSTR, instance: HMODULE) -> Result<isize> {
+    pub fn create_hidden_window(name: PCWSTR, instance: HMODULE) -> Result<isize> {
         unsafe {
-            CreateWindowExA(
+            CreateWindowExW(
                 WS_EX_NOACTIVATE,
                 name,
                 name,

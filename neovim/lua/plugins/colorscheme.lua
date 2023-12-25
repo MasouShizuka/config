@@ -1,9 +1,9 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
 
 return {
     {
         "olimorris/onedarkpro.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         config = function(_, opts)
             require("onedarkpro").setup(opts)
 

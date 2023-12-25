@@ -143,6 +143,8 @@ lazy_static! {
     ]));
     static ref MONITOR_INDEX_PREFERENCES: Arc<Mutex<HashMap<usize, Rect>>> =
         Arc::new(Mutex::new(HashMap::new()));
+    static ref DISPLAY_INDEX_PREFERENCES: Arc<Mutex<HashMap<usize, String>>> =
+        Arc::new(Mutex::new(HashMap::new()));
     static ref WORKSPACE_RULES: Arc<Mutex<HashMap<String, WorkspaceRule>>> =
         Arc::new(Mutex::new(HashMap::new()));
     static ref REGEX_IDENTIFIERS: Arc<Mutex<HashMap<String, Regex>>> =
@@ -448,16 +450,16 @@ fn detect_deadlocks() {
 #[clap(author, about, version)]
 struct Opts {
     /// Allow the use of komorebi's custom focus-follows-mouse implementation
-    #[clap(action, short, long = "ffm")]
+    #[clap(short, long = "ffm")]
     focus_follows_mouse: bool,
     /// Wait for 'komorebic complete-configuration' to be sent before processing events
-    #[clap(action, short, long)]
+    #[clap(short, long)]
     await_configuration: bool,
     /// Start a TCP server on the given port to allow the direct sending of SocketMessages
-    #[clap(action, short, long)]
+    #[clap(short, long)]
     tcp_port: Option<usize>,
     /// Path to a static configuration JSON file
-    #[clap(action, short, long)]
+    #[clap(short, long)]
     config: Option<PathBuf>,
 }
 
@@ -496,6 +498,8 @@ fn main() -> Result<()> {
     // File logging worker guard has to have an assignment in the main fn to work
     let (_guard, _color_guard) = setup()?;
 
+    WindowsApi::foreground_lock_timeout()?;
+
     #[cfg(feature = "deadlock_detection")]
     detect_deadlocks();
 
@@ -507,7 +511,19 @@ fn main() -> Result<()> {
 
     Hidden::create("komorebi-hidden")?;
 
-    let wm = if let Some(config) = &opts.config {
+    let static_config = opts.config.map_or_else(
+        || {
+            let komorebi_json = HOME_DIR.join("komorebi.json");
+            if komorebi_json.is_file() {
+                Option::from(komorebi_json)
+            } else {
+                None
+            }
+        },
+        Option::from,
+    );
+
+    let wm = if let Some(config) = &static_config {
         tracing::info!(
             "creating window manager from static configuration file: {}",
             config.display()
@@ -524,7 +540,8 @@ fn main() -> Result<()> {
     };
 
     wm.lock().init()?;
-    if let Some(config) = &opts.config {
+
+    if let Some(config) = &static_config {
         StaticConfig::postload(config, &wm)?;
     }
 
@@ -538,7 +555,7 @@ fn main() -> Result<()> {
         listen_for_commands_tcp(wm.clone(), port);
     }
 
-    if opts.config.is_none() {
+    if static_config.is_none() {
         std::thread::spawn(|| load_configuration().expect("could not load configuration"));
 
         if opts.await_configuration {

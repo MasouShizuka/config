@@ -353,7 +353,7 @@ impl Window {
             }
         };
 
-        // FIX: 激活鼠标位置的 hwnd
+        // NOTE: 激活鼠标位置的 hwnd
         if mouse_follows_focus {
             let exclude_classes = [
                 // Chromium/Electron

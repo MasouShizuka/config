@@ -1,46 +1,128 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
 
 return {
+    -- {
+    --     "dstein64/nvim-scrollview",
+    --     cmd = {
+    --         "ScrollViewDisable",
+    --         "ScrollViewEnable",
+    --         "ScrollViewToggle",
+    --         "ScrollViewRefresh",
+    --         "ScrollViewNext",
+    --         "ScrollViewPrev",
+    --         "ScrollViewFirst",
+    --         "ScrollViewLast",
+    --     },
+    --     enabled = not environment.is_vscode,
+    --     -- lazy 读取不起作用
+    --     -- event = {
+    --     --     "BufNewFile",
+    --     --     "BufReadPost",
+    --     -- },
+    --     lazy = false,
+    --     opts = {
+    --         current_only = true,
+    --         excluded_filetypes = filetype.skip_filetype_list,
+    --         line_limit = -1,
+    --         signs_column = 0,
+    --         signs_on_startup = {
+    --             "conflicts",
+    --             -- "cursor",
+    --             "diagnostics",
+    --             "folds",
+    --             "loclist",
+    --             "marks",
+    --             "quickfix",
+    --             "search",
+    --             "spell",
+    --             -- "textwidth",
+    --             -- "trail",
+    --         },
+    --         diagnostics_error_symbol = icons.diagnostics.Error,
+    --         diagnostics_severities = {
+    --             vim.diagnostic.severity.ERROR,
+    --             vim.diagnostic.severity.WARN,
+    --         },
+    --         diagnostics_warn_symbol = icons.diagnostics.Warn,
+    --     },
+    -- },
+
     {
-        "dstein64/nvim-scrollview",
-        cmd = {
-            "ScrollViewDisable",
-            "ScrollViewEnable",
-            "ScrollViewToggle",
-            "ScrollViewRefresh",
-            "ScrollViewNext",
-            "ScrollViewPrev",
-            "ScrollViewFirst",
-            "ScrollViewLast",
-        },
-        enabled = not variables.is_vscode,
+        "echasnovski/mini.map",
+        config = function(_, opts)
+            local map = require("mini.map")
+            require("mini.map").setup(opts)
+            vim.schedule(function()
+                map.open()
+            end)
+        end,
+        enabled = not environment.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
         },
-        opts = {
-            current_only = true,
-            excluded_filetypes = variables.skip_filetype_list,
-            line_limit = -1,
-            signs_column = 0,
-            signs_on_startup = {
-                "conflicts",
-                -- "cursor",
-                "diagnostics",
-                "folds",
-                "loclist",
-                "marks",
-                "quickfix",
-                "search",
-                "spell",
-                -- "textwidth",
-                -- "trail",
-            },
-            diagnostics_severities = {
-                vim.diagnostic.severity.ERROR,
-                vim.diagnostic.severity.WARN,
-            },
-        },
+        opts = function()
+            local map = require("mini.map")
+
+            local function spell(hl_groups)
+                if hl_groups == nil then
+                    hl_groups = { spell = "SpellBad" }
+                end
+
+                local augroup = vim.api.nvim_create_augroup("MiniMapSpell", {})
+                vim.api.nvim_create_autocmd("OptionSet", {
+                    callback = vim.schedule_wrap(function()
+                        map.refresh({}, { lines = false, scrollbar = false })
+                    end),
+                    desc = "On 'spell' update",
+                    group = augroup,
+                    pattern = { "dictionary", "spell" },
+                })
+
+                local spell_hl = hl_groups.spell
+
+                return function()
+                    local line_hl = {}
+
+                    local spell = vim.api.nvim_get_option_value("spell", { scope = "local" })
+                    if spell then
+                        local lines = vim.api.nvim_buf_get_lines(map.current.buf_data.source, 0, -1, false)
+                        for lnum, line in ipairs(lines) do
+                            local spellbadword = vim.fn.spellbadword(line)
+                            if spellbadword[1] ~= "" then
+                                table.insert(line_hl, { line = lnum + 1, hl_group = spell_hl })
+                            end
+                        end
+                    end
+
+                    return line_hl
+                end
+            end
+
+            local integrations = {
+                map.gen_integration.builtin_search({ search = "green" }),
+                map.gen_integration.gitsigns(),
+                map.gen_integration.diagnostic({
+                    error = "DiagnosticError",
+                    warn  = "DiagnosticWarn",
+                    info  = "DiagnosticInfo",
+                    hint  = "DiagnosticHint",
+                }),
+                spell({ spell = "purple" }),
+            }
+
+            return {
+                integrations = integrations,
+                window = {
+                    show_integration_count = false,
+                    width = 2,
+                    winblend = 0,
+                    zindex = 40,
+                },
+
+            }
+        end,
+        version = false,
     },
 
     {
@@ -64,6 +146,7 @@ return {
 
             require("neoscroll.config").set_mappings(t)
         end,
+        enabled = not environment.is_vscode,
         keys = {
             { "<c-u>", desc = "Scroll half page up",   mode = { "n", "x" } },
             { "<c-d>", desc = "Scroll half page down", mode = { "n", "x" } },

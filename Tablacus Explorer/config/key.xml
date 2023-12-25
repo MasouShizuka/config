@@ -156,9 +156,7 @@ if (FV) {
 		}
 		api.DestroyMenu(hMenu);
 	}
-}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">SevenZipCompress</List><List Key="Shift+Z" Type="">Context,自动解压(&amp;Z)
-Context,自动解压到单独的文件夹
-</List><List Key="Shift+1" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
+}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">PeaZip.add2separate</List><List Key="Shift+Z" Type="Context">PeaZip.ext2smart</List><List Key="Shift+1" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
 	Addons.Split.Exec(1, 1);
 } else {
 	Addons.Split.Exec(2, 2);

@@ -20,6 +20,7 @@ use parking_lot::Mutex;
 use schemars::schema_for;
 use uds_windows::UnixStream;
 
+use komorebi_core::config_generation::ApplicationConfiguration;
 use komorebi_core::config_generation::IdWithIdentifier;
 use komorebi_core::config_generation::MatchingStrategy;
 use komorebi_core::ApplicationIdentifier;
@@ -58,6 +59,7 @@ use crate::BORDER_OVERFLOW_IDENTIFIERS;
 use crate::BORDER_WIDTH;
 use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
+use crate::DISPLAY_INDEX_PREFERENCES;
 use crate::FLOAT_IDENTIFIERS;
 use crate::HIDING_BEHAVIOUR;
 use crate::INITIAL_CONFIGURATION_LOADED;
@@ -195,7 +197,7 @@ impl WindowManager {
                 WindowsApi::center_cursor_in_rect(&focused_window_rect)?;
                 WindowsApi::left_click();
             }
-            // FIX: 关闭窗口时不会触发 Destroy 事件，因此添加 Destroy 事件的处理
+            // NOTE: 关闭窗口时不会触发 Destroy 事件，因此添加 Destroy 事件的处理
             SocketMessage::Close => {
                 let focused_window = self.focused_window()?;
                 let hwnd = focused_window.hwnd;
@@ -678,6 +680,10 @@ impl WindowManager {
                         bottom,
                     },
                 );
+            }
+            SocketMessage::DisplayIndexPreference(index_preference, ref display) => {
+                let mut display_index_preferences = DISPLAY_INDEX_PREFERENCES.lock();
+                display_index_preferences.insert(index_preference, display.clone());
             }
             SocketMessage::EnsureWorkspaces(monitor_idx, workspace_count) => {
                 self.ensure_workspaces_for_monitor(monitor_idx, workspace_count)?;
@@ -1183,6 +1189,14 @@ impl WindowManager {
             SocketMessage::AltFocusHack(enable) => {
                 ALT_FOCUS_HACK.store(enable, Ordering::SeqCst);
             }
+            SocketMessage::ApplicationSpecificConfigurationSchema => {
+                let asc = schema_for!(Vec<ApplicationConfiguration>);
+                let schema = serde_json::to_string_pretty(&asc)?;
+                let socket = DATA_DIR.join("komorebic.sock");
+
+                let mut stream = UnixStream::connect(socket)?;
+                stream.write_all(schema.as_bytes())?;
+            }
             SocketMessage::NotificationSchema => {
                 let notification = schema_for!(Notification);
                 let schema = serde_json::to_string_pretty(&notification)?;
@@ -1263,6 +1277,7 @@ impl WindowManager {
         }
 
         match message {
+            // NOTE: 添加一些命令，使得 border 能够更新
             SocketMessage::ChangeLayout(_)
             | SocketMessage::CycleLayout(_)
             | SocketMessage::ChangeLayoutCustom(_)
@@ -1271,6 +1286,9 @@ impl WindowManager {
             | SocketMessage::MoveWorkspaceToMonitorNumber(_)
             | SocketMessage::MoveContainerToMonitorNumber(_)
             | SocketMessage::MoveContainerToWorkspaceNumber(_)
+            | SocketMessage::SendContainerToMonitorNumber(_)
+            | SocketMessage::SendContainerToWorkspaceNumber(_)
+            | SocketMessage::SendContainerToMonitorWorkspaceNumber(_, _)
             | SocketMessage::ResizeWindowEdge(_, _)
             | SocketMessage::ResizeWindowAxis(_, _)
             | SocketMessage::ToggleFloat
@@ -1287,7 +1305,6 @@ impl WindowManager {
             // Adding this one because sometimes EVENT_SYSTEM_FOREGROUND isn't
             // getting sent on FocusWindow, meaning the border won't be set
             // when processing events
-            // FIX: 添加一些命令，使得 border 能够更新
             | SocketMessage::CycleFocusWindow(_)
             | SocketMessage::FocusWindow(_)
             | SocketMessage::InvisibleBorders(_)
@@ -1301,7 +1318,7 @@ impl WindowManager {
                 rect.bottom += self.invisible_borders.bottom;
 
                 let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-                // FIX: 更新 border
+                // NOTE: 更新 border
                 border.set_position(foreground_window, &self.invisible_borders, true)?;
             }
             SocketMessage::TogglePause => {
@@ -1316,18 +1333,7 @@ impl WindowManager {
                     focused.focus(false)?;
                 }
             }
-            SocketMessage::ToggleTiling | SocketMessage::WorkspaceTiling(..) => {
-                let tiling_enabled = *self.focused_workspace_mut()?.tile();
-                let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-
-                if tiling_enabled {
-                    let focused = self.focused_window()?;
-                    border.set_position(*focused, &self.invisible_borders, true)?;
-                    focused.focus(false)?;
-                } else {
-                    border.hide()?;
-                }
-            }
+            // NOTE: 去除 ToggleTiling 和 WorkspaceTiling 事件触发时改变 border 状态
             _ => {}
         };
 
@@ -1391,7 +1397,7 @@ pub fn read_commands_uds(wm: &Arc<Mutex<WindowManager>>, stream: UnixStream) -> 
         if wm.is_paused {
             return match message {
                 SocketMessage::TogglePause | SocketMessage::State | SocketMessage::Stop => {
-                    // FIX: 向 subscribes 发送事件
+                    // NOTE: 向 subscribes 发送事件
                     wm.process_command(message.clone())?;
                     notify_subscribers(&serde_json::to_string(&Notification {
                         event: NotificationEvent::Socket(message),
@@ -1446,7 +1452,7 @@ pub fn read_commands_tcp(
                 if wm.is_paused {
                     return match message {
                         SocketMessage::TogglePause | SocketMessage::State | SocketMessage::Stop => {
-                            // FIX: 向 subscribes 发送事件
+                            // NOTE: 向 subscribes 发送事件
                             wm.process_command(message.clone())?;
                             notify_subscribers(&serde_json::to_string(&Notification {
                                 event: NotificationEvent::Socket(message),

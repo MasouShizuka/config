@@ -783,6 +783,15 @@ impl Workspace {
     fn enforce_resize_constraints(&mut self) {
         match self.layout {
             Layout::Default(DefaultLayout::BSP) => self.enforce_resize_constraints_for_bsp(),
+            // NOTE: 添加各个 layout 的 resize 内容
+            Layout::Default(DefaultLayout::Columns) => self.enforce_resize_for_columns(),
+            Layout::Default(DefaultLayout::Rows) => self.enforce_resize_for_rows(),
+            Layout::Default(DefaultLayout::VerticalStack) => {
+                self.enforce_resize_for_verticalstack();
+            }
+            Layout::Default(DefaultLayout::HorizontalStack) => {
+                self.enforce_resize_for_horizontalstack();
+            }
             Layout::Default(DefaultLayout::UltrawideVerticalStack) => {
                 self.enforce_resize_for_ultrawide();
             }
@@ -813,6 +822,109 @@ impl Workspace {
         if let Some(Some(last)) = self.resize_dimensions_mut().last_mut() {
             last.bottom = 0;
             last.right = 0;
+        }
+    }
+
+    // NOTE: 各个 layout 的 resize 内容
+    fn enforce_resize_for_columns(&mut self) {
+        let resize_dimensions = self.resize_dimensions_mut();
+        match resize_dimensions.len() {
+            0 | 1 => self.enforce_no_resize(),
+            _ => {
+                let len = resize_dimensions.len();
+                for (i, rect) in resize_dimensions.iter_mut().enumerate() {
+                    if let Some(rect) = rect {
+                        rect.top = 0;
+                        rect.bottom = 0;
+
+                        if i == 0 {
+                            rect.left = 0;
+                        }
+                        if i == len - 1 {
+                            rect.right = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn enforce_resize_for_rows(&mut self) {
+        let resize_dimensions = self.resize_dimensions_mut();
+        match resize_dimensions.len() {
+            0 | 1 => self.enforce_no_resize(),
+            _ => {
+                let len = resize_dimensions.len();
+                for (i, rect) in resize_dimensions.iter_mut().enumerate() {
+                    if let Some(rect) = rect {
+                        rect.left = 0;
+                        rect.right = 0;
+
+                        if i == 0 {
+                            rect.top = 0;
+                        }
+                        if i == len - 1 {
+                            rect.bottom = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn enforce_resize_for_verticalstack(&mut self) {
+        let resize_dimensions = self.resize_dimensions_mut();
+        match resize_dimensions.len() {
+            0 | 1 => self.enforce_no_resize(),
+            _ => {
+                if let Some(mut left) = resize_dimensions[0] {
+                    left.top = 0;
+                    left.bottom = 0;
+                    left.left = 0;
+                }
+
+                let stack_size = resize_dimensions[1..].len();
+                for (i, rect) in resize_dimensions[1..].iter_mut().enumerate() {
+                    if let Some(rect) = rect {
+                        rect.right = 0;
+
+                        if i == 0 {
+                            rect.top = 0;
+                        }
+                        if i == stack_size - 1 {
+                            rect.bottom = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn enforce_resize_for_horizontalstack(&mut self) {
+        let resize_dimensions = self.resize_dimensions_mut();
+        match resize_dimensions.len() {
+            0 | 1 => self.enforce_no_resize(),
+            _ => {
+                if let Some(mut left) = resize_dimensions[0] {
+                    left.top = 0;
+                    left.left = 0;
+                    left.right = 0;
+                }
+
+                let stack_size = resize_dimensions[1..].len();
+                for (i, rect) in resize_dimensions[1..].iter_mut().enumerate() {
+                    if let Some(rect) = rect {
+                        rect.bottom = 0;
+
+                        if i == 0 {
+                            rect.left = 0;
+                        }
+                        if i == stack_size - 1 {
+                            rect.right = 0;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -884,10 +996,13 @@ impl Workspace {
 
     pub fn new_monocle_container(&mut self) -> Result<()> {
         let focused_idx = self.focused_container_idx();
+        // NOTE: 不要去除 monocle 对应的 container
+        // 否则当处于 monocle 状态时 containers 的数量会少 1，导致取消 monocle 时最后 1 个窗口的 resize 不能得到保存
         let container = self
             .containers_mut()
-            .remove(focused_idx)
-            .ok_or_else(|| anyhow!("there is no container"))?;
+            .get(focused_idx)
+            .ok_or_else(|| anyhow!("there is no container"))?
+            .clone();
 
         // We don't remove any resize adjustments for a monocle, because when this container is
         // inevitably reintegrated, it would be weird if it doesn't go back to the dimensions
@@ -895,7 +1010,6 @@ impl Workspace {
 
         self.set_monocle_container(Option::from(container));
         self.set_monocle_container_restore_idx(Option::from(focused_idx));
-        self.focus_previous_container();
 
         self.monocle_container_mut()
             .as_mut()
@@ -910,18 +1024,12 @@ impl Workspace {
             .monocle_container_restore_idx()
             .ok_or_else(|| anyhow!("there is no monocle restore index"))?;
 
-        let container = self
-            .monocle_container_mut()
-            .as_ref()
-            .ok_or_else(|| anyhow!("there is no monocle container"))?;
-
-        let container = container.clone();
+        // NOTE: 由于修改为不去除 monocle 对应的 container，因此不再需要恢复 monocle 的 container
         if restore_idx > self.containers().len() - 1 {
             self.containers_mut()
                 .resize(restore_idx, Container::default());
         }
 
-        self.containers_mut().insert(restore_idx, container);
         self.focus_container(restore_idx);
         self.focused_container_mut()
             .ok_or_else(|| anyhow!("there is no container"))?

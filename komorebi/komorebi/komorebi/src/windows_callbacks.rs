@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 use std::sync::atomic::Ordering;
+use widestring::U16CStr;
 
 use windows::Win32::Foundation::BOOL;
 use windows::Win32::Foundation::COLORREF;
@@ -40,6 +41,7 @@ use crate::winevent_listener::WINEVENT_CALLBACK_CHANNEL;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_RECT;
 use crate::BORDER_WIDTH;
+use crate::DISPLAY_INDEX_PREFERENCES;
 use crate::MONITOR_INDEX_PREFERENCES;
 use crate::TRANSPARENCY_COLOUR;
 
@@ -72,7 +74,38 @@ pub extern "system" fn enum_display_monitor(
         }
     }
 
-    if let Ok(m) = WindowsApi::monitor(hmonitor.0) {
+    let current_index = monitors.elements().len();
+
+    if let Ok(mut m) = WindowsApi::monitor(hmonitor.0) {
+        #[allow(clippy::cast_possible_truncation)]
+        if let Ok(d) = WindowsApi::enum_display_devices(current_index as u32, None) {
+            let name = U16CStr::from_slice_truncate(d.DeviceName.as_ref())
+                .expect("display device name was not a valid u16 c string")
+                .to_ustring()
+                .to_string_lossy()
+                .trim_start_matches(r"\\.\")
+                .to_string();
+
+            if name.eq(m.name()) {
+                if let Ok(device) = WindowsApi::enum_display_devices(0, Some(d.DeviceName.as_ptr()))
+                {
+                    let id = U16CStr::from_slice_truncate(device.DeviceID.as_ref())
+                        .expect("display device id was not a valid u16 c string")
+                        .to_ustring()
+                        .to_string_lossy()
+                        .trim_start_matches(r"\\?\")
+                        .to_string();
+
+                    let mut split: Vec<_> = id.split('#').collect();
+                    split.remove(0);
+                    split.remove(split.len() - 1);
+
+                    m.set_device(Option::from(split[0].to_string()));
+                    m.set_device_id(Option::from(split.join("-")));
+                }
+            }
+        }
+
         let monitor_index_preferences = MONITOR_INDEX_PREFERENCES.lock();
         let mut index_preference = None;
         for (index, monitor_size) in &*monitor_index_preferences {
@@ -81,7 +114,18 @@ pub extern "system" fn enum_display_monitor(
             }
         }
 
-        if let Some(preference) = index_preference {
+        let display_index_preferences = DISPLAY_INDEX_PREFERENCES.lock();
+        for (index, device) in &*display_index_preferences {
+            if let Some(known_device) = m.device_id() {
+                if device == known_device {
+                    index_preference = Option::from(index);
+                }
+            }
+        }
+
+        if monitors.elements().is_empty() {
+            monitors.elements_mut().push_back(m);
+        } else if let Some(preference) = index_preference {
             let current_len = monitors.elements().len();
             if *preference > current_len {
                 monitors.elements_mut().reserve(1);
@@ -172,7 +216,7 @@ pub extern "system" fn border_window(
 
                 SelectObject(hdc, hpen);
                 SelectObject(hdc, hbrush);
-                // FIX: 修正 border 的位置
+                // NOTE: 修正 border 的位置
                 Rectangle(hdc, 1, 1, border_rect.right, border_rect.bottom);
                 EndPaint(window, &ps);
                 ValidateRect(window, None);

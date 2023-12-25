@@ -1,20 +1,24 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local filetype = require("utils.filetype")
+local lsp = require("utils.lsp")
+local path = require("utils.path")
+local treesitter = require("utils.treesitter")
+local utils = require("utils")
 
 -- 检测到对应类型的文件时发出 event
 vim.api.nvim_create_autocmd("Filetype", {
     callback = function()
         utils.event("TreesitterFile")
-        if not variables.is_vscode then
-            utils.refresh_current_buf(10)
+        if not environment.is_vscode then
+            utils.refresh_current_buf(3000, true)
         end
     end,
     desc = "Treesitter file",
     group = vim.api.nvim_create_augroup("TreesitterFile", { clear = true }),
     once = true,
-    pattern = variables.treesitter_filetype_list,
+    pattern = treesitter.treesitter_filetype_list,
 })
-if not variables.is_vscode then
+if not environment.is_vscode then
     vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
         callback = function(args)
             local current_file = vim.fn.resolve(vim.fn.expand("%"))
@@ -31,32 +35,76 @@ if not variables.is_vscode then
     vim.api.nvim_create_autocmd("Filetype", {
         callback = function()
             utils.event("LspFile")
-            utils.refresh_current_buf(10)
+            utils.refresh_current_buf(3000, true)
         end,
         desc = "Lsp file",
         group = vim.api.nvim_create_augroup("LspFile", { clear = true }),
         once = true,
-        pattern = variables.lsp_filetype_list,
+        pattern = lsp.lsp_filetype_list,
     })
 end
 
-if not variables.is_vscode then
-    -- 使用宏时显示信息
+-- 自动保存 macro 到本地文件，并自动读取
+local macro_auto_save_load = vim.api.nvim_create_augroup("MacroAutoSaveLoad", { clear = true })
+local macro_file = path.data_path .. "/macro.json"
+vim.api.nvim_create_autocmd("RecordingLeave", {
+    callback = function()
+        local data = utils.json_load(macro_file)
+        data[vim.fn.reg_recording()] = vim.v.event["regcontents"]
+        utils.json_save(macro_file, data)
+    end,
+    desc = "Save macro to local file",
+    group = macro_auto_save_load,
+})
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+    callback = function()
+        local data = utils.json_load(macro_file)
+        for key, value in pairs(data) do
+            vim.fn.setreg(key, value)
+        end
+    end,
+    desc = "Load macro from local file",
+    group = macro_auto_save_load,
+    once = true,
+})
+
+if not environment.is_vscode then
+    -- lsp 文件切换部分设置
+    vim.api.nvim_create_autocmd("FileType", {
+        callback = function()
+            vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
+        end,
+        desc = "Change settings for lsp file",
+        group = vim.api.nvim_create_augroup("LspSetting", { clear = true }),
+        pattern = lsp.lsp_filetype_list,
+    })
+    -- 文本文件切换部分设置
+    vim.api.nvim_create_autocmd("FileType", {
+        callback = function()
+            vim.api.nvim_set_option_value("spell", true, { scope = "local" })
+            vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
+        end,
+        desc = "Change settings for text file",
+        group = vim.api.nvim_create_augroup("TextSetting", { clear = true }),
+        pattern = filetype.text_filetype,
+    })
+
+    -- 录制 macro 时显示信息
     if not utils.is_available("heirline.nvim") then
-        local show_recording_info = vim.api.nvim_create_augroup("ShowRecording", { clear = true })
+        local show_recording = vim.api.nvim_create_augroup("ShowRecording", { clear = true })
         vim.api.nvim_create_autocmd("RecordingEnter", {
             callback = function()
                 vim.api.nvim_set_option_value("cmdheight", 1, {})
             end,
             desc = "Set cmdheight=1 when start recording",
-            group = show_recording_info,
+            group = show_recording,
         })
         vim.api.nvim_create_autocmd("RecordingLeave", {
             callback = function()
                 vim.api.nvim_set_option_value("cmdheight", 0, {})
             end,
             desc = "Set cmdheight=0 when finished recording",
-            group = show_recording_info,
+            group = show_recording,
         })
     end
 

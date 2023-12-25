@@ -22,6 +22,10 @@ use fs_tail::TailedFile;
 use heck::ToKebabCase;
 use komorebi_core::resolve_home_path;
 use lazy_static::lazy_static;
+use miette::NamedSource;
+use miette::Report;
+use miette::SourceOffset;
+use miette::SourceSpan;
 use paste::paste;
 use sysinfo::SystemExt;
 use uds_windows::UnixListener;
@@ -80,6 +84,17 @@ trait AhkLibrary {
 
 trait AhkFunction {
     fn generate_ahk_function() -> String;
+}
+
+#[derive(thiserror::Error, Debug, miette::Diagnostic)]
+#[error("{message}")]
+#[diagnostic(code(komorebi::configuration), help("try fixing this syntax error"))]
+struct ConfigurationError {
+    message: String,
+    #[source_code]
+    src: NamedSource,
+    #[label("This bit here")]
+    bad_bit: SourceSpan,
 }
 
 #[derive(Copy, Clone, ValueEnum)]
@@ -402,6 +417,14 @@ struct MonitorIndexPreference {
 }
 
 #[derive(Parser, AhkFunction)]
+struct DisplayIndexPreference {
+    /// Preferred monitor index (zero-indexed)
+    index_preference: usize,
+    /// Display name as identified in komorebic state
+    display: String,
+}
+
+#[derive(Parser, AhkFunction)]
 struct EnsureWorkspaces {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -631,29 +654,29 @@ struct ActiveWindowBorderOffset {
 #[allow(clippy::struct_excessive_bools)]
 struct Start {
     /// Allow the use of komorebi's custom focus-follows-mouse implementation
-    #[clap(action, short, long = "ffm")]
+    #[clap(short, long = "ffm")]
     ffm: bool,
     /// Path to a static configuration JSON file
-    #[clap(action, short, long)]
+    #[clap(short, long)]
     config: Option<PathBuf>,
     /// Wait for 'komorebic complete-configuration' to be sent before processing events
-    #[clap(action, short, long)]
+    #[clap(short, long)]
     await_configuration: bool,
     /// Start a TCP server on the given port to allow the direct sending of SocketMessages
-    #[clap(action, short, long)]
+    #[clap(short, long)]
     tcp_port: Option<usize>,
     /// Start whkd in a background process
-    #[clap(action, long)]
+    #[clap(long)]
     whkd: bool,
     /// Start autohotkey configuration file
-    #[clap(action, long)]
+    #[clap(long)]
     ahk: bool,
 }
 
 #[derive(Parser, AhkFunction)]
 struct Stop {
     /// Stop whkd if it is running as a background process
-    #[clap(action, long)]
+    #[clap(long)]
     whkd: bool,
 }
 
@@ -719,15 +742,15 @@ struct AltFocusHack {
 struct EnableAutostart {
     /// Path to a static configuration JSON file
     #[clap(action, short, long)]
-    config: PathBuf,
+    config: Option<PathBuf>,
     /// Enable komorebi's custom focus-follows-mouse implementation
-    #[clap(action, short, long = "ffm")]
+    #[clap(short, long = "ffm")]
     ffm: bool,
     /// Enable autostart of whkd
-    #[clap(action, long)]
+    #[clap(long)]
     whkd: bool,
     /// Enable autostart of ahk
-    #[clap(action, long)]
+    #[clap(long)]
     ahk: bool,
 }
 
@@ -915,6 +938,9 @@ enum SubCommand {
     /// Set the monitor index preference for a monitor identified using its size
     #[clap(arg_required_else_help = true)]
     MonitorIndexPreference(MonitorIndexPreference),
+    /// Set the display index preference for a monitor identified using its display name
+    #[clap(arg_required_else_help = true)]
+    DisplayIndexPreference(DisplayIndexPreference),
     /// Create at least this many workspaces for the specified monitor
     #[clap(arg_required_else_help = true)]
     EnsureWorkspaces(EnsureWorkspaces),
@@ -1087,6 +1113,9 @@ enum SubCommand {
     /// Fetch the latest version of applications.yaml from komorebi-application-specific-configuration
     #[clap(alias = "fetch-asc")]
     FetchAppSpecificConfiguration,
+    /// Generate a JSON Schema for applications.yaml
+    #[clap(alias = "asc-schema")]
+    ApplicationSpecificConfigurationSchema,
     /// Generate a JSON Schema of subscription notifications
     NotificationSchema,
     /// Generate a JSON Schema of socket messages
@@ -1096,7 +1125,6 @@ enum SubCommand {
     /// Generates a static configuration JSON file based on the current window manager state
     GenerateStaticConfig,
     /// Generates the komorebi.lnk shortcut in shell:startup to autostart komorebi
-    #[clap(arg_required_else_help = true)]
     EnableAutostart(EnableAutostart),
     /// Deletes the komorebi.lnk shortcut in shell:startup to disable autostart
     DisableAutostart,
@@ -1193,20 +1221,21 @@ fn main() -> Result<()> {
             );
         }
         SubCommand::EnableAutostart(args) => {
-            let mut current_exe_dir = std::env::current_exe().expect("unable to get exec path");
-            current_exe_dir.pop();
-
-            let komorebic_exe = current_exe_dir.join("komorebic.exe");
+            let mut current_exe = std::env::current_exe().expect("unable to get exec path");
+            current_exe.pop();
+            let komorebic_exe = current_exe.join("komorebic-no-console.exe");
             let komorebic_exe = dunce::simplified(&komorebic_exe);
 
             let startup_dir = startup_dir()?;
             let shortcut_file = startup_dir.join("komorebi.lnk");
             let shortcut_file = dunce::simplified(&shortcut_file);
 
-            let mut arguments = format!(
-                "start --config {}",
-                dunce::canonicalize(args.config)?.display()
-            );
+            let mut arguments = String::from("start");
+
+            if let Some(config) = args.config {
+                arguments.push_str("--config ");
+                arguments.push_str(&config.to_string_lossy());
+            }
 
             if args.ffm {
                 arguments.push_str(" --ffm");
@@ -1258,6 +1287,30 @@ fn main() -> Result<()> {
                 .join("whkdrc");
 
             if static_config.exists() {
+                let config_source = std::fs::read_to_string(&static_config)?;
+                let lines: Vec<_> = config_source.lines().collect();
+                let parsed_config = serde_json::from_str::<serde_json::Value>(&config_source);
+                if let Err(serde_error) = parsed_config {
+                    let line = lines[serde_error.line() - 2];
+
+                    let offset = SourceOffset::from_location(
+                        config_source.clone(),
+                        serde_error.line() - 1,
+                        line.len(),
+                    );
+
+                    let error_string = serde_error.to_string();
+                    let msgs: Vec<_> = error_string.split(" at ").collect();
+
+                    let diagnostic = ConfigurationError {
+                        message: msgs[0].to_string(),
+                        src: NamedSource::new("komorebi.json", config_source.clone()),
+                        bad_bit: SourceSpan::new(offset, 2.into()),
+                    };
+
+                    println!("{:?}", Report::new(diagnostic));
+                }
+
                 println!("Found komorebi.json; this file can be passed to the start command with the --config flag\n");
                 if config_whkd.exists() {
                     println!("Found ~/.config/whkdrc; key bindings will be loaded from here when whkd is started, and you can start it automatically using the --whkd flag\n");
@@ -1848,6 +1901,12 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
                 .as_bytes()?,
             )?;
         }
+        SubCommand::DisplayIndexPreference(arg) => {
+            send_message(
+                &SocketMessage::DisplayIndexPreference(arg.index_preference, arg.display)
+                    .as_bytes()?,
+            )?;
+        }
         SubCommand::EnsureWorkspaces(workspaces) => {
             send_message(
                 &SocketMessage::EnsureWorkspaces(workspaces.monitor, workspaces.workspace_count)
@@ -2094,6 +2153,11 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
                "You can add this to your komorebi.json static configuration file like this: \n\n\"app_specific_configuration_path\": \"{}\"",
                output_file.display()
             );
+        }
+        SubCommand::ApplicationSpecificConfigurationSchema => {
+            with_komorebic_socket(|| {
+                send_message(&SocketMessage::ApplicationSpecificConfigurationSchema.as_bytes()?)
+            })?;
         }
         SubCommand::NotificationSchema => {
             with_komorebic_socket(|| send_message(&SocketMessage::NotificationSchema.as_bytes()?))?;

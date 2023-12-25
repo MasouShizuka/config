@@ -1,4 +1,5 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local keymap = require("utils.keymap")
 
 return {
     {
@@ -6,7 +7,7 @@ return {
         cmd = {
             "PasteImg",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         keys = {
             { "<leader>p", function() vim.api.nvim_command("PasteImg") end, desc = "Paste image", mode = "n" },
         },
@@ -45,25 +46,25 @@ return {
             "MarkdownPreviewStop",
             "MarkdownPreviewToggle",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         ft = "markdown",
     },
 
     {
         "jakewvincent/mkdnflow.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         ft = "markdown",
         -- keys = {
-        --     { variables.keymap["<c-space>"], function() vim.api.nvim_command("MkdnToggleToDo") end,             desc = "Toggle todo",                mode = { "n", "x" } },
-        --     { "<cr>",                        function() vim.api.nvim_command("MkdnNewListItem") end,            desc = "New list item",              mode = "i" },
-        --     { "o",                           function() vim.api.nvim_command("MkdnNewListItemBelowInsert") end, desc = "New list item below insert", mode = "n" },
-        --     { "O",                           function() vim.api.nvim_command("MkdnNewListItemAboveInsert") end, desc = "New list item above insert", mode = "n" },
-        --     { "<tab>",                       function() vim.api.nvim_command("MkdnTableNextCell") end,          desc = "Table next cell",            mode = { "n", "i" } },
-        --     { "<s-tab>",                     function() vim.api.nvim_command("MkdnTablePrevCell") end,          desc = "Table previous cell",        mode = { "n", "i" } },
-        --     { "<s-down>",                    function() vim.api.nvim_command("MkdnTableNewRowBelow") end,       desc = "Table new row below",        mode = { "n", "i" } },
-        --     { "<s-up>",                      function() vim.api.nvim_command("MkdnTableNewRowAbove") end,       desc = "Table new row above",        mode = { "n", "i" } },
-        --     { "<s-right>",                   function() vim.api.nvim_command("MkdnTableNewColAfter") end,       desc = "Table new column after",     mode = { "n", "i" } },
-        --     { "<s-left>",                    function() vim.api.nvim_command("MkdnTableNewColBefore") end,      desc = "Table new column before",    mode = { "n", "i" } },
+        --     { keymap["<c-space>"], function() vim.api.nvim_command("MkdnToggleToDo") end,             desc = "Toggle todo",                mode = { "n", "x" } },
+        --     { "<cr>",              function() vim.api.nvim_command("MkdnNewListItem") end,            desc = "New list item",              mode = "i" },
+        --     { "o",                 function() vim.api.nvim_command("MkdnNewListItemBelowInsert") end, desc = "New list item below insert", mode = "n" },
+        --     { "O",                 function() vim.api.nvim_command("MkdnNewListItemAboveInsert") end, desc = "New list item above insert", mode = "n" },
+        --     { "<tab>",             function() vim.api.nvim_command("MkdnTableNextCell") end,          desc = "Table next cell",            mode = { "n", "i" } },
+        --     { "<s-tab>",           function() vim.api.nvim_command("MkdnTablePrevCell") end,          desc = "Table previous cell",        mode = { "n", "i" } },
+        --     { "<s-down>",          function() vim.api.nvim_command("MkdnTableNewRowBelow") end,       desc = "Table new row below",        mode = { "n", "i" } },
+        --     { "<s-up>",            function() vim.api.nvim_command("MkdnTableNewRowAbove") end,       desc = "Table new row above",        mode = { "n", "i" } },
+        --     { "<s-right>",         function() vim.api.nvim_command("MkdnTableNewColAfter") end,       desc = "Table new column after",     mode = { "n", "i" } },
+        --     { "<s-left>",          function() vim.api.nvim_command("MkdnTableNewColBefore") end,      desc = "Table new column before",    mode = { "n", "i" } },
         -- },
         opts = {
             modules = {
@@ -114,7 +115,7 @@ return {
                 MkdnPrevHeading = false,
                 MkdnIncreaseHeading = false,
                 MkdnDecreaseHeading = false,
-                MkdnToggleToDo = { { "n", "x" }, variables.keymap["<c-space>"] },
+                MkdnToggleToDo = { { "n", "x" }, keymap["<c-space>"] },
                 MkdnNewListItem = { "i", "<cr>" },
                 MkdnNewListItemBelowInsert = { "n", "o" },
                 MkdnNewListItemAboveInsert = { "n", "O" },

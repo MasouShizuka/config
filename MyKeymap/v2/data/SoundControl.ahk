@@ -130,25 +130,25 @@ class Sound {
     }
 
     incVolume(num) {
-        this.brightness := this.limitBrightness(this.brightness + num)
+        this.brightness := this.limitVolume(this.brightness + num)
         SoundSetVolume(this.brightness)
         this.setVolumeText(this.brightness)
     }
 
     decVolume(num) {
-        this.brightness := this.limitBrightness(this.brightness - num)
+        this.brightness := this.limitVolume(this.brightness - num)
         SoundSetVolume(this.brightness)
         this.setVolumeText(this.brightness)
     }
 
-    limitBrightness(b) {
-        if (b <= 0) {
+    limitVolume(v) {
+        if (v <= 0) {
             return 0
         }
-        if (b >= 100) {
+        if (v >= 100) {
             return 100
         }
-        return b
+        return v
     }
 }
 

@@ -1,14 +1,16 @@
-local variables = require("config.variables")
+local dap = require("utils.dap")
+local environment = require("utils.environment")
+local icons = require("utils.icons")
 
 return {
     "mfussenegger/nvim-dap",
     config = function(_, opts)
         local signs = {
-            DapBreakpoint = { text = variables.icons.dap.Breakpoint, texthl = "DiagnosticError" },
-            DapBreakpointCondition = { text = variables.icons.dap.BreakpointCondition, texthl = "DiagnosticInfo" },
-            DapBreakpointRejected = { text = variables.icons.dap.BreakpointRejected, texthl = "DiagnosticError" },
-            DapLogPoint = { text = variables.icons.dap.LogPoint, texthl = "DiagnosticInfo" },
-            DapStopped = { text = variables.icons.dap.Stopped, texthl = "DiagnosticWarn", linehl = "Visual", numhl = "Visual" },
+            DapBreakpoint = { text = icons.dap.Breakpoint, texthl = "DiagnosticError" },
+            DapBreakpointCondition = { text = icons.dap.BreakpointCondition, texthl = "DiagnosticInfo" },
+            DapBreakpointRejected = { text = icons.dap.BreakpointRejected, texthl = "DiagnosticError" },
+            DapLogPoint = { text = icons.dap.LogPoint, texthl = "DiagnosticInfo" },
+            DapStopped = { text = icons.dap.Stopped, texthl = "DiagnosticWarn", linehl = "Visual", numhl = "Visual" },
         }
         for name, sign in pairs(signs) do
             vim.fn.sign_define(name, sign)
@@ -32,12 +34,12 @@ return {
                         mason_nvim_dap.default_setup(config)
                     end,
                 }
-                for dap, setup in pairs(variables.dap(mason_nvim_dap)) do
+                for dap, setup in pairs(dap.dap(mason_nvim_dap)) do
                     handlers[dap] = setup
                 end
 
                 mason_nvim_dap.setup({
-                    ensure_installed = variables.dap_list,
+                    ensure_installed = dap.dap_list,
                     automatic_installation = true,
                     handlers = handlers,
                 })
@@ -74,7 +76,7 @@ return {
             opts = {},
         },
     },
-    enabled = not variables.is_vscode,
+    enabled = not environment.is_vscode,
     init = function()
         local is_which_key_available, which_key = pcall(require, "which-key")
         if is_which_key_available then

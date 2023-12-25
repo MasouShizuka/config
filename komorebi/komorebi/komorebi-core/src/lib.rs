@@ -84,6 +84,7 @@ pub enum SocketMessage {
     FlipLayout(Axis),
     // Monitor and Workspace Commands
     MonitorIndexPreference(usize, i32, i32, i32, i32),
+    DisplayIndexPreference(usize, String),
     EnsureWorkspaces(usize, usize),
     EnsureNamedWorkspaces(usize, Vec<String>),
     NewWorkspace,
@@ -155,6 +156,7 @@ pub enum SocketMessage {
     ToggleTitleBars,
     AddSubscriber(String),
     RemoveSubscriber(String),
+    ApplicationSpecificConfigurationSchema,
     NotificationSchema,
     SocketSchema,
     StaticConfigSchema,

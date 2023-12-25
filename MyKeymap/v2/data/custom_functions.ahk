@@ -106,42 +106,16 @@ exit_mouse_mode_with_left_click_up() {
     Send("{Blind}{LButton Up}")
 }
 
-left_click_down() {
-    Send("{Blind}{LButton Down}")
+click_down(button := "L") {
+    Send("{Blind}{" . button . "Button Down}")
 }
 
-left_click_up_without_hide_mouse_move_prompt() {
-    Send("{Blind}{LButton Up}")
+click_up_without_hide_mouse_move_prompt(button := "L") {
+    Send("{Blind}{" . button . "Button Up}")
 }
 
-left_click_up() {
-    left_click_up_without_hide_mouse_move_prompt()
-    exit_mouse_mode()
-}
-
-right_click_down() {
-    Send("{Blind}{RButton Down}")
-}
-
-right_click_up_without_hide_mouse_move_prompt() {
-    Send("{Blind}{RButton Up}")
-}
-
-right_click_up() {
-    right_click_up_without_hide_mouse_move_prompt()
-    exit_mouse_mode()
-}
-
-middle_click_down() {
-    Send("{Blind}{MButton Down}")
-}
-
-middle_click_up_without_hide_mouse_move_prompt() {
-    Send("{Blind}{MButton Up}")
-}
-
-middle_click_up() {
-    middle_click_up_without_hide_mouse_move_prompt()
+click_up(button := "L") {
+    click_up_without_hide_mouse_move_prompt(button)
     exit_mouse_mode()
 }
 
@@ -293,7 +267,7 @@ change_window_size(direction := "left", size := 40) {
 
 *CapsLock Up:: {
     If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
-        Send("{blind}{esc}")
+        Send("{Blind}{Esc}")
     }
 }
 
@@ -324,13 +298,13 @@ change_window_size(direction := "left", size := 40) {
 *H:: scroll_wheel("H", "left")
 *O:: scroll_wheel("O", "down")
 *`;:: scroll_wheel(";", "right")
-*N:: left_click_down()
-*N Up:: left_click_up()
-*M:: right_click_down()
-*M Up:: right_click_up()
-*.:: middle_click_down()
-*,:: left_click_down()
-*. Up:: middle_click_up()
+*N:: click_down("L")
+*N Up:: click_up("L")
+*M:: click_down("R")
+*M Up:: click_up("R")
+*,:: click_down("L")
+*.:: click_down("M")
+*. Up:: click_up("M")
 */:: MakeWindowDraggable()
 #HotIf
 
@@ -347,16 +321,16 @@ change_window_size(direction := "left", size := 40) {
 *H:: scroll_wheel("H", "left")
 *O:: scroll_wheel("O", "down")
 *`;:: scroll_wheel(";", "right")
-*N:: left_click_down()
-*N Up:: left_click_up_without_hide_mouse_move_prompt()
-*M:: right_click_down()
-*M Up:: right_click_up_without_hide_mouse_move_prompt()
-*,:: left_click_down()
-*.:: middle_click_down()
-*. Up:: middle_click_up_without_hide_mouse_move_prompt()
+*N:: click_down("L")
+*N Up:: click_up_without_hide_mouse_move_prompt("L")
+*M:: click_down("R")
+*M Up:: click_up_without_hide_mouse_move_prompt("R")
+*,:: click_down("L")
+*.:: click_down("M")
+*. Up:: click_up_without_hide_mouse_move_prompt("M")
 */:: MakeWindowDraggable()
 *Esc:: exit_mouse_mode_with_left_click_up()
-*Space:: exit_mouse_mode_with_left_click_up()
+*Space:: exit_mouse_mode()
 *CapsLock Up:: {
     If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
         exit_mouse_mode_with_left_click_up()
@@ -377,16 +351,16 @@ change_window_size(direction := "left", size := 40) {
 *H:: scroll_wheel("H", "left")
 *O:: scroll_wheel("O", "down")
 *`;:: scroll_wheel(";", "right")
-*N:: left_click_down()
-*N Up:: left_click_up_without_hide_mouse_move_prompt()
-*M:: right_click_down()
-*M Up:: right_click_up_without_hide_mouse_move_prompt()
-*,:: left_click_down()
-*.:: middle_click_down()
-*. Up:: middle_click_up_without_hide_mouse_move_prompt()
+*N:: click_down("L")
+*N Up:: click_up_without_hide_mouse_move_prompt("L")
+*M:: click_down("R")
+*M Up:: click_up_without_hide_mouse_move_prompt("R")
+*,:: click_down("L")
+*.:: click_down("M")
+*. Up:: click_up_without_hide_mouse_move_prompt("M")
 */:: MakeWindowDraggable()
 *Esc:: exit_mouse_mode_with_left_click_up()
-*Space:: exit_mouse_mode_with_left_click_up()
+*Space:: exit_mouse_mode()
 *CapsLock Up:: {
     If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
         exit_mouse_mode_with_left_click_up()

@@ -1,5 +1,10 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local icons = require("utils.icons")
+local keymap = require("utils.keymap")
+local lsp = require("utils.lsp")
+local null_ls = require("utils.null_ls")
+local path = require("utils.path")
+local utils = require("utils")
 
 return {
     {
@@ -10,7 +15,7 @@ return {
             "Glance type_definitions",
             "Glance implementations",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         keys = {
             { "gd", function() vim.api.nvim_command("Glance definitions") end,      desc = "Glance definitions",      mode = "n" },
             { "gi", function() vim.api.nvim_command("Glance implementations") end,  desc = "Glance implementations",  mode = "n" },
@@ -77,13 +82,13 @@ return {
                                 jump(results[1])
                             end
 
-                            vim.cmd.normal("zt")
+                            vim.cmd("normal! zt")
                         else
                             open(results)
                         end
                     end,
                     after_close = function()
-                        vim.cmd.normal("zt")
+                        vim.cmd("normal! zt")
                     end,
                 },
                 folds = {
@@ -104,7 +109,7 @@ return {
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             local is_which_key_available, which_key = pcall(require, "which-key")
             if is_which_key_available then
@@ -182,7 +187,7 @@ return {
 
     {
         "j-hui/fidget.nvim",
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "LspAttach",
         },
@@ -216,12 +221,12 @@ return {
                             -- disables automatic setup of all null-ls sources
                         end,
                     }
-                    for null_ls_builtin, setup in pairs(variables.null_ls_builtins(require("null-ls"))) do
+                    for null_ls_builtin, setup in pairs(null_ls.null_ls_builtins(require("null-ls"))) do
                         handlers[null_ls_builtin] = setup
                     end
 
                     return {
-                        ensure_installed = variables.null_ls_builtins_list,
+                        ensure_installed = null_ls.null_ls_builtins_list,
                         automatic_installation = true,
                         handlers = handlers,
                     }
@@ -230,7 +235,7 @@ return {
 
             "nvim-lua/plenary.nvim",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User LspFile",
         },
@@ -264,15 +269,13 @@ return {
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     local client = vim.lsp.get_client_by_id(args.data.client_id)
-                    local bufnr = args.buf
-
-                    local function bool2str(bool)
-                        return bool and "On" or "Off"
-                    end
+                    local buf = args.buf
 
                     local function has_capability(capability, filter)
-                        for _, client in ipairs(vim.lsp.get_active_clients(filter)) do
-                            if client.supports_method(capability) then return true end
+                        for _, lsp_client in ipairs(vim.lsp.get_clients(filter)) do
+                            if lsp_client.supports_method(capability) then
+                                return true
+                            end
                         end
                         return false
                     end
@@ -306,33 +309,104 @@ return {
                             ["<leader>l"] = {
                                 name = "+lsp",
                             },
-                            buffer = bufnr,
+                            buffer = buf,
                         })
                         which_key.register({
                             mode = "n",
                             ["<leader>lt"] = {
                                 name = "+lsp toggle",
                             },
-                            buffer = bufnr,
+                            buffer = buf,
                         })
                     end
 
-                    vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = bufnr, desc = "Hover diagnostics", silent = true })
+                    vim.b.lsp_enabled = nil
+                    if vim.g.lsp_enabled == nil then
+                        vim.g.lsp_enabled = true
+                    end
+
+                    local function lsp_stop_command()
+                        vim.schedule(function()
+                            vim.api.nvim_command("LspStop")
+                        end)
+                    end
+
+                    local function lsp_stop()
+                        if vim.b[buf].lsp_enabled ~= nil then
+                            if not vim.b[buf].lsp_enabled then
+                                lsp_stop_command()
+                            end
+                        else
+                            if not vim.g.lsp_enabled then
+                                lsp_stop_command()
+                            end
+                        end
+                    end
+
+                    lsp_stop()
+                    add_buffer_autocmd("lsp_stop", buf, {
+                        callback = function()
+                            lsp_stop()
+                        end,
+                        desc = "Stop LSP",
+                        events = "BufReadPost",
+                    })
+
+                    vim.keymap.set("n", "<leader>ltl", function()
+                        local buffer_lsp_enabled = vim.b[buf].lsp_enabled or false
+                        local global_lsp_enabled = vim.g.lsp_enabled or false
+                        local prev_lsp_enabled = buffer_lsp_enabled or global_lsp_enabled
+
+                        global_lsp_enabled = not global_lsp_enabled
+                        vim.g.lsp_enabled = global_lsp_enabled
+                        local lsp_enabled = buffer_lsp_enabled or global_lsp_enabled
+
+                        if not global_lsp_enabled then
+                            vim.lsp.stop_client(vim.lsp.get_clients())
+                        end
+                        if not prev_lsp_enabled and lsp_enabled then
+                            utils.refresh_current_buf()
+                            vim.b[buf].lsp_enabled = buffer_lsp_enabled
+                        end
+
+                        vim.notify(string.format("Lsp: %s", utils.bool2str(global_lsp_enabled)), vim.log.levels.INFO, { title = "Global" })
+                    end, { buffer = buf, desc = "Toggle LSP", silent = true })
+                    vim.keymap.set("n", "<leader>ltL", function()
+                        local buffer_lsp_enabled = vim.b[buf].lsp_enabled or false
+                        local global_lsp_enabled = vim.g.lsp_enabled or false
+                        local prev_lsp_enabled = buffer_lsp_enabled or global_lsp_enabled
+
+                        buffer_lsp_enabled = not buffer_lsp_enabled
+                        vim.b[buf].lsp_enabled = buffer_lsp_enabled
+                        local lsp_enabled = buffer_lsp_enabled
+
+                        if not buffer_lsp_enabled then
+                            lsp_stop_command()
+                        end
+                        if not prev_lsp_enabled and lsp_enabled then
+                            utils.refresh_current_buf()
+                            vim.b[buf].lsp_enabled = buffer_lsp_enabled
+                        end
+
+                        vim.notify(string.format("Lsp: %s", utils.bool2str(buffer_lsp_enabled)), vim.log.levels.INFO, { title = "Buffer" })
+                    end, { buffer = buf, desc = "Toggle LSP (buffer)", silent = true })
+
+                    vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
                     if not utils.is_available("trouble.nvim") then
-                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = bufnr, desc = "Previous diagnostic", silent = true })
-                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = bufnr, desc = "Next diagnostic", silent = true })
+                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = buf, desc = "Previous diagnostic", silent = true })
+                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
                     end
 
                     if utils.is_available("mason-lspconfig.nvim") then
-                        vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = bufnr, desc = "LSP information", silent = true })
+                        vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
                     end
 
                     if utils.is_available("none-ls.nvim") then
-                        vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = bufnr, desc = "Null-ls information", silent = true })
+                        vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = buf, desc = "Null-ls information", silent = true })
                     end
 
                     if client.supports_method("textDocument/codeAction") then
-                        vim.keymap.set({ "n", "x" }, variables.keymap["<c-;>"], function() vim.lsp.buf.code_action() end, { buffer = bufnr, desc = "LSP code action", silent = true })
+                        vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() vim.lsp.buf.code_action() end, { buffer = buf, desc = "LSP code action", silent = true })
                     end
 
                     if client.supports_method("textDocument/codeLens") then
@@ -341,14 +415,14 @@ return {
                             vim.g.codelens_enabled = true
                         end
 
-                        add_buffer_autocmd("lsp_codelens_refresh", bufnr, {
+                        add_buffer_autocmd("lsp_codelens_refresh", buf, {
                             callback = function()
-                                if not has_capability("textDocument/codeLens", { bufnr = bufnr }) then
-                                    del_buffer_autocmd("lsp_codelens_refresh", bufnr)
+                                if not has_capability("textDocument/codeLens", { bufnr = buf }) then
+                                    del_buffer_autocmd("lsp_codelens_refresh", buf)
                                     return
                                 end
-                                if vim.b[bufnr].codelens_enabled ~= nil then
-                                    if vim.b[bufnr].codelens_enabled then
+                                if vim.b[buf].codelens_enabled ~= nil then
+                                    if vim.b[buf].codelens_enabled then
                                         vim.lsp.codelens.refresh()
                                     end
                                 else
@@ -361,15 +435,9 @@ return {
                             events = { "BufEnter", "InsertLeave" },
                         })
 
-                        vim.keymap.set("n", "<leader>ltl", function()
-                            local buffer_codelens_enabled = vim.b[bufnr].codelens_enabled
-                            local global_codelens_enabled = vim.g.codelens_enabled
-                            if buffer_codelens_enabled == nil then
-                                buffer_codelens_enabled = false
-                            end
-                            if global_codelens_enabled == nil then
-                                global_codelens_enabled = false
-                            end
+                        vim.keymap.set("n", "<leader>ltc", function()
+                            local buffer_codelens_enabled = vim.b[buf].codelens_enabled or false
+                            local global_codelens_enabled = vim.g.codelens_enabled or false
 
                             global_codelens_enabled = not global_codelens_enabled
                             vim.g.codelens_enabled = global_codelens_enabled
@@ -378,70 +446,67 @@ return {
                                 vim.lsp.codelens.clear()
                             end
 
-                            vim.notify(string.format("CodeLens: %s", bool2str(global_codelens_enabled)), vim.log.levels.INFO, { title = "Global" })
-                        end, { buffer = bufnr, desc = "Toggle LSP codelens", silent = true })
-                        vim.keymap.set("n", "<leader>ltL", function()
-                            local buffer_codelens_enabled = vim.b[bufnr].codelens_enabled
-                            if buffer_codelens_enabled == nil then
-                                buffer_codelens_enabled = false
-                            end
+                            vim.notify(string.format("CodeLens: %s", utils.bool2str(global_codelens_enabled)), vim.log.levels.INFO, { title = "Global" })
+                        end, { buffer = buf, desc = "Toggle LSP codelens", silent = true })
+                        vim.keymap.set("n", "<leader>ltC", function()
+                            local buffer_codelens_enabled = vim.b[buf].codelens_enabled or false
 
                             buffer_codelens_enabled = not buffer_codelens_enabled
-                            vim.b[bufnr].codelens_enabled = buffer_codelens_enabled
+                            vim.b[buf].codelens_enabled = buffer_codelens_enabled
 
                             if not buffer_codelens_enabled then
                                 vim.lsp.codelens.clear()
                             end
 
-                            vim.notify(string.format("CodeLens: %s", bool2str(buffer_codelens_enabled)), vim.log.levels.INFO, { title = "Buffer" })
-                        end, { buffer = bufnr, desc = "Toggle LSP codelens (buffer)", silent = true })
+                            vim.notify(string.format("CodeLens: %s", utils.bool2str(buffer_codelens_enabled)), vim.log.levels.INFO, { title = "Buffer" })
+                        end, { buffer = buf, desc = "Toggle LSP codelens (buffer)", silent = true })
 
-                        vim.keymap.set("n", "<leader>ll", function() vim.lsp.codelens.refresh() end, { buffer = bufnr, desc = "LSP CodeLens refresh", silent = true })
-                        vim.keymap.set("n", "<leader>lL", function() vim.lsp.codelens.run() end, { buffer = bufnr, desc = "LSP CodeLens run", silent = true })
+                        vim.keymap.set("n", "<leader>lc", function() vim.lsp.codelens.refresh() end, { buffer = buf, desc = "LSP CodeLens refresh", silent = true })
+                        vim.keymap.set("n", "<leader>lC", function() vim.lsp.codelens.run() end, { buffer = buf, desc = "LSP CodeLens run", silent = true })
                     end
 
                     if client.supports_method("textDocument/declaration") then
-                        vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = bufnr, desc = "Declaration of current symbol", silent = true })
+                        vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
                     end
 
                     if not utils.is_available("glance.nvim") then
                         if client.supports_method("textDocument/definition") then
-                            vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = bufnr, desc = "Show the definition of current symbol", silent = true })
+                            vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
                         end
 
                         if client.supports_method("textDocument/implementation") then
-                            vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, { buffer = bufnr, desc = "Implementation of current symbol", silent = true })
+                            vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, { buffer = buf, desc = "Implementation of current symbol", silent = true })
                         end
 
                         if client.supports_method("textDocument/typeDefinition") then
-                            vim.keymap.set("n", "gy", function() vim.lsp.buf.type_definition() end, { buffer = bufnr, desc = "Definition of current type", silent = true })
+                            vim.keymap.set("n", "gy", function() vim.lsp.buf.type_definition() end, { buffer = buf, desc = "Definition of current type", silent = true })
                         end
 
                         if client.supports_method("textDocument/references") then
-                            vim.keymap.set("n", "gr", function() vim.lsp.buf.references() end, { buffer = bufnr, desc = "References of current symbol", silent = true })
+                            vim.keymap.set("n", "gr", function() vim.lsp.buf.references() end, { buffer = buf, desc = "References of current symbol", silent = true })
                         end
                     end
 
                     if client.supports_method("textDocument/formatting") then
                         local format = function()
-                            vim.lsp.buf.format({ bufnr = bufnr })
+                            vim.lsp.buf.format({ bufnr = buf })
                         end
 
-                        vim.keymap.set({ "n", "x" }, "<leader>f", format, { buffer = bufnr, desc = "Format buffer", silent = true })
+                        vim.keymap.set({ "n", "x" }, "<leader>f", format, { buffer = buf, desc = "Format buffer", silent = true })
 
                         vim.b.autoformat_enabled = nil
                         if vim.g.autoformat_enabled == nil then
                             vim.g.autoformat_enabled = false
                         end
 
-                        add_buffer_autocmd("lsp_auto_format", bufnr, {
+                        add_buffer_autocmd("lsp_auto_format", buf, {
                             callback = function()
-                                if not has_capability("textDocument/formatting", { bufnr = bufnr }) then
-                                    del_buffer_autocmd("lsp_auto_format", bufnr)
+                                if not has_capability("textDocument/formatting", { bufnr = buf }) then
+                                    del_buffer_autocmd("lsp_auto_format", buf)
                                     return
                                 end
-                                if vim.b[bufnr].autoformat_enabled ~= nil then
-                                    if vim.b[bufnr].autoformat_enabled then
+                                if vim.b[buf].autoformat_enabled ~= nil then
+                                    if vim.b[buf].autoformat_enabled then
                                         format()
                                     end
                                 else
@@ -455,35 +520,29 @@ return {
                         })
 
                         vim.keymap.set("n", "<leader>ltf", function()
-                            local global_autoformat_enabled = vim.g.autoformat_enabled
-                            if global_autoformat_enabled == nil then
-                                global_autoformat_enabled = false
-                            end
+                            local global_autoformat_enabled = vim.g.autoformat_enabled or false
 
                             global_autoformat_enabled = not global_autoformat_enabled
                             vim.g.autoformat_enabled = global_autoformat_enabled
 
-                            vim.notify(string.format("AutoFormat: %s", bool2str(global_autoformat_enabled)), vim.log.levels.INFO, { title = "Global" })
-                        end, { buffer = bufnr, desc = "Toggle autoformatting", silent = true })
+                            vim.notify(string.format("AutoFormat: %s", utils.bool2str(global_autoformat_enabled)), vim.log.levels.INFO, { title = "Global" })
+                        end, { buffer = buf, desc = "Toggle autoformatting", silent = true })
                         vim.keymap.set("n", "<leader>ltF", function()
-                            local buffer_autoformat_enabled = vim.b[bufnr].autoformat_enabled
-                            if buffer_autoformat_enabled == nil then
-                                buffer_autoformat_enabled = false
-                            end
+                            local buffer_autoformat_enabled = vim.b[buf].autoformat_enabled or false
 
                             buffer_autoformat_enabled = not buffer_autoformat_enabled
-                            vim.b[bufnr].autoformat_enabled = buffer_autoformat_enabled
+                            vim.b[buf].autoformat_enabled = buffer_autoformat_enabled
 
-                            vim.notify(string.format("Buffer AutoFormat: %s", bool2str(buffer_autoformat_enabled)), vim.log.levels.INFO, { title = "Buffer" })
-                        end, { buffer = bufnr, desc = "Toggle autoformatting (buffer)", silent = true })
+                            vim.notify(string.format("Buffer AutoFormat: %s", utils.bool2str(buffer_autoformat_enabled)), vim.log.levels.INFO, { title = "Buffer" })
+                        end, { buffer = buf, desc = "Toggle autoformatting (buffer)", silent = true })
                     end
 
                     if client.supports_method("textDocument/documentHighlight") then
-                        add_buffer_autocmd("lsp_document_highlight", bufnr, {
+                        add_buffer_autocmd("lsp_document_highlight", buf, {
                             {
                                 callback = function()
-                                    if not has_capability("textDocument/documentHighlight", { bufnr = bufnr }) then
-                                        del_buffer_autocmd("lsp_document_highlight", bufnr)
+                                    if not has_capability("textDocument/documentHighlight", { bufnr = buf }) then
+                                        del_buffer_autocmd("lsp_document_highlight", buf)
                                         return
                                     end
                                     vim.lsp.buf.document_highlight()
@@ -502,7 +561,7 @@ return {
                     end
 
                     if client.supports_method("textDocument/hover") then
-                        vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { buffer = bufnr, desc = "Hover symbol details", silent = true })
+                        vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { buffer = buf, desc = "Hover symbol details", silent = true })
                     end
 
                     if client.supports_method("textDocument/inlayHint") then
@@ -511,97 +570,108 @@ return {
                             vim.g.inlay_hints_enabled = true
                         end
 
-                        if vim.b[bufnr].inlay_hints_enabled ~= nil then
-                            if vim.b[bufnr].inlay_hints_enabled then
-                                vim.lsp.inlay_hint.enable(bufnr, true)
+                        if vim.b[buf].inlay_hints_enabled ~= nil then
+                            if vim.b[buf].inlay_hints_enabled then
+                                vim.lsp.inlay_hint.enable(buf, true)
                             end
                         else
                             if vim.g.inlay_hints_enabled then
-                                vim.lsp.inlay_hint.enable(bufnr, true)
+                                vim.lsp.inlay_hint.enable(buf, true)
                             end
                         end
 
-                        vim.keymap.set("n", "<leader>lth", function()
-                            local buffer_inlay_hints_enabled = vim.b[bufnr].inlay_hints_enabled
-                            local global_inlay_hints_enabled = vim.g.inlay_hints_enabled
-                            if buffer_inlay_hints_enabled == nil then
-                                buffer_inlay_hints_enabled = false
-                            end
-                            if global_inlay_hints_enabled == nil then
-                                global_inlay_hints_enabled = false
-                            end
+                        vim.keymap.set("n", "<leader>lti", function()
+                            local buffer_inlay_hints_enabled = vim.b[buf].inlay_hints_enabled or false
+                            local global_inlay_hints_enabled = vim.g.inlay_hints_enabled or false
 
                             global_inlay_hints_enabled = not global_inlay_hints_enabled
                             vim.g.inlay_hints_enabled = global_inlay_hints_enabled
 
                             local enabled = buffer_inlay_hints_enabled or global_inlay_hints_enabled
-                            if enabled ~= vim.lsp.inlay_hint.get({ bufnr = bufnr }) then
-                                vim.lsp.inlay_hint.enable(bufnr, enabled)
+                            if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
+                                vim.lsp.inlay_hint.enable(buf, enabled)
                             end
 
-                            vim.notify(string.format("Inlay Hints: %s", bool2str(global_inlay_hints_enabled)), vim.log.levels.INFO, { title = "Global" })
-                        end, { buffer = bufnr, desc = "Toggle LSP inlay hints", silent = true })
-                        vim.keymap.set("n", "<leader>ltH", function()
-                            local buffer_inlay_hints_enabled = vim.b[bufnr].inlay_hints_enabled
-                            if buffer_inlay_hints_enabled == nil then
-                                buffer_inlay_hints_enabled = false
-                            end
+                            vim.notify(string.format("Inlay Hints: %s", utils.bool2str(global_inlay_hints_enabled)), vim.log.levels.INFO, { title = "Global" })
+                        end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
+                        vim.keymap.set("n", "<leader>ltI", function()
+                            local buffer_inlay_hints_enabled = vim.b[buf].inlay_hints_enabled or false
 
                             buffer_inlay_hints_enabled = not buffer_inlay_hints_enabled
-                            vim.b[bufnr].inlay_hints_enabled = buffer_inlay_hints_enabled
+                            vim.b[buf].inlay_hints_enabled = buffer_inlay_hints_enabled
 
                             local enabled = buffer_inlay_hints_enabled
-                            if enabled ~= vim.lsp.inlay_hint.get({ bufnr = bufnr }) then
-                                vim.lsp.inlay_hint.enable(bufnr, enabled)
+                            if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
+                                vim.lsp.inlay_hint.enable(buf, enabled)
                             end
 
-                            vim.notify(string.format("Inlay Hints: %s", bool2str(buffer_inlay_hints_enabled)), vim.log.levels.INFO, { title = "Buffer" })
-                        end, { buffer = bufnr, desc = "Toggle LSP inlay hints (buffer)", silent = true })
+                            vim.notify(string.format("Inlay Hints: %s", utils.bool2str(buffer_inlay_hints_enabled)), vim.log.levels.INFO, { title = "Buffer" })
+                        end, { buffer = buf, desc = "Toggle LSP inlay hints (buffer)", silent = true })
                     end
 
                     if client.supports_method("textDocument/rename") then
-                        vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = bufnr, desc = "Rename current symbol", silent = true })
+                        vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = buf, desc = "Rename current symbol", silent = true })
                     end
 
                     if client.supports_method("textDocument/signatureHelp") then
-                        vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = bufnr, desc = "Signature help", silent = true })
+                        vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
                     end
 
                     if client.supports_method("workspace/symbol") then
-                        vim.keymap.set("n", "<leader>lg", function() vim.lsp.buf.workspace_symbol() end, { buffer = bufnr, desc = "Search workspace symbols", silent = true })
+                        vim.keymap.set("n", "<leader>lg", function() vim.lsp.buf.workspace_symbol() end, { buffer = buf, desc = "Search workspace symbols", silent = true })
                     end
 
                     if client.supports_method("textDocument/semanticTokens/full") and vim.lsp.semantic_tokens then
-                        vim.b.semantic_tokens_enabled = true
-                        if vim.b.semantic_tokens_enabled then
-                            vim.keymap.set("n", "<leader>lts", function()
-                                vim.b[bufnr].semantic_tokens_enabled = not vim.b[bufnr].semantic_tokens_enabled
-                                local toggled = false
-                                for _, client in ipairs(vim.lsp.get_active_clients { bufnr = bufnr }) do
-                                    if client.server_capabilities.semanticTokensProvider then
-                                        vim.lsp.semantic_tokens[vim.b[bufnr].semantic_tokens_enabled and "start" or "stop"](bufnr, client.id)
-                                        toggled = true
-                                    end
-                                end
-                                if toggled then
-                                    vim.notify(string.format("Lsp Semantic Highlighting: %s", bool2str(vim.b[bufnr].semantic_tokens_enabled)), vim.log.levels.INFO, { title = "Buffer" })
-                                end
-                            end, { buffer = bufnr, desc = "Toggle LSP semantic highlight (buffer)", silent = true })
-                        else
-                            client.server_capabilities.semanticTokensProvider = nil
+                        vim.b.semantic_tokens_enabled = false
+                        if vim.g.semantic_tokens_enabled == nil then
+                            vim.g.semantic_tokens_enabled = true
                         end
+
+                        local toggle_semantic_tokens = function(enabled)
+                            for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = buf })) do
+                                if client.server_capabilities.semanticTokensProvider then
+                                    vim.lsp.semantic_tokens[enabled and "start" or "stop"](buf, client.id)
+                                end
+                            end
+                        end
+
+                        vim.keymap.set("n", "<leader>lts", function()
+                            local buffer_semantic_tokens_enabled = vim.b[buf].semantic_tokens_enabled or false
+                            local global_semantic_tokens_enabled = vim.g.semantic_tokens_enabled or false
+                            local prev_enabled = buffer_semantic_tokens_enabled or global_semantic_tokens_enabled
+
+                            global_semantic_tokens_enabled = not global_semantic_tokens_enabled
+                            vim.g.semantic_tokens_enabled = global_semantic_tokens_enabled
+
+                            local enabled = buffer_semantic_tokens_enabled or global_semantic_tokens_enabled
+                            if enabled ~= prev_enabled then
+                                toggle_semantic_tokens(enabled)
+                            end
+
+                            vim.notify(string.format("Lsp Semantic Highlighting: %s", utils.bool2str(global_semantic_tokens_enabled)), vim.log.levels.INFO, { title = "Global" })
+                        end, { buffer = buf, desc = "Toggle LSP semantic highlight", silent = true })
+                        vim.keymap.set("n", "<leader>ltS", function()
+                            local buffer_semantic_tokens_enabled = vim.b[buf].semantic_tokens_enabled or false
+                            local global_semantic_tokens_enabled = vim.g.semantic_tokens_enabled or false
+                            local prev_enabled = buffer_semantic_tokens_enabled or global_semantic_tokens_enabled
+
+                            buffer_semantic_tokens_enabled = not buffer_semantic_tokens_enabled
+                            vim.b[buf].semantic_tokens_enabled = buffer_semantic_tokens_enabled
+
+                            local enabled = buffer_semantic_tokens_enabled
+                            if enabled ~= prev_enabled then
+                                toggle_semantic_tokens(buffer_semantic_tokens_enabled)
+                            end
+
+                            vim.notify(string.format("Lsp Semantic Highlighting: %s", utils.bool2str(buffer_semantic_tokens_enabled)), vim.log.levels.INFO, { title = "Buffer" })
+                        end, { buffer = buf, desc = "Toggle LSP semantic highlight (buffer)", silent = true })
                     end
                 end,
-                desc = "Lsp setting",
-                group = vim.api.nvim_create_augroup("LspSetting", { clear = true }),
+                desc = "Lsp config",
+                group = vim.api.nvim_create_augroup("LspConfig", { clear = true }),
             })
         end,
         dependencies = {
-            {
-                "folke/neodev.nvim",
-                opts = {},
-            },
-
             {
                 "kosayoda/nvim-lightbulb",
                 opts = {
@@ -637,26 +707,33 @@ return {
                         -- The first entry (without a key) will be the default handler
                         -- and will be called for each installed server that doesn't have
                         -- a dedicated handler.
-                        function(server_name)
-                            lspconfig[server_name].setup(default_config)
-                        end,
+                        -- function(server_name)
+                        --     lspconfig[server_name].setup(default_config)
+                        -- end,
                     }
-                    for lsp, setup in pairs(variables.lsp(lspconfig, default_config)) do
+                    for lsp, setup in pairs(lsp.lsp(lspconfig, default_config)) do
                         handlers[lsp] = setup
                     end
 
                     return {
-                        ensure_installed = variables.lsp_list,
+                        ensure_installed = lsp.lsp_list,
                         automatic_installation = true,
                         handlers = handlers,
                     }
                 end,
             },
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User LspFile",
         },
+        init = function()
+            -- Change diagnostic symbols in the sign column (gutter)
+            for type, icon in pairs(icons.diagnostics) do
+                local hl = "DiagnosticSign" .. type
+                vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+            end
+        end,
     },
 
     -- {
@@ -679,7 +756,7 @@ return {
     --         "nvim-treesitter/nvim-treesitter",
     --         "nvim-tree/nvim-web-devicons",
     --     },
-    --     enabled = not variables.is_vscode,
+    --     enabled = not environment.is_vscode,
     --     opts = {
     --         keymaps = {
     --             -- ["?"] = "actions.show_help",
@@ -733,8 +810,19 @@ return {
 
     {
         "williamboman/mason.nvim",
-        build = function()
-            vim.api.nvim_command("MasonUpdate")
+        build = {
+            ":MasonUpdate",
+        },
+        cmd = {
+            "Mason",
+            "MasonUpdate",
+            "MasonInstall",
+            "MasonUninstall",
+            "MasonUninstallAll",
+            "MasonLog",
+        },
+        config = function(_, opts)
+            require("mason").setup(opts)
 
             -- 更新所有已经安装的 mason package
             local function mason_notify(msg, type)
@@ -747,7 +835,7 @@ return {
                 return
             end
 
-            mason_notify("Checking for package updates...")
+            -- mason_notify("Checking for package updates...")
             registry.update(vim.schedule_wrap(function(success, updated_registries)
                 if success then
                     local installed_pkgs = registry.get_installed_packages()
@@ -755,7 +843,7 @@ return {
                     local no_pkgs = running == 0
 
                     if no_pkgs then
-                        mason_notify("No updates available")
+                        -- mason_notify("No updates available")
                     else
                         local updated = false
                         for _, pkg in ipairs(installed_pkgs) do
@@ -775,33 +863,26 @@ return {
                                         if updated then
                                             mason_notify("Update Complete")
                                         else
-                                            mason_notify("No updates available")
+                                            -- mason_notify("No updates available")
                                         end
                                     end
                                 end
                             end)
                         end
                     end
-                else
-                    mason_notify(("Failed to update registries: %s"):format(updated_registries), vim.log.levels.ERROR)
+                    -- else
+                    --     mason_notify(("Failed to update registries: %s"):format(updated_registries), vim.log.levels.ERROR)
                 end
             end))
         end,
-        cmd = {
-            "Mason",
-            "MasonUpdate",
-            "MasonInstall",
-            "MasonUninstall",
-            "MasonUninstallAll",
-            "MasonLog",
-        },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         opts = {
-            install_root_dir = variables.mason_install_root_path,
+            install_root_dir = path.mason_install_root_path,
             log_level = vim.log.levels.OFF,
             ui = {
                 border = "rounded",
             },
         },
     },
+
 }

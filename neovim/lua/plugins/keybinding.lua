@@ -1,4 +1,4 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
 
 return {
     {
@@ -14,7 +14,7 @@ return {
                 },
             })
         end,
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "VeryLazy",
         },

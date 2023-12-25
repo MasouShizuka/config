@@ -1,5 +1,6 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local buftype = require("utils.buftype")
+local environment = require("utils.environment")
+local utils = require("utils")
 
 return {
     {
@@ -12,10 +13,10 @@ return {
                 return require("ultimate-autopair.core").run("<cr>") .. require("ultimate-autopair.core").run("x<bs>")
             end, { desc = "Enter", expr = true, replace_keycodes = false })
         end,
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
-            "InsertEnter",
             "CmdlineEnter",
+            "InsertEnter",
         },
         opts = {
             space = {
@@ -30,7 +31,7 @@ return {
             "Neogen",
         },
         config = function(_, opts)
-            if not variables.is_vscode then
+            if not environment.is_vscode then
                 opts["snippet_engine"] = "luasnip"
             end
             require("neogen").setup(opts)
@@ -80,7 +81,7 @@ return {
                     },
                 },
             },
-            n_lines = 500,
+            n_lines = math.huge,
         },
         version = false,
     },
@@ -90,11 +91,12 @@ return {
             require("mini.operators").setup(opts)
         end,
         keys = {
-            { "se", desc = "Evaluate text and replace with output", mode = { "n", "x" } },
-            { "sx", desc = "Exchange text regions",                 mode = { "n", "x" } },
-            { "sm", desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
-            { "ss", desc = "Replace text with register",            mode = { "n", "x" } },
-            { "sS", desc = "Sort text",                             mode = { "n", "x" } },
+            { "se",    desc = "Evaluate text and replace with output", mode = { "n", "x" } },
+            { "sx",    desc = "Exchange text regions",                 mode = { "n", "x" } },
+            { "<c-c>", desc = "Stop exchanging after the first step",  mode = { "n", "x" } },
+            { "sm",    desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
+            { "ss",    desc = "Replace text with register",            mode = { "n", "x" } },
+            { "sS",    desc = "Sort text",                             mode = { "n", "x" } },
         },
         opts = {
             -- Evaluate text and replace with output
@@ -151,7 +153,7 @@ return {
             require("mini.trailspace").setup(opts)
         end,
         init = function()
-            if variables.is_vscode then
+            if environment.is_vscode then
                 vim.api.nvim_create_autocmd("InsertLeave", {
                     callback = function()
                         -- 新行不清空空格
@@ -179,7 +181,7 @@ return {
         dependencies = {
             "nvim-lua/plenary.nvim",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User TreesitterFile",
         },
@@ -187,16 +189,27 @@ return {
             { "<leader>xt", function() vim.api.nvim_command("TodoTrouble") end, desc = "List all project todos in trouble", mode = "n" },
         },
         opts = function()
-            local opts = {
-                keywords = {
-                    FIX = { icon = " ", color = "red", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                    TODO = { icon = " ", color = "green" },
-                    HACK = { icon = " ", color = "orange" },
-                    WARN = { icon = " ", color = "yellow", alt = { "WARNING", "XXX" } },
-                    PERF = { icon = " ", color = "purple", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                    NOTE = { icon = " ", color = "blue", alt = { "INFO" } },
-                    TEST = { icon = " ", color = "cyan", alt = { "TESTING", "PASSED", "FAILED" } },
-                },
+            local keywords = {
+                FIX = { icon = " ", color = "red", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+                TODO = { icon = " ", color = "green" },
+                HACK = { icon = " ", color = "orange" },
+                WARN = { icon = " ", color = "yellow", alt = { "WARNING", "XXX" } },
+                PERF = { icon = " ", color = "purple", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+                NOTE = { icon = " ", color = "blue", alt = { "INFO" } },
+                TEST = { icon = " ", color = "cyan", alt = { "TESTING", "PASSED", "FAILED" } },
+            }
+            -- 忽略大小写
+            for key, value in pairs(keywords) do
+                value = vim.deepcopy(value)
+                local alt = value.alt
+                if alt then
+                    value.alt = vim.tbl_map(string.lower, alt)
+                end
+                keywords[key:lower()] = value
+            end
+
+            return {
+                keywords = keywords,
                 colors = {
                     red = { "DiagnosticError", "ErrorMsg", "#e06c75" },
                     green = { "String", "#98c379" },
@@ -211,18 +224,6 @@ return {
                     keyword = "bg",
                 },
             }
-
-            -- 忽略大小写
-            for key, value in pairs(opts.keywords) do
-                local alt = value.alt
-                if alt then
-                    alt = vim.tbl_map(string.lower, alt)
-                    value.alt = alt
-                end
-                opts.keywords[key:lower()] = value
-            end
-
-            return opts
         end,
     },
 
@@ -271,7 +272,7 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User TreesitterFile",
         },
@@ -324,7 +325,7 @@ return {
             require("dial.config").augends:register_group({
                 default = {
                     augend.case.new({
-                        types = { "camelCase", "snake_case", "kebab-case" },
+                        types = { "camelCase", "snake_case" },
                         cyclic = true,
                     }),
 
@@ -400,7 +401,7 @@ return {
             local ft = require("Comment.ft")
             ft.python = { "#%s", [["""%s"""]] }
         end,
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         keys = {
             { "gc", desc = "Comment toggle linewise",  mode = { "n", "x" } },
             { "gb", desc = "Comment toggle blockwise", mode = { "n", "x" } },
@@ -464,8 +465,8 @@ return {
 
             local group = vim.api.nvim_create_augroup("autosave", {})
             vim.api.nvim_create_autocmd("User", {
-                callback = function(opts)
-                    if opts.data.saved_buffer ~= nil then
+                callback = function(args)
+                    if args.data.saved_buffer ~= nil then
                         local is_mini_trailspace_available, mini_trailspace = pcall(require, "mini.trailspace")
                         if is_mini_trailspace_available then
                             -- 新行不清空空格
@@ -487,8 +488,8 @@ return {
                 pattern = "AutoSaveWritePre",
             })
             vim.api.nvim_create_autocmd("User", {
-                callback = function(opts)
-                    if opts.data.saved_buffer ~= nil then
+                callback = function(args)
+                    if args.data.saved_buffer ~= nil then
                         -- 读取上次复制的范围
                         vim.fn.setpos("'[", last_paste_start)
                         vim.fn.setpos("']", last_paste_end)
@@ -498,7 +499,7 @@ return {
                 pattern = "AutoSaveWritePost",
             })
         end,
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         event = {
             "User AutoSave",
         },
@@ -508,10 +509,10 @@ return {
 
             vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertLeave", "TextChanged" }, {
                 callback = function(args)
-                    local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
                     local is_modifiable = vim.api.nvim_get_option_value("modifiable", { buf = args.buf })
                     local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
-                    if not vim.tbl_contains(variables.skip_buftype_list, buftype) and is_modifiable and is_modified then
+                    if not vim.tbl_contains(buftype.skip_buftype_list, bt) and is_modifiable and is_modified then
                         pcall(vim.cmd.write)
                         utils.event("AutoSave")
                         vim.api.nvim_del_augroup_by_name("AutoSave")
@@ -530,13 +531,24 @@ return {
                 defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
                 cancel_defered_save = { "InsertEnter" },       -- vim events that cancel a pending deferred save
             },
-            debounce_delay = 1,                                -- delay after which a pending save is executed
+            condition = function(buf)
+                local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                    return false
+                end
+                return true
+            end,
+            debounce_delay = 1, -- delay after which a pending save is executed
         },
     },
 
     {
         "utilyre/sentiment.nvim",
-        enabled = not variables.is_vscode,
+        cmd = {
+            "NoMatchParen",
+            "DoMatchParen",
+        },
+        enabled = not environment.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
@@ -551,7 +563,7 @@ return {
 
     {
         "wingforth/nvim-im-select",
-        enabled = variables.is_windows,
+        enabled = environment.is_windows,
         event = {
             "InsertEnter",
         },

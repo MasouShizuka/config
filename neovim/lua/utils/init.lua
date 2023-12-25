@@ -1,5 +1,9 @@
 local M = {}
 
+function M.bool2str(bool)
+    return bool and "On" or "Off"
+end
+
 --- Run a shell command and capture the output and if the command succeeded or failed
 ---@param cmd string|string[] The terminal command to execute
 ---@param show_error? boolean Whether or not to show an unsuccessful command as an error to the user
@@ -16,11 +20,27 @@ function M.cmd(cmd, show_error)
     return success and result:gsub("[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]", "") or nil
 end
 
+function M.defer(fn, timeout, timer)
+    if timeout == nil then
+        fn()
+        return
+    end
+
+    if timer then
+        vim.fn.timer_stopall()
+        vim.fn.timer_start(timeout, fn)
+    else
+        vim.defer_fn(fn, timeout)
+    end
+end
+
 --- Trigger an AstroNvim user event
 ---@param event string The event name to be appended to Astro
 ---@param delay? boolean Whether or not to delay the event asynchronously (Default: true)
 function M.event(event, delay)
-    local emit_event = function() vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false }) end
+    local emit_event = function()
+        vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false })
+    end
     if delay == false then
         emit_event()
     else
@@ -30,8 +50,8 @@ end
 
 function M.diffthis()
     vim.cmd.windo("diffthis")
-    vim.cmd.normal("gg")
-    vim.cmd.normal("]c")
+    vim.cmd("normal! gg")
+    vim.cmd("normal! ]c")
 end
 
 -- https://github.com/amrbashir/nvim-docs-view
@@ -49,8 +69,8 @@ function M.extra_view_toggle(update, opts)
         if group == config.filetype then
             for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 local buf = vim.api.nvim_win_get_buf(win)
-                local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                if filetype == config.filetype then
+                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                if ft == config.filetype then
                     vim.api.nvim_win_close(win, false)
                     vim.api.nvim_del_augroup_by_name(config.filetype)
                     return
@@ -75,7 +95,7 @@ function M.extra_view_toggle(update, opts)
         width = vim.api.nvim_win_get_width(prev_win)
     elseif config.position == "top" then
         vim.api.nvim_command("top new")
-        width = vim.api.nvim_win_get_height(prev_win)
+        width = vim.api.nvim_win_get_width(prev_win)
     elseif config.position == "left" then
         vim.api.nvim_command("topleft vnew")
         height = vim.api.nvim_win_get_height(prev_win)
@@ -274,7 +294,7 @@ function M.is_available(plugin)
 end
 
 function M.is_bigfile(buf)
-    local max_filesize = 100 * 1024
+    local max_filesize = 500 * 1024
     local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
     if ok and stats and stats.size > max_filesize then
         return true
@@ -282,14 +302,90 @@ function M.is_bigfile(buf)
     return false
 end
 
-function M.refresh_current_buf(timeout)
-    if timeout then
-        vim.defer_fn(function()
-            vim.cmd.edit()
-        end, timeout)
+function M.is_longfile(buf, detect_all_lines)
+    local max_linewidth = 10000
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+    if detect_all_lines then
+        for _, line in ipairs(lines) do
+            if #line > max_linewidth then
+                return true
+            end
+        end
     else
-        vim.cmd.edit()
+        if #lines > 0 and #lines[1] > max_linewidth then
+            return true
+        end
     end
+    return false
+end
+
+function M.json_save(file, data)
+    local f = io.open(file, "w")
+    if not f then
+        vim.notify("Unable to open " .. file .. " for write")
+        return
+    end
+    f:write(vim.fn.json_encode(data))
+    io.close(f)
+end
+
+function M.json_load(file)
+    if vim.fn.filereadable(file) ~= 0 then
+        local f = io.open(file, "r")
+        if f then
+            local content = f:read("*a")
+            io.close(f)
+            return vim.fn.json_decode(content)
+        end
+    end
+    return {}
+end
+
+function M.move(key, set_jumps)
+    local buf = vim.api.nvim_get_current_buf()
+    local keep_center = vim.b[buf].keep_center or false
+    if set_jumps == nil then
+        set_jumps = true
+    end
+
+    local prefix = ""
+    local postfix = ""
+
+    if keep_center then
+        postfix = postfix .. "zz"
+    end
+
+    local count = vim.v.count
+    if count > 0 then
+        prefix = prefix .. tostring(count)
+        if set_jumps then
+            vim.cmd("normal! m'")
+        end
+    end
+
+    if count == 0 and not vim.fn.mode():find("V") then
+        vim.cmd.normal(("g%s%s"):format(key, postfix))
+    else
+        vim.cmd(("normal! %s%s%s"):format(prefix, key, postfix))
+    end
+end
+
+function M.refresh_buf(buf, timeout, timer)
+    vim.api.nvim_create_autocmd("BufEnter", {
+        buffer = buf,
+        callback = function()
+            M.defer(function()
+                vim.cmd.edit()
+            end, timeout, timer)
+        end,
+        once = true,
+    })
+end
+
+function M.refresh_current_buf(timeout, timer)
+    M.defer(function()
+        vim.cmd.edit()
+    end, timeout, timer)
 end
 
 --- Open a URL under the cursor with the current operating system
@@ -313,7 +409,7 @@ function M.system_open(path)
 end
 
 -- https://github.com/AndrewRadev/undoquit.vim
-function M.undoquit()
+function M.undoquit(create_autocmd)
     local undoquit_stack = {}
 
     local function is_storable(buf)
@@ -451,11 +547,13 @@ function M.undoquit()
         end
     end
 
-    vim.api.nvim_create_autocmd("QuitPre", {
-        callback = save_window_quit_history,
-        desc = "Undoquit save window quit history",
-        group = vim.api.nvim_create_augroup("Undoquit", { clear = true }),
-    })
+    if create_autocmd then
+        vim.api.nvim_create_autocmd("QuitPre", {
+            callback = save_window_quit_history,
+            desc = "Undoquit save window quit history",
+            group = vim.api.nvim_create_augroup("Undoquit", { clear = true }),
+        })
+    end
 
     return restore_window, restore_tab
 end

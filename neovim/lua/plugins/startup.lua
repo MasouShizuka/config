@@ -1,4 +1,4 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
 
 return {
     -- {
@@ -27,7 +27,7 @@ return {
     --     dependencies = {
     --         "nvim-tree/nvim-web-devicons",
     --     },
-    --     enabled = not variables.is_vscode,
+    --     enabled = not environment.is_vscode,
     --     init = function()
     --         -- 判断是否启动 alpha
     --         vim.api.nvim_create_autocmd("VimEnter", {
@@ -70,7 +70,7 @@ return {
     --             " ╚═╝  ╚═══╝ ╚══════╝ ╚═════╝    ╚═══╝   ╚═╝ ╚═╝     ╚═╝ ",
     --         }
 
-    --         -- local config_session = variables.config_path:gsub("/", vim.g.path_replacer):gsub(":", vim.g.colon_replacer)
+    --         -- local config_session = path.config_path:gsub("/", vim.g.path_replacer):gsub(":", vim.g.colon_replacer)
     --         dashboard.section.buttons.val = {
     --             dashboard.button("n", "  New File", ":ene <bar> startinsert<cr>"),
     --             dashboard.button("f", "  Find File", ":Telescope find_files<cr>"),
@@ -98,7 +98,7 @@ return {
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             -- 判断是否启动 dashboard
             vim.api.nvim_create_autocmd("VimEnter", {

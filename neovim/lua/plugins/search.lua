@@ -1,3 +1,5 @@
+local utils = require("utils")
+
 return {
     {
         "asiryk/auto-hlsearch.nvim",
@@ -19,7 +21,11 @@ return {
             remap_keys = { "/", "?", "*", "#", "n", "N" },
             create_commands = true,
             pre_hook = function() end,
-            post_hook = function() end,
+            post_hook = function()
+                if utils.is_available("mini.map") then
+                    require("mini.map").refresh()
+                end
+            end,
         },
     },
 }

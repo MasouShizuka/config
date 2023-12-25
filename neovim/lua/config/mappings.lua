@@ -1,5 +1,8 @@
-local utils = require("config.utils")
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local filetype = require("utils.filetype")
+local keymap = require("utils.keymap")
+local lsp = require("utils.lsp")
+local utils = require("utils")
 
 -- 设置 leader 为空格
 vim.g.mapleader = " "
@@ -7,7 +10,6 @@ vim.g.maplocalleader = " "
 
 -- 清除原有 keymap
 vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
-vim.keymap.set({ "n", "x" }, "m", "<nop>", { silent = true })
 vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
 vim.keymap.set({ "n", "x" }, "<c-c>", "<nop>", { silent = true })
 
@@ -16,8 +18,8 @@ vim.keymap.set({ "n", "x", "o" }, "H", "^", { desc = "Start of line (non-blank)"
 vim.keymap.set({ "n", "x", "o" }, "L", "g_", { desc = "End of line (non-blank)", silent = true })
 
 -- 折行时小步上下移动
-vim.keymap.set({ "n", "x" }, "j", "v:count == 0 && mode() !=# 'V' ? 'gj' : 'j'", { desc = "Down", expr = true, remap = true, silent = true })
-vim.keymap.set({ "n", "x" }, "k", "v:count == 0 && mode() !=# 'V' ? 'gk' : 'k'", { desc = "Up", expr = true, remap = true, silent = true })
+vim.keymap.set({ "n", "x" }, "j", function() utils.move("j") end, { desc = "Down", silent = true })
+vim.keymap.set({ "n", "x" }, "k", function() utils.move("k") end, { desc = "up", silent = true })
 
 -- 上下移动选中文本
 vim.keymap.set("x", "J", ":move '>+1<cr>gv-gv", { desc = "Move selected text up", silent = true })
@@ -33,7 +35,7 @@ vim.keymap.set("n", "gp", "`[v`]", { desc = "Select last pasted text", silent = 
 vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
 vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
 
-if variables.is_vscode then
+if environment.is_vscode then
     local vscode = require("vscode-neovim")
     vim.notify = vscode.notify
 
@@ -81,6 +83,26 @@ if variables.is_vscode then
     vim.keymap.set("n", "zm", function() vscode.action("editor.foldAll") end, { silent = true })
     vim.keymap.set("n", "zr", function() vscode.action("editor.unfoldAll") end, { silent = true })
 
+    -- 平滑滚动，防止 vscode 产生新的 jumplist
+    local scroll_interval = 10
+    local scroll_lines = 20
+    vim.keymap.set({ "n", "x" }, "<c-d>", function()
+        vim.fn.timer_stopall()
+        for i = 1, scroll_lines do
+            vim.fn.timer_start(i * scroll_interval, function()
+                vim.cmd("normal! j")
+            end)
+        end
+    end, { silent = true })
+    vim.keymap.set({ "n", "x" }, "<c-u>", function()
+        vim.fn.timer_stopall()
+        for i = 1, scroll_lines do
+            vim.fn.timer_start(i * scroll_interval, function()
+                vim.cmd("normal! k")
+            end)
+        end
+    end, { silent = true })
+
     -- 调试
     vim.keymap.set("n", "<leader>dr", function() vscode.action("workbench.action.debug.restart") end, { silent = true })
     vim.keymap.set("n", "<leader>dk", function() vscode.action("workbench.action.debug.callStackUp") end, { silent = true })
@@ -98,12 +120,12 @@ if variables.is_vscode then
 
     -- 运行
     vim.keymap.set("n", "<leader>r", function()
-        local filetype = vim.bo.filetype
-        if filetype == "html" or filetype == "xhtml" then
+        local ft = vim.bo.filetype
+        if ft == "html" or ft == "xhtml" then
             vscode.action("office.html.preview")
-        elseif filetype == "markdown" then
+        elseif ft == "markdown" then
             vscode.action("markdown.showPreviewToSide")
-        elseif filetype == "tex" then
+        elseif ft == "tex" then
             vscode.action("latex-workshop.build")
         else
             vscode.action("code-runner.run")
@@ -133,33 +155,40 @@ else
 
     if not utils.is_available("edgy.nvim") then
         -- 聚焦左侧边栏
-        vim.keymap.set("n", variables.keymap["<c-1>"], function()
-            if not variables.toggle_filetype(variables.toggle_filetype_list1) then
-                require("nvim-tree.api").tree.open()
+        vim.keymap.set("n", keymap["<c-1>"], function()
+            if not filetype.toggle_filetype(filetype.toggle_filetype_list_of_left) then
+                if utils.is_available("neo-tree.nvim") then
+                    require("neo-tree.sources.manager").close_all()
+                    require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
+                elseif utils.is_available("nvim-tree.lua") then
+                    require("nvim-tree.api").tree.open()
+                end
             end
         end, { desc = "Focus left panel", silent = true })
 
         -- 聚焦编辑文件
-        vim.keymap.set("n", variables.keymap["<c-2>"], function()
-            variables.skip_filetype(variables.skip_filetype_list1, "W")
+        vim.keymap.set("n", keymap["<c-2>"], function()
+            filetype.skip_filetype(filetype.skip_filetype_list_to_main, "W")
         end, { desc = "Focus editor", silent = true })
 
         -- 聚焦底栏
-        vim.keymap.set("n", variables.keymap["<c-3>"], function()
+        vim.keymap.set("n", keymap["<c-3>"], function()
             local count = vim.v.count
-            if count > 0 then
+            if count > 0 and utils.is_available("toggleterm.nvim") then
                 vim.api.nvim_command(tostring(count) .. "ToggleTerm")
                 return
             end
 
-            if not variables.toggle_filetype(variables.toggle_filetype_list2) then
-                vim.api.nvim_command("ToggleTerm")
+            if not filetype.toggle_filetype(filetype.toggle_filetype_list_of_bottom) then
+                if utils.is_available("toggleterm.nvim") then
+                    vim.api.nvim_command("ToggleTerm")
+                end
             end
         end, { desc = "Focus bottom panel", silent = true })
 
         -- 聚焦右侧边栏
-        vim.keymap.set("n", variables.keymap["<c-4>"], function()
-            if not variables.toggle_filetype(variables.toggle_filetype_list3) then
+        vim.keymap.set("n", keymap["<c-4>"], function()
+            if not filetype.toggle_filetype(filetype.toggle_filetype_list_of_right) then
                 vim.api.nvim_command("DocsViewToggle")
             end
         end, { desc = "Focus right panel", silent = true })
@@ -173,11 +202,11 @@ else
     vim.keymap.set("n", "<c-e>", function() vim.cmd.wincmd("r") end, { desc = "Exchange window", silent = true })
     vim.keymap.set("n", "<c-j>", function()
         vim.cmd.wincmd("w")
-        variables.skip_filetype(variables.skip_filetype_list2, "w")
+        filetype.skip_filetype(filetype.skip_filetype_list_of_panel, "w")
     end, { desc = "Move to next window", silent = true })
     vim.keymap.set("n", "<c-k>", function()
         vim.cmd.wincmd("W")
-        variables.skip_filetype(variables.skip_filetype_list2, "W")
+        filetype.skip_filetype(filetype.skip_filetype_list_of_panel, "W")
     end, { desc = "Move to previous window", silent = true })
     vim.keymap.set("n", "<c-s>h", function()
         vim.api.nvim_set_option_value("splitright", false, {})
@@ -209,15 +238,15 @@ else
     -- tab
     vim.keymap.set("n", "<c-h>", function() vim.cmd.tabprevious() end, { desc = "Cycle next tab", silent = true })
     vim.keymap.set("n", "<c-l>", function() vim.cmd.tabnext() end, { desc = "Cycle previous tab", silent = true })
-    vim.keymap.set("n", variables.keymap["<c-,>"], function() vim.cmd.tabmove("-") end, { desc = "Move tab left", silent = true })
-    vim.keymap.set("n", variables.keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
+    vim.keymap.set("n", keymap["<c-,>"], function() vim.cmd.tabmove("-") end, { desc = "Move tab left", silent = true })
+    vim.keymap.set("n", keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
     vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
-    vim.keymap.set("n", "<c-s>" .. variables.keymap["<c-,>"], function()
+    vim.keymap.set("n", "<c-s>" .. keymap["<c-,>"], function()
         local buf = vim.api.nvim_get_current_buf()
         vim.cmd.tabprevious()
         vim.api.nvim_command("vertical sbuffer " .. buf)
     end, { desc = "Split buffer to previous tab", silent = true })
-    vim.keymap.set("n", "<c-s>" .. variables.keymap["<c-.>"], function()
+    vim.keymap.set("n", "<c-s>" .. keymap["<c-.>"], function()
         local buf = vim.api.nvim_get_current_buf()
         vim.cmd.tabnext()
         vim.api.nvim_command("vertical sbuffer " .. buf)
@@ -229,12 +258,12 @@ else
 
     -- diff
     vim.keymap.set("n", "<c-n>", function()
-        vim.cmd.normal("]c")
-        vim.cmd.normal("zz")
+        vim.cmd("normal! ]c")
+        vim.cmd("normal! zz")
     end, { desc = "Next diff", silent = true })
-    vim.keymap.set("n", variables.keymap["<c-s-n>"], function()
-        vim.cmd.normal("[c")
-        vim.cmd.normal("zz")
+    vim.keymap.set("n", keymap["<c-s-n>"], function()
+        vim.cmd("normal! [c")
+        vim.cmd("normal! zz")
     end, { desc = "Previous diff", silent = true })
 
     -- 退出
@@ -243,48 +272,47 @@ else
 
     -- 运行
     vim.keymap.set("n", "<leader>r", function()
-        local path = vim.fn.expand("%:~:.")
-        if variables.is_windows then
-            path = path:gsub("\\", "/")
+        local curr_file_path = vim.fn.expand("%:~:.")
+        if environment.is_windows then
+            curr_file_path = curr_file_path:gsub("\\", "/")
         end
 
-        local is_toggleterm_available = utils.is_available("toggleterm.nvim")
-        local filetype = vim.bo.filetype
-        if is_toggleterm_available then
-            if variables.is_windows then
-                vim.opt.shellslash = true
-            end
-
-            if filetype == "lua" then
-                vim.api.nvim_command(([[TermExec cmd='lua "%s"']]):format(path))
-            elseif filetype == "markdown" then
-                vim.api.nvim_command("MarkdownPreviewToggle")
-            elseif filetype == "python" then
-                vim.api.nvim_command(([[TermExec cmd='python -u "%s"']]):format(path))
-            elseif filetype == "rust" then
+        local ft = vim.bo.filetype
+        if utils.is_available("toggleterm.nvim") then
+            if ft == "lua" then
+                vim.api.nvim_command(([[TermExec cmd='lua "%s"']]):format(curr_file_path))
+            elseif ft == "markdown" then
+                if utils.is_available("markdown-preview.nvim") then
+                    vim.api.nvim_command("MarkdownPreviewToggle")
+                end
+            elseif ft == "python" then
+                vim.api.nvim_command(([[TermExec cmd='python -u "%s"']]):format(curr_file_path))
+            elseif ft == "rust" then
                 vim.api.nvim_command([[TermExec cmd='cargo run']])
-            elseif filetype == "sh" then
-                vim.api.nvim_command(([[TermExec cmd='bash "%s"']]):format(path))
-            elseif filetype == "tex" then
-                vim.api.nvim_command("TexlabBuild")
-            end
-
-            if variables.is_windows then
-                vim.opt.shellslash = false
+            elseif ft == "sh" then
+                vim.api.nvim_command(([[TermExec cmd='bash "%s"']]):format(curr_file_path))
+            elseif ft == "tex" then
+                if vim.tbl_contains(lsp.lsp_list, "texlab") then
+                    vim.api.nvim_command("TexlabBuild")
+                end
             end
         else
-            if filetype == "lua" then
+            if ft == "lua" then
                 vim.api.nvim_command("luafile %")
-            elseif filetype == "markdown" then
-                vim.api.nvim_command("MarkdownPreviewToggle")
-            elseif filetype == "python" then
+            elseif ft == "markdown" then
+                if utils.is_available("markdown-preview.nvim") then
+                    vim.api.nvim_command("MarkdownPreviewToggle")
+                end
+            elseif ft == "python" then
                 vim.api.nvim_command("python -u %")
-            elseif filetype == "rust" then
+            elseif ft == "rust" then
                 vim.api.nvim_command("cargo run")
-            elseif filetype == "sh" then
+            elseif ft == "sh" then
                 vim.api.nvim_command("bash %")
-            elseif filetype == "tex" then
-                vim.api.nvim_command("TexlabBuild")
+            elseif ft == "tex" then
+                if vim.tbl_contains(lsp.lsp_list, "texlab") then
+                    vim.api.nvim_command("TexlabBuild")
+                end
             end
         end
     end, { desc = "Run", silent = true })

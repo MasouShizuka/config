@@ -1,4 +1,8 @@
-local variables = require("config.variables")
+local environment = require("utils.environment")
+local lsp = require("utils.lsp")
+local path = require("utils.path")
+local treesitter = require("utils.treesitter")
+local utils = require("utils")
 
 return {
     {
@@ -10,10 +14,32 @@ return {
             "SessionManager save_current_session",
             "SessionManager delete_session",
         },
+        config = function(_, opts)
+            require("session_manager").setup(opts)
+
+            -- 由于使用 file event 的方式激活 nvim-lspconfig 和 nvim-treesitter，需要刷新 session 中的 buffer 使得 plugins 生效
+            vim.api.nvim_create_autocmd("User", {
+                callback = function()
+                    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                        if vim.api.nvim_buf_is_valid(buf) and buf ~= vim.api.nvim_get_current_buf() then
+                            local filetype = vim.bo[buf].filetype
+                            if vim.tbl_contains(lsp.lsp_filetype_list, filetype) then
+                                utils.refresh_buf(buf, 1, true)
+                            end
+                            if vim.tbl_contains(treesitter.treesitter_filetype_list, filetype) then
+                                utils.refresh_buf(buf, 1, true)
+                            end
+                        end
+                    end
+                end,
+                group = vim.api.nvim_create_augroup("neovim-session-manager", { clear = true }),
+                pattern = "SessionLoadPost",
+            })
+        end,
         dependencies = {
             "nvim-lua/plenary.nvim",
         },
-        enabled = not variables.is_vscode,
+        enabled = not environment.is_vscode,
         init = function()
             local is_which_key_available, which_key = pcall(require, "which-key")
             if is_which_key_available then
@@ -45,9 +71,9 @@ return {
             { "<leader>sd", function() vim.api.nvim_command("SessionManager delete_session") end, desc = "Delete session", mode = "n" },
         },
         opts = function()
-            local sessions_dir = variables.data_path .. "/lazy/neovim-session-manager/sessions"
-            if variables.is_wsl then
-                sessions_dir = variables.wsl_data_path .. "/lazy/neovim-session-manager/sessions_wsl"
+            local sessions_dir = path.data_path .. "/lazy/neovim-session-manager/sessions"
+            if environment.is_wsl then
+                sessions_dir = path.wsl_data_path .. "/lazy/neovim-session-manager/sessions_wsl"
             end
             if vim.fn.isdirectory(sessions_dir) == 0 then
                 vim.fn.mkdir(sessions_dir)
@@ -79,7 +105,7 @@ return {
     --
     --         local function get_saved_session_name()
     --             local cwd = vim.fn.getcwd()
-    --             if variables.is_windows then
+    --             if environment.is_windows then
     --                 cwd = cwd:gsub("\\", "/")
     --             end
     --             cwd = cwd:gsub("/", vim.g.path_replacer)
@@ -150,7 +176,7 @@ return {
     --             end,
     --         })
     --     end,
-    --     enabled = not variables.is_vscode,
+    --     enabled = not environment.is_vscode,
     --     event = {
     --         "VimEnter",
     --     },

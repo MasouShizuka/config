@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ 96b57b259ee6ca547564c20745531804deff0f0d
+COMMIT_ b36cefed888c1cd2d4e0b667cc177d781c2af987
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -111,6 +111,7 @@ defaults = {
 	idlemsg = 'default',
 	idle_call_menu = 0,
 	custom_font = 'default',
+	ziggy_pth = 'default',
 }
 options = table_copy(defaults)
 opt.read_options(options, nil, function(_)
@@ -148,6 +149,9 @@ function auto_ui_scale()
 end
 -- 设置脚本属性
 mp.set_property_native('user-data/osc', { idlescreen = options.idlescreen })
+
+--[[ Language ]]
+require('lib/char_conv')
 
 --[[ CONFIG ]]
 local config_defaults = {
@@ -411,7 +415,7 @@ require('lib/menus')
 -- Determine path to ziggy
 do
 	local bin = 'ziggy-' .. (state.platform == 'windows' and 'windows.exe' or state.platform)
-	config.ziggy_path = join_path(mp.get_script_directory(), join_path('bin', bin))
+	config.ziggy_path = options.ziggy_pth ~= "default" and mp.command_native({'expand-path', options.ziggy_pth}) or (join_path(mp.get_script_directory(), join_path('bin', bin)))
 end
 
 --[[ STATE UPDATERS ]]
@@ -948,7 +952,7 @@ bind_command('show-in-directory', function()
 	if not state.path or is_protocol(state.path) then return end
 
 	if state.platform == 'windows' then
-		utils.subprocess_detached({args = {'explorer', '/select,', state.path}, cancellable = false})
+		utils.subprocess_detached({args = {'explorer', '/select,', state.path .. ' '}, cancellable = false})
 	elseif state.platform == 'darwin' then
 		utils.subprocess_detached({args = {'open', '-R', state.path}, cancellable = false})
 	elseif state.platform == 'linux' then
