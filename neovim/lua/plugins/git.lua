@@ -118,10 +118,35 @@ return {
             "DiffviewFocusFiles",
             "DiffviewRefresh",
         },
-        config = function(_, opts)
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-tree/nvim-web-devicons",
+        },
+        enabled = not environment.is_vscode,
+        init = function()
+            local is_which_key_available, which_key = pcall(require, "which-key")
+            if is_which_key_available then
+                which_key.register({
+                    mode = "n",
+                    ["<leader>v"] = {
+                        name = "+diffview",
+                    },
+                })
+            end
+        end,
+        keys = {
+            { "<leader>vv", function() vim.api.nvim_command("DiffviewOpen") end,        desc = "Open",         mode = "n" },
+            { "<leader>vf", function() vim.api.nvim_command("DiffviewFileHistory") end, desc = "File history", mode = "n" },
+            { "<leader>vq", function() vim.api.nvim_command("DiffviewClose") end,       desc = "Close",        mode = "n" },
+            { "<leader>vt", function() vim.api.nvim_command("DiffviewToggleFiles") end, desc = "Toggle files", mode = "n" },
+            -- { "<leader>vf", function() vim.api.nvim_command("DiffviewFocusFiles") end,  desc = "Focus files",  mode = "n" },
+            { "<leader>vr", function() vim.api.nvim_command("DiffviewRefresh") end,     desc = "Refresh",      mode = "n" },
+            { "<leader>vl", function() vim.api.nvim_command("DiffviewLog") end,         desc = "Log",          mode = "n" },
+        },
+        opts = function()
             local actions = require("diffview.actions")
 
-            require("diffview").setup({
+            return {
                 file_panel = {
                     win_config = {
                         position = "left",
@@ -298,32 +323,7 @@ return {
                         { "n", "<esc>", actions.close, { desc = "Close help menu" } },
                     },
                 },
-            })
+            }
         end,
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "nvim-tree/nvim-web-devicons",
-        },
-        enabled = not environment.is_vscode,
-        init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>v"] = {
-                        name = "+diffview",
-                    },
-                })
-            end
-        end,
-        keys = {
-            { "<leader>vv", function() vim.api.nvim_command("DiffviewOpen") end,        desc = "Open",         mode = "n" },
-            { "<leader>vf", function() vim.api.nvim_command("DiffviewFileHistory") end, desc = "File history", mode = "n" },
-            { "<leader>vq", function() vim.api.nvim_command("DiffviewClose") end,       desc = "Close",        mode = "n" },
-            { "<leader>vt", function() vim.api.nvim_command("DiffviewToggleFiles") end, desc = "Toggle files", mode = "n" },
-            -- { "<leader>vf", function() vim.api.nvim_command("DiffviewFocusFiles") end,  desc = "Focus files",  mode = "n" },
-            { "<leader>vr", function() vim.api.nvim_command("DiffviewRefresh") end,     desc = "Refresh",      mode = "n" },
-            { "<leader>vl", function() vim.api.nvim_command("DiffviewLog") end,         desc = "Log",          mode = "n" },
-        },
     },
 }

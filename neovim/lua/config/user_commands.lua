@@ -39,7 +39,23 @@ end
 vim.api.nvim_create_user_command("ToggleKeepCursorCenter", toggle_keep_cursor_center, { desc = "Toggle keep cursor center" })
 vim.keymap.set("n", "<leader>ctc", toggle_keep_cursor_center, { desc = "Toggle keep cursor center", silent = true })
 
-if not environment.is_vscode then
+if environment.is_vscode then
+    local vscode = require("vscode-neovim")
+
+    -- toggle fileformat
+    local function toggle_fileformat()
+        vscode.action("workbench.action.editor.changeEOL")
+    end
+    vim.api.nvim_create_user_command("ToggleFileformat", toggle_fileformat, { desc = "Toggle fileformat" })
+    vim.keymap.set("n", "<leader>ctf", toggle_fileformat, { desc = "Toggle fileformat", silent = true })
+
+    -- toggle wrap
+    local function toggle_wrap()
+        vscode.action("editor.action.toggleWordWrap")
+    end
+    vim.api.nvim_create_user_command("ToggleWrap", toggle_wrap, { desc = "Toggle wrap" })
+    vim.keymap.set("n", "<leader>ctw", toggle_wrap, { desc = "Toggle wrap", silent = true })
+else
     -- toggle fileformat
     local function toggle_fileformat()
         local fileformat = vim.api.nvim_get_option_value("fileformat", { scope = "local" })

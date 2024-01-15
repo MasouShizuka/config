@@ -1,6 +1,5 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     {
@@ -44,7 +43,9 @@ return {
             "neovim/nvim-lspconfig",
         },
         enabled = not environment.is_vscode,
-        ft = "rust",
+        ft = {
+            "rust",
+        },
     },
 
     -- {
@@ -74,6 +75,8 @@ return {
     --         "nvim-lua/plenary.nvim",
     --     },
     --     enabled = not environment.is_vscode,
-    --     ft = "rust",
+    --     ft = {
+    --         "rust",
+    --     },
     -- },
 }

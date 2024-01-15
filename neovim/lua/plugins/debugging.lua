@@ -59,7 +59,7 @@ return {
                 dapui.setup(opts)
             end,
             keys = {
-                { "<leader>du", function() require("dapui").toggle({}) end, desc = "Toggle ui", mode = "n" },
+                { "<leader>du", function() require("dapui").toggle({}) end, desc = "Toggle dapui", mode = "n" },
             },
             opts = {
                 floating = {

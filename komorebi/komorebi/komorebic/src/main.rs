@@ -7,6 +7,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::ErrorKind;
 use std::io::Write;
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::atomic::AtomicBool;
@@ -27,7 +28,6 @@ use miette::Report;
 use miette::SourceOffset;
 use miette::SourceSpan;
 use paste::paste;
-use sysinfo::SystemExt;
 use uds_windows::UnixListener;
 use uds_windows::UnixStream;
 use which::which;
@@ -773,6 +773,8 @@ enum SubCommand {
     Check,
     /// Show a JSON representation of the current window manager state
     State,
+    /// Show a JSON representation of visible windows
+    VisibleWindows,
     /// Query the current window manager state
     #[clap(arg_required_else_help = true)]
     Query(Query),
@@ -867,6 +869,8 @@ enum SubCommand {
     /// Focus the specified monitor
     #[clap(arg_required_else_help = true)]
     FocusMonitor(FocusMonitor),
+    /// Focus the last focused workspace on the focused monitor
+    FocusLastWorkspace,
     /// Focus the specified workspace on the focused monitor
     #[clap(arg_required_else_help = true)]
     FocusWorkspace(FocusWorkspace),
@@ -1233,7 +1237,7 @@ fn main() -> Result<()> {
             let mut arguments = String::from("start");
 
             if let Some(config) = args.config {
-                arguments.push_str("--config ");
+                arguments.push_str(" --config ");
                 arguments.push_str(&config.to_string_lossy());
             }
 
@@ -1290,7 +1294,7 @@ fn main() -> Result<()> {
                 let config_source = std::fs::read_to_string(&static_config)?;
                 let lines: Vec<_> = config_source.lines().collect();
                 let parsed_config = serde_json::from_str::<serde_json::Value>(&config_source);
-                if let Err(serde_error) = parsed_config {
+                if let Err(serde_error) = &parsed_config {
                     let line = lines[serde_error.line() - 2];
 
                     let offset = SourceOffset::from_location(
@@ -1312,6 +1316,24 @@ fn main() -> Result<()> {
                 }
 
                 println!("Found komorebi.json; this file can be passed to the start command with the --config flag\n");
+
+                if let Ok(config) = &parsed_config {
+                    if let Some(asc_path) = config.get("app_specific_configuration_path") {
+                        let normalized_asc_path = asc_path
+                            .to_string()
+                            .replace(
+                                "$Env:USERPROFILE",
+                                &dirs::home_dir().unwrap().to_string_lossy(),
+                            )
+                            .replace('"', "")
+                            .replace('\\', "/");
+
+                        if !Path::exists(Path::new(&normalized_asc_path)) {
+                            println!("Application specific configuration file path '{normalized_asc_path}' does not exist. Try running 'komorebic fetch-asc'\n");
+                        }
+                    }
+                }
+
                 if config_whkd.exists() {
                     println!("Found ~/.config/whkdrc; key bindings will be loaded from here when whkd is started, and you can start it automatically using the --whkd flag\n");
                 } else {
@@ -1763,7 +1785,7 @@ if (!(Get-Process whkd -ErrorAction SilentlyContinue))
 
                 let script = format!(
                     r#"
-  Start-Process {ahk} {config} -WindowStyle hidden
+  Start-Process '{ahk}' '{config}' -WindowStyle hidden
                 "#,
                     config = config_ahk.display()
                 );
@@ -1856,6 +1878,9 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
         SubCommand::FocusMonitor(arg) => {
             send_message(&SocketMessage::FocusMonitorNumber(arg.target).as_bytes()?)?;
         }
+        SubCommand::FocusLastWorkspace => {
+            send_message(&SocketMessage::FocusLastWorkspace.as_bytes()?)?;
+        }
         SubCommand::FocusWorkspace(arg) => {
             send_message(&SocketMessage::FocusWorkspaceNumber(arg.target).as_bytes()?)?;
         }
@@ -1920,6 +1945,9 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
         }
         SubCommand::State => {
             with_komorebic_socket(|| send_message(&SocketMessage::State.as_bytes()?))?;
+        }
+        SubCommand::VisibleWindows => {
+            with_komorebic_socket(|| send_message(&SocketMessage::VisibleWindows.as_bytes()?))?;
         }
         SubCommand::Query(arg) => {
             with_komorebic_socket(|| {

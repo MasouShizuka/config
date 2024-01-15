@@ -154,32 +154,28 @@ return {
             "kdheepak/cmp-latex-symbols",
 
             {
-                "saadparwaiz1/cmp_luasnip",
+                "L3MON4D3/LuaSnip",
+                config = function(_, opts)
+                    require("luasnip").setup(opts)
+                    require("luasnip.loaders.from_vscode").lazy_load()
+                    require("luasnip.loaders.from_vscode").lazy_load({
+                        paths = { path.vscode_snippet_path },
+                    })
+                end,
                 dependencies = {
-                    {
-                        "L3MON4D3/LuaSnip",
-                        config = function(_, opts)
-                            require("luasnip").setup(opts)
-                            require("luasnip.loaders.from_vscode").lazy_load()
-                            require("luasnip.loaders.from_vscode").lazy_load({
-                                paths = { path.vscode_snippet_path },
-                            })
-                        end,
-                        dependencies = {
-                            "rafamadriz/friendly-snippets",
-                        },
-                        opts = {
-                            enable_autosnippets = true,
-                        },
-                    },
+                    "rafamadriz/friendly-snippets",
+                },
+                opts = {
+                    enable_autosnippets = true,
                 },
             },
+
+            "saadparwaiz1/cmp_luasnip",
         },
         enabled = not environment.is_vscode,
         event = {
             "CmdlineEnter",
             "InsertEnter",
         },
-        version = false,
     },
 }

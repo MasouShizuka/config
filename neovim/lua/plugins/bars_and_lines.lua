@@ -20,26 +20,25 @@ return {
             local heirline_utils = require("heirline.utils")
 
             local colors = {
-                bright_bg = heirline_utils.get_highlight("Folded").bg,
-                bright_fg = heirline_utils.get_highlight("Folded").fg,
-                red = heirline_utils.get_highlight("DiagnosticError").fg,
-                dark_red = heirline_utils.get_highlight("DiffDelete").bg,
-                green = heirline_utils.get_highlight("String").fg,
-                yellow = heirline_utils.get_highlight("DiagnosticWarn").fg,
-                blue = heirline_utils.get_highlight("DiagnosticInfo").fg,
-                gray = heirline_utils.get_highlight("NonText").fg,
-                orange = heirline_utils.get_highlight("Constant").fg,
-                purple = heirline_utils.get_highlight("Statement").fg,
-                cyan = heirline_utils.get_highlight("DiagnosticHint").fg,
-                diag_warn = heirline_utils.get_highlight("DiagnosticWarn").fg,
-                diag_error = heirline_utils.get_highlight("DiagnosticError").fg,
-                diag_hint = heirline_utils.get_highlight("DiagnosticHint").fg,
-                diag_info = heirline_utils.get_highlight("DiagnosticInfo").fg,
-                git_del = heirline_utils.get_highlight("diffRemoved").fg,
-                git_add = heirline_utils.get_highlight("diffAdded").fg,
-                git_change = heirline_utils.get_highlight("diffChanged").fg,
+                "black",
+                "blue",
+                "cyan",
+                "gray",
+                "green",
+                "orange",
+                "purple",
+                "red",
+                "yellow",
+
+                "git_add",
+                "git_change",
+                "git_delete",
             }
-            require("heirline").load_colors(colors)
+            local heirline_colors = {}
+            for _, color in ipairs(colors) do
+                heirline_colors[color] = heirline_utils.get_highlight(color).fg
+            end
+            require("heirline").load_colors(heirline_colors)
 
             local align = { provider = "%=" }
 
@@ -105,16 +104,16 @@ return {
                 local icon, hl
                 if severity == "error" then
                     icon = icons.diagnostics.Error
-                    hl = { fg = "diag_error" }
+                    hl = { fg = "red" }
                 elseif severity == "warn" then
                     icon = icons.diagnostics.Warn
-                    hl = { fg = "diag_warn" }
+                    hl = { fg = "yellow" }
                 elseif severity == "info" then
                     icon = icons.diagnostics.Info
-                    hl = { fg = "diag_info" }
+                    hl = { fg = "blue" }
                 elseif severity == "hint" then
                     icon = icons.diagnostics.Hint
-                    hl = { fg = "diag_hint" }
+                    hl = { fg = "cyan" }
                 end
 
                 return {
@@ -143,7 +142,7 @@ return {
                     hl = { fg = "git_change" }
                 elseif status == "removed" then
                     icon = icons.git.deleted
-                    hl = { fg = "git_del" }
+                    hl = { fg = "git_delete" }
                 end
 
                 return {
@@ -245,7 +244,7 @@ return {
                         provider = function(self)
                             return " " .. self.mode_names[self.mode]
                         end,
-                        hl = { fg = heirline_utils.get_highlight("bg").fg },
+                        hl = { fg = "black" },
                     }
                 ),
             }
@@ -1070,7 +1069,7 @@ return {
 
             return {
                 statusline = {
-                    hl = { bg = heirline_utils.get_highlight("bg_statusline").fg },
+                    hl = { bg = "black" },
                     fallthrough = false,
 
                     terminal_statusline,

@@ -94,18 +94,18 @@ Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 # │ Theme │
 # ╰───────╯
 
-$ENV:STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml"
+$ENV:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
 
 # OSC 7 on Windows with powershell (with starship)
-If ($env:TERM_PROGRAM -eq "WezTerm") {
-    $prompt = ""
+if ($env:TERM_PROGRAM -eq "WezTerm") {
+    $prompt=""
     function Invoke-Starship-PreCommand {
-        $current_location = $executionContext.SessionState.Path.CurrentLocation
+        $current_location=$executionContext.SessionState.Path.CurrentLocation
         if ($current_location.Provider.Name -eq "FileSystem") {
-            $ansi_escape = [char]27
-            $provider_path = $current_location.ProviderPath -replace "\\", "/"
-            $prompt = "$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
+            $ansi_escape=[char]27
+            $provider_path=$current_location.ProviderPath -replace "\\", "/"
+            $prompt="$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
         }
         $host.ui.Write($prompt)
     }
@@ -117,6 +117,6 @@ If ($env:TERM_PROGRAM -eq "WezTerm") {
 # │ Conda │
 # ╰───────╯
 
-If (Test-Path "$HOME/miniconda3/Scripts/conda.exe") {
+if (Test-Path "$HOME/miniconda3/Scripts/conda.exe") {
     (& "$HOME/miniconda3/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null
 }

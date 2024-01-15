@@ -84,6 +84,8 @@ return {
         version = false,
     },
 
+    -- NOTE: 需要安装 C 编译器，例如 msys2 中的 mingw-w64-ucrt-x86_64-gcc
+    -- msys2 中的 gcc 编译的 parser 会使得 neovim 闪退
     {
         "nvim-treesitter/nvim-treesitter",
         build = {
@@ -200,7 +202,6 @@ return {
 
             return opts
         end,
-        version = false,
     },
     {
         "nvim-treesitter/nvim-treesitter-context",

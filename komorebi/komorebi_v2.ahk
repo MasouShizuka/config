@@ -77,8 +77,8 @@ global workspace_key_value := Map(
     "2", [1, " "],
     "3", [2, " "],
     "4", [3, " "],
-    "5", [4, " "],
-    "6", [5, " "],
+    "5", [4, " "],
+    "6", [5, " "],
     "7", [6, " "]
 )
 
@@ -115,7 +115,8 @@ RunWait(Format("komorebic.exe workspace-rule exe `"QQ.exe`" {} 2", main_monitor)
 RunWait(Format("komorebic.exe workspace-rule exe `"WeChat.exe`" {} 2", main_monitor), , "Hide")
 RunWait(Format("komorebic.exe workspace-rule exe `"cloudmusic.exe`" {} 3", main_monitor), , "Hide")
 RunWait(Format("komorebic.exe workspace-rule exe `"foobar2000.exe`" {} 3", main_monitor), , "Hide")
-RunWait(Format("komorebic.exe workspace-rule exe `"Thunder.exe`" {} 5", main_monitor), , "Hide")
+RunWait(Format("komorebic.exe workspace-rule exe `"Thunder.exe`" {} 4", main_monitor), , "Hide")
+RunWait(Format("komorebic.exe workspace-rule exe `"nekoray.exe`" {} 5", main_monitor), , "Hide")
 
 
 ;#######

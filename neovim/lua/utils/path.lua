@@ -18,6 +18,21 @@ if environment.is_windows then
     M.home_path = M.home_path:gsub("\\", "/")
 end
 
+M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
+
+M.msys2_path = "C:/msys64"
+
+M.vscode_path = nil
+if environment.is_windows then
+    M.vscode_path = vim.env.APPDATA:gsub("\\", "/") .. "/Code"
+elseif environment.is_mac then
+    M.vscode_path = M.home_path .. "/Library/Application\\ Support/Code"
+elseif environment.is_linux then
+    M.vscode_path = M.home_path .. "/.config/Code"
+end
+M.vscode_snippet_path = M.vscode_path .. "/User/snippets"
+M.vscode_extension_path = M.home_path .. "/.vscode/extensions"
+
 M.conda_path = M.home_path .. "/miniconda3"
 M.python_path = M.conda_path .. "/bin/python"
 if environment.is_windows then
@@ -38,18 +53,5 @@ M.get_python_envs_path = function()
 
     return python_envs_path
 end
-
-M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
-
-M.vscode_path = nil
-if environment.is_windows then
-    M.vscode_path = vim.env.APPDATA:gsub("\\", "/") .. "/Code"
-elseif environment.is_mac then
-    M.vscode_path = M.home_path .. "/Library/Application\\ Support/Code"
-elseif environment.is_linux then
-    M.vscode_path = M.home_path .. "/.config/Code"
-end
-M.vscode_snippet_path = M.vscode_path .. "/User/snippets"
-M.vscode_extension_path = M.home_path .. "/.vscode/extensions"
 
 return M

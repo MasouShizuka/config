@@ -87,16 +87,15 @@ vim.opt.sessionoptions = { "curdir", "folds", "globals", "help", "localoptions",
 
 -- Shell
 if environment.is_windows then
+    -- shellslash 不能如下直接修改，否则会导致 windows 下 friendly-snippets 等失效
     vim.opt.shell = "pwsh -NoLogo"                                                                      -- name of shell to use for external commands
     vim.opt.shellcmdflag = "-Command"                                                                   -- flag to shell to execute one command
     vim.opt.shellpipe  = "2>&1 | %%{ '$_' } | tee %s; exit $LastExitCode"                               -- string to put output of ":make" in error file
     vim.opt.shellquote = ""                                                                             -- quote character(s) for around shell command
-    vim.opt.shellslash = true                                                                           -- use forward slash for shell file names
     vim.opt.shellredir = "2>&1 | %%{ '$_' } | Out-File %s; exit $LastExitCode"                          -- string to put output of filter in a temp file
     vim.opt.shellxquote = ""                                                                            -- like 'shellquote', but include redirection
-    -- vim.opt.shell = "C:/msys64/usr/bin/zsh.exe"                                                      -- name of shell to use for external commands
+    -- vim.opt.shell = path.msys2_path .. "/usr/bin/zsh.exe"                                                      -- name of shell to use for external commands
     -- vim.opt.shellcmdflag = "-c"                                                                      -- flag to shell to execute one command
-    -- vim.opt.shellslash = true                                                                        -- use forward slash for shell file names
     -- vim.opt.shellxquote = ""                                                                         -- like 'shellquote', but include redirection
 end
 

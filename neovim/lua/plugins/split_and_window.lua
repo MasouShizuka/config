@@ -157,9 +157,6 @@ return {
             end, { desc = "Focus right panel", silent = true })
         end,
         enabled = not environment.is_vscode,
-        event = {
-            "VeryLazy",
-        },
         init = function()
             -- views can only be fully collapsed with the global statusline
             vim.opt.laststatus = 3

@@ -1,0 +1,72 @@
+local environment = require("utils.environment")
+local path = require("utils.path")
+
+return {
+    -- NOTE: leetcode.nvim 使用 curl 来 post 数据，需要安装 curl
+    -- msys2 默认的 curl 对于 windows 存在一定的问题，比如在 powershell 中，-d 中的文件内容需要用单引号包裹，而在 zsh 中不需要
+    -- 最好选择安装 mingw-w64-ucrt-x86_64-curl，并记得将环境变量中 msys64/ucrt64/bin 放在 msys64/usr/bin/curl 之上
+    {
+        "kawre/leetcode.nvim",
+        build = ":TSUpdate html",
+        cmd = {
+            "Leet",
+        },
+        dependencies = {
+            "MunifTanjim/nui.nvim",
+            "nvim-lua/plenary.nvim",
+            "nvim-telescope/telescope.nvim",
+
+            -- 可选
+            "nvim-tree/nvim-web-devicons",
+            "nvim-treesitter/nvim-treesitter",
+            "rcarriga/nvim-notify",
+        },
+        enabled = not environment.is_vscode,
+        lazy = "leetcode" ~= vim.fn.argv()[1],
+        opts = function()
+            local directory = path.data_path .. "/lazy/leetcode.nvim/leetcode"
+            if vim.fn.isdirectory(directory) == 0 then
+                vim.fn.mkdir(directory)
+            end
+            -- plenary 在 windows 下必须传入 \ 作为路径分隔符，否则路径不正确
+            if environment.is_windows then
+                directory = directory:gsub("/", "\\")
+            end
+            return {
+                arg = "leetcode",
+                lang = "cpp",
+                cn = {
+                    enabled = true,
+                },
+                directory = directory,
+                logging = false,
+                injector = {
+                    ["cpp"] = {
+                        before = {
+                            "#include <algorithm>",
+                            "#include <deque>",
+                            "#include <iostream>",
+                            "#include <map>",
+                            "#include <queue>",
+                            "#include <set>",
+                            "#include <stack>",
+                            "#include <unordered_map>",
+                            "#include <unordered_set>",
+                            "#include <vector>",
+                            "",
+                            "using namespace std;",
+                        },
+                    },
+                },
+                keys = {
+                    toggle = { "q", "<esc>" },
+                    confirm = { "<cr>" },
+                    reset_testcases = "r",
+                    use_testcase = "U",
+                    focus_testcases = "H",
+                    focus_result = "L",
+                },
+            }
+        end,
+    },
+}

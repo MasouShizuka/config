@@ -1,4 +1,5 @@
 local environment = require("utils.environment")
+local utils = require("utils")
 
 return {
     -- {
@@ -52,14 +53,34 @@ return {
         config = function(_, opts)
             local map = require("mini.map")
             require("mini.map").setup(opts)
-            vim.schedule(function()
-                map.open()
-            end)
+
+            local function open_map()
+                vim.schedule(function()
+                    map.open()
+                end)
+            end
+            open_map()
+
+            vim.api.nvim_create_autocmd("TabEnter", {
+                callback = function()
+                    open_map()
+                end,
+                desc = "Auto open minimap",
+                group = vim.api.nvim_create_augroup("MiniMapAutoOpen", { clear = true }),
+            })
         end,
         enabled = not environment.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
+        },
+        keys = {
+            { "<leader>mm", function() require("mini.map").open() end,         desc = "Open map window",                 mode = "n" },
+            { "<leader>mr", function() require("mini.map").refresh() end,      desc = "Refresh map window",              mode = "n" },
+            { "<leader>mc", function() require("mini.map").close() end,        desc = "Close map window",                mode = "n" },
+            { "<leader>mt", function() require("mini.map").toggle() end,       desc = "Toggle map window",               mode = "n" },
+            { "<leader>mf", function() require("mini.map").toggle_focus() end, desc = "Toggle focus to/from map window", mode = "n" },
+            { "<leader>ms", function() require("mini.map").toggle_side() end,  desc = "Toggle side of map window",       mode = "n" },
         },
         opts = function()
             local map = require("mini.map")
@@ -69,13 +90,12 @@ return {
                     hl_groups = { spell = "SpellBad" }
                 end
 
-                local augroup = vim.api.nvim_create_augroup("MiniMapSpell", {})
                 vim.api.nvim_create_autocmd("OptionSet", {
                     callback = vim.schedule_wrap(function()
                         map.refresh({}, { lines = false, scrollbar = false })
                     end),
                     desc = "On 'spell' update",
-                    group = augroup,
+                    group = vim.api.nvim_create_augroup("MiniMapSpell", { clear = true }),
                     pattern = { "dictionary", "spell" },
                 })
 
@@ -101,15 +121,15 @@ return {
 
             local integrations = {
                 map.gen_integration.builtin_search({ search = "green" }),
-                map.gen_integration.gitsigns(),
                 map.gen_integration.diagnostic({
                     error = "DiagnosticError",
                     warn  = "DiagnosticWarn",
-                    info  = "DiagnosticInfo",
-                    hint  = "DiagnosticHint",
                 }),
                 spell({ spell = "purple" }),
             }
+            if utils.is_git() then
+                table.insert(integrations, 2, map.gen_integration.gitsigns())
+            end
 
             return {
                 integrations = integrations,

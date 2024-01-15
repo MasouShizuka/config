@@ -1,37 +1,41 @@
+local environment = require("utils.environment")
 local path = require("utils.path")
 
 local M = {}
 
 M.dap = function(mason_nvim_dap)
     return {
-        -- 由 rust-tools 设置
         codelldb = function(config)
-            -- config.adapters = {
-            --     type = "server",
-            --     port = "${port}",
-            --     executable = {
-            --         -- CHANGE THIS to your path!
-            --         command = path.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb",
-            --         args = { "--port", "${port}" },
-            --         -- On windows you may have to uncomment this:
-            --         detached = false,
-            --     },
-            -- }
+            local detached = true
+            if environment.is_windows then
+                detached = false
+            end
+            config.adapters = {
+                type = "server",
+                port = "${port}",
+                executable = {
+                    -- CHANGE THIS to your path!
+                    command = path.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb",
+                    args = { "--port", "${port}" },
+                    -- On windows you may have to uncomment this:
+                    detached = detached,
+                },
+            }
 
-            -- config.configurations = {
-            --     {
-            --         name = "Launch file",
-            --         type = "codelldb",
-            --         request = "launch",
-            --         program = function()
-            --             return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-            --         end,
-            --         cwd = "${workspaceFolder}",
-            --         stopOnEntry = false,
-            --     },
-            -- }
+            config.configurations = {
+                {
+                    name = "Launch file",
+                    type = "codelldb",
+                    request = "launch",
+                    program = function()
+                        return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+                    end,
+                    cwd = "${workspaceFolder}",
+                    stopOnEntry = false,
+                },
+            }
 
-            -- mason_nvim_dap.default_setup(config)
+            mason_nvim_dap.default_setup(config)
         end,
         python = function(config)
             config.adapters = {

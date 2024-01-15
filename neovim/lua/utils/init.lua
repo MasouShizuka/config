@@ -302,6 +302,10 @@ function M.is_bigfile(buf)
     return false
 end
 
+function M.is_git()
+    return M.cmd({ "git", "-C", vim.fn.getcwd(), "rev-parse" }, false)
+end
+
 function M.is_longfile(buf, detect_all_lines)
     local max_linewidth = 10000
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
@@ -322,23 +326,59 @@ end
 function M.json_save(file, data)
     local f = io.open(file, "w")
     if not f then
-        vim.notify("Unable to open " .. file .. " for write")
         return
     end
-    f:write(vim.fn.json_encode(data))
+
+    local ok, json = pcall(vim.json.encode, data)
+    if ok then
+        f:write(json)
+    end
+
     io.close(f)
+
+    -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
+    -- local fd = vim.uv.fs_open(file, "w", -1)
+    -- if fd == nil then
+    --     return
+    -- end
+    --
+    -- local ok, json = pcall(vim.json.encode, data)
+    -- if ok then
+    --     vim.uv.fs_write(fd, json, -1)
+    -- end
+    --
+    -- vim.uv.fs_close(fd)
 end
 
 function M.json_load(file)
-    if vim.fn.filereadable(file) ~= 0 then
-        local f = io.open(file, "r")
-        if f then
-            local content = f:read("*a")
-            io.close(f)
-            return vim.fn.json_decode(content)
-        end
+    if vim.fn.filereadable(file) == 0 then
+        return {}
     end
-    return {}
+
+    local f = io.open(file, "r")
+    if not f then
+        return {}
+    end
+
+    local json = f:read("*a")
+    io.close(f)
+
+    -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
+    -- local fd = vim.uv.fs_open(file, "r", 438)
+    -- if fd == nil then
+    --     return {}
+    -- end
+    --
+    -- local stat = vim.uv.fs_fstat(fd)
+    -- local json = vim.uv.fs_read(fd, stat.size, 0)
+    -- vim.uv.fs_close(fd)
+
+    local ok, data = pcall(vim.json.decode, json)
+    if not ok then
+        return {}
+    end
+
+    return data
 end
 
 function M.move(key, set_jumps)

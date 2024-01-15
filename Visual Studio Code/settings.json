@@ -32,8 +32,8 @@
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
     "code-runner.executorMap": {
-        "c": "cd $dirWithoutTrailingSlash && gcc $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
-        "cpp": "cd $dirWithoutTrailingSlash && g++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
+        "c": "cd $dirWithoutTrailingSlash && gcc -static-libgcc $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
+        "cpp": "cd $dirWithoutTrailingSlash && g++ -static-libstdc++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
         "java": "cd $dirWithoutTrailingSlash && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
         "rust": "cargo run # $fileName",
         "shellscript": "cd $dirWithoutTrailingSlash && bash $fileName"
@@ -381,7 +381,7 @@
         "backspace",
         "delete"
     ],
-    "vscode-neovim.neovimExecutablePaths.win32": "D:\\Tools\\Neovim\\bin\\nvim.exe",
+    "vscode-neovim.neovimExecutablePaths.win32": "C:\\Program Files\\Neovim\\bin\\nvim.exe",
     "window.density.editorTabHeight": "compact",
     "window.dialogStyle": "custom",
     "window.menuBarVisibility": "compact",
@@ -401,6 +401,7 @@
         "titleBar.inactiveBackground": "#282c34"
     },
     "workbench.colorTheme": "One Dark Pro Flat",
+    "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
         "*.drawio": "hediet.vscode-drawio-text",

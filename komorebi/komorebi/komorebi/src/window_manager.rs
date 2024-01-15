@@ -1340,7 +1340,7 @@ impl WindowManager {
                     .ok_or_else(|| anyhow!("there is no monitor at this index"))?
                     .id();
 
-                if !WindowsApi::monitors_have_same_scale_factor(a, b)? {
+                if !WindowsApi::monitors_have_same_dpi(a, b)? {
                     self.update_focused_workspace(self.mouse_follows_focus)?;
                 }
             }
@@ -2216,6 +2216,14 @@ impl WindowManager {
             .ok_or_else(|| anyhow!("there is no workspace"))
     }
 
+    pub fn focused_workspace_idx_for_monitor_idx(&self, idx: usize) -> Result<usize> {
+        Ok(self
+            .monitors()
+            .get(idx)
+            .ok_or_else(|| anyhow!("there is no monitor at this index"))?
+            .focused_workspace_idx())
+    }
+
     pub fn focused_workspace_for_monitor_idx(&self, idx: usize) -> Result<&Workspace> {
         self.monitors()
             .get(idx)
@@ -2242,9 +2250,10 @@ impl WindowManager {
             .ok_or_else(|| anyhow!("there is no workspace"))?;
 
         monitor.focus_workspace(idx)?;
-        monitor.load_focused_workspace(mouse_follows_focus)?;
+        // NOTE: 保证目标 workspace 为空时，也能将鼠标移动到 monitor 中心
+        monitor.load_focused_workspace(false)?;
 
-        self.update_focused_workspace(false)
+        self.update_focused_workspace(mouse_follows_focus)
     }
 
     #[tracing::instrument(skip(self))]

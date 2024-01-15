@@ -12,29 +12,28 @@ M.lsp = function(lspconfig, default_config)
             -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
             lspconfig.bashls.setup(vim.tbl_deep_extend("keep", {}, default_config))
         end,
-        -- jedi 速度明显快于 pyright
-        -- jedi_language_server = function()
-        --     local python_path = path.python_path
-        --     if not utils.is_available("venv-selector.nvim") then
-        --         local python_envs_path = path.get_python_envs_path()
-        --         if python_envs_path then
-        --             python_path = python_envs_path
-        --             vim.notify(("Activated:\n%s"):format(python_envs_path), vim.log.levels.INFO, { title = "jedi-language-server" })
-        --         end
-        --     end
-        --
-        --     lspconfig.jedi_language_server.setup(vim.tbl_deep_extend("keep", {
-        --         root_dir = lspconfig.util.root_pattern("*"),
-        --         init_options = {
-        --             diagnostics = {
-        --                 enable = true,
-        --             },
-        --             workspace = {
-        --                 environmentPath = python_path,
-        --             },
-        --         },
-        --     }, default_config))
-        -- end,
+        clangd = function()
+            local fallbackFlags = {}
+            if environment.is_windows then
+                -- NOTE: 需要安装 msys2 中的 mingw-w64-ucrt-x86_64-gcc 或 mingw-w64-x86_64-gcc
+                -- msys64/ucrt64/bin 或 msys64/mingw/bin 需要添加到环境变量的用户变量和系统变量的 Path 的顶部
+                -- 同时需要检查是否有其他的环境变量路径是否含有 libstdc++-6.dll，若有则可能需要去除
+                -- 否则 gcc 编译出的程序可能无法执行
+                -- https://stackoverflow.com/questions/76495365/simple-hello-world-program-giving-segmentation-fault-in-vs-code
+                fallbackFlags[#fallbackFlags + 1] = "--target=x86_64-w64-mingw32"
+            end
+
+            lspconfig.clangd.setup(vim.tbl_deep_extend("keep", {
+                cmd = {
+                    "clangd",
+                    -- https://github.com/jose-elias-alvarez/null-ls.nvim/issues/428
+                    "--offset-encoding=utf-16",
+                },
+                init_options = {
+                    fallbackFlags = fallbackFlags,
+                },
+            }, default_config))
+        end,
         jsonls = function()
             lspconfig.jsonls.setup(vim.tbl_deep_extend("keep", {}, default_config))
         end,
@@ -118,10 +117,10 @@ M.lsp = function(lspconfig, default_config)
                 },
             }, default_config))
         end,
-        -- 由 rust-tools 设置
-        -- rust_analyzer = function()
-        --     lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("keep", {}, default_config))
-        -- end,
+        rust_analyzer = function()
+            -- 由 rustaceanvim 设置
+            -- lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("keep", {}, default_config))
+        end,
         texlab = function()
             local executable = "sioyek"
             local args = {
@@ -169,6 +168,7 @@ end
 M.lsp_list = vim.tbl_keys(M.lsp())
 
 M.lsp_filetype_list = {
+    "cpp",
     "json",
     "lua",
     "markdown",

@@ -10,34 +10,31 @@ vim.api.nvim_create_autocmd("Filetype", {
     callback = function()
         utils.event("TreesitterFile")
         if not environment.is_vscode then
-            utils.refresh_current_buf(3000, true)
+            utils.refresh_current_buf(1000, true)
         end
     end,
-    desc = "Treesitter file",
+    desc = "Treesitter file event",
     group = vim.api.nvim_create_augroup("TreesitterFile", { clear = true }),
     once = true,
     pattern = treesitter.treesitter_filetype_list,
 })
 if not environment.is_vscode then
     vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
-        callback = function(args)
-            local current_file = vim.fn.resolve(vim.fn.expand("%"))
-            if not (current_file == "" or vim.api.nvim_get_option_value("buftype", { buf = args.buf }) == "nofile") then
-                if utils.cmd({ "git", "-C", vim.fn.fnamemodify(current_file, ":p:h"), "rev-parse" }, false) then
-                    utils.event("GitFile")
-                    vim.api.nvim_del_augroup_by_name("GitFile")
-                end
+        callback = function()
+            if utils.is_git() then
+                utils.event("GitFile")
+                vim.api.nvim_del_augroup_by_name("GitFile")
             end
         end,
-        desc = "Git file",
+        desc = "Git file event",
         group = vim.api.nvim_create_augroup("GitFile", { clear = true }),
     })
     vim.api.nvim_create_autocmd("Filetype", {
         callback = function()
             utils.event("LspFile")
-            utils.refresh_current_buf(3000, true)
+            utils.refresh_current_buf(1000, true)
         end,
-        desc = "Lsp file",
+        desc = "Lsp file event",
         group = vim.api.nvim_create_augroup("LspFile", { clear = true }),
         once = true,
         pattern = lsp.lsp_filetype_list,
@@ -69,10 +66,43 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
 })
 
 if not environment.is_vscode then
+    -- edgy.nvim 自动激活
+    if utils.is_available("edgy.nvim") then
+        local edgy_activate = vim.api.nvim_create_augroup("EdgyActivate", { clear = true })
+        vim.api.nvim_create_autocmd("BufAdd", {
+            callback = function(args)
+                vim.schedule(function()
+                    if vim.api.nvim_buf_is_valid(args.buf) then
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                        if filetype.is_in_toggle_filetype_list(ft) then
+                            require("edgy")
+                            pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
+                        end
+                    end
+                end)
+            end,
+            desc = "Activate edgy",
+            group = edgy_activate,
+        })
+        if utils.is_available("toggleterm.nvim") and filetype.is_in_toggle_filetype_list("toggleterm") then
+            vim.api.nvim_create_autocmd("TermOpen", {
+                callback = function()
+                    require("edgy")
+                    pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
+                end,
+                desc = "Activate edgy",
+                group = edgy_activate,
+            })
+        end
+    end
+
     -- lsp 文件切换部分设置
     vim.api.nvim_create_autocmd("FileType", {
-        callback = function()
-            vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
+        callback = function(args)
+            local session_file = vim.b[args.buf].session_file or false
+            if not session_file then
+                vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
+            end
         end,
         desc = "Change settings for lsp file",
         group = vim.api.nvim_create_augroup("LspSetting", { clear = true }),
@@ -80,9 +110,12 @@ if not environment.is_vscode then
     })
     -- 文本文件切换部分设置
     vim.api.nvim_create_autocmd("FileType", {
-        callback = function()
-            vim.api.nvim_set_option_value("spell", true, { scope = "local" })
-            vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
+        callback = function(args)
+            local session_file = vim.b[args.buf].session_file or false
+            if not session_file then
+                vim.api.nvim_set_option_value("spell", true, { scope = "local" })
+                vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
+            end
         end,
         desc = "Change settings for text file",
         group = vim.api.nvim_create_augroup("TextSetting", { clear = true }),

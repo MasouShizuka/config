@@ -7,11 +7,11 @@
 
 ## 配置文件
 
-| 文件     | 路径                   | 说明     |
-| -------- | ---------------------- | -------- |
-| lua      | `$APPDATA/Local/nvim/` | 配置文件 |
-| init.lua | `$APPDATA/Local/nvim/` | 配置文件 |
+| 文件     | 路径                  | 说明         |
+| -------- | --------------------- | ------------ |
+| lua      | `$LOCALAPPDATA/nvim/` | 配置文件     |
+| init.lua | `$LOCALAPPDATA/nvim/` | 配置入口文件 |
 
 ## 注意
 
-本配置文件可兼容 `neovim` 与 `VSCode-Neovim`
+本配置文件可兼容 `neovim` 与 `VSCode Neovim`

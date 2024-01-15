@@ -35,6 +35,9 @@ pub struct Monitor {
     work_area_offset: Option<Rect>,
     workspaces: Ring<Workspace>,
     #[serde(skip_serializing)]
+    #[getset(get_copy = "pub", set = "pub")]
+    last_focused_workspace: Option<usize>,
+    #[serde(skip_serializing)]
     #[getset(get_mut = "pub")]
     workspace_names: HashMap<usize, String>,
 }
@@ -54,6 +57,7 @@ pub fn new(id: isize, size: Rect, work_area_size: Rect, name: String) -> Monitor
         work_area_size,
         work_area_offset: None,
         workspaces,
+        last_focused_workspace: None,
         workspace_names: HashMap::default(),
     }
 }
@@ -61,7 +65,7 @@ pub fn new(id: isize, size: Rect, work_area_size: Rect, name: String) -> Monitor
 impl Monitor {
     pub fn load_focused_workspace(&mut self, mouse_follows_focus: bool) -> Result<()> {
         // NOTE: 令 focused_workspace 最后 restore
-        //       保证从 monocle workspace 切换时隐藏 monocle window
+        // 保证从 monocle workspace 切换时隐藏 monocle window
         let focused_idx = self.focused_workspace_idx();
         for (i, workspace) in self.workspaces_mut().iter_mut().enumerate() {
             if i != focused_idx {

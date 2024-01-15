@@ -10,7 +10,8 @@ return {
 
             -- 新行保持缩进
             vim.keymap.set("i", "<cr>", function()
-                return require("ultimate-autopair.core").run("<cr>") .. require("ultimate-autopair.core").run("x<bs>")
+                local core = require("ultimate-autopair.core")
+                return core.run(vim.api.nvim_replace_termcodes("<cr>", true, true, true)) .. core.run(vim.api.nvim_replace_termcodes("x<bs>", true, true, true))
             end, { desc = "Enter", expr = true, replace_keycodes = false })
         end,
         enabled = not environment.is_vscode,
@@ -40,7 +41,7 @@ return {
             "nvim-treesitter/nvim-treesitter",
         },
         keys = {
-            { "<leader>gcd", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
+            { "<leader>gca", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
         },
         opts = {},
     },
@@ -50,9 +51,56 @@ return {
         config = function(_, opts)
             require("mini.ai").setup(opts)
         end,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
+        keys = {
+            { "a(",  mode = { "x", "o" } },
+            { "i(",  mode = { "x", "o" } },
+            { "a[",  mode = { "x", "o" } },
+            { "i[",  mode = { "x", "o" } },
+            { "a{",  mode = { "x", "o" } },
+            { "i{",  mode = { "x", "o" } },
+            { "a<",  mode = { "x", "o" } },
+            { "i<",  mode = { "x", "o" } },
+            { "a)",  mode = { "x", "o" } },
+            { "i)",  mode = { "x", "o" } },
+            { "a]",  mode = { "x", "o" } },
+            { "i]",  mode = { "x", "o" } },
+            { "a}",  mode = { "x", "o" } },
+            { "i}",  mode = { "x", "o" } },
+            { "a>",  mode = { "x", "o" } },
+            { "i>",  mode = { "x", "o" } },
+            { "ab",  mode = { "x", "o" } },
+            { "ib",  mode = { "x", "o" } },
+            { "a\"", mode = { "x", "o" } },
+            { "i\"", mode = { "x", "o" } },
+            { "a'",  mode = { "x", "o" } },
+            { "i'",  mode = { "x", "o" } },
+            { "a`",  mode = { "x", "o" } },
+            { "i`",  mode = { "x", "o" } },
+            { "aq",  mode = { "x", "o" } },
+            { "iq",  mode = { "x", "o" } },
+            { "a?",  mode = { "x", "o" } },
+            { "i?",  mode = { "x", "o" } },
+            { "at",  mode = { "x", "o" } },
+            { "it",  mode = { "x", "o" } },
+            -- nvim-treesitter-textobjects
+            -- { "af",  mode = { "x", "o" } },
+            -- { "if",  mode = { "x", "o" } },
+            -- { "aa",  mode = { "x", "o" } },
+            -- { "ia",  mode = { "x", "o" } },
+            { "a_",  mode = { "x", "o" } },
+            { "i_",  mode = { "x", "o" } },
+            { "a ",  mode = { "x", "o" } },
+            { "i ",  mode = { "x", "o" } },
+            { "a,",  mode = { "x", "o" } },
+            { "i,",  mode = { "x", "o" } },
+            { "a.",  mode = { "x", "o" } },
+            { "i.",  mode = { "x", "o" } },
+            { "ae",  mode = { "x", "o" } },
+            { "ie",  mode = { "x", "o" } },
+            { "ar",  mode = { "x", "o" } },
+            { "ir",  mode = { "x", "o" } },
+            { "av",  mode = { "x", "o" } },
+            { "iv",  mode = { "x", "o" } },
         },
         opts = {
             custom_textobjects = {
@@ -290,32 +338,75 @@ return {
             "CBrlbox",
             "CBrcbox",
             "CBrrbox",
-            "CBalbox",
-            "CBacbox",
-            "CBarbox",
+            "CBlabox",
+            "CBcabox",
+            "CBrabox",
+            "CBllline",
+            "CBlcline",
+            "CBlrline",
+            "CBclline",
+            "CBccline",
+            "CBcrline",
+            "CBrlline",
+            "CBrcline",
+            "CBrrline",
             "CBline",
             "CBcline",
             "CBrline",
+            "CBd",
+            "CBy",
             "CBcatalog",
         },
+        init = function()
+            local is_which_key_available, which_key = pcall(require, "which-key")
+            if is_which_key_available then
+                which_key.register({
+                    mode = { "n", "x" },
+                    ["<leader>gcb"] = {
+                        name = "+boxes",
+                    },
+                    ["<leader>gct"] = {
+                        name = "+titled lines",
+                    },
+                    ["<leader>gcl"] = {
+                        name = "+lines",
+                    },
+                })
+            end
+        end,
         keys = {
-            { "<leader>gcll", function() require("comment-box").llbox() end, desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
-            { "<leader>gclc", function() require("comment-box").lcbox() end, desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
-            { "<leader>gclr", function() require("comment-box").lrbox() end, desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
-            { "<leader>gccl", function() require("comment-box").clbox() end, desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
-            { "<leader>gccc", function() require("comment-box").crbox() end, desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
-            { "<leader>gccr", function() require("comment-box").ccbox() end, desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
-            { "<leader>gcrl", function() require("comment-box").rlbox() end, desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
-            { "<leader>gcrc", function() require("comment-box").rcbox() end, desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
-            { "<leader>gcrr", function() require("comment-box").rrbox() end, desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
-            { "<leader>gcal", function() require("comment-box").albox() end, desc = "Left aligned adapted box",                                mode = { "n", "x" } },
-            { "<leader>gcac", function() require("comment-box").acbox() end, desc = "Centered adapted box",                                    mode = { "n", "x" } },
-            { "<leader>gcar", function() require("comment-box").arbox() end, desc = "Right aligned adapted box",                               mode = { "n", "x" } },
-            { "<leader>gbl",  function() require("comment-box").line() end,  desc = "Left aligned line",                                       mode = { "n", "x" } },
-            { "<leader>gbc",  function() require("comment-box").cline() end, desc = "Centered line",                                           mode = { "n", "x" } },
-            { "<leader>gbr",  function() require("comment-box").rline() end, desc = "Right aligned line",                                      mode = { "n", "x" } },
+            { "<leader>gcbll", function() require("comment-box").llbox() end,  desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
+            { "<leader>gcblc", function() require("comment-box").lcbox() end,  desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
+            { "<leader>gcblr", function() require("comment-box").lrbox() end,  desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
+            { "<leader>gcbcl", function() require("comment-box").clbox() end,  desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
+            { "<leader>gcbcc", function() require("comment-box").ccbox() end,  desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
+            { "<leader>gcbcr", function() require("comment-box").crbox() end,  desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
+            { "<leader>gcbrl", function() require("comment-box").rlbox() end,  desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
+            { "<leader>gcbrc", function() require("comment-box").rcbox() end,  desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
+            { "<leader>gcbrr", function() require("comment-box").rrbox() end,  desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
+            { "<leader>gcbla", function() require("comment-box").labox() end,  desc = "Left aligned adapted box",                                mode = { "n", "x" } },
+            { "<leader>gcbca", function() require("comment-box").cabox() end,  desc = "Centered adapted box",                                    mode = { "n", "x" } },
+            { "<leader>gcbra", function() require("comment-box").rabox() end,  desc = "Right aligned adapted box",                               mode = { "n", "x" } },
+            { "<leader>gctll", function() require("comment-box").llline() end, desc = "Left aligned titled line with Left aligned text",         mode = { "n", "x" } },
+            { "<leader>gctlc", function() require("comment-box").lcline() end, desc = "Left aligned titled line with Centered text",             mode = { "n", "x" } },
+            { "<leader>gctlr", function() require("comment-box").lrline() end, desc = "Left aligned titled line with Right aligned text",        mode = { "n", "x" } },
+            { "<leader>gctcl", function() require("comment-box").clline() end, desc = "Centered titled line with Left aligned text",             mode = { "n", "x" } },
+            { "<leader>gctcc", function() require("comment-box").ccline() end, desc = "Centered titled line with Centered text",                 mode = { "n", "x" } },
+            { "<leader>gctcr", function() require("comment-box").crline() end, desc = "Centered titled line with Right aligned text",            mode = { "n", "x" } },
+            { "<leader>gctrl", function() require("comment-box").rlline() end, desc = "Right aligned titled line with Left aligned text",        mode = { "n", "x" } },
+            { "<leader>gctrc", function() require("comment-box").rcline() end, desc = "Right aligned titled line with Centered text",            mode = { "n", "x" } },
+            { "<leader>gctrr", function() require("comment-box").rrline() end, desc = "Right aligned titled line with Right aligned text",       mode = { "n", "x" } },
+            { "<leader>gcd",   function() require("comment-box").dbox() end,   desc = "Remove a box or titled line, keeping its content",        mode = { "n", "x" } },
+            { "<leader>gcy",   function() require("comment-box").yank() end,   desc = "Yank the content of a box or titled line",                mode = { "n", "x" } },
+            { "<leader>gcll",  function() require("comment-box").line() end,   desc = "Left aligned line",                                       mode = { "n", "x" } },
+            { "<leader>gclc",  function() require("comment-box").cline() end,  desc = "Centered line",                                           mode = { "n", "x" } },
+            { "<leader>gclr",  function() require("comment-box").rline() end,  desc = "Right aligned line",                                      mode = { "n", "x" } },
         },
-        opts = {},
+        opts = {
+            doc_width = 80,
+            box_width = 60,
+            line_width = 58,
+        },
     },
 
     {
@@ -484,6 +575,7 @@ return {
                         last_paste_end = vim.fn.getpos("']")
                     end
                 end,
+                desc = "AutoSaveWritePre event",
                 group = group,
                 pattern = "AutoSaveWritePre",
             })
@@ -496,6 +588,7 @@ return {
                     end
                 end,
                 group = group,
+                desc = "AutoSaveWritePost event",
                 pattern = "AutoSaveWritePost",
             })
         end,
@@ -518,7 +611,7 @@ return {
                         vim.api.nvim_del_augroup_by_name("AutoSave")
                     end
                 end,
-                desc = "Auto save buffer",
+                desc = "AutoSave event",
                 group = vim.api.nvim_create_augroup("AutoSave", { clear = true }),
             })
         end,

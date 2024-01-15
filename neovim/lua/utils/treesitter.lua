@@ -4,6 +4,8 @@ M.treesitter = {
     "bash",
     "bibtex",
     "c",
+    "cpp",
+    "html",
     "latex",
     "lua",
     "markdown",
@@ -18,7 +20,9 @@ M.treesitter = {
 M.treesitter_filetype_list = {
     "bib",
     "c",
+    "cpp",
     "help",
+    "html",
     "lua",
     "markdown",
     "python",

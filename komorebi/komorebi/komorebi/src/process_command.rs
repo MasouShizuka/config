@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::BufRead;
@@ -168,6 +169,23 @@ impl WindowManager {
                     BORDER_HIDDEN.store(true, Ordering::SeqCst);
                 }
             }
+            _ => {}
+        };
+
+        match message {
+            SocketMessage::CycleFocusWorkspace(_) | SocketMessage::FocusWorkspaceNumber(_) => {
+                if let Some(monitor) = self.focused_monitor_mut() {
+                    let idx = monitor.focused_workspace_idx();
+                    monitor.set_last_focused_workspace(Option::from(idx));
+                }
+            }
+            SocketMessage::FocusMonitorWorkspaceNumber(target_monitor_idx, _) => {
+                let idx = self.focused_workspace_idx_for_monitor_idx(target_monitor_idx)?;
+                if let Some(monitor) = self.monitors_mut().get_mut(target_monitor_idx) {
+                    monitor.set_last_focused_workspace(Option::from(idx));
+                }
+            }
+
             _ => {}
         };
 
@@ -604,6 +622,33 @@ impl WindowManager {
                     self.show_border()?;
                 };
             }
+            SocketMessage::FocusLastWorkspace => {
+                // This is to ensure that even on an empty workspace on a secondary monitor, the
+                // secondary monitor where the cursor is focused will be used as the target for
+                // the workspace switch op
+                if let Some(monitor_idx) = self.monitor_idx_from_current_pos() {
+                    self.focus_monitor(monitor_idx)?;
+                }
+
+                let idx = self
+                    .focused_monitor()
+                    .ok_or_else(|| anyhow!("there is no monitor"))?
+                    .focused_workspace_idx();
+
+                if let Some(monitor) = self.focused_monitor_mut() {
+                    if let Some(last_focused_workspace) = monitor.last_focused_workspace() {
+                        self.focus_workspace(last_focused_workspace)?;
+                    }
+                }
+
+                self.focused_monitor_mut()
+                    .ok_or_else(|| anyhow!("there is no monitor"))?
+                    .set_last_focused_workspace(Option::from(idx));
+
+                if BORDER_ENABLED.load(Ordering::SeqCst) {
+                    self.show_border()?;
+                };
+            }
             SocketMessage::FocusWorkspaceNumber(workspace_idx) => {
                 // This is to ensure that even on an empty workspace on a secondary monitor, the
                 // secondary monitor where the cursor is focused will be used as the target for
@@ -708,6 +753,32 @@ impl WindowManager {
                 let mut stream = UnixStream::connect(socket)?;
                 stream.write_all(state.as_bytes())?;
             }
+            SocketMessage::VisibleWindows => {
+                let mut monitor_visible_windows = HashMap::new();
+
+                for (index, monitor) in self.monitors().iter().enumerate() {
+                    if let Some(ws) = monitor.focused_workspace() {
+                        monitor_visible_windows.insert(
+                            monitor
+                                .device_id()
+                                .clone()
+                                .unwrap_or_else(|| format!("{index}")),
+                            ws.visible_window_details().clone(),
+                        );
+                    }
+                }
+
+                let visible_windows_state =
+                    match serde_json::to_string_pretty(&monitor_visible_windows) {
+                        Ok(state) => state,
+                        Err(error) => error.to_string(),
+                    };
+
+                let socket = DATA_DIR.join("komorebic.sock");
+                let mut stream = UnixStream::connect(socket)?;
+                stream.write_all(visible_windows_state.as_bytes())?;
+            }
+
             SocketMessage::Query(query) => {
                 let response = match query {
                     StateQuery::FocusedMonitorIndex => self.focused_monitor_idx(),
@@ -1310,12 +1381,31 @@ impl WindowManager {
             | SocketMessage::InvisibleBorders(_)
             | SocketMessage::WorkAreaOffset(_)
             | SocketMessage::CycleMoveWindow(_)
-            | SocketMessage::MoveWindow(_) => {
+            | SocketMessage::MoveWindow(_)
+            | SocketMessage::CycleFocusMonitor(_)
+            | SocketMessage::CycleFocusWorkspace(_)
+            | SocketMessage::FocusMonitorNumber(_)
+            | SocketMessage::FocusMonitorWorkspaceNumber(_, _)
+            | SocketMessage::FocusWorkspaceNumber(_) => {
                 let foreground = WindowsApi::foreground_window()?;
                 let foreground_window = Window { hwnd: foreground };
                 let mut rect = WindowsApi::window_rect(foreground_window.hwnd())?;
                 rect.top -= self.invisible_borders.bottom;
                 rect.bottom += self.invisible_borders.bottom;
+
+                let monocle = BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst);
+                if monocle != 0 && self.focused_workspace()?.monocle_container().is_some() {
+                    BORDER_COLOUR_CURRENT.store(
+                        monocle,
+                        Ordering::SeqCst,
+                    );
+                }
+
+                let stack = BORDER_COLOUR_STACK.load(Ordering::SeqCst);
+                if stack != 0 && self.focused_container()?.windows().len() > 1 {
+                    BORDER_COLOUR_CURRENT
+                        .store(stack, Ordering::SeqCst);
+                }
 
                 let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
                 // NOTE: 更新 border

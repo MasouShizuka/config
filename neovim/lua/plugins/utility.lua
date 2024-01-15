@@ -9,8 +9,8 @@ return {
         "Aasim-A/scrollEOF.nvim",
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "CursorMoved",
+            "WinScrolled",
         },
         opts = {
             -- The pattern used for the internal autocmd to determine
@@ -19,7 +19,7 @@ return {
             -- Whether or not scrollEOF should be enabled in insert mode
             insert_mode = false,
             -- List of filetypes to disable scrollEOF for.
-            disabled_filetypes = {},
+            disabled_filetypes = filetype.skip_filetype_list,
             -- List of modes to disable scrollEOF for. see https://neovim.io/doc/user/builtin.html#mode() for available modes.
             disabled_modes = {},
         },
@@ -158,7 +158,7 @@ return {
                         })
                     end
                 end,
-                desc = "Big file",
+                desc = "Big file event",
                 group = vim.api.nvim_create_augroup("BigFile", { clear = true }),
             })
 
@@ -247,7 +247,7 @@ return {
                         end,
                     })
                 end,
-                desc = "Long file",
+                desc = "Long file event",
                 group = vim.api.nvim_create_augroup("LongFile", { clear = true }),
             })
         end,

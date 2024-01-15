@@ -83,8 +83,8 @@ global workspace_key_value := { 1: [0, " "]
                               , 2: [1, " "]
                               , 3: [2, " "]
                               , 4: [3, " "]
-                              , 5: [4, " "]
-                              , 6: [5, " "]
+                              , 5: [4, " "]
+                              , 6: [5, " "]
                               , 7: [6, " "] }
 global workspace_num := workspace_key_value.Length()
 
@@ -148,7 +148,8 @@ RunWait, komorebic.exe workspace-rule exe "QQ.exe" %main_monitor% 2, , Hide
 RunWait, komorebic.exe workspace-rule exe "WeChat.exe" %main_monitor% 2, , Hide
 RunWait, komorebic.exe workspace-rule exe "cloudmusic.exe" %main_monitor% 3, , Hide
 RunWait, komorebic.exe workspace-rule exe "foobar2000.exe" %main_monitor% 3, , Hide
-RunWait, komorebic.exe workspace-rule exe "Thunder.exe" %main_monitor% 5, , Hide
+RunWait, komorebic.exe workspace-rule exe "Thunder.exe" %main_monitor% 4, , Hide
+RunWait, komorebic.exe workspace-rule exe "nekoray.exe" %main_monitor% 5, , Hide
 
 
 

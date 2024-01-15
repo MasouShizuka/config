@@ -628,7 +628,13 @@
     // 在新窗口打开当前文件
     {
         "key": "ctrl+t",
-        "command": "workbench.action.moveEditorToNewWindow",
+        "command": "extension.multiCommand.execute",
+        "args": {
+            "sequence": [
+                "workbench.action.files.showOpenedFileInNewWindow",
+                "workbench.action.closeActiveEditor"
+            ]
+        },
         "when": "emptyWorkspaceSupport"
     },
 

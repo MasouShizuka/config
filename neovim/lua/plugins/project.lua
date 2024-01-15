@@ -1,6 +1,7 @@
 local environment = require("utils.environment")
 
 return {
+    -- NOTE: 需要安装 ripgrep 和 sed
     {
         "nvim-pack/nvim-spectre",
         dependencies = {

@@ -17,6 +17,8 @@ vim.opt.rtp:prepend(lazypath)
 if vim.g.mapleader == nil then
     vim.g.mapleader = " "
 end
+vim.keymap.set( "n", "<leader>z", function() require("lazy").home() end, { desc = "Lazy", silent = true })
+
 return require("lazy").setup("plugins", {
     lockfile = path.data_path .. "/lazy/lazy-lock.json",
     install = {

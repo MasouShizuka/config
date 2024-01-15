@@ -65,7 +65,7 @@ fi
 # wsl 使用 windows 的 neovim 配置
 if (( is_wsl )); then
     if [[ ! -d "$HOME/.config/nvim" ]]; then
-        ln -s "/mnt/c/Users/MasouShizuka/AppData/Local/nvim" $HOME/.config/nvim
+        ln -s "/mnt/c/Users/MasouShizuka/AppData/Local/nvim" "$HOME/.config/nvim"
     fi
 fi
 
@@ -154,12 +154,17 @@ zstyle ":completion:*" rehash true
 # ╰───────╯
 
 if (( is_wsl )); then
-    export STARSHIP_CONFIG=/mnt/c/Users/MasouShizuka/.config/starship/starship.toml
+    export STARSHIP_CONFIG="/mnt/c/Users/MasouShizuka/.config/starship/starship.toml"
 else
-    export STARSHIP_CONFIG=$HOME/.config/starship/starship.toml
+    export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 fi
 
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
+# 替换 starship 路径两边的 ' 为 "，使得路径中允许存在 space
+# 即：'/c/Program Files/starship/bin/starship.exe' -> "/c/Program Files/starship/bin/starship.exe"
+starship_init="$(starship init zsh)"
+starship_init=$(echo "$starship_init" | sed "s#'\(/.*\)starship.exe'#\"\1starship.exe\"#g")
+eval "$starship_init"
 
 
 
@@ -246,7 +251,7 @@ elif (( is_linux )); then
 
     if (( is_wsl )); then
         if [[ ! -f "$HOME/.condarc" ]]; then
-            ln -s "/mnt/c/Users/MasouShizuka/.condarc" $HOME/.condarc
+            ln -s "/mnt/c/Users/MasouShizuka/.condarc" "$HOME/.condarc"
         fi
     fi
 fi

@@ -272,32 +272,45 @@ else
 
     -- 运行
     vim.keymap.set("n", "<leader>r", function()
-        local curr_file_path = vim.fn.expand("%:~:.")
+        local curr_file = vim.fn.expand("%:~:.")
+        local curr_file_without_ext = vim.fn.expand("%:.:r")
         if environment.is_windows then
-            curr_file_path = curr_file_path:gsub("\\", "/")
+            curr_file = curr_file:gsub("\\", "/")
         end
 
         local ft = vim.bo.filetype
         if utils.is_available("toggleterm.nvim") then
-            if ft == "lua" then
-                vim.api.nvim_command(([[TermExec cmd='lua "%s"']]):format(curr_file_path))
+            -- TermExec 执行时需要修改 shellslash = true，否则会输出 v:null
+            local shellslash = vim.opt.shellslash:get()
+            vim.opt.shellslash = true
+
+            if ft == "cpp" then
+                -- 若在使用 vector 等库时编译的程序无法运行，可能在编译时需要添加 -static-libstdc++
+                -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
+                vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s"']], curr_file, curr_file_without_ext, curr_file_without_ext))
+            elseif ft == "lua" then
+                vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
             elseif ft == "markdown" then
                 if utils.is_available("markdown-preview.nvim") then
                     vim.api.nvim_command("MarkdownPreviewToggle")
                 end
             elseif ft == "python" then
-                vim.api.nvim_command(([[TermExec cmd='python -u "%s"']]):format(curr_file_path))
+                vim.api.nvim_command(string.format([[TermExec cmd='python -u "%s"']], curr_file))
             elseif ft == "rust" then
                 vim.api.nvim_command([[TermExec cmd='cargo run']])
             elseif ft == "sh" then
-                vim.api.nvim_command(([[TermExec cmd='bash "%s"']]):format(curr_file_path))
+                vim.api.nvim_command(string.format([[TermExec cmd='bash "%s"']], curr_file))
             elseif ft == "tex" then
                 if vim.tbl_contains(lsp.lsp_list, "texlab") then
                     vim.api.nvim_command("TexlabBuild")
                 end
             end
+
+            vim.opt.shellslash = shellslash
         else
-            if ft == "lua" then
+            if ft == "cpp" then
+                vim.api.nvim_command(([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s"]]):format(curr_file, curr_file_without_ext, curr_file_without_ext))
+            elseif ft == "lua" then
                 vim.api.nvim_command("luafile %")
             elseif ft == "markdown" then
                 if utils.is_available("markdown-preview.nvim") then

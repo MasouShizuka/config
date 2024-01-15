@@ -3,6 +3,7 @@ local path = require("utils.path")
 local utils = require("utils")
 
 return {
+    -- NOTE: 需要安装 fd
     {
         "linux-cultist/venv-selector.nvim",
         cmd = {
@@ -21,7 +22,7 @@ return {
                     if vim.bo[args.buf].filetype == "python" then
                         utils.defer(function()
                             require("venv-selector").retrieve_from_cache()
-                        end, 5000, false)
+                        end, 2000, false)
                         vim.api.nvim_del_augroup_by_name("Venv")
                     end
                 end,
