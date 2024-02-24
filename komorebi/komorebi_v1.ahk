@@ -4,28 +4,37 @@
 #Persistent
 OnExit("komorebic_stop")
 
+EnvGet, localappdata, LOCALAPPDATA
+
+ProcessCloseAll(PIDOrName) {
+    Loop {
+        Process, Close, % PIDOrName
+        Process, Exist, % PIDOrName  ; 在一些情况下提高稳定性.
+    } Until not ErrorLevel
+}
+
 komorebic_stop() {
+    ProcessCloseAll("yasb.exe")
+
     RunWait, komorebic.exe stop, , Hide
 
-    RunWait, rm ~/komorebic.sock, , Hide
-    RunWait, rm -rf ~/AppData/Local/komorebi, , Hide
-
-    Return
+    FileRemoveDir, %localappdata%  "/komorebi", 1
 }
 
 
 
-;##################
-;# Start komorebi #
-;##################
+; ╭────────────────╮
+; │ Start komorebi │
+; ╰────────────────╯
 
+FileCreateDir, %localappdata%  "/komorebi"
 RunWait, komorebic.exe start --await-configuration, , Hide
 
 
 
-;###########
-;# Setting #
-;###########
+; ╭─────────╮
+; │ Setting │
+; ╰─────────╯
 
 ; Configure the invisible border dimensions
 RunWait, komorebic.exe invisible-borders 7 0 14 7, , Hide
@@ -52,9 +61,9 @@ RunWait, komorebic.exe mouse-follows-focus enable, , Hide
 
 
 
-;###########
-;# Monitor #
-;###########
+; ╭─────────╮
+; │ Monitor │
+; ╰─────────╯
 
 SysGet, monitor_count, MonitorCount
 global main_monitor := monitor_count - 1
@@ -75,9 +84,9 @@ For key, value in monitor_key_value {
 
 
 
-;#############
-;# Workspace #
-;#############
+; ╭───────────╮
+; │ Workspace │
+; ╰───────────╯
 
 global workspace_key_value := { 1: [0, " "]
                               , 2: [1, " "]
@@ -153,9 +162,9 @@ RunWait, komorebic.exe workspace-rule exe "nekoray.exe" %main_monitor% 5, , Hide
 
 
 
-;#######
-;# APP #
-;#######
+; ╭─────╮
+; │ APP │
+; ╰─────╯
 
 ; Always float, matching on class
 ; RunWait, komorebic.exe float-rule class SunAwtDialog, , Hide
@@ -214,21 +223,23 @@ RunWait, komorebic.exe identify-layered-application exe "WINWORD.EXE", , Hide
 
 
 
-;##################
-;# Start komorebi #
-;##################
+; ╭────────────────╮
+; │ Start komorebi │
+; ╰────────────────╯
 
 ; Allow komorebi to start managing windows
 RunWait, komorebic.exe complete-configuration, , Hide
 
 ; Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+
+ProcessCloseAll("yasb.exe")
 Run, %A_ScriptDir%/yasb.exe, , Hide
 
 
 
-;###########
-;# Keybind #
-;###########
+; ╭─────────╮
+; │ Keybind │
+; ╰─────────╯
 
 !q::
     ; WinClose, A
@@ -501,5 +512,6 @@ Return
 
 !+b::
     ; Run, pythonw %A_ScriptDir%/yasb/src/main.py, , Hide
+    ProcessCloseAll("yasb.exe")
     Run, %A_ScriptDir%/yasb.exe, , Hide
 Return

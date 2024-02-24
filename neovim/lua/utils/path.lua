@@ -38,6 +38,7 @@ M.python_path = M.conda_path .. "/bin/python"
 if environment.is_windows then
     M.python_path = M.conda_path .. "/python.exe"
 end
+
 M.get_python_envs_path = function()
     local python_envs_path = nil
 

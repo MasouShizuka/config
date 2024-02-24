@@ -147,8 +147,8 @@ else
     end
 
     -- 折行时小步上下移动
-    vim.keymap.set("i", "<down>", "<c-o>gj", { desc = "Down", silent = true })
-    vim.keymap.set("i", "<up>", "<c-o>gk", { desc = "Up", silent = true })
+    vim.keymap.set("i", "<down>", function() vim.cmd("normal! gj") end, { desc = "Down", silent = true })
+    vim.keymap.set("i", "<up>", function() vim.cmd("normal! gk") end, { desc = "Up", silent = true })
 
     -- 终端
     vim.keymap.set("t", "<esc>", [[<c-\><c-n>]], { desc = "Enter normal mode", silent = true })
@@ -236,8 +236,8 @@ else
     vim.keymap.set("n", "<c-down>", function() vim.cmd.wincmd("-") end, { desc = "Decrease window height", silent = true })
 
     -- tab
-    vim.keymap.set("n", "<c-h>", function() vim.cmd.tabprevious() end, { desc = "Cycle next tab", silent = true })
-    vim.keymap.set("n", "<c-l>", function() vim.cmd.tabnext() end, { desc = "Cycle previous tab", silent = true })
+    vim.keymap.set("n", "<c-h>", function() vim.cmd.tabprevious() end, { desc = "Cycle previous tab", silent = true })
+    vim.keymap.set("n", "<c-l>", function() vim.cmd.tabnext() end, { desc = "Cycle next tab", silent = true })
     vim.keymap.set("n", keymap["<c-,>"], function() vim.cmd.tabmove("-") end, { desc = "Move tab left", silent = true })
     vim.keymap.set("n", keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
     vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
@@ -285,9 +285,12 @@ else
             vim.opt.shellslash = true
 
             if ft == "cpp" then
-                -- 若在使用 vector 等库时编译的程序无法运行，可能在编译时需要添加 -static-libstdc++
+                -- 若在使用 vector 等库时编译的程序无法运行，可能需要在编译时添加 -static-libstdc++
                 -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
-                vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s"']], curr_file, curr_file_without_ext, curr_file_without_ext))
+                if environment.is_windows then
+                    curr_file_without_ext = curr_file_without_ext .. ".exe"
+                end
+                vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"']], curr_file, curr_file_without_ext, curr_file_without_ext, curr_file_without_ext))
             elseif ft == "lua" then
                 vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
             elseif ft == "markdown" then
@@ -309,7 +312,10 @@ else
             vim.opt.shellslash = shellslash
         else
             if ft == "cpp" then
-                vim.api.nvim_command(([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s"]]):format(curr_file, curr_file_without_ext, curr_file_without_ext))
+                if environment.is_windows then
+                    curr_file_without_ext = curr_file_without_ext .. ".exe"
+                end
+                vim.api.nvim_command(([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]]):format(curr_file, curr_file_without_ext, curr_file_without_ext, curr_file_without_ext))
             elseif ft == "lua" then
                 vim.api.nvim_command("luafile %")
             elseif ft == "markdown" then

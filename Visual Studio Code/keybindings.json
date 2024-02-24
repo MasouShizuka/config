@@ -95,22 +95,22 @@
     {
         "key": "ctrl+w -",
         "command": "-workbench.action.decreaseViewHeight",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.decreaseViewWidth",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.increaseViewHeight",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.increaseViewWidth",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
     },
 
     // 增加 Neovim 的接收键位

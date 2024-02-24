@@ -64,9 +64,7 @@ class TrafficWidget(BaseWidget):
     def _update_label(self):
         # Update the active label at each timer interval
         active_label = self._label_alt if self._show_alt_label else self._label
-        active_label_content = (
-            self._label_alt_content if self._show_alt_label else self._label_content
-        )
+        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
         active_label_formatted = active_label_content
 
         try:

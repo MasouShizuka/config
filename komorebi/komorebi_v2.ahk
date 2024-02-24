@@ -4,27 +4,30 @@
 Persistent
 OnExit((*) => komorebic_stop())
 
+localappdata := EnvGet("LOCALAPPDATA")
+
 komorebic_stop() {
     While (ProcessExist("yasb.exe")) {
         ProcessClose("yasb.exe")
     }
+
     RunWait("komorebic.exe stop", , "Hide")
 
-    RunWait("rm ~/komorebic.sock", , "Hide")
-    RunWait("rm -rf ~/AppData/Local/komorebi", , "Hide")
+    DirDelete(localappdata . "/komorebi", true)
 }
 
 
-;##################
-;# Start komorebi #
-;##################
+; ╭────────────────╮
+; │ Start komorebi │
+; ╰────────────────╯
 
+DirCreate(localappdata . "/komorebi")
 RunWait("komorebic.exe start --await-configuration", , "Hide")
 
 
-;###########
-;# Setting #
-;###########
+; ╭─────────╮
+; │ Setting │
+; ╰─────────╯
 
 RunWait("komorebic.exe invisible-borders 7 0 14 7", , "Hide")
 
@@ -44,9 +47,9 @@ RunWait("komorebic.exe focus-follows-mouse disable --implementation windows", , 
 RunWait("komorebic.exe mouse-follows-focus enable", , "Hide")
 
 
-;###########
-;# Monitor #
-;###########
+; ╭─────────╮
+; │ Monitor │
+; ╰─────────╯
 
 monitor_count := SysGet(80)
 global main_monitor := monitor_count - 1
@@ -68,9 +71,9 @@ For key, value in monitor_key_value {
 }
 
 
-;#############
-;# Workspace #
-;#############
+; ╭───────────╮
+; │ Workspace │
+; ╰───────────╯
 
 global workspace_key_value := Map(
     "1", [0, " "],
@@ -119,9 +122,9 @@ RunWait(Format("komorebic.exe workspace-rule exe `"Thunder.exe`" {} 4", main_mon
 RunWait(Format("komorebic.exe workspace-rule exe `"nekoray.exe`" {} 5", main_monitor), , "Hide")
 
 
-;#######
-;# APP #
-;#######
+; ╭─────╮
+; │ APP │
+; ╰─────╯
 
 RunWait("komorebic.exe float-rule class `"ExplorerBrowserControl`"", , "Hide")
 RunWait("komorebic.exe float-rule class `"jsplitter_panel_container`"", , "Hide")
@@ -163,9 +166,9 @@ RunWait("komorebic.exe identify-layered-application exe `"POWERPNT.EXE`"", , "Hi
 RunWait("komorebic.exe identify-layered-application exe `"WINWORD.EXE`"", , "Hide")
 
 
-;##################
-;# Start komorebi #
-;##################
+; ╭────────────────╮
+; │ Start komorebi │
+; ╰────────────────╯
 
 RunWait("komorebic.exe complete-configuration", , "Hide")
 
@@ -175,9 +178,9 @@ While (ProcessExist("yasb.exe")) {
 Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
 
 
-;###########
-;# Keybind #
-;###########
+; ╭─────────╮
+; │ Keybind │
+; ╰─────────╯
 
 !q:: {
     ; WinClose, A

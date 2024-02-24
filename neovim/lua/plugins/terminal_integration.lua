@@ -14,6 +14,7 @@ return {
         },
         enabled = not environment.is_vscode,
         opts = {
+            -- size can be a number or function which is passed the current terminal
             size = function(term)
                 if term.direction == "horizontal" then
                     return math.floor((vim.o.lines - vim.o.cmdheight) * 0.3)
@@ -23,6 +24,7 @@ return {
             end,
             persist_size = false,
             direction = "horizontal",
+            -- This field is only relevant if direction is set to 'float'
             float_opts = {
                 border = "curved",
                 height = function()

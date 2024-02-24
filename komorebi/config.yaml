@@ -573,7 +573,7 @@ widgets:
     type: "komorebi.multi_window.MultiWindowWidget"
     options:
       label: "{win[title]}"
-      label_alt: "[class={win[class]} exe={win[exe]} hwnd={win[hwnd]}]"
+      label_alt: "class={win[class]} exe={win[exe]} hwnd={win[hwnd]} pid={win[pid]}"
       show_icon: true
       min_update_interval: 200
       update_title:

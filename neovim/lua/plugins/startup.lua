@@ -1,4 +1,5 @@
 local environment = require("utils.environment")
+local icons = require("utils.icons")
 
 return {
     -- {
@@ -8,13 +9,13 @@ return {
     --     },
     --     config = function(_, opts)
     --         require("alpha").setup(opts.config)
-
+    --
     --         -- 显示 plugins 加载时间
     --         vim.api.nvim_create_autocmd("User", {
     --             callback = function()
     --                 local stats = require("lazy").stats()
     --                 local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
-    --                 opts.section.footer.val = { ("󱐋 Neovim loaded %s plugins   in %s ms 󱐋"):format(stats.count, ms) }
+    --                 opts.section.footer.val = { string.format("%s Neovim loaded %s plugins %s in %s ms %s", icons.misc.bolt, stats.count, icons.misc.plug, ms, icons.misc.bolt) }
     --                 opts.section.footer.opts.hl = "DashboardFooter"
     --                 pcall(vim.cmd.AlphaRedraw)
     --             end,
@@ -60,7 +61,7 @@ return {
     --     end,
     --     opts = function()
     --         local dashboard = require("alpha.themes.dashboard")
-
+    --
     --         dashboard.section.header.val = {
     --             " ███╗   ██╗ ███████╗ ██████╗  ██╗   ██╗ ██╗ ███╗   ███╗ ",
     --             " ████╗  ██║ ██╔════╝██╔═══██╗ ██║   ██║ ██║ ████╗ ████║ ",
@@ -69,22 +70,23 @@ return {
     --             " ██║ ╚████║ ███████╗╚██████╔╝  ╚████╔╝  ██║ ██║ ╚═╝ ██║ ",
     --             " ╚═╝  ╚═══╝ ╚══════╝ ╚═════╝    ╚═══╝   ╚═╝ ╚═╝     ╚═╝ ",
     --         }
-
+    --
     --         -- local config_session = path.config_path:gsub("/", vim.g.path_replacer):gsub(":", vim.g.colon_replacer)
     --         dashboard.section.buttons.val = {
-    --             dashboard.button("n", "  New File", ":ene <bar> startinsert<cr>"),
-    --             dashboard.button("f", "  Find File", ":Telescope find_files<cr>"),
-    --             dashboard.button("c", "  Config", [[:execute "cd " . fnamemodify($MYVIMRC, ":p:h")<cr>:SessionManager load_current_dir_session<cr>]]),
-    --             dashboard.button("s", "  Load Session", ":SessionManager load_session<cr>"),
-    --             dashboard.button("S", "  Load Last Session", ":SessionManager load_last_session<cr>"),
+    --             dashboard.button("n", icons.misc.new_file .. " New File", ":ene <bar> startinsert<cr>"),
+    --             dashboard.button("f", icons.misc.search .. " Find File", ":Telescope find_files<cr>"),
+    --             dashboard.button("f", icons.misc.search .. " Find Text", ":Telescope live_grep<cr>"),
+    --             dashboard.button("c", icons.misc.gear .. " Config", [[:execute "cd " . fnamemodify($MYVIMRC, ":p:h")<cr>:SessionManager load_current_dir_session<cr>]]),
+    --             dashboard.button("s", icons.misc.list_unordered .. " Load Session", ":SessionManager load_session<cr>"),
+    --             dashboard.button("S", icons.misc.refresh .. " Load Last Session", ":SessionManager load_last_session<cr>"),
     --             -- 启用 resession 时取消注释
-    --             -- dashboard.button("c", "  Config", [[:execute "cd " . fnamemodify($MYVIMRC, ":p:h")<cr>:lua require("resession").load("]] .. config_session .. [[")<cr>]]),
-    --             -- dashboard.button("s", "  Load Session", [[:lua require("resession").load()<cr>]]),
-    --             -- dashboard.button("S", "  Load Last Session", [[:lua require("resession").load("last")<cr>]]),
-    --             dashboard.button("l", "  Lazy", ":Lazy<cr>"),
-    --             dashboard.button("q", "  Quit", ":qa<cr>"),
+    --             -- dashboard.button("c", icons.misc.gear .. " Config", [[:execute "cd " . fnamemodify($MYVIMRC, ":p:h")<cr>:lua require("resession").load("]] .. config_session .. [[")<cr>]]),
+    --             -- dashboard.button("s", icons.misc.list_unordered .. " Load Session", [[:lua require("resession").load()<cr>]]),
+    --             -- dashboard.button("S", icons.misc.refresh .. " Load Last Session", [[:lua require("resession").load("last")<cr>]]),
+    --             dashboard.button("l", icons.misc.extensions" Lazy", ":Lazy<cr>"),
+    --             dashboard.button("q", icons.misc.close" Quit", ":qa<cr>"),
     --         }
-
+    --
     --         return dashboard
     --     end,
     -- },
@@ -149,7 +151,7 @@ return {
                     header = logo,
                     center = {
                         {
-                            icon = "  ",
+                            icon = icons.misc.new_file .. " ",
                             desc = "New File",
                             key = "n",
                             action = function()
@@ -157,10 +159,10 @@ return {
                                 vim.cmd.startinsert()
                             end,
                         },
-                        { icon = "  ", desc = "Find File", key = "f", action = function() vim.api.nvim_command("Telescope find_files") end },
-                        { icon = "  ", desc = "Find Text", key = "/", action = function() vim.api.nvim_command("Telescope live_grep") end },
+                        { icon = icons.misc.search .. " ", desc = "Find File", key = "f", action = function() vim.api.nvim_command("Telescope find_files") end },
+                        { icon = icons.misc.search .. " ", desc = "Find Text", key = "/", action = function() vim.api.nvim_command("Telescope live_grep") end },
                         {
-                            icon = "  ",
+                            icon = icons.misc.gear .. " ",
                             desc = "Config",
                             key = "c",
                             action = function()
@@ -168,15 +170,15 @@ return {
                                 vim.api.nvim_command("SessionManager load_current_dir_session")
                             end,
                         },
-                        { icon = "  ", desc = "Load Session", key = "s", action = function() vim.api.nvim_command("SessionManager load_session") end },
-                        { icon = "  ", desc = "Load Last Session", key = "S", action = function() vim.api.nvim_command("SessionManager load_last_session") end },
-                        { icon = "  ", desc = "Lazy", key = "l", action = function() require("lazy").home() end },
-                        { icon = "  ", desc = "Quit", key = "q", action = function() vim.cmd.quitall() end },
+                        { icon = icons.misc.list_unordered .. " ", desc = "Load Session",      key = "s", action = function() vim.api.nvim_command("SessionManager load_session") end },
+                        { icon = icons.misc.refresh .. " ",        desc = "Load Last Session", key = "S", action = function() vim.api.nvim_command("SessionManager load_last_session") end },
+                        { icon = icons.misc.extensions .. " ",     desc = "Lazy",              key = "l", action = function() require("lazy").home() end },
+                        { icon = icons.misc.close .. " ",          desc = "Quit",              key = "q", action = function() vim.cmd.quitall() end },
                     },
                     footer = function()
                         local stats = require("lazy").stats()
                         local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-                        return { string.format("󱐋 Neovim loaded %s plugins   in %s ms 󱐋", stats.count, ms) }
+                        return { string.format("%s Neovim loaded %s plugins %s in %s ms %s", icons.misc.bolt, stats.count, icons.misc.plug, ms, icons.misc.bolt) }
                     end,
                 },
                 hide = {

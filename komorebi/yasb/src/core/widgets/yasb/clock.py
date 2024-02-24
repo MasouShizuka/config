@@ -69,14 +69,10 @@ class ClockWidget(BaseWidget):
 
     def _update_label(self):
         active_label = self._label_alt if self._show_alt_label else self._label
-        active_label_content = (
-            self._label_alt_content if self._show_alt_label else self._label_content
-        )
+        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
 
         try:
-            datetime_now = pytz.utc.localize(datetime.utcnow()).astimezone(
-                pytz.timezone(self._active_tz)
-            )
+            datetime_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone(self._active_tz))
             active_label_content = datetime_now.strftime(active_label_content)
             active_label_content = active_label_content.replace(
                 "{icon}", self._status_icons[f"icon_{datetime_now.hour % 12}"]

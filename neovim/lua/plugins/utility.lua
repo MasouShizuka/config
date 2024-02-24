@@ -9,19 +9,34 @@ return {
         "Aasim-A/scrollEOF.nvim",
         enabled = not environment.is_vscode,
         event = {
-            "CursorMoved",
-            "WinScrolled",
+            "BufNewFile",
+            "BufReadPost",
         },
         opts = {
-            -- The pattern used for the internal autocmd to determine
-            -- where to run scrollEOF. See https://neovim.io/doc/user/autocmd.html#autocmd-pattern
-            pattern = "*",
-            -- Whether or not scrollEOF should be enabled in insert mode
-            insert_mode = false,
             -- List of filetypes to disable scrollEOF for.
             disabled_filetypes = filetype.skip_filetype_list,
-            -- List of modes to disable scrollEOF for. see https://neovim.io/doc/user/builtin.html#mode() for available modes.
-            disabled_modes = {},
+        },
+    },
+
+    {
+        "delphinus/cellwidths.nvim",
+        cmd = {
+            "CellWidthsAdd",
+            "CellWidthsDelete",
+            "CellWidthsLoad",
+            "CellWidthsRemove",
+        },
+        enabled = not environment.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        opts = {
+            name = "default",
+            -- name = "empty",          -- 空の設定です。
+            -- name = "default",        -- vim-ambiwidth のデフォルトです。
+            -- name = "cica",           -- vim-ambiwidth の Cica 用設定です。
+            -- name = "sfmono_square",  -- SF Mono Square 用設定です。
         },
     },
 
@@ -254,8 +269,8 @@ return {
         opts = function()
             return {
                 -- 禁用 filesize 检查，只通过 pattern 判断
-                filesize = math.huge,
-                pattern = function(bufnr, filesize_mib)
+                filesize = math.huge,                   -- size of the file in MiB, the plugin round file sizes to the closest MiB
+                pattern = function(bufnr, filesize_mib) -- autocmd pattern or function see <### Overriding the detection of big files>
                     local bt = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
                     if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                         return false
@@ -273,7 +288,7 @@ return {
 
                     return false
                 end,
-                features = vim.g.bigfile_features,
+                features = vim.g.bigfile_features, -- features to disable
             }
         end,
     },

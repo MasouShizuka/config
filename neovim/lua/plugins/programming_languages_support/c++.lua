@@ -15,16 +15,11 @@ return {
             "MunifTanjim/nui.nvim",
             "nvim-lua/plenary.nvim",
             "nvim-telescope/telescope.nvim",
-
-            -- 可选
-            "nvim-tree/nvim-web-devicons",
-            "nvim-treesitter/nvim-treesitter",
-            "rcarriga/nvim-notify",
         },
         enabled = not environment.is_vscode,
         lazy = "leetcode" ~= vim.fn.argv()[1],
         opts = function()
-            local directory = path.data_path .. "/lazy/leetcode.nvim/leetcode"
+            local directory = path.data_path .. "/leetcode"
             if vim.fn.isdirectory(directory) == 0 then
                 vim.fn.mkdir(directory)
             end
@@ -38,12 +33,16 @@ return {
                 cn = {
                     enabled = true,
                 },
-                directory = directory,
+                storage = {
+                    home = directory,
+                    cache = directory,
+                },
                 logging = false,
                 injector = {
                     ["cpp"] = {
                         before = {
                             "#include <algorithm>",
+                            "#include <cmath>",
                             "#include <deque>",
                             "#include <iostream>",
                             "#include <map>",
@@ -63,8 +62,8 @@ return {
                     confirm = { "<cr>" },
                     reset_testcases = "r",
                     use_testcase = "U",
-                    focus_testcases = "H",
-                    focus_result = "L",
+                    focus_testcases = "<c-k>",
+                    focus_result = "<c-j>",
                 },
             }
         end,

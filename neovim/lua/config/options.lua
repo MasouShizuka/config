@@ -8,9 +8,6 @@ vim.opt.listchars:append({
     tab = ">~",
     trail = "·",
 })                                                                                                      -- characters for displaying in list mode
-if not environment.is_vscode then
-    utils.fix_cellwidths()
-end
 
 -- Clipboard
 vim.opt.clipboard = "unnamedplus"                                                                       -- use the clipboard as the unnamed register

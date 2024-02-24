@@ -104,21 +104,16 @@ M.is_toggle_filetype = function(filetype, toggle_filetype_list)
             end
         end
     else
-        for toggle_filetype, close_function in pairs(M.toggle_filetype_list_of_left) do
-            if filetype == toggle_filetype then
-                return true, close_function
-            end
-        end
-
-        for toggle_filetype, close_function in pairs(M.toggle_filetype_list_of_bottom) do
-            if filetype == toggle_filetype then
-                return true, close_function
-            end
-        end
-
-        for toggle_filetype, close_function in pairs(M.toggle_filetype_list_of_right) do
-            if filetype == toggle_filetype then
-                return true, close_function
+        local toggle_filetype_lists = {
+            M.toggle_filetype_list_of_left,
+            M.toggle_filetype_list_of_bottom,
+            M.toggle_filetype_list_of_right,
+        }
+        for _, toggle_filetype_list in ipairs(toggle_filetype_lists) do
+            for toggle_filetype, close_function in pairs(toggle_filetype_list) do
+                if filetype == toggle_filetype then
+                    return true, close_function
+                end
             end
         end
     end

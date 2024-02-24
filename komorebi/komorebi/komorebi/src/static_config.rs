@@ -6,7 +6,6 @@ use crate::window_manager::WindowManager;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::workspace::Workspace;
-use crate::ALT_FOCUS_HACK;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_COLOUR_MONOCLE;
 use crate::BORDER_COLOUR_SINGLE;
@@ -231,6 +230,7 @@ impl From<&Monitor> for MonitorConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+/// The `komorebi.json` static configuration file reference for `v0.1.20`
 pub struct StaticConfig {
     /// Dimensions of Windows' own invisible borders; don't set these yourself unless you are told to
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -256,12 +256,6 @@ pub struct StaticConfig {
     /// Path to applications.yaml from komorebi-application-specific-configurations (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub app_specific_configuration_path: Option<PathBuf>,
-    /// DEPRECATED from v0.1.19: use active_window_border_width instead
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub border_width: Option<i32>,
-    /// DEPRECATED from v0.1.19: use active_window_border_offset instead
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub border_offset: Option<Rect>,
     /// Width of the active window border (default: 20)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_window_border_width: Option<i32>,
@@ -283,8 +277,9 @@ pub struct StaticConfig {
     /// Monitor and workspace configurations
     #[serde(skip_serializing_if = "Option::is_none")]
     pub monitors: Option<Vec<MonitorConfig>>,
-    /// Always send the ALT key when using focus commands (default: false)
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// DEPRECATED from v0.1.20: no longer required
+    #[schemars(skip)]
+    #[serde(skip_serializing)]
     pub alt_focus_hack: Option<bool>,
     /// Which Windows signal to use when hiding windows (default: minimize)
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -415,8 +410,6 @@ impl From<&WindowManager> for StaticConfig {
             active_window_border_offset: BORDER_OFFSET
                 .lock()
                 .map_or(None, |offset| Option::from(offset.left)),
-            border_width: None,
-            border_offset: None,
             active_window_border: Option::from(BORDER_ENABLED.load(Ordering::SeqCst)),
             active_window_border_colours: border_colours,
             default_workspace_padding: Option::from(
@@ -426,7 +419,7 @@ impl From<&WindowManager> for StaticConfig {
                 DEFAULT_CONTAINER_PADDING.load(Ordering::SeqCst),
             ),
             monitors: Option::from(monitors),
-            alt_focus_hack: Option::from(ALT_FOCUS_HACK.load(Ordering::SeqCst)),
+            alt_focus_hack: None,
             window_hiding_behaviour: Option::from(*HIDING_BEHAVIOUR.lock()),
             global_work_area_offset: value.work_area_offset,
             float_rules: None,
@@ -457,10 +450,6 @@ impl StaticConfig {
         if let Some(behaviour) = self.window_hiding_behaviour {
             let mut window_hiding_behaviour = HIDING_BEHAVIOUR.lock();
             *window_hiding_behaviour = behaviour;
-        }
-
-        if let Some(hack) = self.alt_focus_hack {
-            ALT_FOCUS_HACK.store(hack, Ordering::SeqCst);
         }
 
         if let Some(container) = self.default_container_padding {
@@ -759,7 +748,7 @@ impl StaticConfig {
     #[allow(clippy::too_many_lines)]
     pub fn preload(
         path: &PathBuf,
-        incoming: Arc<Mutex<Receiver<WindowManagerEvent>>>,
+        incoming: Receiver<WindowManagerEvent>,
     ) -> Result<WindowManager> {
         let content = std::fs::read_to_string(path)?;
         let mut value: Self = serde_json::from_str(&content)?;

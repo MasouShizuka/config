@@ -6,7 +6,6 @@ return {
     initial_rows = 30,
 
     animation_fps = 60,
-    max_fps = 60,
 
     color_scheme = "Windows 10 (base16)",
 
@@ -14,7 +13,6 @@ return {
     font = wezterm.font("Sarasa Mono SC Nerd Font"),
     font_size = 16.0,
 
-    front_end = "WebGpu",
     webgpu_power_preference = "HighPerformance",
 
     hide_tab_bar_if_only_one_tab = true,

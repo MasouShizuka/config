@@ -2,42 +2,6 @@ local environment = require("utils.environment")
 local keymap = require("utils.keymap")
 
 return {
-    -- {
-    --     "dfendr/clipboard-image.nvim",
-    --     cmd = {
-    --         "PasteImg",
-    --     },
-    --     enabled = not environment.is_vscode,
-    --     keys = {
-    --         { "<leader>p", function() vim.api.nvim_command("PasteImg") end, desc = "Paste image", mode = "n" },
-    --     },
-    --     opts = {
-    --         default = {
-    --             -- img_dir = function()
-    --             --     return vim.fn.expand("%:.:h") .. "/_images_" .. vim.fn.expand("%:t:r")
-    --             -- end,
-    --             img_dir = "img",
-    --             -- img_dir_txt = function()
-    --             --     return "_images_" .. vim.fn.expand("%:t:r")
-    --             -- end,
-    --             img_dir_txt = function ()
-
-    --             end,
-    --             img_name = function()
-    --                 return os.date("%Y-%m-%d-%H-%M-%S")
-    --             end,
-    --             img_handler = function(img) end,
-    --             affix = "%s",
-    --         },
-    --         asciidoc = {
-    --             affix = "image::%s[]",
-    --         },
-    --         markdown = {
-    --             affix = "![](%s)",
-    --         },
-    --     },
-    -- },
-
     {
         "HakonHarnes/img-clip.nvim",
         cmd = {
@@ -48,7 +12,7 @@ return {
         },
         opts = {
             default = {
-                dir_path = function()
+                dir_path = function() -- directory path to save images to, can be relative (cwd or current file) or absolute
                     return "_images_" .. vim.fn.expand("%:t:r")
                 end,
                 file_name = "%Y-%m-%d-%H-%M-%S", -- file name format (see lua.org/pil/22.1.html)

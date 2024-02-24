@@ -156,8 +156,10 @@ pub enum SocketMessage {
     ToggleMouseFollowsFocus,
     RemoveTitleBar(ApplicationIdentifier, String),
     ToggleTitleBars,
-    AddSubscriber(String),
-    RemoveSubscriber(String),
+    AddSubscriberSocket(String),
+    RemoveSubscriberSocket(String),
+    AddSubscriberPipe(String),
+    RemoveSubscriberPipe(String),
     ApplicationSpecificConfigurationSchema,
     NotificationSchema,
     SocketSchema,
@@ -316,6 +318,16 @@ pub fn resolve_home_path<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
                 let home = dirs::home_dir().ok_or_else(|| anyhow!("there is no home directory"))?;
 
                 resolved_path.extend(home.components());
+                resolved = true;
+            }
+
+            std::path::Component::Normal(c) if (c == "$Env:KOMOREBI_CONFIG_HOME") && !resolved => {
+                let komorebi_config_home =
+                    PathBuf::from(std::env::var("KOMOREBI_CONFIG_HOME").ok().ok_or_else(|| {
+                        anyhow!("there is no KOMOREBI_CONFIG_HOME environment variable set")
+                    })?);
+
+                resolved_path.extend(komorebi_config_home.components());
                 resolved = true;
             }
 

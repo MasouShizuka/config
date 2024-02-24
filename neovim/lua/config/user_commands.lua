@@ -31,7 +31,7 @@ local function toggle_keep_cursor_center()
     vim.b[buf].keep_center = keep_center
 
     if keep_center then
-        vim.cmd.normal("zz")
+        vim.cmd("normal! zz")
     end
 
     vim.notify(string.format("Keep Cursor Center: %s", utils.bool2str(keep_center)), vim.log.levels.INFO, { title = "Buffer" })

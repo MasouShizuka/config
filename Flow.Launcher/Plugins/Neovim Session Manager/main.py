@@ -14,15 +14,13 @@ class NeovimSessionManager(FlowLauncher):
 
         self.platforms = {
             "Windows": {
-                "session_dir": localappdata
-                + "/nvim-data/lazy/neovim-session-manager/sessions",
+                "session_dir": localappdata + "/nvim-data/lazy/neovim-session-manager/sessions",
                 "cmd": 'wezterm start --cwd "{}" -- nvim +',
                 # "cmd": "neovide --frame none -- +",
                 "icon": "💻",
             },
             "WSL": {
-                "session_dir": localappdata
-                + "/nvim-data/lazy/neovim-session-manager/sessions_wsl",
+                "session_dir": localappdata + "/nvim-data/lazy/neovim-session-manager/sessions_wsl",
                 "cmd": 'wezterm start -- wsl --cd "{}" -e nvim +',
                 # "cmd": "neovide --frame none --wsl -- +",
                 "icon": "🐧",

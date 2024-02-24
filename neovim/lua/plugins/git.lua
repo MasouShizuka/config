@@ -1,4 +1,5 @@
 local environment = require("utils.environment")
+local icons = require("utils.icons")
 local keymap = require("utils.keymap")
 
 return {
@@ -21,44 +22,26 @@ return {
         end,
         opts = {
             signs = {
-                add          = { text = "▎" },
-                change       = { text = "▎" },
-                delete       = { text = "" },
-                topdelete    = { text = "" },
-                changedelete = { text = "▎" },
-                untracked    = { text = "▎" },
+                add          = { text = icons.misc.left_half_block },
+                change       = { text = icons.misc.left_half_medium_shade },
+                delete       = { text = icons.misc.caret_right },
+                topdelete    = { text = icons.misc.caret_right },
+                changedelete = { text = icons.misc.left_half_medium_shade },
+                untracked    = { text = icons.misc.left_half_block },
             },
             signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
             numhl = true,      -- Toggle with `:Gitsigns toggle_numhl`
             linehl = false,    -- Toggle with `:Gitsigns toggle_linehl`
             word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
-            watch_gitdir = {
-                interval = 1000,
-                follow_files = true,
-            },
-            attach_to_untracked = true,
             current_line_blame = true,
             current_line_blame_opts = {
-                virt_text = true,
                 virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
                 delay = 100,
                 ignore_whitespace = false,
             },
-            current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
-            sign_priority = 6,
-            update_debounce = 100,
-            status_formatter = nil,  -- Use default
-            max_file_length = 40000, -- Disable if file is longer than this (in lines)
             preview_config = {
                 -- Options passed to nvim_open_win
                 border = "rounded",
-                style = "minimal",
-                relative = "cursor",
-                row = 0,
-                col = 1,
-            },
-            yadm = {
-                enable = false,
             },
             on_attach = function(bufnr)
                 local gs = package.loaded.gitsigns
@@ -139,7 +122,7 @@ return {
             { "<leader>vf", function() vim.api.nvim_command("DiffviewFileHistory") end, desc = "File history", mode = "n" },
             { "<leader>vq", function() vim.api.nvim_command("DiffviewClose") end,       desc = "Close",        mode = "n" },
             { "<leader>vt", function() vim.api.nvim_command("DiffviewToggleFiles") end, desc = "Toggle files", mode = "n" },
-            -- { "<leader>vf", function() vim.api.nvim_command("DiffviewFocusFiles") end,  desc = "Focus files",  mode = "n" },
+            { "<leader>vF", function() vim.api.nvim_command("DiffviewFocusFiles") end,  desc = "Focus files",  mode = "n" },
             { "<leader>vr", function() vim.api.nvim_command("DiffviewRefresh") end,     desc = "Refresh",      mode = "n" },
             { "<leader>vl", function() vim.api.nvim_command("DiffviewLog") end,         desc = "Log",          mode = "n" },
         },

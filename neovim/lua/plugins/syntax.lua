@@ -29,6 +29,8 @@ return {
             end
         end,
         opts = {
+            -- Add custom surroundings to be used on top of builtin ones. For more
+            -- information with examples, see `:h MiniSurround.config`.
             custom_surroundings = {
                 [","] = {
                     input = { "%<().-()%>" },
@@ -64,6 +66,8 @@ return {
                     output = { left = "[", right = "]" },
                 },
             },
+
+            -- Module mappings. Use `''` (empty string) to disable one.
             mappings = {
                 add = "sa",    -- Add surrounding in Normal and Visual modes
                 delete = "sd", -- Delete surrounding
@@ -78,10 +82,15 @@ return {
                 suffix_last = "p",     -- Suffix to search with "prev" method
                 suffix_next = "n",     -- Suffix to search with "next" method
             },
+
+            -- Number of lines within which surrounding is searched
             n_lines = math.huge,
+
+            -- Whether to respect selection type:
+            -- - Place surroundings on separate lines in linewise mode.
+            -- - Place surroundings on each line in blockwise mode.
             respect_selection_type = true,
         },
-        version = false,
     },
 
     -- NOTE: 需要安装 C 编译器，例如 msys2 中的 mingw-w64-ucrt-x86_64-gcc
@@ -126,6 +135,7 @@ return {
         end,
         opts = function()
             local opts = {
+                -- A list of parser names, or "all" (the five listed parsers should always be installed)
                 ensure_installed = treesitter.treesitter,
                 highlight = {
                     enable = not environment.is_vscode,
@@ -218,19 +228,7 @@ return {
             "User TreesitterFile",
         },
         opts = {
-            enable = true,         -- Enable this plugin (Can be enabled/disabled later via commands)
-            max_lines = 0,         -- How many lines the window should span. Values <= 0 mean no limit.
-            min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-            line_numbers = true,
-            -- multiline_threshold = 20, -- Maximum number of lines to show for a single context
             multiline_threshold = 1, -- Maximum number of lines to show for a single context
-            trim_scope = "outer",    -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-            mode = "cursor",         -- Line used to calculate context. Choices: 'cursor', 'topline'
-            -- Separator between context and content. Should be a single character string, like '-'.
-            -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-            separator = nil,
-            zindex = 20,     -- The Z-index of the context window
-            on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
         },
     },
 }

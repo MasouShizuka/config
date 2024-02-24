@@ -44,7 +44,7 @@ alias vim=nvim
 
 # wsl 调用 windows 的代理
 if (( is_wsl )); then
-    alias proxy="source ~/scripts/proxy.sh"
+    alias proxy="source $HOME/scripts/proxy.sh"
 fi
 
 
@@ -79,7 +79,7 @@ fi
 autoload -Uz compinit && compinit
 
 # 历史文件和大小
-HISTFILE=~/.zsh_history
+HISTFILE="$HOME/.zsh_history"
 HISTSIZE=10000
 SAVEHIST=10000
 
@@ -134,9 +134,9 @@ zshaddhistory() {
 # 退出后删除所有重复命令，并保留最后一条
 # zshexit() {
 #     if [[ -n ${LASTHIST//[[:space:]]/} ]] ; then
-#         tac "$HISTFILE" | awk '!a[$0]++' | tac > ~/tmpfile
-#         # tac "$HISTFILE" | awk -F ';' '!a[$2]++' | tac > ~/tmpfile
-#         mv ~/tmpfile "$HISTFILE"
+#         tac "$HISTFILE" | awk '!a[$0]++' | tac > "$HOME/tmpfile"
+#         # tac "$HISTFILE" | awk -F ';' '!a[$2]++' | tac > "$HOME/tmpfile"
+#         mv "$HOME/tmpfile" "$HISTFILE"
 #     fi
 # }
 

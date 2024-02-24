@@ -84,16 +84,10 @@ class ActiveLayoutWidget(BaseWidget):
         self.register_callback("next_layout", self._next_layout)
         self.register_callback("prev_layout", self._prev_layout)
         self.register_callback("flip_layout", self._komorebic.flip_layout)
-        self.register_callback(
-            "toggle_tiling", lambda: self._komorebic.toggle("tiling")
-        )
+        self.register_callback("toggle_tiling", lambda: self._komorebic.toggle("tiling"))
         self.register_callback("toggle_float", lambda: self._komorebic.toggle("float"))
-        self.register_callback(
-            "toggle_monocle", lambda: self._komorebic.toggle("monocle")
-        )
-        self.register_callback(
-            "toggle_maximise", lambda: self._komorebic.toggle("maximise")
-        )
+        self.register_callback("toggle_monocle", lambda: self._komorebic.toggle("monocle"))
+        self.register_callback("toggle_maximise", lambda: self._komorebic.toggle("maximise"))
         self.register_callback("toggle_pause", lambda: self._komorebic.toggle("pause"))
 
         self._register_signals_and_events()
@@ -136,12 +130,8 @@ class ActiveLayoutWidget(BaseWidget):
         self.k_signal_disconnect.connect(self._on_komorebi_disconnect_event)
         self.k_signal_layout_change.connect(self._on_komorebi_layout_change_event)
 
-        self._event_service.register_event(
-            KomorebiEvent.KomorebiConnect, self.k_signal_connect
-        )
-        self._event_service.register_event(
-            KomorebiEvent.KomorebiDisconnect, self.k_signal_disconnect
-        )
+        self._event_service.register_event(KomorebiEvent.KomorebiConnect, self.k_signal_connect)
+        self._event_service.register_event(KomorebiEvent.KomorebiDisconnect, self.k_signal_disconnect)
 
         for event_type in active_layout_change_event_watchlist:
             self._event_service.register_event(event_type, self.k_signal_layout_change)
@@ -159,9 +149,7 @@ class ActiveLayoutWidget(BaseWidget):
     def _update_active_layout(self, state: dict, is_connect_event=False):
         try:
             if self._update_komorebi_state(state):
-                self._focused_workspace = self._komorebic.get_focused_workspace(
-                    self._komorebi_screen
-                )
+                self._focused_workspace = self._komorebic.get_focused_workspace(self._komorebi_screen)
 
                 if not self._focused_workspace:
                     return
@@ -176,17 +164,13 @@ class ActiveLayoutWidget(BaseWidget):
                         self._layouts.rotate(1)
 
                 self._active_layout_text.setText(
-                    self._label.replace("{icon}", layout_icon).replace(
-                        "{layout_name}", layout_name
-                    )
+                    self._label.replace("{icon}", layout_icon).replace("{layout_name}", layout_name)
                 )
 
                 if self._active_layout_text.isHidden():
                     self._active_layout_text.show()
         except Exception:
-            logging.exception(
-                "Failed to update komorebi status and widget button state"
-            )
+            logging.exception("Failed to update komorebi status and widget button state")
 
     def _get_layout_label_info(self):
         if self._komorebi_state.get("is_paused", False):
@@ -203,9 +187,7 @@ class ActiveLayoutWidget(BaseWidget):
             layout_icon = self._layout_icons["monocle"]
         else:
             layout_name = self._focused_workspace["layout"]["Default"]
-            layout_icon = self._layout_icons.get(
-                layout_snake_case[layout_name], "unknown layout"
-            )
+            layout_icon = self._layout_icons.get(layout_snake_case[layout_name], "unknown layout")
 
         return layout_name, layout_icon
 
@@ -215,12 +197,8 @@ class ActiveLayoutWidget(BaseWidget):
             self._komorebi_state = komorebi_state
 
             if self._komorebi_state:
-                self._komorebi_screen = self._komorebic.get_screen_by_hwnd(
-                    self._komorebi_state, self._screen_hwnd
-                )
-                self._komorebi_workspaces = self._komorebic.get_workspaces(
-                    self._komorebi_screen
-                )
+                self._komorebi_screen = self._komorebic.get_screen_by_hwnd(self._komorebi_state, self._screen_hwnd)
+                self._komorebi_workspaces = self._komorebic.get_workspaces(self._komorebi_screen)
                 return True
         except TypeError:
             return False

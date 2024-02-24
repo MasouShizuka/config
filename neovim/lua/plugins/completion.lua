@@ -87,11 +87,12 @@ return {
                     end,
                 },
                 sources = cmp.config.sources({
+                    { name = "luasnip" },
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
-                    { name = "luasnip" },
                     { name = "buffer" },
-                    { name = "path" },
+                    { name = "async_path" },
+                    { name = "dotenv" },
                 }),
                 window = {
                     completion = cmp.config.window.bordered(),
@@ -124,33 +125,35 @@ return {
                             ignore_cmds = { "Man", "!" },
                         },
                     },
-                    { name = "path" },
+                    { name = "async_path" },
                 }),
             })
 
             cmp.setup.filetype(filetype.text_filetype, {
                 sources = cmp.config.sources({
+                    { name = "luasnip" },
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
-                    { name = "luasnip" },
                     {
                         name = "latex_symbols",
                         option = {
                             strategy = 2,
                         },
                     },
+                    { name = "spell" },
                     { name = "buffer" },
-                    { name = "path" },
+                    { name = "async_path" },
                 }),
             })
         end,
         dependencies = {
             "dmitmel/cmp-cmdline-history",
+            "f3fora/cmp-spell",
+            "FelipeLema/cmp-async-path",
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-nvim-lsp",
             "hrsh7th/cmp-nvim-lsp-signature-help",
-            "hrsh7th/cmp-path",
             "kdheepak/cmp-latex-symbols",
 
             {
@@ -171,6 +174,7 @@ return {
             },
 
             "saadparwaiz1/cmp_luasnip",
+            "SergioRibera/cmp-dotenv",
         },
         enabled = not environment.is_vscode,
         event = {

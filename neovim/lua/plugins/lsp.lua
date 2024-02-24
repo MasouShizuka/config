@@ -108,13 +108,6 @@ return {
             "TroubleRefresh",
             "TroubleToggle",
         },
-        config = function(_, opts)
-            -- if utils.is_available("edgy.nvim") then
-            --     require("edgy")
-            -- end
-
-            require("trouble").setup(opts)
-        end,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
@@ -190,7 +183,7 @@ return {
                 -- next = "j",                                       -- next item
                 -- help = "?",                                       -- help menu
             },
-            use_diagnostic_signs = true,
+            use_diagnostic_signs = true, -- enabling this will use the signs defined in your lsp client
         },
     },
 
@@ -231,9 +224,7 @@ return {
                 },
                 opts = function()
                     local handlers = {
-                        function()
-                            -- disables automatic setup of all null-ls sources
-                        end,
+                        function() end, -- disables automatic setup of all null-ls sources
                     }
                     for null_ls_builtin, setup in pairs(null_ls.null_ls_builtins(require("null-ls"))) do
                         handlers[null_ls_builtin] = setup
@@ -253,7 +244,9 @@ return {
         event = {
             "User LspFile",
         },
-        opts = {},
+        opts = {
+            border = "rounded",
+        },
     },
 
     {
@@ -268,13 +261,14 @@ return {
                 opts.border = opts.border or "rounded"
                 return orig_util_open_floating_preview(contents, syntax, opts, ...)
             end
+            require("lspconfig.ui.windows").default_options.border = "rounded"
 
             -- Customizing how diagnostics are displayed
             vim.diagnostic.config({
                 virtual_text = {
                     source = "if_many",
                     spacing = 4,
-                    prefix = "●",
+                    prefix = icons.dap.Breakpoint,
                 },
                 update_in_insert = true,
                 severity_sort = true,
@@ -441,9 +435,7 @@ return {
                         vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
                     end
 
-                    if utils.is_available("mason-lspconfig.nvim") then
-                        vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
-                    end
+                    vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
 
                     if utils.is_available("none-ls.nvim") then
                         vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = buf, desc = "Null-ls information", silent = true })
@@ -569,9 +561,7 @@ return {
 
                         -- 若 lsp 和 null-ls 都有 formatter，则优先使用 null-ls 的 formatter
                         local format = function()
-                            local buf = vim.api.nvim_get_current_buf()
-
-                            local formatters = get_formatters(buf)
+                            local formatters = get_formatters(args.buf)
                             local client_ids = vim.tbl_map(function(client)
                                 return client.id
                             end, formatters.active)
@@ -581,7 +571,7 @@ return {
                             end
 
                             vim.lsp.buf.format({
-                                bufnr = buf,
+                                bufnr = args.buf,
                                 filter = function(client)
                                     return vim.tbl_contains(client_ids, client.id)
                                 end,
@@ -649,36 +639,37 @@ return {
                         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { buffer = buf, desc = "Hover symbol details", silent = true })
                     end
 
-                    if client.supports_method("textDocument/inlayHint") then
-                        if vim.g.inlay_hints_enabled == nil then
-                            vim.g.inlay_hints_enabled = true
-                        end
+                    -- NOTE: 等 neovim 正式版到 0.10 再解除注释
+                    -- if client.supports_method("textDocument/inlayHint") then
+                    --     if vim.g.inlay_hints_enabled == nil then
+                    --         vim.g.inlay_hints_enabled = true
+                    --     end
 
-                        if vim.b[buf].inlay_hints_enabled ~= nil then
-                            if vim.b[buf].inlay_hints_enabled then
-                                vim.lsp.inlay_hint.enable(buf, true)
-                            end
-                        else
-                            if vim.g.inlay_hints_enabled then
-                                vim.lsp.inlay_hint.enable(buf, true)
-                            end
-                        end
+                    --     if vim.b[buf].inlay_hints_enabled ~= nil then
+                    --         if vim.b[buf].inlay_hints_enabled then
+                    --             vim.lsp.inlay_hint.enable(buf, true)
+                    --         end
+                    --     else
+                    --         if vim.g.inlay_hints_enabled then
+                    --             vim.lsp.inlay_hint.enable(buf, true)
+                    --         end
+                    --     end
 
-                        vim.keymap.set("n", "<leader>lti", function()
-                            toggle_global_setting("inlay_hints_enabled", function(global_enabled, prev_enabled, enabled)
-                                if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
-                                    vim.lsp.inlay_hint.enable(buf, enabled)
-                                end
-                            end)
-                        end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
-                        vim.keymap.set("n", "<leader>ltI", function()
-                            toggle_buffer_setting("inlay_hints_enabled", function(prev_enabled, enabled)
-                                if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
-                                    vim.lsp.inlay_hint.enable(buf, enabled)
-                                end
-                            end)
-                        end, { buffer = buf, desc = "Toggle LSP inlay hints (buffer)", silent = true })
-                    end
+                    --     vim.keymap.set("n", "<leader>lti", function()
+                    --         toggle_global_setting("inlay_hints_enabled", function(global_enabled, prev_enabled, enabled)
+                    --             if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
+                    --                 vim.lsp.inlay_hint.enable(buf, enabled)
+                    --             end
+                    --         end)
+                    --     end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
+                    --     vim.keymap.set("n", "<leader>ltI", function()
+                    --         toggle_buffer_setting("inlay_hints_enabled", function(prev_enabled, enabled)
+                    --             if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
+                    --                 vim.lsp.inlay_hint.enable(buf, enabled)
+                    --             end
+                    --         end)
+                    --     end, { buffer = buf, desc = "Toggle LSP inlay hints (buffer)", silent = true })
+                    -- end
 
                     if client.supports_method("textDocument/rename") then
                         vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = buf, desc = "Rename current symbol", silent = true })
@@ -767,8 +758,8 @@ return {
                         --     lspconfig[server_name].setup(default_config)
                         -- end,
                     }
-                    for lsp, setup in pairs(lsp.lsp(lspconfig, default_config)) do
-                        handlers[lsp] = setup
+                    for lsp_server, setup in pairs(lsp.lsp(lspconfig, default_config)) do
+                        handlers[lsp_server] = setup
                     end
 
                     return {
@@ -936,7 +927,10 @@ return {
             { "<leader>lm", function() vim.api.nvim_command("Mason") end, desc = "Mason information", mode = "n" },
         },
         opts = {
+            -- The directory in which to install packages.
             install_root_dir = path.mason_install_root_path,
+            -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
+            -- debugging issues with package installations.
             log_level = vim.log.levels.OFF,
             ui = {
                 border = "rounded",

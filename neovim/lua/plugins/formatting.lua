@@ -13,12 +13,12 @@ return {
             { "gA", desc = "Align with preview", mode = { "n", "x" } },
         },
         opts = {
+            -- Module mappings. Use `''` (empty string) to disable one.
             mappings = {
                 start = "ga",
                 start_with_preview = "gA",
             },
         },
-        version = false,
     },
 
     {

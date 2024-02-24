@@ -1,8 +1,8 @@
 local buftype = require("utils.buftype")
+local colors = require("utils.colors")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
 local icons = require("utils.icons")
-local lsp = require("utils.lsp")
 local utils = require("utils")
 
 return {
@@ -19,24 +19,9 @@ return {
             local herrline_conditions = require("heirline.conditions")
             local heirline_utils = require("heirline.utils")
 
-            local colors = {
-                "black",
-                "blue",
-                "cyan",
-                "gray",
-                "green",
-                "orange",
-                "purple",
-                "red",
-                "yellow",
-
-                "git_add",
-                "git_change",
-                "git_delete",
-            }
             local heirline_colors = {}
-            for _, color in ipairs(colors) do
-                heirline_colors[color] = heirline_utils.get_highlight(color).fg
+            for _, name in ipairs(vim.tbl_keys(colors)) do
+                heirline_colors[name] = heirline_utils.get_highlight(name).fg
             end
             require("heirline").load_colors(heirline_colors)
 
@@ -101,24 +86,26 @@ return {
             end
 
             local function get_diagnostic_severity(severity, show_count)
+                severity = severity:upper()
+
                 local icon, hl
-                if severity == "error" then
+                if severity == "ERROR" then
                     icon = icons.diagnostics.Error
                     hl = { fg = "red" }
-                elseif severity == "warn" then
+                elseif severity == "WARN" then
                     icon = icons.diagnostics.Warn
                     hl = { fg = "yellow" }
-                elseif severity == "info" then
+                elseif severity == "INFO" then
                     icon = icons.diagnostics.Info
                     hl = { fg = "blue" }
-                elseif severity == "hint" then
+                elseif severity == "HINT" then
                     icon = icons.diagnostics.Hint
                     hl = { fg = "cyan" }
                 end
 
                 return {
                     condition = function(self)
-                        self.count = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity[severity:upper()] })
+                        self.count = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity[severity] })
                         return self.count > 0
                     end,
                     provider = function(self)
@@ -133,6 +120,8 @@ return {
             end
 
             local function get_git_status(status, show_count)
+                status = status:lower()
+
                 local icon, hl
                 if status == "added" then
                     icon = icons.git.added
@@ -233,7 +222,7 @@ return {
                 },
 
                 surround(
-                    { "", "" },
+                    { icons.surround.left_half_circle_thick, icons.surround.right_half_circle_thick },
                     function(self)
                         return self:mode_color()
                     end,
@@ -242,7 +231,7 @@ return {
                             self.mode = vim.fn.mode(1)
                         end,
                         provider = function(self)
-                            return " " .. self.mode_names[self.mode]
+                            return icons.misc.circle .. self.mode_names[self.mode]
                         end,
                         hl = { fg = "black" },
                     }
@@ -252,22 +241,22 @@ return {
             local file_encoding = {
                 provider = function(self)
                     local encoding = vim.bo.fenc ~= "" and vim.bo.fenc or vim.o.enc
-                    return "󰅩 " .. encoding:upper()
+                    return icons.misc.code_braces .. encoding:upper()
                 end,
             }
             local file_format = {
                 provider = function(self)
-                    local fmt = vim.bo.fileformat
-                    if fmt == "dos" then
-                        return " CRLF"
+                    if vim.bo.fileformat == "dos" then
+                        return icons.platforms.windows .. "CRLF"
                     else
-                        return " LF"
+                        return icons.platforms.linux .. "LF"
                     end
                 end,
             }
             local file_icon = {
                 init = function(self)
-                    local filename = self.filename or vim.api.nvim_buf_get_name(0)
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    local filename = self.filename or vim.api.nvim_buf_get_name(buf)
                     local extension = vim.fn.fnamemodify(filename, ":e")
                     self.icon, self.icon_color = require("nvim-web-devicons").get_icon_color(filename, extension, { default = true })
                 end,
@@ -283,24 +272,26 @@ return {
                     local buf = self.buf or vim.api.nvim_get_current_buf()
                     return vim.api.nvim_get_option_value("modified", { buf = buf })
                 end,
-                provider = " ",
+                provider = icons.dap.Breakpoint,
                 hl = { fg = "green" },
                 update = "BufModifiedSet",
             }
             local file_name = {
                 init = function(self)
                     self.max_length = 30
-                    self.is_terminal = herrline_conditions.buffer_matches({ buftype = { "terminal" } })
                 end,
                 provider = function(self)
-                    local filename = self.filename or vim.api.nvim_buf_get_name(0)
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    local filename = self.filename or vim.api.nvim_buf_get_name(buf)
+
                     if filename == "" then
                         return "[No Name]"
                     end
 
                     filename = vim.fn.fnamemodify(filename, ":t")
-                    if self.is_terminal then
-                        filename, _ = vim.api.nvim_buf_get_name(0):gsub(".*:", "")
+
+                    if vim.api.nvim_get_option_value("buftype", { buf = buf }) == "terminal" then
+                        filename, _ = vim.api.nvim_buf_get_name(buf):gsub(".*:", "")
                     else
                         local char_count, char_list = utils.get_char_from_string(filename)
                         if char_count > self.max_length then
@@ -344,16 +335,17 @@ return {
                 end,
                 provider = function(self)
                     if vim.api.nvim_get_option_value("buftype", { buf = self.buf }) == "terminal" then
-                        return " "
+                        return icons.misc.terminal
                     else
-                        return " "
+                        return icons.misc.lock
                     end
                 end,
                 hl = { fg = "orange" },
             }
             local file_size = {
                 provider = function(self)
-                    local filename = self.filename or vim.api.nvim_buf_get_name(0)
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    local filename = self.filename or vim.api.nvim_buf_get_name(buf)
                     local suffix = { "B", "K", "M", "G", "T", "P", "E" }
                     local fsize = vim.fn.getfsize(filename)
                     fsize = (fsize < 0 and 0) or fsize
@@ -366,7 +358,7 @@ return {
             }
 
             local ruler = {
-                update = "CursorMoved",
+                update = { "CursorMoved", "ModeChanged" },
 
                 padding_after({
                     condition = function(self)
@@ -377,24 +369,31 @@ return {
                     end,
                     provider = function(self)
                         if self.is_mode_v then
-                            return ("󰈍 %s"):format(vim.fn.wordcount().visual_chars)
+                            return string.format("%s%s", icons.misc.order_alphabetical_ascending, vim.fn.wordcount().visual_chars)
                         elseif self.is_mode_V then
                             local visual_start = vim.fn.line("v")
                             local visual_end = vim.fn.line(".")
                             local lines = visual_start <= visual_end and visual_end - visual_start + 1 or visual_start - visual_end + 1
-                            return (" %s"):format(lines)
+                            return string.format("%s %s", icons.misc.line_number, lines)
                         end
 
                         return ""
                     end,
                 }),
                 {
-                    provider = " %l:%c %P",
+                    provider = icons.misc.text .. "%l:%c %P",
                 },
             }
             local scrollbar = {
                 static = {
-                    sbar = { "🭶", "🭷", "🭸", "🭹", "🭺", "🭻" },
+                    sbar = {
+                        icons.misc.horizontal_one_eighth_block_2,
+                        icons.misc.horizontal_one_eighth_block_3,
+                        icons.misc.horizontal_one_eighth_block_4,
+                        icons.misc.horizontal_one_eighth_block_5,
+                        icons.misc.horizontal_one_eighth_block_6,
+                        icons.misc.horizontal_one_eighth_block_7,
+                    },
                 },
                 init = function(self)
                     self.row = vim.api.nvim_win_get_cursor(0)[1]
@@ -410,7 +409,7 @@ return {
 
             local python_venv = {
                 condition = function(self)
-                    return utils.is_available("venv-selector.nvim") and vim.bo.filetype == "python"
+                    return utils.is_available("venv-selector.nvim") and package.loaded["venv-selector"] and vim.bo.filetype == "python"
                 end,
                 provider = function(self)
                     local venv_name = "base"
@@ -420,7 +419,7 @@ return {
                             venv_name = vim.fn.fnamemodify(active_venv, ":t")
                         end
                     end
-                    return " " .. venv_name
+                    return icons.languages.python .. venv_name
                 end,
                 hl = { fg = "yellow" },
                 on_click = {
@@ -435,9 +434,20 @@ return {
                 provider = function(self)
                     local names = {}
                     for _, server in pairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
-                        table.insert(names, server.name)
+                        if server.name == "null-ls" then
+                            local null_ls_sources = require("null-ls.sources").get_available(vim.bo.filetype)
+                            for _, source in ipairs(null_ls_sources) do
+                                local name = source.name
+                                -- null-ls 的相同的 source 可能有不同的功能，导致重复
+                                if names[#names] ~= name then
+                                    table.insert(names, source.name)
+                                end
+                            end
+                        else
+                            table.insert(names, server.name)
+                        end
                     end
-                    return " " .. table.concat(names, ",")
+                    return icons.misc.gear .. table.concat(names, ",")
                 end,
                 hl       = { fg = "green" },
                 update   = { "LspAttach", "LspDetach" },
@@ -453,7 +463,7 @@ return {
 
             local navic = {
                 condition = function(self)
-                    return utils.is_available("nvim-navic")
+                    return utils.is_available("nvim-navic") and package.loaded["nvim-navic"]
                 end,
                 static = {
                     type_hl = {
@@ -555,7 +565,7 @@ return {
                     return self.status_dict and true or false
                 end,
                 provider = function(self)
-                    return " " .. self.status_dict.head
+                    return icons.git.branch .. self.status_dict.head
                 end,
                 hl = { fg = "orange" },
             }
@@ -603,7 +613,7 @@ return {
                 update = { "RecordingEnter", "RecordingLeave" },
 
                 {
-                    provider = "󰻃 ",
+                    provider = icons.misc.record,
                     hl = { fg = "orange", bold = true },
                 },
                 surround({ "[", "]" }, nil, {
@@ -683,7 +693,7 @@ return {
                                 condition = function(self)
                                     return self.is_active
                                 end,
-                                update = { "DiagnosticChanged", "BufEnter" },
+                                update = { "BufEnter", "DiagnosticChanged" },
                             },
                             {
                                 condition = function(self)
@@ -709,7 +719,7 @@ return {
                     )
                 ),
                 padding_before({
-                    provider = "",
+                    provider = icons.misc.close,
                     hl = { fg = "gray" },
                     on_click = {
                         callback = function(_, minwid)
@@ -727,8 +737,8 @@ return {
             }
 
             local function make_tablist(tab_component, left_trunc, right_trunc)
-                left_trunc = left_trunc or { provider = " " }
-                right_trunc = right_trunc or { provider = " " }
+                left_trunc = left_trunc or { provider = icons.surround.chevron_left }
+                right_trunc = right_trunc or { provider = icons.surround.chevron_right }
 
                 left_trunc.on_click = {
                     callback = function(self)
@@ -810,8 +820,8 @@ return {
 
             local tablist = make_tablist(
                 surround({ " ", " " }, nil, tab),
-                { provider = " ", hl = { fg = "gray" } },
-                { provider = " ", hl = { fg = "gray" } }
+                { provider = icons.surround.chevron_left, hl = { fg = "gray" } },
+                { provider = icons.surround.chevron_right, hl = { fg = "gray" } }
             )
 
             --- A helper function for decoding statuscolumn click events with mouse click pressed, modifier keys, as well as which signcolumn sign was clicked if any
@@ -865,6 +875,7 @@ return {
                 win_T *find_window_by_handle(int Window, Error *err);
                 int compute_foldcolumn(win_T *wp, int col);
             ]]
+
             local fold = {
                 condition = function(self)
                     return vim.opt.foldcolumn:get() ~= "0"
@@ -914,9 +925,9 @@ return {
                         local char = statuscolumn_clickargs(...).char
                         local fillchars = vim.opt_local.fillchars:get()
                         if char == (fillchars.foldopen or icons.fold.FoldOpened) then
-                            vim.cmd("norm! zc")
+                            vim.cmd("normal! zc")
                         elseif char == (fillchars.foldcolse or icons.fold.FoldClosed) then
-                            vim.cmd("norm! zo")
+                            vim.cmd("normal! zo")
                         end
                     end,
                     name = "fold_click",
@@ -1089,13 +1100,10 @@ return {
                 },
                 opts = {
                     disable_winbar_cb = function(args)
-                        if not utils.is_available("nvim-navic") then
+                        local is_navic_loaded = package.loaded["nvim-navic"] or false
+                        if not utils.is_available("nvim-navic") or not is_navic_loaded then
                             return true
                         end
-                        return not vim.tbl_contains(lsp.lsp_filetype_list, vim.bo[args.buf].filetype) or herrline_conditions.buffer_matches({
-                            buftype = buftype.skip_buftype_list,
-                            filetype = filetype.skip_filetype_list,
-                        }, args.buf)
                     end,
                 },
             }
@@ -1108,10 +1116,9 @@ return {
         init = function()
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    local buffer = args.buf
                     local client = vim.lsp.get_client_by_id(args.data.client_id)
                     if client.supports_method("textDocument/documentSymbol") then
-                        require("nvim-navic").attach(client, buffer)
+                        require("nvim-navic").attach(client, args.buf)
                     end
                 end,
             })

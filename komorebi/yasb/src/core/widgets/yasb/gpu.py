@@ -63,9 +63,7 @@ class GpuWidget(BaseWidget):
 
     def _update_label(self):
         active_label = self._label_alt if self._show_alt_label else self._label
-        active_label_content = (
-            self._label_alt_content if self._show_alt_label else self._label_content
-        )
+        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
         active_label.setText(active_label_content)
 
         try:
@@ -121,19 +119,11 @@ class GpuWidget(BaseWidget):
             },
             "histograms": {
                 "gpu_percent": "".join(
-                    [
-                        self._get_histogram_bar(percent, 0, 100)
-                        for percent in self._gpu_percent_history
-                    ]
+                    [self._get_histogram_bar(percent, 0, 100) for percent in self._gpu_percent_history]
                 )
                 .encode("utf-8")
                 .decode("unicode_escape"),
-                "cores": "".join(
-                    [
-                        self._get_histogram_bar(percent, 0, 100)
-                        for percent in cores_percent
-                    ]
-                )
+                "cores": "".join([self._get_histogram_bar(percent, 0, 100) for percent in cores_percent])
                 .encode("utf-8")
                 .decode("unicode_escape"),
             },

@@ -23,39 +23,48 @@ return {
                 "DapInstall",
                 "DapUninstall",
             },
-            config = function(_, opts)
-                local mason_nvim_dap = require("mason-nvim-dap")
-
-                local handlers = {
-                    function(config)
-                        -- all sources with no handler get passed here
-
-                        -- Keep original functionality
-                        mason_nvim_dap.default_setup(config)
-                    end,
-                }
-                for dap, setup in pairs(dap.dap(mason_nvim_dap)) do
-                    handlers[dap] = setup
-                end
-
-                mason_nvim_dap.setup({
-                    ensure_installed = dap.dap_list,
-                    automatic_installation = true,
-                    handlers = handlers,
-                })
-            end,
             dependencies = {
                 "williamboman/mason.nvim",
             },
+            opts = function()
+                local handlers = {
+                    -- function(config)
+                    --     -- all sources with no handler get passed here
+                    --
+                    --     -- Keep original functionality
+                    --     mason_nvim_dap.default_setup(config)
+                    -- end,
+                }
+                for dap_server, setup in pairs(dap.dap(require("mason-nvim-dap"))) do
+                    handlers[dap_server] = setup
+                end
+
+                return {
+                    -- A list of adapters to install if they're not already installed.
+                    -- This setting has no relation with the `automatic_installation` setting.
+                    ensure_installed = dap.dap_list,
+
+                    -- Whether adapters that are set up (via dap) should be automatically installed if they're not already installed.
+                    -- This setting has no relation with the `ensure_installed` setting.
+                    -- Can either be:
+                    --   - false: Daps are not automatically installed.
+                    --   - true: All adapters set up via dap are automatically installed.
+                    --   - { exclude: string[] }: All adapters set up via mason-nvim-dap, except the ones provided in the list, are automatically installed.
+                    --       Example: automatic_installation = { exclude = { "python", "delve" } }
+                    automatic_installation = true,
+
+                    handlers = handlers,
+                }
+            end,
         },
 
         {
             "rcarriga/nvim-dap-ui",
             config = function(_, opts)
-                local dap, dapui = require("dap"), require("dapui")
-                dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open({}) end
-                dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close({}) end
-                dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
+                local dap_listeners, dapui = require("dap").listeners, require("dapui")
+                dap_listeners.after.event_initialized["dapui_config"] = function() dapui.open({}) end
+                dap_listeners.before.event_terminated["dapui_config"] = function() dapui.close({}) end
+                dap_listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
                 dapui.setup(opts)
             end,
             keys = {

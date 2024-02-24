@@ -78,11 +78,7 @@ class BatteryWidget(BaseWidget):
             time_left = "unlimited"
         elif type(secs_left) == int:
             time_left = timedelta(seconds=secs_left)
-            time_left = (
-                humanize.naturaldelta(time_left)
-                if self._time_remaining_natural
-                else str(time_left)
-            )
+            time_left = humanize.naturaldelta(time_left) if self._time_remaining_natural else str(time_left)
         else:
             time_left = "unknown"
 
@@ -93,27 +89,13 @@ class BatteryWidget(BaseWidget):
 
         if percent <= self._status_thresholds["critical"]:
             return "critical"
-        elif (
-            self._status_thresholds["critical"]
-            < percent
-            <= self._status_thresholds["low"]
-        ):
+        elif self._status_thresholds["critical"] < percent <= self._status_thresholds["low"]:
             return "low"
-        elif (
-            self._status_thresholds["low"]
-            < percent
-            <= self._status_thresholds["medium"]
-        ):
+        elif self._status_thresholds["low"] < percent <= self._status_thresholds["medium"]:
             return "medium"
-        elif (
-            self._status_thresholds["medium"]
-            < percent
-            <= self._status_thresholds["high"]
-        ):
+        elif self._status_thresholds["medium"] < percent <= self._status_thresholds["high"]:
             return "high"
-        elif (
-            self._status_thresholds["high"] < percent <= self._status_thresholds["full"]
-        ):
+        elif self._status_thresholds["high"] < percent <= self._status_thresholds["full"]:
             return "full"
 
     def _get_charging_icon(self, threshold: str):
@@ -123,9 +105,9 @@ class BatteryWidget(BaseWidget):
 
             if self._blink:
                 empty_charging_icon = len(self._status_icons["icon_charging"]) * " "
-                icon_str = self._icon_charging_format.replace(
-                    "{charging_icon}", empty_charging_icon
-                ).replace("{icon}", self._status_icons[f"icon_{threshold}"])
+                icon_str = self._icon_charging_format.replace("{charging_icon}", empty_charging_icon).replace(
+                    "{icon}", self._status_icons[f"icon_{threshold}"]
+                )
             else:
                 icon_str = self._icon_charging_format.replace(
                     "{charging_icon}", self._status_icons["icon_charging"]
@@ -137,9 +119,7 @@ class BatteryWidget(BaseWidget):
 
     def _update_label(self):
         active_label = self._label_alt if self._show_alt_label else self._label
-        active_label_content = (
-            self._label_alt_content if self._show_alt_label else self._label_content
-        )
+        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
         active_label.setText(active_label_content)
 
         self._battery_state = psutil.sensors_battery()

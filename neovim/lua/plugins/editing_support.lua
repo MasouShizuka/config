@@ -1,5 +1,6 @@
 local buftype = require("utils.buftype")
 local environment = require("utils.environment")
+local icons = require("utils.icons")
 local utils = require("utils")
 
 return {
@@ -31,19 +32,21 @@ return {
         cmd = {
             "Neogen",
         },
-        config = function(_, opts)
-            if not environment.is_vscode then
-                opts["snippet_engine"] = "luasnip"
-            end
-            require("neogen").setup(opts)
-        end,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
         keys = {
             { "<leader>gca", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
         },
-        opts = {},
+        opts = function()
+            local opts = {}
+
+            if not environment.is_vscode then
+                opts["snippet_engine"] = "luasnip"
+            end
+
+            return opts
+        end,
     },
 
     {
@@ -103,6 +106,8 @@ return {
             { "iv",  mode = { "x", "o" } },
         },
         opts = {
+            -- Table with textobject id as fields, textobject specification as values.
+            -- Also use this to disable builtin textobjects. See |MiniAi.config|.
             custom_textobjects = {
                 [","] = { "<().-()>" },
                 ["."] = { "<().-()>" },
@@ -129,9 +134,10 @@ return {
                     },
                 },
             },
+
+            -- Number of lines within which textobject is searched
             n_lines = math.huge,
         },
-        version = false,
     },
     {
         "echasnovski/mini.operators",
@@ -177,7 +183,6 @@ return {
                 prefix = "sS",
             },
         },
-        version = false,
     },
     {
         "echasnovski/mini.splitjoin",
@@ -188,12 +193,13 @@ return {
             { "gs", desc = "Split join", mode = "n" },
         },
         opts = {
+            -- Module mappings. Use `''` (empty string) to disable one.
+            -- Created for both Normal and Visual modes.
             mappings = {
                 -- toggle = "gS",
                 toggle = "gs",
             },
         },
-        version = false,
     },
     {
         "echasnovski/mini.trailspace",
@@ -215,7 +221,6 @@ return {
             end
         end,
         lazy = true,
-        version = false,
     },
 
     {
@@ -238,13 +243,13 @@ return {
         },
         opts = function()
             local keywords = {
-                FIX = { icon = " ", color = "red", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                TODO = { icon = " ", color = "green" },
-                HACK = { icon = " ", color = "orange" },
-                WARN = { icon = " ", color = "yellow", alt = { "WARNING", "XXX" } },
-                PERF = { icon = " ", color = "purple", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                NOTE = { icon = " ", color = "blue", alt = { "INFO" } },
-                TEST = { icon = " ", color = "cyan", alt = { "TESTING", "PASSED", "FAILED" } },
+                FIX = { icon = icons.misc.bug, color = "red", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+                TODO = { icon = icons.misc.check, color = "green" },
+                HACK = { icon = icons.misc.flame, color = "orange" },
+                WARN = { icon = icons.diagnostics.Warn, color = "yellow", alt = { "WARNING", "XXX" } },
+                PERF = { icon = icons.misc.clock, color = "purple", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+                NOTE = { icon = icons.diagnostics.Info, color = "blue", alt = { "INFO" } },
+                TEST = { icon = icons.misc.beaker, color = "cyan", alt = { "TESTING", "PASSED", "FAILED" } },
             }
             -- 忽略大小写
             for key, value in pairs(keywords) do
@@ -257,7 +262,17 @@ return {
             end
 
             return {
+                -- keywords recognized as todo comments
                 keywords = keywords,
+                -- highlighting of the line containing the todo comment
+                -- * before: highlights before the keyword (typically comment characters)
+                -- * keyword: highlights of the keyword
+                -- * after: highlights after the keyword (todo text)
+                highlight = {
+                    keyword = "bg",
+                },
+                -- list of named colors where we try to extract the guifg from the
+                -- list of highlight groups or use the hex color if hl not found as a fallback
                 colors = {
                     red = { "DiagnosticError", "ErrorMsg", "#e06c75" },
                     green = { "String", "#98c379" },
@@ -267,9 +282,6 @@ return {
                     blue = { "DiagnosticInfo", "#61afef" },
                     cyan = { "DiagnosticHint", "#56b6c2" },
                     default = { "NonText", "#5c6370" },
-                },
-                highlight = {
-                    keyword = "bg",
                 },
             }
         end,
@@ -286,23 +298,8 @@ return {
         },
         opts = {
             ring = {
-                -- history_length = 100,
                 history_length = 0,
-                -- storage = "shada",
                 storage = "memory",
-                sync_with_numbered_registers = true,
-                cancel_event = "update",
-            },
-            picker = {
-                select = {
-                    action = nil, -- nil to use default put action
-                },
-                telescope = {
-                    mappings = nil, -- nil to use default mappings
-                },
-            },
-            system_clipboard = {
-                sync_with_ring = true,
             },
             highlight = {
                 on_put = true,
@@ -403,10 +400,66 @@ return {
             { "<leader>gclr",  function() require("comment-box").rline() end,  desc = "Right aligned line",                                      mode = { "n", "x" } },
         },
         opts = {
-            doc_width = 80,
-            box_width = 60,
-            line_width = 58,
+            doc_width = 80,  -- width of the document
+            box_width = 60,  -- width of the boxes
+            line_width = 60, -- width of the lines
         },
+    },
+
+    {
+        "keaising/im-select.nvim",
+        enabled = environment.is_windows,
+        event = {
+            "InsertEnter",
+        },
+        opts = function()
+            local default_im_select = "com.apple.keylayout.ABC"
+            local default_command = "im-select"
+            if environment.is_windows or environment.is_wsl then
+                default_im_select = "1033"
+                default_command = "im-select.exe"
+            elseif environment.is_mac then
+                default_im_select = "com.apple.keylayout.ABC"
+            elseif environment.is_linux then
+                default_im_select = "keyboard-us"
+                default_command = "fcitx5-remote"
+            end
+
+            return {
+                -- IM will be set to `default_im_select` in `normal` mode
+                -- For Windows/WSL, default: "1033", aka: English US Keyboard
+                -- For macOS, default: "com.apple.keylayout.ABC", aka: US
+                -- For Linux, default:
+                --               "keyboard-us" for Fcitx5
+                --               "1" for Fcitx
+                --               "xkb:us::eng" for ibus
+                -- You can use `im-select` or `fcitx5-remote -n` to get the IM's name
+                default_im_select       = default_im_select,
+
+                -- Can be binary's name or binary's full path,
+                -- e.g. 'im-select' or '/usr/local/bin/im-select'
+                -- For Windows/WSL, default: "im-select.exe"
+                -- For macOS, default: "im-select"
+                -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
+                default_command         = default_command,
+
+                -- Restore the default input method state when the following events are triggered
+                -- set_default_events      = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
+                set_default_events      = { "InsertLeave" },
+
+                -- Restore the previous used input method state when the following events
+                -- are triggered, if you don't want to restore previous used im in Insert mode,
+                -- e.g. deprecated `disable_auto_restore = 1`, just let it empty
+                -- as `set_previous_events = {}`
+                set_previous_events     = { "InsertEnter" },
+
+                -- Show notification about how to install executable binary when binary missed
+                keep_quiet_on_no_binary = false,
+
+                -- Async run `default_command` to switch IM or not
+                async_switch_im         = true,
+            }
+        end,
     },
 
     {
@@ -498,48 +551,56 @@ return {
             { "gb", desc = "Comment toggle blockwise", mode = { "n", "x" } },
         },
         opts = {
-            ---Add a space b/w comment and the line
-            padding = true,
-            ---Whether the cursor should stay at its position
-            sticky = true,
-            ---Lines to be ignored while (un)comment
-            ignore = nil,
             ---LHS of toggle mappings in NORMAL mode
             toggler = {
-                ---Line-comment toggle keymap
-                line = "gcc",
                 ---Block-comment toggle keymap
                 -- block = "gbc",
                 block = "gbb",
             },
-            ---LHS of operator-pending mappings in NORMAL and VISUAL mode
-            opleader = {
-                ---Line-comment keymap
-                line = "gc",
-                ---Block-comment keymap
-                block = "gb",
-            },
-            ---LHS of extra mappings
-            extra = {
-                ---Add comment on the line above
-                above = "gcO",
-                ---Add comment on the line below
-                below = "gco",
-                ---Add comment at the end of line
-                eol = "gcA",
-            },
-            ---Enable keybindings
-            ---NOTE: If given `false` then the plugin won't create any mappings
-            mappings = {
-                ---Operator-pending mapping; `gcc` `gbc` `gc[count]{motion}` `gb[count]{motion}`
-                basic = true,
-                ---Extra mapping; `gco`, `gcO`, `gcA`
-                extra = true,
-            },
             ---Function to call before (un)comment
-            pre_hook = nil,
-            ---Function to call after (un)comment
-            post_hook = nil,
+            post_hook = function(ctx)
+                -- block-comment 换行
+
+                -- 跳过 line-comment
+                if ctx.ctype == 1 then
+                    return
+                end
+
+                if ctx.range.srow == -1 then
+                    return
+                end
+
+                local C = require("Comment.config")
+                local F = require("Comment.ft")
+                local U = require("Comment.utils")
+
+                local cstr = F.get(vim.bo.filetype, ctx.ctype)
+                local lcs, rcs = U.unwrap_cstr(cstr)
+                lcs = utils.escape(lcs)
+                rcs = utils.escape(rcs)
+                local padding = U.get_pad(C:get().padding)
+
+                local lines = vim.api.nvim_buf_get_lines(0, ctx.range.srow - 1, ctx.range.erow, false)
+                if ctx.cmode == 1 then
+                    -- comment
+                    local str = lines[1]
+                    local i, j = string.find(str, lcs .. padding)
+                    lines[1] = string.sub(str, i, j - #padding)
+                    table.insert(lines, 2, string.sub(str, 0, i - 1) .. string.sub(str, j + #padding, #str))
+
+                    str = lines[#lines]
+                    i, j = string.find(str, rcs)
+                    lines[#lines] = string.sub(str, 0, i - #padding - 1)
+                    table.insert(lines, #lines + 1, string.sub(str, i, j))
+                elseif ctx.cmode == 2 then
+                    -- uncomment
+                    if #lines[1] == 0 and #lines[#lines] == 0 then
+                        table.remove(lines, 1)
+                        table.remove(lines, #lines)
+                    end
+                end
+                vim.api.nvim_buf_set_lines(0, ctx.range.srow - 1, ctx.range.erow, false, lines)
+            end,
         },
     },
 
@@ -551,6 +612,39 @@ return {
         config = function(_, opts)
             require("auto-save").setup(opts)
 
+            local function trailspace()
+                if not utils.is_available("mini.trailspace") then
+                    return
+                end
+
+                local is_mini_trailspace_available, mini_trailspace = pcall(require, "mini.trailspace")
+                if not is_mini_trailspace_available then
+                    return
+                end
+
+                -- 新行不清空尾随空格
+                if vim.api.nvim_get_current_line():match("^%s*$") ~= nil then
+                    return
+                end
+
+                -- 当处于 LuaSnip 的 snippet 时，不清空尾随空格
+                if utils.is_available("LuaSnip") then
+                    local luasnip = require("luasnip")
+                    if luasnip.in_snippet() then
+                        return
+                    end
+                end
+
+                -- 间隔小于指定间隔时，不清空尾随空格
+                local trailspace_time = os.time()
+                if trailspace_time - vim.g.prev_trailspace_time <= vim.g.trailspace_interval then
+                    return
+                end
+
+                mini_trailspace.trim()
+                vim.g.prev_trailspace_time = trailspace_time
+            end
+
             local last_paste_start = vim.fn.getpos("'[")
             local last_paste_end = vim.fn.getpos("']")
 
@@ -558,17 +652,7 @@ return {
             vim.api.nvim_create_autocmd("User", {
                 callback = function(args)
                     if args.data.saved_buffer ~= nil then
-                        local is_mini_trailspace_available, mini_trailspace = pcall(require, "mini.trailspace")
-                        if is_mini_trailspace_available then
-                            -- 新行不清空空格
-                            if vim.api.nvim_get_current_line():match("^%s*$") == nil then
-                                local trailspace_time = os.time()
-                                if trailspace_time - vim.g.prev_trailspace_time > vim.g.trailspace_interval then
-                                    mini_trailspace.trim()
-                                    vim.g.prev_trailspace_time = trailspace_time
-                                end
-                            end
-                        end
+                        trailspace()
 
                         -- 保存文件前保存上次复制的范围
                         last_paste_start = vim.fn.getpos("'[")
@@ -624,6 +708,10 @@ return {
                 defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
                 cancel_defered_save = { "InsertEnter" },       -- vim events that cancel a pending deferred save
             },
+            -- function that takes the buffer handle and determines whether to save the current buffer or not
+            -- return true: if buffer is ok to be saved
+            -- return false: if it's not ok to be saved
+            -- if set to `nil` then no specific condition is applied
             condition = function(buf)
                 local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
                 if vim.tbl_contains(buftype.skip_buftype_list, bt) then
@@ -652,27 +740,5 @@ return {
         end,
         opts = {},
         version = "*",
-    },
-
-    {
-        "wingforth/nvim-im-select",
-        enabled = environment.is_windows,
-        event = {
-            "InsertEnter",
-        },
-        opts = {
-            -- im-select command, maybe the path to the executable `im-select`.
-            -- default value : "im-select"
-            im_select_cmd = "im-select",
-            -- default input method for normal mode or others except insert.
-            -- default value for macOS: "com.apple.keylayout.ABC".
-            -- defalt value for Windows: "1033"
-            default_im = "1033",
-            -- enable or disable switch input method automatically on FocusLost and FocusGained events.
-            -- disable by setting this option to false/0, or any other to enable.
-            -- if you have set up other ways to switch IM among different windows/applications, you may want to set this option to false.
-            -- default value is true.
-            enable_on_focus_events = false,
-        },
     },
 }

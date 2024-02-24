@@ -7,9 +7,7 @@ return {
             { "b",  function() require("spider").motion("b") end,  desc = "Previous word",        mode = { "n", "x", "o" } },
             { "ge", function() require("spider").motion("ge") end, desc = "Previous end of word", mode = { "n", "x", "o" } },
         },
-        opts = {
-            skipInsignificantPunctuation = true,
-        },
+        opts = {},
     },
 
     {
@@ -25,15 +23,25 @@ return {
         },
         opts = {
             search = {
+                -- search/jump in all windows
                 multi_window = false,
             },
             label = {
+                -- allow uppercase labels
                 uppercase = false,
+                -- show the label after the match
                 after = false,
+                -- show the label before the match
                 before = true,
             },
+            -- You can override the default options for a specific mode.
+            -- Use it with `require("flash").jump({mode = "forward"})`
+            ---@type table<string, Flash.Config>
             modes = {
+                -- options used when flash is activated through
+                -- `f`, `F`, `t`, `T`, `;` and `,` motions
                 char = {
+                    -- dynamic configuration for ftFT motions
                     config = function(opts)
                         if vim.fn.mode(true):find("o") then
                             local autohide_operator_list = { "y", "d", "g@" }
@@ -51,6 +59,8 @@ return {
                             end
                         end
                     end,
+                    -- When using jump labels, don't use these keys
+                    -- This allows using those keys directly after the motion
                     label = { exclude = "hjkliardcx" },
                     highlight = {
                         backdrop = false,

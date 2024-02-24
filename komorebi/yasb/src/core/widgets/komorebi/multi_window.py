@@ -92,9 +92,7 @@ class MultiWindowWidget(BaseWidget):
 
         self.widget_layout.addWidget(self._multi_window_container)
         self.register_callback("toggle_label", self._toggle_title_text)
-        self.register_callback(
-            "_update_workspace_windows_title", self._update_workspace_windows_title
-        )
+        self.register_callback("_update_workspace_windows_title", self._update_workspace_windows_title)
 
         self.callback_left = callbacks["on_left"]
         self.callback_right = callbacks["on_right"]
@@ -159,9 +157,7 @@ class MultiWindowWidget(BaseWidget):
     def _update_workspace_windows(self, state: dict):
         try:
             if self._update_komorebi_state(state):
-                self._focused_workspace = self._komorebic.get_focused_workspace(
-                    self._komorebi_screen
-                )
+                self._focused_workspace = self._komorebic.get_focused_workspace(self._komorebi_screen)
 
                 if not self._focused_workspace:
                     return
@@ -204,21 +200,15 @@ class MultiWindowWidget(BaseWidget):
             self._komorebi_state = komorebi_state
 
             if self._komorebi_state:
-                self._komorebi_screen = self._komorebic.get_screen_by_hwnd(
-                    self._komorebi_state, self._screen_hwnd
-                )
-                self._komorebi_workspaces = self._komorebic.get_workspaces(
-                    self._komorebi_screen
-                )
+                self._komorebi_screen = self._komorebic.get_screen_by_hwnd(self._komorebi_state, self._screen_hwnd)
+                self._komorebi_workspaces = self._komorebic.get_workspaces(self._komorebi_screen)
                 return True
         except TypeError:
             return False
 
     def _clear_container_layout(self):
         for i in reversed(range(self._multi_window_container_layout.count())):
-            old_workspace_widget = self._multi_window_container_layout.itemAt(
-                i
-            ).widget()
+            old_workspace_widget = self._multi_window_container_layout.itemAt(i).widget()
             self._multi_window_container_layout.removeWidget(old_workspace_widget)
             old_workspace_widget.deleteLater()
 

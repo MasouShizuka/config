@@ -5,8 +5,9 @@ use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::BufRead;
 use std::io::BufReader;
-use std::io::ErrorKind;
+use std::io::Read;
 use std::io::Write;
+use std::net::Shutdown;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -14,11 +15,13 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
+use clap::CommandFactory;
 use clap::Parser;
 use clap::ValueEnum;
 use color_eyre::eyre::anyhow;
 use color_eyre::eyre::bail;
 use color_eyre::Result;
+use dirs::data_local_dir;
 use fs_tail::TailedFile;
 use heck::ToKebabCase;
 use komorebi_core::resolve_home_path;
@@ -28,7 +31,6 @@ use miette::Report;
 use miette::SourceOffset;
 use miette::SourceSpan;
 use paste::paste;
-use uds_windows::UnixListener;
 use uds_windows::UnixStream;
 use which::which;
 use windows::Win32::Foundation::HWND;
@@ -76,6 +78,26 @@ lazy_static! {
     static ref DATA_DIR: PathBuf = dirs::data_local_dir()
         .expect("there is no local data directory")
         .join("komorebi");
+    static ref WHKD_CONFIG_DIR: PathBuf = {
+        std::env::var("WHKD_CONFIG_HOME").map_or_else(
+            |_| {
+                dirs::home_dir()
+                    .expect("there is no home directory")
+                    .join(".config")
+            },
+            |home_path| {
+                let whkd_config_home = PathBuf::from(&home_path);
+
+                assert!(
+                    whkd_config_home.as_path().is_dir(),
+                    "$Env:WHKD_CONFIG_HOME is set to '{}', which is not a valid directory",
+                    whkd_config_home.to_string_lossy()
+                );
+
+                whkd_config_home
+            },
+        )
+    };
 }
 
 trait AhkLibrary {
@@ -699,13 +721,25 @@ struct LoadCustomLayout {
 }
 
 #[derive(Parser, AhkFunction)]
-struct Subscribe {
+struct SubscribeSocket {
+    /// Name of the socket to send event notifications to
+    socket: String,
+}
+
+#[derive(Parser, AhkFunction)]
+struct UnsubscribeSocket {
+    /// Name of the socket to stop sending event notifications to
+    socket: String,
+}
+
+#[derive(Parser, AhkFunction)]
+struct SubscribePipe {
     /// Name of the pipe to send event notifications to (without "\\.\pipe\" prepended)
     named_pipe: String,
 }
 
 #[derive(Parser, AhkFunction)]
-struct Unsubscribe {
+struct UnsubscribePipe {
     /// Name of the pipe to stop sending event notifications to (without "\\.\pipe\" prepended)
     named_pipe: String,
 }
@@ -763,6 +797,8 @@ struct Opts {
 
 #[derive(Parser, AhkLibrary)]
 enum SubCommand {
+    #[clap(hide = true)]
+    Docgen,
     /// Gather example configurations for a new-user quickstart
     Quickstart,
     /// Start komorebi.exe as a background process
@@ -778,12 +814,20 @@ enum SubCommand {
     /// Query the current window manager state
     #[clap(arg_required_else_help = true)]
     Query(Query),
-    /// Subscribe to komorebi events
+    /// Subscribe to komorebi events using a Unix Domain Socket
     #[clap(arg_required_else_help = true)]
-    Subscribe(Subscribe),
+    SubscribeSocket(SubscribeSocket),
     /// Unsubscribe from komorebi events
     #[clap(arg_required_else_help = true)]
-    Unsubscribe(Unsubscribe),
+    UnsubscribeSocket(UnsubscribeSocket),
+    /// Subscribe to komorebi events using a Named Pipe
+    #[clap(arg_required_else_help = true)]
+    #[clap(alias = "subscribe")]
+    SubscribePipe(SubscribePipe),
+    /// Unsubscribe from komorebi events
+    #[clap(arg_required_else_help = true)]
+    #[clap(alias = "unsubscribe")]
+    UnsubscribePipe(UnsubscribePipe),
     /// Tail komorebi.exe's process logs (cancel with Ctrl-C)
     Log,
     /// Quicksave the current resize layout dimensions
@@ -1136,39 +1180,38 @@ enum SubCommand {
 
 pub fn send_message(bytes: &[u8]) -> Result<()> {
     let socket = DATA_DIR.join("komorebi.sock");
-    let mut stream = UnixStream::connect(socket)?;
-    Ok(stream.write_all(bytes)?)
+
+    let mut connected = false;
+    while !connected {
+        if let Ok(mut stream) = UnixStream::connect(&socket) {
+            connected = true;
+            stream.write_all(bytes)?;
+        }
+    }
+
+    Ok(())
 }
 
-fn with_komorebic_socket<F: Fn() -> Result<()>>(f: F) -> Result<()> {
-    let socket = DATA_DIR.join("komorebic.sock");
+pub fn send_query(bytes: &[u8]) -> Result<String> {
+    let socket = DATA_DIR.join("komorebi.sock");
 
-    match std::fs::remove_file(&socket) {
-        Ok(()) => {}
-        Err(error) => match error.kind() {
-            // Doing this because ::exists() doesn't work reliably on Windows via IntelliJ
-            ErrorKind::NotFound => {}
-            _ => {
-                return Err(error.into());
-            }
-        },
-    };
+    let mut stream = UnixStream::connect(socket)?;
+    stream.write_all(bytes)?;
+    stream.shutdown(Shutdown::Write)?;
 
-    f()?;
+    let mut reader = BufReader::new(stream);
+    let mut response = String::new();
+    reader.read_to_string(&mut response)?;
 
-    let listener = UnixListener::bind(socket)?;
-    match listener.accept() {
-        Ok(incoming) => {
-            let stream = BufReader::new(incoming.0);
-            for line in stream.lines() {
-                println!("{}", line?);
-            }
+    Ok(response)
+}
 
-            Ok(())
-        }
-        Err(error) => {
-            panic!("{}", error);
-        }
+// print_query is a helper that queries komorebi and prints the response.
+// panics on error.
+fn print_query(bytes: &[u8]) {
+    match send_query(bytes) {
+        Ok(response) => println!("{response}"),
+        Err(error) => panic!("{}", error),
     }
 }
 
@@ -1195,12 +1238,31 @@ fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
 
     match opts.subcmd {
+        SubCommand::Docgen => {
+            let mut cli = Opts::command();
+            let subcommands = cli.get_subcommands_mut();
+            std::fs::create_dir_all("docs/cli")?;
+
+            for cmd in subcommands {
+                let name = cmd.get_name().to_string();
+                if name != "docgen" {
+                    let help_text = cmd.render_long_help().to_string();
+                    let outpath = format!("docs/cli/{name}.md");
+                    let markdown = format!("# {name}\n\n```\n{help_text}\n```");
+                    std::fs::write(outpath, markdown)?;
+                    println!("    - cli/{name}.md");
+                }
+            }
+        }
         SubCommand::Quickstart => {
             let version = env!("CARGO_PKG_VERSION");
 
             let home_dir = dirs::home_dir().expect("could not find home dir");
             let config_dir = home_dir.join(".config");
+            let local_appdata_dir = data_local_dir().expect("could not find localdata dir");
+            let data_dir = local_appdata_dir.join("komorebi");
             std::fs::create_dir_all(&config_dir)?;
+            std::fs::create_dir_all(data_dir)?;
 
             let komorebi_json = reqwest::blocking::get(
                 format!("https://raw.githubusercontent.com/LGUG2Z/komorebi/v{version}/komorebi.example.json")
@@ -1220,9 +1282,7 @@ fn main() -> Result<()> {
             std::fs::write(config_dir.join("whkdrc"), whkdrc)?;
 
             println!("Example ~/komorebi.json, ~/.config/whkdrc and latest ~/applications.yaml files downloaded");
-            println!(
-                "You can now run komorebic start -c \"$Env:USERPROFILE\\komorebi.json\" --whkd"
-            );
+            println!("You can now run komorebic start --whkd");
         }
         SubCommand::EnableAutostart(args) => {
             let mut current_exe = std::env::current_exe().expect("unable to get exec path");
@@ -1285,10 +1345,7 @@ fn main() -> Result<()> {
             let static_config = HOME_DIR.join("komorebi.json");
             let config_pwsh = HOME_DIR.join("komorebi.ps1");
             let config_ahk = HOME_DIR.join("komorebi.ahk");
-            let config_whkd = dirs::home_dir()
-                .expect("no home dir found")
-                .join(".config")
-                .join("whkdrc");
+            let config_whkd = WHKD_CONFIG_DIR.join("whkdrc");
 
             if static_config.exists() {
                 let config_source = std::fs::read_to_string(&static_config)?;
@@ -1319,7 +1376,7 @@ fn main() -> Result<()> {
 
                 if let Ok(config) = &parsed_config {
                     if let Some(asc_path) = config.get("app_specific_configuration_path") {
-                        let normalized_asc_path = asc_path
+                        let mut normalized_asc_path = asc_path
                             .to_string()
                             .replace(
                                 "$Env:USERPROFILE",
@@ -1328,6 +1385,13 @@ fn main() -> Result<()> {
                             .replace('"', "")
                             .replace('\\', "/");
 
+                        if let Ok(komorebi_config_home) = std::env::var("KOMOREBI_CONFIG_HOME") {
+                            normalized_asc_path = normalized_asc_path
+                                .replace("$Env:KOMOREBI_CONFIG_HOME", &komorebi_config_home)
+                                .replace('"', "")
+                                .replace('\\', "/");
+                        }
+
                         if !Path::exists(Path::new(&normalized_asc_path)) {
                             println!("Application specific configuration file path '{normalized_asc_path}' does not exist. Try running 'komorebic fetch-asc'\n");
                         }
@@ -1335,14 +1399,17 @@ fn main() -> Result<()> {
                 }
 
                 if config_whkd.exists() {
-                    println!("Found ~/.config/whkdrc; key bindings will be loaded from here when whkd is started, and you can start it automatically using the --whkd flag\n");
+                    println!("Found {}; key bindings will be loaded from here when whkd is started, and you can start it automatically using the --whkd flag\n", config_whkd.to_string_lossy());
                 } else {
                     println!("No ~/.config/whkdrc found; you may not be able to control komorebi with your keyboard\n");
                 }
             } else if config_pwsh.exists() {
                 println!("Found komorebi.ps1; this file will be autoloaded by komorebi\n");
                 if config_whkd.exists() {
-                    println!("Found ~/.config/whkdrc; key bindings will be loaded from here when whkd is started\n");
+                    println!(
+                        "Found {}; key bindings will be loaded from here when whkd is started\n",
+                        config_whkd.to_string_lossy()
+                    );
                 } else {
                     println!("No ~/.config/whkdrc found; you may not be able to control komorebi with your keyboard\n");
                 }
@@ -1386,7 +1453,7 @@ fn main() -> Result<()> {
             let color_log = std::env::temp_dir().join("komorebi.log");
             let file = TailedFile::new(File::open(color_log)?);
             let locked = file.lock();
-            #[allow(clippy::significant_drop_in_scrutinee)]
+            #[allow(clippy::significant_drop_in_scrutinee, clippy::lines_filter_map_ok)]
             for line in locked.lines().flatten() {
                 println!("{line}");
             }
@@ -1683,7 +1750,7 @@ fn main() -> Result<()> {
             let exec = if let Ok(output) = Command::new("where.exe").arg("komorebi.ps1").output() {
                 let stdout = String::from_utf8(output.stdout)?;
                 match stdout.trim() {
-                    stdout if stdout.is_empty() => None,
+                    "" => None,
                     // It's possible that a komorebi.ps1 config will be in %USERPROFILE% - ignore this
                     stdout if !stdout.contains("scoop") => None,
                     stdout => {
@@ -1944,15 +2011,13 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
             )?;
         }
         SubCommand::State => {
-            with_komorebic_socket(|| send_message(&SocketMessage::State.as_bytes()?))?;
+            print_query(&SocketMessage::State.as_bytes()?);
         }
         SubCommand::VisibleWindows => {
-            with_komorebic_socket(|| send_message(&SocketMessage::VisibleWindows.as_bytes()?))?;
+            print_query(&SocketMessage::VisibleWindows.as_bytes()?);
         }
         SubCommand::Query(arg) => {
-            with_komorebic_socket(|| {
-                send_message(&SocketMessage::Query(arg.state_query).as_bytes()?)
-            })?;
+            print_query(&SocketMessage::Query(arg.state_query).as_bytes()?);
         }
         SubCommand::RestoreWindows => {
             let hwnd_json = DATA_DIR.join("komorebi.hwnd.json");
@@ -2043,11 +2108,17 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
         SubCommand::LoadResize(arg) => {
             send_message(&SocketMessage::Load(resolve_home_path(arg.path)?).as_bytes()?)?;
         }
-        SubCommand::Subscribe(arg) => {
-            send_message(&SocketMessage::AddSubscriber(arg.named_pipe).as_bytes()?)?;
+        SubCommand::SubscribeSocket(arg) => {
+            send_message(&SocketMessage::AddSubscriberSocket(arg.socket).as_bytes()?)?;
         }
-        SubCommand::Unsubscribe(arg) => {
-            send_message(&SocketMessage::RemoveSubscriber(arg.named_pipe).as_bytes()?)?;
+        SubCommand::UnsubscribeSocket(arg) => {
+            send_message(&SocketMessage::RemoveSubscriberSocket(arg.socket).as_bytes()?)?;
+        }
+        SubCommand::SubscribePipe(arg) => {
+            send_message(&SocketMessage::AddSubscriberPipe(arg.named_pipe).as_bytes()?)?;
+        }
+        SubCommand::UnsubscribePipe(arg) => {
+            send_message(&SocketMessage::RemoveSubscriberPipe(arg.named_pipe).as_bytes()?)?;
         }
         SubCommand::ToggleMouseFollowsFocus => {
             send_message(&SocketMessage::ToggleMouseFollowsFocus.as_bytes()?)?;
@@ -2183,23 +2254,19 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
             );
         }
         SubCommand::ApplicationSpecificConfigurationSchema => {
-            with_komorebic_socket(|| {
-                send_message(&SocketMessage::ApplicationSpecificConfigurationSchema.as_bytes()?)
-            })?;
+            print_query(&SocketMessage::ApplicationSpecificConfigurationSchema.as_bytes()?);
         }
         SubCommand::NotificationSchema => {
-            with_komorebic_socket(|| send_message(&SocketMessage::NotificationSchema.as_bytes()?))?;
+            print_query(&SocketMessage::NotificationSchema.as_bytes()?);
         }
         SubCommand::SocketSchema => {
-            with_komorebic_socket(|| send_message(&SocketMessage::SocketSchema.as_bytes()?))?;
+            print_query(&SocketMessage::SocketSchema.as_bytes()?);
         }
         SubCommand::StaticConfigSchema => {
-            with_komorebic_socket(|| send_message(&SocketMessage::StaticConfigSchema.as_bytes()?))?;
+            print_query(&SocketMessage::StaticConfigSchema.as_bytes()?);
         }
         SubCommand::GenerateStaticConfig => {
-            with_komorebic_socket(|| {
-                send_message(&SocketMessage::GenerateStaticConfig.as_bytes()?)
-            })?;
+            print_query(&SocketMessage::GenerateStaticConfig.as_bytes()?);
         }
     }
 

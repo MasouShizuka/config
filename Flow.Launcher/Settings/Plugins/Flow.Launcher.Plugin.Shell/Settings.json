@@ -1,6 +1,7 @@
 {
   "Shell": 3,
   "ReplaceWinR": false,
+  "CloseShellAfterPress": false,
   "LeaveShellOpen": false,
   "RunAsAdministrator": true,
   "ShowOnlyMostUsedCMDs": false,

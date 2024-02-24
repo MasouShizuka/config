@@ -2,52 +2,6 @@ local environment = require("utils.environment")
 local utils = require("utils")
 
 return {
-    -- {
-    --     "dstein64/nvim-scrollview",
-    --     cmd = {
-    --         "ScrollViewDisable",
-    --         "ScrollViewEnable",
-    --         "ScrollViewToggle",
-    --         "ScrollViewRefresh",
-    --         "ScrollViewNext",
-    --         "ScrollViewPrev",
-    --         "ScrollViewFirst",
-    --         "ScrollViewLast",
-    --     },
-    --     enabled = not environment.is_vscode,
-    --     -- lazy 读取不起作用
-    --     -- event = {
-    --     --     "BufNewFile",
-    --     --     "BufReadPost",
-    --     -- },
-    --     lazy = false,
-    --     opts = {
-    --         current_only = true,
-    --         excluded_filetypes = filetype.skip_filetype_list,
-    --         line_limit = -1,
-    --         signs_column = 0,
-    --         signs_on_startup = {
-    --             "conflicts",
-    --             -- "cursor",
-    --             "diagnostics",
-    --             "folds",
-    --             "loclist",
-    --             "marks",
-    --             "quickfix",
-    --             "search",
-    --             "spell",
-    --             -- "textwidth",
-    --             -- "trail",
-    --         },
-    --         diagnostics_error_symbol = icons.diagnostics.Error,
-    --         diagnostics_severities = {
-    --             vim.diagnostic.severity.ERROR,
-    --             vim.diagnostic.severity.WARN,
-    --         },
-    --         diagnostics_warn_symbol = icons.diagnostics.Warn,
-    --     },
-    -- },
-
     {
         "echasnovski/mini.map",
         config = function(_, opts)
@@ -128,7 +82,7 @@ return {
                 spell({ spell = "purple" }),
             }
             if utils.is_git() then
-                table.insert(integrations, 2, map.gen_integration.gitsigns())
+                table.insert(integrations, 4, map.gen_integration.gitsigns())
             end
 
             return {
@@ -142,7 +96,6 @@ return {
 
             }
         end,
-        version = false,
     },
 
     {
@@ -173,17 +126,8 @@ return {
         },
         opts = {
             -- All these keys will be mapped to their corresponding default scrolling animation
-            -- mappings = { "<c-u>", "<c-d>", "<c-b>", "<c-f>", "<c-y>", "<c-e>", "zt", "zz", "zb" },
             mappings = { "<c-u>", "<c-d>" },
-            -- hide_cursor = true,       -- Hide cursor while scrolling
-            hide_cursor = false,
-            stop_eof = true,             -- Stop at <EOF> when scrolling downwards
-            respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
-            cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-            easing_function = nil,       -- Default easing function
-            pre_hook = nil,              -- Function to run before the scrolling animation starts
-            post_hook = nil,             -- Function to run after the scrolling animation ends
-            performance_mode = false,    -- Disable "Performance Mode" on all buffers.
+            hide_cursor = false, -- Hide cursor while scrolling
         },
     },
 }

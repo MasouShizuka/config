@@ -66,36 +66,6 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
 })
 
 if not environment.is_vscode then
-    -- edgy.nvim 自动激活
-    if utils.is_available("edgy.nvim") then
-        local edgy_activate = vim.api.nvim_create_augroup("EdgyActivate", { clear = true })
-        vim.api.nvim_create_autocmd("BufAdd", {
-            callback = function(args)
-                vim.schedule(function()
-                    if vim.api.nvim_buf_is_valid(args.buf) then
-                        local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-                        if filetype.is_in_toggle_filetype_list(ft) then
-                            require("edgy")
-                            pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
-                        end
-                    end
-                end)
-            end,
-            desc = "Activate edgy",
-            group = edgy_activate,
-        })
-        if utils.is_available("toggleterm.nvim") and filetype.is_in_toggle_filetype_list("toggleterm") then
-            vim.api.nvim_create_autocmd("TermOpen", {
-                callback = function()
-                    require("edgy")
-                    pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
-                end,
-                desc = "Activate edgy",
-                group = edgy_activate,
-            })
-        end
-    end
-
     -- lsp 文件切换部分设置
     vim.api.nvim_create_autocmd("FileType", {
         callback = function(args)

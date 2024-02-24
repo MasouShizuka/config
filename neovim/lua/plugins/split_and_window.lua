@@ -74,20 +74,20 @@ return {
                 return result
             end
 
-            local function focus_nth_win(pos, n)
-                for p, edgebar in pairs(require("edgy.config").layout) do
-                    if p == pos then
-                        if #edgebar.wins >= n then
-                            edgebar.wins[n]:focus()
-                            return true
-                        end
-
-                        break
-                    end
-                end
-
-                return false
-            end
+            -- local function focus_nth_win(pos, n)
+            --     for p, edgebar in pairs(require("edgy.config").layout) do
+            --         if p == pos then
+            --             if #edgebar.wins >= n then
+            --                 edgebar.wins[n]:focus()
+            --                 return true
+            --             end
+            --
+            --             break
+            --         end
+            --     end
+            --
+            --     return false
+            -- end
 
             local prev_tabpage
             local prev_win
@@ -163,6 +163,34 @@ return {
             -- Default splitting will cause your main splits to jump when opening an edgebar.
             -- To prevent this, set `splitkeep` to either `screen` or `topline`.
             vim.opt.splitkeep = "screen"
+
+            -- edgy 自动激活
+            local edgy_activate = vim.api.nvim_create_augroup("EdgyActivate", { clear = true })
+            vim.api.nvim_create_autocmd("BufAdd", {
+                callback = function(args)
+                    vim.schedule(function()
+                        if vim.api.nvim_buf_is_valid(args.buf) then
+                            local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                            if filetype.is_in_toggle_filetype_list(ft) then
+                                require("edgy")
+                                pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
+                            end
+                        end
+                    end)
+                end,
+                desc = "Activate edgy",
+                group = edgy_activate,
+            })
+            if utils.is_available("toggleterm.nvim") and filetype.is_in_toggle_filetype_list("toggleterm") then
+                vim.api.nvim_create_autocmd("TermOpen", {
+                    callback = function()
+                        require("edgy")
+                        pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
+                    end,
+                    desc = "Activate edgy",
+                    group = edgy_activate,
+                })
+            end
         end,
         keys = {
             { keymap["<c-1>"], desc = "Focus left panel",   mode = "n" },
@@ -321,6 +349,10 @@ return {
                 animate = {
                     enabled = false,
                 },
+                -- buffer-local keymaps to be added to edgebar buffers.
+                -- Existing buffer-local keymaps will never be overridden.
+                -- Set to false to disable a builtin.
+                ---@type table<string, fun(win:Edgy.Window)|false>
                 keys = {
                     -- close window
                     ["q"] = function(win)
@@ -494,7 +526,6 @@ return {
     --             signcolumn = false,
     --         },
     --     },
-    --     version = false,
     -- },
 
     {

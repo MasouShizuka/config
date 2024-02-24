@@ -42,7 +42,9 @@ return {
         opts = {
             anaconda_base_path = path.conda_path,
             anaconda_envs_path = path.conda_path .. "/envs",
-            anaconda = { python_parent_dir = "" },
+            anaconda = {
+                python_parent_dir = "",
+            },
             cache_file = path.data_path .. "/lazy/venv-selector.nvim/venv-selector/venvs.json",
             cache_dir = path.data_path .. "/lazy/venv-selector.nvim/venv-selector",
         },
