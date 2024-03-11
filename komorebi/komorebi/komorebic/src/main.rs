@@ -114,7 +114,7 @@ trait AhkFunction {
 struct ConfigurationError {
     message: String,
     #[source_code]
-    src: NamedSource,
+    src: NamedSource<String>,
     #[label("This bit here")]
     bad_bit: SourceSpan,
 }
@@ -805,8 +805,14 @@ enum SubCommand {
     Start(Start),
     /// Stop the komorebi.exe process and restore all hidden windows
     Stop(Stop),
-    /// Output various important komorebi-related environment values
+    /// Check komorebi configuration and related files for common errors
     Check,
+    /// Show the path to komorebi.json
+    #[clap(alias = "config")]
+    Configuration,
+    /// Show the path to whkdrc
+    #[clap(alias = "whkd")]
+    Whkdrc,
     /// Show a JSON representation of the current window manager state
     State,
     /// Show a JSON representation of visible windows
@@ -1071,8 +1077,9 @@ enum SubCommand {
     WatchConfiguration(WatchConfiguration),
     /// Signal that the final configuration option has been sent
     CompleteConfiguration,
-    /// Enable or disable a hack simulating ALT key presses to ensure focus changes succeed
+    /// DEPRECATED since v0.1.22
     #[clap(arg_required_else_help = true)]
+    #[clap(hide = true)]
     AltFocusHack(AltFocusHack),
     /// Set the window behaviour when switching workspaces / cycling stacks
     #[clap(arg_required_else_help = true)]
@@ -1181,15 +1188,9 @@ enum SubCommand {
 pub fn send_message(bytes: &[u8]) -> Result<()> {
     let socket = DATA_DIR.join("komorebi.sock");
 
-    let mut connected = false;
-    while !connected {
-        if let Ok(mut stream) = UnixStream::connect(&socket) {
-            connected = true;
-            stream.write_all(bytes)?;
-        }
-    }
-
-    Ok(())
+    let mut stream = UnixStream::connect(socket)?;
+    stream.write_all(bytes)?;
+    Ok(stream.shutdown(Shutdown::Write)?)
 }
 
 pub fn send_query(bytes: &[u8]) -> Result<String> {
@@ -1366,7 +1367,7 @@ fn main() -> Result<()> {
                     let diagnostic = ConfigurationError {
                         message: msgs[0].to_string(),
                         src: NamedSource::new("komorebi.json", config_source.clone()),
-                        bad_bit: SourceSpan::new(offset, 2.into()),
+                        bad_bit: SourceSpan::new(offset, 2),
                     };
 
                     println!("{:?}", Report::new(diagnostic));
@@ -1418,6 +1419,20 @@ fn main() -> Result<()> {
             } else {
                 println!("No komorebi configuration found in {home_display}\n");
                 println!("If running 'komorebic start --await-configuration', you will manually have to call the following command to begin tiling: komorebic complete-configuration\n");
+            }
+        }
+        SubCommand::Configuration => {
+            let static_config = HOME_DIR.join("komorebi.json");
+
+            if static_config.exists() {
+                println!("{}", static_config.display());
+            }
+        }
+        SubCommand::Whkdrc => {
+            let whkdrc = WHKD_CONFIG_DIR.join("whkdrc");
+
+            if whkdrc.exists() {
+                println!("{}", whkdrc.display());
             }
         }
         SubCommand::AhkLibrary => {

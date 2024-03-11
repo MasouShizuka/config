@@ -76,11 +76,11 @@ return {
                     local chunkText = chunk[1]
                     local chunkWidth = vim.fn.strdisplaywidth(chunkText)
                     if targetWidth > curWidth + chunkWidth then
-                        table.insert(newVirtText, chunk)
+                        newVirtText[#newVirtText + 1] = chunk
                     else
                         chunkText = truncate(chunkText, targetWidth - curWidth)
                         local hlGroup = chunk[2]
-                        table.insert(newVirtText, { chunkText, hlGroup })
+                        newVirtText[#newVirtText + 1] = { chunkText, hlGroup }
                         chunkWidth = vim.fn.strdisplaywidth(chunkText)
                         -- str width returned from truncate() may less than 2nd argument, need padding
                         if curWidth + chunkWidth < targetWidth then
@@ -90,7 +90,7 @@ return {
                     end
                     curWidth = curWidth + chunkWidth
                 end
-                table.insert(newVirtText, { suffix, "MoreMsg" })
+                newVirtText[#newVirtText + 1] = { suffix, "MoreMsg" }
                 return newVirtText
             end
             opts["fold_virt_text_handler"] = handler
@@ -142,10 +142,8 @@ return {
     {
         "LunarVim/bigfile.nvim",
         enabled = not environment.is_vscode,
-        event = {
-            "User BigFile",
-        },
         init = function()
+            -- bigfile 自动激活
             vim.api.nvim_create_autocmd("BufReadPre", {
                 callback = function(args)
                     local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
@@ -159,17 +157,17 @@ return {
                     end
 
                     if utils.is_bigfile(args.buf) then
-                        utils.event("BigFile")
+                        require("bigfile")
                         vim.api.nvim_del_augroup_by_name("BigFile")
 
                         vim.api.nvim_create_autocmd("BufReadPost", {
                             buffer = args.buf,
                             callback = function()
-                                utils.refresh_current_buf(1, true)
+                                utils.refresh_buf(args.buf, 1, true)
+                                vim.api.nvim_del_augroup_by_name("BigFileRefresh")
                             end,
                             desc = "Big file",
                             group = vim.api.nvim_create_augroup("BigFileRefresh", { clear = true }),
-                            once = true,
                         })
                     end
                 end,
@@ -249,7 +247,7 @@ return {
                     for _, feature in ipairs(matched_features) do
                         feature.disable(args.buf)
                         if feature.opts.defer then
-                            table.insert(matched_deferred_features, feature)
+                            matched_deferred_features[#matched_deferred_features + 1] = feature
                         end
                     end
 
@@ -266,6 +264,7 @@ return {
                 group = vim.api.nvim_create_augroup("LongFile", { clear = true }),
             })
         end,
+        lazy = true,
         opts = function()
             return {
                 -- 禁用 filesize 检查，只通过 pattern 判断
@@ -299,6 +298,12 @@ return {
             "FencAutoDetect",
             "FencView",
         },
+        init = function()
+            vim.api.nvim_create_user_command("FencAutoDetectWithoutEcho", function()
+                vim.api.nvim_command("FencAutoDetect")
+                vim.cmd.redraw()
+            end, { desc = "Toggle wrap" })
+        end,
         enabled = not environment.is_vscode,
     },
 

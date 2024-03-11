@@ -337,7 +337,7 @@
         "AutoUpload": false
       },
       "OCROptions": {
-        "Language": "en",
+        "Language": "zh-Hans-CN",
         "ScaleFactor": 2.0,
         "SingleLine": false,
         "Silent": false,
@@ -376,9 +376,9 @@
       "UseCustomTimeZone": false,
       "CustomTimeZone": {
         "Id": "UTC",
-        "DisplayName": "UTC",
-        "StandardName": "UTC",
-        "DaylightName": "UTC",
+        "DisplayName": "(UTC) 协调世界时",
+        "StandardName": "协调世界时",
+        "DaylightName": "协调世界时",
         "BaseUtcOffset": "00:00:00",
         "AdjustmentRules": null,
         "SupportsDaylightSavingTime": false
@@ -583,7 +583,7 @@
       "AfterUploadTasks": "None"
     }
   ],
-  "FirstTimeMinimizeToTray": true,
+  "FirstTimeMinimizeToTray": false,
   "TaskListViewColumnWidths": [],
   "PreviewSplitterDistance": 335,
   "Language": "Automatic",

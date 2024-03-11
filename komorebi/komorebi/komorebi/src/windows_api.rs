@@ -22,6 +22,7 @@ use windows::Win32::Foundation::WPARAM;
 use windows::Win32::Graphics::Dwm::DwmGetWindowAttribute;
 use windows::Win32::Graphics::Dwm::DwmSetWindowAttribute;
 use windows::Win32::Graphics::Dwm::DWMWA_CLOAKED;
+use windows::Win32::Graphics::Dwm::DWMWA_EXTENDED_FRAME_BOUNDS;
 use windows::Win32::Graphics::Dwm::DWMWA_WINDOW_CORNER_PREFERENCE;
 use windows::Win32::Graphics::Dwm::DWMWCP_ROUND;
 use windows::Win32::Graphics::Dwm::DWMWINDOWATTRIBUTE;
@@ -82,6 +83,7 @@ use windows::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId;
 use windows::Win32::UI::WindowsAndMessaging::IsIconic;
 use windows::Win32::UI::WindowsAndMessaging::IsWindow;
 use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
+use windows::Win32::UI::WindowsAndMessaging::IsZoomed;
 use windows::Win32::UI::WindowsAndMessaging::PostMessageW;
 use windows::Win32::UI::WindowsAndMessaging::RealGetWindowClassW;
 use windows::Win32::UI::WindowsAndMessaging::RegisterClassW;
@@ -100,7 +102,7 @@ use windows::Win32::UI::WindowsAndMessaging::GWL_STYLE;
 use windows::Win32::UI::WindowsAndMessaging::GW_HWNDNEXT;
 use windows::Win32::UI::WindowsAndMessaging::HWND_BOTTOM;
 use windows::Win32::UI::WindowsAndMessaging::HWND_NOTOPMOST;
-use windows::Win32::UI::WindowsAndMessaging::HWND_TOPMOST;
+use windows::Win32::UI::WindowsAndMessaging::HWND_TOP;
 use windows::Win32::UI::WindowsAndMessaging::LWA_ALPHA;
 use windows::Win32::UI::WindowsAndMessaging::LWA_COLORKEY;
 use windows::Win32::UI::WindowsAndMessaging::SET_WINDOW_POS_FLAGS;
@@ -125,8 +127,7 @@ use windows::Win32::UI::WindowsAndMessaging::WS_DISABLED;
 use windows::Win32::UI::WindowsAndMessaging::WS_EX_LAYERED;
 use windows::Win32::UI::WindowsAndMessaging::WS_EX_NOACTIVATE;
 use windows::Win32::UI::WindowsAndMessaging::WS_EX_TOOLWINDOW;
-use windows::Win32::UI::WindowsAndMessaging::WS_MAXIMIZEBOX;
-use windows::Win32::UI::WindowsAndMessaging::WS_MINIMIZEBOX;
+use windows::Win32::UI::WindowsAndMessaging::WS_EX_TOPMOST;
 use windows::Win32::UI::WindowsAndMessaging::WS_POPUP;
 use windows::Win32::UI::WindowsAndMessaging::WS_SYSMENU;
 
@@ -339,14 +340,25 @@ impl WindowsApi {
         unsafe { MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST) }.0
     }
 
+    /// position window resizes the target window to the given layout, adjusting
+    /// the layout to account for any window shadow borders (the window painted
+    /// region will match layout on completion).
     pub fn position_window(hwnd: HWND, layout: &Rect, top: bool) -> Result<()> {
         let flags = SetWindowPosition::NO_ACTIVATE
             | SetWindowPosition::NO_SEND_CHANGING
             | SetWindowPosition::NO_COPY_BITS
             | SetWindowPosition::FRAME_CHANGED;
 
-        let position = if top { HWND_TOPMOST } else { HWND_BOTTOM };
-        Self::set_window_pos(hwnd, layout, position, flags.bits())
+        let shadow_rect = Self::shadow_rect(hwnd)?;
+        let rect = Rect {
+            left: layout.left + shadow_rect.left,
+            top: layout.top + shadow_rect.top,
+            right: layout.right + shadow_rect.right,
+            bottom: layout.bottom + shadow_rect.bottom,
+        };
+
+        let position = if top { HWND_TOP } else { HWND_BOTTOM };
+        Self::set_window_pos(hwnd, &rect, position, flags.bits())
     }
 
     pub fn bring_window_to_top(hwnd: HWND) -> Result<()> {
@@ -356,7 +368,7 @@ impl WindowsApi {
     pub fn raise_window(hwnd: HWND) -> Result<()> {
         let flags = SetWindowPosition::NO_MOVE;
 
-        let position = HWND_TOPMOST;
+        let position = HWND_TOP;
         Self::set_window_pos(hwnd, &Rect::default(), position, flags.bits())
     }
 
@@ -367,6 +379,18 @@ impl WindowsApi {
             SetWindowPosition::NO_ACTIVATE
         };
 
+        // TODO(raggi): This leaves the window behind the active window, which
+        // can result e.g. single pixel window borders being invisible in the
+        // case of opaque window borders (e.g. EPIC Games Launcher). Ideally
+        // we'd be able to pass a parent window to place ourselves just in front
+        // of, however the SetWindowPos API explicitly ignores that parameter
+        // unless the window being positioned is being activated - and we don't
+        // want to activate the border window here. We can hopefully find a
+        // better workaround in the future.
+        // The trade-off chosen prevents the border window from sitting over the
+        // top of other pop-up dialogs such as a file picker dialog from
+        // Firefox. When adjusting this in the future, it's important to check
+        // those dialog cases.
         let position = HWND_NOTOPMOST;
         Self::set_window_pos(hwnd, layout, position, flags.bits())
     }
@@ -378,7 +402,8 @@ impl WindowsApi {
         Self::set_window_pos(hwnd, &Rect::default(), position, flags.bits())
     }
 
-    pub fn set_window_pos(hwnd: HWND, layout: &Rect, position: HWND, flags: u32) -> Result<()> {
+    /// set_window_pos calls SetWindowPos without any accounting for Window decorations.
+    fn set_window_pos(hwnd: HWND, layout: &Rect, position: HWND, flags: u32) -> Result<()> {
         unsafe {
             SetWindowPos(
                 hwnd,
@@ -470,9 +495,36 @@ impl WindowsApi {
 
     pub fn window_rect(hwnd: HWND) -> Result<Rect> {
         let mut rect = unsafe { std::mem::zeroed() };
-        unsafe { GetWindowRect(hwnd, &mut rect) }.process()?;
 
-        Ok(Rect::from(rect))
+        if Self::dwm_get_window_attribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &mut rect).is_ok() {
+            // TODO(raggi): once we declare DPI awareness, we will need to scale the rect.
+            // let window_scale = unsafe { GetDpiForWindow(hwnd) };
+            // let system_scale = unsafe { GetDpiForSystem() };
+            // Ok(Rect::from(rect).scale(system_scale.try_into()?, window_scale.try_into()?))
+            Ok(Rect::from(rect))
+        } else {
+            unsafe { GetWindowRect(hwnd, &mut rect) }.process()?;
+            Ok(Rect::from(rect))
+        }
+    }
+
+    /// shadow_rect computes the offset of the shadow position of the window to
+    /// the window painted region. The four values in the returned Rect can be
+    /// added to a position rect to compute a size for set_window_pos that will
+    /// fill the target area, ignoring shadows.
+    fn shadow_rect(hwnd: HWND) -> Result<Rect> {
+        let window_rect = Self::window_rect(hwnd)?;
+
+        let mut srect = Default::default();
+        unsafe { GetWindowRect(hwnd, &mut srect) }.process()?;
+        let shadow_rect = Rect::from(srect);
+
+        Ok(Rect {
+            left: shadow_rect.left - window_rect.left,
+            top: shadow_rect.top - window_rect.top,
+            right: shadow_rect.right - window_rect.right,
+            bottom: shadow_rect.bottom - window_rect.bottom,
+        })
     }
 
     fn set_cursor_pos(x: i32, y: i32) -> Result<()> {
@@ -677,6 +729,10 @@ impl WindowsApi {
         unsafe { IsIconic(hwnd) }.into()
     }
 
+    pub fn is_zoomed(hwnd: HWND) -> bool {
+        unsafe { IsZoomed(hwnd) }.into()
+    }
+
     pub fn monitor_info_w(hmonitor: HMONITOR) -> Result<MONITORINFOEXW> {
         let mut ex_info = MONITORINFOEXW::default();
         ex_info.monitorInfo.cbSize = u32::try_from(std::mem::size_of::<MONITORINFOEXW>())?;
@@ -844,10 +900,10 @@ impl WindowsApi {
     pub fn create_border_window(name: PCWSTR, instance: HMODULE) -> Result<isize> {
         unsafe {
             let hwnd = CreateWindowExW(
-                WS_EX_TOOLWINDOW | WS_EX_LAYERED,
+                WS_EX_TOOLWINDOW | WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_NOACTIVATE,
                 name,
                 name,
-                WS_POPUP | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX,
+                WS_POPUP | WS_SYSMENU,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,

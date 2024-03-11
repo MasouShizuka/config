@@ -26,6 +26,8 @@ use crate::static_config::WorkspaceConfig;
 use crate::window::Window;
 use crate::window::WindowDetails;
 use crate::windows_api::WindowsApi;
+use crate::BORDER_OFFSET;
+use crate::BORDER_WIDTH;
 use crate::DEFAULT_CONTAINER_PADDING;
 use crate::DEFAULT_WORKSPACE_PADDING;
 use crate::INITIAL_CONFIGURATION_LOADED;
@@ -201,12 +203,7 @@ impl Workspace {
         Ok(())
     }
 
-    pub fn update(
-        &mut self,
-        work_area: &Rect,
-        offset: Option<Rect>,
-        invisible_borders: &Rect,
-    ) -> Result<()> {
+    pub fn update(&mut self, work_area: &Rect, offset: Option<Rect>) -> Result<()> {
         if !INITIAL_CONFIGURATION_LOADED.load(Ordering::SeqCst) {
             return Ok(());
         }
@@ -225,7 +222,7 @@ impl Workspace {
             },
         );
 
-        adjusted_work_area.add_padding(self.workspace_padding());
+        adjusted_work_area.add_padding(self.workspace_padding().unwrap_or_default());
 
         self.enforce_resize_constraints();
 
@@ -247,11 +244,19 @@ impl Workspace {
             }
         }
 
+        let managed_maximized_window = self.maximized_window().is_some();
+
         if *self.tile() {
             if let Some(container) = self.monocle_container_mut() {
                 if let Some(window) = container.focused_window_mut() {
-                    adjusted_work_area.add_padding(container_padding);
-                    window.set_position(&adjusted_work_area, invisible_borders, true)?;
+                    adjusted_work_area.add_padding(container_padding.unwrap_or_default());
+                    {
+                        let border_offset = BORDER_OFFSET.load(Ordering::SeqCst);
+                        adjusted_work_area.add_padding(border_offset);
+                        let width = BORDER_WIDTH.load(Ordering::SeqCst);
+                        adjusted_work_area.add_padding(width);
+                    }
+                    window.set_position(&adjusted_work_area, true)?;
                 };
             } else if let Some(window) = self.maximized_window_mut() {
                 window.maximize();
@@ -280,7 +285,22 @@ impl Workspace {
                             window.add_title_bar()?;
                         }
 
-                        window.set_position(layout, invisible_borders, false)?;
+                        // If a window has been unmaximized via toggle-maximize, this block
+                        // will make sure that it is unmaximized via restore_window
+                        if window.is_maximized() && !managed_maximized_window {
+                            WindowsApi::restore_window(window.hwnd());
+                        }
+
+                        let mut rect = *layout;
+                        {
+                            let border_offset = BORDER_OFFSET.load(Ordering::SeqCst);
+                            rect.add_padding(border_offset);
+
+                            let width = BORDER_WIDTH.load(Ordering::SeqCst);
+                            rect.add_padding(width);
+                        }
+
+                        window.set_position(&rect, false)?;
                     }
                 }
 

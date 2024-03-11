@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/autoload.lua
-COMMIT_ d147a06e60bfc10cb2fd7c66af7eb6871dba163e
+COMMIT_ b1491bed28ffad2adb23d704241ca4cbfcae8df3
 SOURCE_ https://github.com/rossy/mpv-open-file-dialog/blob/master/open-file-dialog.lua
 COMMIT_ 04fe818fc703d8c5dcc3a6aabe1caeed8286bdbb
 文档_ https://github.com/hooke007/MPV_lazy/discussions/106
@@ -293,6 +293,12 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
 end
 
 function find_and_add_entries()
+	local aborted = mp.get_property_native("playback-abort")
+	if aborted then
+		msg.verbose("自动队列中止：播放中止")
+		return
+	end
+
 	local path = mp.get_property("path", "")
 	local dir, filename = utils.split_path(path)
 	msg.trace(("dir: %s, filename: %s"):format(dir, filename))

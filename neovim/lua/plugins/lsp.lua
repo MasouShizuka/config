@@ -261,6 +261,7 @@ return {
                 opts.border = opts.border or "rounded"
                 return orig_util_open_floating_preview(contents, syntax, opts, ...)
             end
+
             require("lspconfig.ui.windows").default_options.border = "rounded"
 
             -- Customizing how diagnostics are displayed
@@ -328,63 +329,12 @@ return {
                         if cmds_found then vim.tbl_map(function(cmd) vim.api.nvim_del_autocmd(cmd.id) end, cmds) end
                     end
 
-                    local function toggle_global_setting(setting, callback, silent)
-                        silent = silent or false
-
-                        local buffer_enabled = vim.b[buf][setting]
-                        local global_enabled = vim.g[setting] or false
-                        local prev_enabled
-                        if buffer_enabled == nil then
-                            prev_enabled = global_enabled
-                        else
-                            prev_enabled = buffer_enabled
-                        end
-
-                        global_enabled = not global_enabled
-                        vim.g[setting] = global_enabled
-                        local enabled
-                        if buffer_enabled == nil then
-                            enabled = global_enabled
-                        else
-                            enabled = buffer_enabled
-                        end
-
-                        callback(global_enabled, prev_enabled, enabled)
-
-                        if not silent then
-                            vim.notify(string.format("%s: %s", setting, utils.bool2str(global_enabled)), vim.log.levels.INFO, { title = "Global" })
-                        end
-                    end
-
-                    local function toggle_buffer_setting(setting, callback, silent)
-                        silent = silent or false
-
-                        local buffer_enabled = vim.b[buf][setting]
-                        local global_enabled = vim.g[setting] or false
-                        if buffer_enabled == nil then
-                            buffer_enabled = global_enabled
-                        end
-                        local prev_enabled = buffer_enabled
-
-                        buffer_enabled = not buffer_enabled
-                        vim.b[buf][setting] = buffer_enabled
-                        local enabled = buffer_enabled
-
-                        callback(prev_enabled, enabled)
-
-                        if not silent then
-                            vim.notify(string.format("%s: %s", setting, utils.bool2str(buffer_enabled)), vim.log.levels.INFO, { title = "Buffer" })
-                        end
-                    end
-
                     if vim.g.lsp_enabled == nil then
                         vim.g.lsp_enabled = true
                     end
 
                     local function lsp_stop_command()
-                        vim.schedule(function()
-                            vim.api.nvim_command("LspStop")
-                        end)
+                        vim.schedule(function() vim.api.nvim_command("LspStop") end)
                     end
 
                     local function lsp_stop()
@@ -409,22 +359,22 @@ return {
                     })
 
                     vim.keymap.set("n", "<leader>ltl", function()
-                        toggle_global_setting("lsp_enabled", function(global_enabled, prev_enabled, enabled)
+                        utils.toggle_global_setting("lsp_enabled", function(global_enabled, prev_enabled, enabled)
                             if not global_enabled then
                                 vim.lsp.stop_client(vim.lsp.get_clients())
                             end
                             if (not prev_enabled or not global_enabled) and enabled then
-                                utils.refresh_current_buf()
+                                utils.refresh_buf(buf)
                             end
                         end)
                     end, { buffer = buf, desc = "Toggle LSP", silent = true })
                     vim.keymap.set("n", "<leader>ltL", function()
-                        toggle_buffer_setting("lsp_enabled", function(prev_enabled, enabled)
+                        utils.toggle_buffer_setting("lsp_enabled", function(prev_enabled, enabled)
                             if not enabled then
                                 lsp_stop_command()
                             end
                             if not prev_enabled and enabled then
-                                utils.refresh_current_buf()
+                                utils.refresh_buf(buf)
                             end
                         end)
                     end, { buffer = buf, desc = "Toggle LSP (buffer)", silent = true })
@@ -472,14 +422,14 @@ return {
                         })
 
                         vim.keymap.set("n", "<leader>ltc", function()
-                            toggle_global_setting("codelens_enabled", function(global_enabled, prev_enabled, enabled)
+                            utils.toggle_global_setting("codelens_enabled", function(global_enabled, prev_enabled, enabled)
                                 if not enabled then
                                     vim.lsp.codelens.clear()
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP codelens", silent = true })
                         vim.keymap.set("n", "<leader>ltC", function()
-                            toggle_buffer_setting("codelens_enabled", function(prev_enabled, enabled)
+                            utils.toggle_buffer_setting("codelens_enabled", function(prev_enabled, enabled)
                                 if not enabled then
                                     vim.lsp.codelens.clear()
                                 end
@@ -515,7 +465,6 @@ return {
                     if client.supports_method("textDocument/formatting") then
                         -- Gets all lsp clients that support formatting
                         -- and have not disabled it in their client config
-                        ---@param client lsp.Client
                         local function supports_format(client)
                             if
                                 client.config
@@ -527,36 +476,31 @@ return {
                             return client.supports_method("textDocument/formatting") or client.supports_method("textDocument/rangeFormatting")
                         end
 
-                        -- Gets all lsp clients that support formatting.
                         -- When a null-ls formatter is available for the current filetype,
                         -- only null-ls formatters are returned.
                         local function get_formatters(bufnr)
+                            local formatters = {}
+
                             local ft = vim.bo[bufnr].filetype
                             -- check if we have any null-ls formatters for the current filetype
                             local null_ls = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
 
-                            ---@class LazyVimFormatters
-                            local ret = {
-                                ---@type lsp.Client[]
-                                active = {},
-                                ---@type lsp.Client[]
-                                available = {},
-                                null_ls = null_ls,
-                            }
-
-                            ---@type lsp.Client[]
-                            local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
-                            for _, client in ipairs(clients) do
-                                if supports_format(client) then
-                                    if (#null_ls > 0 and client.name == "null-ls") or #null_ls == 0 then
-                                        table.insert(ret.active, client)
-                                    else
-                                        table.insert(ret.available, client)
+                            local clients = vim.lsp.get_clients({ bufnr = bufnr })
+                            if #null_ls > 0 then
+                                for _, client in ipairs(clients) do
+                                    if supports_format(client) and client.name == "null-ls" then
+                                        formatters[#formatters + 1] = client
+                                    end
+                                end
+                            else
+                                for _, client in ipairs(clients) do
+                                    if supports_format(client) then
+                                        formatters[#formatters + 1] = client
                                     end
                                 end
                             end
 
-                            return ret
+                            return formatters
                         end
 
                         -- 若 lsp 和 null-ls 都有 formatter，则优先使用 null-ls 的 formatter
@@ -564,7 +508,7 @@ return {
                             local formatters = get_formatters(args.buf)
                             local client_ids = vim.tbl_map(function(client)
                                 return client.id
-                            end, formatters.active)
+                            end, formatters)
 
                             if #client_ids == 0 then
                                 return
@@ -604,12 +548,8 @@ return {
                             events = "BufWritePre",
                         })
 
-                        vim.keymap.set("n", "<leader>ltf", function()
-                            toggle_global_setting("autoformat_enabled", function(global_enabled, prev_enabled, enabled) end)
-                        end, { buffer = buf, desc = "Toggle autoformatting", silent = true })
-                        vim.keymap.set("n", "<leader>ltF", function()
-                            toggle_buffer_setting("autoformat_enabled", function(prev_enabled, enabled) end)
-                        end, { buffer = buf, desc = "Toggle autoformatting (buffer)", silent = true })
+                        vim.keymap.set("n", "<leader>ltf", function() utils.toggle_global_setting("autoformat_enabled", function(global_enabled, prev_enabled, enabled) end) end, { buffer = buf, desc = "Toggle autoformatting", silent = true })
+                        vim.keymap.set("n", "<leader>ltF", function() utils.toggle_buffer_setting("autoformat_enabled", function(prev_enabled, enabled) end) end, { buffer = buf, desc = "Toggle autoformatting (buffer)", silent = true })
                     end
 
                     if client.supports_method("textDocument/documentHighlight") then
@@ -639,37 +579,36 @@ return {
                         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { buffer = buf, desc = "Hover symbol details", silent = true })
                     end
 
-                    -- NOTE: 等 neovim 正式版到 0.10 再解除注释
-                    -- if client.supports_method("textDocument/inlayHint") then
-                    --     if vim.g.inlay_hints_enabled == nil then
-                    --         vim.g.inlay_hints_enabled = true
-                    --     end
+                    if client.supports_method("textDocument/inlayHint") then
+                        if vim.g.inlay_hints_enabled == nil then
+                            vim.g.inlay_hints_enabled = true
+                        end
 
-                    --     if vim.b[buf].inlay_hints_enabled ~= nil then
-                    --         if vim.b[buf].inlay_hints_enabled then
-                    --             vim.lsp.inlay_hint.enable(buf, true)
-                    --         end
-                    --     else
-                    --         if vim.g.inlay_hints_enabled then
-                    --             vim.lsp.inlay_hint.enable(buf, true)
-                    --         end
-                    --     end
+                        if vim.b[buf].inlay_hints_enabled ~= nil then
+                            if vim.b[buf].inlay_hints_enabled then
+                                vim.lsp.inlay_hint.enable(buf, true)
+                            end
+                        else
+                            if vim.g.inlay_hints_enabled then
+                                vim.lsp.inlay_hint.enable(buf, true)
+                            end
+                        end
 
-                    --     vim.keymap.set("n", "<leader>lti", function()
-                    --         toggle_global_setting("inlay_hints_enabled", function(global_enabled, prev_enabled, enabled)
-                    --             if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
-                    --                 vim.lsp.inlay_hint.enable(buf, enabled)
-                    --             end
-                    --         end)
-                    --     end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
-                    --     vim.keymap.set("n", "<leader>ltI", function()
-                    --         toggle_buffer_setting("inlay_hints_enabled", function(prev_enabled, enabled)
-                    --             if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
-                    --                 vim.lsp.inlay_hint.enable(buf, enabled)
-                    --             end
-                    --         end)
-                    --     end, { buffer = buf, desc = "Toggle LSP inlay hints (buffer)", silent = true })
-                    -- end
+                        vim.keymap.set("n", "<leader>lti", function()
+                            utils.toggle_global_setting("inlay_hints_enabled", function(global_enabled, prev_enabled, enabled)
+                                if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
+                                    vim.lsp.inlay_hint.enable(buf, enabled)
+                                end
+                            end)
+                        end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
+                        vim.keymap.set("n", "<leader>ltI", function()
+                            utils.toggle_buffer_setting("inlay_hints_enabled", function(prev_enabled, enabled)
+                                if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
+                                    vim.lsp.inlay_hint.enable(buf, enabled)
+                                end
+                            end)
+                        end, { buffer = buf, desc = "Toggle LSP inlay hints (buffer)", silent = true })
+                    end
 
                     if client.supports_method("textDocument/rename") then
                         vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = buf, desc = "Rename current symbol", silent = true })
@@ -689,7 +628,7 @@ return {
                         end
 
                         local toggle_semantic_tokens = function(enabled)
-                            for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = buf })) do
+                            for _, client in ipairs(vim.lsp.get_clients({ bufnr = buf })) do
                                 if client.server_capabilities.semanticTokensProvider then
                                     vim.lsp.semantic_tokens[enabled and "start" or "stop"](buf, client.id)
                                 end
@@ -697,14 +636,14 @@ return {
                         end
 
                         vim.keymap.set("n", "<leader>lts", function()
-                            toggle_global_setting("semantic_tokens_enabled", function(global_enabled, prev_enabled, enabled)
+                            utils.toggle_global_setting("semantic_tokens_enabled", function(global_enabled, prev_enabled, enabled)
                                 if enabled ~= prev_enabled then
                                     toggle_semantic_tokens(enabled)
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP semantic highlight", silent = true })
                         vim.keymap.set("n", "<leader>ltS", function()
-                            toggle_buffer_setting("semantic_tokens_enabled", function(prev_enabled, enabled)
+                            utils.toggle_buffer_setting("semantic_tokens_enabled", function(prev_enabled, enabled)
                                 if enabled ~= prev_enabled then
                                     toggle_semantic_tokens(enabled)
                                 end

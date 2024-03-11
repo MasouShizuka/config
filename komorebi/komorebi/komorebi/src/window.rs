@@ -4,7 +4,6 @@ use std::convert::TryFrom;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Write as _;
-use std::sync::atomic::Ordering;
 
 use color_eyre::eyre;
 use color_eyre::eyre::anyhow;
@@ -19,9 +18,6 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde::Serializer;
 use windows::Win32::Foundation::HWND;
-use winput::press;
-use winput::release;
-use winput::Vk;
 
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::HidingBehaviour;
@@ -31,8 +27,6 @@ use crate::styles::ExtendedWindowStyle;
 use crate::styles::WindowStyle;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
-use crate::ALT_FOCUS_HACK;
-use crate::BORDER_OVERFLOW_IDENTIFIERS;
 use crate::FLOAT_IDENTIFIERS;
 use crate::HIDDEN_HWNDS;
 use crate::HIDING_BEHAVIOUR;
@@ -129,7 +123,7 @@ impl Window {
         HWND(self.hwnd)
     }
 
-    pub fn center(&mut self, work_area: &Rect, invisible_borders: &Rect) -> Result<()> {
+    pub fn center(&mut self, work_area: &Rect) -> Result<()> {
         let half_width = work_area.right / 2;
         let half_weight = work_area.bottom / 2;
 
@@ -140,43 +134,21 @@ impl Window {
                 right: half_width,
                 bottom: half_weight,
             },
-            invisible_borders,
             true,
         )
     }
 
-    pub fn set_position(
-        &mut self,
-        layout: &Rect,
-        invisible_borders: &Rect,
-        top: bool,
-    ) -> Result<()> {
-        let mut rect = *layout;
-
-        let border_overflows = BORDER_OVERFLOW_IDENTIFIERS.lock();
-        let regex_identifiers = REGEX_IDENTIFIERS.lock();
-
-        let title = &self.title()?;
-        let class = &self.class()?;
-        let exe_name = &self.exe()?;
-
-        let should_remove_border = !should_act(
-            title,
-            exe_name,
-            class,
-            &border_overflows,
-            &regex_identifiers,
-        );
-
-        if should_remove_border {
-            // Remove the invisible borders
-            rect.left -= invisible_borders.left;
-            rect.top -= invisible_borders.top;
-            rect.right += invisible_borders.right;
-            rect.bottom += invisible_borders.bottom;
-        }
-
+    pub fn set_position(&mut self, layout: &Rect, top: bool) -> Result<()> {
+        let rect = *layout;
         WindowsApi::position_window(self.hwnd(), &rect, top)
+    }
+
+    pub fn is_maximized(self) -> bool {
+        WindowsApi::is_zoomed(self.hwnd())
+    }
+
+    pub fn is_miminized(self) -> bool {
+        WindowsApi::is_iconic(self.hwnd())
     }
 
     pub fn hide(self) {
@@ -317,12 +289,7 @@ impl Window {
         let mut tried_resetting_foreground_access = false;
         let mut max_attempts = 10;
 
-        let hotkey_uses_alt = WindowsApi::alt_is_pressed();
         while !foregrounded && max_attempts > 0 {
-            if ALT_FOCUS_HACK.load(Ordering::SeqCst) {
-                press(Vk::Alt);
-            }
-
             match WindowsApi::set_foreground_window(self.hwnd()) {
                 Ok(()) => {
                     foregrounded = true;
@@ -343,10 +310,6 @@ impl Window {
                     }
                 }
             };
-
-            if ALT_FOCUS_HACK.load(Ordering::SeqCst) && !hotkey_uses_alt {
-                release(Vk::Alt);
-            }
         }
 
         // Center cursor in Window
@@ -438,6 +401,14 @@ impl Window {
         WindowsApi::window_text_w(self.hwnd())
     }
 
+    pub fn path(self) -> Result<String> {
+        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
+        let handle = WindowsApi::process_handle(process_id)?;
+        let path = WindowsApi::exe_path(handle);
+        WindowsApi::close_process(handle)?;
+        path
+    }
+
     pub fn exe(self) -> Result<String> {
         let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
         let handle = WindowsApi::process_handle(process_id)?;
@@ -501,8 +472,8 @@ impl Window {
             (true, _) |
             // If not allowing cloaked windows, we need to ensure the window is not cloaked
             (false, false) => {
-                if let (Ok(title), Ok(exe_name), Ok(class)) = (self.title(), self.exe(), self.class()) {
-                    return Ok(window_is_eligible(&title, &exe_name, &class, &self.style()?, &self.ex_style()?, event));
+                if let (Ok(title), Ok(exe_name), Ok(class), Ok(path)) = (self.title(), self.exe(), self.class(), self.path()) {
+                    return Ok(window_is_eligible(&title, &exe_name, &class, &path, &self.style()?, &self.ex_style()?, event));
                 }
             }
             _ => {}
@@ -516,6 +487,7 @@ fn window_is_eligible(
     title: &String,
     exe_name: &String,
     class: &String,
+    path: &str,
     style: &WindowStyle,
     ex_style: &ExtendedWindowStyle,
     event: Option<WindowManagerEvent>,
@@ -534,6 +506,7 @@ fn window_is_eligible(
         title,
         exe_name,
         class,
+        path,
         &float_identifiers,
         &regex_identifiers,
     );
@@ -543,6 +516,7 @@ fn window_is_eligible(
         title,
         exe_name,
         class,
+        path,
         &manage_identifiers,
         &regex_identifiers,
     );
@@ -556,6 +530,7 @@ fn window_is_eligible(
         title,
         exe_name,
         class,
+        path,
         &layered_whitelist,
         &regex_identifiers,
     );
@@ -583,8 +558,13 @@ fn window_is_eligible(
         || managed_override
     {
         return true;
-    } else if event.is_some() {
-        tracing::debug!("ignoring (exe: {}, title: {})", exe_name, title);
+    } else if let Some(event) = event {
+        tracing::debug!(
+            "ignoring (exe: {}, title: {}, event: {})",
+            exe_name,
+            title,
+            event
+        );
     }
 
     false
@@ -595,6 +575,7 @@ pub fn should_act(
     title: &str,
     exe_name: &str,
     class: &str,
+    path: &str,
     identifiers: &[IdWithIdentifier],
     regex_identifiers: &HashMap<String, Regex>,
 ) -> bool {
@@ -620,6 +601,11 @@ pub fn should_act(
                         should_act = true;
                     }
                 }
+                ApplicationIdentifier::Path => {
+                    if path.eq(&identifier.id) {
+                        should_act = true;
+                    }
+                }
             },
             Some(MatchingStrategy::Equals) => match identifier.kind {
                 ApplicationIdentifier::Title => {
@@ -634,6 +620,11 @@ pub fn should_act(
                 }
                 ApplicationIdentifier::Exe => {
                     if exe_name.eq(&identifier.id) {
+                        should_act = true;
+                    }
+                }
+                ApplicationIdentifier::Path => {
+                    if path.eq(&identifier.id) {
                         should_act = true;
                     }
                 }
@@ -654,6 +645,11 @@ pub fn should_act(
                         should_act = true;
                     }
                 }
+                ApplicationIdentifier::Path => {
+                    if path.starts_with(&identifier.id) {
+                        should_act = true;
+                    }
+                }
             },
             Some(MatchingStrategy::EndsWith) => match identifier.kind {
                 ApplicationIdentifier::Title => {
@@ -671,6 +667,11 @@ pub fn should_act(
                         should_act = true;
                     }
                 }
+                ApplicationIdentifier::Path => {
+                    if path.ends_with(&identifier.id) {
+                        should_act = true;
+                    }
+                }
             },
             Some(MatchingStrategy::Contains) => match identifier.kind {
                 ApplicationIdentifier::Title => {
@@ -685,6 +686,11 @@ pub fn should_act(
                 }
                 ApplicationIdentifier::Exe => {
                     if exe_name.contains(&identifier.id) {
+                        should_act = true;
+                    }
+                }
+                ApplicationIdentifier::Path => {
+                    if path.contains(&identifier.id) {
                         should_act = true;
                     }
                 }
@@ -707,6 +713,13 @@ pub fn should_act(
                 ApplicationIdentifier::Exe => {
                     if let Some(re) = regex_identifiers.get(&identifier.id) {
                         if re.is_match(exe_name) {
+                            should_act = true;
+                        }
+                    }
+                }
+                ApplicationIdentifier::Path => {
+                    if let Some(re) = regex_identifiers.get(&identifier.id) {
+                        if re.is_match(path) {
                             should_act = true;
                         }
                     }

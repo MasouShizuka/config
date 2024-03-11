@@ -206,11 +206,7 @@ impl Monitor {
         self.workspaces().len()
     }
 
-    pub fn update_focused_workspace(
-        &mut self,
-        offset: Option<Rect>,
-        invisible_borders: &Rect,
-    ) -> Result<()> {
+    pub fn update_focused_workspace(&mut self, offset: Option<Rect>) -> Result<()> {
         let work_area = *self.work_area_size();
         let offset = if self.work_area_offset().is_some() {
             self.work_area_offset()
@@ -220,7 +216,7 @@ impl Monitor {
 
         self.focused_workspace_mut()
             .ok_or_else(|| anyhow!("there is no workspace"))?
-            .update(&work_area, offset, invisible_borders)?;
+            .update(&work_area, offset)?;
 
         Ok(())
     }

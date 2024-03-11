@@ -24,6 +24,7 @@ layout_cmds = {
     "VerticalStack": "vertical-stack",
     "HorizontalStack": "horizontal-stack",
     "UltrawideVerticalStack": "ultrawide-vertical-stack",
+    "Grid": "grid",
 }
 
 layout_snake_case = {
@@ -33,6 +34,7 @@ layout_snake_case = {
     "VerticalStack": "vertical_stack",
     "HorizontalStack": "horizontal_stack",
     "UltrawideVerticalStack": "ultrawide_vertical_stack",
+    "Grid": "grid",
 }
 
 

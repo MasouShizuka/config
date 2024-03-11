@@ -1,4 +1,5 @@
 use crate::border::Border;
+use crate::colour::Colour;
 use crate::current_virtual_desktop;
 use crate::monitor::Monitor;
 use crate::ring::Ring;
@@ -28,9 +29,10 @@ use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REGEX_IDENTIFIERS;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
 use crate::WORKSPACE_RULES;
+
 use color_eyre::Result;
 use crossbeam_channel::Receiver;
-use hotwatch::notify::DebouncedEvent;
+use hotwatch::EventKind;
 use hotwatch::Hotwatch;
 use komorebi_core::config_generation::ApplicationConfigurationGenerator;
 use komorebi_core::config_generation::ApplicationOptions;
@@ -63,33 +65,13 @@ use uds_windows::UnixListener;
 use uds_windows::UnixStream;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct Rgb {
-    /// Red
-    pub r: u32,
-    /// Green
-    pub g: u32,
-    /// Blue
-    pub b: u32,
-}
-
-impl From<u32> for Rgb {
-    fn from(value: u32) -> Self {
-        Self {
-            r: value & 0xff,
-            g: value >> 8 & 0xff,
-            b: value >> 16 & 0xff,
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct ActiveWindowBorderColours {
     /// Border colour when the container contains a single window
-    pub single: Rgb,
+    pub single: Colour,
     /// Border colour when the container contains multiple windows
-    pub stack: Rgb,
+    pub stack: Colour,
     /// Border colour when the container is in monocle mode
-    pub monocle: Rgb,
+    pub monocle: Colour,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -232,7 +214,7 @@ impl From<&Monitor> for MonitorConfig {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 /// The `komorebi.json` static configuration file reference for `v0.1.20`
 pub struct StaticConfig {
-    /// Dimensions of Windows' own invisible borders; don't set these yourself unless you are told to
+    /// DEPRECATED from v0.1.22: no longer required
     #[serde(skip_serializing_if = "Option::is_none")]
     pub invisible_borders: Option<Rect>,
     /// Delta to resize windows by (default 50)
@@ -256,12 +238,14 @@ pub struct StaticConfig {
     /// Path to applications.yaml from komorebi-application-specific-configurations (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub app_specific_configuration_path: Option<PathBuf>,
-    /// Width of the active window border (default: 20)
+    /// Width of the window border (default: 8)
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active_window_border_width: Option<i32>,
-    /// Offset of the active window border (default: None)
+    #[serde(alias = "active_window_border_width")]
+    pub border_width: Option<i32>,
+    /// Offset of the window border (default: -1)
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active_window_border_offset: Option<i32>,
+    #[serde(alias = "active_window_border_offset")]
+    pub border_offset: Option<i32>,
     /// Display an active window border (default: false)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_window_border: Option<bool>,
@@ -277,10 +261,6 @@ pub struct StaticConfig {
     /// Monitor and workspace configurations
     #[serde(skip_serializing_if = "Option::is_none")]
     pub monitors: Option<Vec<MonitorConfig>>,
-    /// DEPRECATED from v0.1.20: no longer required
-    #[schemars(skip)]
-    #[serde(skip_serializing)]
-    pub alt_focus_hack: Option<bool>,
     /// Which Windows signal to use when hiding windows (default: minimize)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window_hiding_behaviour: Option<HidingBehaviour>,
@@ -316,13 +296,6 @@ pub struct StaticConfig {
 impl From<&WindowManager> for StaticConfig {
     #[allow(clippy::too_many_lines)]
     fn from(value: &WindowManager) -> Self {
-        let default_invisible_borders = Rect {
-            left: 7,
-            top: 0,
-            right: 14,
-            bottom: 7,
-        };
-
         let mut monitors = vec![];
         for m in value.monitors() {
             monitors.push(MonitorConfig::from(m));
@@ -377,13 +350,13 @@ impl From<&WindowManager> for StaticConfig {
             None
         } else {
             Option::from(ActiveWindowBorderColours {
-                single: Rgb::from(BORDER_COLOUR_SINGLE.load(Ordering::SeqCst)),
-                stack: Rgb::from(if BORDER_COLOUR_STACK.load(Ordering::SeqCst) == 0 {
+                single: Colour::from(BORDER_COLOUR_SINGLE.load(Ordering::SeqCst)),
+                stack: Colour::from(if BORDER_COLOUR_STACK.load(Ordering::SeqCst) == 0 {
                     BORDER_COLOUR_SINGLE.load(Ordering::SeqCst)
                 } else {
                     BORDER_COLOUR_STACK.load(Ordering::SeqCst)
                 }),
-                monocle: Rgb::from(if BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst) == 0 {
+                monocle: Colour::from(if BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst) == 0 {
                     BORDER_COLOUR_SINGLE.load(Ordering::SeqCst)
                 } else {
                     BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst)
@@ -392,11 +365,7 @@ impl From<&WindowManager> for StaticConfig {
         };
 
         Self {
-            invisible_borders: if value.invisible_borders == default_invisible_borders {
-                None
-            } else {
-                Option::from(value.invisible_borders)
-            },
+            invisible_borders: None,
             resize_delta: Option::from(value.resize_delta),
             window_container_behaviour: Option::from(value.window_container_behaviour),
             cross_monitor_move_behaviour: Option::from(value.cross_monitor_move_behaviour),
@@ -406,10 +375,8 @@ impl From<&WindowManager> for StaticConfig {
             focus_follows_mouse: value.focus_follows_mouse,
             mouse_follows_focus: Option::from(value.mouse_follows_focus),
             app_specific_configuration_path: None,
-            active_window_border_width: Option::from(BORDER_WIDTH.load(Ordering::SeqCst)),
-            active_window_border_offset: BORDER_OFFSET
-                .lock()
-                .map_or(None, |offset| Option::from(offset.left)),
+            border_width: Option::from(BORDER_WIDTH.load(Ordering::SeqCst)),
+            border_offset: Option::from(BORDER_OFFSET.load(Ordering::SeqCst)),
             active_window_border: Option::from(BORDER_ENABLED.load(Ordering::SeqCst)),
             active_window_border_colours: border_colours,
             default_workspace_padding: Option::from(
@@ -419,7 +386,6 @@ impl From<&WindowManager> for StaticConfig {
                 DEFAULT_CONTAINER_PADDING.load(Ordering::SeqCst),
             ),
             monitors: Option::from(monitors),
-            alt_focus_hack: None,
             window_hiding_behaviour: Option::from(*HIDING_BEHAVIOUR.lock()),
             global_work_area_offset: value.work_area_offset,
             float_rules: None,
@@ -460,49 +426,22 @@ impl StaticConfig {
             DEFAULT_WORKSPACE_PADDING.store(workspace, Ordering::SeqCst);
         }
 
-        self.active_window_border_width.map_or_else(
+        self.border_width.map_or_else(
             || {
-                BORDER_WIDTH.store(20, Ordering::SeqCst);
+                BORDER_WIDTH.store(8, Ordering::SeqCst);
             },
             |width| {
                 BORDER_WIDTH.store(width, Ordering::SeqCst);
             },
         );
-        self.active_window_border_offset.map_or_else(
-            || {
-                let mut border_offset = BORDER_OFFSET.lock();
-                *border_offset = None;
-            },
-            |offset| {
-                let new_border_offset = Rect {
-                    left: offset,
-                    top: offset,
-                    right: offset * 2,
-                    bottom: offset * 2,
-                };
 
-                let mut border_offset = BORDER_OFFSET.lock();
-                *border_offset = Some(new_border_offset);
-            },
-        );
+        BORDER_OFFSET.store(self.border_offset.unwrap_or(-1), Ordering::SeqCst);
 
         if let Some(colours) = &self.active_window_border_colours {
-            BORDER_COLOUR_SINGLE.store(
-                colours.single.r | (colours.single.g << 8) | (colours.single.b << 16),
-                Ordering::SeqCst,
-            );
-            BORDER_COLOUR_CURRENT.store(
-                colours.single.r | (colours.single.g << 8) | (colours.single.b << 16),
-                Ordering::SeqCst,
-            );
-            BORDER_COLOUR_STACK.store(
-                colours.stack.r | (colours.stack.g << 8) | (colours.stack.b << 16),
-                Ordering::SeqCst,
-            );
-            BORDER_COLOUR_MONOCLE.store(
-                colours.monocle.r | (colours.monocle.g << 8) | (colours.monocle.b << 16),
-                Ordering::SeqCst,
-            );
+            BORDER_COLOUR_SINGLE.store(u32::from(colours.single), Ordering::SeqCst);
+            BORDER_COLOUR_CURRENT.store(u32::from(colours.single), Ordering::SeqCst);
+            BORDER_COLOUR_STACK.store(u32::from(colours.stack), Ordering::SeqCst);
+            BORDER_COLOUR_MONOCLE.store(u32::from(colours.monocle), Ordering::SeqCst);
         }
 
         let mut float_identifiers = FLOAT_IDENTIFIERS.lock();
@@ -775,12 +714,6 @@ impl StaticConfig {
             incoming_events: incoming,
             command_listener: listener,
             is_paused: false,
-            invisible_borders: value.invisible_borders.unwrap_or(Rect {
-                left: 7,
-                top: 0,
-                right: 14,
-                bottom: 7,
-            }),
             virtual_desktop_id: current_virtual_desktop(),
             work_area_offset: value.global_work_area_offset,
             window_container_behaviour: value
@@ -811,10 +744,10 @@ impl StaticConfig {
 
         let bytes = SocketMessage::ReloadStaticConfiguration(path.clone()).as_bytes()?;
 
-        wm.hotwatch.watch(path, move |event| match event {
+        wm.hotwatch.watch(path, move |event| match event.kind {
             // Editing in Notepad sends a NoticeWrite while editing in (Neo)Vim sends
             // a NoticeRemove, presumably because of the use of swap files?
-            DebouncedEvent::NoticeWrite(_) | DebouncedEvent::NoticeRemove(_) => {
+            EventKind::Modify(_) | EventKind::Remove(_) => {
                 let socket = DATA_DIR.join("komorebi.sock");
                 let mut stream =
                     UnixStream::connect(socket).expect("could not connect to komorebi.sock");
@@ -927,10 +860,6 @@ impl StaticConfig {
             wm.hide_border()?;
         }
 
-        if let Some(val) = value.invisible_borders {
-            wm.invisible_borders = val;
-        }
-
         if let Some(val) = value.window_container_behaviour {
             wm.window_container_behaviour = val;
         }
@@ -962,6 +891,12 @@ impl StaticConfig {
         };
 
         wm.focus_follows_mouse = value.focus_follows_mouse;
+
+        let monitor_count = wm.monitors().len();
+
+        for i in 0..monitor_count {
+            wm.update_focused_workspace_by_monitor_idx(i)?;
+        }
 
         Ok(())
     }

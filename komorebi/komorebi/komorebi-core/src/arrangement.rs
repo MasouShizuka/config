@@ -232,11 +232,65 @@ impl Arrangement for DefaultLayout {
                 layouts
             }
             Self::UltrawideVerticalStack => ultrawide(area, len, layout_flip, resize_dimensions),
+            #[allow(
+                clippy::cast_precision_loss,
+                clippy::cast_possible_truncation,
+                clippy::cast_possible_wrap
+            )]
+            Self::Grid => {
+                // Shamelessly lifted from LeftWM
+                // https://github.com/leftwm/leftwm/blob/18675067b8450e520ef75db2ebbb0d973aa1199e/leftwm-core/src/layouts/grid_horizontal.rs
+                let mut layouts: Vec<Rect> = vec![];
+                layouts.resize(len, Rect::default());
+
+                let len = len as i32;
+
+                let num_cols = (len as f32).sqrt().ceil() as i32;
+                let mut iter = layouts.iter_mut().enumerate().peekable();
+
+                for col in 0..num_cols {
+                    let iter_peek = iter.peek().map(|x| x.0).unwrap_or_default() as i32;
+                    let remaining_windows = len - iter_peek;
+                    let remaining_columns = num_cols - col;
+                    let num_rows_in_this_col = remaining_windows / remaining_columns;
+
+                    let win_height = area.bottom / num_rows_in_this_col;
+                    let win_width = area.right / num_cols;
+
+                    for row in 0..num_rows_in_this_col {
+                        if let Some((_idx, win)) = iter.next() {
+                            let mut left = area.left + win_width * col;
+                            let mut top = area.top + win_height * row;
+
+                            match layout_flip {
+                                Some(Axis::Horizontal) => {
+                                    left = area.right - win_width * (col + 1) + area.left;
+                                }
+                                Some(Axis::Vertical) => {
+                                    top = area.bottom - win_height * (row + 1) + area.top;
+                                }
+                                Some(Axis::HorizontalAndVertical) => {
+                                    left = area.right - win_width * (col + 1) + area.left;
+                                    top = area.bottom - win_height * (row + 1) + area.top;
+                                }
+                                None => {} // No flip
+                            }
+
+                            win.bottom = win_height;
+                            win.right = win_width;
+                            win.left = left;
+                            win.top = top;
+                        }
+                    }
+                }
+
+                layouts
+            }
         };
 
         dimensions
             .iter_mut()
-            .for_each(|l| l.add_padding(container_padding));
+            .for_each(|l| l.add_padding(container_padding.unwrap_or_default()));
 
         dimensions
     }
@@ -359,7 +413,7 @@ impl Arrangement for CustomLayout {
 
         dimensions
             .iter_mut()
-            .for_each(|l| l.add_padding(container_padding));
+            .for_each(|l| l.add_padding(container_padding.unwrap_or_default()));
 
         dimensions
     }

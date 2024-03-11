@@ -4,6 +4,12 @@ function M.bool2str(bool)
     return bool and "On" or "Off"
 end
 
+function M.clear(a)
+    for key, _ in pairs(a) do
+        a[key] = nil
+    end
+end
+
 --- Run a shell command and capture the output and if the command succeeded or failed
 ---@param cmd string|string[] The terminal command to execute
 ---@param show_error? boolean Whether or not to show an unsuccessful command as an error to the user
@@ -72,14 +78,23 @@ function M.extra_view_toggle(update, opts)
     for group in vim.fn.execute("augroup"):gmatch("%S+") do
         if group == config.filetype then
             for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                if not vim.api.nvim_win_is_valid(win) then
+                    goto continue
+                end
+
                 local buf = vim.api.nvim_win_get_buf(win)
                 local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
                 if ft == config.filetype then
-                    vim.api.nvim_win_close(win, false)
+                    vim.api.nvim_win_close(win, true)
                     vim.api.nvim_del_augroup_by_name(config.filetype)
-                    return
+
+                    break
                 end
+
+                ::continue::
             end
+
+            return
         end
     end
 
@@ -179,7 +194,7 @@ end
 
 function M.is_bigfile(buf)
     local max_filesize = 500 * 1024
-    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+    local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
     if ok and stats and stats.size > max_filesize then
         return true
     end
@@ -266,16 +281,20 @@ function M.json_load(file)
 end
 
 function M.move(key, set_jumps)
-    local buf = vim.api.nvim_get_current_buf()
-    local keep_center = vim.b[buf].keep_center or false
     if set_jumps == nil then
         set_jumps = true
+    end
+
+    local buf = vim.api.nvim_get_current_buf()
+    local cursor_center_enabled = vim.g.cursor_center_enabled or false
+    if vim.b[buf].cursor_center_enabled ~= nil then
+        cursor_center_enabled = vim.b[buf].cursor_center_enabled
     end
 
     local prefix = ""
     local postfix = ""
 
-    if keep_center then
+    if cursor_center_enabled then
         postfix = postfix .. "zz"
     end
 
@@ -295,21 +314,41 @@ function M.move(key, set_jumps)
 end
 
 function M.refresh_buf(buf, timeout, timer)
-    vim.api.nvim_create_autocmd("BufEnter", {
-        buffer = buf,
-        callback = function()
-            M.defer(function()
-                vim.cmd.edit()
-            end, timeout, timer)
-        end,
-        once = true,
-    })
-end
+    local function focus_buf(buf)
+        if vim.api.nvim_get_current_buf() ~= buf then
+            for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                if not vim.api.nvim_win_is_valid(win) then
+                    goto continue
+                end
 
-function M.refresh_current_buf(timeout, timer)
-    M.defer(function()
+                if vim.api.nvim_win_get_buf(win) == buf then
+                    vim.api.nvim_set_current_win(win)
+                    break
+                end
+
+                ::continue::
+            end
+        end
+    end
+
+    local function focus_and_refresh_buf(buf)
+        focus_buf(buf)
         vim.cmd.edit()
-    end, timeout, timer)
+    end
+
+    if buf == vim.api.nvim_get_current_buf() then
+        M.defer(function() focus_and_refresh_buf(buf) end, timeout, timer)
+    else
+        local name = string.format("Buf%sRefresh", buf)
+        vim.api.nvim_create_autocmd("BufEnter", {
+            buffer = buf,
+            callback = function()
+                M.defer(function() focus_and_refresh_buf(buf) end, timeout, timer)
+                vim.api.nvim_del_augroup_by_name(name)
+            end,
+            group = vim.api.nvim_create_augroup(name, { clear = true }),
+        })
+    end
 end
 
 --- Open a URL under the cursor with the current operating system
@@ -330,6 +369,57 @@ function M.system_open(path)
     end
 
     vim.fn.jobstart(vim.fn.extend(cmd, { path or vim.fn.expand("<cfile>") }), { detach = true })
+end
+
+function M.toggle_buffer_setting(setting, callback, silent)
+    silent = silent or false
+
+    local buf = vim.api.nvim_get_current_buf()
+    local buffer_enabled = vim.b[buf][setting]
+    local global_enabled = vim.g[setting] or false
+    if buffer_enabled == nil then
+        buffer_enabled = global_enabled
+    end
+    local prev_enabled = buffer_enabled
+
+    buffer_enabled = not buffer_enabled
+    vim.b[buf][setting] = buffer_enabled
+    local enabled = buffer_enabled
+
+    callback(prev_enabled, enabled)
+
+    if not silent then
+        vim.notify(string.format("%s: %s", setting, M.bool2str(buffer_enabled)), vim.log.levels.INFO, { title = "Buffer" })
+    end
+end
+
+function M.toggle_global_setting(setting, callback, silent)
+    silent = silent or false
+
+    local buf = vim.api.nvim_get_current_buf()
+    local buffer_enabled = vim.b[buf][setting]
+    local global_enabled = vim.g[setting] or false
+    local prev_enabled
+    if buffer_enabled == nil then
+        prev_enabled = global_enabled
+    else
+        prev_enabled = buffer_enabled
+    end
+
+    global_enabled = not global_enabled
+    vim.g[setting] = global_enabled
+    local enabled
+    if buffer_enabled == nil then
+        enabled = global_enabled
+    else
+        enabled = buffer_enabled
+    end
+
+    callback(global_enabled, prev_enabled, enabled)
+
+    if not silent then
+        vim.notify(string.format("%s: %s", setting, M.bool2str(global_enabled)), vim.log.levels.INFO, { title = "Global" })
+    end
 end
 
 -- https://github.com/AndrewRadev/undoquit.vim

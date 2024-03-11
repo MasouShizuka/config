@@ -6,16 +6,19 @@ local M = {}
 M.dap = function(mason_nvim_dap)
     return {
         codelldb = function(config)
+            local command = path.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb"
             local detached = true
             if environment.is_windows then
+                command = command .. ".exe"
                 detached = false
             end
+
             config.adapters = {
                 type = "server",
                 port = "${port}",
                 executable = {
                     -- CHANGE THIS to your path!
-                    command = path.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb",
+                    command = command,
                     args = { "--port", "${port}" },
                     -- On windows you may have to uncomment this:
                     detached = detached,

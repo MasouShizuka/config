@@ -18,10 +18,10 @@ return {
     --                 opts.section.footer.val = { string.format("%s Neovim loaded %s plugins %s in %s ms %s", icons.misc.bolt, stats.count, icons.misc.plug, ms, icons.misc.bolt) }
     --                 opts.section.footer.opts.hl = "DashboardFooter"
     --                 pcall(vim.cmd.AlphaRedraw)
+    --                 vim.api.nvim_del_augroup_by_name("AlphaFooter")
     --             end,
     --             desc = "Add Alpha dashboard footer",
     --             group = vim.api.nvim_create_augroup("AlphaFooter", { clear = true }),
-    --             once = true,
     --             pattern = "LazyVimStarted",
     --         })
     --     end,

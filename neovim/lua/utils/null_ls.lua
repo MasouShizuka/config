@@ -9,12 +9,29 @@ M.null_ls_builtins = function(null_ls)
                 },
             }))
         end,
-        -- NOTE: clangd 本身带有 clang-format，但是不能从命令行传递 custom style，只能传递已有的 style
-        -- 若 clangd 支持从命令行传递 custom style，则可以去除 null-ls 的 clang-format
+        -- NOTE: clangd 本身带有 clang-format，但是不能传递 custom style，只能通过 --fallback-style 传递预定义的 style
+        -- 若 clangd 支持从命令行传递 custom style，则去除 clang-format
         clang_format = function(source_name, methods)
+            local style = {
+                "BasedOnStyle: LLVM",
+                "AlignArrayOfStructures: Right",
+                "AlignTrailingComments: {Kind: Always}",
+                "ColumnLimit: 10000",
+                "IndentWidth: 4",
+                "PointerAlignment: Left",
+            }
+            local style_str = "{"
+            for index, value in ipairs(style) do
+                style_str = style_str .. value
+                if index ~= #style then
+                    style_str = style_str .. ", "
+                end
+            end
+            style_str = style_str .. "}"
+
             null_ls.register(null_ls.builtins.formatting.clang_format.with({
                 extra_args = {
-                    "--style", "{BasedOnStyle: LLVM, AlignArrayOfStructures: Right, AlignTrailingComments: {Kind: Always}, ColumnLimit: 10000, IndentWidth: 4, PointerAlignment: Left}",
+                    "--style", style_str,
                 },
             }))
         end,
@@ -30,10 +47,8 @@ M.null_ls_builtins = function(null_ls)
                 },
             }))
         end,
-        shellcheck = function(source_name, methods)
-            null_ls.register(null_ls.builtins.code_actions.shellcheck)
-            null_ls.register(null_ls.builtins.diagnostics.shellcheck)
-        end,
+        -- bashls 可通过 shellcheckPath 启用 shellcheck
+        shellcheck = function(source_name, methods) end,
         shfmt = function(source_name, methods)
             null_ls.register(null_ls.builtins.formatting.shfmt.with({
                 extra_args = {

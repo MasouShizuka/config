@@ -28,6 +28,8 @@ use crate::BORDER_COLOUR_STACK;
 use crate::BORDER_ENABLED;
 use crate::BORDER_HIDDEN;
 use crate::BORDER_HWND;
+use crate::BORDER_OFFSET;
+use crate::BORDER_WIDTH;
 use crate::DATA_DIR;
 use crate::HIDDEN_HWNDS;
 use crate::REGEX_IDENTIFIERS;
@@ -109,7 +111,6 @@ impl WindowManager {
             _ => {}
         }
 
-        let invisible_borders = self.invisible_borders;
         let offset = self.work_area_offset;
 
         for (i, monitor) in self.monitors_mut().iter_mut().enumerate() {
@@ -123,7 +124,7 @@ impl WindowManager {
             for (j, workspace) in monitor.workspaces_mut().iter_mut().enumerate() {
                 let reaped_orphans = workspace.reap_orphans()?;
                 if reaped_orphans.0 > 0 || reaped_orphans.1 > 0 {
-                    workspace.update(&work_area, offset, &invisible_borders)?;
+                    workspace.update(&work_area, offset)?;
                     tracing::info!(
                         "reaped {} orphan window(s) and {} orphaned container(s) on monitor: {}, workspace: {}",
                         reaped_orphans.0,
@@ -188,6 +189,7 @@ impl WindowManager {
                     let title = &window.title()?;
                     let exe_name = &window.exe()?;
                     let class = &window.class()?;
+                    let path = &window.path()?;
 
                     // We don't want to purge windows that have been deliberately hidden by us, eg. when
                     // they are not on the top of a container stack.
@@ -196,6 +198,7 @@ impl WindowManager {
                         title,
                         exe_name,
                         class,
+                        path,
                         &tray_and_multi_window_identifiers,
                         &regex_identifiers,
                     );
@@ -313,21 +316,24 @@ impl WindowManager {
                 }
             }
             WindowManagerEvent::MoveResizeStart(_, window) => {
-                let monitor_idx = self.focused_monitor_idx();
-                let workspace_idx = self
-                    .focused_monitor()
-                    .ok_or_else(|| anyhow!("there is no monitor with this idx"))?
-                    .focused_workspace_idx();
-                let container_idx = self
-                    .focused_monitor()
-                    .ok_or_else(|| anyhow!("there is no monitor with this idx"))?
-                    .focused_workspace()
-                    .ok_or_else(|| anyhow!("there is no workspace with this idx"))?
-                    .focused_container_idx();
+                if *self.focused_workspace()?.tile() {
+                    let monitor_idx = self.focused_monitor_idx();
+                    let workspace_idx = self
+                        .focused_monitor()
+                        .ok_or_else(|| anyhow!("there is no monitor with this idx"))?
+                        .focused_workspace_idx();
+                    let container_idx = self
+                        .focused_monitor()
+                        .ok_or_else(|| anyhow!("there is no monitor with this idx"))?
+                        .focused_workspace()
+                        .ok_or_else(|| anyhow!("there is no workspace with this idx"))?
+                        .focused_container_idx();
 
-                WindowsApi::bring_window_to_top(window.hwnd())?;
+                    WindowsApi::bring_window_to_top(window.hwnd())?;
 
-                self.pending_move_op = Option::from((monitor_idx, workspace_idx, container_idx));
+                    self.pending_move_op =
+                        Option::from((monitor_idx, workspace_idx, container_idx));
+                }
             }
             WindowManagerEvent::MoveResizeEnd(_, window) => {
                 // We need this because if the event ends on a different monitor,
@@ -341,7 +347,6 @@ impl WindowManager {
                     .ok_or_else(|| anyhow!("cannot get monitor idx from current position"))?;
 
                 let new_window_behaviour = self.window_container_behaviour;
-                let invisible_borders = self.invisible_borders;
 
                 let workspace = self.focused_workspace_mut()?;
                 if !workspace
@@ -351,7 +356,7 @@ impl WindowManager {
                 {
                     let focused_container_idx = workspace.focused_container_idx();
 
-                    let mut new_position = WindowsApi::window_rect(window.hwnd())?;
+                    let new_position = WindowsApi::window_rect(window.hwnd())?;
 
                     let old_position = *workspace
                         .latest_layout()
@@ -376,12 +381,6 @@ impl WindowManager {
                         }
                     }
 
-                    // Adjust for the invisible borders
-                    new_position.left += invisible_borders.left;
-                    new_position.top += invisible_borders.top;
-                    new_position.right -= invisible_borders.right;
-                    new_position.bottom -= invisible_borders.bottom;
-
                     let resize = Rect {
                         left: new_position.left - old_position.left,
                         top: new_position.top - old_position.top,
@@ -391,10 +390,14 @@ impl WindowManager {
 
                     // If we have moved across the monitors, use that override, otherwise determine
                     // if a move has taken place by ruling out a resize
+                    let right_bottom_constant = ((BORDER_WIDTH.load(Ordering::SeqCst)
+                        + BORDER_OFFSET.load(Ordering::SeqCst))
+                        * 2)
+                    .abs();
+
                     let is_move = moved_across_monitors
-                        || resize.right == 0 && resize.bottom == 0
-                        || resize.right.abs() == invisible_borders.right
-                            && resize.bottom.abs() == invisible_borders.bottom;
+                        || resize.right.abs() == right_bottom_constant
+                            && resize.bottom.abs() == right_bottom_constant;
 
                     if is_move {
                         tracing::info!("moving with mouse");
@@ -486,17 +489,17 @@ impl WindowManager {
                         let mut ops = vec![];
 
                         macro_rules! resize_op {
-                        ($coordinate:expr, $comparator:tt, $direction:expr) => {{
-                            let adjusted = $coordinate * 2;
-                            let sizing = if adjusted $comparator 0 {
-                                Sizing::Decrease
-                            } else {
-                                Sizing::Increase
-                            };
+                            ($coordinate:expr, $comparator:tt, $direction:expr) => {{
+                                let adjusted = $coordinate * 2;
+                                let sizing = if adjusted $comparator 0 {
+                                    Sizing::Decrease
+                                } else {
+                                    Sizing::Increase
+                                };
 
-                            ($direction, sizing, adjusted.abs())
-                        }};
-                    }
+                                ($direction, sizing, adjusted.abs())
+                            }};
+                        }
 
                         if resize.left != 0 {
                             ops.push(resize_op!(resize.left, >, OperationDirection::Left));
@@ -506,11 +509,14 @@ impl WindowManager {
                             ops.push(resize_op!(resize.top, >, OperationDirection::Up));
                         }
 
-                        if resize.right != 0 && resize.left == 0 {
+                        let top_left_constant = BORDER_WIDTH.load(Ordering::SeqCst)
+                            + BORDER_OFFSET.load(Ordering::SeqCst);
+
+                        if resize.right != 0 && resize.left == top_left_constant {
                             ops.push(resize_op!(resize.right, <, OperationDirection::Right));
                         }
 
-                        if resize.bottom != 0 && resize.top == 0 {
+                        if resize.bottom != 0 && resize.top == top_left_constant {
                             ops.push(resize_op!(resize.bottom, <, OperationDirection::Down));
                         }
 
@@ -556,6 +562,8 @@ impl WindowManager {
             }
         };
 
+        // NOTE: 非 Tiling 状态时仍保留 border
+
         if *self.focused_workspace()?.tile() && BORDER_ENABLED.load(Ordering::SeqCst) {
             match event {
                 WindowManagerEvent::MoveResizeStart(_, _) => {
@@ -567,6 +575,7 @@ impl WindowManager {
                 | WindowManagerEvent::Show(_, window)
                 | WindowManagerEvent::FocusChange(_, window)
                 | WindowManagerEvent::Hide(_, window)
+                | WindowManagerEvent::Uncloak(_, window)
                 | WindowManagerEvent::Minimize(_, window) => {
                     let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
                     let mut target_window = None;
@@ -624,16 +633,12 @@ impl WindowManager {
                                 Ordering::SeqCst,
                             );
                         }
-                        let window = target_window;
-                        let mut rect = WindowsApi::window_rect(window.hwnd())?;
-                        rect.top -= self.invisible_borders.bottom;
-                        rect.bottom += self.invisible_borders.bottom;
 
                         let activate = BORDER_HIDDEN.load(Ordering::SeqCst);
 
                         WindowsApi::invalidate_border_rect()?;
                         // NOTE: 更新 border
-                        border.set_position(target_window, &self.invisible_borders, true)?;
+                        border.set_position(target_window, true)?;
 
                         if activate {
                             BORDER_HIDDEN.store(false, Ordering::SeqCst);
@@ -646,7 +651,7 @@ impl WindowManager {
 
         // If we unmanaged a window, it shouldn't be immediately hidden behind managed windows
         if let WindowManagerEvent::Unmanage(window) = event {
-            window.center(&self.focused_monitor_work_area()?, &invisible_borders)?;
+            window.center(&self.focused_monitor_work_area()?)?;
         }
 
         // If there are no more windows on the workspace, we shouldn't show the border window

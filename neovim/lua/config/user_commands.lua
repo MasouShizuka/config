@@ -22,22 +22,25 @@ if is_which_key_available then
     })
 end
 
--- toggle keep cursor center
-local function toggle_keep_cursor_center()
-    local buf = vim.api.nvim_get_current_buf()
-    local keep_center = vim.b[buf].keep_center or false
-
-    keep_center = not keep_center
-    vim.b[buf].keep_center = keep_center
-
-    if keep_center then
-        vim.cmd("normal! zz")
-    end
-
-    vim.notify(string.format("Keep Cursor Center: %s", utils.bool2str(keep_center)), vim.log.levels.INFO, { title = "Buffer" })
+-- toggle cursor center
+if vim.g.cursor_center_enabled == nil then
+    vim.g.cursor_center_enabled = false
 end
-vim.api.nvim_create_user_command("ToggleKeepCursorCenter", toggle_keep_cursor_center, { desc = "Toggle keep cursor center" })
-vim.keymap.set("n", "<leader>ctc", toggle_keep_cursor_center, { desc = "Toggle keep cursor center", silent = true })
+
+vim.keymap.set("n", "<leader>ctc", function()
+    utils.toggle_global_setting("cursor_center_enabled", function(global_enabled, prev_enabled, enabled)
+        if enabled then
+            vim.cmd("normal! zz")
+        end
+    end)
+end, { desc = "Toggle cursor center", silent = true })
+vim.keymap.set("n", "<leader>ctC", function()
+    utils.toggle_buffer_setting("cursor_center_enabled", function(prev_enabled, enabled)
+        if enabled then
+            vim.cmd("normal! zz")
+        end
+    end)
+end, { desc = "Toggle cursor center (buffer)", silent = true })
 
 if environment.is_vscode then
     local vscode = require("vscode-neovim")
@@ -68,7 +71,7 @@ else
         vim.api.nvim_set_option_value("fileformat", fileformat, { scope = "local" })
 
         vim.cmd.write()
-        utils.refresh_current_buf()
+        utils.refresh_buf(vim.api.nvim_get_current_buf())
 
         vim.notify(string.format("Fileformat: %s", fileformat), vim.log.levels.INFO, { title = "Buffer" })
     end
@@ -173,7 +176,7 @@ if not environment.is_vscode then
     vim.api.nvim_create_user_command("DocsViewToggle", function()
         utils.extra_view_toggle(function(buf, win)
             local can_hover = false
-            for _, client in ipairs(vim.lsp.get_active_clients()) do
+            for _, client in ipairs(vim.lsp.get_clients()) do
                 if client.supports_method("textDocument/hover") then
                     can_hover = true
                     break
@@ -186,7 +189,6 @@ if not environment.is_vscode then
             vim.lsp.buf_request(0, "textDocument/hover", vim.lsp.util.make_position_params(), function(err, result, ctx, config)
                 if win and vim.api.nvim_win_is_valid(win) and result and result.contents then
                     local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
-                    markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
                     if vim.tbl_isempty(markdown_lines) then
                         return
                     end

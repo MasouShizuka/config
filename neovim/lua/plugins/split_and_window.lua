@@ -4,6 +4,8 @@ local keymap = require("utils.keymap")
 local utils = require("utils")
 
 return {
+    -- NOTE: 需要对 lua/windows/lib/frame.lua 的 Frame:autowidth 函数的 curwinLeaf 参数添加 nil 判断
+    -- https://github.com/anuvyklack/windows.nvim/issues/31
     {
         "anuvyklack/windows.nvim",
         cmd = {
@@ -44,35 +46,8 @@ return {
     {
         "folke/edgy.nvim",
         config = function(_, opts)
-            require("edgy").setup(opts)
-
-            local function close_all_wins(pos, toggle_filetype_list)
-                local result = false
-                for p, edgebar in pairs(require("edgy.config").layout) do
-                    if p == pos then
-                        if #edgebar.wins > 0 then
-                            result = true
-                        end
-
-                        for _, win in ipairs(edgebar.wins) do
-                            if vim.api.nvim_win_is_valid(win.win) then
-                                local buf = vim.api.nvim_win_get_buf(win.win)
-                                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                                local close_function = toggle_filetype_list[ft]
-                                if close_function and type(close_function) == "function" then
-                                    close_function()
-                                else
-                                    win:close()
-                                end
-                            end
-                        end
-
-                        break
-                    end
-                end
-
-                return result
-            end
+            local edgy = require("edgy")
+            edgy.setup(opts)
 
             -- local function focus_nth_win(pos, n)
             --     for p, edgebar in pairs(require("edgy.config").layout) do
@@ -91,20 +66,36 @@ return {
 
             local prev_tabpage
             local prev_win
-            local function toggle(pos, toggle_filetype_list)
-                local is_focused, close_function = filetype.is_toggle_filetype_focused(toggle_filetype_list, false)
+            local function toggle(pos)
+                local toggle_filetype_list = filetype.toggle_filetype_lists[pos]
+
+                local is_focused, _ = filetype.is_toggle_filetype_focused(toggle_filetype_list)
                 if is_focused then
-                    if not close_all_wins(pos, toggle_filetype_list) then
-                        close_function()
+                    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                        if not vim.api.nvim_win_is_valid(win) then
+                            goto continue
+                        end
+
+                        local buf = vim.api.nvim_win_get_buf(win)
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                        local is_toggle_filetype, func = filetype.is_toggle_filetype(ft, toggle_filetype_list)
+                        if is_toggle_filetype then
+                            local close_func = func.close
+                            if type(close_func) == "function" then
+                                close_func()
+                            else
+                                vim.api.nvim_win_close(win, true)
+                            end
+                        end
+
+                        ::continue::
                     end
-                    require("edgy").close(pos)
 
                     return
                 end
 
                 local callback
-
-                local is_opened, win = filetype.is_toggle_filetype_opened(toggle_filetype_list, false)
+                local is_opened, win = filetype.is_toggle_filetype_opened(toggle_filetype_list)
                 if is_opened then
                     callback = function()
                         -- if not focus_nth_win(pos, 1) then
@@ -114,25 +105,22 @@ return {
                     end
                 else
                     callback = function()
-                        require("edgy").open(pos)
+                        edgy.open(pos)
                     end
                 end
+                callback()
 
                 if not filetype.is_in_toggle_filetype_list(vim.bo.filetype) then
                     prev_tabpage = vim.api.nvim_get_current_tabpage()
                     prev_win = vim.api.nvim_get_current_win()
                 end
-
-                callback()
             end
 
-            vim.keymap.set("n", keymap["<c-1>"], function()
-                toggle("left", filetype.toggle_filetype_list_of_left)
-            end, { desc = "Focus left panel", silent = true })
+            vim.keymap.set("n", keymap["<c-1>"], function() toggle("left") end, { desc = "Focus left panel", silent = true })
             vim.keymap.set("n", keymap["<c-2>"], function()
                 -- for _, edgebar in pairs(require("edgy.config").layout) do
                 --     if #edgebar.wins > 0 then
-                --         require("edgy").goto_main()
+                --         edgy.goto_main()
                 --         return
                 --     end
                 -- end
@@ -140,7 +128,7 @@ return {
                 if vim.api.nvim_get_current_tabpage() == prev_tabpage and prev_win then
                     vim.api.nvim_set_current_win(prev_win)
                 else
-                    filetype.skip_filetype(filetype.skip_filetype_list_to_main, "W")
+                    filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1)
                 end
             end, { desc = "Focus main editor", silent = true })
             vim.keymap.set("n", keymap["<c-3>"], function()
@@ -150,11 +138,9 @@ return {
                     return
                 end
 
-                toggle("bottom", filetype.toggle_filetype_list_of_bottom)
+                toggle("bottom")
             end, { desc = "Focus bottom panel", silent = true })
-            vim.keymap.set("n", keymap["<c-4>"], function()
-                toggle("right", filetype.toggle_filetype_list_of_right)
-            end, { desc = "Focus right panel", silent = true })
+            vim.keymap.set("n", keymap["<c-4>"], function() toggle("right") end, { desc = "Focus right panel", silent = true })
         end,
         enabled = not environment.is_vscode,
         init = function()

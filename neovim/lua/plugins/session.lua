@@ -26,26 +26,23 @@ return {
                         end
                     end
                 end,
-                group = vim.api.nvim_create_augroup("NeovimSessionManagerFile", { clear = true }),
+                group = vim.api.nvim_create_augroup("SessionManagerFile", { clear = true }),
                 pattern = "SessionLoadPost",
             })
 
-            -- 由于使用 file event 的方式激活 nvim-lspconfig 和 nvim-treesitter，需要刷新 session 中的 buffer 使 plugins 生效
+            -- 由于使用 file event 的方式激活 nvim-lspconfig 和 nvim-treesitter，需要刷新 session 中的 buf 使 plugins 生效
             vim.api.nvim_create_autocmd("User", {
                 callback = function()
                     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                         if vim.api.nvim_buf_is_valid(buf) and buf ~= vim.api.nvim_get_current_buf() then
-                            local filetype = vim.bo[buf].filetype
-                            if vim.tbl_contains(lsp.lsp_filetype_list, filetype) then
-                                utils.refresh_buf(buf, 1, true)
-                            end
-                            if vim.tbl_contains(treesitter.treesitter_filetype_list, filetype) then
+                            local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                            if vim.tbl_contains(lsp.lsp_filetype_list, filetype) or vim.tbl_contains(treesitter.treesitter_filetype_list, filetype) then
                                 utils.refresh_buf(buf, 1, true)
                             end
                         end
                     end
                 end,
-                group = vim.api.nvim_create_augroup("NeovimSessionManagerRefresh", { clear = true }),
+                group = vim.api.nvim_create_augroup("SessionManagerRefresh", { clear = true }),
                 pattern = "SessionLoadPost",
             })
         end,

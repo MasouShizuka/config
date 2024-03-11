@@ -411,7 +411,8 @@
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
-        "*.md": "default"
+        "*.md": "default",
+        "{git,gitlens}:/**/*.{md,csv}": "default"
     },
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,

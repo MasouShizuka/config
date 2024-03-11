@@ -13,11 +13,13 @@ use windows::Win32::Graphics::Gdi::BeginPaint;
 use windows::Win32::Graphics::Gdi::CreatePen;
 use windows::Win32::Graphics::Gdi::EndPaint;
 use windows::Win32::Graphics::Gdi::Rectangle;
+use windows::Win32::Graphics::Gdi::RoundRect;
 use windows::Win32::Graphics::Gdi::SelectObject;
 use windows::Win32::Graphics::Gdi::ValidateRect;
 use windows::Win32::Graphics::Gdi::HDC;
 use windows::Win32::Graphics::Gdi::HMONITOR;
 use windows::Win32::Graphics::Gdi::PAINTSTRUCT;
+use windows::Win32::Graphics::Gdi::PS_INSIDEFRAME;
 use windows::Win32::Graphics::Gdi::PS_SOLID;
 use windows::Win32::UI::Accessibility::HWINEVENTHOOK;
 use windows::Win32::UI::WindowsAndMessaging::DefWindowProcW;
@@ -37,6 +39,7 @@ use crate::ring::Ring;
 use crate::window::Window;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
+use crate::winevent::WinEvent;
 use crate::winevent_listener;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_RECT;
@@ -44,6 +47,7 @@ use crate::BORDER_WIDTH;
 use crate::DISPLAY_INDEX_PREFERENCES;
 use crate::MONITOR_INDEX_PREFERENCES;
 use crate::TRANSPARENCY_COLOUR;
+use crate::WINDOWS_11;
 
 pub extern "system" fn valid_display_monitors(
     hmonitor: HMONITOR,
@@ -146,12 +150,17 @@ pub extern "system" fn enum_window(hwnd: HWND, lparam: LPARAM) -> BOOL {
     let is_visible = WindowsApi::is_window_visible(hwnd);
     let is_window = WindowsApi::is_window(hwnd);
     let is_minimized = WindowsApi::is_iconic(hwnd);
+    let is_maximized = WindowsApi::is_zoomed(hwnd);
 
     if is_visible && is_window && !is_minimized {
         let window = Window { hwnd: hwnd.0 };
 
         if let Ok(should_manage) = window.should_manage(None) {
             if should_manage {
+                if is_maximized {
+                    WindowsApi::restore_window(hwnd);
+                }
+
                 let mut container = Container::default();
                 container.windows_mut().push_back(window);
                 containers.push_back(container);
@@ -178,7 +187,10 @@ pub extern "system" fn win_event_hook(
 
     let window = Window { hwnd: hwnd.0 };
 
-    let winevent = unsafe { ::std::mem::transmute(event) };
+    let winevent = match WinEvent::try_from(event) {
+        Ok(event) => event,
+        Err(_) => return,
+    };
     let event_type = match WindowManagerEvent::from_win_event(winevent, window) {
         None => return,
         Some(event) => event,
@@ -206,7 +218,7 @@ pub extern "system" fn border_window(
                 let mut ps = PAINTSTRUCT::default();
                 let hdc = BeginPaint(window, &mut ps);
                 let hpen = CreatePen(
-                    PS_SOLID,
+                    PS_SOLID | PS_INSIDEFRAME,
                     BORDER_WIDTH.load(Ordering::SeqCst),
                     COLORREF(BORDER_COLOUR_CURRENT.load(Ordering::SeqCst)),
                 );
@@ -214,8 +226,17 @@ pub extern "system" fn border_window(
 
                 SelectObject(hdc, hpen);
                 SelectObject(hdc, hbrush);
-                // NOTE: 修正 border 的位置
-                Rectangle(hdc, 1, 1, border_rect.right, border_rect.bottom);
+                // TODO(raggi): this is approximately the correct curvature for
+                // the top left of a Windows 11 window (DWMWCP_DEFAULT), but
+                // often the bottom right has a different shape. Furthermore if
+                // the window was made with DWMWCP_ROUNDSMALL then this is the
+                // wrong size.  In the future we should read the DWM properties
+                // of windows and attempt to match appropriately.
+                if *WINDOWS_11 {
+                    RoundRect(hdc, 0, 0, border_rect.right, border_rect.bottom, 20, 20);
+                } else {
+                    Rectangle(hdc, 0, 0, border_rect.right, border_rect.bottom);
+                }
                 EndPaint(window, &ps);
                 ValidateRect(window, None);
 
@@ -240,9 +261,9 @@ pub extern "system" fn hidden_window(
         match message {
             WM_DISPLAYCHANGE => {
                 let event_type = WindowManagerEvent::DisplayChange(Window { hwnd: window.0 });
-            winevent_listener::event_tx()
-                .send(event_type)
-                .expect("could not send message on winevent_listener::event_tx");
+                winevent_listener::event_tx()
+                    .send(event_type)
+                    .expect("could not send message on winevent_listener::event_tx");
 
                 LRESULT(0)
             }
@@ -253,9 +274,9 @@ pub extern "system" fn hidden_window(
                     || wparam.0 as u32 == SPI_ICONVERTICALSPACING.0
                 {
                     let event_type = WindowManagerEvent::DisplayChange(Window { hwnd: window.0 });
-            winevent_listener::event_tx()
-                .send(event_type)
-                .expect("could not send message on winevent_listener::event_tx");
+                    winevent_listener::event_tx()
+                        .send(event_type)
+                        .expect("could not send message on winevent_listener::event_tx");
                 }
                 LRESULT(0)
             }
@@ -264,9 +285,9 @@ pub extern "system" fn hidden_window(
                 #[allow(clippy::cast_possible_truncation)]
                 if wparam.0 as u32 == DBT_DEVNODES_CHANGED {
                     let event_type = WindowManagerEvent::DisplayChange(Window { hwnd: window.0 });
-            winevent_listener::event_tx()
-                .send(event_type)
-                .expect("could not send message on winevent_listener::event_tx");
+                    winevent_listener::event_tx()
+                        .send(event_type)
+                        .expect("could not send message on winevent_listener::event_tx");
                 }
                 LRESULT(0)
             }

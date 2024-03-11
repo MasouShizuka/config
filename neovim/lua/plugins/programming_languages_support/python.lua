@@ -17,18 +17,19 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
+            -- 激活 venv-selector 并读取环境
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     if vim.bo[args.buf].filetype == "python" then
-                        utils.defer(function()
-                            require("venv-selector").retrieve_from_cache()
-                        end, 2000, false)
-                        vim.api.nvim_del_augroup_by_name("Venv")
+                        utils.defer(function() require("venv-selector").retrieve_from_cache() end, 2000, false)
+                        vim.api.nvim_del_augroup_by_name("VenvActivate")
                     end
                 end,
                 desc = "Auto select virtualenv",
-                group = vim.api.nvim_create_augroup("Venv", { clear = true }),
+                group = vim.api.nvim_create_augroup("VenvActivate", { clear = true }),
             })
+
+            -- 设置 python 的 环境切换 keymap
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     if vim.bo[args.buf].filetype == "python" then

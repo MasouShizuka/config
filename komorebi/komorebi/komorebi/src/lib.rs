@@ -2,6 +2,7 @@ pub mod border;
 pub mod com;
 #[macro_use]
 pub mod ring;
+pub mod colour;
 pub mod container;
 pub mod hidden;
 pub mod monitor;
@@ -169,7 +170,7 @@ lazy_static! {
             }
         })
     };
-    static ref DATA_DIR: PathBuf = dirs::data_local_dir().expect("there is no local data directory").join("komorebi");
+    pub static ref DATA_DIR: PathBuf = dirs::data_local_dir().expect("there is no local data directory").join("komorebi");
     pub static ref AHK_EXE: String = {
         let mut ahk: String = String::from("autohotkey.exe");
 
@@ -191,8 +192,6 @@ lazy_static! {
     static ref BORDER_RECT: Arc<Mutex<Rect>> =
         Arc::new(Mutex::new(Rect::default()));
 
-    static ref BORDER_OFFSET: Arc<Mutex<Option<Rect>>> =
-        Arc::new(Mutex::new(None));
 
     // Use app-specific titlebar removal options where possible
     // eg. Windows Terminal, IntelliJ IDEA, Firefox
@@ -205,7 +204,6 @@ pub static DEFAULT_CONTAINER_PADDING: AtomicI32 = AtomicI32::new(10);
 pub static INITIAL_CONFIGURATION_LOADED: AtomicBool = AtomicBool::new(false);
 pub static CUSTOM_FFM: AtomicBool = AtomicBool::new(false);
 pub static SESSION_ID: AtomicU32 = AtomicU32::new(0);
-pub static ALT_FOCUS_HACK: AtomicBool = AtomicBool::new(false);
 pub static BORDER_ENABLED: AtomicBool = AtomicBool::new(false);
 pub static BORDER_HWND: AtomicIsize = AtomicIsize::new(0);
 pub static BORDER_HIDDEN: AtomicBool = AtomicBool::new(false);
@@ -213,7 +211,9 @@ pub static BORDER_COLOUR_SINGLE: AtomicU32 = AtomicU32::new(0);
 pub static BORDER_COLOUR_STACK: AtomicU32 = AtomicU32::new(0);
 pub static BORDER_COLOUR_MONOCLE: AtomicU32 = AtomicU32::new(0);
 pub static BORDER_COLOUR_CURRENT: AtomicU32 = AtomicU32::new(0);
-pub static BORDER_WIDTH: AtomicI32 = AtomicI32::new(20);
+pub static BORDER_WIDTH: AtomicI32 = AtomicI32::new(8);
+pub static BORDER_OFFSET: AtomicI32 = AtomicI32::new(-1);
+
 // 0 0 0 aka pure black, I doubt anyone will want this as a border colour
 pub const TRANSPARENCY_COLOUR: u32 = 0;
 pub static REMOVE_TITLEBARS: AtomicBool = AtomicBool::new(false);

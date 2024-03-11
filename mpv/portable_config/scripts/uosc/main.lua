@@ -1,12 +1,12 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ b36cefed888c1cd2d4e0b667cc177d781c2af987
+COMMIT_ 48e0100727c5568bc670e4b8ff23efa24af4e142
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
 ]]
 
-local uosc_version = '5.1.1'
+local uosc_version = '5.2.0'
 
 mp.commandv('script-message', 'uosc-version', uosc_version)
 
@@ -79,7 +79,7 @@ defaults = {
 	color = '',
 	opacity = '',
 	animation_duration = 100,
-	text_width_estimation = true,
+	refine = 'text_width,sorting',
 	click_threshold = 0,
 	click_command = 'cycle pause; script-binding uosc/flash-pause-indicator',
 	flash_duration = 1000,
@@ -114,7 +114,10 @@ defaults = {
 	ziggy_pth = 'default',
 }
 options = table_copy(defaults)
-opt.read_options(options, nil, function(_)
+opt.read_options(options, nil, function(changed_options)
+	if changed_options.time_precision then
+		timestamp_zero_rep_clear_cache()
+	end
 	update_config()
 	update_human_times()
 	Manager:disable('user', options.disable_elements)
@@ -205,6 +208,7 @@ config = {
 	osd_margin_y = mp.get_property('osd-margin-y'),
 	osd_alignment_x = mp.get_property('osd-align-x'),
 	osd_alignment_y = mp.get_property('osd-align-y'),
+	refine = create_set(comma_split(options.refine)),
 	types = {
 		video = comma_split(options.video_types),
 		audio = comma_split(options.audio_types),
@@ -568,7 +572,7 @@ function load_file_index_in_current_directory(index)
 		})
 
 		if not files then return end
-		sort_filenames(files)
+		sort_strings(files)
 		if index < 0 then index = #files + index + 1 end
 
 		if files[index] then
@@ -611,14 +615,17 @@ if options.click_threshold > 0 then
 		if delta > 0 and delta < click_time and delta > 0.02 then mp.command(options.click_command) end
 	end)
 	click_timer:kill()
-	mp.set_key_bindings({{'mbtn_left',
-		function() last_up = mp.get_time() end,
-		function()
-			last_down = mp.get_time()
-			if click_timer:is_enabled() then click_timer:kill() else click_timer:resume() end
-		end,
-	}}, 'mouse_movement', 'force')
-	mp.enable_key_bindings('mouse_movement', 'allow-vo-dragging+allow-hide-cursor')
+	local function handle_up() last_up = mp.get_time() end
+	local function handle_down()
+		last_down = mp.get_time()
+		if click_timer:is_enabled() then click_timer:kill() else click_timer:resume() end
+	end
+	-- If this function exists, it'll be called at the beginning of render().
+	function setup_click_detection()
+		local hitbox = {ax = 0, ay = 0, bx = display.width, by = display.height, window_drag = true}
+		cursor:zone('primary_down', hitbox, handle_down)
+		cursor:zone('primary_up', hitbox, handle_up)
+	end
 end
 
 mp.observe_property('osc', 'bool', function(name, value) if value == true then mp.set_property('osc', 'no') end end)
@@ -853,6 +860,7 @@ bind_command('flash-top-bar', function() Elements:flash({'top_bar'}) end)
 bind_command('flash-volume', function() Elements:flash({'volume'}) end)
 bind_command('flash-speed', function() Elements:flash({'speed'}) end)
 bind_command('flash-pause-indicator', function() Elements:flash({'pause_indicator'}) end)
+bind_command('flash-progress', function() Elements:flash({'progress'}) end)
 bind_command('toggle-progress', function() Elements:maybe('timeline', 'toggle_progress') end)
 bind_command('toggle-title', function() Elements:maybe('top_bar', 'toggle_title') end)
 bind_command('decide-pause-indicator', function() Elements:maybe('pause_indicator', 'decide') end)
@@ -862,7 +870,7 @@ bind_command('keybinds', function()
 	if Menu:is_open('keybinds') then
 		Menu:close()
 	else
-		open_command_menu({type = 'keybinds', items = get_keybinds_items(), palette = true})
+		open_command_menu({type = 'keybinds', items = get_keybinds_items(), search_style = 'palette'})
 	end
 end)
 bind_command('download-subtitles', open_subtitle_downloader)

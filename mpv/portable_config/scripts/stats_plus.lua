@@ -1,10 +1,9 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/player/lua/stats.lua
-COMMIT_ 6f17a5efe3929dc1a330471382137a5fcc075f12
+COMMIT_ fd2c5ee21d8b5c4d28e8a8fa11d5125610a94810
 文档_ stats_plus.conf
 
 mpv.conf的（可选）前置条件 --load-stats-overlay=no
-
 可用的快捷键示例（在 input.conf 中写入）：
 
  <KEY>   script-binding stats_plus/display-stats          # 临时显示统计信息
@@ -22,7 +21,6 @@ mpv.conf的（可选）前置条件 --load-stats-overlay=no
  <KEY>   script-message-to stats_plus display-page-3         # ...
  <KEY>   script-message-to stats_plus display-page-4         # ...
  <KEY>   script-message-to stats_plus display-page-0         # ...
-
 ]]
 
 local mp = require 'mp'
@@ -672,7 +670,7 @@ local function add_file(s)
     end
 
     local fs = append_property(s, "file-size", {prefix="大小："})
-    append_property(s, "file-format", {prefix="封装格式/协议：",
+    append_property(s, "file-format", {prefix="协议/封装格式：",
                                        nl=fs and "" or o.nl,
                                        indent=fs and o.prefix_sep .. o.prefix_sep})
 
@@ -881,6 +879,8 @@ local function add_video_out(s)
     append(s, vo, {prefix_sep="", nl="", indent=""})
     append_property(s, "display-names", {prefix_sep="", prefix="(", suffix=")",
                                          no_prefix_markup=true, nl="", indent=" "})
+    append(s, mp.get_property_native("current-gpu-context"),
+           {prefix="GPU执行环境：", nl="", indent=o.prefix_sep .. o.prefix_sep})
     append_property(s, "avsync", {prefix="音视频同步偏移："})
     append_fps(s, "display-fps", "estimated-display-fps")
     if append_property(s, "decoder-frame-drop-count",
@@ -890,8 +890,8 @@ local function add_video_out(s)
     append_display_sync(s)
     append_perfdata(s, false, o.print_perfdata_passes)
 
-    if mp.get_property_native("deinterlace") then
-        append_property(s, "deinterlace", {prefix="反交错："})
+    if mp.get_property_native("deinterlace-active") then
+        append_property(s, "deinterlace", {prefix="去隔行/反交错："})
     end
 
     local scale = nil
@@ -964,7 +964,6 @@ local function add_video(s)
         append_fps(s, "container-fps", "estimated-vf-fps")
     end
     append_img_params(s, r, ro)
-
     append_hdr(s, ro)
     append_property(s, "packet-video-bitrate", {prefix="码率：", suffix=" kbps"})
     append_filters(s, "vf", "视频滤镜链：")
@@ -1085,7 +1084,7 @@ local function perf_stats()
     eval_ass_formatting()
     add_header(stats)
     local page = pages[o.key_page_0]
-    append(stats, "", {prefix=page.desc .. "：", nl="", indent=""})
+    append(stats, "", {prefix=page.desc .. ":", nl="", indent=""})
     page.offset = append_general_perfdata(stats, page.offset)
     return table.concat(stats)
 end
@@ -1157,9 +1156,9 @@ local function cache_stats()
         suffix=speed_graph})
 
     append(stats, utils.format_bytes_humanized(info["total-bytes"]),
-           {prefix = "总计大小："})
+           {prefix = "总计RAM大小："})
     append(stats, utils.format_bytes_humanized(info["fw-bytes"]),
-           {prefix = "预计大小："})
+           {prefix = "预计RAM大小："})
 
     local fc = info["file-cache-bytes"]
     if fc ~= nil then
@@ -1437,7 +1436,7 @@ if o.bindlist ~= "no" then
         o.ass_formatting = false
         o.no_ass_indent = " "
         eval_ass_formatting()
-        io.write(pages[o.key_page_4].desc .. "：" ..
+        io.write(pages[o.key_page_4].desc .. ":" ..
                  table.concat(get_kbinfo_lines(width)) .. "\n")
         mp.command("quit")
     end)

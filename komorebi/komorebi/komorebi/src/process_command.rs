@@ -38,6 +38,7 @@ use komorebi_core::WindowContainerBehaviour;
 use komorebi_core::WindowKind;
 
 use crate::border::Border;
+use crate::colour::Rgb;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
 use crate::static_config::StaticConfig;
@@ -47,7 +48,6 @@ use crate::window_manager::WindowManager;
 use crate::windows_api::WindowsApi;
 use crate::Notification;
 use crate::NotificationEvent;
-use crate::ALT_FOCUS_HACK;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_COLOUR_MONOCLE;
 use crate::BORDER_COLOUR_SINGLE;
@@ -311,7 +311,6 @@ impl WindowManager {
                     });
                 }
 
-                let invisible_borders = self.invisible_borders;
                 let offset = self.work_area_offset;
 
                 let mut hwnds_to_purge = vec![];
@@ -323,6 +322,11 @@ impl WindowManager {
                     {
                         for window in container.windows() {
                             match identifier {
+                                ApplicationIdentifier::Path => {
+                                    if window.path()? == *id {
+                                        hwnds_to_purge.push((i, window.hwnd));
+                                    }
+                                }
                                 ApplicationIdentifier::Exe => {
                                     if window.exe()? == *id {
                                         hwnds_to_purge.push((i, window.hwnd));
@@ -354,7 +358,7 @@ impl WindowManager {
                         .ok_or_else(|| anyhow!("there is no focused workspace"))?
                         .remove_window(hwnd)?;
 
-                    monitor.update_focused_workspace(offset, &invisible_borders)?;
+                    monitor.update_focused_workspace(offset)?;
                 }
             }
             SocketMessage::FocusedWorkspaceContainerPadding(adjustment) => {
@@ -1100,10 +1104,7 @@ impl WindowManager {
             SocketMessage::UnmanageFocusedWindow => {
                 self.unmanage_focused_window()?;
             }
-            SocketMessage::InvisibleBorders(rect) => {
-                self.invisible_borders = rect;
-                self.retile_all(false)?;
-            }
+            SocketMessage::InvisibleBorders(_rect) => {}
             SocketMessage::WorkAreaOffset(rect) => {
                 self.work_area_offset = Option::from(rect);
                 self.retile_all(false)?;
@@ -1241,14 +1242,14 @@ impl WindowManager {
             SocketMessage::ActiveWindowBorderColour(kind, r, g, b) => {
                 match kind {
                     WindowKind::Single => {
-                        BORDER_COLOUR_SINGLE.store(r | (g << 8) | (b << 16), Ordering::SeqCst);
-                        BORDER_COLOUR_CURRENT.store(r | (g << 8) | (b << 16), Ordering::SeqCst);
+                        BORDER_COLOUR_SINGLE.store(Rgb::new(r, g, b).into(), Ordering::SeqCst);
+                        BORDER_COLOUR_CURRENT.store(Rgb::new(r, g, b).into(), Ordering::SeqCst);
                     }
                     WindowKind::Stack => {
-                        BORDER_COLOUR_STACK.store(r | (g << 8) | (b << 16), Ordering::SeqCst);
+                        BORDER_COLOUR_STACK.store(Rgb::new(r, g, b).into(), Ordering::SeqCst);
                     }
                     WindowKind::Monocle => {
-                        BORDER_COLOUR_MONOCLE.store(r | (g << 8) | (b << 16), Ordering::SeqCst);
+                        BORDER_COLOUR_MONOCLE.store(Rgb::new(r, g, b).into(), Ordering::SeqCst);
                     }
                 }
 
@@ -1259,21 +1260,11 @@ impl WindowManager {
                 WindowsApi::invalidate_border_rect()?;
             }
             SocketMessage::ActiveWindowBorderOffset(offset) => {
-                let mut current_border_offset = BORDER_OFFSET.lock();
-
-                let new_border_offset = Rect {
-                    left: offset,
-                    top: offset,
-                    right: offset * 2,
-                    bottom: offset * 2,
-                };
-
-                *current_border_offset = Option::from(new_border_offset);
-
+                BORDER_OFFSET.store(offset, Ordering::SeqCst);
                 WindowsApi::invalidate_border_rect()?;
             }
-            SocketMessage::AltFocusHack(enable) => {
-                ALT_FOCUS_HACK.store(enable, Ordering::SeqCst);
+            SocketMessage::AltFocusHack(_) => {
+                tracing::info!("this action is deprecated");
             }
             SocketMessage::ApplicationSpecificConfigurationSchema => {
                 let asc = schema_for!(Vec<ApplicationConfiguration>);
@@ -1401,9 +1392,6 @@ impl WindowManager {
             | SocketMessage::FocusWorkspaceNumber(_) => {
                 let foreground = WindowsApi::foreground_window()?;
                 let foreground_window = Window { hwnd: foreground };
-                let mut rect = WindowsApi::window_rect(foreground_window.hwnd())?;
-                rect.top -= self.invisible_borders.bottom;
-                rect.bottom += self.invisible_borders.bottom;
 
                 let monocle = BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst);
                 if monocle != 0 && self.focused_workspace()?.monocle_container().is_some() {
@@ -1413,15 +1401,19 @@ impl WindowManager {
                     );
                 }
 
-                let stack = BORDER_COLOUR_STACK.load(Ordering::SeqCst);
-                if stack != 0 && self.focused_container()?.windows().len() > 1 {
-                    BORDER_COLOUR_CURRENT
-                        .store(stack, Ordering::SeqCst);
+                // it is not acceptable to fail here; we need to be able to send the event to
+                // subscribers
+                if self.focused_container().is_ok() {
+                    let stack = BORDER_COLOUR_STACK.load(Ordering::SeqCst);
+                    if stack != 0 && self.focused_container()?.windows().len() > 1 {
+                        BORDER_COLOUR_CURRENT
+                            .store(stack, Ordering::SeqCst);
+                    }
                 }
 
                 let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
                 // NOTE: 更新 border
-                border.set_position(foreground_window, &self.invisible_borders, true)?;
+                border.set_position(foreground_window, true)?;
             }
             SocketMessage::TogglePause => {
                 let is_paused = self.is_paused;
@@ -1431,11 +1423,11 @@ impl WindowManager {
                     border.hide()?;
                 } else {
                     let focused = self.focused_window()?;
-                    border.set_position(*focused, &self.invisible_borders, true)?;
+                    border.set_position(*focused, true)?;
                     focused.focus(false)?;
                 }
             }
-            // NOTE: 去除 ToggleTiling 和 WorkspaceTiling 事件触发时改变 border 状态
+            // NOTE: Tiling 状态改变时不改变 border 状态
             _ => {}
         };
 

@@ -9,9 +9,7 @@ return {
             require("mini.map").setup(opts)
 
             local function open_map()
-                vim.schedule(function()
-                    map.open()
-                end)
+                vim.schedule(function() map.open() end)
             end
             open_map()
 
@@ -28,6 +26,17 @@ return {
             "BufNewFile",
             "BufReadPost",
         },
+        init = function()
+            local is_which_key_available, which_key = pcall(require, "which-key")
+            if is_which_key_available then
+                which_key.register({
+                    mode = "n",
+                    ["<leader>m"] = {
+                        name = "+minimap",
+                    },
+                })
+            end
+        end,
         keys = {
             { "<leader>mm", function() require("mini.map").open() end,         desc = "Open map window",                 mode = "n" },
             { "<leader>mr", function() require("mini.map").refresh() end,      desc = "Refresh map window",              mode = "n" },
@@ -45,9 +54,7 @@ return {
                 end
 
                 vim.api.nvim_create_autocmd("OptionSet", {
-                    callback = vim.schedule_wrap(function()
-                        map.refresh({}, { lines = false, scrollbar = false })
-                    end),
+                    callback = vim.schedule_wrap(function() map.refresh({}, { lines = false, scrollbar = false }) end),
                     desc = "On 'spell' update",
                     group = vim.api.nvim_create_augroup("MiniMapSpell", { clear = true }),
                     pattern = { "dictionary", "spell" },
@@ -64,7 +71,7 @@ return {
                         for lnum, line in ipairs(lines) do
                             local spellbadword = vim.fn.spellbadword(line)
                             if spellbadword[1] ~= "" then
-                                table.insert(line_hl, { line = lnum + 1, hl_group = spell_hl })
+                                line_hl[#line_hl + 1] = { line = lnum + 1, hl_group = spell_hl }
                             end
                         end
                     end

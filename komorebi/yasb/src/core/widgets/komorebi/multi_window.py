@@ -180,7 +180,6 @@ class MultiWindowWidget(BaseWidget):
                     if self._show_icon:
                         p = Process(pid)
                         exe = p.exe()
-                        # qicon = QFileIconProvider().icon(QFileInfo(exe_path))
                         qicon = self.get_exe_icon(exe)
                         window_button.setIcon(qicon)
                     if index == focused_window_index:

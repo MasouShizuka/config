@@ -6,11 +6,21 @@ local M = {}
 
 M.lsp = function(lspconfig, default_config)
     return {
+        -- wsl 下安装后 mason.nvim/mason/bin/bash-language-server 中的路径错误
+        -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
+        -- https://github.com/williamboman/mason.nvim/issues/1315
         bashls = function()
-            -- https://github.com/williamboman/mason.nvim/issues/1315
-            -- wsl 下安装后 mason.nvim/mason/bin/bash-language-server 中的路径错误
-            -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
-            lspconfig.bashls.setup(vim.tbl_deep_extend("keep", {}, default_config))
+            local shellcheckPath = path.mason_install_root_path .. "/packages/shellcheck/shellcheck"
+            if environment.is_windows then
+                shellcheckPath = shellcheckPath .. ".exe"
+            end
+            lspconfig.bashls.setup(vim.tbl_deep_extend("keep", {
+                settings = {
+                    bashIde = {
+                        shellcheckPath = shellcheckPath,
+                    },
+                },
+            }, default_config))
         end,
         clangd = function()
             local fallbackFlags = {}
@@ -50,7 +60,7 @@ M.lsp = function(lspconfig, default_config)
                 if utils.is_available("neodev.nvim") then
                     require("neodev")
                 end
-                table.insert(library, path.config_path .. "/lua")
+                library[#library + 1] = path.config_path .. "/lua"
             end
 
             lspconfig.lua_ls.setup(vim.tbl_deep_extend("keep", {
@@ -91,20 +101,22 @@ M.lsp = function(lspconfig, default_config)
             }, default_config))
         end,
         marksman = function()
-            lspconfig.marksman.setup(vim.tbl_deep_extend("keep", {}, default_config))
+            lspconfig.marksman.setup(vim.tbl_deep_extend("keep", {
+                root_dir = function() return vim.fn.getcwd() end,
+            }, default_config))
         end,
         pyright = function()
-            local python_path = path.python_path
+            local pythonPath = path.python_path
             if not utils.is_available("venv-selector.nvim") then
                 local python_envs_path = path.get_python_envs_path()
                 if python_envs_path then
-                    python_path = python_envs_path
+                    pythonPath = python_envs_path
                     vim.notify(("Activated:\n%s"):format(python_envs_path), vim.log.levels.INFO, { title = "pyright" })
                 end
             end
 
             lspconfig.pyright.setup(vim.tbl_deep_extend("keep", {
-                root_dir = lspconfig.util.root_pattern("*"),
+                root_dir = function() return vim.fn.getcwd() end,
                 settings = {
                     python = {
                         analysis = {
@@ -112,7 +124,7 @@ M.lsp = function(lspconfig, default_config)
                             diagnosticMode = "openFilesOnly",
                             useLibraryCodeForTypes = true,
                         },
-                        pythonPath = python_path,
+                        pythonPath = pythonPath,
                     },
                 },
             }, default_config))
@@ -134,7 +146,7 @@ M.lsp = function(lspconfig, default_config)
             }
 
             lspconfig.texlab.setup(vim.tbl_deep_extend("keep", {
-                root_dir = lspconfig.util.root_pattern("*"),
+                root_dir = function() return vim.fn.getcwd() end,
                 settings = {
                     texlab = {
                         build = {

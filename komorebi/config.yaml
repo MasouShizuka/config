@@ -490,6 +490,7 @@ widgets:
         vertical_stack: "[V]="
         horizontal_stack: "[H]="
         ultrawide_vertical_stack: "||="
+        grid: "[G]"
         monocle: "[M]"
         maximised: "[X]"
         floating: "><>"

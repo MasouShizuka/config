@@ -675,6 +675,13 @@ return {
                 desc = "AutoSaveWritePost event",
                 pattern = "AutoSaveWritePost",
             })
+
+            if vim.g.autosave_enabled == nil then
+                vim.g.autosave_enabled = true
+            end
+
+            vim.keymap.set("n", "<leader>cta", function() utils.toggle_global_setting("autosave_enabled", function(global_enabled, prev_enabled, enabled) end) end, { desc = "Toggle autoSave", silent = true })
+            vim.keymap.set("n", "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(prev_enabled, enabled) end) end, { desc = "Toggle autoSave (buffer)", silent = true })
         end,
         enabled = not environment.is_vscode,
         event = {
@@ -717,7 +724,12 @@ return {
                 if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                     return false
                 end
-                return true
+
+                if vim.b[buf].autosave_enabled ~= nil then
+                    return vim.b[buf].autosave_enabled
+                else
+                    return vim.g.autosave_enabled
+                end
             end,
             debounce_delay = 1, -- delay after which a pending save is executed
         },

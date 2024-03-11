@@ -65,7 +65,7 @@ function Controls:init_options()
 		hwdec              = 'cycle:developer_board_off:hwdec:no=developer_board_off/yes=memory/auto-copy=developer_board?' .. ulang._button_ext07,
 		unscaled           = 'cycle:fit_screen:video-unscaled:no/yes!?' .. ulang._button_ext08,
 		deband             = 'cycle:texture:deband:no/yes!?' .. ulang._button_ext09,
-		deint              = 'cycle:clear_all:deinterlace:no/yes!?' .. ulang._button_ext10,
+		deint              = 'cycle:autofps_select:deinterlace:no=align_horizontal_center/yes=clear_all/auto=autofps_select?' .. ulang._button_ext10,
 		['shot-vid']       = 'command:screenshot:screenshot video?' .. ulang._button_ext11,
 
 		['ST-stats_tog']   = 'command:info_outline:script-binding display-stats-toggle?' .. ulang._button_ext12,

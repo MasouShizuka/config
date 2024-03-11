@@ -29,9 +29,7 @@ return {
                 local cfg = require("rustaceanvim.config")
                 return {
                     server = {
-                        cmd = function()
-                            return { rust_analyzer_path }
-                        end,
+                        cmd = { rust_analyzer_path },
                     },
                     dap = {
                         adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
@@ -39,9 +37,6 @@ return {
                 }
             end
         end,
-        dependencies = {
-            "neovim/nvim-lspconfig",
-        },
         enabled = not environment.is_vscode,
         ft = {
             "rust",
@@ -62,7 +57,7 @@ return {
     --         elseif environment.is_linux then
     --             liblldb_path = liblldb_path .. ".so"
     --         end
-
+    --
     --         require("rust-tools").setup({
     --             dap = {
     --                 adapter = require("rust-tools.dap").get_codelldb_adapter(codelldb_path, liblldb_path),
@@ -70,9 +65,7 @@ return {
     --         })
     --     end,
     --     dependencies = {
-    --         "mfussenegger/nvim-dap",
     --         "neovim/nvim-lspconfig",
-    --         "nvim-lua/plenary.nvim",
     --     },
     --     enabled = not environment.is_vscode,
     --     ft = {

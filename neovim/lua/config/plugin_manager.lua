@@ -2,7 +2,7 @@ local environment = require("utils.environment")
 local path = require("utils.path")
 
 local lazypath = path.data_path .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -17,7 +17,10 @@ vim.opt.rtp:prepend(lazypath)
 if vim.g.mapleader == nil then
     vim.g.mapleader = " "
 end
-vim.keymap.set( "n", "<leader>z", function() require("lazy").home() end, { desc = "Lazy", silent = true })
+if vim.g.maplocalleader == nil then
+    vim.g.maplocalleader = " "
+end
+vim.keymap.set("n", "<leader>z", function() require("lazy").home() end, { desc = "Lazy", silent = true })
 
 return require("lazy").setup("plugins", {
     lockfile = path.data_path .. "/lazy/lazy-lock.json",

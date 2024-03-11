@@ -19,7 +19,7 @@ vim.keymap.set({ "n", "x", "o" }, "L", "g_", { desc = "End of line (non-blank)",
 
 -- 折行时小步上下移动
 vim.keymap.set({ "n", "x" }, "j", function() utils.move("j") end, { desc = "Down", silent = true })
-vim.keymap.set({ "n", "x" }, "k", function() utils.move("k") end, { desc = "up", silent = true })
+vim.keymap.set({ "n", "x" }, "k", function() utils.move("k") end, { desc = "Up", silent = true })
 
 -- 上下移动选中文本
 vim.keymap.set("x", "J", ":move '>+1<cr>gv-gv", { desc = "Move selected text up", silent = true })
@@ -166,10 +166,8 @@ else
             end
         end, { desc = "Focus left panel", silent = true })
 
-        -- 聚焦编辑文件
-        vim.keymap.set("n", keymap["<c-2>"], function()
-            filetype.skip_filetype(filetype.skip_filetype_list_to_main, "W")
-        end, { desc = "Focus editor", silent = true })
+        -- 聚焦主编辑区域
+        vim.keymap.set("n", keymap["<c-2>"], function() filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1) end, { desc = "Focus editor", silent = true })
 
         -- 聚焦底栏
         vim.keymap.set("n", keymap["<c-3>"], function()
@@ -200,14 +198,8 @@ else
 
     -- 窗口
     vim.keymap.set("n", "<c-e>", function() vim.cmd.wincmd("r") end, { desc = "Exchange window", silent = true })
-    vim.keymap.set("n", "<c-j>", function()
-        vim.cmd.wincmd("w")
-        filetype.skip_filetype(filetype.skip_filetype_list_of_panel, "w")
-    end, { desc = "Move to next window", silent = true })
-    vim.keymap.set("n", "<c-k>", function()
-        vim.cmd.wincmd("W")
-        filetype.skip_filetype(filetype.skip_filetype_list_of_panel, "W")
-    end, { desc = "Move to previous window", silent = true })
+    vim.keymap.set("n", "<c-j>", function() filetype.skip_filetype(filetype.skip_filetype_list_of_panel, 1) end, { desc = "Move to next window", silent = true })
+    vim.keymap.set("n", "<c-k>", function() filetype.skip_filetype(filetype.skip_filetype_list_of_panel, -1) end, { desc = "Move to previous window", silent = true })
     vim.keymap.set("n", "<c-s>h", function()
         vim.api.nvim_set_option_value("splitright", false, {})
         vim.cmd.wincmd("v")

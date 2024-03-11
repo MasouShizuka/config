@@ -63,12 +63,12 @@ class WifiWidget(BaseWidget):
         for name in {name for name, net in net_if_stats().items() if net.isup}:
             name_lower = name.lower()
             if name_lower.startswith("eth") or name_lower.startswith("以太网"):
-                wifi_icon = self._wifi_icons[4]
                 wifi_name = name
+                wifi_icon = self._wifi_icons[4]
                 break
             elif name_lower == "wlan":
-                wifi_icon, _ = self._get_wifi_icon()
-                wifi_name = self._get_wifi_name()
+                wifi_name, wifi_icon = self._get_wifi_name_and_icon()
+                break
 
         # Determine which label is active
         if self._show_alt_label:
@@ -94,42 +94,31 @@ class WifiWidget(BaseWidget):
         except Exception:
             active_label.setText(active_label_content)
 
-    def _get_wifi_strength(self):
-        # Get the wifi strength from the system
-        result = os.popen("netsh wlan show interfaces").read()
-
-        # Return 0 if no wifi interface is found
-        if "There is no wireless interface on the system." in result:
-            return 0
-
-        # Extract signal strength from the result
-        for line in result.split("\n"):
-            if "Signal" in line:  # FIXME: This will break if the system language is not English
-                strength = line.split(":")[1].strip().split(" ")[0].replace("%", "")
-                return int(strength)
-
-        return 0
-
-    def _get_wifi_name(self):
-        result = os.popen("netsh wlan show interfaces").read()
-
-        for line in result.split("\n"):
-            if "SSID" in line:
-                return line.split(":")[1].strip()
-
-        return ""
-
-    def _get_wifi_icon(self):
-        # Map strength to its corresponding icon
-        strength = self._get_wifi_strength()
-
+    def _get_wifi_icon(self, strength):
         if strength == 0:
-            return self._wifi_icons[0], strength
+            return self._wifi_icons[0]
         elif strength <= 25:
-            return self._wifi_icons[1], strength
+            return self._wifi_icons[1]
         elif strength <= 50:
-            return self._wifi_icons[2], strength
+            return self._wifi_icons[2]
         elif strength <= 75:
-            return self._wifi_icons[3], strength
+            return self._wifi_icons[3]
         else:
-            return self._wifi_icons[4], strength
+            return self._wifi_icons[4]
+
+    def _get_wifi_name_and_icon(self):
+        result = os.popen("netsh wlan show interfaces").read()
+
+        name = ""
+        strength = 0
+        for line in result.split("\n"):
+            line = line.split()
+            if "SSID" in line:
+                name = line[2]
+                continue
+            if "Signal" in line or "信号" in line:  # FIXME: This will break if the system language is not English
+                strength = int(line[2].replace("%", ""))
+                break
+        icon = self._get_wifi_icon(strength)
+
+        return name, icon

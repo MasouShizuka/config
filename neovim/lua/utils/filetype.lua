@@ -14,6 +14,8 @@ M.skip_filetype_list = {
     "dashboard",
     "DiffviewFiles",
     "DiffviewFileHistory",
+    "fidget",
+    "minimap",
     "neo-tree",
     "NvimTree",
     "notify",
@@ -31,7 +33,9 @@ M.skip_filetype_list_to_main = {
     "dapui_console",
     "DiffviewFiles",
     "DiffviewFileHistory",
+    "fidget",
     "help",
+    "minimap",
     "neo-tree",
     "NvimTree",
     "notify",
@@ -50,131 +54,198 @@ M.skip_filetype_list_of_panel = {
     "dapui_console",
     "DiffviewFiles",
     "DiffviewFileHistory",
+    "fidget",
     "help",
     "neo-tree",
+    "minimap",
     "NvimTree",
     "nvim-docs-view",
     "toggleterm",
     "Trouble",
 }
 
-M.skip_filetype = function(skip_filetype_list, wincmd)
-    wincmd = wincmd or "W"
+M.skip_filetype = function(skip_filetype_list, step)
+    step = step or -1
 
-    local ft = vim.bo.filetype
-    local max_skip = 20
-    while vim.tbl_contains(skip_filetype_list, ft) and max_skip > 0 do
-        vim.cmd.wincmd(wincmd)
-        ft = vim.bo.filetype
-        max_skip = max_skip - 1
+    local curr_winnr = vim.fn.winnr()
+    local win_count = vim.fn.winnr("$")
+
+    local winnr = curr_winnr
+    while true do
+        winnr = winnr + step
+        if winnr <= 0 then
+            winnr = win_count
+        end
+        if winnr > win_count then
+            winnr = 1
+        end
+
+        if winnr == curr_winnr then
+            break
+        end
+
+        local win = vim.fn.win_getid(winnr)
+        local buf = vim.api.nvim_win_get_buf(win)
+        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+        if not vim.tbl_contains(skip_filetype_list, ft) then
+            vim.api.nvim_set_current_win(win)
+            break
+        end
     end
 end
 
 -- toggle left panel
 M.toggle_filetype_list_of_left = {
-    ["aerial"] = function() vim.api.nvim_command("AerialClose") end,
-    ["dapui_scopes"] = false,
-    ["dapui_breakpoints"] = false,
-    ["dapui_stacks"] = false,
-    ["dapui_watches"] = false,
-    ["DiffviewFiles"] = function() vim.api.nvim_command("DiffviewClose") end,
-    ["DiffviewFileHistory"] = function() vim.api.nvim_command("DiffviewClose") end,
-    ["neo-tree"] = function() require("neo-tree.command").execute({ action = "close" }) end,
-    ["NvimTree"] = function() require("nvim-tree.api").tree.close() end,
+    ["aerial"] = {
+        open = function() vim.api.nvim_command("AerialOpen") end,
+        close = function() vim.api.nvim_command("AerialClose") end,
+    },
+    ["dapui_scopes"] = {
+        open = function() require("dapui").open() end,
+        close = function() require("dapui").close() end,
+    },
+    ["dapui_breakpoints"] = {
+        open = function() require("dapui").open() end,
+        close = function() require("dapui").close() end,
+    },
+    ["dapui_stacks"] = {
+        open = function() require("dapui").open() end,
+        close = function() require("dapui").close() end,
+    },
+    ["dapui_watches"] = {
+        open = function() require("dapui").open() end,
+        close = function() require("dapui").close() end,
+    },
+    ["DiffviewFiles"] = {
+        open = function() vim.api.nvim_command("DiffviewOpen") end,
+        close = function() vim.api.nvim_command("DiffviewClose") end,
+    },
+    ["DiffviewFileHistory"] = {
+        open = function() vim.api.nvim_command("DiffviewOpen") end,
+        close = function() vim.api.nvim_command("DiffviewClose") end,
+    },
+    ["neo-tree"] = {
+        open = function()
+            require("neo-tree.sources.manager").close_all()
+            require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
+        end,
+        close = function() require("neo-tree.command").execute({ action = "close" }) end,
+    },
+    ["NvimTree"] = {
+        open = function() require("nvim-tree.api").tree.open() end,
+        close = function() require("nvim-tree.api").tree.close() end,
+    },
 }
 -- toggle bottom panel
 M.toggle_filetype_list_of_bottom = {
-    ["dap-repl"] = false,
-    ["dapui_console"] = false,
-    ["qf"] = false,
-    ["toggleterm"] = function() vim.api.nvim_command("ToggleTerm") end,
-    ["Trouble"] = function() vim.api.nvim_command("TroubleClose") end,
+    ["dap-repl"] = {
+        open = function() require("dapui").open() end,
+        close = function() require("dapui").close() end,
+    },
+    ["dapui_console"] = {
+        open = function() require("dapui").open() end,
+        close = function() require("dapui").close() end,
+    },
+    ["qf"] = {
+        open = function() vim.api.nvim_command("copen") end,
+        close = function() vim.api.nvim_command("cclose") end,
+    },
+    ["toggleterm"] = {
+        open = function() vim.api.nvim_command("ToggleTerm") end,
+        close = function() vim.api.nvim_command("ToggleTerm") end,
+    },
+    ["Trouble"] = {
+        open = function() vim.api.nvim_command("Trouble") end,
+        close = function() vim.api.nvim_command("TroubleClose") end,
+    },
 }
 -- toggle right panel
 M.toggle_filetype_list_of_right = {
-    ["help"] = false,
-    ["nvim-docs-view"] = function() vim.api.nvim_command("DocsViewToggle") end,
+    ["help"] = {
+        open = false,
+        close = false,
+    },
+    ["nvim-docs-view"] = {
+        open = function() vim.api.nvim_command("DocsViewToggle") end,
+        close = function() vim.api.nvim_command("DocsViewToggle") end,
+    },
+}
+M.toggle_filetype_lists = {
+    left = M.toggle_filetype_list_of_left,
+    bottom = M.toggle_filetype_list_of_bottom,
+    right = M.toggle_filetype_list_of_right,
 }
 
 M.is_toggle_filetype = function(filetype, toggle_filetype_list)
+    local is_toggle_filetype, func
+
     if toggle_filetype_list then
-        for toggle_filetype, close_function in pairs(toggle_filetype_list) do
-            if filetype == toggle_filetype then
-                return true, close_function
-            end
+        func = toggle_filetype_list[filetype]
+        if func ~= nil then
+            is_toggle_filetype = true
         end
     else
-        local toggle_filetype_lists = {
-            M.toggle_filetype_list_of_left,
-            M.toggle_filetype_list_of_bottom,
-            M.toggle_filetype_list_of_right,
-        }
-        for _, toggle_filetype_list in ipairs(toggle_filetype_lists) do
-            for toggle_filetype, close_function in pairs(toggle_filetype_list) do
-                if filetype == toggle_filetype then
-                    return true, close_function
-                end
+        for _, toggle_filetype_list in pairs(M.toggle_filetype_lists) do
+            func = toggle_filetype_list[filetype]
+            if func ~= nil then
+                is_toggle_filetype = true
+                break
             end
         end
     end
 
-    return false, nil
+    return is_toggle_filetype, func
 end
 
 M.is_in_toggle_filetype_list = function(filetype, toggle_filetype_list)
     local is_in_toggle_filetype_list, _ = M.is_toggle_filetype(filetype, toggle_filetype_list)
-    if is_in_toggle_filetype_list then
-        return true
-    end
-
-    return false
+    return is_in_toggle_filetype_list
 end
 
-M.is_toggle_filetype_focused = function(toggle_filetype_list, close)
-    local ok, close_function = M.is_toggle_filetype(vim.bo.filetype, toggle_filetype_list)
+M.is_toggle_filetype_focused = function(toggle_filetype_list)
+    local ok, func = M.is_toggle_filetype(vim.bo.filetype, toggle_filetype_list)
+    local close_func
     if ok then
-        if type(close_function) ~= "function" then
-            close_function = function()
-                vim.api.nvim_win_close(vim.api.nvim_get_current_win(), false)
+        close_func = func.close
+        if type(close_func) ~= "function" then
+            local win = vim.api.nvim_get_current_win()
+            close_func = function()
+                vim.api.nvim_win_close(win, true)
             end
         end
-
-        if close then
-            close_function()
-        end
-
-        return true, close_function
     end
 
-    return false, nil
+    return ok, close_func
 end
 
-M.is_toggle_filetype_opened = function(toggle_filetype_list, focus)
+M.is_toggle_filetype_opened = function(toggle_filetype_list)
     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        if not vim.api.nvim_win_is_valid(win) then
+            goto continue
+        end
+
         local buf = vim.api.nvim_win_get_buf(win)
         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-
-        local ok, _ = M.is_toggle_filetype(ft, toggle_filetype_list)
-        if ok then
-            if focus then
-                vim.api.nvim_set_current_win(win)
-            end
-
+        if M.is_in_toggle_filetype_list(ft, toggle_filetype_list) then
             return true, win
         end
+
+        ::continue::
     end
 
     return false, nil
 end
 
 M.toggle_filetype = function(toggle_filetype_list)
-    local is_focused, _ = M.is_toggle_filetype_focused(toggle_filetype_list, true)
+    local is_focused, func = M.is_toggle_filetype_focused(toggle_filetype_list)
     if is_focused then
+        func.close()
         return true
     end
 
-    local is_opened, _ = M.is_toggle_filetype_opened(toggle_filetype_list, true)
+    local is_opened, win = M.is_toggle_filetype_opened(toggle_filetype_list)
     if is_opened then
+        vim.api.nvim_set_current_win(win)
         return true
     end
 

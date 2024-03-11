@@ -18,99 +18,94 @@
 
     // 去除 Neovim 的接收键位
     {
-        "key": "ctrl+w up",
-        "command": "-workbench.action.navigateUp",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w k",
-        "command": "-workbench.action.navigateUp",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w down",
-        "command": "-workbench.action.navigateDown",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w j",
-        "command": "-workbench.action.navigateDown",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w right",
-        "command": "-workbench.action.navigateRight",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w l",
-        "command": "-workbench.action.navigateRight",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w left",
-        "command": "-workbench.action.navigateLeft",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w h",
-        "command": "-workbench.action.navigateLeft",
-        "when": "!editorTextFocus && !terminalFocus"
-    },
-    {
         "key": "ctrl+w q",
         "command": "-workbench.action.closeActiveEditor",
-        "when": "!editorTextFocus && !filesExplorerFocus && !searchViewletFocus && !terminalFocus"
+        "when": "!editorTextFocus && !filesExplorerFocus && !searchViewletFocus && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w ctrl+w",
         "command": "-workbench.action.focusNextGroup",
-        "when": "!editorTextFocus && !filesExplorerFocus && !inSearchEditor && !replaceInputBoxFocus && !searchViewletFocus && !terminalFocus"
-    },
-    {
-        "key": "ctrl+w ctrl+w",
-        "command": "-workbench.action.focusFirstEditorGroup",
-        "when": "!editorTextFocus && !filesExplorerFocus && !inSearchEditor && !replaceInputBoxFocus && !searchViewletFocus && !terminalFocus"
+        "when": "!editorTextFocus && !filesExplorerFocus && !inSearchEditor && !replaceInputBoxFocus && !searchViewletFocus && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.toggleEditorWidths",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w s",
         "command": "-workbench.action.splitEditorDown",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w v",
         "command": "-workbench.action.splitEditorRight",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w =",
         "command": "-workbench.action.evenEditorWidths",
-        "when": "!editorTextFocus && !terminalFocus"
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w up",
+        "command": "-workbench.action.navigateUp",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w k",
+        "command": "-workbench.action.navigateUp",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w down",
+        "command": "-workbench.action.navigateDown",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w j",
+        "command": "-workbench.action.navigateDown",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w left",
+        "command": "-workbench.action.navigateLeft",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w h",
+        "command": "-workbench.action.navigateLeft",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w right",
+        "command": "-workbench.action.navigateRight",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
+    },
+    {
+        "key": "ctrl+w l",
+        "command": "-workbench.action.navigateRight",
+        "when": "!editorTextFocus && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w -",
         "command": "-workbench.action.decreaseViewHeight",
-        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.decreaseViewWidth",
-        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.increaseViewHeight",
-        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus && neovim.mode != 'cmdline'"
     },
     {
         "key": "ctrl+w unknown",
         "command": "-workbench.action.increaseViewWidth",
-        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus"
+        "when": "!editorTextFocus && !isAuxiliaryWindowFocusedContext && !terminalFocus && neovim.mode != 'cmdline'"
     },
 
     // 增加 Neovim 的接收键位

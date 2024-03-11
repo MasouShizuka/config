@@ -1,5 +1,4 @@
 use std::sync::atomic::Ordering;
-use std::time::Duration;
 
 use color_eyre::Result;
 use windows::core::PCWSTR;
@@ -12,19 +11,14 @@ use windows::Win32::UI::WindowsAndMessaging::CS_VREDRAW;
 use windows::Win32::UI::WindowsAndMessaging::MSG;
 use windows::Win32::UI::WindowsAndMessaging::WNDCLASSW;
 
-use komorebi_core::Rect;
-
-use crate::window::should_act;
 use crate::window::Window;
 use crate::windows_callbacks;
 use crate::WindowsApi;
 use crate::BORDER_HWND;
 use crate::BORDER_OFFSET;
-use crate::BORDER_OVERFLOW_IDENTIFIERS;
 use crate::BORDER_RECT;
-use crate::REGEX_IDENTIFIERS;
+use crate::BORDER_WIDTH;
 use crate::TRANSPARENCY_COLOUR;
-use crate::WINDOWS_11;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Border {
@@ -68,7 +62,6 @@ impl Border {
             unsafe {
                 while GetMessageW(&mut message, border.hwnd(), 0, 0).into() {
                     DispatchMessageW(&message);
-                    std::thread::sleep(Duration::from_millis(10));
                 }
             }
 
@@ -82,10 +75,6 @@ impl Border {
 
         BORDER_HWND.store(hwnd.0, Ordering::SeqCst);
 
-        if *WINDOWS_11 {
-            WindowsApi::round_corners(hwnd.0)?;
-        }
-
         Ok(())
     }
 
@@ -97,12 +86,7 @@ impl Border {
         }
     }
 
-    pub fn set_position(
-        self,
-        window: Window,
-        invisible_borders: &Rect,
-        activate: bool,
-    ) -> Result<()> {
+    pub fn set_position(self, window: Window, activate: bool) -> Result<()> {
         if self.hwnd == 0 {
             Ok(())
         } else {
@@ -111,46 +95,10 @@ impl Border {
             }
 
             let mut rect = WindowsApi::window_rect(window.hwnd())?;
-            // NOTE: 修正 border 的位置
-            rect.left += invisible_borders.left;
-            rect.top += invisible_borders.top;
-            rect.right -= invisible_borders.right;
-            rect.bottom -= invisible_borders.bottom;
-            let border_width = crate::BORDER_WIDTH.load(Ordering::SeqCst) / 2;
-            rect.left -= border_width;
-            rect.top -= border_width;
-            rect.right += 2 * border_width;
-            rect.bottom += 2 * border_width;
+            rect.add_padding(-BORDER_OFFSET.load(Ordering::SeqCst));
 
-            let border_overflows = BORDER_OVERFLOW_IDENTIFIERS.lock();
-            let regex_identifiers = REGEX_IDENTIFIERS.lock();
-
-            let title = &window.title()?;
-            let exe_name = &window.exe()?;
-            let class = &window.class()?;
-
-            let should_expand_border = should_act(
-                title,
-                exe_name,
-                class,
-                &border_overflows,
-                &regex_identifiers,
-            );
-
-            if should_expand_border {
-                rect.left -= invisible_borders.left;
-                rect.top -= invisible_borders.top;
-                rect.right += invisible_borders.right;
-                rect.bottom += invisible_borders.bottom;
-            }
-
-            let border_offset = BORDER_OFFSET.lock();
-            if let Some(border_offset) = *border_offset {
-                rect.left -= border_offset.left;
-                rect.top -= border_offset.top;
-                rect.right += border_offset.right;
-                rect.bottom += border_offset.bottom;
-            }
+            let border_width = BORDER_WIDTH.load(Ordering::SeqCst);
+            rect.add_margin(border_width);
 
             *BORDER_RECT.lock() = rect;
 

@@ -20,6 +20,7 @@ pub enum DefaultLayout {
     VerticalStack,
     HorizontalStack,
     UltrawideVerticalStack,
+    Grid,
     // NOTE: If any new layout is added, please make sure to register the same in `DefaultLayout::cycle`
 }
 
@@ -34,7 +35,10 @@ impl DefaultLayout {
         sizing: Sizing,
         delta: i32,
     ) -> Option<Rect> {
-        // NOTE: 由于添加了所有 layout 的 resize，因此去除未添加 resize 的 layout 的检测
+        // NOTE: 去除对已添加 resize 的 layout 的检测
+        if matches!(self, Self::Grid) {
+            return None;
+        };
         let max_divisor = 1.005;
         let mut r = resize.unwrap_or_default();
 
@@ -132,7 +136,8 @@ impl DefaultLayout {
             Self::Rows => Self::VerticalStack,
             Self::VerticalStack => Self::HorizontalStack,
             Self::HorizontalStack => Self::UltrawideVerticalStack,
-            Self::UltrawideVerticalStack => Self::BSP,
+            Self::UltrawideVerticalStack => Self::Grid,
+            Self::Grid => Self::BSP,
         }
     }
 
@@ -144,7 +149,8 @@ impl DefaultLayout {
             Self::HorizontalStack => Self::VerticalStack,
             Self::VerticalStack => Self::Rows,
             Self::Rows => Self::Columns,
-            Self::Columns => Self::BSP,
+            Self::Columns => Self::Grid,
+            Self::Grid => Self::BSP,
         }
     }
 }

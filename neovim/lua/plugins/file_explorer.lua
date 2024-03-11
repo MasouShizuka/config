@@ -311,26 +311,6 @@ return {
             "NvimTreeCollapseKeepBuffers",
             "NvimTreeGenerateOnAttach",
         },
-        config = function(_, opts)
-            require("nvim-tree").setup(opts)
-
-            -- 最后的窗口为 NvimTree 时自动关闭
-            vim.api.nvim_create_autocmd("BufEnter", {
-                callback = function()
-                    local layout = vim.api.nvim_call_function("winlayout", {})
-                    if
-                        layout[1] == "leaf"
-                        and vim.api.nvim_get_option_value("filetype", { buf = vim.api.nvim_win_get_buf(layout[2]) }) == "NvimTree"
-                        and layout[3] == nil
-                    then
-                        vim.api.nvim_command("confirm quit")
-                    end
-                end,
-                desc = "Auto close when nvim-tree is the last window",
-                group = vim.api.nvim_create_augroup("NvimTreeClose", { clear = true }),
-                pattern = "NvimTree_*",
-            })
-        end,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
@@ -339,9 +319,6 @@ return {
             -- disable netrw at the very start of your init.lua
             vim.g.loaded_netrw = 1
             vim.g.loaded_netrwPlugin = 1
-
-            -- set termguicolors to enable highlight groups
-            vim.opt.termguicolors = true
         end,
         opts = function()
             local api = require("nvim-tree.api")
@@ -373,7 +350,7 @@ return {
             return {
                 on_attach = function(bufnr)
                     local function opts(desc)
-                        return { desc = "nvim-tree: " .. desc, buffer = bufnr, silent = true, nowait = true }
+                        return { buffer = bufnr, desc = "nvim-tree: " .. desc, nowait = true, silent = true }
                     end
 
                     vim.keymap.set("n", "q", api.tree.close, opts("Close"))
@@ -416,7 +393,7 @@ return {
                     vim.keymap.set("n", "d", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
-                            table.insert(marks, api.tree.get_node_under_cursor())
+                            marks[#marks + 1] = api.tree.get_node_under_cursor()
                         end
                         vim.ui.input({ prompt = ("Remove %s files? [y/N]"):format(#marks) }, function(input)
                             if input == "y" then
@@ -435,7 +412,7 @@ return {
                     vim.keymap.set("n", "x", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
-                            table.insert(marks, api.tree.get_node_under_cursor())
+                            marks[#marks + 1] = api.tree.get_node_under_cursor()
                         end
                         for _, node in pairs(marks) do
                             api.fs.cut(node)
@@ -448,7 +425,7 @@ return {
                     vim.keymap.set("n", "c", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
-                            table.insert(marks, api.tree.get_node_under_cursor())
+                            marks[#marks + 1] = api.tree.get_node_under_cursor()
                         end
                         for _, node in pairs(marks) do
                             api.fs.copy.node(node)
@@ -518,9 +495,13 @@ return {
                     vim.keymap.set("n", "V", api.node.open.horizontal, opts("Open: Horizontal Split"))
                     -- vim.keymap.set("n", "t", api.node.open.tab, opts("Open: New Tab"))
                     vim.keymap.set("n", "t", function()
+                        vim.g.is_opening_tab = true
+
                         local node = api.tree.get_node_under_cursor()
                         api.node.open.tab(node)
                         vim.cmd.tabprev()
+
+                        vim.g.is_opening_tab = false
                     end, opts("Open: New Tab"))
                     vim.keymap.set("n", "<tab>", api.node.open.preview, opts("Open Preview"))
                     vim.keymap.set("n", "]c", api.node.navigate.git.next, opts("Next Git"))
@@ -589,12 +570,11 @@ return {
                 update_focused_file = {
                     enable = true,
                 },
-                -- windows 平台以下三个选项有时候不起效，因此干脆禁止
                 git = {
-                    enable = not environment.is_windows,
+                    enable = true,
                 },
                 diagnostics = {
-                    enable = not environment.is_windows,
+                    enable = true,
                     icons = {
                         error = icons.diagnostics.Error,
                         hint = icons.diagnostics.Hint,
@@ -602,20 +582,11 @@ return {
                         warning = icons.diagnostics.Warn,
                     },
                 },
-                modified = {
-                    enable = not environment.is_windows,
-                },
                 filters = {
                     git_ignored = false,
                 },
                 live_filter = {
                     always_show_folders = false,
-                },
-                tab = {
-                    sync = {
-                        open = true,
-                        close = true,
-                    },
                 },
                 ui = {
                     confirm = {

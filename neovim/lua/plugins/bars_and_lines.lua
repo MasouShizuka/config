@@ -63,7 +63,7 @@ return {
 
                 for _, child in ipairs(children) do
                     local new_child = heirline_utils.clone(child)
-                    table.insert(new, new_child)
+                    new[#new + 1] = new_child
                 end
 
                 local old_condition = new.condition
@@ -215,9 +215,7 @@ return {
                 },
                 update = {
                     "ModeChanged",
-                    callback = vim.schedule_wrap(function()
-                        vim.cmd.redrawstatus()
-                    end),
+                    callback = vim.schedule_wrap(function() vim.cmd.redrawstatus() end),
                     pattern = "*:*",
                 },
 
@@ -433,18 +431,18 @@ return {
             local lsp_server = {
                 provider = function(self)
                     local names = {}
-                    for _, server in pairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+                    for _, server in pairs(vim.lsp.get_clients({ bufnr = 0 })) do
                         if server.name == "null-ls" then
                             local null_ls_sources = require("null-ls.sources").get_available(vim.bo.filetype)
                             for _, source in ipairs(null_ls_sources) do
                                 local name = source.name
                                 -- null-ls 的相同的 source 可能有不同的功能，导致重复
                                 if names[#names] ~= name then
-                                    table.insert(names, source.name)
+                                    names[#names + 1] = source.name
                                 end
                             end
                         else
-                            table.insert(names, server.name)
+                            names[#names + 1] = server.name
                         end
                     end
                     return icons.misc.gear .. table.concat(names, ",")
@@ -506,12 +504,12 @@ return {
                         filename = filename:gsub("\\", "/")
                     end
                     for token in filename:gmatch("([^/]+)/?") do
-                        table.insert(children, {
+                        children[#children + 1] = {
                             provider = token,
-                        })
-                        table.insert(children, {
+                        }
+                        children[#children + 1] = {
                             provider = separator,
-                        })
+                        }
                     end
                     table.remove(children, #children)
                     table.insert(children, #children, file_icon)
@@ -533,7 +531,7 @@ return {
                                     provider = d.name:gsub("%%", "%%%%"):gsub("%s*->%s*", ""),
                                 },
                             }
-                            table.insert(children, child)
+                            children[#children + 1] = child
                         end
                     end
 
@@ -744,7 +742,7 @@ return {
                     callback = function(self)
                         self._buflist[1]._cur_page = self._cur_page - 1
                         self._buflist[1]._force_page = true
-                        vim.cmd("redrawtabline")
+                        vim.cmd.redrawtabline()
                     end,
                     name = "Heirline_tabline_prev",
                 }
@@ -752,7 +750,7 @@ return {
                     callback = function(self)
                         self._buflist[1]._cur_page = self._cur_page + 1
                         self._buflist[1]._force_page = true
-                        vim.cmd("redrawtabline")
+                        vim.cmd.redrawtabline()
                     end,
                     name = "Heirline_tabline_next",
                 }
@@ -766,7 +764,7 @@ return {
                     },
                     init = function(self)
                         if vim.tbl_isempty(self._buflist) then
-                            table.insert(self._buflist, self)
+                            self._buflist[#self._buflist + 1] = self
                         end
                         if not self.left_trunc then
                             self.left_trunc = self:new(self._left_trunc)

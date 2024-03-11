@@ -29,10 +29,6 @@ RunWait("komorebic.exe start --await-configuration", , "Hide")
 ; │ Setting │
 ; ╰─────────╯
 
-RunWait("komorebic.exe invisible-borders 7 0 14 7", , "Hide")
-
-RunWait("komorebic.exe watch-configuration enable", , "Hide")
-
 RunWait("komorebic.exe window-hiding-behaviour cloak", , "Hide")
 
 RunWait("komorebic.exe cross-monitor-move-behaviour insert", , "Hide")
@@ -41,7 +37,7 @@ RunWait("komorebic.exe active-window-border enable", , "Hide")
 RunWait("komorebic.exe active-window-border-colour 66 165 245 --window-kind single", , "Hide")
 RunWait("komorebic.exe active-window-border-colour 256 165 66 --window-kind stack", , "Hide")
 RunWait("komorebic.exe active-window-border-colour 255 51 153 --window-kind monocle", , "Hide")
-RunWait("komorebic.exe active-window-border-width 14", , "Hide")
+RunWait("komorebic.exe active-window-border-width 6", , "Hide")
 
 RunWait("komorebic.exe focus-follows-mouse disable --implementation windows", , "Hide")
 RunWait("komorebic.exe mouse-follows-focus enable", , "Hide")
@@ -85,8 +81,8 @@ global workspace_key_value := Map(
     "7", [6, " "]
 )
 
-global container_padding := 10
-global workspace_padding := 10
+global container_padding := 4
+global workspace_padding := 4
 
 RunWait(Format("komorebic.exe ensure-workspaces {} {}", main_monitor, workspace_key_value.Count), , "Hide")
 For key, value in workspace_key_value {
@@ -183,7 +179,6 @@ Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
 ; ╰─────────╯
 
 !q:: {
-    ; WinClose, A
     RunWait("komorebic.exe close", , "Hide")
 }
 
@@ -247,63 +242,72 @@ send_to_monitor(ThisHotkey) {
     RunWait(Format("komorebic.exe send-to-monitor {}", value), , "Hide")
 }
 
-; -------------
-; |     |     |
-; |     |------
-; |     |  |  |
-; -------------
+; +-------+-----+
+; |       |     |
+; |       +--+--+
+; |       |  |--|
+; +-------+--+--+
 !b:: {
     RunWait("komorebic.exe change-layout bsp", , "Hide")
 }
 
-; -------------
-; |   |   |   |
-; |   |   |   |
-; -------------
+; +--+--+--+--+
+; |  |  |  |  |
+; |  |  |  |  |
+; |  |  |  |  |
+; +--+--+--+--+
 !c:: {
     RunWait("komorebic.exe change-layout columns", , "Hide")
 }
 
-; ------------
-; |          |
-; ------------
-; |          |
-; ------------
-; |          |
-; ------------
+; +-----------+
+; |-----------|
+; |-----------|
+; |-----------|
+; +-----------+
 !r:: {
     RunWait("komorebic.exe change-layout rows", , "Hide")
 }
 
-; -----------
-; |    |    |
-; |    |-----
-; |    |    |
-; |    |-----
-; |    |    |
-; -----------
+; +-------+-----+
+; |       |     |
+; |       +-----+
+; |       |     |
+; +-------+-----+
 !+c:: {
     RunWait("komorebic.exe change-layout vertical-stack", , "Hide")
 }
 
-; ----------------
-; |              |
-; ----------------
-; |    |    |    |
-; ----------------
+; +------+------+
+; |             |
+; |------+------+
+; |      |      |
+; +------+------+
 !+r:: {
     RunWait("komorebic.exe change-layout horizontal-stack", , "Hide")
 }
 
-; ------------
-; |  |    |  |
-; |  |    |---
-; |  |    |  |
-; |  |    |---
-; |  |    |  |
-; ------------
+; +-----+-----------+-----+
+; |     |           |     |
+; |     |           +-----+
+; |     |           |     |
+; |     |           +-----+
+; |     |           |     |
+; +-----+-----------+-----+
 !+m:: {
     RunWait("komorebic.exe change-layout ultrawide-vertical-stack", , "Hide")
+}
+
+; +-----+-----+   +---+---+---+   +---+---+---+   +---+---+---+
+; |     |     |   |   |   |   |   |   |   |   |   |   |   |   |
+; |     |     |   |   |   |   |   |   |   |   |   |   |   +---+
+; +-----+-----+   |   +---+---+   +---+---+---+   +---+---|   |
+; |     |     |   |   |   |   |   |   |   |   |   |   |   +---+
+; |     |     |   |   |   |   |   |   |   |   |   |   |   |   |
+; +-----+-----+   +---+---+---+   +---+---+---+   +---+---+---+
+;   4 windows       5 windows       6 windows       7 windows
+!g:: {
+    RunWait("komorebic.exe change-layout grid", , "Hide")
 }
 
 !+Capslock::
@@ -361,7 +365,6 @@ send_to_monitor(ThisHotkey) {
 }
 
 !+b:: {
-    ; Run(Format("pythonw {}/yasb/src/main.py", A_ScriptDir),  , "Hide")
     While (ProcessExist("yasb.exe")) {
         ProcessClose("yasb.exe")
     } Else {
