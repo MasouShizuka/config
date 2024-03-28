@@ -3,6 +3,7 @@ local colors = require("utils.colors")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
 local icons = require("utils.icons")
+local lsp = require("utils.lsp")
 local utils = require("utils")
 
 return {
@@ -238,10 +239,11 @@ return {
 
             local file_encoding = {
                 provider = function(self)
-                    local encoding = vim.bo.fenc ~= "" and vim.bo.fenc or vim.o.enc
+                    local encoding = vim.bo.fileencoding ~= "" and vim.bo.fileencoding or vim.o.encoding
                     return icons.misc.code_braces .. encoding:upper()
                 end,
             }
+
             local file_format = {
                 provider = function(self)
                     if vim.bo.fileformat == "dos" then
@@ -251,6 +253,7 @@ return {
                     end
                 end,
             }
+
             local file_icon = {
                 init = function(self)
                     local buf = self.buf or vim.api.nvim_get_current_buf()
@@ -265,6 +268,13 @@ return {
                     return { fg = self.icon_color }
                 end,
             }
+
+            local file_indent = {
+                provider = function(self)
+                    return icons.misc.bottom_square_bracket .. vim.bo.tabstop
+                end,
+            }
+
             local file_modified = {
                 condition = function(self)
                     local buf = self.buf or vim.api.nvim_get_current_buf()
@@ -274,6 +284,7 @@ return {
                 hl = { fg = "green" },
                 update = "BufModifiedSet",
             }
+
             local file_name = {
                 init = function(self)
                     self.max_length = 30
@@ -324,6 +335,7 @@ return {
                     return hl
                 end,
             }
+
             local file_readonly = {
                 condition = function(self)
                     local buf = self.buf or vim.api.nvim_get_current_buf()
@@ -340,6 +352,7 @@ return {
                 end,
                 hl = { fg = "orange" },
             }
+
             local file_size = {
                 provider = function(self)
                     local buf = self.buf or vim.api.nvim_get_current_buf()
@@ -382,6 +395,7 @@ return {
                     provider = icons.misc.text .. "%l:%c %P",
                 },
             }
+
             local scrollbar = {
                 static = {
                     sbar = {
@@ -452,9 +466,7 @@ return {
             }
 
             local lsp_info = heirline_utils.insert(
-                {
-                    condition = herrline_conditions.lsp_attached,
-                },
+                { condition = herrline_conditions.lsp_attached },
                 padding_after(python_venv),
                 lsp_server
             )
@@ -577,6 +589,21 @@ return {
 
             local git = insert_with_child_condition({}, git_branch, git_status)
 
+            local dap = {
+                condition = function(self)
+                    if not utils.is_available("nvim-dap") or not package.loaded["dap"] then
+                        return false
+                    end
+
+                    self.dap = require("dap")
+                    return self.dap.session() ~= nil
+                end,
+                provider = function(self)
+                    return icons.misc.bug .. self.dap.status()
+                end,
+                hl = "blue",
+            }
+
             local search_count = {
                 condition = function(self)
                     if vim.v.hlsearch == 0 then
@@ -636,7 +663,10 @@ return {
                     return require("lazy.status").updates()
                 end,
                 hl = { fg = "#ff9e64" },
-                update = { "User", pattern = "LazyUpdate" },
+                update = {
+                    "User",
+                    pattern = "LazyUpdate",
+                },
                 on_click = {
                     callback = function()
                         require("lazy").update()
@@ -650,7 +680,8 @@ return {
                     self.title = "Explorer"
                     self.win = vim.api.nvim_tabpage_list_wins(0)[1]
                     self.buf = vim.api.nvim_win_get_buf(self.win)
-                    return filetype.is_in_toggle_filetype_list(vim.bo[self.buf].filetype, filetype.toggle_filetype_list_of_left)
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = self.buf })
+                    return filetype.is_in_toggle_filetype_list(ft, filetype.toggle_filetype_list_of_left)
                 end,
                 provider = function(self)
                     local width = vim.api.nvim_win_get_width(self.win)
@@ -972,6 +1003,51 @@ return {
                 },
             }
 
+            local sign_handlers = {}
+
+            -- gitsigns handlers
+            local gitsigns = function(_)
+                local gitsigns_avail, gitsigns = pcall(require, "gitsigns")
+                if gitsigns_avail then
+                    vim.schedule(gitsigns.preview_hunk)
+                end
+            end
+            for _, sign in ipairs { "Topdelete", "Untracked", "Add", "Changedelete", "Delete" } do
+                local name = "GitSigns" .. sign
+                if not sign_handlers[name] then
+                    sign_handlers[name] = gitsigns
+                end
+            end
+
+            -- diagnostic handlers
+            local diagnostics = function(args)
+                if args.mods:find("c") then
+                    vim.schedule(vim.lsp.buf.code_action)
+                else
+                    vim.schedule(vim.diagnostic.open_float)
+                end
+            end
+            for _, sign in ipairs { "Error", "Hint", "Info", "Warn" } do
+                local name = "DiagnosticSign" .. sign
+                if not sign_handlers[name] then
+                    sign_handlers[name] = diagnostics
+                end
+            end
+
+            -- DAP handlers
+            local dap_breakpoint = function(_)
+                local dap_avail, dap = pcall(require, "dap")
+                if dap_avail then
+                    vim.schedule(dap.toggle_breakpoint)
+                end
+            end
+            for _, sign in ipairs { "", "Rejected", "Condition" } do
+                local name = "DapBreakpoint" .. sign
+                if not sign_handlers[name] then
+                    sign_handlers[name] = dap_breakpoint
+                end
+            end
+
             local signcolumn = {
                 condition = function(self)
                     return vim.opt.signcolumn:get() ~= "no"
@@ -982,49 +1058,6 @@ return {
                 on_click = {
                     callback = function(...)
                         local args = statuscolumn_clickargs(...)
-
-                        local sign_handlers = {}
-                        -- gitsigns handlers
-                        local gitsigns = function(_)
-                            local gitsigns_avail, gitsigns = pcall(require, "gitsigns")
-                            if gitsigns_avail then
-                                vim.schedule(gitsigns.preview_hunk)
-                            end
-                        end
-                        for _, sign in ipairs { "Topdelete", "Untracked", "Add", "Changedelete", "Delete" } do
-                            local name = "GitSigns" .. sign
-                            if not sign_handlers[name] then
-                                sign_handlers[name] = gitsigns
-                            end
-                        end
-                        -- diagnostic handlers
-                        local diagnostics = function(args)
-                            if args.mods:find("c") then
-                                vim.schedule(vim.lsp.buf.code_action)
-                            else
-                                vim.schedule(vim.diagnostic.open_float)
-                            end
-                        end
-                        for _, sign in ipairs { "Error", "Hint", "Info", "Warn" } do
-                            local name = "DiagnosticSign" .. sign
-                            if not sign_handlers[name] then
-                                sign_handlers[name] = diagnostics
-                            end
-                        end
-                        -- DAP handlers
-                        local dap_breakpoint = function(_)
-                            local dap_avail, dap = pcall(require, "dap")
-                            if dap_avail then
-                                vim.schedule(dap.toggle_breakpoint)
-                            end
-                        end
-                        for _, sign in ipairs { "", "Rejected", "Condition" } do
-                            local name = "DapBreakpoint" .. sign
-                            if not sign_handlers[name] then
-                                sign_handlers[name] = dap_breakpoint
-                            end
-                        end
-
                         if args.sign and args.sign.name and sign_handlers[args.sign.name] then
                             sign_handlers[args.sign.name](args)
                         end
@@ -1064,12 +1097,14 @@ return {
                 padding_after(mode, 2),
                 padding_after(insert_with_child_condition({ flexible = 2 }, git, git_status), 2),
                 padding_after(insert_with_child_condition({ flexible = 1 }, lsp_diagnostic, diagnostic), 2),
+                padding_after(dap, 2),
                 padding_after(file_size, 2),
                 padding_after(search_count, 2),
                 padding_after(macro, 2),
                 padding_after(show_cmd, 2),
                 align,
                 padding_before(lazy, 2),
+                padding_before(file_indent, 2),
                 padding_before(file_encoding, 2),
                 padding_before(file_format, 2),
                 padding_before(ruler, 2),
@@ -1098,10 +1133,8 @@ return {
                 },
                 opts = {
                     disable_winbar_cb = function(args)
-                        local is_navic_loaded = package.loaded["nvim-navic"] or false
-                        if not utils.is_available("nvim-navic") or not is_navic_loaded then
-                            return true
-                        end
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                        return not vim.tbl_contains(lsp.lsp_filetype_list, ft)
                     end,
                 },
             }

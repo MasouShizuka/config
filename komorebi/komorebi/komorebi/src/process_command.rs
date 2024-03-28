@@ -23,6 +23,7 @@ use uds_windows::UnixStream;
 
 use komorebi_core::config_generation::ApplicationConfiguration;
 use komorebi_core::config_generation::IdWithIdentifier;
+use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::config_generation::MatchingStrategy;
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::Axis;
@@ -165,20 +166,7 @@ impl WindowManager {
             }
         }
 
-        match message {
-            SocketMessage::CycleFocusMonitor(_)
-            | SocketMessage::CycleFocusWorkspace(_)
-            | SocketMessage::FocusMonitorNumber(_)
-            | SocketMessage::FocusMonitorWorkspaceNumber(_, _)
-            | SocketMessage::FocusWorkspaceNumber(_) => {
-                if self.focused_workspace()?.visible_windows().is_empty() {
-                    let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-                    border.hide()?;
-                    BORDER_HIDDEN.store(true, Ordering::SeqCst);
-                }
-            }
-            _ => {}
-        };
+        // NOTE: 处理命令前不需要隐藏 border
 
         match message {
             SocketMessage::CycleFocusWorkspace(_) | SocketMessage::FocusWorkspaceNumber(_) => {
@@ -216,6 +204,7 @@ impl WindowManager {
             SocketMessage::UnstackWindow => self.remove_window_from_container()?,
             SocketMessage::CycleStack(direction) => {
                 self.cycle_container_window_in_direction(direction)?;
+                self.focused_window()?.focus(self.mouse_follows_focus)?;
             }
             SocketMessage::ForceFocus => {
                 let focused_window = self.focused_window()?;
@@ -280,17 +269,19 @@ impl WindowManager {
 
                 let mut should_push = true;
                 for m in &*manage_identifiers {
-                    if m.id.eq(id) {
-                        should_push = false;
+                    if let MatchingRule::Simple(m) = m {
+                        if m.id.eq(id) {
+                            should_push = false;
+                        }
                     }
                 }
 
                 if should_push {
-                    manage_identifiers.push(IdWithIdentifier {
+                    manage_identifiers.push(MatchingRule::Simple(IdWithIdentifier {
                         kind: identifier,
                         id: id.clone(),
                         matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    });
+                    }));
                 }
             }
             SocketMessage::FloatRule(identifier, ref id) => {
@@ -298,17 +289,19 @@ impl WindowManager {
 
                 let mut should_push = true;
                 for f in &*float_identifiers {
-                    if f.id.eq(id) {
-                        should_push = false;
+                    if let MatchingRule::Simple(f) = f {
+                        if f.id.eq(id) {
+                            should_push = false;
+                        }
                     }
                 }
 
                 if should_push {
-                    float_identifiers.push(IdWithIdentifier {
+                    float_identifiers.push(MatchingRule::Simple(IdWithIdentifier {
                         kind: identifier,
                         id: id.clone(),
                         matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    });
+                    }));
                 }
 
                 let offset = self.work_area_offset;
@@ -1032,17 +1025,19 @@ impl WindowManager {
 
                 let mut should_push = true;
                 for i in &*identifiers {
-                    if i.id.eq(id) {
-                        should_push = false;
+                    if let MatchingRule::Simple(i) = i {
+                        if i.id.eq(id) {
+                            should_push = false;
+                        }
                     }
                 }
 
                 if should_push {
-                    identifiers.push(IdWithIdentifier {
+                    identifiers.push(MatchingRule::Simple(IdWithIdentifier {
                         kind: identifier,
                         id: id.clone(),
                         matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    });
+                    }));
                 }
             }
             SocketMessage::IdentifyObjectNameChangeApplication(identifier, ref id) => {
@@ -1050,34 +1045,38 @@ impl WindowManager {
 
                 let mut should_push = true;
                 for i in &*identifiers {
-                    if i.id.eq(id) {
-                        should_push = false;
+                    if let MatchingRule::Simple(i) = i {
+                        if i.id.eq(id) {
+                            should_push = false;
+                        }
                     }
                 }
 
                 if should_push {
-                    identifiers.push(IdWithIdentifier {
+                    identifiers.push(MatchingRule::Simple(IdWithIdentifier {
                         kind: identifier,
                         id: id.clone(),
                         matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    });
+                    }));
                 }
             }
             SocketMessage::IdentifyTrayApplication(identifier, ref id) => {
                 let mut identifiers = TRAY_AND_MULTI_WINDOW_IDENTIFIERS.lock();
                 let mut should_push = true;
                 for i in &*identifiers {
-                    if i.id.eq(id) {
-                        should_push = false;
+                    if let MatchingRule::Simple(i) = i {
+                        if i.id.eq(id) {
+                            should_push = false;
+                        }
                     }
                 }
 
                 if should_push {
-                    identifiers.push(IdWithIdentifier {
+                    identifiers.push(MatchingRule::Simple(IdWithIdentifier {
                         kind: identifier,
                         id: id.clone(),
                         matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    });
+                    }));
                 }
             }
             SocketMessage::IdentifyLayeredApplication(identifier, ref id) => {
@@ -1085,17 +1084,19 @@ impl WindowManager {
 
                 let mut should_push = true;
                 for i in &*identifiers {
-                    if i.id.eq(id) {
-                        should_push = false;
+                    if let MatchingRule::Simple(i) = i {
+                        if i.id.eq(id) {
+                            should_push = false;
+                        }
                     }
                 }
 
                 if should_push {
-                    identifiers.push(IdWithIdentifier {
+                    identifiers.push(MatchingRule::Simple(IdWithIdentifier {
                         kind: identifier,
                         id: id.clone(),
                         matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    });
+                    }));
                 }
             }
             SocketMessage::ManageFocusedWindow => {
@@ -1379,6 +1380,8 @@ impl WindowManager {
             // Adding this one because sometimes EVENT_SYSTEM_FOREGROUND isn't
             // getting sent on FocusWindow, meaning the border won't be set
             // when processing events
+            | SocketMessage::Close
+            | SocketMessage::Minimize
             | SocketMessage::CycleFocusWindow(_)
             | SocketMessage::FocusWindow(_)
             | SocketMessage::InvisibleBorders(_)
@@ -1390,30 +1393,38 @@ impl WindowManager {
             | SocketMessage::FocusMonitorNumber(_)
             | SocketMessage::FocusMonitorWorkspaceNumber(_, _)
             | SocketMessage::FocusWorkspaceNumber(_) => {
-                let foreground = WindowsApi::foreground_window()?;
-                let foreground_window = Window { hwnd: foreground };
+                // NOTE: 保证从 empty workspace 聚焦另一个 empty workspace 时不返回 Err，导致 notify_subscribers 无法执行
+                if !self.focused_workspace()?.visible_windows().is_empty() {
+                    let foreground = WindowsApi::foreground_window()?;
+                    let foreground_window = Window { hwnd: foreground };
 
-                let monocle = BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst);
-                if monocle != 0 && self.focused_workspace()?.monocle_container().is_some() {
-                    BORDER_COLOUR_CURRENT.store(
-                        monocle,
-                        Ordering::SeqCst,
-                    );
-                }
-
-                // it is not acceptable to fail here; we need to be able to send the event to
-                // subscribers
-                if self.focused_container().is_ok() {
-                    let stack = BORDER_COLOUR_STACK.load(Ordering::SeqCst);
-                    if stack != 0 && self.focused_container()?.windows().len() > 1 {
-                        BORDER_COLOUR_CURRENT
-                            .store(stack, Ordering::SeqCst);
+                    let monocle = BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst);
+                    if monocle != 0 && self.focused_workspace()?.monocle_container().is_some() {
+                        BORDER_COLOUR_CURRENT.store(
+                            monocle,
+                            Ordering::SeqCst,
+                        );
                     }
-                }
 
-                let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-                // NOTE: 更新 border
-                border.set_position(foreground_window, true)?;
+                    // it is not acceptable to fail here; we need to be able to send the event to
+                    // subscribers
+                    if self.focused_container().is_ok() {
+                        let stack = BORDER_COLOUR_STACK.load(Ordering::SeqCst);
+                        if stack != 0 && self.focused_container()?.windows().len() > 1 {
+                            BORDER_COLOUR_CURRENT
+                                .store(stack, Ordering::SeqCst);
+                        }
+                    }
+
+                    let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
+                    // NOTE: 更新 border
+                    border.set_position(foreground_window, true)?;
+                } else {
+                    // NOTE: 当前 workspace 为空时，去除 border
+                    let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
+                    border.hide()?;
+                    BORDER_HIDDEN.store(true, Ordering::SeqCst);
+                }
             }
             SocketMessage::TogglePause => {
                 let is_paused = self.is_paused;

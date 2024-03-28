@@ -1,5 +1,4 @@
 local environment = require("utils.environment")
-local utils = require("utils")
 
 -- Char
 vim.opt.list = true                                                                                     -- show <Tab> and <EOL>

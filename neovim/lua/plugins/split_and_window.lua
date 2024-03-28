@@ -94,25 +94,19 @@ return {
                     return
                 end
 
-                local callback
-                local is_opened, win = filetype.is_toggle_filetype_opened(toggle_filetype_list)
-                if is_opened then
-                    callback = function()
-                        -- if not focus_nth_win(pos, 1) then
-                        --     vim.api.nvim_set_current_win(win)
-                        -- end
-                        vim.api.nvim_set_current_win(win)
-                    end
-                else
-                    callback = function()
-                        edgy.open(pos)
-                    end
-                end
-                callback()
-
                 if not filetype.is_in_toggle_filetype_list(vim.bo.filetype) then
                     prev_tabpage = vim.api.nvim_get_current_tabpage()
                     prev_win = vim.api.nvim_get_current_win()
+                end
+
+                local is_opened, win = filetype.is_toggle_filetype_opened(toggle_filetype_list)
+                if is_opened then
+                    -- if not focus_nth_win(pos, 1) then
+                    --     vim.api.nvim_set_current_win(win)
+                    -- end
+                    vim.api.nvim_set_current_win(win)
+                else
+                    edgy.open(pos)
                 end
             end
 
@@ -316,7 +310,7 @@ return {
                     ft = "help",
                     -- only show help buffers
                     filter = function(buf)
-                        return vim.bo[buf].buftype == "help"
+                        return vim.api.nvim_get_option_value("buftype", { buf = buf }) == "help"
                     end,
                     size = { width = 0.5 },
                 },
@@ -448,7 +442,7 @@ return {
     --     config = function(_, opts)
     --         local focus = require("focus")
     --         focus.setup(opts)
-
+    --
     --         local ignore_buftypes = buftype.skip_buftype_list
     --         local ignore_filetypes = filetype.skip_filetype_list
     --         local augroup = vim.api.nvim_create_augroup("FocusDisable", { clear = true })
@@ -474,7 +468,7 @@ return {
     --             desc = "Disable focus autoresize for FileType",
     --             group = augroup,
     --         })
-
+    --
     --         local is_equalised = false
     --         local is_maximised = false
     --         vim.keymap.set("n", "<c-s><c-t>", function() focus.focus_toggle() end, { desc = "Toggle focus on and off again", silent = true })

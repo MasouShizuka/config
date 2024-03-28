@@ -1,16 +1,5 @@
 return {
     {
-        "chrisgrieser/nvim-spider",
-        keys = {
-            { "w",  function() require("spider").motion("w") end,  desc = "Next word",            mode = { "n", "x", "o" } },
-            { "e",  function() require("spider").motion("e") end,  desc = "Next end of word",     mode = { "n", "x", "o" } },
-            { "b",  function() require("spider").motion("b") end,  desc = "Previous word",        mode = { "n", "x", "o" } },
-            { "ge", function() require("spider").motion("ge") end, desc = "Previous end of word", mode = { "n", "x", "o" } },
-        },
-        opts = {},
-    },
-
-    {
         "folke/flash.nvim",
         keys = {
             { "m", function() require("flash").jump() end, desc = "Flash",     mode = { "n", "x" } },

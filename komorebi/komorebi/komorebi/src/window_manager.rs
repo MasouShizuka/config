@@ -21,7 +21,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use uds_windows::UnixListener;
 
-use komorebi_core::config_generation::IdWithIdentifier;
+use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::custom_layout::CustomLayout;
 use komorebi_core::Arrangement;
 use komorebi_core::Axis;
@@ -97,12 +97,12 @@ pub struct State {
     pub mouse_follows_focus: bool,
     pub has_pending_raise_op: bool,
     pub remove_titlebars: bool,
-    pub float_identifiers: Vec<IdWithIdentifier>,
-    pub manage_identifiers: Vec<IdWithIdentifier>,
-    pub layered_whitelist: Vec<IdWithIdentifier>,
-    pub tray_and_multi_window_identifiers: Vec<IdWithIdentifier>,
-    pub border_overflow_identifiers: Vec<IdWithIdentifier>,
-    pub name_change_on_launch_identifiers: Vec<IdWithIdentifier>,
+    pub float_identifiers: Vec<MatchingRule>,
+    pub manage_identifiers: Vec<MatchingRule>,
+    pub layered_whitelist: Vec<MatchingRule>,
+    pub tray_and_multi_window_identifiers: Vec<MatchingRule>,
+    pub border_overflow_identifiers: Vec<MatchingRule>,
+    pub name_change_on_launch_identifiers: Vec<MatchingRule>,
     pub monitor_index_preferences: HashMap<usize, Rect>,
     pub display_index_preferences: HashMap<usize, String>,
 }
@@ -671,63 +671,44 @@ impl WindowManager {
 
     #[tracing::instrument(skip(self))]
     pub fn raise_window_at_cursor_pos(&mut self) -> Result<()> {
-        let mut hwnd = WindowsApi::window_at_cursor_pos()?;
+        let mut hwnd = None;
 
-        if self.has_pending_raise_op
-            || self.focused_window()?.hwnd == hwnd
-            // Sometimes we need this check, because the focus may have been given by a click
-            // to a non-window such as the taskbar or system tray, and komorebi doesn't know that
-            // the focused window of the workspace is not actually focused by the OS at that point
-            || WindowsApi::foreground_window()? == hwnd
-        {
-            Ok(())
-        } else {
-            let mut known_hwnd = false;
-            for monitor in self.monitors() {
-                for workspace in monitor.workspaces() {
-                    if workspace.contains_window(hwnd) {
-                        known_hwnd = true;
-                    }
-                }
-            }
-
-            // TODO: Not sure if this needs to be made configurable just yet...
-            let overlay_classes = [
-                // Chromium/Electron
-                "Chrome_RenderWidgetHostHWND".to_string(),
-                // Explorer
-                "DirectUIHWND".to_string(),
-                "SysTreeView32".to_string(),
-                "ToolbarWindow32".to_string(),
-                "NetUIHWND".to_string(),
-            ];
-
-            if !known_hwnd {
-                let class = Window { hwnd }.class()?;
-                // Some applications (Electron/Chromium-based, explorer) have (invisible?) overlays
-                // windows that we need to look beyond to find the actual window to raise
-                if overlay_classes.contains(&class) {
-                    for monitor in self.monitors() {
-                        for workspace in monitor.workspaces() {
-                            if let Some(exe_hwnd) = workspace.hwnd_from_exe(&Window { hwnd }.exe()?)
-                            {
-                                hwnd = exe_hwnd;
-                                known_hwnd = true;
-                            }
+        for monitor in self.monitors() {
+            for workspace in monitor.workspaces() {
+                if let Some(container_idx) = workspace.container_idx_from_current_point() {
+                    if let Some(container) = workspace.containers().get(container_idx) {
+                        if let Some(window) = container.focused_window() {
+                            hwnd = Some(window.hwnd);
                         }
                     }
                 }
             }
-
-            if known_hwnd {
-                let event = WindowManagerEvent::Raise(Window { hwnd });
-                self.has_pending_raise_op = true;
-                Ok(winevent_listener::event_tx().send(event)?)
-            } else {
-                tracing::debug!("not raising unknown window: {}", Window { hwnd });
-                Ok(())
-            }
         }
+
+        if let Some(hwnd) = hwnd {
+            if self.has_pending_raise_op
+                    || self.focused_window()?.hwnd == hwnd
+                    // Sometimes we need this check, because the focus may have been given by a click
+                    // to a non-window such as the taskbar or system tray, and komorebi doesn't know that
+                    // the focused window of the workspace is not actually focused by the OS at that point
+                    || WindowsApi::foreground_window()? == hwnd
+            {
+                return Ok(());
+            }
+
+            let event = WindowManagerEvent::Raise(Window { hwnd });
+            self.has_pending_raise_op = true;
+            winevent_listener::event_tx().send(event)?;
+        } else {
+            tracing::debug!(
+                "not raising unknown window: {}",
+                Window {
+                    hwnd: WindowsApi::window_at_cursor_pos()?
+                }
+            );
+        }
+
+        Ok(())
     }
 
     #[tracing::instrument(skip(self))]
@@ -860,16 +841,16 @@ impl WindowManager {
         if !follow_focus && self.focused_container_mut().is_ok() {
             // and we have a stack with >1 windows
             if self.focused_container_mut()?.windows().len() > 1
-            // and we don't have a maxed window 
-            && self.focused_workspace()?.maximized_window().is_none()
-            // and we don't have a monocle container
-            && self.focused_workspace()?.monocle_container().is_none()
+                // and we don't have a maxed window 
+                && self.focused_workspace()?.maximized_window().is_none()
+                // and we don't have a monocle container
+                && self.focused_workspace()?.monocle_container().is_none()
             {
                 if let Ok(window) = self.focused_window_mut() {
                     window.focus(self.mouse_follows_focus)?;
                 }
             }
-        };
+        }
 
         // This is to correctly restore and focus when switching to a workspace which
         // contains a managed maximized window
@@ -1231,7 +1212,21 @@ impl WindowManager {
             }
         }
 
-        self.focused_window_mut()?.focus(self.mouse_follows_focus)?;
+        // When switching workspaces and landing focus on a window that is not stack, but a stack
+        // exists, and there is a stackbar visible, when changing focus to that container stack,
+        // the focused text colour will not be applied until the stack has been cycled at least once
+        //
+        // With this piece of code, we check if we have changed focus to a container stack with
+        // a stackbar, and if we have, we run a quick update to make sure the focused text colour
+        // has been applied
+        let focused_window = self.focused_window_mut()?;
+        let focused_window_hwnd = focused_window.hwnd;
+        focused_window.focus(self.mouse_follows_focus)?;
+
+        let focused_container = self.focused_container()?;
+        if let Some(stackbar) = focused_container.stackbar() {
+            stackbar.update(focused_container.windows(), focused_window_hwnd)?;
+        }
 
         Ok(())
     }

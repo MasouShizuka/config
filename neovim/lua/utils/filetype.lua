@@ -14,6 +14,7 @@ M.skip_filetype_list = {
     "dashboard",
     "DiffviewFiles",
     "DiffviewFileHistory",
+    "edgy",
     "fidget",
     "minimap",
     "neo-tree",
@@ -33,6 +34,7 @@ M.skip_filetype_list_to_main = {
     "dapui_console",
     "DiffviewFiles",
     "DiffviewFileHistory",
+    "edgy",
     "fidget",
     "help",
     "minimap",
@@ -54,6 +56,7 @@ M.skip_filetype_list_of_panel = {
     "dapui_console",
     "DiffviewFiles",
     "DiffviewFileHistory",
+    "edgy",
     "fidget",
     "help",
     "neo-tree",
@@ -75,8 +78,7 @@ M.skip_filetype = function(skip_filetype_list, step)
         winnr = winnr + step
         if winnr <= 0 then
             winnr = win_count
-        end
-        if winnr > win_count then
+        elseif winnr > win_count then
             winnr = 1
         end
 

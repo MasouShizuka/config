@@ -1,4 +1,5 @@
 local environment = require("utils.environment")
+local utils = require("utils")
 
 local M = {}
 
@@ -33,17 +34,10 @@ end
 M.vscode_snippet_path = M.vscode_path .. "/User/snippets"
 M.vscode_extension_path = M.home_path .. "/.vscode/extensions"
 
-M.conda_path = M.home_path .. "/miniconda3"
-M.python_path = M.conda_path .. "/bin/python"
-if environment.is_windows then
-    M.python_path = M.conda_path .. "/python.exe"
-end
-
-M.get_python_envs_path = function()
+M.get_python_envs_path = function(envs)
     local python_envs_path = nil
 
     local conda_envs_path = M.conda_path .. "/envs"
-    local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
     local envs_path = conda_envs_path .. "/" .. envs
     if vim.fn.isdirectory(envs_path) ~= 0 then
         python_envs_path = envs_path .. "/bin/python"
@@ -53,6 +47,19 @@ M.get_python_envs_path = function()
     end
 
     return python_envs_path
+end
+M.conda_path = M.home_path .. "/mambaforge"
+M.python_path = M.conda_path .. "/bin/python"
+if environment.is_windows then
+    M.python_path = M.conda_path .. "/python.exe"
+end
+M.python_envs_path = nil
+if not utils.is_available("venv-selector.nvim") then
+    local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+    local python_envs_path = M.get_python_envs_path(envs)
+    if python_envs_path then
+        M.python_envs_path = python_envs_path
+    end
 end
 
 return M

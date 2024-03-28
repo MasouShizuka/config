@@ -54,6 +54,7 @@ class BatteryWidget(BaseWidget):
         self.callback_middle = callbacks["on_middle"]
         self.callback_timer = "update_label"
 
+        self.enabled = True
         self._label.show()
         self._label_alt.hide()
 
@@ -118,11 +119,27 @@ class BatteryWidget(BaseWidget):
             return self._status_icons[f"icon_{threshold}"]
 
     def _update_label(self):
+        self._battery_state = psutil.sensors_battery()
+
+        enabled = self._battery_state is not None
+        if enabled != self.enabled:
+            if enabled:
+                if self._show_alt_label:
+                    self._label_alt.show()
+                else:
+                    self._label.show()
+            else:
+                if self._show_alt_label:
+                    self._label_alt.hide()
+                else:
+                    self._label.hide()
+
+            self.enabled = enabled
+            if not self.enabled:
+                return
+
         active_label = self._label_alt if self._show_alt_label else self._label
         active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
-        active_label.setText(active_label_content)
-
-        self._battery_state = psutil.sensors_battery()
 
         threshold = self._get_battery_threshold()
         time_remaining = self._get_time_remaining()

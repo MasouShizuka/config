@@ -64,92 +64,6 @@ function M.diffthis()
     vim.cmd("normal! ]c")
 end
 
--- https://github.com/amrbashir/nvim-docs-view
-function M.extra_view_toggle(update, opts)
-    local default_config = {
-        filetype = "extra-view",
-        focus = false,
-        height = 10,
-        width = 60,
-        position = "right",
-    }
-    local config = vim.tbl_deep_extend("force", default_config, opts)
-
-    for group in vim.fn.execute("augroup"):gmatch("%S+") do
-        if group == config.filetype then
-            for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-                if not vim.api.nvim_win_is_valid(win) then
-                    goto continue
-                end
-
-                local buf = vim.api.nvim_win_get_buf(win)
-                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                if ft == config.filetype then
-                    vim.api.nvim_win_close(win, true)
-                    vim.api.nvim_del_augroup_by_name(config.filetype)
-
-                    break
-                end
-
-                ::continue::
-            end
-
-            return
-        end
-    end
-
-    local prev_win = vim.api.nvim_get_current_win()
-
-    local height = config.height
-    if type(height) == "function" then
-        height = config.height()
-    end
-    local width = config.width
-    if type(width) == "function" then
-        width = config.width()
-    end
-
-    if config.position == "bottom" then
-        vim.api.nvim_command("bel new")
-        width = vim.api.nvim_win_get_width(prev_win)
-    elseif config.position == "top" then
-        vim.api.nvim_command("top new")
-        width = vim.api.nvim_win_get_width(prev_win)
-    elseif config.position == "left" then
-        vim.api.nvim_command("topleft vnew")
-        height = vim.api.nvim_win_get_height(prev_win)
-    else
-        vim.api.nvim_command("botright vnew")
-        height = vim.api.nvim_win_get_height(prev_win)
-    end
-
-    local win = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_height(win, height)
-    vim.api.nvim_win_set_width(win, width)
-    vim.api.nvim_set_option_value("number", false, { win = win })
-    vim.api.nvim_set_option_value("relativenumber", false, { win = win })
-    vim.api.nvim_set_option_value("signcolumn", "no", { win = win })
-
-    local buf = vim.api.nvim_get_current_buf()
-    vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
-    vim.api.nvim_set_option_value("buflisted", false, { buf = buf })
-    vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
-    vim.api.nvim_set_option_value("filetype", config.filetype, { buf = buf })
-    vim.api.nvim_set_option_value("swapfile", false, { buf = buf })
-
-    if not config.focus then
-        vim.api.nvim_set_current_win(prev_win)
-    end
-
-    vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-        callback = function()
-            update(buf, win)
-        end,
-        desc = config.filetype .. " auto update",
-        group = vim.api.nvim_create_augroup(config.filetype, { clear = true }),
-    })
-end
-
 function M.get_char_from_string(str)
     local char_list = {}
     local char_count = 0
@@ -236,7 +150,7 @@ function M.json_save(file, data)
     io.close(f)
 
     -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
-    -- local fd = vim.uv.fs_open(file, "w", -1)
+    -- local fd = vim.uv.fs_open(file, "w", 438)
     -- if fd == nil then
     --     return
     -- end
@@ -280,75 +194,33 @@ function M.json_load(file)
     return data
 end
 
-function M.move(key, set_jumps)
-    if set_jumps == nil then
-        set_jumps = true
-    end
-
-    local buf = vim.api.nvim_get_current_buf()
-    local cursor_center_enabled = vim.g.cursor_center_enabled or false
-    if vim.b[buf].cursor_center_enabled ~= nil then
-        cursor_center_enabled = vim.b[buf].cursor_center_enabled
-    end
-
-    local prefix = ""
-    local postfix = ""
-
-    if cursor_center_enabled then
-        postfix = postfix .. "zz"
-    end
-
-    local count = vim.v.count
-    if count > 0 then
-        prefix = prefix .. tostring(count)
-        if set_jumps then
-            vim.cmd("normal! m'")
-        end
-    end
-
-    if count == 0 and not vim.fn.mode():find("V") then
-        vim.cmd.normal(string.format("g%s%s", key, postfix))
-    else
-        vim.cmd(string.format("normal! %s%s%s", prefix, key, postfix))
-    end
-end
-
 function M.refresh_buf(buf, timeout, timer)
-    local function focus_buf(buf)
-        if vim.api.nvim_get_current_buf() ~= buf then
-            for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-                if not vim.api.nvim_win_is_valid(win) then
-                    goto continue
-                end
+    buf = buf or vim.api.nvim_get_current_buf()
 
-                if vim.api.nvim_win_get_buf(win) == buf then
-                    vim.api.nvim_set_current_win(win)
-                    break
-                end
-
-                ::continue::
-            end
-        end
-    end
-
-    local function focus_and_refresh_buf(buf)
-        focus_buf(buf)
-        vim.cmd.edit()
-    end
-
-    if buf == vim.api.nvim_get_current_buf() then
-        M.defer(function() focus_and_refresh_buf(buf) end, timeout, timer)
-    else
-        local name = string.format("Buf%sRefresh", buf)
+    local function create_refresh_buf_autocmd()
+        local augroup = string.format("Buf%sRefresh", buf)
         vim.api.nvim_create_autocmd("BufEnter", {
             buffer = buf,
             callback = function()
-                M.defer(function() focus_and_refresh_buf(buf) end, timeout, timer)
-                vim.api.nvim_del_augroup_by_name(name)
+                M.defer(function() vim.cmd.edit() end, timeout, timer)
+                vim.api.nvim_del_augroup_by_name(augroup)
             end,
-            group = vim.api.nvim_create_augroup(name, { clear = true }),
+            group = vim.api.nvim_create_augroup(augroup, { clear = true }),
         })
     end
+
+    if buf ~= vim.api.nvim_get_current_buf() then
+        create_refresh_buf_autocmd()
+        return
+    end
+
+    M.defer(function()
+        if buf == vim.api.nvim_get_current_buf() then
+            vim.cmd.edit()
+        else
+            create_refresh_buf_autocmd()
+        end
+    end, timeout, timer)
 end
 
 --- Open a URL under the cursor with the current operating system
@@ -399,12 +271,7 @@ function M.toggle_global_setting(setting, callback, silent)
     local buf = vim.api.nvim_get_current_buf()
     local buffer_enabled = vim.b[buf][setting]
     local global_enabled = vim.g[setting] or false
-    local prev_enabled
-    if buffer_enabled == nil then
-        prev_enabled = global_enabled
-    else
-        prev_enabled = buffer_enabled
-    end
+    local prev_enabled = buffer_enabled == nil and global_enabled or buffer_enabled
 
     global_enabled = not global_enabled
     vim.g[setting] = global_enabled
@@ -420,156 +287,6 @@ function M.toggle_global_setting(setting, callback, silent)
     if not silent then
         vim.notify(string.format("%s: %s", setting, M.bool2str(global_enabled)), vim.log.levels.INFO, { title = "Global" })
     end
-end
-
--- https://github.com/AndrewRadev/undoquit.vim
-function M.undoquit(create_autocmd)
-    local undoquit_stack = {}
-
-    local function is_storable(buf)
-        local buftype = vim.api.nvim_get_option_value("buftype", { buf = buf })
-
-        if vim.fn.buflisted(buf) == 1 and buftype == "" then
-            return true
-        end
-
-        return buftype == "help"
-    end
-
-    local function real_tab_buffers()
-        local real_buffers = {}
-        for _, buf in ipairs(vim.fn.tabpagebuflist()) do
-            if is_storable(buf) then
-                real_buffers[#real_buffers + 1] = buf
-            end
-        end
-
-        return real_buffers
-    end
-
-    local function use_neighbour_window(direction, split_command, window_data)
-        local current_bufnr = vim.api.nvim_get_current_buf()
-        local current_winnr = vim.api.nvim_get_current_win()
-        local result = false
-
-        local function try()
-            vim.cmd.wincmd(direction)
-            local bufnr = vim.api.nvim_get_current_buf()
-            if is_storable(bufnr) and bufnr ~= current_bufnr then
-                window_data.neighbour_buffer = vim.fn.expand("%")
-                window_data.open_command = string.format("tabnext %s | %s", window_data.tabpagenr, split_command)
-                result = true
-            end
-            vim.cmd(string.format("%swincmd w", current_winnr))
-        end
-        pcall(try)
-
-        return result, window_data
-    end
-
-    local function get_window_restore_data()
-        local window_data = {
-            filename = vim.fn.expand("%:p"),
-            tabpagenr = vim.fn.tabpagenr(),
-            view = vim.fn.winsaveview(),
-        }
-
-        local real_buffers = real_tab_buffers()
-        if #real_buffers == 1 then
-            window_data["neighbour_buffer"] = ""
-            window_data["open_command"] = string.format("%stabnew", vim.fn.tabpagenr() - 1)
-
-            return window_data
-        end
-
-        local directions = {
-            j = "leftabove split",
-            k = "rightbelow split",
-            l = "rightbelow split",
-            h = "leftabove split",
-        }
-        for direction, split_command in pairs(directions) do
-            local ok, data = use_neighbour_window(direction, split_command, window_data)
-            if ok then
-                return data
-            end
-        end
-
-        window_data.neighbour_buffer = ""
-        window_data.open_command = "edit"
-
-        return window_data
-    end
-
-    local function save_window_quit_history()
-        if not is_storable(vim.api.nvim_get_current_buf()) then
-            return
-        end
-
-        undoquit_stack[#undoquit_stack + 1] = get_window_restore_data()
-    end
-
-    local function restore_window()
-        if #undoquit_stack == 0 then
-            vim.notify("No closed windows to undo")
-            return
-        end
-
-        local window_data = undoquit_stack[#undoquit_stack]
-        table.remove(undoquit_stack, #undoquit_stack)
-
-        local real_buffers = real_tab_buffers()
-        if #real_buffers == 0 then
-            window_data.open_command = "only | edit"
-        end
-
-        local neighbour_buffer = window_data.neighbour_buffer
-        local neighbour_buf = vim.fn.bufnr(neighbour_buffer)
-        local neighbour_win = vim.fn.bufwinnr(neighbour_buf)
-        if neighbour_buffer ~= "" and neighbour_buf >= 0 and neighbour_win >= 0 then
-            vim.cmd(string.format("%swincmd w", neighbour_win))
-        end
-
-        vim.cmd(string.format("%s %s", window_data.open_command, vim.fn.escape(vim.fn.fnamemodify(window_data.filename, ":~:."), " ")))
-
-        local view = window_data.view
-        if view then
-            vim.fn.winrestview(view)
-        end
-    end
-
-    local function restore_tab()
-        if #undoquit_stack == 0 then
-            vim.notify("No closed tabs to undo")
-            return
-        end
-
-        local last_window = undoquit_stack[#undoquit_stack]
-        local last_tab = last_window.tabpagenr
-        while last_window.tabpagenr == last_tab do
-            restore_window()
-
-            if #undoquit_stack > 0 then
-                last_window = undoquit_stack[#undoquit_stack]
-            else
-                break
-            end
-
-            if last_window.open_command == "1tabnew" then
-                break
-            end
-        end
-    end
-
-    if create_autocmd then
-        vim.api.nvim_create_autocmd("QuitPre", {
-            callback = save_window_quit_history,
-            desc = "Undoquit save window quit history",
-            group = vim.api.nvim_create_augroup("Undoquit", { clear = true }),
-        })
-    end
-
-    return restore_window, restore_tab
 end
 
 return M

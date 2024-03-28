@@ -38,12 +38,28 @@ return {
         opts = function()
             local actions = require("telescope.actions")
 
+            local select_one_or_multi_tab = function(prompt_bufnr)
+                local picker = require("telescope.actions.state").get_current_picker(prompt_bufnr)
+                local multi = picker:get_multi_selection()
+                if not vim.tbl_isempty(multi) then
+                    require("telescope.actions").close(prompt_bufnr)
+                    for _, j in pairs(multi) do
+                        if j.path ~= nil then
+                            vim.cmd(string.format("%s %s", "tabnew", j.path))
+                        end
+                    end
+                else
+                    require("telescope.actions").select_tab(prompt_bufnr)
+                end
+            end
+
             return {
                 defaults = {
                     sorting_strategy = "ascending",
                     layout_config = {
                         horizontal = {
                             prompt_position = "top",
+                            preview_width = 0.5,
                         },
                     },
                     mappings = {
@@ -52,25 +68,24 @@ return {
                             ["<c-k>"] = actions.move_selection_previous,
                             ["<down>"] = actions.move_selection_next,
                             ["<up>"] = actions.move_selection_previous,
-                            ["<tab>"] = actions.toggle_selection + actions.move_selection_worse,
-                            ["<s-tab>"] = actions.toggle_selection + actions.move_selection_better,
+                            ["<s-down>"] = actions.toggle_selection + actions.move_selection_next,
+                            ["<s-up>"] = actions.toggle_selection + actions.move_selection_previous,
                             ["<c-a>"] = actions.toggle_all,
                             ["<c-u>"] = actions.preview_scrolling_up,
                             ["<c-d>"] = actions.preview_scrolling_down,
+                            ["<c-h>"] = actions.preview_scrolling_left,
+                            ["<c-l>"] = actions.preview_scrolling_right,
                             ["<pageup>"] = actions.results_scrolling_up,
                             ["<pagedown>"] = actions.results_scrolling_down,
                             ["<cr>"] = actions.select_default,
-                            ["<c-i>"] = actions.select_default,
-                            ["<c-h>"] = actions.select_horizontal,
+                            ["<c-x>"] = actions.select_horizontal,
                             ["<c-v>"] = actions.select_vertical,
-                            ["<c-t>"] = actions.select_tab,
+                            ["<c-t>"] = select_one_or_multi_tab,
                             ["<c-w>"] = actions.close,
                             ["<c-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-                            ["<c-l>"] = actions.complete_tag,
                             ["<c-n>"] = actions.cycle_history_next,
                             ["<c-p>"] = actions.cycle_history_prev,
                             ["<c-/>"] = actions.which_key,
-                            ["<c-_>"] = actions.which_key,
                         },
                     },
                     history = {

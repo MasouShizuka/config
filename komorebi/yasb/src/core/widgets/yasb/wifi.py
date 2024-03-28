@@ -40,6 +40,7 @@ class WifiWidget(BaseWidget):
         self.callback_middle = callbacks["on_middle"]
         self.callback_timer = "update_label"
 
+        self.enabled = True
         self._label.show()
         self._label_alt.hide()
 
@@ -69,6 +70,23 @@ class WifiWidget(BaseWidget):
             elif name_lower == "wlan":
                 wifi_name, wifi_icon = self._get_wifi_name_and_icon()
                 break
+
+        enabled = wifi_name != ""
+        if enabled != self.enabled:
+            if enabled:
+                if self._show_alt_label:
+                    self._label_alt.show()
+                else:
+                    self._label.show()
+            else:
+                if self._show_alt_label:
+                    self._label_alt.hide()
+                else:
+                    self._label.hide()
+
+            self.enabled = enabled
+            if not self.enabled:
+                return
 
         # Determine which label is active
         if self._show_alt_label:

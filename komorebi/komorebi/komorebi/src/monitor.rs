@@ -71,7 +71,7 @@ impl Monitor {
         let focused_idx = self.focused_workspace_idx();
         for (i, workspace) in self.workspaces_mut().iter_mut().enumerate() {
             if i != focused_idx {
-                workspace.hide();
+                workspace.hide(None);
             }
         }
         let focused_workspace = self

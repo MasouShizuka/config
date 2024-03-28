@@ -107,12 +107,9 @@ M.lsp = function(lspconfig, default_config)
         end,
         pyright = function()
             local pythonPath = path.python_path
-            if not utils.is_available("venv-selector.nvim") then
-                local python_envs_path = path.get_python_envs_path()
-                if python_envs_path then
-                    pythonPath = python_envs_path
-                    vim.notify(("Activated:\n%s"):format(python_envs_path), vim.log.levels.INFO, { title = "pyright" })
-                end
+            if path.python_envs_path then
+                pythonPath = path.python_envs_path
+                vim.notify(("Activated:\n%s"):format(pythonPath), vim.log.levels.INFO, { title = "pyright" })
             end
 
             lspconfig.pyright.setup(vim.tbl_deep_extend("keep", {
@@ -130,8 +127,9 @@ M.lsp = function(lspconfig, default_config)
             }, default_config))
         end,
         rust_analyzer = function()
-            -- 由 rustaceanvim 设置
-            -- lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("keep", {}, default_config))
+            if not utils.is_available("rustaceanvim") then
+                lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("keep", {}, default_config))
+            end
         end,
         texlab = function()
             local executable = "sioyek"

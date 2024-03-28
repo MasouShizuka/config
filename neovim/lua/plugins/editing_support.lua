@@ -223,6 +223,7 @@ return {
         lazy = true,
     },
 
+    -- NOTE: 需要安装 ripgrep
     {
         "folke/todo-comments.nvim",
         cmd = {
@@ -232,6 +233,7 @@ return {
             "TodoTelescope",
         },
         dependencies = {
+            "folke/trouble.nvim",
             "nvim-lua/plenary.nvim",
         },
         enabled = not environment.is_vscode,
@@ -314,12 +316,20 @@ return {
 
     {
         "HiPhish/rainbow-delimiters.nvim",
+        config = function(_, opts)
+            require("rainbow-delimiters.setup").setup(opts)
+        end,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
         enabled = not environment.is_vscode,
         event = {
             "User TreesitterFile",
+        },
+        opts = {
+            log = {
+                level = vim.log.levels.OFF,
+            },
         },
     },
 
@@ -648,7 +658,7 @@ return {
             local last_paste_start = vim.fn.getpos("'[")
             local last_paste_end = vim.fn.getpos("']")
 
-            local group = vim.api.nvim_create_augroup("autosave", {})
+            local augroup = vim.api.nvim_create_augroup("AutoSaveWritePreAndPost", { clear = true })
             vim.api.nvim_create_autocmd("User", {
                 callback = function(args)
                     if args.data.saved_buffer ~= nil then
@@ -660,7 +670,7 @@ return {
                     end
                 end,
                 desc = "AutoSaveWritePre event",
-                group = group,
+                group = augroup,
                 pattern = "AutoSaveWritePre",
             })
             vim.api.nvim_create_autocmd("User", {
@@ -671,7 +681,7 @@ return {
                         vim.fn.setpos("']", last_paste_end)
                     end
                 end,
-                group = group,
+                group = augroup,
                 desc = "AutoSaveWritePost event",
                 pattern = "AutoSaveWritePost",
             })
@@ -684,13 +694,11 @@ return {
             vim.keymap.set("n", "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(prev_enabled, enabled) end) end, { desc = "Toggle autoSave (buffer)", silent = true })
         end,
         enabled = not environment.is_vscode,
-        event = {
-            "User AutoSave",
-        },
         init = function()
             vim.g.trailspace_interval = 3
             vim.g.prev_trailspace_time = os.time()
 
+            -- auto-save 自动激活
             vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertLeave", "TextChanged" }, {
                 callback = function(args)
                     local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
@@ -698,12 +706,12 @@ return {
                     local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
                     if not vim.tbl_contains(buftype.skip_buftype_list, bt) and is_modifiable and is_modified then
                         pcall(vim.cmd.write)
-                        utils.event("AutoSave")
-                        vim.api.nvim_del_augroup_by_name("AutoSave")
+                        require("auto-save")
+                        vim.api.nvim_del_augroup_by_name("AutoSaveActivate")
                     end
                 end,
                 desc = "AutoSave event",
-                group = vim.api.nvim_create_augroup("AutoSave", { clear = true }),
+                group = vim.api.nvim_create_augroup("AutoSaveActivate", { clear = true }),
             })
         end,
         opts = {

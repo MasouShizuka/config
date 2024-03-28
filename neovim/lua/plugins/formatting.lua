@@ -23,7 +23,7 @@ return {
 
     {
         "lukas-reineke/indent-blankline.nvim",
-        -- 严重影响性能，因此不启用 rainbow-delimiters.nvim integration
+        -- 严重影响性能，因此不启用 rainbow-delimiters integration
         -- config = function(_, opts)
         --     if utils.is_available("rainbow-delimiters.nvim") then
         --         local highlight = {

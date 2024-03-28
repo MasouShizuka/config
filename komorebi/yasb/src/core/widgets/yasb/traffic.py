@@ -44,6 +44,7 @@ class TrafficWidget(BaseWidget):
         self.callback_middle = callbacks["on_middle"]
         self.callback_timer = "update_label"
 
+        self.enabled = True
         self._label.show()
         self._label_alt.hide()
 
@@ -62,15 +63,32 @@ class TrafficWidget(BaseWidget):
         self._update_label()
 
     def _update_label(self):
-        # Update the active label at each timer interval
-        active_label = self._label_alt if self._show_alt_label else self._label
-        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
-        active_label_formatted = active_label_content
-
         try:
             upload_speed, download_speed = self._get_speed()
         except Exception:
             upload_speed, download_speed = "N/A", "N/A"
+
+        enabled = not (upload_speed == "N/A" and download_speed == "N/A")
+        if enabled != self.enabled:
+            if enabled:
+                if self._show_alt_label:
+                    self._label_alt.show()
+                else:
+                    self._label.show()
+            else:
+                if self._show_alt_label:
+                    self._label_alt.hide()
+                else:
+                    self._label.hide()
+
+            self.enabled = enabled
+            if not self.enabled:
+                return
+
+        # Update the active label at each timer interval
+        active_label = self._label_alt if self._show_alt_label else self._label
+        active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
+        active_label_formatted = active_label_content
 
         label_options = [
             ("{upload_speed}", upload_speed),
@@ -87,11 +105,14 @@ class TrafficWidget(BaseWidget):
         upload_diff = current_io.bytes_sent - self.bytes_sent
         download_diff = current_io.bytes_recv - self.bytes_recv
 
+        if upload_diff == 0 and download_diff == 0:
+            return "N/A", "N/A"
+
         if upload_diff < 1024:
             upload_speed = f"{upload_diff}B"
         else:
             upload_speed = naturalsize(
-                (current_io.bytes_sent - self.bytes_sent) // self.interval,
+                upload_diff // self.interval,
                 gnu=True,
             )
 
@@ -99,10 +120,11 @@ class TrafficWidget(BaseWidget):
             download_speed = f"{download_diff}B"
         else:
             download_speed = naturalsize(
-                (current_io.bytes_recv - self.bytes_recv) // self.interval,
+                download_diff // self.interval,
                 gnu=True,
             )
 
         self.bytes_sent = current_io.bytes_sent
         self.bytes_recv = current_io.bytes_recv
+
         return upload_speed, download_speed

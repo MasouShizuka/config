@@ -19,6 +19,8 @@ class KomorebiEvent(Event):
     KomorebiDisconnect = "KomorebiDisconnect"
     KomorebiUpdate = "KomorebiUpdate"
 
+    # SocketMessage
+
     ChangeLayout = "ChangeLayout"
     ToggleMaximize = "ToggleMaximize"
     ToggleMonocle = "ToggleMonocle"
@@ -28,10 +30,14 @@ class KomorebiEvent(Event):
     Cloak = "Cloak"
     Uncloak = "Uncloak"
 
+    Close = "Close"
+    # NOTE: komorebi 中 Minimize 包含 2 种 event：SocketMessage::Minimize 和 WindowManagerEvent::Minimize
+    # 前者不带参数，后者带参数，一般应该捕获后者
+    Minimize = "Minimize"
+
     CycleFocusMonitor = "CycleFocusMonitor"
     CycleFocusWindow = "CycleFocusWindow"
     CycleFocusWorkspace = "CycleFocusWorkspace"
-    FocusChange = "FocusChange"
     FocusMonitorNumber = "FocusMonitorNumber"
     FocusMonitorWorkspaceNumber = "FocusMonitorWorkspaceNumber"
     FocusWorkspaceNumber = "FocusWorkspaceNumber"
@@ -44,9 +50,6 @@ class KomorebiEvent(Event):
     NewWorkspace = "NewWorkspace"
     WorkspaceName = "WorkspaceName"
 
-    Manage = "Manage"
-    Unmanage = "Unmanage"
-
     MoveContainerToMonitorNumber = "MoveContainerToMonitorNumber"
     MoveContainerToWorkspaceNumber = "MoveContainerToWorkspaceNumber"
     MoveWorkspaceToMonitorNumber = "MoveWorkspaceToMonitorNumber"
@@ -56,3 +59,11 @@ class KomorebiEvent(Event):
 
     ReloadConfiguration = "ReloadConfiguration"
     WatchConfiguration = "WatchConfiguration"
+
+    # WindowManagerEvent
+
+    FocusChange = "FocusChange"
+    Manage = "Manage"
+    Unmanage = "Unmanage"
+    Show = "Show"
+

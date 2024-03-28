@@ -10,7 +10,7 @@ vim.api.nvim_create_autocmd("Filetype", {
     callback = function(args)
         utils.event("TreesitterFile")
         if not environment.is_vscode then
-            utils.refresh_buf(args.buf, 1000, true)
+            utils.refresh_buf(args.buf, 1, true)
         end
         vim.api.nvim_del_augroup_by_name("TreesitterFile")
     end,
@@ -32,7 +32,7 @@ if not environment.is_vscode then
     vim.api.nvim_create_autocmd("Filetype", {
         callback = function(args)
             utils.event("LspFile")
-            utils.refresh_buf(args.buf, 1000, true)
+            utils.refresh_buf(args.buf, 1, true)
             vim.api.nvim_del_augroup_by_name("LspFile")
         end,
         desc = "Lsp file event",
@@ -193,6 +193,10 @@ if not environment.is_vscode then
         callback = function()
             local is_opening_tab = vim.g.is_opening_tab or false
             if is_opening_tab then
+                return
+            end
+
+            if #auto_closed_sidebars > 0 then
                 return
             end
 

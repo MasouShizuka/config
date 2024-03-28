@@ -98,7 +98,7 @@ return {
     --                     end
     --                     return nil
     --                 end
-
+    --
     --                 local node = state.tree:get_node()
     --                 local siblings = state.tree:get_node(node:get_parent_id()):get_child_ids()
     --                 if not node.is_last_child then
@@ -116,7 +116,7 @@ return {
     --                     end
     --                     return nil
     --                 end
-
+    --
     --                 local node = state.tree:get_node()
     --                 local siblings = state.tree:get_node(node:get_parent_id()):get_child_ids()
     --                 local current_index = index_of(siblings, node.id)
@@ -130,7 +130,7 @@ return {
     --                 local filepath = node:get_id()
     --                 local filename = node.name
     --                 local modify = vim.fn.fnamemodify
-
+    --
     --                 local results = {
     --                     e = { val = modify(filename, ":e"), msg = "Extension only" },
     --                     f = { val = filename, msg = "Filename" },
@@ -139,7 +139,7 @@ return {
     --                     r = { val = modify(filepath, ":."), msg = "Path relative to CWD" },
     --                     a = { val = filepath, msg = "Absolute path" },
     --                 }
-
+    --
     --                 local messages = {
     --                     { "\nChoose to copy to clipboard:\n", "Normal" },
     --                 }
@@ -168,7 +168,7 @@ return {
     --                 --     nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use
     --                 -- },
     --                 ["<space>"] = "none",
-    --                 -- ["<2-LeftMouse>"] = "open",
+    --                 -- ["<2-leftmouse>"] = "open",
     --                 -- ["<cr>"] = "open",
     --                 ["l"] = "open",
     --                 -- ["<esc>"] = "cancel", -- close preview or floating neo-tree window
@@ -215,7 +215,7 @@ return {
     --                 -- ["?"] = "show_help",
     --                 -- ["<"] = "prev_source",
     --                 -- [">"] = "next_source",
-
+    --
     --                 ["o"] = "system_open",
     --                 ["h"] = "parent",
     --                 ["J"] = "next_sibling",
@@ -353,8 +353,7 @@ return {
                         return { buffer = bufnr, desc = "nvim-tree: " .. desc, nowait = true, silent = true }
                     end
 
-                    vim.keymap.set("n", "q", api.tree.close, opts("Close"))
-                    vim.keymap.set("n", "<c-r>", api.tree.reload, opts("Refresh"))
+                    vim.keymap.set("n", "<2-rightmouse>", api.tree.change_root_to_node, opts("CD"))
                     vim.keymap.set("n", "L", function()
                         local node = api.tree.get_node_under_cursor()
                         if node.type ~= "directory" then
@@ -364,11 +363,10 @@ return {
                             api.tree.change_root_to_node()
                         end
                     end, opts("CD"))
-                    vim.keymap.set("n", "<2-RightMouse>", api.tree.change_root_to_node, opts("CD"))
                     vim.keymap.set("n", "H", api.tree.change_root_to_parent, opts("Up"))
                     vim.keymap.set("n", "<c-f>", api.tree.search_node, opts("Search"))
-                    vim.keymap.set("n", "W", api.tree.collapse_all, opts("Collapse"))
-                    vim.keymap.set("n", "E", api.tree.expand_all, opts("Expand All"))
+                    vim.keymap.set("n", "zm", api.tree.collapse_all, opts("Collapse"))
+                    vim.keymap.set("n", "zr", api.tree.expand_all, opts("Expand All"))
                     vim.keymap.set("n", "Ti", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
                     vim.keymap.set("n", "Tc", api.tree.toggle_git_clean_filter, opts("Toggle Git Clean"))
                     vim.keymap.set("n", "Tb", api.tree.toggle_no_buffer_filter, opts("Toggle No Buffer"))
@@ -379,17 +377,7 @@ return {
                     vim.keymap.set("n", "Ts", cycle_sort, opts("Cycle Sort"))
 
                     vim.keymap.set("n", "a", api.fs.create, opts("Create"))
-                    -- vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
                     -- vim.keymap.set("n", "D", api.fs.trash, opts("Trash"))
-                    -- vim.keymap.set("n", "d", function()
-                    --     local node = api.tree.get_node_under_cursor()
-                    --     vim.ui.input({ prompt = ("Remove %s? [y/N]"):format(node.name) }, function(input)
-                    --         if input == "y" then
-                    --             api.fs.remove()
-                    --             api.tree.reload()
-                    --         end
-                    --     end)
-                    -- end, opts("Delete"))
                     vim.keymap.set("n", "d", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
@@ -407,8 +395,7 @@ return {
                     end, opts("Delete File(s)"))
                     vim.keymap.set("n", "r", api.fs.rename, opts("Rename"))
                     vim.keymap.set("n", "e", api.fs.rename_basename, opts("Rename: Basename"))
-                    vim.keymap.set("n", "R", api.fs.rename_sub, opts("Rename: Omit Filename"))
-                    -- vim.keymap.set("n", "x", api.fs.cut, opts("Cut"))
+                    vim.keymap.set("n", "R", api.fs.rename_full, opts("Rename: Full Path"))
                     vim.keymap.set("n", "x", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
@@ -421,7 +408,6 @@ return {
                         api.tree.reload()
                     end, opts("Cut File(s)"))
                     vim.keymap.set("n", "p", api.fs.paste, opts("Paste"))
-                    -- vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
                     vim.keymap.set("n", "c", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
@@ -489,11 +475,9 @@ return {
 
                     vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
                     vim.keymap.set("n", "<cr>", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "O", api.node.open.no_window_picker, opts("Open: No Window Picker"))
+                    vim.keymap.set("n", "<2-leftmouse>", api.node.open.edit, opts("Open"))
                     vim.keymap.set("n", "v", api.node.open.vertical, opts("Open: Vertical Split"))
                     vim.keymap.set("n", "V", api.node.open.horizontal, opts("Open: Horizontal Split"))
-                    -- vim.keymap.set("n", "t", api.node.open.tab, opts("Open: New Tab"))
                     vim.keymap.set("n", "t", function()
                         vim.g.is_opening_tab = true
 
@@ -503,7 +487,6 @@ return {
 
                         vim.g.is_opening_tab = false
                     end, opts("Open: New Tab"))
-                    vim.keymap.set("n", "<tab>", api.node.open.preview, opts("Open Preview"))
                     vim.keymap.set("n", "]c", api.node.navigate.git.next, opts("Next Git"))
                     vim.keymap.set("n", "[c", api.node.navigate.git.prev, opts("Prev Git"))
                     vim.keymap.set("n", "]e", api.node.navigate.diagnostics.next, opts("Next Diagnostic"))

@@ -117,6 +117,6 @@ if ($env:TERM_PROGRAM -eq "WezTerm") {
 # │ Conda │
 # ╰───────╯
 
-if (Test-Path "$HOME/miniconda3/Scripts/conda.exe") {
-    (& "$HOME/miniconda3/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null
+if (Test-Path "$HOME/mambaforge/Scripts/conda.exe") {
+    (& "$HOME/mambaforge/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null
 }

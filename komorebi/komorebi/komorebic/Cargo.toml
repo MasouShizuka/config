@@ -1,6 +1,6 @@
 [package]
 name = "komorebic"
-version = "0.1.22"
+version = "0.1.23-dev.0"
 authors = ["Jade Iqbal <jadeiqbal@fastmail.com>"]
 description = "The command-line interface for Komorebi, a tiling window manager for Windows"
 categories = ["cli", "tiling-window-manager", "windows"]
@@ -19,7 +19,7 @@ color-eyre = { workspace = true }
 dirs = { workspace = true }
 dunce = { workspace = true }
 fs-tail = "0.1"
-heck = "0.4"
+heck = "0.5"
 lazy_static = "1"
 miette = { version = "7", features = ["fancy"] }
 paste = "1"
@@ -33,3 +33,6 @@ thiserror = "1"
 uds_windows = "1"
 which = "6"
 windows = { workspace = true }
+
+[build-dependencies]
+reqwest = { version = "0.11", features = ["blocking"] }

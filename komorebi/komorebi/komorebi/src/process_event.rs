@@ -147,7 +147,7 @@ impl WindowManager {
 
         match event {
             WindowManagerEvent::Raise(window) => {
-                window.raise();
+                window.focus(false)?;
                 self.has_pending_raise_op = false;
             }
             WindowManagerEvent::Destroy(_, window) | WindowManagerEvent::Unmanage(window) => {
@@ -528,6 +528,9 @@ impl WindowManager {
                     }
                 }
             }
+            WindowManagerEvent::ForceUpdate(_) => {
+                self.update_focused_workspace(false)?;
+            }
             WindowManagerEvent::DisplayChange(..)
             | WindowManagerEvent::MouseCapture(..)
             | WindowManagerEvent::Cloak(..) => {}
@@ -571,7 +574,9 @@ impl WindowManager {
                     border.hide()?;
                     BORDER_HIDDEN.store(true, Ordering::SeqCst);
                 }
+                // NOTE: 添加一些命令，使得 border 能够更新
                 WindowManagerEvent::MoveResizeEnd(_, window)
+                | WindowManagerEvent::Manage(window)
                 | WindowManagerEvent::Show(_, window)
                 | WindowManagerEvent::FocusChange(_, window)
                 | WindowManagerEvent::Hide(_, window)

@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
+local utils = require("utils")
 
 local M = {}
 
@@ -41,41 +42,67 @@ M.dap = function(mason_nvim_dap)
             mason_nvim_dap.default_setup(config)
         end,
         python = function(config)
-            config.adapters = {
-                type = "executable",
-                command = path.python_path,
-                args = { "-m", "debugpy.adapter" },
-                options = {
-                    source_filetype = "python",
-                },
-            }
+            if not utils.is_available("nvim-dap-python") then
+                local adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/bin/python"
+                if environment.is_windows then
+                    adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
+                end
+                if config.request == "attach" then
+                    ---@diagnostic disable-next-line: undefined-field
+                    local port = (config.connect or config).port
+                    ---@diagnostic disable-next-line: undefined-field
+                    local host = (config.connect or config).host or "127.0.0.1"
+                    config.adapters = {
+                        type = "server",
+                        port = assert(port, "`connect.port` is required for a python `attach` configuration"),
+                        host = host,
+                        options = {
+                            source_filetype = "python",
+                        },
+                    }
+                else
+                    config.adapters = {
+                        type = "executable",
+                        command = adapter_python_path,
+                        args = { "-m", "debugpy.adapter" },
+                        options = {
+                            source_filetype = "python",
+                        },
+                    }
+                end
 
-            config.configurations = {
-                {
-                    -- The first three options are required by nvim-dap
-                    type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
-                    request = "launch",
-                    name = "Launch file",
-                    -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
+                local python_path = path.python_path
+                if path.python_envs_path then
+                    python_path = path.python_envs_path
+                end
+                config.configurations = {
+                    {
+                        -- The first three options are required by nvim-dap
+                        type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
+                        request = "launch",
+                        name = "Launch file",
 
-                    program = "${file}", -- This configuration will launch the current file if used.
-                    pythonPath = function()
-                        -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itM.
-                        -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-                        -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
-                        local cwd = vim.fn.getcwd()
-                        if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
-                            return cwd .. "/venv/bin/python"
-                        elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
-                            return cwd .. "/.venv/bin/python"
-                        else
-                            return path.python_path
-                        end
-                    end,
-                },
-            }
+                        -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 
-            mason_nvim_dap.default_setup(config)
+                        program = "${file}", -- This configuration will launch the current file if used.
+                        pythonPath = function()
+                            -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+                            -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+                            -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+                            local cwd = vim.fn.getcwd()
+                            if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+                                return cwd .. "/venv/bin/python"
+                            elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+                                return cwd .. "/.venv/bin/python"
+                            else
+                                return python_path
+                            end
+                        end,
+                    },
+                }
+
+                mason_nvim_dap.default_setup(config)
+            end
         end,
     }
 end

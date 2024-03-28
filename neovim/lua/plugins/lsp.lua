@@ -7,6 +7,20 @@ local path = require("utils.path")
 local utils = require("utils")
 
 return {
+    -- NOTE: glance 通过 uri 比较来确定当前位置，但没有考虑到相同 uri 可能存在差异，导致定位失败
+    -- 比如转义：: <-> %3A
+    -- 比如路径的 uri 的大小写可能不同：d:/path <-> D:/path
+    -- 因此需要对 lua/glance/list.lua 的 is_starting_location 函数进行修改
+    --
+    -- 将：
+    -- if location_uri ~= position_params.textDocument.uri then
+    --   return false
+    -- end
+    --
+    -- 修改为：
+    -- if vim.uri_to_fname(location_uri:lower()) ~= vim.uri_to_fname(position_params.textDocument.uri:lower()) then
+    --   return false
+    -- end
     {
         "dnlhc/glance.nvim",
         cmd = {
@@ -100,6 +114,39 @@ return {
         end,
     },
 
+    -- NOTE: trouble 无法在打开时 focus 与当前 cursor 最近的 item
+    -- 若想实现以上功能，需要对 lua/trouble/view.lua 的 View:setup 函数的末尾添加：
+    --
+    -- local parent_bufnr = vim.api.nvim_win_get_buf(self.parent)
+    -- local parent_row = vim.api.nvim_win_get_cursor(self.parent)[1]
+    -- -- 其他 plugin 调用 trouble 可能会导致 self.items 不能及时更新
+    -- -- 因此使用 defer_fn 延迟对 self.items 的访问
+    -- vim.defer_fn(function ()
+    --   local row = nil
+    --
+    --   local min_distance = math.huge
+    --   for i = 1, vim.api.nvim_buf_line_count(self.buf), 1 do
+    --     local item = self.items[i]
+    --     if item == nil or (opts.skip_groups and item.is_file) then
+    --       goto continue
+    --     end
+    --     if item.bufnr ~= parent_bufnr then
+    --       goto continue
+    --     end
+    --
+    --     local distance = math.abs(item.lnum - parent_row)
+    --     if distance < min_distance then
+    --       row = i
+    --       min_distance = distance
+    --     end
+    --
+    --     ::continue::
+    --   end
+    --
+    --   if row then
+    --     vim.api.nvim_win_set_cursor(self.win, { row, self:get_col() })
+    --   end
+    -- end, 200)
     {
         "folke/trouble.nvim",
         cmd = {
@@ -334,18 +381,19 @@ return {
                     end
 
                     local function lsp_stop_command()
-                        vim.schedule(function() vim.api.nvim_command("LspStop") end)
+                        vim.schedule(function()
+                            local servers_on_buffer = vim.lsp.get_clients({ bufnr = buf })
+                            for _, client in ipairs(servers_on_buffer) do
+                                if client.attached_buffers[buf] then
+                                    client.stop()
+                                end
+                            end
+                        end)
                     end
 
                     local function lsp_stop()
-                        if vim.b[buf].lsp_enabled ~= nil then
-                            if not vim.b[buf].lsp_enabled then
-                                lsp_stop_command()
-                            end
-                        else
-                            if not vim.g.lsp_enabled then
-                                lsp_stop_command()
-                            end
+                        if not (vim.b[buf].lsp_enabled == nil and vim.g.lsp_enabled or vim.b[buf].lsp_enabled) then
+                            lsp_stop_command()
                         end
                     end
 
@@ -396,7 +444,6 @@ return {
                     end
 
                     if client.supports_method("textDocument/codeLens") then
-                        vim.b.codelens_enabled = nil
                         if vim.g.codelens_enabled == nil then
                             vim.g.codelens_enabled = true
                         end
@@ -407,14 +454,9 @@ return {
                                     del_buffer_autocmd("lsp_codelens_refresh", buf)
                                     return
                                 end
-                                if vim.b[buf].codelens_enabled ~= nil then
-                                    if vim.b[buf].codelens_enabled then
-                                        vim.lsp.codelens.refresh()
-                                    end
-                                else
-                                    if vim.g.codelens_enabled then
-                                        vim.lsp.codelens.refresh()
-                                    end
+
+                                if vim.b[buf].codelens_enabled == nil and vim.g.codelens_enabled or vim.b[buf].codelens_enabled then
+                                    vim.lsp.codelens.refresh()
                                 end
                             end,
                             desc = "Refresh codelens",
@@ -478,14 +520,14 @@ return {
 
                         -- When a null-ls formatter is available for the current filetype,
                         -- only null-ls formatters are returned.
-                        local function get_formatters(bufnr)
+                        local function get_formatters()
                             local formatters = {}
 
-                            local ft = vim.bo[bufnr].filetype
+                            local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
                             -- check if we have any null-ls formatters for the current filetype
                             local null_ls = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
 
-                            local clients = vim.lsp.get_clients({ bufnr = bufnr })
+                            local clients = vim.lsp.get_clients({ bufnr = buf })
                             if #null_ls > 0 then
                                 for _, client in ipairs(clients) do
                                     if supports_format(client) and client.name == "null-ls" then
@@ -505,7 +547,7 @@ return {
 
                         -- 若 lsp 和 null-ls 都有 formatter，则优先使用 null-ls 的 formatter
                         local format = function()
-                            local formatters = get_formatters(args.buf)
+                            local formatters = get_formatters()
                             local client_ids = vim.tbl_map(function(client)
                                 return client.id
                             end, formatters)
@@ -515,7 +557,8 @@ return {
                             end
 
                             vim.lsp.buf.format({
-                                bufnr = args.buf,
+                                timeout_ms = 5000,
+                                bufnr = buf,
                                 filter = function(client)
                                     return vim.tbl_contains(client_ids, client.id)
                                 end,
@@ -534,14 +577,9 @@ return {
                                     del_buffer_autocmd("lsp_auto_format", buf)
                                     return
                                 end
-                                if vim.b[buf].autoformat_enabled ~= nil then
-                                    if vim.b[buf].autoformat_enabled then
-                                        format()
-                                    end
-                                else
-                                    if vim.g.autoformat_enabled then
-                                        format()
-                                    end
+
+                                if vim.b[buf].autoformat_enabled == nil and vim.g.autoformat_enabled or vim.b[buf].autoformat_enabled then
+                                    format()
                                 end
                             end,
                             desc = "Autoformat on save",
@@ -584,14 +622,8 @@ return {
                             vim.g.inlay_hints_enabled = true
                         end
 
-                        if vim.b[buf].inlay_hints_enabled ~= nil then
-                            if vim.b[buf].inlay_hints_enabled then
-                                vim.lsp.inlay_hint.enable(buf, true)
-                            end
-                        else
-                            if vim.g.inlay_hints_enabled then
-                                vim.lsp.inlay_hint.enable(buf, true)
-                            end
+                        if vim.b[buf].inlay_hints_enabled == nil and vim.g.inlay_hints_enabled or vim.b[buf].inlay_hints_enabled then
+                            vim.lsp.inlay_hint.enable(buf, true)
                         end
 
                         vim.keymap.set("n", "<leader>lti", function()
@@ -749,7 +781,7 @@ return {
     --             -- ["g?"] = "actions.show_help",
     --             -- ["<CR>"] = "actions.jump",
     --             ["l"] = "actions.jump",
-    --             -- ["<2-LeftMouse>"] = "actions.jump",
+    --             -- ["<2-leftmouse>"] = "actions.jump",
     --             -- ["<C-v>"] = "actions.jump_vsplit",
     --             -- ["<C-s>"] = "actions.jump_split",
     --             ["<C-v>"] = false,

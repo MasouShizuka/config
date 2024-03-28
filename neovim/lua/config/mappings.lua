@@ -18,8 +18,38 @@ vim.keymap.set({ "n", "x", "o" }, "H", "^", { desc = "Start of line (non-blank)"
 vim.keymap.set({ "n", "x", "o" }, "L", "g_", { desc = "End of line (non-blank)", silent = true })
 
 -- 折行时小步上下移动
-vim.keymap.set({ "n", "x" }, "j", function() utils.move("j") end, { desc = "Down", silent = true })
-vim.keymap.set({ "n", "x" }, "k", function() utils.move("k") end, { desc = "Up", silent = true })
+local function move(key, set_jumps)
+    set_jumps = set_jumps == nil or set_jumps
+
+    local buf = vim.api.nvim_get_current_buf()
+    local cursor_center_enabled = vim.g.cursor_center_enabled or false
+    if vim.b[buf].cursor_center_enabled ~= nil then
+        cursor_center_enabled = vim.b[buf].cursor_center_enabled
+    end
+
+    local prefix = ""
+    local postfix = ""
+
+    if cursor_center_enabled then
+        postfix = postfix .. "zz"
+    end
+
+    local count = vim.v.count
+    if count > 0 then
+        prefix = prefix .. tostring(count)
+        if set_jumps then
+            vim.cmd("normal! m'")
+        end
+    end
+
+    if count == 0 and not vim.fn.mode():find("V") then
+        vim.cmd.normal(string.format("g%s%s", key, postfix))
+    else
+        vim.cmd(string.format("normal! %s%s%s", prefix, key, postfix))
+    end
+end
+vim.keymap.set({ "n", "x" }, "j", function() move("j") end, { desc = "Down", silent = true })
+vim.keymap.set({ "n", "x" }, "k", function() move("k") end, { desc = "Up", silent = true })
 
 -- 上下移动选中文本
 vim.keymap.set("x", "J", ":move '>+1<cr>gv-gv", { desc = "Move selected text up", silent = true })
@@ -201,20 +231,36 @@ else
     vim.keymap.set("n", "<c-j>", function() filetype.skip_filetype(filetype.skip_filetype_list_of_panel, 1) end, { desc = "Move to next window", silent = true })
     vim.keymap.set("n", "<c-k>", function() filetype.skip_filetype(filetype.skip_filetype_list_of_panel, -1) end, { desc = "Move to previous window", silent = true })
     vim.keymap.set("n", "<c-s>h", function()
+        local splitright = vim.api.nvim_get_option_value("splitright", {})
+
         vim.api.nvim_set_option_value("splitright", false, {})
         vim.cmd.wincmd("v")
+
+        vim.api.nvim_set_option_value("splitright", splitright, {})
     end, { desc = "Split window to left", silent = true })
     vim.keymap.set("n", "<c-s>l", function()
+        local splitright = vim.api.nvim_get_option_value("splitright", {})
+
         vim.api.nvim_set_option_value("splitright", true, {})
         vim.cmd.wincmd("v")
+
+        vim.api.nvim_set_option_value("splitright", splitright, {})
     end, { desc = "Split window to right", silent = true })
     vim.keymap.set("n", "<c-s>j", function()
+        local splitbelow = vim.api.nvim_get_option_value("splitbelow", {})
+
         vim.api.nvim_set_option_value("splitbelow", true, {})
         vim.cmd.wincmd("s")
+
+        vim.api.nvim_set_option_value("splitbelow", splitbelow, {})
     end, { desc = "Split window to down", silent = true })
     vim.keymap.set("n", "<c-s>k", function()
+        local splitbelow = vim.api.nvim_get_option_value("splitbelow", {})
+
         vim.api.nvim_set_option_value("splitbelow", false, {})
         vim.cmd.wincmd("s")
+
+        vim.api.nvim_set_option_value("splitbelow", splitbelow, {})
     end, { desc = "Split window to up", silent = true })
     if not utils.is_available("winshift.nvim") then
         vim.keymap.set("n", "<c-s><c-h>", function() vim.cmd.wincmd("H") end, { desc = "Move window to left", silent = true })

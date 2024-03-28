@@ -1,8 +1,10 @@
 local wezterm = require("wezterm")
 
-local config = {}
+local config
 if wezterm.config_builder then
     config = wezterm.config_builder()
+else
+    config = {}
 end
 
 local function apply_to_config(options)
@@ -12,11 +14,10 @@ local function apply_to_config(options)
                 "Duplicate config option detected: ",
                 { old = config[k], new = options[k] }
             )
-        else
-            config[k] = v
         end
+
+        config[k] = v
     end
-    return config
 end
 
 apply_to_config(require("config.options"))

@@ -8,7 +8,9 @@ use strum::EnumString;
 
 use crate::ApplicationIdentifier;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Display, EnumString, ValueEnum, JsonSchema)]
+#[derive(
+    Clone, Copy, Debug, Serialize, Deserialize, Display, EnumString, ValueEnum, JsonSchema,
+)]
 #[strum(serialize_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum ApplicationOptions {
@@ -51,6 +53,13 @@ impl ApplicationOptions {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum MatchingRule {
+    Simple(IdWithIdentifier),
+    Composite(Vec<IdWithIdentifier>),
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct IdWithIdentifier {
     pub kind: ApplicationIdentifier,
     pub id: String,
@@ -66,6 +75,10 @@ pub enum MatchingStrategy {
     EndsWith,
     Contains,
     Regex,
+    DoesNotEndWith,
+    DoesNotStartWith,
+    DoesNotEqual,
+    DoesNotContain,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
@@ -95,7 +108,7 @@ pub struct ApplicationConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<Vec<ApplicationOptions>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub float_identifiers: Option<Vec<IdWithIdentifierAndComment>>,
+    pub float_identifiers: Option<Vec<MatchingRule>>,
 }
 
 impl ApplicationConfiguration {
@@ -181,19 +194,21 @@ impl ApplicationConfigurationGenerator {
             }
 
             if let Some(float_identifiers) = app.float_identifiers {
-                for float in float_identifiers {
-                    let float_rule =
-                        format!("komorebic.exe float-rule {} \"{}\"", float.kind, float.id);
+                for matching_rule in float_identifiers {
+                    if let MatchingRule::Simple(float) = matching_rule {
+                        let float_rule =
+                            format!("komorebic.exe float-rule {} \"{}\"", float.kind, float.id);
 
-                    // Don't want to send duped signals especially as configs get larger
-                    if !float_rules.contains(&float_rule) {
-                        float_rules.push(float_rule.clone());
+                        // Don't want to send duped signals especially as configs get larger
+                        if !float_rules.contains(&float_rule) {
+                            float_rules.push(float_rule.clone());
 
-                        if let Some(comment) = float.comment {
-                            lines.push(format!("# {comment}"));
-                        };
+                            // if let Some(comment) = float.comment {
+                            //     lines.push(format!("# {comment}"));
+                            // };
 
-                        lines.push(float_rule);
+                            lines.push(float_rule);
+                        }
                     }
                 }
             }
@@ -230,21 +245,23 @@ impl ApplicationConfigurationGenerator {
             }
 
             if let Some(float_identifiers) = app.float_identifiers {
-                for float in float_identifiers {
-                    let float_rule = format!(
-                        "RunWait('komorebic.exe float-rule {} \"{}\"', , \"Hide\")",
-                        float.kind, float.id
-                    );
+                for matching_rule in float_identifiers {
+                    if let MatchingRule::Simple(float) = matching_rule {
+                        let float_rule = format!(
+                            "RunWait('komorebic.exe float-rule {} \"{}\"', , \"Hide\")",
+                            float.kind, float.id
+                        );
 
-                    // Don't want to send duped signals especially as configs get larger
-                    if !float_rules.contains(&float_rule) {
-                        float_rules.push(float_rule.clone());
+                        // Don't want to send duped signals especially as configs get larger
+                        if !float_rules.contains(&float_rule) {
+                            float_rules.push(float_rule.clone());
 
-                        if let Some(comment) = float.comment {
-                            lines.push(format!("; {comment}"));
-                        };
+                            // if let Some(comment) = float.comment {
+                            //     lines.push(format!("; {comment}"));
+                            // };
 
-                        lines.push(float_rule);
+                            lines.push(float_rule);
+                        }
                     }
                 }
             }

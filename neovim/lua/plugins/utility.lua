@@ -55,17 +55,6 @@ return {
             vim.opt.foldlevel = 99
             vim.opt.foldlevelstart = 99
 
-            -- 启用 resession 时取消注释
-            -- https://github.com/kevinhwang91/nvim-ufo/issues/57
-            -- Folds close automatically when leaving insert mode by pressing <esc>
-            -- vim.api.nvim_create_autocmd("BufEnter", {
-            --     callback = function()
-            --         vim.api.nvim_set_option_value("foldlevel", 99, { scope = "local" })
-            --     end,
-            --     desc = "Set foldlevel=99 when enter buffer",
-            --     group = vim.api.nvim_create_augroup("nvim-ufo", { clear = true }),
-            -- })
-
             local handler = function(virtText, lnum, endLnum, width, truncate)
                 local newVirtText = {}
                 local suffix = (" 󰁂 %d "):format(endLnum - lnum)
@@ -159,16 +148,6 @@ return {
                     if utils.is_bigfile(args.buf) then
                         require("bigfile")
                         vim.api.nvim_del_augroup_by_name("BigFile")
-
-                        vim.api.nvim_create_autocmd("BufReadPost", {
-                            buffer = args.buf,
-                            callback = function()
-                                utils.refresh_buf(args.buf, 1, true)
-                                vim.api.nvim_del_augroup_by_name("BigFileRefresh")
-                            end,
-                            desc = "Big file",
-                            group = vim.api.nvim_create_augroup("BigFileRefresh", { clear = true }),
-                        })
                     end
                 end,
                 desc = "Big file event",
@@ -220,19 +199,25 @@ return {
                         return
                     end
 
-                    local status_ok, _ = pcall(vim.api.nvim_buf_get_var, args.buf, "bigfile_detected")
-                    if status_ok then
+                    local bigfile_status, bigfile_detected = pcall(vim.api.nvim_buf_get_var, args.buf, "bigfile_detected")
+                    if bigfile_status and bigfile_detected == 1 then
+                        return
+                    end
+
+                    local longfile_status, _ = pcall(vim.api.nvim_buf_get_var, args.buf, "longfile_detected")
+                    if longfile_status then
                         return
                     end
 
                     if not utils.is_longfile(args.buf) then
-                        vim.api.nvim_buf_set_var(args.buf, "bigfile_detected", 0)
+                        vim.api.nvim_buf_set_var(args.buf, "longfile_detected", 0)
                         return
                     end
 
                     vim.notify("Long file detected!", vim.log.levels.WARN, { title = "bigfile" })
 
                     vim.api.nvim_buf_set_var(args.buf, "bigfile_detected", 1)
+                    vim.api.nvim_buf_set_var(args.buf, "longfile_detected", 1)
 
                     local features = bigfile_features
                     for _, feature in ipairs(longfile_features) do
@@ -329,16 +314,53 @@ return {
     },
 
     {
+        "Sam-programs/cmdline-hl.nvim",
+        build = ":TSUpdate regex",
+        event = {
+            "CmdlineEnter",
+        },
+        enabled = not environment.is_vscode,
+        opts = {
+            -- custom prefixes for builtin-commands
+            type_signs = {
+                [":"] = { icons.surround.chevron_right .. " ", "Title" },
+                ["/"] = { icons.misc.search .. icons.surround.angle_double_down .. " ", "Title" },
+                ["?"] = { icons.misc.search .. icons.surround.angle_double_up .. " ", "Title" },
+            },
+            -- custom formatting/highlight for commands
+            custom_types = {
+                -- ["command-name"] = {
+                -- [icon],[icon_hl], default to `:` icon and highlight
+                -- [lang], defaults to vim
+                -- [showcmd], defaults to false
+                -- [pat], defaults to "%w*%s*(.*)"
+                -- [code], defaults to nil
+                -- }
+                -- lang is the treesitter language to use for the commands
+                -- showcmd is true if the command should be displayed or to only show the icon
+                -- pat is used to extract the part of the command that needs highlighting
+                -- the part is matched against the raw command you don't need to worry about ranges
+                -- e.g. in '<,>'s/foo/bar/
+                -- pat is checked against s/foo/bar
+                -- you could also use the 'code' function to extract the part that needs highlighting
+                ["="] = { pat = "=(.*)", icon = icons.misc.calculator .. " ", lang = "lua", show_cmd = false },
+                ["help"] = { icon = icons.misc.question .. " " },
+                ["lua"] = { icon = icons.languages.lua .. " ", lang = "lua" },
+                ["substitute"] = { icon = icons.misc.replace_all .. " ", lang = "regex", show_cmd = true },
+            },
+        },
+    },
+
+    {
         "stevearc/dressing.nvim",
         enabled = not environment.is_vscode,
         init = function()
             vim.ui.select = function(...)
-                require("lazy").load({ plugins = { "dressing.nvim" } })
-                return vim.ui.select(...)
+                require("dressing.select")(...)
             end
+
             vim.ui.input = function(...)
-                require("lazy").load({ plugins = { "dressing.nvim" } })
-                return vim.ui.input(...)
+                require("dressing.input")(...)
             end
         end,
         lazy = true,

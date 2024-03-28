@@ -64,7 +64,6 @@ class GpuWidget(BaseWidget):
     def _update_label(self):
         active_label = self._label_alt if self._show_alt_label else self._label
         active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
-        active_label.setText(active_label_content)
 
         try:
             info = self._get_gpu_info()

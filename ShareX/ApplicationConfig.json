@@ -40,8 +40,7 @@
       "UseCustomErrorSound": false,
       "CustomErrorSoundPath": "",
       "DisableNotifications": false,
-      "DisableNotificationsOnFullscreen": false,
-      "PopUpNotification": "ToastNotification"
+      "DisableNotificationsOnFullscreen": false
     },
     "UseDefaultImageSettings": true,
     "ImageSettings": {
@@ -113,6 +112,7 @@
       "SelectedImageEffectPreset": 0,
       "ShowImageEffectsWindowAfterCapture": false,
       "ImageEffectOnlyRegionCapture": false,
+      "UseRandomImageEffect": false,
       "ThumbnailWidth": 200,
       "ThumbnailHeight": 0,
       "ThumbnailName": "-thumbnail",
@@ -128,6 +128,7 @@
       "CaptureClientArea": false,
       "CaptureAutoHideTaskbar": false,
       "CaptureCustomRegion": "0, 0, 0, 0",
+      "CaptureCustomWindow": "",
       "SurfaceOptions": {
         "QuickCrop": false,
         "MinimumSize": 5,
@@ -164,8 +165,8 @@
         ],
         "ShowInfo": true,
         "ShowMagnifier": true,
-        "UseSquareMagnifier": false,
-        "MagnifierPixelCount": 15,
+        "UseSquareMagnifier": true,
+        "MagnifierPixelCount": 17,
         "MagnifierPixelSize": 10,
         "ShowCrosshair": false,
         "UseLightResizeNodes": false,
@@ -279,8 +280,8 @@
       "FFmpegOptions": {
         "OverrideCLIPath": false,
         "CLIPath": "",
-        "VideoSource": "GDI grab",
-        "AudioSource": "None",
+        "VideoSource": "gdigrab",
+        "AudioSource": "",
         "VideoCodec": "libx264",
         "AudioCodec": "libvoaacenc",
         "UserArgs": "",
@@ -292,13 +293,15 @@
         "x264_Bitrate": 3000,
         "VPx_Bitrate": 3000,
         "XviD_QScale": 10,
-        "NVENC_Preset": "llhp",
+        "NVENC_Preset": "p4",
+        "NVENC_Tune": "ll",
         "NVENC_Bitrate": 3000,
         "GIFStatsMode": "full",
         "GIFDither": "sierra2_4a",
         "GIFBayerScale": 2,
         "AMF_Usage": "transcoding",
         "AMF_Quality": "speed",
+        "AMF_Bitrate": 3000,
         "QSV_Preset": "fast",
         "QSV_Bitrate": 3000,
         "AAC_Bitrate": 128,
@@ -317,24 +320,12 @@
       "ScreenRecordAskConfirmationOnAbort": false,
       "ScreenRecordTransparentRegion": false,
       "ScrollingCaptureOptions": {
-        "TrimLeftEdge": 0,
-        "TrimTopEdge": 0,
-        "TrimRightEdge": 0,
-        "TrimBottomEdge": 0,
-        "CombineAdjustmentVertical": 0,
-        "CombineAdjustmentLastVertical": 0,
-        "IgnoreLast": 0,
-        "ScrollMethod": "Automatic",
-        "StartDelay": 500,
-        "ScrollDelay": 500,
-        "MaximumScrollCount": 20,
-        "StartSelectionAutomatically": true,
-        "StartCaptureAutomatically": false,
-        "ScrollTopMethodBeforeCapture": "All",
-        "AutoDetectScrollEnd": true,
-        "RemoveDuplicates": true,
-        "AfterCaptureAutomaticallyCombine": true,
-        "AutoUpload": false
+        "StartDelay": 300,
+        "AutoScrollTop": false,
+        "ScrollDelay": 300,
+        "ScrollAmount": 2,
+        "AutoUpload": false,
+        "ShowRegion": true
       },
       "OCROptions": {
         "Language": "zh-Hans-CN",
@@ -368,6 +359,7 @@
             "URL": "https://www.deepl.com/translator#auto/en/{0}"
           }
         ],
+        "CloseWindowAfterOpeningServiceLink": false,
         "SelectedServiceLink": 0
       }
     },
@@ -403,6 +395,23 @@
       "ScreenColorPickerFormat": "$hex",
       "ScreenColorPickerFormatCtrl": "$r255, $g255, $b255",
       "ScreenColorPickerInfoText": "RGB: $r255, $g255, $b255$nHex: $hex$nX: $x Y: $y",
+      "PinToScreenOptions": {
+        "InitialScale": 100,
+        "ScaleStep": 10,
+        "HighQualityScale": true,
+        "InitialOpacity": 100,
+        "OpacityStep": 10,
+        "Placement": "BottomRight",
+        "PlacementOffset": 10,
+        "TopMost": true,
+        "KeepCenterLocation": true,
+        "BackgroundColor": "White",
+        "Shadow": true,
+        "Border": true,
+        "BorderSize": 2,
+        "BorderColor": "CornflowerBlue",
+        "MinimizeSize": "100, 100"
+      },
       "IndexerSettings": {
         "Output": "Html",
         "SkipHiddenFolders": true,
@@ -419,6 +428,33 @@
         "UseAttribute": true,
         "CreateParseableJson": true
       },
+      "ImageBeautifierOptions": {
+        "Margin": 80,
+        "Padding": 40,
+        "SmartPadding": true,
+        "RoundedCorner": 20,
+        "ShadowRadius": 30,
+        "ShadowOpacity": 80,
+        "ShadowDistance": 10,
+        "ShadowAngle": 180,
+        "ShadowColor": "Black",
+        "BackgroundType": "Gradient",
+        "BackgroundGradient": {
+          "Type": "ForwardDiagonal",
+          "Colors": [
+            {
+              "Color": "255, 81, 47",
+              "Location": 0.0
+            },
+            {
+              "Color": "221, 36, 118",
+              "Location": 100.0
+            }
+          ]
+        },
+        "BackgroundColor": "34, 34, 34",
+        "BackgroundImageFilePath": ""
+      },
       "ImageCombinerOptions": {
         "Orientation": "Vertical",
         "Alignment": "LeftOrTop",
@@ -432,6 +468,8 @@
         "OutputFileName": null,
         "VideoCodec": "x264",
         "VideoQuality": 23,
+        "VideoQualityUseBitrate": false,
+        "VideoQualityBitrate": 3000,
         "UseCustomArguments": false,
         "CustomArguments": "",
         "AutoOpenFolder": true
@@ -467,9 +505,9 @@
     },
     "UseDefaultAdvancedSettings": true,
     "AdvancedSettings": {
-      "CapturePath": null,
       "ProcessImagesDuringFileUpload": false,
       "ProcessImagesDuringClipboardUpload": false,
+      "ProcessImagesDuringExtensionUpload": false,
       "UseAfterCaptureTasksDuringFileUpload": true,
       "TextTaskSaveAsFile": true,
       "AutoClearClipboard": false,
@@ -599,8 +637,8 @@
   "TrayLeftClickAction": "RectangleRegion",
   "TrayLeftDoubleClickAction": "OpenMainWindow",
   "TrayMiddleClickAction": "ClipboardUploadWithContentViewer",
+  "AutoCheckUpdate": true,
   "CheckPreReleaseUpdates": false,
-  "UseDarkTheme": true,
   "UseCustomTheme": true,
   "Themes": [
     {
@@ -777,7 +815,6 @@
     "Slexy",
     "Paste_ee",
     "Gist",
-    "Teknik",
     "Upaste",
     "Hastebin",
     "OneTimeSecret",
@@ -797,7 +834,6 @@
     "GoogleCloudStorage",
     "AzureStorage",
     "BackblazeB2",
-    "Gfycat",
     "OwnCloud",
     "MediaFire",
     "Pushbullet",
@@ -805,7 +841,6 @@
     "Localhostr",
     "Jira",
     "Lambda",
-    "Teknik",
     "Pomf",
     "Uguu",
     "Seafile",
@@ -886,7 +921,6 @@
   "ActionsToolbarLockPosition": false,
   "ActionsToolbarStayTopMost": true,
   "RecentColors": [],
-  "AutoCheckUpdate": true,
   "BinaryUnits": false,
   "ShowMostRecentTaskFirst": false,
   "WorkflowsOnlyShowEdited": false,
@@ -919,5 +953,5 @@
   "DropAlignment": "BottomRight",
   "DropOpacity": 100,
   "DropHoverOpacity": 255,
-  "ApplicationVersion": "15.0.0"
+  "ApplicationVersion": "16.0.1"
 }

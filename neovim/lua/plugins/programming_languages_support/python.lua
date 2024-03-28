@@ -11,17 +11,31 @@ return {
             "VenvSelectCached",
         },
         dependencies = {
+            {
+                "mfussenegger/nvim-dap-python",
+                config = function(_, opts)
+                    local adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/bin/python"
+                    if environment.is_windows then
+                        adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
+                    end
+                    require("dap-python").setup(adapter_python_path)
+                end,
+                dependencies = {
+                    "mfussenegger/nvim-dap",
+                },
+            },
+
             "neovim/nvim-lspconfig",
             "nvim-telescope/telescope.nvim",
-            -- "mfussenegger/nvim-dap-python",
         },
         enabled = not environment.is_vscode,
         init = function()
             -- 激活 venv-selector 并读取环境
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    if vim.bo[args.buf].filetype == "python" then
-                        utils.defer(function() require("venv-selector").retrieve_from_cache() end, 2000, false)
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if ft == "python" then
+                        utils.defer(function() require("venv-selector").retrieve_from_cache() end, 1000, false)
                         vim.api.nvim_del_augroup_by_name("VenvActivate")
                     end
                 end,
@@ -32,7 +46,8 @@ return {
             -- 设置 python 的 环境切换 keymap
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    if vim.bo[args.buf].filetype == "python" then
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if ft == "python" then
                         vim.keymap.set("n", "<leader>lv", function() require("venv-selector").open() end, { buffer = args.buf, desc = "Open VenvSelector to pick a venv", silent = true })
                     end
                 end,
@@ -48,6 +63,7 @@ return {
             },
             cache_file = path.data_path .. "/lazy/venv-selector.nvim/venv-selector/venvs.json",
             cache_dir = path.data_path .. "/lazy/venv-selector.nvim/venv-selector",
+            dap_enabled = true,
         },
     },
 }

@@ -56,7 +56,7 @@ return {
                     vim.keymap.set({ "n", "i" }, "<s-right>", function() vim.api.nvim_command("MkdnTableNewColAfter") end, { buffer = args.buf, desc = "Table new column after" })
                     vim.keymap.set({ "n", "i" }, "<s-left>", function() vim.api.nvim_command("MkdnTableNewColBefore") end, { buffer = args.buf, desc = "Table new column before" })
                 end,
-                desc = "mkdnflow keymap",
+                desc = "Mkdnflow keymap",
                 group = vim.api.nvim_create_augroup("MkdnflowKeymap", { clear = true }),
                 pattern = "markdown",
             })

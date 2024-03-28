@@ -2,10 +2,9 @@ import logging
 from time import time
 
 from psutil import Process
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QIcon, QImage, QPixmap
-from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QWidget
-from win32gui import DestroyIcon, ExtractIconEx, GetWindowText, SetForegroundWindow
+from PyQt6.QtCore import QFileInfo, pyqtSignal
+from PyQt6.QtWidgets import QFileIconProvider, QHBoxLayout, QPushButton, QWidget
+from win32gui import GetWindowText, SetForegroundWindow
 from win32process import GetWindowThreadProcessId
 
 from core.event_enums import KomorebiEvent
@@ -109,27 +108,30 @@ class MultiWindowWidget(BaseWidget):
             KomorebiEvent.ToggleMonocle,
             KomorebiEvent.Cloak,
             KomorebiEvent.Uncloak,
+            KomorebiEvent.Close,
+            KomorebiEvent.Minimize,
             KomorebiEvent.CycleFocusMonitor,
             KomorebiEvent.CycleFocusWindow,
             KomorebiEvent.CycleFocusWorkspace,
-            KomorebiEvent.FocusChange,
             KomorebiEvent.FocusMonitorNumber,
             KomorebiEvent.FocusMonitorWorkspaceNumber,
             KomorebiEvent.FocusWorkspaceNumber,
             KomorebiEvent.PromoteFocus,
             KomorebiEvent.CycleMoveWindow,
             KomorebiEvent.Promote,
+            KomorebiEvent.SendContainerToMonitorNumber,
+            KomorebiEvent.SendContainerToMonitorWorkspaceNumber,
+            KomorebiEvent.SendContainerToWorkspaceNumber,
+            KomorebiEvent.FocusChange,
             KomorebiEvent.Manage,
             KomorebiEvent.Unmanage,
+            KomorebiEvent.Show,
         ]
 
         self.k_signal_connect.connect(self._on_komorebi_connect_event)
         self.k_signal_window_change.connect(self._on_komorebi_window_change_event)
 
-        self._event_service.register_event(
-            KomorebiEvent.KomorebiConnect,
-            self.k_signal_connect,
-        )
+        self._event_service.register_event(KomorebiEvent.KomorebiConnect, self.k_signal_connect)
 
         for event_type in window_change_event_watchlist:
             self._event_service.register_event(event_type, self.k_signal_window_change)
@@ -145,6 +147,9 @@ class MultiWindowWidget(BaseWidget):
         self._update_workspace_windows(state)
 
     def _on_komorebi_window_change_event(self, event: dict, state: dict):
+        if event["type"] == "Minimize" and not event.__contains__("content"):
+            return
+
         # NOTE: 用于测试 komorebi 的 event 输出
         # print(event)
 
@@ -223,18 +228,18 @@ class MultiWindowWidget(BaseWidget):
             window_button.setText(self._active_label.format(win=window_info))
 
     def get_exe_icon(self, exe):
-        # NOTE: pyqt6 <= 6.6.0 有效
-        # return QFileIconProvider().icon(QFileInfo(exe))
+        return QFileIconProvider().icon(QFileInfo(exe))
 
-        icons = ExtractIconEx(exe, 0)
-        icon = icons[0][0]
-
-        qimage = QImage.fromHICON(icon)
-        qpixmap = QPixmap.fromImage(qimage)
-        qicon = QIcon(qpixmap)
-
-        for icon_list in icons:
-            for icon in icon_list:
-                DestroyIcon(icon)
-
-        return qicon
+        # NOTE: 上面的方法无效时，使用下面的方法
+        # icons = ExtractIconEx(exe, 0)
+        # icon = icons[0][0]
+        #
+        # qimage = QImage.fromHICON(icon)
+        # qpixmap = QPixmap.fromImage(qimage)
+        # qicon = QIcon(qpixmap)
+        #
+        # for icon_list in icons:
+        #     for icon in icon_list:
+        #         DestroyIcon(icon)
+        #
+        # return qicon

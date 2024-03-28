@@ -28,7 +28,10 @@ return require("lazy").setup("plugins", {
         colorscheme = { "onedark" },
     },
     ui = {
+        -- The border to use for the UI window. Accepts same border values as |nvim_open_win()|.
         border = "rounded",
+        -- The backdrop opacity. 0 is fully opaque, 100 is fully transparent.
+        backdrop = 100,
     },
     checker = {
         enabled = not environment.is_vscode,

@@ -71,7 +71,7 @@ return {
                         for lnum, line in ipairs(lines) do
                             local spellbadword = vim.fn.spellbadword(line)
                             if spellbadword[1] ~= "" then
-                                line_hl[#line_hl + 1] = { line = lnum + 1, hl_group = spell_hl }
+                                line_hl[#line_hl + 1] = { line = lnum, hl_group = spell_hl }
                             end
                         end
                     end

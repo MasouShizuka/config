@@ -4,11 +4,13 @@ use std::convert::TryFrom;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Write as _;
+use std::time::Duration;
 
 use color_eyre::eyre;
 use color_eyre::eyre::anyhow;
 use color_eyre::Result;
 use komorebi_core::config_generation::IdWithIdentifier;
+use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::config_generation::MatchingStrategy;
 use regex::Regex;
 use schemars::JsonSchema;
@@ -215,57 +217,6 @@ impl Window {
         WindowsApi::unmaximize_window(self.hwnd());
     }
 
-    pub fn raise(self) {
-        // Attach komorebi thread to Window thread
-        let (_, window_thread_id) = WindowsApi::window_thread_process_id(self.hwnd());
-        let current_thread_id = WindowsApi::current_thread_id();
-
-        // This can be allowed to fail if a window doesn't have a message queue or if a journal record
-        // hook has been installed
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-attachthreadinput#remarks
-        match WindowsApi::attach_thread_input(current_thread_id, window_thread_id, true) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not attach to window thread input processing mechanism, but continuing execution of raise(): {}",
-                    error
-                );
-            }
-        };
-
-        // Raise Window to foreground
-        match WindowsApi::set_foreground_window(self.hwnd()) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not set as foreground window, but continuing execution of raise(): {}",
-                    error
-                );
-            }
-        };
-
-        // This isn't really needed when the above command works as expected via AHK
-        match WindowsApi::set_focus(self.hwnd()) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not set focus, but continuing execution of raise(): {}",
-                    error
-                );
-            }
-        };
-
-        match WindowsApi::attach_thread_input(current_thread_id, window_thread_id, false) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not detach from window thread input processing mechanism, but continuing execution of raise(): {}",
-                    error
-                );
-            }
-        };
-    }
-
     pub fn focus(self, mouse_follows_focus: bool) -> Result<()> {
         // Attach komorebi thread to Window thread
         let (_, window_thread_id) = WindowsApi::window_thread_process_id(self.hwnd());
@@ -357,7 +308,7 @@ impl Window {
                 let hwnd_window_at_cursor_pos = WindowsApi::window_at_cursor_pos()?;
                 // 某些程序需要激活鼠标位置的 hwnd 才能响应按键
                 if hwnd_window_at_cursor_pos != hwnd {
-                    Window {hwnd: hwnd_window_at_cursor_pos}.raise();
+                    Window {hwnd: hwnd_window_at_cursor_pos}.focus(false)?;
                 }
             }
         }
@@ -548,6 +499,10 @@ fn window_is_eligible(
         titlebars_removed.contains(exe_name)
     };
 
+    if exe_name.contains("firefox") {
+        std::thread::sleep(Duration::from_millis(10));
+    }
+
     if (allow_wsl2_gui || allow_titlebar_removed || style.contains(WindowStyle::CAPTION) && ex_style.contains(ExtendedWindowStyle::WINDOWEDGE))
                         && !ex_style.contains(ExtendedWindowStyle::DLGMODALFRAME)
                         // Get a lot of dupe events coming through that make the redrawing go crazy
@@ -576,156 +531,289 @@ pub fn should_act(
     exe_name: &str,
     class: &str,
     path: &str,
-    identifiers: &[IdWithIdentifier],
+    identifiers: &[MatchingRule],
     regex_identifiers: &HashMap<String, Regex>,
 ) -> bool {
     let mut should_act = false;
     for identifier in identifiers {
-        match identifier.matching_strategy {
-            None => {
-                panic!("there is no matching strategy identified for this rule");
+        match identifier {
+            MatchingRule::Simple(identifier) => {
+                if should_act_individual(
+                    title,
+                    exe_name,
+                    class,
+                    path,
+                    identifier,
+                    regex_identifiers,
+                ) {
+                    should_act = true
+                };
             }
-            Some(MatchingStrategy::Legacy) => match identifier.kind {
-                ApplicationIdentifier::Title => {
-                    if title.starts_with(&identifier.id) || title.ends_with(&identifier.id) {
-                        should_act = true;
-                    }
+            MatchingRule::Composite(identifiers) => {
+                let mut composite_results = vec![];
+                for identifier in identifiers {
+                    composite_results.push(should_act_individual(
+                        title,
+                        exe_name,
+                        class,
+                        path,
+                        identifier,
+                        regex_identifiers,
+                    ));
                 }
-                ApplicationIdentifier::Class => {
-                    if class.starts_with(&identifier.id) || class.ends_with(&identifier.id) {
-                        should_act = true;
-                    }
+
+                if composite_results.iter().all(|&x| x) {
+                    should_act = true;
                 }
-                ApplicationIdentifier::Exe => {
-                    if exe_name.eq(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Path => {
-                    if path.eq(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-            },
-            Some(MatchingStrategy::Equals) => match identifier.kind {
-                ApplicationIdentifier::Title => {
-                    if title.eq(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Class => {
-                    if class.eq(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Exe => {
-                    if exe_name.eq(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Path => {
-                    if path.eq(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-            },
-            Some(MatchingStrategy::StartsWith) => match identifier.kind {
-                ApplicationIdentifier::Title => {
-                    if title.starts_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Class => {
-                    if class.starts_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Exe => {
-                    if exe_name.starts_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Path => {
-                    if path.starts_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-            },
-            Some(MatchingStrategy::EndsWith) => match identifier.kind {
-                ApplicationIdentifier::Title => {
-                    if title.ends_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Class => {
-                    if class.ends_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Exe => {
-                    if exe_name.ends_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Path => {
-                    if path.ends_with(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-            },
-            Some(MatchingStrategy::Contains) => match identifier.kind {
-                ApplicationIdentifier::Title => {
-                    if title.contains(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Class => {
-                    if class.contains(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Exe => {
-                    if exe_name.contains(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-                ApplicationIdentifier::Path => {
-                    if path.contains(&identifier.id) {
-                        should_act = true;
-                    }
-                }
-            },
-            Some(MatchingStrategy::Regex) => match identifier.kind {
-                ApplicationIdentifier::Title => {
-                    if let Some(re) = regex_identifiers.get(&identifier.id) {
-                        if re.is_match(title) {
-                            should_act = true;
-                        }
-                    }
-                }
-                ApplicationIdentifier::Class => {
-                    if let Some(re) = regex_identifiers.get(&identifier.id) {
-                        if re.is_match(class) {
-                            should_act = true;
-                        }
-                    }
-                }
-                ApplicationIdentifier::Exe => {
-                    if let Some(re) = regex_identifiers.get(&identifier.id) {
-                        if re.is_match(exe_name) {
-                            should_act = true;
-                        }
-                    }
-                }
-                ApplicationIdentifier::Path => {
-                    if let Some(re) = regex_identifiers.get(&identifier.id) {
-                        if re.is_match(path) {
-                            should_act = true;
-                        }
-                    }
-                }
-            },
+            }
         }
+    }
+
+    should_act
+}
+
+pub fn should_act_individual(
+    title: &str,
+    exe_name: &str,
+    class: &str,
+    path: &str,
+    identifier: &IdWithIdentifier,
+    regex_identifiers: &HashMap<String, Regex>,
+) -> bool {
+    let mut should_act = false;
+
+    match identifier.matching_strategy {
+        None => {
+            panic!("there is no matching strategy identified for this rule");
+        }
+        Some(MatchingStrategy::Legacy) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if title.starts_with(&identifier.id) || title.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if class.starts_with(&identifier.id) || class.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if exe_name.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if path.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::Equals) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if title.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if class.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if exe_name.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if path.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::DoesNotEqual) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if !title.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if !class.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if !exe_name.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if !path.eq(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::StartsWith) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if title.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if class.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if exe_name.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if path.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::DoesNotStartWith) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if !title.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if !class.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if !exe_name.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if !path.starts_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::EndsWith) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if title.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if class.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if exe_name.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if path.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::DoesNotEndWith) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if !title.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if !class.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if !exe_name.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if !path.ends_with(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::Contains) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if title.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if class.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if exe_name.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if path.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::DoesNotContain) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if !title.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if !class.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if !exe_name.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if !path.contains(&identifier.id) {
+                    should_act = true;
+                }
+            }
+        },
+        Some(MatchingStrategy::Regex) => match identifier.kind {
+            ApplicationIdentifier::Title => {
+                if let Some(re) = regex_identifiers.get(&identifier.id) {
+                    if re.is_match(title) {
+                        should_act = true;
+                    }
+                }
+            }
+            ApplicationIdentifier::Class => {
+                if let Some(re) = regex_identifiers.get(&identifier.id) {
+                    if re.is_match(class) {
+                        should_act = true;
+                    }
+                }
+            }
+            ApplicationIdentifier::Exe => {
+                if let Some(re) = regex_identifiers.get(&identifier.id) {
+                    if re.is_match(exe_name) {
+                        should_act = true;
+                    }
+                }
+            }
+            ApplicationIdentifier::Path => {
+                if let Some(re) = regex_identifiers.get(&identifier.id) {
+                    if re.is_match(path) {
+                        should_act = true;
+                    }
+                }
+            }
+        },
     }
 
     should_act
