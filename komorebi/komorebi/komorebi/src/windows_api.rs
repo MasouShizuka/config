@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 use std::convert::TryFrom;
 use std::ffi::c_void;
+use std::mem::size_of;
 use std::sync::atomic::Ordering;
 
 use color_eyre::eyre::anyhow;
@@ -47,9 +48,7 @@ use windows::Win32::Graphics::Gdi::MONITORINFOEXW;
 use windows::Win32::Graphics::Gdi::MONITOR_DEFAULTTONEAREST;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::System::RemoteDesktop::ProcessIdToSessionId;
-use windows::Win32::System::Threading::AttachThreadInput;
 use windows::Win32::System::Threading::GetCurrentProcessId;
-use windows::Win32::System::Threading::GetCurrentThreadId;
 use windows::Win32::System::Threading::OpenProcess;
 use windows::Win32::System::Threading::QueryFullProcessImageNameW;
 use windows::Win32::System::Threading::PROCESS_ACCESS_RIGHTS;
@@ -61,7 +60,6 @@ use windows::Win32::UI::HiDpi::DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
 use windows::Win32::UI::HiDpi::MDT_EFFECTIVE_DPI;
 use windows::Win32::UI::Input::KeyboardAndMouse::GetKeyState;
 use windows::Win32::UI::Input::KeyboardAndMouse::SendInput;
-use windows::Win32::UI::Input::KeyboardAndMouse::SetFocus;
 use windows::Win32::UI::Input::KeyboardAndMouse::INPUT;
 use windows::Win32::UI::Input::KeyboardAndMouse::INPUT_0;
 use windows::Win32::UI::Input::KeyboardAndMouse::INPUT_MOUSE;
@@ -104,7 +102,6 @@ use windows::Win32::UI::WindowsAndMessaging::GWL_EXSTYLE;
 use windows::Win32::UI::WindowsAndMessaging::GWL_STYLE;
 use windows::Win32::UI::WindowsAndMessaging::GW_HWNDNEXT;
 use windows::Win32::UI::WindowsAndMessaging::HWND_BOTTOM;
-use windows::Win32::UI::WindowsAndMessaging::HWND_NOTOPMOST;
 use windows::Win32::UI::WindowsAndMessaging::HWND_TOP;
 use windows::Win32::UI::WindowsAndMessaging::LWA_ALPHA;
 use windows::Win32::UI::WindowsAndMessaging::LWA_COLORKEY;
@@ -115,6 +112,9 @@ use windows::Win32::UI::WindowsAndMessaging::SPI_GETACTIVEWINDOWTRACKING;
 use windows::Win32::UI::WindowsAndMessaging::SPI_GETFOREGROUNDLOCKTIMEOUT;
 use windows::Win32::UI::WindowsAndMessaging::SPI_SETACTIVEWINDOWTRACKING;
 use windows::Win32::UI::WindowsAndMessaging::SPI_SETFOREGROUNDLOCKTIMEOUT;
+use windows::Win32::UI::WindowsAndMessaging::SWP_NOMOVE;
+use windows::Win32::UI::WindowsAndMessaging::SWP_NOSIZE;
+use windows::Win32::UI::WindowsAndMessaging::SWP_SHOWWINDOW;
 use windows::Win32::UI::WindowsAndMessaging::SW_HIDE;
 use windows::Win32::UI::WindowsAndMessaging::SW_MAXIMIZE;
 use windows::Win32::UI::WindowsAndMessaging::SW_MINIMIZE;
@@ -347,10 +347,17 @@ impl WindowsApi {
     /// the layout to account for any window shadow borders (the window painted
     /// region will match layout on completion).
     pub fn position_window(hwnd: HWND, layout: &Rect, top: bool) -> Result<()> {
-        let flags = SetWindowPosition::NO_ACTIVATE
+        let mut flags = SetWindowPosition::NO_ACTIVATE
             | SetWindowPosition::NO_SEND_CHANGING
             | SetWindowPosition::NO_COPY_BITS
             | SetWindowPosition::FRAME_CHANGED;
+
+        // If the request is to place the window on top, then HWND_TOP will take
+        // effect, otherwise pass NO_Z_ORDER that will cause set_window_pos to
+        // ignore the z-order paramter.
+        if !top {
+            flags |= SetWindowPosition::NO_Z_ORDER;
+        }
 
         let shadow_rect = Self::shadow_rect(hwnd)?;
         let rect = Rect {
@@ -360,16 +367,29 @@ impl WindowsApi {
             bottom: layout.bottom + shadow_rect.bottom,
         };
 
-        let position = if top { HWND_TOP } else { HWND_NOTOPMOST };
-        Self::set_window_pos(hwnd, &rect, position, flags.bits())
+        // Note: earlier code had set HWND_TOPMOST here, but we should not do
+        // that. HWND_TOPMOST is a sticky z-order change, rather than a regular
+        // z-order reordering. Programs will use TOPMOST themselves to do things
+        // such as making sure that their tool windows or dialog pop-ups are
+        // above their main window. If any such windows are unmanaged, they must
+        // still remian topmost, so we set HWND_TOP here, which will cause the
+        // managed window to come to the front, but if the managed window has a
+        // child that is TOPMOST it will still be rendered above, in the proper
+        // order expected by the application. It's also important to understand
+        // that TOPMOST is somewhat viral, in that when you set a window to
+        // TOPMOST all of its owned windows are also made TOPMOST.
+        // See https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos#remarks
+        Self::set_window_pos(hwnd, &rect, HWND_TOP, flags.bits())
     }
 
     pub fn bring_window_to_top(hwnd: HWND) -> Result<()> {
         unsafe { BringWindowToTop(hwnd) }.process()
     }
 
+    // Raise the window to the top of the Z order, but do not activate or focus
+    // it. Use raise_and_focus_window to activate and focus a window.
     pub fn raise_window(hwnd: HWND) -> Result<()> {
-        let flags = SetWindowPosition::NO_MOVE;
+        let flags = SetWindowPosition::NO_MOVE | SetWindowPosition::NO_ACTIVATE;
 
         let position = HWND_TOP;
         Self::set_window_pos(hwnd, &Rect::default(), position, flags.bits())
@@ -394,8 +414,7 @@ impl WindowsApi {
         // top of other pop-up dialogs such as a file picker dialog from
         // Firefox. When adjusting this in the future, it's important to check
         // those dialog cases.
-        let position = HWND_NOTOPMOST;
-        Self::set_window_pos(hwnd, layout, position, flags.bits())
+        Self::set_window_pos(hwnd, layout, HWND_TOP, flags.bits())
     }
 
     pub fn hide_border_window(hwnd: HWND) -> Result<()> {
@@ -462,8 +481,31 @@ impl WindowsApi {
         unsafe { GetForegroundWindow() }.process()
     }
 
-    pub fn set_foreground_window(hwnd: HWND) -> Result<()> {
-        unsafe { SetForegroundWindow(hwnd) }.ok().process()
+    pub fn raise_and_focus_window(hwnd: HWND) -> Result<()> {
+        let event = [INPUT {
+            r#type: INPUT_MOUSE,
+            ..Default::default()
+        }];
+
+        unsafe {
+            // Send an input event to our own process first so that we pass the
+            // foreground lock check
+            SendInput(&event, size_of::<INPUT>() as i32);
+            // Error ignored, as the operation is not always necessary.
+            let _ = SetWindowPos(
+                hwnd,
+                HWND_TOP,
+                0,
+                0,
+                0,
+                0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW,
+            )
+            .process();
+            SetForegroundWindow(hwnd)
+        }
+        .ok()
+        .process()
     }
 
     #[allow(dead_code)]
@@ -583,10 +625,6 @@ impl WindowsApi {
         (process_id, thread_id)
     }
 
-    pub fn current_thread_id() -> u32 {
-        unsafe { GetCurrentThreadId() }
-    }
-
     pub fn current_process_id() -> u32 {
         unsafe { GetCurrentProcessId() }
     }
@@ -602,16 +640,6 @@ impl WindowsApi {
                 Err(anyhow!("could not determine current session id"))
             }
         }
-    }
-
-    pub fn attach_thread_input(thread_id: u32, target_thread_id: u32, attach: bool) -> Result<()> {
-        unsafe { AttachThreadInput(thread_id, target_thread_id, attach) }
-            .ok()
-            .process()
-    }
-
-    pub fn set_focus(hwnd: HWND) -> Result<()> {
-        unsafe { SetFocus(hwnd) }.process().map(|_| ())
     }
 
     #[allow(dead_code)]

@@ -10,17 +10,31 @@ return {
     -- NOTE: glance 通过 uri 比较来确定当前位置，但没有考虑到相同 uri 可能存在差异，导致定位失败
     -- 比如转义：: <-> %3A
     -- 比如路径的 uri 的大小写可能不同：d:/path <-> D:/path
-    -- 因此需要对 lua/glance/list.lua 的 is_starting_location 函数进行修改
-    --
-    -- 将：
-    -- if location_uri ~= position_params.textDocument.uri then
-    --   return false
-    -- end
-    --
+    -- 因此需要对 lua/glance/list.lua 的 is_starting_location 函数进行修改，将：
+    -- ╭──────────────────────────────────────────────────────────╮
+    -- │ if location_uri ~= position_params.textDocument.uri then │
+    -- │   return false                                           │
+    -- │ end                                                      │
+    -- ╰──────────────────────────────────────────────────────────╯
     -- 修改为：
-    -- if vim.uri_to_fname(location_uri:lower()) ~= vim.uri_to_fname(position_params.textDocument.uri:lower()) then
-    --   return false
-    -- end
+    -- ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+    -- │ if vim.uri_to_fname(location_uri:lower()) ~= vim.uri_to_fname(position_params.textDocument.uri:lower()) then │
+    -- │   return false                                                                                               │
+    -- │ end                                                                                                          │
+    -- ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    --
+    -- NOTE: glance 在进行相同的行为时可能会产生不同的顺序，需要在渲染前进行排序
+    -- 因此需要对 lua/glance/list.lua 的 List:render 函数进行修改，将：
+    -- ╭─────────────────────────────────────────╮
+    -- │ for filename, group in pairs(groups) do │
+    -- ╰─────────────────────────────────────────╯
+    -- 修改为：
+    -- ╭────────────────────────────────────╮
+    -- │ local keys = vim.tbl_keys(groups)  │
+    -- │ table.sort(keys)                   │
+    -- │ for _, filename in ipairs(keys) do │
+    -- │   local group = groups[filename]   │
+    -- ╰────────────────────────────────────╯
     {
         "dnlhc/glance.nvim",
         cmd = {
@@ -116,37 +130,38 @@ return {
 
     -- NOTE: trouble 无法在打开时 focus 与当前 cursor 最近的 item
     -- 若想实现以上功能，需要对 lua/trouble/view.lua 的 View:setup 函数的末尾添加：
-    --
-    -- local parent_bufnr = vim.api.nvim_win_get_buf(self.parent)
-    -- local parent_row = vim.api.nvim_win_get_cursor(self.parent)[1]
-    -- -- 其他 plugin 调用 trouble 可能会导致 self.items 不能及时更新
-    -- -- 因此使用 defer_fn 延迟对 self.items 的访问
-    -- vim.defer_fn(function ()
-    --   local row = nil
-    --
-    --   local min_distance = math.huge
-    --   for i = 1, vim.api.nvim_buf_line_count(self.buf), 1 do
-    --     local item = self.items[i]
-    --     if item == nil or (opts.skip_groups and item.is_file) then
-    --       goto continue
-    --     end
-    --     if item.bufnr ~= parent_bufnr then
-    --       goto continue
-    --     end
-    --
-    --     local distance = math.abs(item.lnum - parent_row)
-    --     if distance < min_distance then
-    --       row = i
-    --       min_distance = distance
-    --     end
-    --
-    --     ::continue::
-    --   end
-    --
-    --   if row then
-    --     vim.api.nvim_win_set_cursor(self.win, { row, self:get_col() })
-    --   end
-    -- end, 200)
+    -- ╭────────────────────────────────────────────────────────────────────╮
+    -- │ local parent_bufnr = vim.api.nvim_win_get_buf(self.parent)         │
+    -- │ local parent_row = vim.api.nvim_win_get_cursor(self.parent)[1]     │
+    -- │ -- 其他 plugin 调用 trouble 可能会导致 self.items 不能及时更新     │
+    -- │ -- 因此使用 defer_fn 延迟对 self.items 的访问                      │
+    -- │ vim.defer_fn(function ()                                           │
+    -- │   local row = nil                                                  │
+    -- │                                                                    │
+    -- │   local min_distance = math.huge                                   │
+    -- │   for i = 1, vim.api.nvim_buf_line_count(self.buf), 1 do           │
+    -- │     local item = self.items[i]                                     │
+    -- │     if item == nil or (opts.skip_groups and item.is_file) then     │
+    -- │       goto continue                                                │
+    -- │     end                                                            │
+    -- │     if item.bufnr ~= parent_bufnr then                             │
+    -- │       goto continue                                                │
+    -- │     end                                                            │
+    -- │                                                                    │
+    -- │     local distance = math.abs(item.lnum - parent_row)              │
+    -- │     if distance < min_distance then                                │
+    -- │       row = i                                                      │
+    -- │       min_distance = distance                                      │
+    -- │     end                                                            │
+    -- │                                                                    │
+    -- │     ::continue::                                                   │
+    -- │   end                                                              │
+    -- │                                                                    │
+    -- │   if row then                                                      │
+    -- │     vim.api.nvim_win_set_cursor(self.win, { row, self:get_col() }) │
+    -- │   end                                                              │
+    -- │ end, 200)                                                          │
+    -- ╰────────────────────────────────────────────────────────────────────╯
     {
         "folke/trouble.nvim",
         cmd = {
@@ -345,37 +360,6 @@ return {
                         })
                     end
 
-                    local function has_capability(capability, filter)
-                        for _, lsp_client in ipairs(vim.lsp.get_clients(filter)) do
-                            if lsp_client.supports_method(capability) then
-                                return true
-                            end
-                        end
-                        return false
-                    end
-
-                    local function add_buffer_autocmd(augroup, bufnr, autocmds)
-                        if not vim.tbl_islist(autocmds) then
-                            autocmds = { autocmds }
-                        end
-                        local cmds_found, cmds = pcall(vim.api.nvim_get_autocmds, { group = augroup, buffer = bufnr })
-                        if not cmds_found or vim.tbl_isempty(cmds) then
-                            vim.api.nvim_create_augroup(augroup, { clear = false })
-                            for _, autocmd in ipairs(autocmds) do
-                                local events = autocmd.events
-                                autocmd.events = nil
-                                autocmd.group = augroup
-                                autocmd.buffer = bufnr
-                                vim.api.nvim_create_autocmd(events, autocmd)
-                            end
-                        end
-                    end
-
-                    local function del_buffer_autocmd(augroup, bufnr)
-                        local cmds_found, cmds = pcall(vim.api.nvim_get_autocmds, { group = augroup, buffer = bufnr })
-                        if cmds_found then vim.tbl_map(function(cmd) vim.api.nvim_del_autocmd(cmd.id) end, cmds) end
-                    end
-
                     if vim.g.lsp_enabled == nil then
                         vim.g.lsp_enabled = true
                     end
@@ -398,16 +382,17 @@ return {
                     end
 
                     lsp_stop()
-                    add_buffer_autocmd("lsp_stop", buf, {
+                    vim.api.nvim_create_autocmd("BufReadPost", {
+                        buffer = buf,
                         callback = function()
                             lsp_stop()
                         end,
-                        desc = "Stop LSP",
-                        events = "BufReadPost",
+                        desc = "Stop Lsp",
+                        group = vim.api.nvim_create_augroup(string.format("LspStop%s", buf), { clear = true }),
                     })
 
                     vim.keymap.set("n", "<leader>ltl", function()
-                        utils.toggle_global_setting("lsp_enabled", function(global_enabled, prev_enabled, enabled)
+                        utils.toggle_global_setting("lsp_enabled", function(enabled, prev_enabled, global_enabled)
                             if not global_enabled then
                                 vim.lsp.stop_client(vim.lsp.get_clients())
                             end
@@ -417,7 +402,7 @@ return {
                         end)
                     end, { buffer = buf, desc = "Toggle LSP", silent = true })
                     vim.keymap.set("n", "<leader>ltL", function()
-                        utils.toggle_buffer_setting("lsp_enabled", function(prev_enabled, enabled)
+                        utils.toggle_buffer_setting("lsp_enabled", function(enabled, prev_enabled)
                             if not enabled then
                                 lsp_stop_command()
                             end
@@ -426,18 +411,6 @@ return {
                             end
                         end)
                     end, { buffer = buf, desc = "Toggle LSP (buffer)", silent = true })
-
-                    vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
-                    if not utils.is_available("trouble.nvim") then
-                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = buf, desc = "Previous diagnostic", silent = true })
-                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
-                    end
-
-                    vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
-
-                    if utils.is_available("none-ls.nvim") then
-                        vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = buf, desc = "Null-ls information", silent = true })
-                    end
 
                     if client.supports_method("textDocument/codeAction") then
                         vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() vim.lsp.buf.code_action() end, { buffer = buf, desc = "LSP code action", silent = true })
@@ -448,30 +421,31 @@ return {
                             vim.g.codelens_enabled = true
                         end
 
-                        add_buffer_autocmd("lsp_codelens_refresh", buf, {
-                            callback = function()
-                                if not has_capability("textDocument/codeLens", { bufnr = buf }) then
-                                    del_buffer_autocmd("lsp_codelens_refresh", buf)
-                                    return
-                                end
+                        local function lsp_codelens_refresh()
+                            if vim.b[buf].codelens_enabled == nil and vim.g.codelens_enabled or vim.b[buf].codelens_enabled then
+                                vim.lsp.codelens.refresh()
+                            end
+                        end
 
-                                if vim.b[buf].codelens_enabled == nil and vim.g.codelens_enabled or vim.b[buf].codelens_enabled then
-                                    vim.lsp.codelens.refresh()
-                                end
+                        lsp_codelens_refresh()
+                        vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+                            buffer = buf,
+                            callback = function()
+                                lsp_codelens_refresh()
                             end,
                             desc = "Refresh codelens",
-                            events = { "BufEnter", "InsertLeave" },
+                            group = vim.api.nvim_create_augroup(string.format("LspCodelensRefresh%s", buf), { clear = true }),
                         })
 
                         vim.keymap.set("n", "<leader>ltc", function()
-                            utils.toggle_global_setting("codelens_enabled", function(global_enabled, prev_enabled, enabled)
+                            utils.toggle_global_setting("codelens_enabled", function(enabled, prev_enabled, global_enabled)
                                 if not enabled then
                                     vim.lsp.codelens.clear()
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP codelens", silent = true })
                         vim.keymap.set("n", "<leader>ltC", function()
-                            utils.toggle_buffer_setting("codelens_enabled", function(prev_enabled, enabled)
+                            utils.toggle_buffer_setting("codelens_enabled", function(enabled, prev_enabled)
                                 if not enabled then
                                     vim.lsp.codelens.clear()
                                 end
@@ -485,7 +459,6 @@ return {
                     if client.supports_method("textDocument/declaration") then
                         vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
                     end
-
                     if not utils.is_available("glance.nvim") then
                         if client.supports_method("textDocument/definition") then
                             vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
@@ -504,7 +477,35 @@ return {
                         end
                     end
 
-                    if client.supports_method("textDocument/formatting") then
+                    if client.supports_method("textDocument/diagnostic") then
+                        vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
+                        if not utils.is_available("trouble.nvim") then
+                            vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = buf, desc = "Previous diagnostic", silent = true })
+                            vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
+                        end
+                    end
+
+                    if client.supports_method("textDocument/documentHighlight") then
+                        local augroup = vim.api.nvim_create_augroup(string.format("LspDocumentHighlight%s", buf), { clear = true })
+                        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+                            buffer = buf,
+                            callback = function()
+                                vim.lsp.buf.document_highlight()
+                            end,
+                            desc = "Highlight references when cursor holds",
+                            group = augroup,
+                        })
+                        vim.api.nvim_create_autocmd({ "BufLeave", "CursorMoved", "CursorMovedI" }, {
+                            buffer = buf,
+                            callback = function()
+                                vim.lsp.buf.clear_references()
+                            end,
+                            desc = "Clear references when cursor moves",
+                            group = augroup,
+                        })
+                    end
+
+                    if client.supports_method("textDocument/formatting") or client.supports_method("textDocument/rangeFormatting") then
                         -- Gets all lsp clients that support formatting
                         -- and have not disabled it in their client config
                         local function supports_format(client)
@@ -571,46 +572,19 @@ return {
                             vim.g.autoformat_enabled = false
                         end
 
-                        add_buffer_autocmd("lsp_auto_format", buf, {
+                        vim.api.nvim_create_autocmd("BufWritePre", {
+                            buffer = buf,
                             callback = function()
-                                if not has_capability("textDocument/formatting", { bufnr = buf }) then
-                                    del_buffer_autocmd("lsp_auto_format", buf)
-                                    return
-                                end
-
                                 if vim.b[buf].autoformat_enabled == nil and vim.g.autoformat_enabled or vim.b[buf].autoformat_enabled then
                                     format()
                                 end
                             end,
                             desc = "Autoformat on save",
-                            events = "BufWritePre",
+                            group = vim.api.nvim_create_augroup(string.format("LspAutoFormat%s", buf), { clear = true }),
                         })
 
-                        vim.keymap.set("n", "<leader>ltf", function() utils.toggle_global_setting("autoformat_enabled", function(global_enabled, prev_enabled, enabled) end) end, { buffer = buf, desc = "Toggle autoformatting", silent = true })
-                        vim.keymap.set("n", "<leader>ltF", function() utils.toggle_buffer_setting("autoformat_enabled", function(prev_enabled, enabled) end) end, { buffer = buf, desc = "Toggle autoformatting (buffer)", silent = true })
-                    end
-
-                    if client.supports_method("textDocument/documentHighlight") then
-                        add_buffer_autocmd("lsp_document_highlight", buf, {
-                            {
-                                callback = function()
-                                    if not has_capability("textDocument/documentHighlight", { bufnr = buf }) then
-                                        del_buffer_autocmd("lsp_document_highlight", buf)
-                                        return
-                                    end
-                                    vim.lsp.buf.document_highlight()
-                                end,
-                                desc = "Highlight references when cursor holds",
-                                events = { "CursorHold", "CursorHoldI" },
-                            },
-                            {
-                                callback = function()
-                                    vim.lsp.buf.clear_references()
-                                end,
-                                desc = "Clear references when cursor moves",
-                                events = { "BufLeave", "CursorMoved", "CursorMovedI" },
-                            },
-                        })
+                        vim.keymap.set("n", "<leader>ltf", function() utils.toggle_global_setting("autoformat_enabled", function(enabled, prev_enabled, global_enabled) end) end, { buffer = buf, desc = "Toggle autoformatting", silent = true })
+                        vim.keymap.set("n", "<leader>ltF", function() utils.toggle_buffer_setting("autoformat_enabled", function(enabled, prev_enabled) end) end, { buffer = buf, desc = "Toggle autoformatting (buffer)", silent = true })
                     end
 
                     if client.supports_method("textDocument/hover") then
@@ -627,14 +601,14 @@ return {
                         end
 
                         vim.keymap.set("n", "<leader>lti", function()
-                            utils.toggle_global_setting("inlay_hints_enabled", function(global_enabled, prev_enabled, enabled)
+                            utils.toggle_global_setting("inlay_hints_enabled", function(enabled, prev_enabled, global_enabled)
                                 if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
                                     vim.lsp.inlay_hint.enable(buf, enabled)
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
                         vim.keymap.set("n", "<leader>ltI", function()
-                            utils.toggle_buffer_setting("inlay_hints_enabled", function(prev_enabled, enabled)
+                            utils.toggle_buffer_setting("inlay_hints_enabled", function(enabled, prev_enabled)
                                 if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
                                     vim.lsp.inlay_hint.enable(buf, enabled)
                                 end
@@ -644,14 +618,6 @@ return {
 
                     if client.supports_method("textDocument/rename") then
                         vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = buf, desc = "Rename current symbol", silent = true })
-                    end
-
-                    if client.supports_method("textDocument/signatureHelp") then
-                        vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
-                    end
-
-                    if client.supports_method("workspace/symbol") then
-                        vim.keymap.set("n", "<leader>lg", function() vim.lsp.buf.workspace_symbol() end, { buffer = buf, desc = "Search workspace symbols", silent = true })
                     end
 
                     if client.supports_method("textDocument/semanticTokens/full") and vim.lsp.semantic_tokens then
@@ -668,19 +634,32 @@ return {
                         end
 
                         vim.keymap.set("n", "<leader>lts", function()
-                            utils.toggle_global_setting("semantic_tokens_enabled", function(global_enabled, prev_enabled, enabled)
+                            utils.toggle_global_setting("semantic_tokens_enabled", function(enabled, prev_enabled, global_enabled)
                                 if enabled ~= prev_enabled then
                                     toggle_semantic_tokens(enabled)
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP semantic highlight", silent = true })
                         vim.keymap.set("n", "<leader>ltS", function()
-                            utils.toggle_buffer_setting("semantic_tokens_enabled", function(prev_enabled, enabled)
+                            utils.toggle_buffer_setting("semantic_tokens_enabled", function(enabled, prev_enabled)
                                 if enabled ~= prev_enabled then
                                     toggle_semantic_tokens(enabled)
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP semantic highlight (buffer)", silent = true })
+                    end
+
+                    if client.supports_method("textDocument/signatureHelp") then
+                        vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
+                    end
+
+                    if client.supports_method("workspace/symbol") then
+                        vim.keymap.set("n", "<leader>lg", function() vim.lsp.buf.workspace_symbol() end, { buffer = buf, desc = "Search workspace symbols", silent = true })
+                    end
+
+                    vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
+                    if utils.is_available("none-ls.nvim") then
+                        vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = buf, desc = "Null-ls information", silent = true })
                     end
                 end,
                 desc = "Lsp config",

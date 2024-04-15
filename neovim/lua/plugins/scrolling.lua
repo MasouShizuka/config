@@ -93,11 +93,21 @@ return {
             end
 
             return {
+                -- Highlight integrations (none by default)
                 integrations = integrations,
+
+                -- Window options
                 window = {
+                    -- Whether to show count of multiple integration highlights
                     show_integration_count = false,
+
+                    -- Total width
                     width = 2,
+
+                    -- Value of 'winblend' option
                     winblend = 0,
+
+                    -- Z-index
                     zindex = 40,
                 },
 
@@ -107,33 +117,33 @@ return {
 
     {
         "karb94/neoscroll.nvim",
-        config = function(_, opts)
-            require("neoscroll").setup(opts)
-
-            local t = {}
-            -- Syntax: t[keys] = {function, {function arguments}}
-            -- t["<c-u>"] = {"scroll", {"-vim.wo.scroll", "true", "250"}}
-            -- t["<c-d>"] = {"scroll", { "vim.wo.scroll", "true", "250"}}
-            t["<c-u>"] = { "scroll", { "-vim.wo.scroll", "true", "100" } }
-            t["<c-d>"] = { "scroll", { "vim.wo.scroll", "true", "100" } }
-            -- t["<c-b>"] = { "scroll", { "-vim.api.nvim_win_get_height(0)", "true", "450" } }
-            -- t["<c-f>"] = { "scroll", { "vim.api.nvim_win_get_height(0)", "true", "450" } }
-            -- t["<c-y>"] = { "scroll", { "-0.10", "false", "100" } }
-            -- t["<c-e>"] = { "scroll", { "0.10", "false", "100" } }
-            -- t["zt"]    = { "zt", { "250" } }
-            -- t["zz"]    = { "zz", { "250" } }
-            -- t["zb"]    = { "zb", { "250" } }
-
-            require("neoscroll.config").set_mappings(t)
-        end,
         enabled = not environment.is_vscode,
         keys = {
-            { "<c-u>", desc = "Scroll half page up",   mode = { "n", "x" } },
-            { "<c-d>", desc = "Scroll half page down", mode = { "n", "x" } },
+            {
+                "<c-u>",
+                function()
+                    local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
+                    require("neoscroll").scroll(-scroll, true, 100)
+                end,
+                desc = "Scroll half page up",
+                mode = { "n", "x" },
+            },
+            {
+                "<c-d>",
+                function()
+                    local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
+                    require("neoscroll").scroll(scroll, true, 100)
+                end,
+                desc = "Scroll half page down",
+                mode = { "n", "x" },
+            },
+            { "zj", function() require("neoscroll").zt(100) end, desc = "Top this line",    mode = { "n", "x" } },
+            { "zz", function() require("neoscroll").zz(100) end, desc = "Center this line", mode = { "n", "x" } },
+            { "zk", function() require("neoscroll").zb(100) end, desc = "Bottom this line", mode = { "n", "x" } },
         },
         opts = {
             -- All these keys will be mapped to their corresponding default scrolling animation
-            mappings = { "<c-u>", "<c-d>" },
+            mappings = {},
             hide_cursor = false, -- Hide cursor while scrolling
         },
     },

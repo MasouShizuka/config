@@ -8,26 +8,11 @@
       "parentID": 0,
       "delay": 0,
       "hotkeys": {
-        "*1": [
+        "*a": [
           {
             "windowGroupID": 0,
             "actionTypeID": 8,
             "ahkCode": "close_or_run_script(\"data/hide_mouse_when_idle.ahk\")"
-          }
-        ],
-        "*2": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 8,
-            "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi_v2.ahk\")"
-          }
-        ],
-        "*a": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 3,
-            "comment": "窗口居中 (1200x800)",
-            "actionValueID": 10
           }
         ],
         "*b": [
@@ -70,9 +55,8 @@
         "*g": [
           {
             "windowGroupID": 0,
-            "actionTypeID": 3,
-            "comment": "在当前程序的窗口间轮换",
-            "actionValueID": 3
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi_v2.ahk\")"
           }
         ],
         "*p": [
@@ -122,8 +106,9 @@
         "*w": [
           {
             "windowGroupID": 0,
-            "actionTypeID": 6,
-            "keysToSend": "!{tab down}{tab up}"
+            "actionTypeID": 3,
+            "comment": "切换到上一个窗口",
+            "actionValueID": 2
           }
         ],
         "*x": [
@@ -162,168 +147,161 @@
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}\\"
+            "keysToSend": "{Blind}\\"
           }
         ],
         "*;": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}0"
+            "keysToSend": "{Blind}0"
           }
         ],
         "*a": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}1"
-          }
-        ],
-        "*c": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 6,
-            "keysToSend": "{blind}{space}"
+            "keysToSend": "{Blind}1"
           }
         ],
         "*d": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}3"
+            "keysToSend": "{Blind}3"
           }
         ],
         "*e": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}("
+            "keysToSend": "{Blind}("
           }
         ],
         "*f": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}4"
+            "keysToSend": "{Blind}4"
           }
         ],
         "*g": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}5"
+            "keysToSend": "{Blind}5"
           }
         ],
         "*h": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}6"
+            "keysToSend": "{Blind}6"
           }
         ],
         "*i": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}-"
+            "keysToSend": "{Blind}-"
           }
         ],
         "*j": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}7"
+            "keysToSend": "{Blind}7"
           }
         ],
         "*k": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}8"
+            "keysToSend": "{Blind}8"
           }
         ],
         "*l": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}9"
+            "keysToSend": "{Blind}9"
           }
         ],
         "*m": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}]"
+            "keysToSend": "{Blind}]"
           }
         ],
         "*n": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}["
+            "keysToSend": "{Blind}["
           }
         ],
         "*o": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}="
+            "keysToSend": "{Blind}="
           }
         ],
         "*p": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{+}"
+            "keysToSend": "{Blind}{+}"
           }
         ],
         "*q": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{backspace}"
+            "keysToSend": "{Blind}{Backspace}"
           }
         ],
         "*r": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind})"
+            "keysToSend": "{Blind})"
           }
         ],
         "*s": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}2"
+            "keysToSend": "{Blind}2"
           }
         ],
         "*space": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{enter}"
+            "keysToSend": "{Blind}{Enter}"
           }
         ],
         "*u": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}_"
+            "keysToSend": "{Blind}_"
           }
         ],
         "*w": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}`"
+            "keysToSend": "{Blind}`"
           }
         ],
         "singlePress": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{space}"
+            "keysToSend": "{Blind}{Space}"
           }
         ]
       }
@@ -339,183 +317,190 @@
         "*,": [
           {
             "windowGroupID": 0,
-            "actionTypeID": 6,
-            "keysToSend": "{blind};"
+            "actionTypeID": 8,
+            "ahkCode": "enter_mouse_mode()"
           }
         ],
         "*a": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f4}"
+            "keysToSend": "{Blind}{F4}"
+          }
+        ],
+        "*b": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{Blind}{Insert}"
           }
         ],
         "*c": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f3}"
+            "keysToSend": "{Blind}{F3}"
           }
         ],
         "*d": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f6}"
+            "keysToSend": "{Blind}{F6}"
           }
         ],
         "*e": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f9}"
+            "keysToSend": "{Blind}{F9}"
           }
         ],
         "*f": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f11}"
+            "keysToSend": "{Blind}{F11}"
+          }
+        ],
+        "*g": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{Blind}{Delete}"
           }
         ],
         "*h": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{backspace}"
+            "keysToSend": "{Blind}{Backspace}"
           }
         ],
         "*i": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{up}"
+            "keysToSend": "{Blind}{Up}"
           }
         ],
         "*j": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{left}"
+            "keysToSend": "{Blind}{Left}"
           }
         ],
         "*k": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{down}"
+            "keysToSend": "{Blind}{Down}"
           }
         ],
         "*l": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{right}"
+            "keysToSend": "{Blind}{Right}"
           }
         ],
         "*m": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}+{f10}"
+            "keysToSend": "{Blind}+{F10}"
           }
         ],
         "*n": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{enter}"
+            "keysToSend": "{Blind}{Enter}"
           }
         ],
         "*o": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{pgdn}"
+            "keysToSend": "{Blind}{PgDn}"
           }
         ],
         "*p": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{end}"
+            "keysToSend": "{Blind}{End}"
           }
         ],
         "*q": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f7}"
+            "keysToSend": "{Blind}{F7}"
           }
         ],
         "*r": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f12}"
+            "keysToSend": "{Blind}{F12}"
           }
         ],
         "*s": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f5}"
-          }
-        ],
-        "*space": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 8,
-            "ahkCode": "enter_mouse_mode()"
+            "keysToSend": "{Blind}{F5}"
           }
         ],
         "*u": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{pgup}"
+            "keysToSend": "{Blind}{PgUp}"
           }
         ],
         "*v": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f10}"
+            "keysToSend": "{Blind}{F10}"
           }
         ],
         "*w": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f8}"
+            "keysToSend": "{Blind}{F8}"
           }
         ],
         "*x": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f2}"
+            "keysToSend": "{Blind}{F2}"
           }
         ],
         "*y": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{home}"
+            "keysToSend": "{Blind}{Home}"
           }
         ],
         "*z": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind}{f1}"
+            "keysToSend": "{Blind}{F1}"
           }
         ],
         "singlePress": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{blind};"
+            "keysToSend": "{Blind};"
           }
         ]
       }
@@ -868,7 +853,7 @@
     }
   ],
   "options": {
-    "mykeymapVersion": "2.0-beta25",
+    "mykeymapVersion": "2.0-beta27",
     "windowGroups": [
       {
         "id": 0,
@@ -930,6 +915,7 @@
       }
     ],
     "startup": false,
+    "language": "zh",
     "keyMapping": "",
     "keyboardLayout": "1 2 3 4 5 6 7 8 9 0\nq w e r t y u i o p\na s d f g h j k l ;\nz x c v b n m , . /\nspace enter backspace - [ ' singlePress"
   }

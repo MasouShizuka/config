@@ -33,15 +33,15 @@ return {
             -- information with examples, see `:h MiniSurround.config`.
             custom_surroundings = {
                 [","] = {
-                    input = { "%<().-()%>" },
-                    output = { left = "<", right = ">" },
+                    input = { "%b<>", "^.%s*().-()%s*.$" },
+                    output = { left = "< ", right = " >" },
                 },
                 ["."] = {
-                    input = { "%<().-()%>" },
+                    input = { "%b<>", "^.().*().$" },
                     output = { left = "<", right = ">" },
                 },
                 B = {
-                    input = { "%{().-()%}" },
+                    input = { "%b{}", "^.().*().$" },
                     output = { left = "{", right = "}" },
                 },
                 L = {
@@ -62,7 +62,7 @@ return {
                     end,
                 },
                 r = {
-                    input = { "%[().-()%]" },
+                    input = { "%b[]", "^.().*().$" },
                     output = { left = "[", right = "]" },
                 },
             },
@@ -78,9 +78,10 @@ return {
                 highlight = "sh",      -- Highlight surrounding
                 replace = "sr",        -- Replace surrounding
                 update_n_lines = "sn", -- Update `n_lines`
+
                 -- suffix_last = "l",     -- Suffix to search with "prev" method
-                suffix_last = "p",     -- Suffix to search with "prev" method
-                suffix_next = "n",     -- Suffix to search with "next" method
+                suffix_last = "p", -- Suffix to search with "prev" method
+                suffix_next = "n", -- Suffix to search with "next" method
             },
 
             -- Number of lines within which surrounding is searched

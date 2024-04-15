@@ -239,14 +239,17 @@ return {
 
             local file_encoding = {
                 provider = function(self)
-                    local encoding = vim.bo.fileencoding ~= "" and vim.bo.fileencoding or vim.o.encoding
-                    return icons.misc.code_braces .. encoding:upper()
+                    local fileencoding = vim.api.nvim_get_option_value("fileencoding", { scope = "local" })
+                    local encoding = vim.api.nvim_get_option_value("encoding", { scope = "local" })
+                    local file_encoding = fileencoding ~= "" and fileencoding or encoding
+                    return icons.misc.code_braces .. file_encoding:upper()
                 end,
             }
 
             local file_format = {
                 provider = function(self)
-                    if vim.bo.fileformat == "dos" then
+                    local fileformat = vim.api.nvim_get_option_value("fileformat", { scope = "local" })
+                    if fileformat == "dos" then
                         return icons.platforms.windows .. "CRLF"
                     else
                         return icons.platforms.linux .. "LF"
@@ -270,8 +273,18 @@ return {
             }
 
             local file_indent = {
+                init = function(self)
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    local expandtab = vim.api.nvim_get_option_value("expandtab", { buf = buf })
+                    if expandtab then
+                        self.icon = icons.misc.bottom_square_bracket
+                    else
+                        self.icon = icons.misc.tab
+                    end
+                    self.tabstop = vim.api.nvim_get_option_value("tabstop", { buf = buf })
+                end,
                 provider = function(self)
-                    return icons.misc.bottom_square_bracket .. vim.bo.tabstop
+                    return self.icon .. self.tabstop
                 end,
             }
 
@@ -302,7 +315,8 @@ return {
                     if vim.api.nvim_get_option_value("buftype", { buf = buf }) == "terminal" then
                         filename, _ = vim.api.nvim_buf_get_name(buf):gsub(".*:", "")
                     else
-                        local char_count, char_list = utils.get_char_from_string(filename)
+                        local char_list = utils.get_char_from_string(filename)
+                        local char_count = #char_list
                         if char_count > self.max_length then
                             filename = "..." .. table.concat(char_list, "", char_count - self.max_length + 1)
                         end
@@ -421,7 +435,9 @@ return {
 
             local python_venv = {
                 condition = function(self)
-                    return utils.is_available("venv-selector.nvim") and package.loaded["venv-selector"] and vim.bo.filetype == "python"
+                    return utils.is_available("venv-selector.nvim")
+                        and package.loaded["venv-selector"]
+                        and vim.api.nvim_get_option_value("filetype", { scope = "local" }) == "python"
                 end,
                 provider = function(self)
                     local venv_name = "base"
@@ -447,7 +463,8 @@ return {
                     local names = {}
                     for _, server in pairs(vim.lsp.get_clients({ bufnr = 0 })) do
                         if server.name == "null-ls" then
-                            local null_ls_sources = require("null-ls.sources").get_available(vim.bo.filetype)
+                            local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+                            local null_ls_sources = require("null-ls.sources").get_available(ft)
                             for _, source in ipairs(null_ls_sources) do
                                 local name = source.name
                                 -- null-ls 的相同的 source 可能有不同的功能，导致重复
@@ -671,7 +688,7 @@ return {
                     callback = function()
                         require("lazy").update()
                     end,
-                    name = "update_plugins",
+                    name = "heirline_update_plugins",
                 },
             }
 
@@ -681,7 +698,7 @@ return {
                     self.win = vim.api.nvim_tabpage_list_wins(0)[1]
                     self.buf = vim.api.nvim_win_get_buf(self.win)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = self.buf })
-                    return filetype.is_in_toggle_filetype_list(ft, filetype.toggle_filetype_list_of_left)
+                    return filetype.is_panel_filetype(ft, filetype.left_panel_filetype_list)
                 end,
                 provider = function(self)
                     local width = vim.api.nvim_win_get_width(self.win)
@@ -775,7 +792,7 @@ return {
                         self._buflist[1]._force_page = true
                         vim.cmd.redrawtabline()
                     end,
-                    name = "Heirline_tabline_prev",
+                    name = "heirline_tabline_prev",
                 }
                 right_trunc.on_click = {
                     callback = function(self)
@@ -783,7 +800,7 @@ return {
                         self._buflist[1]._force_page = true
                         vim.cmd.redrawtabline()
                     end,
-                    name = "Heirline_tabline_next",
+                    name = "heirline_tabline_next",
                 }
 
                 local tablist = {
@@ -959,7 +976,7 @@ return {
                             vim.cmd("normal! zo")
                         end
                     end,
-                    name = "fold_click",
+                    name = "heirline_fold_click",
                 },
             }
 
@@ -999,7 +1016,7 @@ return {
                             end
                         end
                     end,
-                    name = "line_click",
+                    name = "heirline_line_click",
                 },
             }
 
@@ -1062,7 +1079,7 @@ return {
                             sign_handlers[args.sign.name](args)
                         end
                     end,
-                    name = "sign_click",
+                    name = "heirline_sign_click",
                 },
             }
 

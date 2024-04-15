@@ -1,9 +1,20 @@
+local utils = require("utils")
+
 local M = {}
 
-M.text_filetype = {
+M.color_filetype_list = {
+    "css",
+    "html",
+    "javascript",
+}
+
+M.tex_filetype_list = {
     "markdown",
     "plaintex",
     "tex",
+}
+
+M.text_filetype_list = {
     "text",
 }
 
@@ -59,8 +70,8 @@ M.skip_filetype_list_of_panel = {
     "edgy",
     "fidget",
     "help",
-    "neo-tree",
     "minimap",
+    "neo-tree",
     "NvimTree",
     "nvim-docs-view",
     "toggleterm",
@@ -96,8 +107,8 @@ M.skip_filetype = function(skip_filetype_list, step)
     end
 end
 
--- toggle left panel
-M.toggle_filetype_list_of_left = {
+-- left panel
+M.left_panel_filetype_list = {
     ["aerial"] = {
         open = function() vim.api.nvim_command("AerialOpen") end,
         close = function() vim.api.nvim_command("AerialClose") end,
@@ -126,6 +137,10 @@ M.toggle_filetype_list_of_left = {
         open = function() vim.api.nvim_command("DiffviewOpen") end,
         close = function() vim.api.nvim_command("DiffviewClose") end,
     },
+    ["edgy"] = {
+        open = false,
+        close = false,
+    },
     ["neo-tree"] = {
         open = function()
             require("neo-tree.sources.manager").close_all()
@@ -138,8 +153,8 @@ M.toggle_filetype_list_of_left = {
         close = function() require("nvim-tree.api").tree.close() end,
     },
 }
--- toggle bottom panel
-M.toggle_filetype_list_of_bottom = {
+-- bottom panel
+M.bottom_panel_filetype_list = {
     ["dap-repl"] = {
         open = function() require("dapui").open() end,
         close = function() require("dapui").close() end,
@@ -147,6 +162,10 @@ M.toggle_filetype_list_of_bottom = {
     ["dapui_console"] = {
         open = function() require("dapui").open() end,
         close = function() require("dapui").close() end,
+    },
+    ["edgy"] = {
+        open = false,
+        close = false,
     },
     ["qf"] = {
         open = function() vim.api.nvim_command("copen") end,
@@ -161,8 +180,12 @@ M.toggle_filetype_list_of_bottom = {
         close = function() vim.api.nvim_command("TroubleClose") end,
     },
 }
--- toggle right panel
-M.toggle_filetype_list_of_right = {
+-- right panel
+M.right_panel_filetype_list = {
+    ["edgy"] = {
+        open = false,
+        close = false,
+    },
     ["help"] = {
         open = false,
         close = false,
@@ -172,40 +195,41 @@ M.toggle_filetype_list_of_right = {
         close = function() vim.api.nvim_command("DocsViewToggle") end,
     },
 }
-M.toggle_filetype_lists = {
-    left = M.toggle_filetype_list_of_left,
-    bottom = M.toggle_filetype_list_of_bottom,
-    right = M.toggle_filetype_list_of_right,
+M.panel_filetype_lists = {
+    left = M.left_panel_filetype_list,
+    bottom = M.bottom_panel_filetype_list,
+    right = M.right_panel_filetype_list,
 }
 
-M.is_toggle_filetype = function(filetype, toggle_filetype_list)
-    local is_toggle_filetype, func
+M.get_panel_filetype_func = function(filetype, panel_filetype_list)
+    local is_panel_filetype, func
 
-    if toggle_filetype_list then
-        func = toggle_filetype_list[filetype]
+    if panel_filetype_list then
+        func = panel_filetype_list[filetype]
         if func ~= nil then
-            is_toggle_filetype = true
+            is_panel_filetype = true
         end
     else
-        for _, toggle_filetype_list in pairs(M.toggle_filetype_lists) do
-            func = toggle_filetype_list[filetype]
+        for _, panel_filetype_list in pairs(M.panel_filetype_lists) do
+            func = panel_filetype_list[filetype]
             if func ~= nil then
-                is_toggle_filetype = true
+                is_panel_filetype = true
                 break
             end
         end
     end
 
-    return is_toggle_filetype, func
+    return is_panel_filetype, func
 end
 
-M.is_in_toggle_filetype_list = function(filetype, toggle_filetype_list)
-    local is_in_toggle_filetype_list, _ = M.is_toggle_filetype(filetype, toggle_filetype_list)
-    return is_in_toggle_filetype_list
+M.is_panel_filetype = function(filetype, panel_filetype_list)
+    local is_panel_filetype, _ = M.get_panel_filetype_func(filetype, panel_filetype_list)
+    return is_panel_filetype
 end
 
-M.is_toggle_filetype_focused = function(toggle_filetype_list)
-    local ok, func = M.is_toggle_filetype(vim.bo.filetype, toggle_filetype_list)
+M.get_focused_panel_filetype = function(panel_filetype_list)
+    local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+    local ok, func = M.get_panel_filetype_func(ft, panel_filetype_list)
     local close_func
     if ok then
         close_func = func.close
@@ -220,7 +244,9 @@ M.is_toggle_filetype_focused = function(toggle_filetype_list)
     return ok, close_func
 end
 
-M.is_toggle_filetype_opened = function(toggle_filetype_list)
+M.get_opened_panel_filetype = function(panel_filetype_list)
+    local opened = {}
+
     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
         if not vim.api.nvim_win_is_valid(win) then
             goto continue
@@ -228,26 +254,32 @@ M.is_toggle_filetype_opened = function(toggle_filetype_list)
 
         local buf = vim.api.nvim_win_get_buf(win)
         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-        if M.is_in_toggle_filetype_list(ft, toggle_filetype_list) then
-            return true, win
+        if utils.is_available("edgy.nvim") and ft == "edgy" then
+            goto continue
+        end
+
+        if M.is_panel_filetype(ft, panel_filetype_list) then
+            opened[#opened + 1] = win
         end
 
         ::continue::
     end
 
-    return false, nil
+    return opened
 end
 
-M.toggle_filetype = function(toggle_filetype_list)
-    local is_focused, func = M.is_toggle_filetype_focused(toggle_filetype_list)
+M.toggle_panel = function(pos)
+    local panel_filetype_list = M.panel_filetype_lists[pos]
+
+    local is_focused, close_func = M.get_focused_panel_filetype(panel_filetype_list)
     if is_focused then
-        func.close()
+        close_func()
         return true
     end
 
-    local is_opened, win = M.is_toggle_filetype_opened(toggle_filetype_list)
-    if is_opened then
-        vim.api.nvim_set_current_win(win)
+    local opened = M.get_opened_panel_filetype(panel_filetype_list)
+    if #opened > 0 then
+        vim.api.nvim_set_current_win(opened[1])
         return true
     end
 

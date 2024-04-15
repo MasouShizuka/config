@@ -7,6 +7,7 @@ use crate::window_manager::WindowManager;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::workspace::Workspace;
+use crate::ACTIVE_WINDOW_BORDER_STYLE;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_COLOUR_MONOCLE;
 use crate::BORDER_COLOUR_SINGLE;
@@ -14,7 +15,6 @@ use crate::BORDER_COLOUR_STACK;
 use crate::BORDER_ENABLED;
 use crate::BORDER_HWND;
 use crate::BORDER_OFFSET;
-use crate::BORDER_OVERFLOW_IDENTIFIERS;
 use crate::BORDER_WIDTH;
 use crate::DATA_DIR;
 use crate::DEFAULT_CONTAINER_PADDING;
@@ -80,6 +80,17 @@ pub struct ActiveWindowBorderColours {
     pub stack: Colour,
     /// Border colour when the container is in monocle mode
     pub monocle: Colour,
+}
+
+#[derive(Default, Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub enum ActiveWindowBorderStyle {
+    #[default]
+    /// Use the system border style
+    System,
+    /// Use the Windows 11-style rounded borders
+    Rounded,
+    /// Use the Windows 10-style square borders
+    Square,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -220,7 +231,7 @@ impl From<&Monitor> for MonitorConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-/// The `komorebi.json` static configuration file reference for `v0.1.20`
+/// The `komorebi.json` static configuration file reference for `v0.1.24`
 pub struct StaticConfig {
     /// DEPRECATED from v0.1.22: no longer required
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -260,6 +271,9 @@ pub struct StaticConfig {
     /// Active window border colours for different container types
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_window_border_colours: Option<ActiveWindowBorderColours>,
+    /// Active window border style (default: System)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_window_border_style: Option<ActiveWindowBorderStyle>,
     /// Global default workspace padding (default: 10)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_workspace_padding: Option<i32>,
@@ -411,6 +425,7 @@ impl From<&WindowManager> for StaticConfig {
             border_offset: Option::from(BORDER_OFFSET.load(Ordering::SeqCst)),
             active_window_border: Option::from(BORDER_ENABLED.load(Ordering::SeqCst)),
             active_window_border_colours: border_colours,
+            active_window_border_style: Option::from(*ACTIVE_WINDOW_BORDER_STYLE.lock()),
             default_workspace_padding: Option::from(
                 DEFAULT_WORKSPACE_PADDING.load(Ordering::SeqCst),
             ),
@@ -477,11 +492,13 @@ impl StaticConfig {
             BORDER_COLOUR_MONOCLE.store(u32::from(colours.monocle), Ordering::SeqCst);
         }
 
+        let active_window_border_style = self.active_window_border_style.unwrap_or_default();
+        *ACTIVE_WINDOW_BORDER_STYLE.lock() = active_window_border_style;
+
         let mut float_identifiers = FLOAT_IDENTIFIERS.lock();
         let mut regex_identifiers = REGEX_IDENTIFIERS.lock();
         let mut manage_identifiers = MANAGE_IDENTIFIERS.lock();
         let mut tray_and_multi_window_identifiers = TRAY_AND_MULTI_WINDOW_IDENTIFIERS.lock();
-        let mut border_overflow_identifiers = BORDER_OVERFLOW_IDENTIFIERS.lock();
         let mut object_name_change_identifiers = OBJECT_NAME_CHANGE_ON_LAUNCH.lock();
         let mut layered_identifiers = LAYERED_WHITELIST.lock();
 
@@ -503,14 +520,6 @@ impl StaticConfig {
 
         if let Some(rules) = &mut self.layered_applications {
             populate_rules(rules, &mut layered_identifiers, &mut regex_identifiers)?;
-        }
-
-        if let Some(rules) = &mut self.border_overflow_applications {
-            populate_rules(
-                rules,
-                &mut border_overflow_identifiers,
-                &mut regex_identifiers,
-            )?;
         }
 
         if let Some(rules) = &mut self.tray_and_multi_window_applications {
@@ -576,13 +585,6 @@ impl StaticConfig {
                                     &mut regex_identifiers,
                                 )?;
                             }
-                            ApplicationOptions::BorderOverflow => {
-                                populate_option(
-                                    &mut entry,
-                                    &mut border_overflow_identifiers,
-                                    &mut regex_identifiers,
-                                )?;
-                            }
                             ApplicationOptions::TrayAndMultiWindow => {
                                 populate_option(
                                     &mut entry,
@@ -597,6 +599,7 @@ impl StaticConfig {
                                     &mut regex_identifiers,
                                 )?;
                             }
+                            ApplicationOptions::BorderOverflow => {} // deprecated
                         }
                     }
                 }

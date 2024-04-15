@@ -62,11 +62,14 @@ vim.keymap.set("n", "M", "m", { desc = "Mark", silent = true })
 vim.keymap.set("n", "gp", "`[v`]", { desc = "Select last pasted text", silent = true })
 
 -- 调整光标所在行到屏幕的位置
-vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
-vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
+if not utils.is_available("neoscroll.nvim") then
+    vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
+    vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
+end
 
 if environment.is_vscode then
     local vscode = require("vscode-neovim")
+
     vim.notify = vscode.notify
 
     -- 注释
@@ -115,10 +118,10 @@ if environment.is_vscode then
 
     -- 平滑滚动，防止 vscode 产生新的 jumplist
     local scroll_interval = 10
-    local scroll_lines = 20
     vim.keymap.set({ "n", "x" }, "<c-d>", function()
         vim.fn.timer_stopall()
-        for i = 1, scroll_lines do
+        local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
+        for i = 1, scroll do
             vim.fn.timer_start(i * scroll_interval, function()
                 vim.cmd("normal! j")
             end)
@@ -126,7 +129,8 @@ if environment.is_vscode then
     end, { silent = true })
     vim.keymap.set({ "n", "x" }, "<c-u>", function()
         vim.fn.timer_stopall()
-        for i = 1, scroll_lines do
+        local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
+        for i = 1, scroll do
             vim.fn.timer_start(i * scroll_interval, function()
                 vim.cmd("normal! k")
             end)
@@ -141,7 +145,7 @@ if environment.is_vscode then
 
     -- 格式化
     vim.keymap.set("n", "<leader>f", function()
-        if vim.fn.expand("%:e"):sub(1, 5) == "ipynb" then
+        if vim.startswith(vim.fn.expand("%:e"), "ipynb") then
             vscode.action("notebook.formatCell")
         else
             vscode.action("editor.action.formatDocument")
@@ -150,7 +154,7 @@ if environment.is_vscode then
 
     -- 运行
     vim.keymap.set("n", "<leader>r", function()
-        local ft = vim.bo.filetype
+        local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
         if ft == "html" or ft == "xhtml" then
             vscode.action("office.html.preview")
         elseif ft == "markdown" then
@@ -184,9 +188,9 @@ else
     vim.keymap.set("t", "<esc>", [[<c-\><c-n>]], { desc = "Enter normal mode", silent = true })
 
     if not utils.is_available("edgy.nvim") then
-        -- 聚焦左侧边栏
+        -- 聚焦 left panel
         vim.keymap.set("n", keymap["<c-1>"], function()
-            if not filetype.toggle_filetype(filetype.toggle_filetype_list_of_left) then
+            if not filetype.toggle_panel("left") then
                 if utils.is_available("neo-tree.nvim") then
                     require("neo-tree.sources.manager").close_all()
                     require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
@@ -199,7 +203,7 @@ else
         -- 聚焦主编辑区域
         vim.keymap.set("n", keymap["<c-2>"], function() filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1) end, { desc = "Focus editor", silent = true })
 
-        -- 聚焦底栏
+        -- 聚焦 bottom panel
         vim.keymap.set("n", keymap["<c-3>"], function()
             local count = vim.v.count
             if count > 0 and utils.is_available("toggleterm.nvim") then
@@ -207,16 +211,16 @@ else
                 return
             end
 
-            if not filetype.toggle_filetype(filetype.toggle_filetype_list_of_bottom) then
+            if not filetype.toggle_panel("bottom") then
                 if utils.is_available("toggleterm.nvim") then
                     vim.api.nvim_command("ToggleTerm")
                 end
             end
         end, { desc = "Focus bottom panel", silent = true })
 
-        -- 聚焦右侧边栏
+        -- 聚焦 right panel
         vim.keymap.set("n", keymap["<c-4>"], function()
-            if not filetype.toggle_filetype(filetype.toggle_filetype_list_of_right) then
+            if not filetype.toggle_panel("right") then
                 vim.api.nvim_command("DocsViewToggle")
             end
         end, { desc = "Focus right panel", silent = true })
@@ -231,36 +235,36 @@ else
     vim.keymap.set("n", "<c-j>", function() filetype.skip_filetype(filetype.skip_filetype_list_of_panel, 1) end, { desc = "Move to next window", silent = true })
     vim.keymap.set("n", "<c-k>", function() filetype.skip_filetype(filetype.skip_filetype_list_of_panel, -1) end, { desc = "Move to previous window", silent = true })
     vim.keymap.set("n", "<c-s>h", function()
-        local splitright = vim.api.nvim_get_option_value("splitright", {})
+        local splitright = vim.api.nvim_get_option_value("splitright", { scope = "local" })
 
-        vim.api.nvim_set_option_value("splitright", false, {})
+        vim.api.nvim_set_option_value("splitright", false, { scope = "local" })
         vim.cmd.wincmd("v")
 
-        vim.api.nvim_set_option_value("splitright", splitright, {})
+        vim.api.nvim_set_option_value("splitright", splitright, { scope = "local" })
     end, { desc = "Split window to left", silent = true })
     vim.keymap.set("n", "<c-s>l", function()
-        local splitright = vim.api.nvim_get_option_value("splitright", {})
+        local splitright = vim.api.nvim_get_option_value("splitright", { scope = "local" })
 
-        vim.api.nvim_set_option_value("splitright", true, {})
+        vim.api.nvim_set_option_value("splitright", true, { scope = "local" })
         vim.cmd.wincmd("v")
 
-        vim.api.nvim_set_option_value("splitright", splitright, {})
+        vim.api.nvim_set_option_value("splitright", splitright, { scope = "local" })
     end, { desc = "Split window to right", silent = true })
     vim.keymap.set("n", "<c-s>j", function()
-        local splitbelow = vim.api.nvim_get_option_value("splitbelow", {})
+        local splitbelow = vim.api.nvim_get_option_value("splitbelow", { scope = "local" })
 
-        vim.api.nvim_set_option_value("splitbelow", true, {})
+        vim.api.nvim_set_option_value("splitbelow", true, { scope = "local" })
         vim.cmd.wincmd("s")
 
-        vim.api.nvim_set_option_value("splitbelow", splitbelow, {})
+        vim.api.nvim_set_option_value("splitbelow", splitbelow, { scope = "local" })
     end, { desc = "Split window to down", silent = true })
     vim.keymap.set("n", "<c-s>k", function()
-        local splitbelow = vim.api.nvim_get_option_value("splitbelow", {})
+        local splitbelow = vim.api.nvim_get_option_value("splitbelow", { scope = "local" })
 
-        vim.api.nvim_set_option_value("splitbelow", false, {})
+        vim.api.nvim_set_option_value("splitbelow", false, { scope = "local" })
         vim.cmd.wincmd("s")
 
-        vim.api.nvim_set_option_value("splitbelow", splitbelow, {})
+        vim.api.nvim_set_option_value("splitbelow", splitbelow, { scope = "local" })
     end, { desc = "Split window to up", silent = true })
     if not utils.is_available("winshift.nvim") then
         vim.keymap.set("n", "<c-s><c-h>", function() vim.cmd.wincmd("H") end, { desc = "Move window to left", silent = true })
@@ -276,8 +280,16 @@ else
     -- tab
     vim.keymap.set("n", "<c-h>", function() vim.cmd.tabprevious() end, { desc = "Cycle previous tab", silent = true })
     vim.keymap.set("n", "<c-l>", function() vim.cmd.tabnext() end, { desc = "Cycle next tab", silent = true })
-    vim.keymap.set("n", keymap["<c-,>"], function() vim.cmd.tabmove("-") end, { desc = "Move tab left", silent = true })
-    vim.keymap.set("n", keymap["<c-.>"], function() vim.cmd.tabmove("+") end, { desc = "Move tab right", silent = true })
+    vim.keymap.set("n", keymap["<c-,>"], function()
+        if vim.fn.tabpagenr() > 1 then
+            vim.cmd.tabmove("-")
+        end
+    end, { desc = "Move tab left", silent = true })
+    vim.keymap.set("n", keymap["<c-.>"], function()
+        if vim.fn.tabpagenr() < vim.fn.tabpagenr("$") then
+            vim.cmd.tabmove("+")
+        end
+    end, { desc = "Move tab right", silent = true })
     vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
     vim.keymap.set("n", "<c-s>" .. keymap["<c-,>"], function()
         local buf = vim.api.nvim_get_current_buf()
@@ -311,12 +323,13 @@ else
     -- 运行
     vim.keymap.set("n", "<leader>r", function()
         local curr_file = vim.fn.expand("%:~:.")
-        local curr_file_without_ext = vim.fn.expand("%:.:r")
+        local output = vim.fn.expand("%:.:r")
         if environment.is_windows then
             curr_file = curr_file:gsub("\\", "/")
+            output = output:gsub("\\", "/") .. ".exe"
         end
 
-        local ft = vim.bo.filetype
+        local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
         if utils.is_available("toggleterm.nvim") then
             -- TermExec 执行时需要修改 shellslash = true，否则会输出 v:null
             local shellslash = vim.opt.shellslash:get()
@@ -325,10 +338,7 @@ else
             if ft == "cpp" then
                 -- 若在使用 vector 等库时编译的程序无法运行，可能需要在编译时添加 -static-libstdc++
                 -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
-                if environment.is_windows then
-                    curr_file_without_ext = curr_file_without_ext .. ".exe"
-                end
-                vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"']], curr_file, curr_file_without_ext, curr_file_without_ext, curr_file_without_ext))
+                vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"']], curr_file, output, output, output))
             elseif ft == "lua" then
                 vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
             elseif ft == "markdown" then
@@ -350,22 +360,19 @@ else
             vim.opt.shellslash = shellslash
         else
             if ft == "cpp" then
-                if environment.is_windows then
-                    curr_file_without_ext = curr_file_without_ext .. ".exe"
-                end
-                vim.api.nvim_command(([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]]):format(curr_file, curr_file_without_ext, curr_file_without_ext, curr_file_without_ext))
+                vim.api.nvim_command(string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output))
             elseif ft == "lua" then
-                vim.api.nvim_command("luafile %")
+                vim.api.nvim_command(string.format("luafile %s", curr_file))
             elseif ft == "markdown" then
                 if utils.is_available("markdown-preview.nvim") then
                     vim.api.nvim_command("MarkdownPreviewToggle")
                 end
             elseif ft == "python" then
-                vim.api.nvim_command("python -u %")
+                vim.api.nvim_command(string.format("python -u %s", curr_file))
             elseif ft == "rust" then
                 vim.api.nvim_command("cargo run")
             elseif ft == "sh" then
-                vim.api.nvim_command("bash %")
+                vim.api.nvim_command(string.format("bash %s", curr_file))
             elseif ft == "tex" then
                 if vim.tbl_contains(lsp.lsp_list, "texlab") then
                     vim.api.nvim_command("TexlabBuild")

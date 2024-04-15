@@ -4,7 +4,7 @@ local path = require("utils.path")
 return {
     -- NOTE: leetcode.nvim 使用 curl 来 post 数据，需要安装 curl
     -- msys2 默认的 curl 对于 windows 存在一定的问题，比如在 powershell 中，-d 中的文件内容需要用单引号包裹，而在 zsh 中不需要
-    -- 最好选择安装 mingw-w64-ucrt-x86_64-curl，并记得将环境变量中 msys64/ucrt64/bin 放在 msys64/usr/bin/curl 之上
+    -- 最好选择安装 mingw-w64-ucrt-x86_64-curl，并记得将环境变量中 msys64/ucrt64/bin 放在 msys64/usr/bin 之上
     {
         "kawre/leetcode.nvim",
         build = ":TSUpdate html",

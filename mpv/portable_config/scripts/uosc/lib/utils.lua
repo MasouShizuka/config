@@ -14,9 +14,9 @@ do
 	-- in windows system, we can use the sorting function provided by the win32 API
 	-- see https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-strcmplogicalw
 	-- this function was taken from https://github.com/mpvnet-player/mpv.net/issues/575#issuecomment-1817413401
-	local winapi = {}
+	local winapi = nil
 
-	if state.platform == 'windows' then
+	if state.platform == 'windows' and config.refine.sorting then
 		-- is_ffi_loaded is false usually means the mpv builds without luajit
 		local is_ffi_loaded, ffi = pcall(require, 'ffi')
 
@@ -29,7 +29,7 @@ do
 			}
 
 			-- ffi code from https://github.com/po5/thumbfast, Mozilla Public License Version 2.0
-			ffi.cdef[[
+			ffi.cdef [[
 				int __stdcall MultiByteToWideChar(unsigned int CodePage, unsigned long dwFlags, const char *lpMultiByteStr,
 				int cbMultiByte, wchar_t *lpWideCharStr, int cchWideChar);
 				int __stdcall StrCmpLogicalW(wchar_t *psz1, wchar_t *psz2);

@@ -27,7 +27,7 @@
 //!HOOK CHROMA
 //!HOOK RGB
 //!BIND HOOKED
-//!DESC hdeband
+//!DESC [hdeband]
 
 // User variables
 

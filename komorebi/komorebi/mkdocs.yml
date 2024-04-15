@@ -53,6 +53,7 @@ nav:
   - Common workflows:
     - common-workflows/komorebi-config-home.md
     - common-workflows/active-window-border.md
+    - common-workflows/stackbar.md
     - common-workflows/remove-gaps.md
     - common-workflows/ignore-windows.md
     - common-workflows/force-manage-windows.md
@@ -181,7 +182,6 @@ nav:
     - cli/identify-layered-application.md
     - cli/remove-title-bar.md
     - cli/toggle-title-bars.md
-    - cli/identify-border-overflow-application.md
     - cli/active-window-border.md
     - cli/active-window-border-colour.md
     - cli/active-window-border-width.md

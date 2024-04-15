@@ -109,8 +109,8 @@ return {
             -- Table with textobject id as fields, textobject specification as values.
             -- Also use this to disable builtin textobjects. See |MiniAi.config|.
             custom_textobjects = {
-                [","] = { "<().-()>" },
-                ["."] = { "<().-()>" },
+                [","] = { "%b<>", "^.%s*().-()%s*.$" },
+                ["."] = { "%b<>", "^.().*().$" },
                 e = function(ai_type)
                     local n_lines = vim.fn.line("$")
                     local start_line, end_line = 1, n_lines
@@ -380,40 +380,340 @@ return {
                     },
                 })
             end
+
+            vim.g.comment_box_config = {
+                -- type of comments:
+                --   - "line":  comment-box will always use line style comments
+                --   - "block": comment-box will always use block style comments
+                --   - "auto":  comment-box will use block line style comments if
+                --              multiple lines are selected, line style comments
+                --              otherwise
+                comment_style = "line",
+                doc_width = 80, -- width of the document
+                box_width = 60, -- width of the boxes
+                borders = {     -- symbols used to draw a box
+                    top = "─",
+                    bottom = "─",
+                    left = "│",
+                    right = "│",
+                    top_left = "╭",
+                    top_right = "╮",
+                    bottom_left = "╰",
+                    bottom_right = "╯",
+                },
+                line_width = 60, -- width of the lines
+                lines = {        -- symbols used to draw a line
+                    line = "─",
+                    line_start = "─",
+                    line_end = "─",
+                    title_left = "─",
+                    title_right = "─",
+                },
+                outer_blank_lines_above = false, -- insert a blank line above the box
+                outer_blank_lines_below = false, -- insert a blank line below the box
+                inner_blank_lines = false,       -- insert a blank line above and below the text
+                line_blank_line_above = false,   -- insert a blank line above the line
+                line_blank_line_below = false,   -- insert a blank line below the line
+            }
         end,
         keys = {
-            { "<leader>gcbll", function() require("comment-box").llbox() end,  desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
-            { "<leader>gcblc", function() require("comment-box").lcbox() end,  desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
-            { "<leader>gcblr", function() require("comment-box").lrbox() end,  desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
-            { "<leader>gcbcl", function() require("comment-box").clbox() end,  desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
-            { "<leader>gcbcc", function() require("comment-box").ccbox() end,  desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
-            { "<leader>gcbcr", function() require("comment-box").crbox() end,  desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
-            { "<leader>gcbrl", function() require("comment-box").rlbox() end,  desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
-            { "<leader>gcbrc", function() require("comment-box").rcbox() end,  desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
-            { "<leader>gcbrr", function() require("comment-box").rrbox() end,  desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
-            { "<leader>gcbla", function() require("comment-box").labox() end,  desc = "Left aligned adapted box",                                mode = { "n", "x" } },
-            { "<leader>gcbca", function() require("comment-box").cabox() end,  desc = "Centered adapted box",                                    mode = { "n", "x" } },
-            { "<leader>gcbra", function() require("comment-box").rabox() end,  desc = "Right aligned adapted box",                               mode = { "n", "x" } },
-            { "<leader>gctll", function() require("comment-box").llline() end, desc = "Left aligned titled line with Left aligned text",         mode = { "n", "x" } },
-            { "<leader>gctlc", function() require("comment-box").lcline() end, desc = "Left aligned titled line with Centered text",             mode = { "n", "x" } },
-            { "<leader>gctlr", function() require("comment-box").lrline() end, desc = "Left aligned titled line with Right aligned text",        mode = { "n", "x" } },
-            { "<leader>gctcl", function() require("comment-box").clline() end, desc = "Centered titled line with Left aligned text",             mode = { "n", "x" } },
-            { "<leader>gctcc", function() require("comment-box").ccline() end, desc = "Centered titled line with Centered text",                 mode = { "n", "x" } },
-            { "<leader>gctcr", function() require("comment-box").crline() end, desc = "Centered titled line with Right aligned text",            mode = { "n", "x" } },
-            { "<leader>gctrl", function() require("comment-box").rlline() end, desc = "Right aligned titled line with Left aligned text",        mode = { "n", "x" } },
-            { "<leader>gctrc", function() require("comment-box").rcline() end, desc = "Right aligned titled line with Centered text",            mode = { "n", "x" } },
-            { "<leader>gctrr", function() require("comment-box").rrline() end, desc = "Right aligned titled line with Right aligned text",       mode = { "n", "x" } },
-            { "<leader>gcd",   function() require("comment-box").dbox() end,   desc = "Remove a box or titled line, keeping its content",        mode = { "n", "x" } },
-            { "<leader>gcy",   function() require("comment-box").yank() end,   desc = "Yank the content of a box or titled line",                mode = { "n", "x" } },
-            { "<leader>gcll",  function() require("comment-box").line() end,   desc = "Left aligned line",                                       mode = { "n", "x" } },
-            { "<leader>gclc",  function() require("comment-box").cline() end,  desc = "Centered line",                                           mode = { "n", "x" } },
-            { "<leader>gclr",  function() require("comment-box").rline() end,  desc = "Right aligned line",                                      mode = { "n", "x" } },
+            { "<leader>gcbll", function() require("comment-box").llbox() end, desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
+            { "<leader>gcblc", function() require("comment-box").lcbox() end, desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
+            { "<leader>gcblr", function() require("comment-box").lrbox() end, desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
+            { "<leader>gcbcl", function() require("comment-box").clbox() end, desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
+            { "<leader>gcbcc", function() require("comment-box").ccbox() end, desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
+            { "<leader>gcbcr", function() require("comment-box").crbox() end, desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
+            { "<leader>gcbrl", function() require("comment-box").rlbox() end, desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
+            { "<leader>gcbrc", function() require("comment-box").rcbox() end, desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
+            { "<leader>gcbrr", function() require("comment-box").rrbox() end, desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
+            {
+                "<leader>gcbla",
+                function()
+                    -- NOTE: 修改 left aligned adapted box，使之保留 indent 且不会在 box_width 处换行
+                    -- 若 comment-box 支持以上功能，则重新使用 labox
+                    -- require("comment-box").labox()
+
+                    local config = vim.g.comment_box_config
+                    local padding_str = " "
+                    local padding_length = 1
+
+                    local comment_box_utils = require("comment-box.utils")
+                    local line_start_pos, line_end_pos = comment_box_utils.get_range()
+                    local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+                    local comment_string_l, comment_string_b_start, comment_string_b_end = comment_box_utils.get_comment_string(ft)
+
+                    local indent_before_comment
+                    local indent_after_comment
+                    local function remove_cs(comment_string, line, start)
+                        -- 跳过空行
+                        if line:match("^%s*$") then
+                            return line
+                        end
+
+                        -- 计算注释前的 indent
+                        local line_indent_before_comment = #line:gsub("^(%s*).-%s*$", "%1")
+                        if indent_before_comment == nil or line_indent_before_comment < indent_before_comment then
+                            indent_before_comment = line_indent_before_comment
+                        end
+
+                        -- 去除 trailspace
+                        line = line:gsub("^(%s*.-)%s*$", "%1")
+
+                        if comment_string ~= "" then
+                            local comment_string_length = vim.fn.strdisplaywidth(comment_string)
+                            if start then
+                                if line:sub(line_indent_before_comment + 1, line_indent_before_comment + comment_string_length) == comment_string then
+                                    line = line:gsub(vim.pesc(comment_string), "", 1) -- remove comment string
+
+                                    -- 跳过空行
+                                    if line:match("^%s*$") then
+                                        return line
+                                    end
+
+                                    -- 计算注释后的 indent
+                                    local line_indent_after_comment = #line:sub(line_indent_before_comment + 1):gsub("^(%s*).-$", "%1")
+                                    if indent_after_comment == nil or line_indent_after_comment < indent_after_comment then
+                                        indent_after_comment = line_indent_after_comment
+                                    end
+                                end
+                            else
+                                local line_length = vim.fn.strdisplaywidth(line)
+                                if line:sub(line_length - comment_string_length + 1) == comment_string then
+                                    line = line:gsub(vim.pesc(comment_string) .. "%s*$", "")
+                                end
+                            end
+                        end
+
+                        return line
+                    end
+
+                    local function skip_cs(line, comment_string_l, comment_string_b_start, comment_string_b_end)
+                        -- Order is important: block comment strings are always longer
+                        line = remove_cs(comment_string_b_start, line, true)
+                        line = remove_cs(comment_string_l, line, true)
+                        line = remove_cs(comment_string_b_end, line, false)
+
+                        return line
+                    end
+
+                    local final_width = 0
+                    local function format_lines(text)
+                        local comment_string = ""
+                        if comment_string_l ~= "" then
+                            comment_string = comment_string_l
+                        elseif comment_string_b_start ~= "" then
+                            comment_string = comment_string_b_start
+                        end
+
+                        for pos, str in ipairs(text) do
+                            if comment_string ~= "" then
+                                table.remove(text, pos)
+
+                                str = skip_cs(
+                                    str,
+                                    comment_string_l,
+                                    comment_string_b_start,
+                                    comment_string_b_end
+                                )
+
+                                table.insert(text, pos, str)
+                            end
+
+                            local str_width = vim.fn.strdisplaywidth(str)
+                            if str_width == nil then
+                                str_width = 0
+                            end
+
+                            -- 去除 box_width 的限制
+                            if str_width > final_width then
+                                final_width = str_width
+                            end
+                        end
+
+                        return text
+                    end
+
+                    local function get_formated_text()
+                        local text = vim.api.nvim_buf_get_lines(0, line_start_pos - 1, line_end_pos, false)
+                        return format_lines(text)
+                    end
+
+                    local function create_box()
+                        local text = get_formated_text()
+
+                        local comment_string_int_row
+                        local comment_style = config.comment_style
+                        -- If the language has no single line comment:
+                        if comment_string_l == "" and comment_string_b_start ~= "" then
+                            comment_style = "block"
+                        end
+                        -- If the language has no block comment:
+                        if comment_string_b_start == "" and comment_string_l ~= "" then
+                            comment_style = "line"
+                        end
+
+                        if comment_style == "line" and comment_string_l ~= "" then
+                            comment_string_int_row = comment_string_l
+                        else
+                            local cs_len = vim.fn.strdisplaywidth(comment_string_b_start)
+                            if cs_len > 1 then
+                                comment_string_int_row = " " .. comment_string_b_start:sub(2, 2)
+                                if cs_len > 2 then
+                                    comment_string_int_row = comment_string_int_row .. string.rep(" ", cs_len - 2)
+                                end
+                            end
+                        end
+                        if not comment_string_int_row then
+                            comment_string_int_row = ""
+                        end
+
+                        -- ╓                                                       ╖
+                        -- ║ Deal with the two ways to declare transparent borders ║
+                        -- ╙                                                       ╜
+
+                        -- 添加 indent
+                        indent_before_comment = indent_before_comment or 0
+                        indent_after_comment = indent_after_comment or 0
+                        local indent = indent_before_comment + indent_after_comment
+
+                        final_width = final_width + 2 * padding_length - indent
+
+                        local ext_top_row = string.format(
+                            "%s%s%s%s%s%s",
+                            string.rep(padding_str, indent_before_comment),
+                            comment_string_int_row,
+                            padding_str,
+                            config.borders.top_left,
+                            string.rep(config.borders.top, final_width),
+                            config.borders.top_right
+                        )
+
+                        local ext_bottom_row = string.format(
+                            "%s%s%s%s%s%s",
+                            string.rep(padding_str, indent_before_comment),
+                            comment_string_int_row,
+                            padding_str,
+                            config.borders.bottom_left,
+                            string.rep(config.borders.bottom, final_width),
+                            config.borders.bottom_right
+                        )
+
+                        local inner_blank_line = string.format(
+                            "%s%s%s%s%s%s",
+                            string.rep(padding_str, indent_before_comment),
+                            comment_string_int_row,
+                            padding_str,
+                            config.borders.left,
+                            string.rep(padding_str, final_width),
+                            config.borders.right
+                        )
+
+                        local lines = {}
+
+                        if config.outer_blank_lines_above then
+                            table.insert(lines, "")
+                        end
+
+                        if comment_style == "block" or (comment_style == "auto") then
+                            table.insert(lines, string.rep(padding_str, indent_before_comment) .. comment_string_b_start)
+                        end
+
+                        table.insert(lines, ext_top_row)
+
+                        if config.inner_blank_lines then
+                            table.insert(lines, inner_blank_line)
+                        end
+
+                        -- ╓                        ╖
+                        -- ║ If text left justified ║
+                        -- ╙                        ╜
+
+                        for _, line in pairs(text) do
+                            line = line:sub(indent + 1)
+                            local right_padding_length = final_width - vim.fn.strdisplaywidth(line) - padding_length
+
+                            local int_row = string.format(
+                                "%s%s%s%s%s%s%s%s",
+                                string.rep(padding_str, indent_before_comment),
+                                comment_string_int_row,
+                                padding_str,
+                                config.borders.left,
+                                string.rep(padding_str, padding_length),
+                                line,
+                                string.rep(padding_str, right_padding_length),
+                                config.borders.right
+                            )
+
+                            table.insert(lines, int_row)
+                        end
+
+                        if config.inner_blank_lines then
+                            table.insert(lines, inner_blank_line)
+                        end
+
+                        table.insert(lines, ext_bottom_row)
+
+                        if comment_style == "block" or (comment_style == "auto") then
+                            table.insert(lines, string.rep(padding_str, indent_before_comment) .. comment_string_b_end)
+                        end
+
+                        if config.outer_blank_lines_below then
+                            table.insert(lines, "")
+                        end
+
+                        return lines
+                    end
+
+                    vim.api.nvim_buf_set_lines(
+                        0,
+                        line_start_pos - 1,
+                        line_end_pos,
+                        false,
+                        create_box()
+                    )
+
+                    local function set_cur_pos(end_pos)
+                        local cur_pos = end_pos + 2
+
+                        if config.inner_blank_lines then
+                            cur_pos = cur_pos + 2
+                        end
+                        if config.outer_blank_lines_above then
+                            cur_pos = cur_pos + 1
+                        end
+                        if config.outer_blank_lines_below then
+                            cur_pos = cur_pos + 1
+                        end
+
+                        return cur_pos
+                    end
+
+                    -- Move the cursor to match the result
+                    vim.api.nvim_win_set_cursor(0, { set_cur_pos(line_end_pos), 0 })
+                end,
+                desc = "Left aligned adapted box",
+                mode = { "n", "x" },
+            },
+            { "<leader>gcbca", function() require("comment-box").cabox() end,  desc = "Centered adapted box",                              mode = { "n", "x" } },
+            { "<leader>gcbra", function() require("comment-box").rabox() end,  desc = "Right aligned adapted box",                         mode = { "n", "x" } },
+            { "<leader>gctll", function() require("comment-box").llline() end, desc = "Left aligned titled line with Left aligned text",   mode = { "n", "x" } },
+            { "<leader>gctlc", function() require("comment-box").lcline() end, desc = "Left aligned titled line with Centered text",       mode = { "n", "x" } },
+            { "<leader>gctlr", function() require("comment-box").lrline() end, desc = "Left aligned titled line with Right aligned text",  mode = { "n", "x" } },
+            { "<leader>gctcl", function() require("comment-box").clline() end, desc = "Centered titled line with Left aligned text",       mode = { "n", "x" } },
+            { "<leader>gctcc", function() require("comment-box").ccline() end, desc = "Centered titled line with Centered text",           mode = { "n", "x" } },
+            { "<leader>gctcr", function() require("comment-box").crline() end, desc = "Centered titled line with Right aligned text",      mode = { "n", "x" } },
+            { "<leader>gctrl", function() require("comment-box").rlline() end, desc = "Right aligned titled line with Left aligned text",  mode = { "n", "x" } },
+            { "<leader>gctrc", function() require("comment-box").rcline() end, desc = "Right aligned titled line with Centered text",      mode = { "n", "x" } },
+            { "<leader>gctrr", function() require("comment-box").rrline() end, desc = "Right aligned titled line with Right aligned text", mode = { "n", "x" } },
+            { "<leader>gcd",   function() require("comment-box").dbox() end,   desc = "Remove a box or titled line, keeping its content",  mode = { "n", "x" } },
+            { "<leader>gcy",   function() require("comment-box").yank() end,   desc = "Yank the content of a box or titled line",          mode = { "n", "x" } },
+            { "<leader>gcll",  function() require("comment-box").line() end,   desc = "Left aligned line",                                 mode = { "n", "x" } },
+            { "<leader>gclc",  function() require("comment-box").cline() end,  desc = "Centered line",                                     mode = { "n", "x" } },
+            { "<leader>gclr",  function() require("comment-box").rline() end,  desc = "Right aligned line",                                mode = { "n", "x" } },
         },
-        opts = {
-            doc_width = 80,  -- width of the document
-            box_width = 60,  -- width of the boxes
-            line_width = 60, -- width of the lines
-        },
+        opts = function()
+            return vim.g.comment_box_config
+        end,
     },
 
     {
@@ -584,10 +884,11 @@ return {
                 local F = require("Comment.ft")
                 local U = require("Comment.utils")
 
-                local cstr = F.get(vim.bo.filetype, ctx.ctype)
+                local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+                local cstr = F.get(ft, ctx.ctype)
                 local lcs, rcs = U.unwrap_cstr(cstr)
-                lcs = utils.escape(lcs)
-                rcs = utils.escape(rcs)
+                lcs = vim.pesc(lcs)
+                rcs = vim.pesc(rcs)
                 local padding = U.get_pad(C:get().padding)
 
                 local lines = vim.api.nvim_buf_get_lines(0, ctx.range.srow - 1, ctx.range.erow, false)
@@ -690,8 +991,8 @@ return {
                 vim.g.autosave_enabled = true
             end
 
-            vim.keymap.set("n", "<leader>cta", function() utils.toggle_global_setting("autosave_enabled", function(global_enabled, prev_enabled, enabled) end) end, { desc = "Toggle autoSave", silent = true })
-            vim.keymap.set("n", "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(prev_enabled, enabled) end) end, { desc = "Toggle autoSave (buffer)", silent = true })
+            vim.keymap.set("n", "<leader>cta", function() utils.toggle_global_setting("autosave_enabled", function(enabled, prev_enabled, global_enabled) end) end, { desc = "Toggle autoSave", silent = true })
+            vim.keymap.set("n", "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(enabled, prev_enabled) end) end, { desc = "Toggle autoSave (buffer)", silent = true })
         end,
         enabled = not environment.is_vscode,
         init = function()
@@ -733,11 +1034,7 @@ return {
                     return false
                 end
 
-                if vim.b[buf].autosave_enabled ~= nil then
-                    return vim.b[buf].autosave_enabled
-                else
-                    return vim.g.autosave_enabled
-                end
+                return vim.b[buf].autosave_enabled == nil and vim.g.autosave_enabled or vim.b[buf].autosave_enabled
             end,
             debounce_delay = 1, -- delay after which a pending save is executed
         },

@@ -1,19 +1,13 @@
 local environment = require("utils.environment")
 
-local M = {
-    ["<c-1>"] = "<c-1>",
-    ["<c-2>"] = "<c-2>",
-    ["<c-3>"] = "<c-3>",
-    ["<c-4>"] = "<c-4>",
-    ["<c-space>"] = "<c-space>",
-    ["<c-,>"] = "<c-,>",
-    ["<c-.>"] = "<c-.>",
-    ["<c-;>"] = "<c-;>",
-    ["<c-s-n>"] = "<c-s-n>",
-    ["<c-s-t>"] = "<c-s-t>",
+local M = {}
+
+local remapped_terminal_emulators = {
+    "WezTerm",
+    "WindowsTerminal",
 }
 
-if vim.env.TERM_PROGRAM == "WezTerm" then
+if vim.tbl_contains(remapped_terminal_emulators, vim.env.TERM_PROGRAM) then
     if environment.is_wsl then
         M = {
             ["<c-1>"] = "<f25>",
@@ -41,6 +35,19 @@ if vim.env.TERM_PROGRAM == "WezTerm" then
             ["<c-s-t>"] = "<c-f10>",
         }
     end
+else
+    M = {
+        ["<c-1>"] = "<c-1>",
+        ["<c-2>"] = "<c-2>",
+        ["<c-3>"] = "<c-3>",
+        ["<c-4>"] = "<c-4>",
+        ["<c-space>"] = "<c-space>",
+        ["<c-,>"] = "<c-,>",
+        ["<c-.>"] = "<c-.>",
+        ["<c-;>"] = "<c-;>",
+        ["<c-s-n>"] = "<c-s-n>",
+        ["<c-s-t>"] = "<c-s-t>",
+    }
 end
 
 return M

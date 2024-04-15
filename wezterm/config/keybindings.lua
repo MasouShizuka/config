@@ -20,8 +20,7 @@ local function set_shell_panes(shell_panes)
 end
 
 local function get_shell_pane_command(pane_id)
-    local shell_panes = get_shell_panes()
-    return shell_panes[tostring(pane_id)]
+    return get_shell_panes()[tostring(pane_id)]
 end
 
 local function add_shell_pane(pane_id, command)
@@ -36,8 +35,9 @@ local function add_shell_pane(pane_id, command)
 end
 
 
+-- 指定 spawn shell in new tab 命令创建的 tab 的 shell，并记录该 tab 创建的 pane 的 shell
 local function create_spawn_shell_in_new_tab_event(shell, command)
-    local event_name = ("spawn_%s_in_new_tab"):format(shell)
+    local event_name = string.format("spawn_%s_in_new_tab", shell)
     wezterm.on(event_name, function(window, pane)
         window:perform_action(act.SpawnCommandInNewTab(command), pane)
         add_shell_pane(window:active_pane():pane_id(), command)
@@ -46,17 +46,18 @@ local function create_spawn_shell_in_new_tab_event(shell, command)
     return event_name
 end
 
-local spawn_shell_in_new_tab_event_names = {}
+local spawn_shell_in_new_tab_events = {}
 for shell, command in pairs(shells) do
     local event_name = create_spawn_shell_in_new_tab_event(shell, command)
-    spawn_shell_in_new_tab_event_names[shell] = event_name
+    spawn_shell_in_new_tab_events[shell] = event_name
 end
 
 
+-- 令 split pane 命令创建与当前 shell 相同的 pane
 local function create_split_pane_event(direction)
     direction = direction or "Right"
 
-    local event_name = ("split_pane_%s"):format(direction:lower())
+    local event_name = string.format("split_pane_%s", direction:lower())
     wezterm.on(event_name, function(window, pane)
         local command = get_shell_pane_command(pane:pane_id())
         if command and command.args then
@@ -96,8 +97,8 @@ return {
 
         { key = "Grave",      mods = "CTRL|SHIFT",     action = act.ShowLauncher },
         { key = "phys:1",     mods = "CTRL|SHIFT",     action = act.SpawnCommandInNewTab(zsh) },
-        { key = "phys:2",     mods = "CTRL|SHIFT",     action = act.EmitEvent(spawn_shell_in_new_tab_event_names["powershell"]) },
-        { key = "phys:3",     mods = "CTRL|SHIFT",     action = act.EmitEvent(spawn_shell_in_new_tab_event_names["arch"]) },
+        { key = "phys:2",     mods = "CTRL|SHIFT",     action = act.EmitEvent(spawn_shell_in_new_tab_events["powershell"]) },
+        { key = "phys:3",     mods = "CTRL|SHIFT",     action = act.EmitEvent(spawn_shell_in_new_tab_events["arch"]) },
 
         -- { key = "Tab",        mods = "CTRL",           action = act.ActivateTabRelative(1) },
         -- { key = "Tab",        mods = "SHIFT|CTRL",     action = act.ActivateTabRelative(-1) },

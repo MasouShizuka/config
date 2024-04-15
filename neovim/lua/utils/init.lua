@@ -4,12 +4,6 @@ function M.bool2str(bool)
     return bool and "On" or "Off"
 end
 
-function M.clear(a)
-    for key, _ in pairs(a) do
-        a[key] = nil
-    end
-end
-
 --- Run a shell command and capture the output and if the command succeeded or failed
 ---@param cmd string|string[] The terminal command to execute
 ---@param show_error? boolean Whether or not to show an unsuccessful command as an error to the user
@@ -40,21 +34,49 @@ function M.defer(fn, timeout, timer)
     end
 end
 
-function M.escape(s)
-    return s:gsub("[%-%.%+%[%]%(%)%$%^%%%?%*]", "%%%1")
+function M.defer_buf(buf, fn, timeout, timer, desc)
+    buf = buf or vim.api.nvim_get_current_buf()
+    desc = desc or ""
+
+    local function create_buf_autocmd()
+        local augroup = string.format("Buf%s%s", buf, desc)
+        vim.api.nvim_create_autocmd("BufEnter", {
+            buffer = buf,
+            callback = function()
+                M.defer(fn, timeout, timer)
+                vim.api.nvim_del_augroup_by_name(augroup)
+            end,
+            group = vim.api.nvim_create_augroup(augroup, { clear = true }),
+        })
+    end
+
+    if buf ~= vim.api.nvim_get_current_buf() then
+        create_buf_autocmd()
+        return
+    end
+
+    M.defer(function()
+        if buf == vim.api.nvim_get_current_buf() then
+            fn()
+        else
+            create_buf_autocmd()
+        end
+    end, timeout, timer)
 end
 
 --- Trigger an AstroNvim user event
----@param event string The event name to be appended to Astro
----@param delay? boolean Whether or not to delay the event asynchronously (Default: true)
-function M.event(event, delay)
-    local emit_event = function()
-        vim.api.nvim_exec_autocmds("User", { pattern = event, modeline = false })
+---@param event string|vim.api.keyset_exec_autocmds The event pattern or full autocmd options (pattern always prepended with "Astro")
+---@param instant boolean? Whether or not to execute instantly or schedule
+function M.event(event, instant)
+    if type(event) == "string" then
+        event = { pattern = event }
     end
-    if delay == false then
-        emit_event()
+    event = vim.tbl_deep_extend("force", { modeline = false }, event)
+
+    if instant then
+        vim.api.nvim_exec_autocmds("User", event)
     else
-        vim.schedule(emit_event)
+        vim.schedule(function() vim.api.nvim_exec_autocmds("User", event) end)
     end
 end
 
@@ -66,13 +88,13 @@ end
 
 function M.get_char_from_string(str)
     local char_list = {}
-    local char_count = 0
 
     local len_in_byte = #str
     local i = 1
     while (i <= len_in_byte) do
-        local cur_byte = str:byte(i)
         local byte_count = 1;
+
+        local cur_byte = str:byte(i)
         if cur_byte > 0 and cur_byte <= 127 then
             byte_count = 1
         elseif cur_byte >= 192 and cur_byte < 223 then
@@ -87,15 +109,9 @@ function M.get_char_from_string(str)
         char_list[#char_list + 1] = char
 
         i = i + byte_count
-        char_count = char_count + 1
     end
 
-    return char_count, char_list
-end
-
-function M.get_highlight(name, key)
-    local hl = vim.api.nvim_get_hl(0, { name = name })
-    return string.format("#%06x", hl[key])
+    return char_list
 end
 
 --- Check if a plugin is defined in lazy. Useful with lazy loading when a plugin is not necessarily loaded yet
@@ -150,17 +166,19 @@ function M.json_save(file, data)
     io.close(f)
 
     -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
-    -- local fd = vim.uv.fs_open(file, "w", 438)
-    -- if fd == nil then
-    --     return
-    -- end
-    --
-    -- local ok, json = pcall(vim.json.encode, data)
-    -- if ok then
-    --     vim.uv.fs_write(fd, json, -1)
-    -- end
-    --
-    -- vim.uv.fs_close(fd)
+    -- ╭───────────────────────────────────────────────╮
+    -- │ local fd = vim.uv.fs_open(file, "w", 438)     │
+    -- │ if fd == nil then                             │
+    -- │     return                                    │
+    -- │ end                                           │
+    -- │                                               │
+    -- │ local ok, json = pcall(vim.json.encode, data) │
+    -- │ if ok then                                    │
+    -- │     vim.uv.fs_write(fd, json, -1)             │
+    -- │ end                                           │
+    -- │                                               │
+    -- │ vim.uv.fs_close(fd)                           │
+    -- ╰───────────────────────────────────────────────╯
 end
 
 function M.json_load(file)
@@ -177,14 +195,16 @@ function M.json_load(file)
     io.close(f)
 
     -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
-    -- local fd = vim.uv.fs_open(file, "r", 438)
-    -- if fd == nil then
-    --     return {}
-    -- end
-    --
-    -- local stat = vim.uv.fs_fstat(fd)
-    -- local json = vim.uv.fs_read(fd, stat.size, 0)
-    -- vim.uv.fs_close(fd)
+    -- ╭───────────────────────────────────────────────╮
+    -- │ local fd = vim.uv.fs_open(file, "r", 438)     │
+    -- │ if fd == nil then                             │
+    -- │     return {}                                 │
+    -- │ end                                           │
+    -- │                                               │
+    -- │ local stat = vim.uv.fs_fstat(fd)              │
+    -- │ local json = vim.uv.fs_read(fd, stat.size, 0) │
+    -- │ vim.uv.fs_close(fd)                           │
+    -- ╰───────────────────────────────────────────────╯
 
     local ok, data = pcall(vim.json.decode, json)
     if not ok then
@@ -195,52 +215,94 @@ function M.json_load(file)
 end
 
 function M.refresh_buf(buf, timeout, timer)
-    buf = buf or vim.api.nvim_get_current_buf()
-
-    local function create_refresh_buf_autocmd()
-        local augroup = string.format("Buf%sRefresh", buf)
-        vim.api.nvim_create_autocmd("BufEnter", {
-            buffer = buf,
-            callback = function()
-                M.defer(function() vim.cmd.edit() end, timeout, timer)
-                vim.api.nvim_del_augroup_by_name(augroup)
-            end,
-            group = vim.api.nvim_create_augroup(augroup, { clear = true }),
-        })
-    end
-
-    if buf ~= vim.api.nvim_get_current_buf() then
-        create_refresh_buf_autocmd()
-        return
-    end
-
-    M.defer(function()
-        if buf == vim.api.nvim_get_current_buf() then
-            vim.cmd.edit()
-        else
-            create_refresh_buf_autocmd()
-        end
-    end, timeout, timer)
+    M.defer_buf(buf, function() vim.cmd.edit() end, timeout, timer, "Refresh")
 end
 
 --- Open a URL under the cursor with the current operating system
 ---@param path string The path of the file to open with the system opener
 function M.system_open(path)
+    if not path then
+        path = vim.fn.expand("<cfile>")
+    elseif not path:match("%w+:") then
+        path = vim.fn.expand(path)
+    end
+
     local cmd
-    if vim.fn.has("win32") == 1 and vim.fn.executable("explorer") == 1 then
+    if vim.fn.has("mac") == 1 then
+        cmd = { "open" }
+    elseif vim.fn.has("win32") == 1 then
+        -- if vim.fn.executable("rundll32") then
+        --     cmd = { "rundll32", "url.dll,FileProtocolHandler" }
+        -- else
+        --     cmd = { "cmd.exe", "/K", "explorer" }
+        -- end
         os.execute("start " .. path)
         return
-    elseif vim.fn.has("unix") == 1 and vim.fn.executable("xdg-open") == 1 then
-        cmd = { "xdg-open" }
-    elseif (vim.fn.has("mac") == 1 or vim.fn.has("unix") == 1) and vim.fn.executable("open") == 1 then
-        cmd = { "open" }
+    elseif vim.fn.has("unix") == 1 then
+        if vim.fn.executable("explorer.exe") == 1 then
+            cmd = { "explorer.exe" }
+        elseif vim.fn.executable("xdg-open") == 1 then
+            cmd = { "xdg-open" }
+        end
     end
     if not cmd then
         vim.notify("Available system opening tool not found!", vim.log.levels.ERROR)
         return
     end
 
-    vim.fn.jobstart(vim.fn.extend(cmd, { path or vim.fn.expand("<cfile>") }), { detach = true })
+    vim.fn.jobstart(vim.list_extend(cmd, { path }), { detach = true })
+end
+
+function M.table_clear(a)
+    for key, _ in pairs(a) do
+        a[key] = nil
+    end
+end
+
+function M.table_concat(a, b)
+    local new = {}
+    vim.list_extend(new, a)
+    vim.list_extend(new, b)
+    return new
+end
+
+function M.toggle_local_option(option, option_list, callback, silent)
+    silent = silent or false
+
+    local enabled = vim.api.nvim_get_option_value(option, { scope = "local" })
+    local prev_enabled = enabled
+
+    if option_list == nil or #option_list == 0 then
+        enabled = not enabled
+    else
+        local prev_index = 1
+        for index, value in ipairs(option_list) do
+            if value == prev_enabled then
+                prev_index = index
+                break
+            end
+        end
+
+        local index = prev_index + 1
+        if index > #option_list then
+            index = 1
+        end
+
+        enabled = option_list[index]
+    end
+    vim.api.nvim_set_option_value(option, enabled, { scope = "local" })
+
+    if type(callback) == "function" then
+        callback(enabled, prev_enabled)
+    end
+
+    if not silent then
+        local status = enabled
+        if option_list == nil then
+            status = M.bool2str(enabled)
+        end
+        vim.notify(string.format("%s: %s", option, status), vim.log.levels.INFO, { title = "Local Option" })
+    end
 end
 
 function M.toggle_buffer_setting(setting, callback, silent)
@@ -258,7 +320,9 @@ function M.toggle_buffer_setting(setting, callback, silent)
     vim.b[buf][setting] = buffer_enabled
     local enabled = buffer_enabled
 
-    callback(prev_enabled, enabled)
+    if type(callback) == "function" then
+        callback(enabled, prev_enabled)
+    end
 
     if not silent then
         vim.notify(string.format("%s: %s", setting, M.bool2str(buffer_enabled)), vim.log.levels.INFO, { title = "Buffer" })
@@ -282,7 +346,9 @@ function M.toggle_global_setting(setting, callback, silent)
         enabled = buffer_enabled
     end
 
-    callback(global_enabled, prev_enabled, enabled)
+    if type(callback) == "function" then
+        callback(enabled, prev_enabled, global_enabled)
+    end
 
     if not silent then
         vim.notify(string.format("%s: %s", setting, M.bool2str(global_enabled)), vim.log.levels.INFO, { title = "Global" })

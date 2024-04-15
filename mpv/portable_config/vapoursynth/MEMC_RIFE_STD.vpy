@@ -12,7 +12,7 @@ clip = video_in
 ############
 
 H_Pre = 1440
-Model = 21
+Model = 23
 T_Tta = False
 Fps_Num = 2
 Fps_Den = 1
@@ -23,7 +23,7 @@ Gpu = 0
 Gpu_T = 2
 Lk_Fmt = False
 ## 整数，预降低处理源高度（填你的显示器高度）
-## <21|37|39> 使用的模型
+## <23|47|49> 使用的模型
 ## <True|False> 是否使用ensemble版模型
 ## 整数，Fps_Num/Fps_Den 的值即帧率倍数
 ## 整数
@@ -36,6 +36,6 @@ Lk_Fmt = False
 
 ret = k7f.FPS_CTRL(clip, fps_in=container_fps, fps_ret=True)
 clip = k7f.FMT_CTRL(clip, h_max=H_Pre, fmt_pix=1 if Lk_Fmt else 0)
-clip = k7f.RIFE_STD(clip, model=Model, t_tta=T_Tta, fps_num=2, fps_den=1, sc_mode=Sc_Mode, skip=Skip, stat_th=Stat_Th, gpu=Gpu, gpu_t=Gpu_T)
+clip = k7f.RIFE_STD(clip, model=Model, t_tta=T_Tta, fps_num=Fps_Num, fps_den=Fps_Den, sc_mode=Sc_Mode, skip=Skip, stat_th=Stat_Th, gpu=Gpu, gpu_t=Gpu_T)
 
 clip.set_output()

@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ db985f1cbb8dea43e2cf42dbc38bb0f7a0bf0f6b
+COMMIT_ 6fa34c31d0a5290dee83282205768d15111df7d8
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -71,7 +71,7 @@ defaults = {
 	shuffle = false,
 
 	scale = 0,
-	scale_fullscreen = 0,
+	scale_fullscreen = 1,
 	font_scale = 1,
 	font_bold = false,
 	text_border = 1.2,
@@ -130,25 +130,17 @@ options.proximity_out = math.max(options.proximity_out, options.proximity_in + 1
 if options.chapter_ranges:sub(1, 4) == '^op|' then options.chapter_ranges = defaults.chapter_ranges end
 -- Ensure required environment configuration
 if options.autoload then mp.commandv('set', 'keep-open-pause', 'no') end
--- 禁用DPI探测时的UI倍率自动计算
+-- 用于UI倍率计算
 function auto_ui_scale()
 	local display_w, display_h = mp.get_property_number('display-width', 0), mp.get_property_number('display-height', 0)
 	local display_aspect = display_w / display_h or 0
-	if display_aspect <= 1 then
-		options.scale = 1
-		msg.warn('检测到异常的显示器分辨率，回退选项 scale 为1')
-		return
-	end
-	if display_aspect >=2 then
-		options.scale = tonumber(string.format('%.2f', display_h / 1080))
-		msg.info('检测到超宽显示器，建议手动指定选项 scale')
-		return
-	end
-	if display_w * display_h > 2304000 then
-		options.scale = tonumber(string.format('%.2f', math.sqrt(display_w * display_h / 2073600)))
+	local factor = 1
+	if display_aspect >= 1 then
+		factor = tonumber(string.format('%.2f', display_h / 1080))
 	else
-		options.scale = 1
+		factor = tonumber(string.format('%.2f', display_w / 1080))
 	end
+	return factor
 end
 -- 设置脚本属性
 mp.set_property_native('user-data/osc', { idlescreen = options.idlescreen })
@@ -429,16 +421,16 @@ function update_display_dimensions()
 	if real_width <= 0 then return end
 
 	-- 此处起才能获取到显示分辨率的信息
-	if options.scale <= 0 then
-		if mp.get_property_native('hidpi-window-scale') then
-			options.scale = 1
-		else
-			auto_ui_scale()
-		end
+	local dpi, scale_fom = state.hidpi_scale, options.scale_fullscreen
+	if scale_fom <= 0 then scale_fom = 1 end
+	if options.scale < 0 then
+		state.scale = (dpi or 1) * (state.fullormaxed and scale_fom or 1)
+	elseif options.scale == 0 then
+		state.scale = auto_ui_scale() * (state.fullormaxed and scale_fom or 1)
+	else
+		state.scale = options.scale * (state.fullormaxed and scale_fom or 1)
 	end
-	if options.scale_fullscreen <= 0 then options.scale_fullscreen = options.scale end
 
-	state.scale = (state.hidpi_scale or 1) * (state.fullormaxed and options.scale_fullscreen or options.scale)
 	state.radius = round(options.border_radius * state.scale)
 	display.width, display.height = real_width, real_height
 	display.initialized = true
@@ -459,13 +451,13 @@ function update_fullormaxed()
 end
 
 function update_human_times()
+	state.speed = state.speed or 1
 	if state.time then
 		local max_seconds = state.duration
 		if state.duration then
-			local speed = state.speed or 1
 			if options.destination_time == 'playtime-remaining' then
-				max_seconds = speed >= 1 and state.duration or state.duration / speed
-				state.destination_time_human = format_time((state.time - state.duration) / speed, max_seconds)
+				max_seconds = state.speed >= 1 and state.duration or state.duration / state.speed
+				state.destination_time_human = format_time((state.time - state.duration) / state.speed, max_seconds)
 			elseif options.destination_time == 'total' then
 				state.destination_time_human = format_time(state.duration, max_seconds)
 			else
@@ -476,7 +468,7 @@ function update_human_times()
 		end
 		state.time_human = format_time(state.time, max_seconds)
 	else
-		state.time_human = nil
+		state.time_human, state.destination_time_human = nil, nil
 	end
 end
 

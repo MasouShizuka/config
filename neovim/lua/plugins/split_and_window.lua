@@ -4,7 +4,12 @@ local keymap = require("utils.keymap")
 local utils = require("utils")
 
 return {
-    -- NOTE: 需要对 lua/windows/lib/frame.lua 的 Frame:autowidth 函数的 curwinLeaf 参数添加 nil 判断
+    -- NOTE: 需要对 lua/windows/lib/frame.lua 的 Frame:autowidth 函数的 curwinLeaf 参数添加 nil 判断：
+    -- ╭───────────────────────────╮
+    -- │ if curwinLeaf == nil then │
+    -- │    return                 │
+    -- │ end                       │
+    -- ╰───────────────────────────╯
     -- https://github.com/anuvyklack/windows.nvim/issues/31
     {
         "anuvyklack/windows.nvim",
@@ -25,8 +30,8 @@ return {
         },
         keys = {
             { "<c-s><c-m>", function() vim.api.nvim_command("WindowsMaximize") end,             desc = "Maximize current window",                 mode = "n" },
-            { "<c-s><c-c>", function() vim.api.nvim_command("WindowsMaximizeVertically") end,   desc = "Maximize width of the current window",    mode = "n" },
-            { "<c-s><c-r>", function() vim.api.nvim_command("WindowsMaximizeHorizontally") end, desc = "Maximize height of the current window",   mode = "n" },
+            { "<c-s><c-c>", function() vim.api.nvim_command("WindowsMaximizeVertically") end,   desc = "Maximize height of the current window",   mode = "n" },
+            { "<c-s><c-r>", function() vim.api.nvim_command("WindowsMaximizeHorizontally") end, desc = "Maximize width of the current window",    mode = "n" },
             { "<c-s><c-e>", function() vim.api.nvim_command("WindowsEqualize") end,             desc = "Equalize all windows heights and widths", mode = "n" },
             { "<c-s><c-t>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
         },
@@ -67,9 +72,9 @@ return {
             local prev_tabpage
             local prev_win
             local function toggle(pos)
-                local toggle_filetype_list = filetype.toggle_filetype_lists[pos]
+                local panel_filetype_list = filetype.panel_filetype_lists[pos]
 
-                local is_focused, _ = filetype.is_toggle_filetype_focused(toggle_filetype_list)
+                local is_focused, _ = filetype.get_focused_panel_filetype(panel_filetype_list)
                 if is_focused then
                     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                         if not vim.api.nvim_win_is_valid(win) then
@@ -78,8 +83,8 @@ return {
 
                         local buf = vim.api.nvim_win_get_buf(win)
                         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                        local is_toggle_filetype, func = filetype.is_toggle_filetype(ft, toggle_filetype_list)
-                        if is_toggle_filetype then
+                        local is_panel_filetype, func = filetype.get_panel_filetype_func(ft, panel_filetype_list)
+                        if is_panel_filetype then
                             local close_func = func.close
                             if type(close_func) == "function" then
                                 close_func()
@@ -94,17 +99,18 @@ return {
                     return
                 end
 
-                if not filetype.is_in_toggle_filetype_list(vim.bo.filetype) then
+                local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+                if not filetype.is_panel_filetype(ft) then
                     prev_tabpage = vim.api.nvim_get_current_tabpage()
                     prev_win = vim.api.nvim_get_current_win()
                 end
 
-                local is_opened, win = filetype.is_toggle_filetype_opened(toggle_filetype_list)
-                if is_opened then
+                local opened = filetype.get_opened_panel_filetype(panel_filetype_list)
+                if #opened > 0 then
                     -- if not focus_nth_win(pos, 1) then
                     --     vim.api.nvim_set_current_win(win)
                     -- end
-                    vim.api.nvim_set_current_win(win)
+                    vim.api.nvim_set_current_win(opened[1])
                 else
                     edgy.open(pos)
                 end
@@ -151,7 +157,7 @@ return {
                     vim.schedule(function()
                         if vim.api.nvim_buf_is_valid(args.buf) then
                             local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-                            if filetype.is_in_toggle_filetype_list(ft) then
+                            if filetype.is_panel_filetype(ft) then
                                 require("edgy")
                                 pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
                             end
@@ -161,7 +167,7 @@ return {
                 desc = "Activate edgy",
                 group = edgy_activate,
             })
-            if utils.is_available("toggleterm.nvim") and filetype.is_in_toggle_filetype_list("toggleterm") then
+            if utils.is_available("toggleterm.nvim") and filetype.is_panel_filetype("toggleterm") then
                 vim.api.nvim_create_autocmd("TermOpen", {
                     callback = function()
                         require("edgy")
@@ -448,7 +454,8 @@ return {
     --         local augroup = vim.api.nvim_create_augroup("FocusDisable", { clear = true })
     --         vim.api.nvim_create_autocmd("WinEnter", {
     --             callback = function(_)
-    --                 if vim.tbl_contains(ignore_buftypes, vim.bo.buftype) then
+    --                 local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+    --                 if vim.tbl_contains(ignore_buftypes, ft) then
     --                     vim.w.focus_disable = true
     --                 else
     --                     vim.w.focus_disable = false
@@ -459,7 +466,8 @@ return {
     --         })
     --         vim.api.nvim_create_autocmd("FileType", {
     --             callback = function(_)
-    --                 if vim.tbl_contains(ignore_filetypes, vim.bo.filetype) then
+    --                 local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+    --                 if vim.tbl_contains(ignore_filetypes, ft) then
     --                     vim.b.focus_disable = true
     --                 else
     --                     vim.b.focus_disable = false

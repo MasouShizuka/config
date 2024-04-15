@@ -357,6 +357,33 @@ impl Workspace {
         Ok(())
     }
 
+    // focus_changed performs updates in response to the fact that a focus
+    // change event has occurred. The focus change is assumed to be valid, and
+    // should not result in a new  focus change - the intent here is to update
+    // focus-reactive elements, such as the stackbar.
+    pub fn focus_changed(&mut self, hwnd: isize) -> Result<()> {
+        if !self.tile() {
+            return Ok(());
+        }
+
+        let containers = self.containers_mut();
+
+        for container in containers.iter_mut() {
+            let container_windows = container.windows().clone();
+            let container_topbar = container.stackbar().clone();
+
+            if let Some(idx) = container.idx_for_window(hwnd) {
+                container.focus_window(idx);
+                container.restore();
+            }
+
+            if let Some(stackbar) = container_topbar {
+                stackbar.update(&container_windows, hwnd)?;
+            }
+        }
+        Ok(())
+    }
+
     pub fn reap_orphans(&mut self) -> Result<(usize, usize)> {
         let mut hwnds = vec![];
         let mut floating_hwnds = vec![];
@@ -843,6 +870,10 @@ impl Workspace {
             if container.windows().is_empty() {
                 self.containers_mut().remove(focused_idx);
                 self.resize_dimensions_mut().remove(focused_idx);
+
+                if focused_idx == self.containers().len() {
+                    self.focus_container(focused_idx - 1);
+                }
             } else {
                 container.load_focused_window();
             }
@@ -1100,7 +1131,7 @@ impl Workspace {
             .ok_or_else(|| anyhow!("there is no monocle restore index"))?;
 
         // NOTE: 由于修改为不去除 monocle 对应的 container，因此不再需要恢复 monocle 的 container
-        if restore_idx > self.containers().len() - 1 {
+        if restore_idx >= self.containers().len() {
             self.containers_mut()
                 .resize(restore_idx, Container::default());
         }

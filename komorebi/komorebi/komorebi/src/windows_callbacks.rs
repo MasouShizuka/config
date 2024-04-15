@@ -41,6 +41,8 @@ use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::winevent::WinEvent;
 use crate::winevent_listener;
+use crate::ActiveWindowBorderStyle;
+use crate::ACTIVE_WINDOW_BORDER_STYLE;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_RECT;
 use crate::BORDER_WIDTH;
@@ -196,13 +198,9 @@ pub extern "system" fn win_event_hook(
         Some(event) => event,
     };
 
-    if let Ok(should_manage) = window.should_manage(Option::from(event_type)) {
-        if should_manage {
-            winevent_listener::event_tx()
-                .send(event_type)
-                .expect("could not send message on winevent_listener::event_tx");
-        }
-    }
+    winevent_listener::event_tx()
+        .send(event_type)
+        .expect("could not send message on winevent_listener::event_tx");
 }
 
 pub extern "system" fn border_window(
@@ -232,10 +230,20 @@ pub extern "system" fn border_window(
                 // the window was made with DWMWCP_ROUNDSMALL then this is the
                 // wrong size.  In the future we should read the DWM properties
                 // of windows and attempt to match appropriately.
-                if *WINDOWS_11 {
-                    RoundRect(hdc, 0, 0, border_rect.right, border_rect.bottom, 20, 20);
-                } else {
-                    Rectangle(hdc, 0, 0, border_rect.right, border_rect.bottom);
+                match *ACTIVE_WINDOW_BORDER_STYLE.lock() {
+                    ActiveWindowBorderStyle::System => {
+                        if *WINDOWS_11 {
+                            RoundRect(hdc, 0, 0, border_rect.right, border_rect.bottom, 20, 20);
+                        } else {
+                            Rectangle(hdc, 0, 0, border_rect.right, border_rect.bottom);
+                        }
+                    }
+                    ActiveWindowBorderStyle::Rounded => {
+                        RoundRect(hdc, 0, 0, border_rect.right, border_rect.bottom, 20, 20);
+                    }
+                    ActiveWindowBorderStyle::Square => {
+                        Rectangle(hdc, 0, 0, border_rect.right, border_rect.bottom);
+                    }
                 }
                 EndPaint(window, &ps);
                 ValidateRect(window, None);

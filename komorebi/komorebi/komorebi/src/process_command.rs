@@ -13,6 +13,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use color_eyre::eyre::anyhow;
+use color_eyre::eyre::bail;
 use color_eyre::Result;
 use miow::pipe::connect;
 use net2::TcpStreamExt;
@@ -57,7 +58,6 @@ use crate::BORDER_ENABLED;
 use crate::BORDER_HIDDEN;
 use crate::BORDER_HWND;
 use crate::BORDER_OFFSET;
-use crate::BORDER_OVERFLOW_IDENTIFIERS;
 use crate::BORDER_WIDTH;
 use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
@@ -218,7 +218,7 @@ impl WindowManager {
                 let hwnd = focused_window.hwnd;
                 focused_window.close()?;
                 self.focused_workspace_mut()?.remove_window(hwnd)?;
-                self.update_focused_workspace(true)?;
+                self.update_focused_workspace(true, true)?;
             }
             SocketMessage::Minimize => self.focused_window()?.minimize(),
             SocketMessage::ToggleFloat => self.toggle_float()?,
@@ -493,11 +493,11 @@ impl WindowManager {
                 );
 
                 self.focus_monitor(monitor_idx)?;
-                self.update_focused_workspace(self.mouse_follows_focus)?;
+                self.update_focused_workspace(self.mouse_follows_focus, true)?;
             }
             SocketMessage::FocusMonitorNumber(monitor_idx) => {
                 self.focus_monitor(monitor_idx)?;
-                self.update_focused_workspace(self.mouse_follows_focus)?;
+                self.update_focused_workspace(self.mouse_follows_focus, true)?;
             }
             SocketMessage::Retile => self.retile_all(false)?,
             SocketMessage::FlipLayout(layout_flip) => self.flip_layout(layout_flip)?,
@@ -908,7 +908,7 @@ impl WindowManager {
                     }
                 }
 
-                self.update_focused_workspace(false)?;
+                self.update_focused_workspace(false, false)?;
             }
             SocketMessage::FocusFollowsMouse(mut implementation, enable) => {
                 if !CUSTOM_FFM.load(Ordering::SeqCst) {
@@ -1014,31 +1014,11 @@ impl WindowManager {
             SocketMessage::CompleteConfiguration => {
                 if !INITIAL_CONFIGURATION_LOADED.load(Ordering::SeqCst) {
                     INITIAL_CONFIGURATION_LOADED.store(true, Ordering::SeqCst);
-                    self.update_focused_workspace(false)?;
+                    self.update_focused_workspace(false, false)?;
                 }
             }
             SocketMessage::WatchConfiguration(enable) => {
                 self.watch_configuration(enable)?;
-            }
-            SocketMessage::IdentifyBorderOverflowApplication(identifier, ref id) => {
-                let mut identifiers = BORDER_OVERFLOW_IDENTIFIERS.lock();
-
-                let mut should_push = true;
-                for i in &*identifiers {
-                    if let MatchingRule::Simple(i) = i {
-                        if i.id.eq(id) {
-                            should_push = false;
-                        }
-                    }
-                }
-
-                if should_push {
-                    identifiers.push(MatchingRule::Simple(IdWithIdentifier {
-                        kind: identifier,
-                        id: id.clone(),
-                        matching_strategy: Option::from(MatchingStrategy::Legacy),
-                    }));
-                }
             }
             SocketMessage::IdentifyObjectNameChangeApplication(identifier, ref id) => {
                 let mut identifiers = OBJECT_NAME_CHANGE_ON_LAUNCH.lock();
@@ -1141,7 +1121,7 @@ impl WindowManager {
                 let resize: Vec<Option<Rect>> = serde_json::from_reader(file)?;
 
                 workspace.set_resize_dimensions(resize);
-                self.update_focused_workspace(false)?;
+                self.update_focused_workspace(false, false)?;
             }
             SocketMessage::Save(ref path) => {
                 let workspace = self.focused_workspace_mut()?;
@@ -1164,7 +1144,7 @@ impl WindowManager {
                 let resize: Vec<Option<Rect>> = serde_json::from_reader(file)?;
 
                 workspace.set_resize_dimensions(resize);
-                self.update_focused_workspace(false)?;
+                self.update_focused_workspace(false, false)?;
             }
             SocketMessage::AddSubscriberSocket(ref socket) => {
                 let mut sockets = SUBSCRIPTION_SOCKETS.lock();
@@ -1264,9 +1244,6 @@ impl WindowManager {
                 BORDER_OFFSET.store(offset, Ordering::SeqCst);
                 WindowsApi::invalidate_border_rect()?;
             }
-            SocketMessage::AltFocusHack(_) => {
-                tracing::info!("this action is deprecated");
-            }
             SocketMessage::ApplicationSpecificConfigurationSchema => {
                 let asc = schema_for!(Vec<ApplicationConfiguration>);
                 let schema = serde_json::to_string_pretty(&asc)?;
@@ -1312,8 +1289,11 @@ impl WindowManager {
             SocketMessage::ToggleTitleBars => {
                 let current = REMOVE_TITLEBARS.load(Ordering::SeqCst);
                 REMOVE_TITLEBARS.store(!current, Ordering::SeqCst);
-                self.update_focused_workspace(false)?;
+                self.update_focused_workspace(false, false)?;
             }
+            // Deprecated commands
+            SocketMessage::AltFocusHack(_)
+            | SocketMessage::IdentifyBorderOverflowApplication(_, _) => {}
         };
 
         match message {
@@ -1395,7 +1375,33 @@ impl WindowManager {
             | SocketMessage::FocusWorkspaceNumber(_) => {
                 // NOTE: 保证从 empty workspace 聚焦另一个 empty workspace 时不返回 Err，导致 notify_subscribers 无法执行
                 if !self.focused_workspace()?.visible_windows().is_empty() {
-                    let foreground = WindowsApi::foreground_window()?;
+                    // The foreground window might be de-activating if we've just
+                    // set it as a result of our own actions, so wait until the new
+                    // one returns. This particularly happens when switching monitors.
+                    //
+                    // TODO(raggi): re-evaluate this branch. I checked the
+                    // suggestion from the comment above, that we don't get
+                    // EVENT_SYSTEM_FOREGROUND, but if I print out trace events I
+                    // see that we do.
+                    // XXX(raggi) We drop FocusChange events though for windows that
+                    // we're not managing, so that's one of the ways that the border
+                    // window gets stuck. We should stop overloading `should_manage`
+                    // as an event filter, and separately filter events that we want
+                    // to handle, and windows that we want to handle, as some events
+                    // must be handled even if we're not managing the target window.
+                    let mut attempts = 0;
+                    let foreground = loop {
+                        match WindowsApi::foreground_window() {
+                            Ok(foreground) => break foreground,
+                            Err(_) => {
+                                std::thread::sleep(std::time::Duration::from_millis(10));
+                                attempts+=1;
+                                if attempts == 10 {
+                                    bail!("failed to get foreground window after 100ms")
+                                }
+                            }
+                        };
+                    };
                     let foreground_window = Window { hwnd: foreground };
 
                     let monocle = BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst);
@@ -1446,7 +1452,7 @@ impl WindowManager {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), level = "debug")]
     fn handle_initial_workspace_rules(
         &mut self,
         id: &String,
@@ -1458,7 +1464,7 @@ impl WindowManager {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), level = "debug")]
     fn handle_definitive_workspace_rules(
         &mut self,
         id: &String,
@@ -1470,7 +1476,7 @@ impl WindowManager {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), level = "debug")]
     pub fn handle_workspace_rules(
         &mut self,
         id: &String,

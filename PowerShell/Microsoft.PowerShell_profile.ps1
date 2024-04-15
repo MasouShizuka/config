@@ -1,6 +1,14 @@
 Import-Module posh-git
 Import-Module PSReadLine
 
+# ╭─────────────────────╮
+# │ Running Environment │
+# ╰─────────────────────╯
+
+$is_vscode=$env:TERM_PROGRAM -eq "vscode"
+
+
+
 # ╭───────╮
 # │ Alias │
 # ╰───────╯
@@ -9,22 +17,6 @@ Set-Alias ll ls
 
 Set-Alias vi nvim
 Set-Alias vim nvim
-
-
-
-# ╭──────────────────────╮
-# │ Environment Variable │
-# ╰──────────────────────╯
-
-$history=(Get-PSReadlineOption).HistorySavePath
-$is_vscode=$env:TERM_PROGRAM -eq "vscode"
-$WarningPreference="SilentlyContinue"
-
-
-
-# ╭──────────╮
-# │ Function │
-# ╰──────────╯
 
 # 打开目录
 function open($path=".") {
@@ -44,9 +36,20 @@ function zsh() {
 
 
 
-# ╭──────────────────╮
-# │ PSReadLineOption │
-# ╰──────────────────╯
+# ╭──────────────────────╮
+# │ Environment Variable │
+# ╰──────────────────────╯
+
+$env:TERM_PROGRAM="WindowsTerminal"
+
+
+
+# ╭─────────╮
+# │ Setting │
+# ╰─────────╯
+
+$history=(Get-PSReadlineOption).HistorySavePath
+$WarningPreference="SilentlyContinue"
 
 Set-PSReadLineOption -HistoryNoDuplicates:$false
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$true
@@ -75,12 +78,6 @@ Set-PSReadLineOption -AddToHistoryHandler {
     return "MemoryOnly"
 }
 
-
-
-# ╭──────────────────────╮
-# │ PSReadLineKeyHandler │
-# ╰──────────────────────╯
-
 Set-PSReadLineKeyHandler -Chord "Shift+RightArrow" -Function ForwardWord
 Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
@@ -94,7 +91,7 @@ Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 # │ Theme │
 # ╰───────╯
 
-$ENV:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+$env:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
 
 # OSC 7 on Windows with powershell (with starship)

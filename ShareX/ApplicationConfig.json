@@ -405,7 +405,7 @@
         "PlacementOffset": 10,
         "TopMost": true,
         "KeepCenterLocation": true,
-        "BackgroundColor": "White",
+        "BackgroundColor": "46, 46, 46",
         "Shadow": true,
         "Border": true,
         "BorderSize": 2,

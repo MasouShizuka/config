@@ -26,4 +26,4 @@
 
 - `aria2_python` 项目可用命令 `pyinstaller -Fw -i AriaNg.ico xxx.py` 生成 `aria2.conf` 中对应的 `exe` 文件
 - `aria2_rust` 项目可用命令 `cargo build --release` 生成 `aria2.conf` 中对应的 `exe` 文件
-- 脚本中用到了 `jq` 命令，因此需要安装：`pacman -S mingw-w64-ucrt-x86_64-jq`
+- 脚本中用到了 `jq` 命令，因此需要安装：`winget install jqlang.jq --accept-source-agreements` 或 `pacman -S mingw-w64-ucrt-x86_64-jq`

@@ -129,7 +129,7 @@ return {
                 }),
             })
 
-            cmp.setup.filetype(filetype.text_filetype, {
+            cmp.setup.filetype(filetype.tex_filetype_list, {
                 sources = cmp.config.sources({
                     { name = "luasnip" },
                     { name = "nvim_lsp" },
@@ -145,11 +145,19 @@ return {
                     { name = "async_path" },
                 }),
             })
+
+            cmp.setup.filetype(filetype.text_filetype_list, {
+                sources = cmp.config.sources({
+                    { name = "spell" },
+                    { name = "buffer" },
+                    { name = "async_path" },
+                }),
+            })
         end,
         dependencies = {
             "dmitmel/cmp-cmdline-history",
             "f3fora/cmp-spell",
-            "FelipeLema/cmp-async-path",
+            "https://codeberg.org/FelipeLema/cmp-async-path.git",
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-nvim-lsp",

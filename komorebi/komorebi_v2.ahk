@@ -78,7 +78,7 @@ global workspace_key_value := Map(
     "4", [3, " "],
     "5", [4, " "],
     "6", [5, " "],
-    "7", [6, " "]
+    "7", [6, " "]
 )
 
 global container_padding := 4
@@ -132,7 +132,6 @@ RunWait("komorebic.exe float-rule title `"Hotkey sink`"", , "Hide")
 
 RunWait("komorebic.exe float-rule exe `"ahk.exe`"", , "Hide")
 RunWait("komorebic.exe float-rule exe `"ApplicationFrameHost.exe`"", , "Hide")
-RunWait("komorebic.exe float-rule exe `"Clash Verge.exe`"", , "Hide")
 RunWait("komorebic.exe float-rule exe `"copyq.exe`"", , "Hide")
 RunWait("komorebic.exe float-rule exe `"Flow.Launcher.exe`"", , "Hide")
 RunWait("komorebic.exe float-rule exe `"MyKeymap.exe`"", , "Hide")
@@ -143,18 +142,11 @@ RunWait("komorebic.exe manage-rule exe `"TE64.exe`"", , "Hide")
 RunWait("komorebic.exe manage-rule exe `"WeChat.exe`"", , "Hide")
 RunWait("komorebic.exe manage-rule exe `"wezterm-gui.exe`"", , "Hide")
 
-RunWait("komorebic.exe identify-tray-application exe `"Clash Verge.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"copyq.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"QQ.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"RemindMe.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"ShareX.exe`"", , "Hide")
 RunWait("komorebic.exe identify-tray-application exe `"WeChat.exe`"", , "Hide")
-
-RunWait("komorebic.exe identify-border-overflow-application exe `"cloudmusic.exe`"", , "Hide")
-RunWait("komorebic.exe identify-border-overflow-application exe `"Code.exe`"", , "Hide")
-RunWait("komorebic.exe identify-border-overflow-application exe `"neovide.exe`"", , "Hide")
-RunWait("komorebic.exe identify-border-overflow-application exe `"QQ.exe`"", , "Hide")
-RunWait("komorebic.exe identify-border-overflow-application exe `"WeChat.exe`"", , "Hide")
 
 RunWait("komorebic.exe float-rule class `"_WwB`"", , "Hide")
 RunWait("komorebic.exe identify-layered-application exe `"EXCEL.EXE`"", , "Hide")
@@ -171,7 +163,7 @@ RunWait("komorebic.exe complete-configuration", , "Hide")
 While (ProcessExist("yasb.exe")) {
     ProcessClose("yasb.exe")
 }
-Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
+Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
 
 
 ; ╭─────────╮
@@ -368,6 +360,6 @@ send_to_monitor(ThisHotkey) {
     While (ProcessExist("yasb.exe")) {
         ProcessClose("yasb.exe")
     } Else {
-        Run(Format("{}/yasb.exe", A_ScriptDir), , "Hide")
+        Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
     }
 }

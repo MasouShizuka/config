@@ -54,7 +54,8 @@ return {
 
                 -- Navigation
                 map("n", "<c-n>", function()
-                    if vim.wo.diff then
+                    local diff = vim.api.nvim_get_option_value("diff", { scope = "local" })
+                    if diff then
                         vim.cmd("normal! ]c")
                         vim.cmd("normal! zz")
                         return
@@ -62,7 +63,8 @@ return {
                     vim.schedule(function() gs.next_hunk() end)
                 end, { desc = "Navigation next", silent = true })
                 map("n", keymap["<c-s-n>"], function()
-                    if vim.wo.diff then
+                    local diff = vim.api.nvim_get_option_value("diff", { scope = "local" })
+                    if diff then
                         vim.cmd("normal! [c")
                         vim.cmd("normal! zz")
                         return

@@ -125,7 +125,7 @@ impl Window {
         HWND(self.hwnd)
     }
 
-    pub fn center(&mut self, work_area: &Rect) -> Result<()> {
+    pub fn center(&self, work_area: &Rect) -> Result<()> {
         let half_width = work_area.right / 2;
         let half_weight = work_area.bottom / 2;
 
@@ -140,7 +140,7 @@ impl Window {
         )
     }
 
-    pub fn set_position(&mut self, layout: &Rect, top: bool) -> Result<()> {
+    pub fn set_position(&self, layout: &Rect, top: bool) -> Result<()> {
         let rect = *layout;
         WindowsApi::position_window(self.hwnd(), &rect, top)
     }
@@ -218,100 +218,20 @@ impl Window {
     }
 
     pub fn focus(self, mouse_follows_focus: bool) -> Result<()> {
-        // Attach komorebi thread to Window thread
-        let (_, window_thread_id) = WindowsApi::window_thread_process_id(self.hwnd());
-        let current_thread_id = WindowsApi::current_thread_id();
-
-        // This can be allowed to fail if a window doesn't have a message queue or if a journal record
-        // hook has been installed
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-attachthreadinput#remarks
-        match WindowsApi::attach_thread_input(current_thread_id, window_thread_id, true) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not attach to window thread input processing mechanism, but continuing execution of focus(): {}",
-                    error
-                );
-            }
-        };
-
-        // Raise Window to foreground
-        let mut foregrounded = false;
-        let mut tried_resetting_foreground_access = false;
-        let mut max_attempts = 10;
-
-        while !foregrounded && max_attempts > 0 {
-            match WindowsApi::set_foreground_window(self.hwnd()) {
-                Ok(()) => {
-                    foregrounded = true;
-                }
-                Err(error) => {
-                    max_attempts -= 1;
-                    tracing::error!(
-                        "could not set as foreground window, but continuing execution of focus(): {}",
-                        error
-                    );
-
-                    // If this still doesn't work then maybe try https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-locksetforegroundwindow
-                    if !tried_resetting_foreground_access {
-                        let process_id = WindowsApi::current_process_id();
-                        if WindowsApi::allow_set_foreground_window(process_id).is_ok() {
-                            tried_resetting_foreground_access = true;
-                        }
-                    }
-                }
-            };
-        }
-
+        // NOTE: 即使目标窗口已经处于 focus 状态，仍然移动 cursor
         // Center cursor in Window
         if mouse_follows_focus {
             WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(self.hwnd())?)?;
         }
 
-        // This isn't really needed when the above command works as expected via AHK
-        match WindowsApi::set_focus(self.hwnd()) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not set focus, but continuing execution of focus(): {}",
-                    error
-                );
-            }
-        };
-
-        match WindowsApi::attach_thread_input(current_thread_id, window_thread_id, false) {
-            Ok(()) => {}
-            Err(error) => {
-                tracing::error!(
-                    "could not detach from window thread input processing mechanism, but continuing execution of focus(): {}",
-                    error
-                );
-            }
-        };
-
-        // NOTE: 激活鼠标位置的 hwnd
-        if mouse_follows_focus {
-            let exclude_classes = [
-                // Chromium/Electron
-                "Chrome_RenderWidgetHostHWND".to_string(),
-                "Chrome_WidgetWin_1".to_string(),
-                // Explorer
-                "DirectUIHWND".to_string(),
-                "SysTreeView32".to_string(),
-                "ToolbarWindow32".to_string(),
-                "NetUIHWND".to_string(),
-            ];
-            let HWND(hwnd) = self.hwnd();
-            let class = Window { hwnd }.class()?;
-            // 防止输入焦点异常
-            if !exclude_classes.contains(&class) {
-                let hwnd_window_at_cursor_pos = WindowsApi::window_at_cursor_pos()?;
-                // 某些程序需要激活鼠标位置的 hwnd 才能响应按键
-                if hwnd_window_at_cursor_pos != hwnd {
-                    Window {hwnd: hwnd_window_at_cursor_pos}.focus(false)?;
-                }
+        // If the target window is already focused, do nothing.
+        if let Ok(ihwnd) = WindowsApi::foreground_window() {
+            if HWND(ihwnd) == self.hwnd() {
+                return Ok(());
             }
         }
+
+        WindowsApi::raise_and_focus_window(self.hwnd())?;
 
         Ok(())
     }
@@ -396,16 +316,15 @@ impl Window {
 
     #[tracing::instrument(fields(exe, title))]
     pub fn should_manage(self, event: Option<WindowManagerEvent>) -> Result<bool> {
-        if let Some(WindowManagerEvent::DisplayChange(_)) = event {
-            return Ok(true);
+        if !self.is_window() {
+            return Ok(false);
         }
 
-        #[allow(clippy::question_mark)]
         if self.title().is_err() {
             return Ok(false);
         }
 
-        let is_cloaked = self.is_cloaked()?;
+        let is_cloaked = self.is_cloaked().unwrap_or_default();
 
         let mut allow_cloaked = false;
 
@@ -424,7 +343,12 @@ impl Window {
             // If not allowing cloaked windows, we need to ensure the window is not cloaked
             (false, false) => {
                 if let (Ok(title), Ok(exe_name), Ok(class), Ok(path)) = (self.title(), self.exe(), self.class(), self.path()) {
-                    return Ok(window_is_eligible(&title, &exe_name, &class, &path, &self.style()?, &self.ex_style()?, event));
+                    // calls for styles can fail quite often for events with windows that aren't really "windows"
+                    // since we have moved up calls of should_manage to the beginning of the process_event handler,
+                    // we should handle failures here gracefully to be able to continue the execution of process_event
+                    if let (Ok(style), Ok(ex_style)) = (&self.style(), &self.ex_style()) {
+                        return Ok(window_is_eligible(&title, &exe_name, &class, &path, style, ex_style, event));
+                    }
                 }
             }
             _ => {}

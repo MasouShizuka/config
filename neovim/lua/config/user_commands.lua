@@ -13,6 +13,7 @@ if is_which_key_available then
 end
 
 -- toggle
+
 if is_which_key_available then
     which_key.register({
         mode = "n",
@@ -28,14 +29,14 @@ if vim.g.cursor_center_enabled == nil then
 end
 
 vim.keymap.set("n", "<leader>ctc", function()
-    utils.toggle_global_setting("cursor_center_enabled", function(global_enabled, prev_enabled, enabled)
+    utils.toggle_global_setting("cursor_center_enabled", function(enabled, prev_enabled, global_enabled)
         if enabled then
             vim.cmd("normal! zz")
         end
     end)
 end, { desc = "Toggle cursor center", silent = true })
 vim.keymap.set("n", "<leader>ctC", function()
-    utils.toggle_buffer_setting("cursor_center_enabled", function(prev_enabled, enabled)
+    utils.toggle_buffer_setting("cursor_center_enabled", function(enabled, prev_enabled)
         if enabled then
             vim.cmd("normal! zz")
         end
@@ -53,71 +54,49 @@ if environment.is_vscode then
 else
     -- toggle fileformat
     local function toggle_fileformat()
-        local fileformat = vim.bo.fileformat
-
-        if fileformat == "unix" then
-            fileformat = "dos"
-        else
-            fileformat = "unix"
-        end
-        vim.bo.fileformat = fileformat
-
-        vim.cmd.write()
-        utils.refresh_buf()
-
-        vim.notify(string.format("Fileformat: %s", fileformat), vim.log.levels.INFO, { title = "Buffer" })
+        utils.toggle_local_option("fileformat", { "dos", "unix" }, function(enabled, prev_enabled)
+            vim.cmd.write()
+            utils.refresh_buf()
+        end)
     end
     vim.api.nvim_create_user_command("ToggleFileformat", toggle_fileformat, { desc = "Toggle fileformat" })
     vim.keymap.set("n", "<leader>ctf", toggle_fileformat, { desc = "Toggle fileformat", silent = true })
 
     -- toggle spell
     local function toggle_spell()
-        local spell = vim.api.nvim_get_option_value("spell", { scope = "local" })
-
-        spell = not spell
-        vim.api.nvim_set_option_value("spell", spell, { scope = "local" })
-
-        vim.notify(string.format("Spell: %s", utils.bool2str(spell)), vim.log.levels.INFO, { title = "Buffer" })
+        utils.toggle_local_option("spell")
     end
     vim.api.nvim_create_user_command("ToggleSpell", toggle_spell, { desc = "Toggle spell" })
     vim.keymap.set("n", "<leader>cts", toggle_spell, { desc = "Toggle spell", silent = true })
 
     -- toggle syntax
     local function toggle_syntax()
-        local buf = vim.api.nvim_get_current_buf()
-        local syntax = vim.api.nvim_get_option_value("syntax", { buf = buf })
-        if syntax ~= "on" and syntax ~= "off" then
-            syntax = "on"
+        local syntax = vim.api.nvim_get_option_value("syntax", { scope = "local" })
+        if syntax == "" then
+            vim.api.nvim_set_option_value("syntax", "on", { scope = "local" })
         end
 
-        local ts_avail, parsers = pcall(require, "nvim-treesitter.parsers")
-        local is_treesitter_available = ts_avail and parsers.has_parser()
-        if syntax == "on" then
+        utils.toggle_local_option("syntax", { "on", "off" }, function(enabled, prev_enabled)
+            local buf = vim.api.nvim_get_current_buf()
+            local ts_avail, parsers = pcall(require, "nvim-treesitter.parsers")
+            local is_treesitter_available = ts_avail and parsers.has_parser()
             if is_treesitter_available then
-                vim.treesitter.stop(buf)
+                if enabled == "off" then
+                    vim.treesitter.stop(buf)
+                    vim.api.nvim_set_option_value("syntax", "off", { scope = "local" })
+                else
+                    vim.treesitter.start(buf)
+                    vim.api.nvim_set_option_value("syntax", "on", { scope = "local" })
+                end
             end
-            syntax = "off"
-        else
-            if is_treesitter_available then
-                vim.treesitter.start(buf)
-            end
-            syntax = "on"
-        end
-        vim.api.nvim_set_option_value("syntax", syntax, { buf = buf })
-
-        vim.notify(string.format("Syntax: %s", syntax), vim.log.levels.INFO, { title = "Buffer" })
+        end)
     end
     vim.api.nvim_create_user_command("ToggleSyntax", toggle_spell, { desc = "Toggle syntax" })
     vim.keymap.set("n", "<leader>ctS", toggle_syntax, { desc = "Toggle syntax", silent = true })
 
     -- toggle wrap
     local function toggle_wrap()
-        local wrap = vim.api.nvim_get_option_value("wrap", { scope = "local" })
-
-        wrap = not wrap
-        vim.api.nvim_set_option_value("wrap", wrap, { scope = "local" })
-
-        vim.notify(string.format("Wrap: %s", utils.bool2str(wrap)), vim.log.levels.INFO, { title = "Buffer" })
+        utils.toggle_local_option("wrap")
     end
     vim.api.nvim_create_user_command("ToggleWrap", toggle_wrap, { desc = "Toggle wrap" })
     vim.keymap.set("n", "<leader>ctw", toggle_wrap, { desc = "Toggle wrap", silent = true })
@@ -125,6 +104,7 @@ end
 
 if not environment.is_vscode then
     -- diff
+
     is_which_key_available, which_key = pcall(require, "which-key")
     if is_which_key_available then
         which_key.register({
@@ -271,6 +251,7 @@ if not environment.is_vscode then
                     end
 
                     vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
+                    vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
                     vim.lsp.util.stylize_markdown(buf, markdown_lines, {})
                     vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
                 end

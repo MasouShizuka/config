@@ -481,9 +481,16 @@ return {
                     vim.keymap.set("n", "t", function()
                         vim.g.is_opening_tab = true
 
-                        local node = api.tree.get_node_under_cursor()
-                        api.node.open.tab(node)
-                        vim.cmd.tabprev()
+                        local marks = api.marks.list()
+                        if #marks == 0 then
+                            marks[#marks + 1] = api.tree.get_node_under_cursor()
+                        end
+                        for _, node in pairs(marks) do
+                            api.node.open.tab(node)
+                            vim.cmd.tabprev()
+                        end
+                        api.marks.clear()
+                        api.tree.reload()
 
                         vim.g.is_opening_tab = false
                     end, opts("Open: New Tab"))

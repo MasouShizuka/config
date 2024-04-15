@@ -1,4 +1,5 @@
 local environment = require("utils.environment")
+local filetype = require("utils.filetype")
 
 return {
     {
@@ -12,11 +13,6 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local color_filetype_list = {
-                "css",
-                "html",
-                "javascript",
-            }
             vim.api.nvim_create_autocmd("Filetype", {
                 callback = function()
                     require("ccc")
@@ -24,7 +20,7 @@ return {
                 end,
                 desc = "Activate ccc",
                 group = vim.api.nvim_create_augroup("CccActivate", { clear = true }),
-                pattern = color_filetype_list,
+                pattern = filetype.color_filetype_list,
             })
         end,
         opts = function()

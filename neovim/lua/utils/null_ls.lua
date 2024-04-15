@@ -35,9 +35,6 @@ M.null_ls_builtins = function(null_ls)
                 },
             }))
         end,
-        gitsigns = function(source_name, methods)
-            null_ls.register(null_ls.builtins.code_actions.gitsigns)
-        end,
         isort = function(source_name, methods)
             null_ls.register(null_ls.builtins.formatting.isort.with({
                 extra_args = {
@@ -53,6 +50,10 @@ M.null_ls_builtins = function(null_ls)
             null_ls.register(null_ls.builtins.formatting.shfmt.with({
                 extra_args = {
                     "-i", 4,
+                },
+                filetypes = {
+                    "sh",
+                    "zsh",
                 },
             }))
         end,

@@ -163,7 +163,7 @@ if ((is_windows)); then
     # 替换 starship 路径两边的 ' 为 "，使得路径中允许存在 space
     # 即：'/c/Program Files/starship/bin/starship.exe' -> "/c/Program Files/starship/bin/starship.exe"
     starship_init=$(starship init zsh)
-    starship_init=$(echo "$starship_init" | sed "s#'\+\(/[^\.]*starship.exe\)'\+#\"\1\"#g")
+    starship_init=$(echo "$starship_init" | sed "s#'\+\(/[^\.]*starship\.exe\)'\+#\"\1\"#g")
     eval "$starship_init"
 else
     eval "$(starship init zsh)"

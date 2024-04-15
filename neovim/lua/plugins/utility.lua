@@ -186,61 +186,57 @@ return {
                     end,
                 },
             }
+            vim.list_extend(longfile_features, bigfile_features)
 
             vim.api.nvim_create_autocmd("BufReadPost", {
                 callback = function(args)
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    local buf = args.buf
+
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
                     if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                         return
                     end
 
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
                     if vim.tbl_contains(filetype.skip_filetype_list, ft) then
                         return
                     end
 
-                    local bigfile_status, bigfile_detected = pcall(vim.api.nvim_buf_get_var, args.buf, "bigfile_detected")
-                    if bigfile_status and bigfile_detected == 1 then
+                    if vim.b[buf].bigfile_detected and vim.b[buf].bigfile_detected == 1 then
                         return
                     end
 
-                    local longfile_status, _ = pcall(vim.api.nvim_buf_get_var, args.buf, "longfile_detected")
-                    if longfile_status then
+                    if vim.b[buf].longfile_detected then
                         return
                     end
 
-                    if not utils.is_longfile(args.buf) then
-                        vim.api.nvim_buf_set_var(args.buf, "longfile_detected", 0)
+                    if not utils.is_longfile(buf) then
+                        vim.b[buf].longfile_detected = 0
                         return
                     end
 
                     vim.notify("Long file detected!", vim.log.levels.WARN, { title = "bigfile" })
 
-                    vim.api.nvim_buf_set_var(args.buf, "bigfile_detected", 1)
-                    vim.api.nvim_buf_set_var(args.buf, "longfile_detected", 1)
-
-                    local features = bigfile_features
-                    for _, feature in ipairs(longfile_features) do
-                        features[#features + 1] = feature
-                    end
+                    vim.b[buf].bigfile_detected = 1
+                    vim.b[buf].longfile_detected = 1
 
                     local matched_features = vim.tbl_map(function(feature)
                         return require("bigfile.features").get_feature(feature)
-                    end, features)
+                    end, longfile_features)
 
                     local matched_deferred_features = {}
                     for _, feature in ipairs(matched_features) do
-                        feature.disable(args.buf)
+                        feature.disable(buf)
                         if feature.opts.defer then
                             matched_deferred_features[#matched_deferred_features + 1] = feature
                         end
                     end
 
                     vim.api.nvim_create_autocmd("BufReadPost", {
-                        buffer = args.buf,
+                        buffer = buf,
                         callback = function()
                             for _, feature in ipairs(matched_deferred_features) do
-                                feature.disable(args.buf)
+                                feature.disable(buf)
                             end
                         end,
                     })

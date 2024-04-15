@@ -15,7 +15,7 @@
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) feature map 1
+//!DESC [FSRCNNX_x2_8_0_4_1] feature map 1
 //!BIND LUMA
 //!SAVE FEATURE1
 //!COMPONENTS 4
@@ -52,7 +52,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) feature map 2
+//!DESC [FSRCNNX_x2_8_0_4_1] feature map 2
 //!BIND LUMA
 //!SAVE FEATURE2
 //!COMPONENTS 4
@@ -89,7 +89,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 1_1
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 1_1
 //!BIND FEATURE1
 //!BIND FEATURE2
 //!SAVE MODEL21
@@ -121,7 +121,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 1_2
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 1_2
 //!BIND FEATURE1
 //!BIND FEATURE2
 //!SAVE MODEL22
@@ -153,7 +153,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 2_1
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 2_1
 //!BIND MODEL21
 //!BIND MODEL22
 //!SAVE MODEL1
@@ -185,7 +185,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 2_2
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 2_2
 //!BIND MODEL21
 //!BIND MODEL22
 //!SAVE MODEL2
@@ -217,7 +217,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 3_1
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 3_1
 //!BIND MODEL1
 //!BIND MODEL2
 //!SAVE MODEL21
@@ -249,7 +249,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 3_2
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 3_2
 //!BIND MODEL1
 //!BIND MODEL2
 //!SAVE MODEL22
@@ -281,7 +281,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 4_1
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 4_1
 //!BIND MODEL21
 //!BIND MODEL22
 //!SAVE MODEL1
@@ -313,7 +313,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) mapping 4_2
+//!DESC [FSRCNNX_x2_8_0_4_1] mapping 4_2
 //!BIND MODEL21
 //!BIND MODEL22
 //!SAVE MODEL2
@@ -345,7 +345,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) sub-band residuals 1
+//!DESC [FSRCNNX_x2_8_0_4_1] sub-band residuals 1
 //!BIND MODEL1
 //!BIND MODEL2
 //!BIND FEATURE1
@@ -363,7 +363,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) sub-band residuals 2
+//!DESC [FSRCNNX_x2_8_0_4_1] sub-band residuals 2
 //!BIND MODEL1
 //!BIND MODEL2
 //!BIND FEATURE2
@@ -381,7 +381,7 @@ return res;
 
 //!HOOK LUMA
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
-//!DESC (FSRCNNX_x2_8-0-4-1) sub-pixel convolution 1
+//!DESC [FSRCNNX_x2_8_0_4_1] sub-pixel convolution 1
 //!BIND RES1
 //!BIND RES2
 //!SAVE SUBCONV1
@@ -414,7 +414,7 @@ return vec4(res);
 //!WHEN OUTPUT.w LUMA.w / 1.200 > OUTPUT.h LUMA.h / 1.200 > *
 //!WIDTH LUMA.w 2 *
 //!HEIGHT LUMA.h 2 *
-//!DESC (FSRCNNX_x2_8-0-4-1) aggregation
+//!DESC [FSRCNNX_x2_8_0_4_1] aggregation
 //!BIND SUBCONV1
 vec4 hook()
 {

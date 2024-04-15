@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//!DESC NNEDI3 (double_y, nns128, win8x6)
+//!DESC [nnedi3_nns128_win8x6] (double_y, nns128, win8x6)
 //!HOOK LUMA
 //!BIND HOOKED
 //!HEIGHT 2 HOOKED.h *
@@ -229,7 +229,7 @@ ret0[0] = inp[local_pos + 41];
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(1, 2), ret0);
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(1, 2) + ivec2(0, 1), ret);
 }  // hook
-//!DESC NNEDI3 (double_x, nns128, win8x6)
+//!DESC [nnedi3_nns128_win8x6] (double_x, nns128, win8x6)
 //!HOOK LUMA
 //!BIND HOOKED
 //!WIDTH 2 HOOKED.w *

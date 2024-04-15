@@ -15,6 +15,10 @@ M.lsp = function(lspconfig, default_config)
                 shellcheckPath = shellcheckPath .. ".exe"
             end
             lspconfig.bashls.setup(vim.tbl_deep_extend("keep", {
+                filetypes = {
+                    "sh",
+                    "zsh",
+                },
                 settings = {
                     bashIde = {
                         shellcheckPath = shellcheckPath,
@@ -178,6 +182,7 @@ end
 M.lsp_list = vim.tbl_keys(M.lsp())
 
 M.lsp_filetype_list = {
+    "bib",
     "cpp",
     "json",
     "lua",
@@ -186,6 +191,7 @@ M.lsp_filetype_list = {
     "rust",
     "sh",
     "tex",
+    "zsh",
 }
 
 return M

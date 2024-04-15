@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use color_eyre::eyre::anyhow;
 use color_eyre::Result;
-use crossbeam_channel::select;
 use parking_lot::Mutex;
 
 use komorebi_core::OperationDirection;
@@ -42,12 +41,14 @@ pub fn listen_for_events(wm: Arc<Mutex<WindowManager>>) {
     std::thread::spawn(move || {
         tracing::info!("listening");
         loop {
-            select! {
-                recv(receiver) -> mut maybe_event => {
-                    if let Ok(event) = maybe_event.as_mut() {
-                        match wm.lock().process_event(event) {
-                            Ok(()) => {},
-                            Err(error) => tracing::error!("{}", error)
+            if let Ok(event) = receiver.recv() {
+                match wm.lock().process_event(event) {
+                    Ok(()) => {}
+                    Err(error) => {
+                        if cfg!(debug_assertions) {
+                            tracing::error!("{:?}", error)
+                        } else {
+                            tracing::error!("{}", error)
                         }
                     }
                 }
@@ -59,9 +60,39 @@ pub fn listen_for_events(wm: Arc<Mutex<WindowManager>>) {
 impl WindowManager {
     #[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
     #[tracing::instrument(skip(self))]
-    pub fn process_event(&mut self, event: &mut WindowManagerEvent) -> Result<()> {
+    pub fn process_event(&mut self, event: WindowManagerEvent) -> Result<()> {
         if self.is_paused {
             tracing::trace!("ignoring while paused");
+            return Ok(());
+        }
+
+        let should_manage = event.window().should_manage(Some(event))?;
+
+        // Hide or reposition the window based on whether the target is managed.
+        if BORDER_ENABLED.load(Ordering::SeqCst) {
+            if let WindowManagerEvent::FocusChange(_, window) = event {
+                let border_window = Border::from(BORDER_HWND.load(Ordering::SeqCst));
+
+                if should_manage {
+                    border_window.set_position(window, true)?;
+                } else {
+                    let mut stackbar = false;
+                    if let Ok(class) = window.class() {
+                        if class == "komorebi_stackbar" {
+                            stackbar = true;
+                        }
+                    }
+
+                    if !stackbar {
+                        border_window.hide()?;
+                    }
+                }
+            }
+        }
+
+        // All event handlers below this point should only be processed if the event is
+        // related to a window that should be managed by the WindowManager.
+        if !should_manage && !matches!(event, WindowManagerEvent::DisplayChange(_)) {
             return Ok(());
         }
 
@@ -85,7 +116,7 @@ impl WindowManager {
             | WindowManagerEvent::MoveResizeEnd(_, window) => {
                 self.reconcile_monitors()?;
 
-                let monitor_idx = self.monitor_idx_from_window(*window)
+                let monitor_idx = self.monitor_idx_from_window(window)
                     .ok_or_else(|| anyhow!("there is no monitor associated with this window, it may have already been destroyed"))?;
 
                 // This is a hidden window apparently associated with COM support mechanisms (based
@@ -122,6 +153,10 @@ impl WindowManager {
             };
 
             for (j, workspace) in monitor.workspaces_mut().iter_mut().enumerate() {
+                if let WindowManagerEvent::FocusChange(_, window) = event {
+                    let _ = workspace.focus_changed(window.hwnd);
+                }
+
                 let reaped_orphans = workspace.reap_orphans()?;
                 if reaped_orphans.0 > 0 || reaped_orphans.1 > 0 {
                     workspace.update(&work_area, offset)?;
@@ -146,14 +181,13 @@ impl WindowManager {
         }
 
         match event {
-            WindowManagerEvent::Raise(window) => {
-                window.focus(false)?;
+            WindowManagerEvent::Raise(_window) => {
                 self.has_pending_raise_op = false;
             }
             WindowManagerEvent::Destroy(_, window) | WindowManagerEvent::Unmanage(window) => {
                 self.focused_workspace_mut()?.remove_window(window.hwnd)?;
                 // NOTE: 重新 focus 当前窗口
-                self.update_focused_workspace(true)?;
+                self.update_focused_workspace(true, true)?;
 
                 let mut already_moved_window_handles = self.already_moved_window_handles.lock();
 
@@ -172,7 +206,7 @@ impl WindowManager {
                 if hide {
                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
                     // NOTE: 重新 focus 当前窗口
-                    self.update_focused_workspace(true)?;
+                    self.update_focused_workspace(true, true)?;
                 }
             }
             WindowManagerEvent::Hide(_, window) => {
@@ -214,7 +248,7 @@ impl WindowManager {
                 if hide {
                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
                     // NOTE: 重新 focus 当前窗口
-                    self.update_focused_workspace(true)?;
+                    self.update_focused_workspace(true, true)?;
                 }
 
                 let mut already_moved_window_handles = self.already_moved_window_handles.lock();
@@ -222,6 +256,8 @@ impl WindowManager {
                 already_moved_window_handles.remove(&window.hwnd);
             }
             WindowManagerEvent::FocusChange(_, window) => {
+                self.update_focused_workspace(true, false)?;
+
                 let workspace = self.focused_workspace_mut()?;
                 if !workspace
                     .floating_windows()
@@ -302,15 +338,15 @@ impl WindowManager {
                 if !workspace.contains_window(window.hwnd) {
                     match behaviour {
                         WindowContainerBehaviour::Create => {
-                            workspace.new_container_for_window(*window);
-                            self.update_focused_workspace(false)?;
+                            workspace.new_container_for_window(window);
+                            self.update_focused_workspace(false, false)?;
                         }
                         WindowContainerBehaviour::Append => {
                             workspace
                                 .focused_container_mut()
                                 .ok_or_else(|| anyhow!("there is no focused container"))?
-                                .add_window(*window);
-                            self.update_focused_workspace(true)?;
+                                .add_window(window);
+                            self.update_focused_workspace(true, false)?;
                         }
                     }
                 }
@@ -349,38 +385,53 @@ impl WindowManager {
                 let new_window_behaviour = self.window_container_behaviour;
 
                 let workspace = self.focused_workspace_mut()?;
-                if !workspace
-                    .floating_windows()
-                    .iter()
-                    .any(|w| w.hwnd == window.hwnd)
-                {
-                    let focused_container_idx = workspace.focused_container_idx();
 
-                    let new_position = WindowsApi::window_rect(window.hwnd())?;
+                let focused_container_idx = workspace.focused_container_idx();
+                let new_position = WindowsApi::window_rect(window.hwnd())?;
+                let old_position = *workspace
+                    .latest_layout()
+                    .get(focused_container_idx)
+                    // If the move was to another monitor with an empty workspace, the
+                    // workspace here will refer to that empty workspace, which won't
+                    // have any latest layout set. We fall back to a Default for Rect
+                    // which allows us to make a reasonable guess that the drag has taken
+                    // place across a monitor boundary to an empty workspace
+                    .unwrap_or(&Rect::default());
 
-                    let old_position = *workspace
-                        .latest_layout()
-                        .get(focused_container_idx)
-                        // If the move was to another monitor with an empty workspace, the
-                        // workspace here will refer to that empty workspace, which won't
-                        // have any latest layout set. We fall back to a Default for Rect
-                        // which allows us to make a reasonable guess that the drag has taken
-                        // place across a monitor boundary to an empty workspace
-                        .unwrap_or(&Rect::default());
+                // This will be true if we have moved to an empty workspace on another monitor
+                let mut moved_across_monitors = old_position == Rect::default();
+                if let Some((origin_monitor_idx, origin_workspace_idx, _)) = pending {
+                    // If we didn't move to another monitor with an empty workspace, it is
+                    // still possible that we moved to another monitor with a populated workspace
+                    if !moved_across_monitors {
+                        // So we'll check if the origin monitor index and the target monitor index
+                        // are different, if they are, we can set the override
+                        moved_across_monitors = origin_monitor_idx != target_monitor_idx;
 
-                    // This will be true if we have moved to an empty workspace on another monitor
-                    let mut moved_across_monitors = old_position == Rect::default();
+                        if moved_across_monitors {
+                            // Want to make sure that we exclude unmanaged windows from cross-monitor
+                            // moves with a mouse, otherwise the currently focused idx container will
+                            // be moved when we just want to drag an unmanaged window
+                            let origin_workspace = self
+                                .monitors()
+                                .get(origin_monitor_idx)
+                                .ok_or_else(|| anyhow!("cannot get monitor idx"))?
+                                .workspaces()
+                                .get(origin_workspace_idx)
+                                .ok_or_else(|| anyhow!("cannot get workspace idx"))?;
 
-                    if let Some((origin_monitor_idx, _, _)) = pending {
-                        // If we didn't move to another monitor with an empty workspace, it is
-                        // still possible that we moved to another monitor with a populated workspace
-                        if !moved_across_monitors {
-                            // So we'll check if the origin monitor index and the target monitor index
-                            // are different, if they are, we can set the override
-                            moved_across_monitors = origin_monitor_idx != target_monitor_idx;
+                            let managed_window =
+                                origin_workspace.contains_managed_window(window.hwnd);
+
+                            if !managed_window {
+                                moved_across_monitors = false;
+                            }
                         }
                     }
+                }
 
+                let workspace = self.focused_workspace_mut()?;
+                if workspace.contains_managed_window(window.hwnd) || moved_across_monitors {
                     let resize = Rect {
                         left: new_position.left - old_position.left,
                         top: new_position.top - old_position.top,
@@ -445,11 +496,11 @@ impl WindowManager {
                                 // the origin monitor's focused workspace
                                 self.focus_monitor(origin_monitor_idx)?;
                                 self.focus_workspace(origin_workspace_idx)?;
-                                self.update_focused_workspace(false)?;
+                                self.update_focused_workspace(false, false)?;
 
                                 self.focus_monitor(target_monitor_idx)?;
                                 self.focus_workspace(target_workspace_idx)?;
-                                self.update_focused_workspace(false)?;
+                                self.update_focused_workspace(false, false)?;
                             }
                             // Here we handle a simple move on the same monitor which is treated as
                             // a container swap
@@ -460,11 +511,12 @@ impl WindowManager {
                                         Some(target_idx) => {
                                             workspace
                                                 .swap_containers(focused_container_idx, target_idx);
-                                            self.update_focused_workspace(false)?;
+                                            self.update_focused_workspace(false, false)?;
                                         }
                                         None => {
                                             self.update_focused_workspace(
                                                 self.mouse_follows_focus,
+                                                false,
                                             )?;
                                         }
                                     }
@@ -473,11 +525,12 @@ impl WindowManager {
                                     match workspace.container_idx_from_current_point() {
                                         Some(target_idx) => {
                                             workspace.move_window_to_container(target_idx)?;
-                                            self.update_focused_workspace(false)?;
+                                            self.update_focused_workspace(false, false)?;
                                         }
                                         None => {
                                             self.update_focused_workspace(
                                                 self.mouse_follows_focus,
+                                                false,
                                             )?;
                                         }
                                     }
@@ -524,12 +577,12 @@ impl WindowManager {
                             self.resize_window(edge, sizing, delta, true)?;
                         }
 
-                        self.update_focused_workspace(false)?;
+                        self.update_focused_workspace(false, false)?;
                     }
                 }
             }
             WindowManagerEvent::ForceUpdate(_) => {
-                self.update_focused_workspace(false)?;
+                self.update_focused_workspace(false, true)?;
             }
             WindowManagerEvent::DisplayChange(..)
             | WindowManagerEvent::MouseCapture(..)
@@ -592,7 +645,7 @@ impl WindowManager {
                         .iter()
                         .any(|w| w.hwnd == window.hwnd)
                     {
-                        target_window = Option::from(*window);
+                        target_window = Option::from(window);
                         WindowsApi::raise_window(border.hwnd())?;
                     };
 
@@ -687,7 +740,7 @@ impl WindowManager {
 
         serde_json::to_writer_pretty(&file, &known_hwnds)?;
         notify_subscribers(&serde_json::to_string(&Notification {
-            event: NotificationEvent::WindowManager(*event),
+            event: NotificationEvent::WindowManager(event),
             state: self.as_ref().into(),
         })?)?;
 

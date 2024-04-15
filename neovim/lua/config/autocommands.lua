@@ -8,7 +8,7 @@ local utils = require("utils")
 -- 检测到对应类型的文件时发出 event
 vim.api.nvim_create_autocmd("Filetype", {
     callback = function(args)
-        utils.event("TreesitterFile")
+        utils.event("TreesitterFile", true)
         if not environment.is_vscode then
             utils.refresh_buf(args.buf, 1, true)
         end
@@ -22,7 +22,7 @@ if not environment.is_vscode then
     vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
         callback = function()
             if utils.is_git() then
-                utils.event("GitFile")
+                utils.event("GitFile", true)
                 vim.api.nvim_del_augroup_by_name("GitFile")
             end
         end,
@@ -31,7 +31,7 @@ if not environment.is_vscode then
     })
     vim.api.nvim_create_autocmd("Filetype", {
         callback = function(args)
-            utils.event("LspFile")
+            utils.event("LspFile", true)
             utils.refresh_buf(args.buf, 1, true)
             vim.api.nvim_del_augroup_by_name("LspFile")
         end,
@@ -88,16 +88,16 @@ if not environment.is_vscode then
         end,
         desc = "Change settings for text file",
         group = vim.api.nvim_create_augroup("TextSetting", { clear = true }),
-        pattern = filetype.text_filetype,
+        pattern = utils.table_concat(filetype.tex_filetype_list, filetype.text_filetype_list),
     })
 
-    -- 当关闭最后一个主编辑区域的 buf 时，自动关闭 sidebar
-    local auto_closed_sidebars = {}
+    -- 当关闭最后一个主编辑区域的 buf 时，自动关闭 panel
+    local auto_closed_panels = {}
     vim.api.nvim_create_autocmd("QuitPre", {
         callback = function(args)
             local buf = args.buf
             local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-            if filetype.is_in_toggle_filetype_list(ft) then
+            if filetype.is_panel_filetype(ft) then
                 return
             end
 
@@ -106,7 +106,7 @@ if not environment.is_vscode then
                 return
             end
 
-            local sidebars = {}
+            local panels = {}
             local floating_wins = {}
             local wins = vim.api.nvim_tabpage_list_wins(0)
 
@@ -117,9 +117,9 @@ if not environment.is_vscode then
 
                 buf = vim.api.nvim_win_get_buf(win)
                 ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                local is_toggle_filetype, func = filetype.is_toggle_filetype(ft)
-                if is_toggle_filetype then
-                    sidebars[#sidebars + 1] = {
+                local is_panel_filetype, func = filetype.get_panel_filetype_func(ft)
+                if is_panel_filetype then
+                    panels[#panels + 1] = {
                         win = win,
                         func = func,
                     }
@@ -132,22 +132,22 @@ if not environment.is_vscode then
                 ::continue::
             end
 
-            if #wins - #floating_wins - #sidebars == 1 then
-                for _, sidebar in ipairs(sidebars) do
-                    local close_func = sidebar.func.close
+            if #wins - #floating_wins - #panels == 1 then
+                for _, panel in ipairs(panels) do
+                    local close_func = panel.func.close
                     if type(close_func) == "function" then
                         close_func()
                     else
-                        vim.api.nvim_win_close(sidebar.win, true)
+                        vim.api.nvim_win_close(panel.win, true)
                     end
                 end
 
-                utils.clear(auto_closed_sidebars)
-                auto_closed_sidebars = sidebars
+                utils.table_clear(auto_closed_panels)
+                auto_closed_panels = panels
             end
         end,
-        desc = "Auto close sidebar",
-        group = vim.api.nvim_create_augroup("SidebarAutoClose", { clear = true }),
+        desc = "Auto close panel",
+        group = vim.api.nvim_create_augroup("PanelAutoClose", { clear = true }),
     })
 
     -- 录制 macro 时显示信息
@@ -155,14 +155,14 @@ if not environment.is_vscode then
         local show_recording = vim.api.nvim_create_augroup("ShowRecording", { clear = true })
         vim.api.nvim_create_autocmd("RecordingEnter", {
             callback = function()
-                vim.api.nvim_set_option_value("cmdheight", 1, {})
+                vim.api.nvim_set_option_value("cmdheight", 1, { scope = "local" })
             end,
             desc = "Set cmdheight=1 when start recording",
             group = show_recording,
         })
         vim.api.nvim_create_autocmd("RecordingLeave", {
             callback = function()
-                vim.api.nvim_set_option_value("cmdheight", 0, {})
+                vim.api.nvim_set_option_value("cmdheight", 0, { scope = "local" })
             end,
             desc = "Set cmdheight=0 when finished recording",
             group = show_recording,
@@ -186,9 +186,9 @@ if not environment.is_vscode then
         group = vim.api.nvim_create_augroup("GoToLeftTab", { clear = true }),
     })
 
-    -- 跨 tab 同步侧边栏的打开状态
-    local opened_sidebars = {}
-    local synchronize_sidebar_status_across_tabs = vim.api.nvim_create_augroup("SynchronizeSidebarStatusAcrossTabs", { clear = true })
+    -- 跨 tab 同步 panel 的打开状态
+    local opened_panels = {}
+    local synchronize_panel_status_across_tabs = vim.api.nvim_create_augroup("SynchronizePanelStatusAcrossTabs", { clear = true })
     vim.api.nvim_create_autocmd("TabLeave", {
         callback = function()
             local is_opening_tab = vim.g.is_opening_tab or false
@@ -196,11 +196,11 @@ if not environment.is_vscode then
                 return
             end
 
-            if #auto_closed_sidebars > 0 then
+            if #auto_closed_panels > 0 then
                 return
             end
 
-            utils.clear(opened_sidebars)
+            utils.table_clear(opened_panels)
 
             for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 if not vim.api.nvim_win_is_valid(win) then
@@ -209,8 +209,8 @@ if not environment.is_vscode then
 
                 local buf = vim.api.nvim_win_get_buf(win)
                 local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                local is_toggle_filetype, func = filetype.is_toggle_filetype(ft)
-                if is_toggle_filetype then
+                local is_panel_filetype, func = filetype.get_panel_filetype_func(ft)
+                if is_panel_filetype then
                     local close_func = func.close
                     if type(close_func) == "function" then
                         close_func()
@@ -218,7 +218,7 @@ if not environment.is_vscode then
                         vim.api.nvim_win_close(win, true)
                     end
 
-                    opened_sidebars[#opened_sidebars + 1] = {
+                    opened_panels[#opened_panels + 1] = {
                         win = win,
                         func = func,
                     }
@@ -227,8 +227,8 @@ if not environment.is_vscode then
                 ::continue::
             end
         end,
-        desc = "Remember sidebar status",
-        group = synchronize_sidebar_status_across_tabs,
+        desc = "Remember panel status",
+        group = synchronize_panel_status_across_tabs,
     })
     vim.api.nvim_create_autocmd("TabEnter", {
         callback = function()
@@ -237,34 +237,34 @@ if not environment.is_vscode then
                 return
             end
 
-            local function reopen(sidebars)
+            local function reopen(panels)
                 local is_opened = false
 
-                for _, sidebar in ipairs(sidebars) do
-                    local open_func = sidebar.func.open
+                for _, panel in ipairs(panels) do
+                    local open_func = panel.func.open
                     if type(open_func) == "function" then
                         vim.schedule(function() open_func() end)
                         is_opened = true
                     end
                 end
 
-                utils.clear(sidebars)
+                utils.table_clear(panels)
 
                 return is_opened
             end
 
             local is_opened
-            if #auto_closed_sidebars > 0 then
-                is_opened = reopen(auto_closed_sidebars)
+            if #auto_closed_panels > 0 then
+                is_opened = reopen(auto_closed_panels)
             else
-                is_opened = reopen(opened_sidebars)
+                is_opened = reopen(opened_panels)
             end
 
             if is_opened then
                 utils.defer(function() filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1) end, 100, false)
             end
         end,
-        desc = "Restore sidebar status",
-        group = synchronize_sidebar_status_across_tabs,
+        desc = "Restore panel status",
+        group = synchronize_panel_status_across_tabs,
     })
 end

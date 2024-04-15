@@ -6,23 +6,18 @@
         {
             "command": 
             {
-                "action": "resizePane",
-                "direction": "left"
+                "action": "sendInput",
+                "input": "\u001b[1;5R"
             },
-            "keys": "ctrl+shift+left"
+            "keys": "ctrl+3"
         },
         {
-            "command": "find",
-            "keys": "ctrl+shift+f"
-        },
-        {
-            "command": "openSystemMenu"
-        },
-        {
-            "command": "duplicateTab"
-        },
-        {
-            "command": "paste"
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[1;5P"
+            },
+            "keys": "ctrl+1"
         },
         {
             "command": 
@@ -34,9 +29,81 @@
         {
             "command": 
             {
-                "action": "copy",
-                "singleLine": false
+                "action": "sendInput",
+                "input": "\u001b[18;5~"
+            },
+            "keys": "ctrl+period"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[21;5~"
+            },
+            "keys": "ctrl+shift+t"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[1;5Q"
+            },
+            "keys": "ctrl+2"
+        },
+        {
+            "command": 
+            {
+                "action": "quakeMode"
             }
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[1;5S"
+            },
+            "keys": "ctrl+4"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[15;5~"
+            },
+            "keys": "ctrl+space"
+        },
+        {
+            "command": 
+            {
+                "action": "globalSummon"
+            }
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[17;5~"
+            },
+            "keys": "ctrl+comma"
+        },
+        {
+            "command": "duplicateTab"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[19;5~"
+            },
+            "keys": "ctrl+;"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[20;5~"
+            },
+            "keys": "ctrl+shift+n"
         },
         {
             "command": 
@@ -49,20 +116,50 @@
         {
             "command": 
             {
-                "action": "swapPane",
-                "direction": "previous"
-            },
-            "keys": "ctrl+shift+e"
+                "action": "splitPane",
+                "split": "auto",
+                "splitMode": "duplicate"
+            }
         },
         {
             "command": 
             {
-                "action": "quakeMode"
-            }
+                "action": "scrollDown"
+            },
+            "keys": "ctrl+shift+d"
         },
         {
-            "command": "scrollToTop",
-            "keys": "ctrl+home"
+            "command": "find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "left"
+            },
+            "keys": "ctrl+shift+left"
+        },
+        {
+            "command": "paste"
+        },
+        {
+            "command": "openSystemMenu"
+        },
+        {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "up"
+            },
+            "keys": "ctrl+shift+up"
+        },
+        {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            }
         },
         {
             "command": 
@@ -71,6 +168,18 @@
                 "direction": "forward"
             },
             "keys": "ctrl+shift+period"
+        },
+        {
+            "command": 
+            {
+                "action": "swapPane",
+                "direction": "previous"
+            },
+            "keys": "ctrl+shift+e"
+        },
+        {
+            "command": "scrollToTop",
+            "keys": "ctrl+home"
         },
         {
             "command": "toggleSplitOrientation"
@@ -241,15 +350,7 @@
         },
         {
             "command": "unbound",
-            "keys": "ctrl+period"
-        },
-        {
-            "command": "unbound",
             "keys": "ctrl+alt+comma"
-        },
-        {
-            "command": "unbound",
-            "keys": "ctrl+comma"
         },
         {
             "command": "unbound",
@@ -305,10 +406,6 @@
         },
         {
             "command": "unbound",
-            "keys": "ctrl+shift+t"
-        },
-        {
-            "command": "unbound",
             "keys": "ctrl+c"
         },
         {
@@ -336,12 +433,40 @@
             "keys": "ctrl+v"
         },
         {
-            "command": 
-            {
-                "action": "splitPane",
-                "split": "auto",
-                "splitMode": "duplicate"
-            }
+            "command": "unbound",
+            "keys": "ctrl+shift+m"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+shift+o"
+        },
+        {
+            "command": "unbound",
+            "keys": "f11"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+numpad_minus"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+numpad_plus"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+insert"
+        },
+        {
+            "command": "unbound",
+            "keys": "menu"
+        },
+        {
+            "command": "unbound",
+            "keys": "shift+insert"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+numpad0"
         },
         {
             "command": 
@@ -411,33 +536,10 @@
             "keys": "ctrl+shift+k"
         },
         {
-            "command": "togglePaneZoom",
-            "keys": "ctrl+shift+o"
+            "command": "togglePaneZoom"
         },
         {
             "command": "identifyWindow"
-        },
-        {
-            "command": 
-            {
-                "action": "resizePane",
-                "direction": "up"
-            },
-            "keys": "ctrl+shift+up"
-        },
-        {
-            "command": 
-            {
-                "action": "scrollDown"
-            },
-            "keys": "ctrl+shift+d"
-        },
-        {
-            "command": 
-            {
-                "action": "nextTab"
-            },
-            "keys": "ctrl+shift+l"
         },
         {
             "command": 
@@ -448,7 +550,15 @@
             }
         },
         {
-            "command": "scrollDownPage"
+            "command": 
+            {
+                "action": "nextTab"
+            },
+            "keys": "ctrl+shift+l"
+        },
+        {
+            "command": "scrollDownPage",
+            "keys": "ctrl+pgdn"
         },
         {
             "command": 
@@ -457,13 +567,8 @@
             }
         },
         {
-            "command": "scrollUpPage"
-        },
-        {
-            "command": 
-            {
-                "action": "globalSummon"
-            }
+            "command": "scrollUpPage",
+            "keys": "ctrl+pgup"
         },
         {
             "command": 
@@ -482,6 +587,12 @@
     "experimental.rendering.forceFullRepaint": false,
     "experimental.rendering.software": false,
     "language": "zh-Hans-CN",
+    "newTabMenu": 
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
     "profiles": 
     {
         "defaults": 
@@ -518,7 +629,6 @@
             {
                 "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
                 "hidden": false,
-                "icon": "C:\\Program Files\\WindowsApps\\22955VineelSai.ArchWSL_1.0.3.0_x64__qz230bc1wsk9j\\Assets\\LargeTile.scale-200.png",
                 "name": "Arch",
                 "source": "Windows.Terminal.Wsl"
             },
@@ -527,13 +637,6 @@
                 "guid": "{6c6fa2ca-edb6-4489-9346-61ce302a091a}",
                 "icon": "C:/Program Files/Git/mingw64/share/git/git-for-windows.ico",
                 "name": "Git Bash",
-                "startingDirectory": "%USERPROFILE%"
-            },
-            {
-                "commandline": "cmd.exe /k \"%USERPROFILE%/miniconda3/Scripts/activate.bat %USERPROFILE%/miniconda3\"",
-                "guid": "{866fcf0d-83ce-434f-b2ad-f068afd65e91}",
-                "icon": "%USERPROFILE%/miniconda3/Menu/Iconleak-Atrous-Console.ico",
-                "name": "Anaconda3",
                 "startingDirectory": "%USERPROFILE%"
             },
             {

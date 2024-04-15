@@ -278,7 +278,7 @@ change_window_size(direction := "left", size := 40) {
 }
 #HotIf
 
-#HotIf GetKeyState("Capslock", "P") && GetKeyState("Space", "P")
+#HotIf GetKeyState("Capslock", "P") && GetKeyState("Alt", "P")
 *W:: change_window_size("up", 60)
 *S:: change_window_size("down", 60)
 *A:: change_window_size("left", 60)
