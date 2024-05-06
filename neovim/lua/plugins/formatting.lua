@@ -1,6 +1,5 @@
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
-local utils = require("utils")
 
 return {
     {
@@ -12,13 +11,24 @@ return {
             { "ga", desc = "Align",              mode = { "n", "x" } },
             { "gA", desc = "Align with preview", mode = { "n", "x" } },
         },
-        opts = {
-            -- Module mappings. Use `''` (empty string) to disable one.
-            mappings = {
-                start = "ga",
-                start_with_preview = "gA",
-            },
-        },
+        opts = function()
+            local align = require("mini.align")
+            return {
+                -- Module mappings. Use `''` (empty string) to disable one.
+                mappings = {
+                    start = "ga",
+                    start_with_preview = "gA",
+                },
+
+                -- Modifiers changing alignment steps and/or options
+                modifiers = {
+                    ["T"] = function(steps, opts)
+                        table.insert(steps.pre_justify, align.gen_step.trim())
+                        opts.merge_delimiter = " "
+                    end,
+                },
+            }
+        end,
     },
 
     {

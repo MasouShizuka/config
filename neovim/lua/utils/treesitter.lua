@@ -2,11 +2,9 @@ local M = {}
 
 M.treesitter = {
     "bash",
-    "bibtex",
     "c",
     "cpp",
     "html",
-    "latex",
     "lua",
     "markdown",
     "markdown_inline",
@@ -19,7 +17,6 @@ M.treesitter = {
 }
 
 M.treesitter_filetype_list = {
-    "bib",
     "c",
     "cpp",
     "help",
@@ -29,7 +26,6 @@ M.treesitter_filetype_list = {
     "python",
     "rust",
     "sh",
-    "tex",
     "vim",
 }
 

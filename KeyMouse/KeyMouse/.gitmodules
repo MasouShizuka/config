@@ -1,3 +1,0 @@
-[submodule "KeyMouse/json"]
-	path = KeyMouse/json
-	url = https://github.com/nlohmann/json.git

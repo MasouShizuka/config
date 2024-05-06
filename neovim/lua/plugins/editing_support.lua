@@ -369,6 +369,9 @@ return {
             if is_which_key_available then
                 which_key.register({
                     mode = { "n", "x" },
+                    ["<leader>gc"] = {
+                        name = "+comment box",
+                    },
                     ["<leader>gcb"] = {
                         name = "+boxes",
                     },

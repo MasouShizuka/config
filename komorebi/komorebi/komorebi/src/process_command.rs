@@ -44,12 +44,15 @@ use crate::colour::Rgb;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
 use crate::static_config::StaticConfig;
+use crate::window::RuleDebug;
 use crate::window::Window;
 use crate::window_manager;
 use crate::window_manager::WindowManager;
 use crate::windows_api::WindowsApi;
+use crate::GlobalState;
 use crate::Notification;
 use crate::NotificationEvent;
+use crate::ACTIVE_WINDOW_BORDER_STYLE;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_COLOUR_MONOCLE;
 use crate::BORDER_COLOUR_SINGLE;
@@ -71,6 +74,12 @@ use crate::MONITOR_INDEX_PREFERENCES;
 use crate::NO_TITLEBAR;
 use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REMOVE_TITLEBARS;
+use crate::STACKBAR_FOCUSED_TEXT_COLOUR;
+use crate::STACKBAR_MODE;
+use crate::STACKBAR_TAB_BACKGROUND_COLOUR;
+use crate::STACKBAR_TAB_HEIGHT;
+use crate::STACKBAR_TAB_WIDTH;
+use crate::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::SUBSCRIPTION_PIPES;
 use crate::SUBSCRIPTION_SOCKETS;
 use crate::TCP_CONNECTIONS;
@@ -450,6 +459,9 @@ impl WindowManager {
             SocketMessage::SendContainerToMonitorWorkspaceNumber(monitor_idx, workspace_idx) => {
                 self.move_container_to_monitor(monitor_idx, Option::from(workspace_idx), false)?;
             }
+            SocketMessage::MoveContainerToMonitorWorkspaceNumber(monitor_idx, workspace_idx) => {
+                self.move_container_to_monitor(monitor_idx, Option::from(workspace_idx), true)?;
+            }
             SocketMessage::SendContainerToNamedWorkspace(ref workspace) => {
                 if let Some((monitor_idx, workspace_idx)) =
                     self.monitor_workspace_index_by_name(workspace)
@@ -759,6 +771,18 @@ impl WindowManager {
                 reply.write_all(state.as_bytes())?;
 
                 tracing::info!("replying to state done");
+            }
+            SocketMessage::GlobalState => {
+                let state = match serde_json::to_string_pretty(&GlobalState::default()) {
+                    Ok(state) => state,
+                    Err(error) => error.to_string(),
+                };
+
+                tracing::info!("replying to global state");
+
+                reply.write_all(state.as_bytes())?;
+
+                tracing::info!("replying to global state done");
             }
             SocketMessage::VisibleWindows => {
                 let mut monitor_visible_windows = HashMap::new();
@@ -1236,13 +1260,49 @@ impl WindowManager {
 
                 WindowsApi::invalidate_border_rect()?;
             }
-            SocketMessage::ActiveWindowBorderWidth(width) => {
+            SocketMessage::ActiveWindowBorderStyle(style) => {
+                let mut active_window_border_style = ACTIVE_WINDOW_BORDER_STYLE.lock();
+                *active_window_border_style = style;
+
+                WindowsApi::invalidate_border_rect()?;
+            }
+            SocketMessage::BorderWidth(width) => {
                 BORDER_WIDTH.store(width, Ordering::SeqCst);
                 WindowsApi::invalidate_border_rect()?;
             }
-            SocketMessage::ActiveWindowBorderOffset(offset) => {
+            SocketMessage::BorderOffset(offset) => {
                 BORDER_OFFSET.store(offset, Ordering::SeqCst);
                 WindowsApi::invalidate_border_rect()?;
+            }
+            SocketMessage::StackbarMode(mode) => {
+                let mut stackbar_mode = STACKBAR_MODE.lock();
+                *stackbar_mode = mode;
+
+                for m in self.monitors_mut() {
+                    for w in m.workspaces_mut() {
+                        for c in w.containers_mut() {
+                            c.set_stackbar_mode(mode);
+                        }
+                    }
+                }
+            }
+            SocketMessage::StackbarFocusedTextColour(r, g, b) => {
+                let rgb = Rgb::new(r, g, b);
+                STACKBAR_FOCUSED_TEXT_COLOUR.store(rgb.into(), Ordering::SeqCst);
+            }
+            SocketMessage::StackbarUnfocusedTextColour(r, g, b) => {
+                let rgb = Rgb::new(r, g, b);
+                STACKBAR_UNFOCUSED_TEXT_COLOUR.store(rgb.into(), Ordering::SeqCst);
+            }
+            SocketMessage::StackbarBackgroundColour(r, g, b) => {
+                let rgb = Rgb::new(r, g, b);
+                STACKBAR_TAB_BACKGROUND_COLOUR.store(rgb.into(), Ordering::SeqCst);
+            }
+            SocketMessage::StackbarHeight(height) => {
+                STACKBAR_TAB_HEIGHT.store(height, Ordering::SeqCst);
+            }
+            SocketMessage::StackbarTabWidth(width) => {
+                STACKBAR_TAB_WIDTH.store(width, Ordering::SeqCst);
             }
             SocketMessage::ApplicationSpecificConfigurationSchema => {
                 let asc = schema_for!(Vec<ApplicationConfiguration>);
@@ -1290,6 +1350,14 @@ impl WindowManager {
                 let current = REMOVE_TITLEBARS.load(Ordering::SeqCst);
                 REMOVE_TITLEBARS.store(!current, Ordering::SeqCst);
                 self.update_focused_workspace(false, false)?;
+            }
+            SocketMessage::DebugWindow(hwnd) => {
+                let window = Window { hwnd };
+                let mut rule_debug = RuleDebug::default();
+                let _ = window.should_manage(None, &mut rule_debug);
+                let schema = serde_json::to_string_pretty(&rule_debug)?;
+
+                reply.write_all(schema.as_bytes())?;
             }
             // Deprecated commands
             SocketMessage::AltFocusHack(_)
@@ -1341,6 +1409,8 @@ impl WindowManager {
             | SocketMessage::MoveWorkspaceToMonitorNumber(_)
             | SocketMessage::MoveContainerToMonitorNumber(_)
             | SocketMessage::MoveContainerToWorkspaceNumber(_)
+            | SocketMessage::MoveContainerToMonitorWorkspaceNumber(_, _)
+            | SocketMessage::MoveContainerToNamedWorkspace(_)
             | SocketMessage::SendContainerToMonitorNumber(_)
             | SocketMessage::SendContainerToWorkspaceNumber(_)
             | SocketMessage::SendContainerToMonitorWorkspaceNumber(_, _)
@@ -1356,7 +1426,7 @@ impl WindowManager {
             | SocketMessage::Retile
             // Adding this one so that changes can be seen instantly after
             // modifying the active window border offset
-            | SocketMessage::ActiveWindowBorderOffset(_)
+            | SocketMessage::BorderOffset(_)
             // Adding this one because sometimes EVENT_SYSTEM_FOREGROUND isn't
             // getting sent on FocusWindow, meaning the border won't be set
             // when processing events
@@ -1511,7 +1581,10 @@ pub fn read_commands_uds(wm: &Arc<Mutex<WindowManager>>, mut stream: UnixStream)
 
         if wm.is_paused {
             return match message {
-                SocketMessage::TogglePause | SocketMessage::State | SocketMessage::Stop => {
+                SocketMessage::TogglePause
+                | SocketMessage::State
+                | SocketMessage::GlobalState
+                | SocketMessage::Stop => {
                     // NOTE: 向 subscribes 发送事件
                     wm.process_command(message.clone(), &mut stream)?;
                     notify_subscribers(&serde_json::to_string(&Notification {
@@ -1566,7 +1639,10 @@ pub fn read_commands_tcp(
 
                 if wm.is_paused {
                     return match message {
-                        SocketMessage::TogglePause | SocketMessage::State | SocketMessage::Stop => {
+                        SocketMessage::TogglePause
+                        | SocketMessage::State
+                        | SocketMessage::GlobalState
+                        | SocketMessage::Stop => {
                             // NOTE: 向 subscribes 发送事件
                             wm.process_command(message.clone(), stream)?;
                             notify_subscribers(&serde_json::to_string(&Notification {

@@ -359,11 +359,16 @@ return {
                         if node.type ~= "directory" then
                             api.node.navigate.parent()
                             api.tree.change_root_to_node()
+                            vim.api.nvim_set_current_dir(node.parent.absolute_path)
                         else
                             api.tree.change_root_to_node()
+                            vim.api.nvim_set_current_dir(node.absolute_path)
                         end
                     end, opts("CD"))
-                    vim.keymap.set("n", "H", api.tree.change_root_to_parent, opts("Up"))
+                    vim.keymap.set("n", "H", function ()
+                        api.tree.change_root_to_parent()
+                        vim.api.nvim_set_current_dir(vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ":h"))
+                    end, opts("Up"))
                     vim.keymap.set("n", "<c-f>", api.tree.search_node, opts("Search"))
                     vim.keymap.set("n", "zm", api.tree.collapse_all, opts("Collapse"))
                     vim.keymap.set("n", "zr", api.tree.expand_all, opts("Expand All"))
@@ -432,7 +437,7 @@ return {
                             b = { val = modify(name, ":r"), msg = "Filename w/o extension" },
                             h = { val = modify(absolute_path, ":~"), msg = "Path relative to Home" },
                             r = { val = modify(absolute_path, ":."), msg = "Path relative to CWD" },
-                            a = { val = absolute_path, msg = "Absolute path" },
+                            y = { val = absolute_path, msg = "Absolute path" },
                         }
 
                         local messages = {
@@ -562,6 +567,7 @@ return {
                 },
                 git = {
                     enable = true,
+                    timeout = 5000,
                 },
                 diagnostics = {
                     enable = true,

@@ -15,6 +15,7 @@ use crate::border::Border;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
 use crate::window::should_act;
+use crate::window::RuleDebug;
 use crate::window_manager::WindowManager;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
@@ -66,7 +67,9 @@ impl WindowManager {
             return Ok(());
         }
 
-        let should_manage = event.window().should_manage(Some(event))?;
+        let mut rule_debug = RuleDebug::default();
+
+        let should_manage = event.window().should_manage(Some(event), &mut rule_debug)?;
 
         // Hide or reposition the window based on whether the target is managed.
         if BORDER_ENABLED.load(Ordering::SeqCst) {
@@ -181,17 +184,20 @@ impl WindowManager {
         }
 
         match event {
-            WindowManagerEvent::Raise(_window) => {
+            WindowManagerEvent::Raise(window) => {
+                window.focus(false)?;
                 self.has_pending_raise_op = false;
             }
             WindowManagerEvent::Destroy(_, window) | WindowManagerEvent::Unmanage(window) => {
-                self.focused_workspace_mut()?.remove_window(window.hwnd)?;
-                // NOTE: 重新 focus 当前窗口
-                self.update_focused_workspace(true, true)?;
+                if self.focused_workspace()?.contains_window(window.hwnd) {
+                    self.focused_workspace_mut()?.remove_window(window.hwnd)?;
+                    // NOTE: 重新 focus 当前窗口
+                    self.update_focused_workspace(true, true)?;
 
-                let mut already_moved_window_handles = self.already_moved_window_handles.lock();
+                    let mut already_moved_window_handles = self.already_moved_window_handles.lock();
 
-                already_moved_window_handles.remove(&window.hwnd);
+                    already_moved_window_handles.remove(&window.hwnd);
+                }
             }
             WindowManagerEvent::Minimize(_, window) => {
                 let mut hide = false;
@@ -235,7 +241,8 @@ impl WindowManager {
                         path,
                         &tray_and_multi_window_identifiers,
                         &regex_identifiers,
-                    );
+                    )
+                    .is_some();
 
                     if !window.is_window()
                         || should_act
@@ -256,7 +263,7 @@ impl WindowManager {
                 already_moved_window_handles.remove(&window.hwnd);
             }
             WindowManagerEvent::FocusChange(_, window) => {
-                self.update_focused_workspace(true, false)?;
+                self.update_focused_workspace(self.mouse_follows_focus, false)?;
 
                 let workspace = self.focused_workspace_mut()?;
                 if !workspace

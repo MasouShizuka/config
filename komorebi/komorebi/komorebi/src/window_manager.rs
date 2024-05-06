@@ -16,6 +16,7 @@ use hotwatch::notify::ErrorKind as NotifyErrorKind;
 use hotwatch::EventKind;
 use hotwatch::Hotwatch;
 use parking_lot::Mutex;
+use regex::Regex;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
@@ -23,11 +24,13 @@ use uds_windows::UnixListener;
 
 use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::custom_layout::CustomLayout;
+use komorebi_core::ActiveWindowBorderStyle;
 use komorebi_core::Arrangement;
 use komorebi_core::Axis;
 use komorebi_core::CycleDirection;
 use komorebi_core::DefaultLayout;
 use komorebi_core::FocusFollowsMouseImplementation;
+use komorebi_core::HidingBehaviour;
 use komorebi_core::Layout;
 use komorebi_core::MoveBehaviour;
 use komorebi_core::OperationBehaviour;
@@ -48,10 +51,23 @@ use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::winevent_listener;
 use crate::workspace::Workspace;
+use crate::ActiveWindowBorderColours;
+use crate::Colour;
+use crate::Rgb;
+use crate::WorkspaceRule;
+use crate::ACTIVE_WINDOW_BORDER_STYLE;
+use crate::BORDER_COLOUR_MONOCLE;
+use crate::BORDER_COLOUR_SINGLE;
+use crate::BORDER_COLOUR_STACK;
+use crate::BORDER_ENABLED;
 use crate::BORDER_HWND;
+use crate::BORDER_OFFSET;
+use crate::BORDER_WIDTH;
+use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
 use crate::DISPLAY_INDEX_PREFERENCES;
 use crate::FLOAT_IDENTIFIERS;
+use crate::HIDING_BEHAVIOUR;
 use crate::HOME_DIR;
 use crate::LAYERED_WHITELIST;
 use crate::MANAGE_IDENTIFIERS;
@@ -59,8 +75,15 @@ use crate::MONITOR_INDEX_PREFERENCES;
 use crate::NO_TITLEBAR;
 use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REMOVE_TITLEBARS;
+use crate::STACKBAR_FOCUSED_TEXT_COLOUR;
+use crate::STACKBAR_MODE;
+use crate::STACKBAR_TAB_BACKGROUND_COLOUR;
+use crate::STACKBAR_TAB_HEIGHT;
+use crate::STACKBAR_TAB_WIDTH;
+use crate::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
 use crate::WORKSPACE_RULES;
+use komorebi_core::StackbarMode;
 
 #[derive(Debug)]
 pub struct WindowManager {
@@ -91,10 +114,27 @@ pub struct State {
     pub resize_delta: i32,
     pub new_window_behaviour: WindowContainerBehaviour,
     pub cross_monitor_move_behaviour: MoveBehaviour,
+    pub unmanaged_window_operation_behaviour: OperationBehaviour,
     pub work_area_offset: Option<Rect>,
     pub focus_follows_mouse: Option<FocusFollowsMouseImplementation>,
     pub mouse_follows_focus: bool,
     pub has_pending_raise_op: bool,
+}
+
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct GlobalState {
+    pub active_window_border_enabled: bool,
+    pub active_window_border_colours: ActiveWindowBorderColours,
+    pub active_window_border_style: ActiveWindowBorderStyle,
+    pub border_offset: i32,
+    pub border_width: i32,
+    pub stackbar_mode: StackbarMode,
+    pub stackbar_focused_text_colour: Colour,
+    pub stackbar_unfocused_text_colour: Colour,
+    pub stackbar_tab_background_colour: Colour,
+    pub stackbar_tab_width: i32,
+    pub stackbar_height: i32,
     pub remove_titlebars: bool,
     pub float_identifiers: Vec<MatchingRule>,
     pub manage_identifiers: Vec<MatchingRule>,
@@ -103,6 +143,52 @@ pub struct State {
     pub name_change_on_launch_identifiers: Vec<MatchingRule>,
     pub monitor_index_preferences: HashMap<usize, Rect>,
     pub display_index_preferences: HashMap<usize, String>,
+    pub workspace_rules: HashMap<String, WorkspaceRule>,
+    pub window_hiding_behaviour: HidingBehaviour,
+    pub configuration_dir: PathBuf,
+    pub data_dir: PathBuf,
+    pub custom_ffm: bool,
+}
+
+impl Default for GlobalState {
+    fn default() -> Self {
+        Self {
+            active_window_border_enabled: BORDER_ENABLED.load(Ordering::SeqCst),
+            active_window_border_colours: ActiveWindowBorderColours {
+                single: Colour::Rgb(Rgb::from(BORDER_COLOUR_SINGLE.load(Ordering::SeqCst))),
+                stack: Colour::Rgb(Rgb::from(BORDER_COLOUR_STACK.load(Ordering::SeqCst))),
+                monocle: Colour::Rgb(Rgb::from(BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst))),
+            },
+            active_window_border_style: *ACTIVE_WINDOW_BORDER_STYLE.lock(),
+            border_offset: BORDER_OFFSET.load(Ordering::SeqCst),
+            border_width: BORDER_WIDTH.load(Ordering::SeqCst),
+            stackbar_mode: *STACKBAR_MODE.lock(),
+            stackbar_focused_text_colour: Colour::Rgb(Rgb::from(
+                STACKBAR_FOCUSED_TEXT_COLOUR.load(Ordering::SeqCst),
+            )),
+            stackbar_unfocused_text_colour: Colour::Rgb(Rgb::from(
+                STACKBAR_UNFOCUSED_TEXT_COLOUR.load(Ordering::SeqCst),
+            )),
+            stackbar_tab_background_colour: Colour::Rgb(Rgb::from(
+                STACKBAR_TAB_BACKGROUND_COLOUR.load(Ordering::SeqCst),
+            )),
+            stackbar_tab_width: STACKBAR_TAB_WIDTH.load(Ordering::SeqCst),
+            stackbar_height: STACKBAR_TAB_HEIGHT.load(Ordering::SeqCst),
+            remove_titlebars: REMOVE_TITLEBARS.load(Ordering::SeqCst),
+            float_identifiers: FLOAT_IDENTIFIERS.lock().clone(),
+            manage_identifiers: MANAGE_IDENTIFIERS.lock().clone(),
+            layered_whitelist: LAYERED_WHITELIST.lock().clone(),
+            tray_and_multi_window_identifiers: TRAY_AND_MULTI_WINDOW_IDENTIFIERS.lock().clone(),
+            name_change_on_launch_identifiers: OBJECT_NAME_CHANGE_ON_LAUNCH.lock().clone(),
+            monitor_index_preferences: MONITOR_INDEX_PREFERENCES.lock().clone(),
+            display_index_preferences: DISPLAY_INDEX_PREFERENCES.lock().clone(),
+            workspace_rules: WORKSPACE_RULES.lock().clone(),
+            window_hiding_behaviour: *HIDING_BEHAVIOUR.lock(),
+            configuration_dir: HOME_DIR.clone(),
+            data_dir: DATA_DIR.clone(),
+            custom_ffm: CUSTOM_FFM.load(Ordering::SeqCst),
+        }
+    }
 }
 
 impl AsRef<Self> for WindowManager {
@@ -123,14 +209,7 @@ impl From<&WindowManager> for State {
             focus_follows_mouse: wm.focus_follows_mouse,
             mouse_follows_focus: wm.mouse_follows_focus,
             has_pending_raise_op: wm.has_pending_raise_op,
-            remove_titlebars: REMOVE_TITLEBARS.load(Ordering::SeqCst),
-            float_identifiers: FLOAT_IDENTIFIERS.lock().clone(),
-            manage_identifiers: MANAGE_IDENTIFIERS.lock().clone(),
-            layered_whitelist: LAYERED_WHITELIST.lock().clone(),
-            tray_and_multi_window_identifiers: TRAY_AND_MULTI_WINDOW_IDENTIFIERS.lock().clone(),
-            name_change_on_launch_identifiers: OBJECT_NAME_CHANGE_ON_LAUNCH.lock().clone(),
-            monitor_index_preferences: MONITOR_INDEX_PREFERENCES.lock().clone(),
-            display_index_preferences: DISPLAY_INDEX_PREFERENCES.lock().clone(),
+            unmanaged_window_operation_behaviour: wm.unmanaged_window_operation_behaviour,
         }
     }
 }
@@ -522,11 +601,36 @@ impl WindowManager {
                 // And all the visible windows (at the top of a container)
                 for window in workspace.visible_windows().into_iter().flatten() {
                     let mut already_moved_window_handles = self.already_moved_window_handles.lock();
+                    let exe_name = window.exe()?;
+                    let title = window.title()?;
+                    let class = window.class()?;
 
-                    let mut found_workspace_rule = workspace_rules.get(&window.exe()?);
+                    let mut found_workspace_rule = workspace_rules.get(&exe_name);
 
                     if found_workspace_rule.is_none() {
-                        found_workspace_rule = workspace_rules.get(&window.title()?);
+                        found_workspace_rule = workspace_rules.get(&title);
+                    }
+
+                    if found_workspace_rule.is_none() {
+                        found_workspace_rule = workspace_rules.get(&class);
+                    }
+
+                    if found_workspace_rule.is_none() {
+                        for (k, v) in workspace_rules.iter() {
+                            if let Ok(re) = Regex::new(k) {
+                                if re.is_match(&exe_name) {
+                                    found_workspace_rule = Some(v);
+                                }
+
+                                if re.is_match(&title) {
+                                    found_workspace_rule = Some(v);
+                                }
+
+                                if re.is_match(&class) {
+                                    found_workspace_rule = Some(v);
+                                }
+                            }
+                        }
                     }
 
                     // If the executable names or titles of any of those windows are in our rules map
@@ -670,14 +774,11 @@ impl WindowManager {
     pub fn raise_window_at_cursor_pos(&mut self) -> Result<()> {
         let mut hwnd = None;
 
-        for monitor in self.monitors() {
-            for workspace in monitor.workspaces() {
-                if let Some(container_idx) = workspace.container_idx_from_current_point() {
-                    if let Some(container) = workspace.containers().get(container_idx) {
-                        if let Some(window) = container.focused_window() {
-                            hwnd = Some(window.hwnd);
-                        }
-                    }
+        let workspace = self.focused_workspace()?;
+        if let Some(container_idx) = workspace.container_idx_from_current_point() {
+            if let Some(container) = workspace.containers().get(container_idx) {
+                if let Some(window) = container.focused_window() {
+                    hwnd = Some(window.hwnd);
                 }
             }
         }
@@ -1605,14 +1706,25 @@ impl WindowManager {
     pub fn toggle_monocle(&mut self) -> Result<()> {
         self.handle_unmanaged_window_behaviour()?;
 
-        let workspace = self.focused_workspace_mut()?;
-
+        let workspace = self.focused_workspace()?;
         match workspace.monocle_container() {
             None => self.monocle_on()?,
             Some(_) => self.monocle_off()?,
         }
 
-        self.update_focused_workspace(true, true)
+        self.update_focused_workspace(true, true)?;
+
+        // TODO: fix this ugly hack to restore stackbar after monocle is toggled off
+        let workspace = self.focused_workspace()?;
+        if workspace.monocle_container().is_none() {
+            if let Some(container) = workspace.focused_container() {
+                if container.stackbar().is_some() {
+                    self.retile_all(true)?;
+                };
+            }
+        };
+
+        Ok(())
     }
 
     #[tracing::instrument(skip(self))]

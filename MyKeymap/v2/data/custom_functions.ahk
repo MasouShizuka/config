@@ -83,7 +83,7 @@ show_mouse_move_prompt() {
         WinSetAlwaysOnTop(true, "ahk_class AutoHotkeyGUI")
     }
     global MouseMovePrompt
-    MouseMovePrompt.show("", 20, 16)
+    MouseMovePrompt.show("")
 }
 
 hide_mouse_move_prompt() {

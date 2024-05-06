@@ -477,14 +477,6 @@ return {
                         end
                     end
 
-                    if client.supports_method("textDocument/diagnostic") then
-                        vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
-                        if not utils.is_available("trouble.nvim") then
-                            vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = buf, desc = "Previous diagnostic", silent = true })
-                            vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
-                        end
-                    end
-
                     if client.supports_method("textDocument/documentHighlight") then
                         local augroup = vim.api.nvim_create_augroup(string.format("LspDocumentHighlight%s", buf), { clear = true })
                         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
@@ -660,6 +652,12 @@ return {
                     vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
                     if utils.is_available("none-ls.nvim") then
                         vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = buf, desc = "Null-ls information", silent = true })
+                    end
+
+                    vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
+                    if not utils.is_available("trouble.nvim") then
+                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = buf, desc = "Previous diagnostic", silent = true })
+                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
                     end
                 end,
                 desc = "Lsp config",

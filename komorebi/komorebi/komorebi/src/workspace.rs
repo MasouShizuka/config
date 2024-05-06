@@ -131,6 +131,8 @@ impl Workspace {
             }
 
             self.set_layout_rules(all_rules);
+
+            self.tile = true;
         }
 
         if let Some(layout_rules) = &config.custom_layout_rules {
@@ -139,6 +141,8 @@ impl Workspace {
                 let rule = CustomLayout::from_path(pathbuf)?;
                 rules.push((*count, Layout::Custom(rule)));
             }
+
+            self.tile = true;
         }
 
         Ok(())
@@ -299,8 +303,10 @@ impl Workspace {
                 let containers = self.containers_mut();
 
                 for (i, container) in containers.iter_mut().enumerate() {
+                    container.renew_stackbar();
+
                     let container_windows = container.windows().clone();
-                    let container_topbar = container.stackbar().clone();
+                    let container_stackbar = container.stackbar().clone();
 
                     if let (Some(window), Some(layout)) =
                         (container.focused_window_mut(), layouts.get(i))
@@ -326,18 +332,21 @@ impl Workspace {
                             rect.add_padding(width);
                         }
 
-                        if let Some(stackbar) = container_topbar {
-                            stackbar.set_position(
-                                &stackbar.get_position_from_container_layout(layout),
-                                false,
-                            )?;
+                        if let Some(stackbar) = container_stackbar {
+                            if stackbar
+                                .set_position(
+                                    &stackbar.get_position_from_container_layout(layout),
+                                    false,
+                                )
+                                .is_ok()
+                            {
+                                stackbar.update(&container_windows, focused_hwnd)?;
+                                let tab_height = STACKBAR_TAB_HEIGHT.load(Ordering::SeqCst);
+                                let total_height = tab_height + container_padding;
 
-                            stackbar.update(&container_windows, focused_hwnd)?;
-                            let tab_height = STACKBAR_TAB_HEIGHT.load(Ordering::SeqCst);
-                            let total_height = tab_height + container_padding;
-
-                            rect.top += total_height;
-                            rect.bottom -= total_height;
+                                rect.top += total_height;
+                                rect.bottom -= total_height;
+                            }
                         }
 
                         window.set_position(&rect, false)?;
@@ -871,7 +880,7 @@ impl Workspace {
                 self.containers_mut().remove(focused_idx);
                 self.resize_dimensions_mut().remove(focused_idx);
 
-                if focused_idx == self.containers().len() {
+                if focused_idx == self.containers().len() && focused_idx != 0 {
                     self.focus_container(focused_idx - 1);
                 }
             } else {
@@ -889,14 +898,16 @@ impl Workspace {
     fn enforce_resize_constraints(&mut self) {
         match self.layout {
             Layout::Default(DefaultLayout::BSP) => self.enforce_resize_constraints_for_bsp(),
-            // NOTE: 添加各个 layout 的 resize 内容
             Layout::Default(DefaultLayout::Columns) => self.enforce_resize_for_columns(),
             Layout::Default(DefaultLayout::Rows) => self.enforce_resize_for_rows(),
             Layout::Default(DefaultLayout::VerticalStack) => {
-                self.enforce_resize_for_verticalstack();
+                self.enforce_resize_for_vertical_stack();
+            }
+            Layout::Default(DefaultLayout::RightMainVerticalStack) => {
+                self.enforce_resize_for_right_vertical_stack();
             }
             Layout::Default(DefaultLayout::HorizontalStack) => {
-                self.enforce_resize_for_horizontalstack();
+                self.enforce_resize_for_horizontal_stack();
             }
             Layout::Default(DefaultLayout::UltrawideVerticalStack) => {
                 self.enforce_resize_for_ultrawide();
@@ -931,7 +942,6 @@ impl Workspace {
         }
     }
 
-    // NOTE: 各个 layout 的 resize 内容
     fn enforce_resize_for_columns(&mut self) {
         let resize_dimensions = self.resize_dimensions_mut();
         match resize_dimensions.len() {
@@ -978,26 +988,31 @@ impl Workspace {
         }
     }
 
-    fn enforce_resize_for_verticalstack(&mut self) {
+    fn enforce_resize_for_vertical_stack(&mut self) {
         let resize_dimensions = self.resize_dimensions_mut();
         match resize_dimensions.len() {
+            // Single window can not be resized at all
             0 | 1 => self.enforce_no_resize(),
             _ => {
+                // Zero is actually on the left
                 if let Some(mut left) = resize_dimensions[0] {
                     left.top = 0;
                     left.bottom = 0;
                     left.left = 0;
                 }
 
+                // Handle stack on the right
                 let stack_size = resize_dimensions[1..].len();
                 for (i, rect) in resize_dimensions[1..].iter_mut().enumerate() {
                     if let Some(rect) = rect {
+                        // No containers can resize to the right
                         rect.right = 0;
 
+                        // First container in stack cant resize up
                         if i == 0 {
                             rect.top = 0;
-                        }
-                        if i == stack_size - 1 {
+                        } else if i == stack_size - 1 {
+                            // Last cant be resized to the bottom
                             rect.bottom = 0;
                         }
                     }
@@ -1006,7 +1021,40 @@ impl Workspace {
         }
     }
 
-    fn enforce_resize_for_horizontalstack(&mut self) {
+    fn enforce_resize_for_right_vertical_stack(&mut self) {
+        let resize_dimensions = self.resize_dimensions_mut();
+        match resize_dimensions.len() {
+            // Single window can not be resized at all
+            0 | 1 => self.enforce_no_resize(),
+            _ => {
+                // Zero is actually on the right
+                if let Some(mut left) = resize_dimensions[1] {
+                    left.top = 0;
+                    left.bottom = 0;
+                    left.right = 0;
+                }
+
+                // Handle stack on the right
+                let stack_size = resize_dimensions[1..].len();
+                for (i, rect) in resize_dimensions[1..].iter_mut().enumerate() {
+                    if let Some(rect) = rect {
+                        // No containers can resize to the left
+                        rect.left = 0;
+
+                        // First container in stack cant resize up
+                        if i == 0 {
+                            rect.top = 0;
+                        } else if i == stack_size - 1 {
+                            // Last cant be resized to the bottom
+                            rect.bottom = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn enforce_resize_for_horizontal_stack(&mut self) {
         let resize_dimensions = self.resize_dimensions_mut();
         match resize_dimensions.len() {
             0 | 1 => self.enforce_no_resize(),

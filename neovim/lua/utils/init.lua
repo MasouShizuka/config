@@ -218,41 +218,6 @@ function M.refresh_buf(buf, timeout, timer)
     M.defer_buf(buf, function() vim.cmd.edit() end, timeout, timer, "Refresh")
 end
 
---- Open a URL under the cursor with the current operating system
----@param path string The path of the file to open with the system opener
-function M.system_open(path)
-    if not path then
-        path = vim.fn.expand("<cfile>")
-    elseif not path:match("%w+:") then
-        path = vim.fn.expand(path)
-    end
-
-    local cmd
-    if vim.fn.has("mac") == 1 then
-        cmd = { "open" }
-    elseif vim.fn.has("win32") == 1 then
-        -- if vim.fn.executable("rundll32") then
-        --     cmd = { "rundll32", "url.dll,FileProtocolHandler" }
-        -- else
-        --     cmd = { "cmd.exe", "/K", "explorer" }
-        -- end
-        os.execute("start " .. path)
-        return
-    elseif vim.fn.has("unix") == 1 then
-        if vim.fn.executable("explorer.exe") == 1 then
-            cmd = { "explorer.exe" }
-        elseif vim.fn.executable("xdg-open") == 1 then
-            cmd = { "xdg-open" }
-        end
-    end
-    if not cmd then
-        vim.notify("Available system opening tool not found!", vim.log.levels.ERROR)
-        return
-    end
-
-    vim.fn.jobstart(vim.list_extend(cmd, { path }), { detach = true })
-end
-
 function M.table_clear(a)
     for key, _ in pairs(a) do
         a[key] = nil

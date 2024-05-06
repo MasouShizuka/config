@@ -10,8 +10,6 @@ patch:
       ascii_mode: true
 
   style:
-    antialias_mode: default
-    ascii_tip_follow_cursor: false
     color_scheme: win11dark
     font_face: Sarasa Mono SC Nerd Font
     label_font_face: Sarasa Mono SC Nerd Font
@@ -20,36 +18,16 @@ patch:
     label_font_point: 20
     comment_font_point: 20
     horizontal: true
-    fullscreen: false
     inline_preedit: true
-    preedit_type: composition
-    display_tray_icon: false
     label_format: "%s."
     mark_text: ""
-    mouse_hover_ms: 0
-    paging_on_scroll: false
-    vertical_auto_reverse: false
-    vertical_text: false
-    vertical_text_left_to_right: false
-    vertical_text_with_wrap: false
     layout:
-      align_type: center
-      max_width: 0	#set 0 to disable max width
-      min_width: 160
-      min_height: 0
-      max_height: 0	#set 0 to disable max height
-      border_width: 3
       margin_x: 0
       margin_y: 0
       spacing: 20
       candidate_spacing: 20
-      hilite_spacing: 4
-      hilite_padding: 2
       round_corner: 10   #别名 hilited_corner_radius
       corner_radius: 10
-      shadow_radius: 0
-      shadow_offset_x: 4
-      shadow_offset_y: 4
 
   preset_color_schemes:
     win11dark:

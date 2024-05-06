@@ -10,9 +10,18 @@ use crate::Rect;
 use crate::Sizing;
 
 #[derive(
-    Clone, Copy, Debug, Serialize, Deserialize, Display, EnumString, ValueEnum, JsonSchema,
+    Clone,
+    Copy,
+    Debug,
+    Serialize,
+    Deserialize,
+    Eq,
+    PartialEq,
+    Display,
+    EnumString,
+    ValueEnum,
+    JsonSchema,
 )]
-#[strum(serialize_all = "snake_case")]
 pub enum DefaultLayout {
     BSP,
     Columns,
@@ -21,6 +30,7 @@ pub enum DefaultLayout {
     HorizontalStack,
     UltrawideVerticalStack,
     Grid,
+    RightMainVerticalStack,
     // NOTE: If any new layout is added, please make sure to register the same in `DefaultLayout::cycle`
 }
 
@@ -35,10 +45,19 @@ impl DefaultLayout {
         sizing: Sizing,
         delta: i32,
     ) -> Option<Rect> {
-        // NOTE: 去除对已添加 resize 的 layout 的检测
-        if matches!(self, Self::Grid) {
+        if !matches!(
+            self,
+            Self::BSP
+                | Self::Columns
+                | Self::Rows
+                | Self::VerticalStack
+                | Self::RightMainVerticalStack
+                | Self::HorizontalStack
+                | Self::UltrawideVerticalStack
+        ) {
             return None;
         };
+
         let max_divisor = 1.005;
         let mut r = resize.unwrap_or_default();
 
@@ -137,7 +156,8 @@ impl DefaultLayout {
             Self::VerticalStack => Self::HorizontalStack,
             Self::HorizontalStack => Self::UltrawideVerticalStack,
             Self::UltrawideVerticalStack => Self::Grid,
-            Self::Grid => Self::BSP,
+            Self::Grid => Self::RightMainVerticalStack,
+            Self::RightMainVerticalStack => Self::BSP,
         }
     }
 
@@ -150,7 +170,8 @@ impl DefaultLayout {
             Self::VerticalStack => Self::Rows,
             Self::Rows => Self::Columns,
             Self::Columns => Self::Grid,
-            Self::Grid => Self::BSP,
+            Self::Grid => Self::RightMainVerticalStack,
+            Self::RightMainVerticalStack => Self::BSP,
         }
     }
 }

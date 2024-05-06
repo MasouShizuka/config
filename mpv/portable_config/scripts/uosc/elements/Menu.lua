@@ -554,6 +554,7 @@ function Menu:back()
 	local current = self.current
 	local parent = current.parent_menu
 
+
 	-- modified
 	if Menu:is_open('open-file') then
 		self.callback(current.items[1].value, { modifiers = self.modifiers or {} })
@@ -1032,7 +1033,6 @@ function Menu:enable_key_bindings()
 	self:add_key_binding('j', 'menu-next3', self:create_key_action('next'), 'repeatable')
 	self:add_key_binding('k', 'menu-prev3', self:create_key_action('prev'), 'repeatable')
 	self:add_key_binding('l', 'menu-select3', self:create_key_action('open_selected_item_preselect'))
-	self:add_key_binding('shift+l', 'menu-select-soft3', self:create_key_action('open_selected_item_soft'))
 
 	self:add_key_binding('mbtn_back', 'menu-back-alt3', self:create_key_action('back'))
 	self:add_key_binding('bs', 'menu-back-alt4', self:create_key_action('key_bs'), {repeatable = true, complex = true})

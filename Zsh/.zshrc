@@ -34,18 +34,10 @@ esac
 
 alias ll="ls -al --color -h --time-style=long-iso"
 
-autoload -Uz run-help
-(( ${+aliases[run-help]} )) && unalias run-help
-alias help=run-help
-autoload -Uz run-help-git run-help-ip run-help-openssl run-help-p4 run-help-sudo run-help-svk run-help-svn
+alias lg=lazygit
 
 alias vi=nvim
 alias vim=nvim
-
-# wsl 调用 windows 的代理
-if ((is_wsl)); then
-    alias proxy=source "$HOME/scripts/proxy.sh"
-fi
 
 
 
@@ -61,12 +53,6 @@ export LC_ALL=en_US.UTF-8
 # msys2 的 ln 功能
 if ((is_windows)); then
     export MSYS=winsymlinks:nativestrict
-fi
-# wsl 使用 windows 的 neovim 配置
-if ((is_wsl)); then
-    if [[ ! -d "$HOME/.config/nvim" ]]; then
-        ln -s "/mnt/c/Users/MasouShizuka/AppData/Local/nvim" "$HOME/.config/nvim"
-    fi
 fi
 
 
@@ -149,28 +135,6 @@ zstyle ":completion:*" rehash true
 
 
 
-# ╭───────╮
-# │ Theme │
-# ╰───────╯
-
-if ((is_wsl)); then
-    export STARSHIP_CONFIG="/mnt/c/Users/MasouShizuka/.config/starship/starship.toml"
-else
-    export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
-fi
-
-if ((is_windows)); then
-    # 替换 starship 路径两边的 ' 为 "，使得路径中允许存在 space
-    # 即：'/c/Program Files/starship/bin/starship.exe' -> "/c/Program Files/starship/bin/starship.exe"
-    starship_init=$(starship init zsh)
-    starship_init=$(echo "$starship_init" | sed "s#'\+\(/[^\.]*starship\.exe\)'\+#\"\1\"#g")
-    eval "$starship_init"
-else
-    eval "$(starship init zsh)"
-fi
-
-
-
 # ╭────────────────╮
 # │ Plugin Manager │
 # ╰────────────────╯
@@ -204,6 +168,9 @@ function zvm_config() {
 }
 zinit ice depth=1
 zinit light jeffreytse/zsh-vi-mode
+# zvm_cursor_style:33: failed to compile regex: trailing backslash (\)
+# https://github.com/jeffreytse/zsh-vi-mode/issues/159
+setopt re_match_pcre
 
 # Shift+左右键移动到上/下一个单词
 bindkey "${terminfo[kLFT]}" backward-word
@@ -228,6 +195,55 @@ function zvm_after_lazy_keybindings() {
     zvm_bindkey vicmd "^[[A" up-line-or-beginning-search
     zvm_bindkey vicmd "^[[B" down-line-or-beginning-search
 }
+
+
+
+# ╭───────────────────╮
+# │ Command Line Tool │
+# ╰───────────────────╯
+
+# fzf
+
+export FZF_COMPLETION_TRIGGER="\\"
+export FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='cat {}'"
+
+# One Dark
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
+    --color=dark
+    --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
+    --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef"
+
+# Set up fzf key bindings and fuzzy completion
+eval "$(fzf --zsh)"
+
+
+# neovim
+
+# wsl 使用 windows 的 neovim 配置
+if ((is_wsl)); then
+    if [[ ! -d "$HOME/.config/nvim" ]]; then
+        ln -s "/mnt/c/Users/MasouShizuka/AppData/Local/nvim" "$HOME/.config/nvim"
+    fi
+fi
+
+
+# starship
+
+if ((is_wsl)); then
+    export STARSHIP_CONFIG="/mnt/c/Users/MasouShizuka/.config/starship/starship.toml"
+else
+    export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+fi
+
+if ((is_windows)); then
+    # 替换 starship 路径两边的 ' 为 "，使得路径中允许存在 space
+    # 即：'/c/Program Files/starship/bin/starship.exe' -> "/c/Program Files/starship/bin/starship.exe"
+    starship_init=$(starship init zsh)
+    starship_init=$(echo "$starship_init" | sed "s#'\+\(/[^\.]*starship\.exe\)'\+#\"\1\"#g")
+    eval "$starship_init"
+else
+    eval "$(starship init zsh)"
+fi
 
 
 

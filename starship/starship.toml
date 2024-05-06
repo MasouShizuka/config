@@ -8,7 +8,7 @@ right_format = ''
 scan_timeout = 30
 
 # Timeout for commands executed by starship (in milliseconds)
-command_timeout = 1000
+command_timeout = 5000
 
 # Inserts blank line between shell prompts
 add_newline = false

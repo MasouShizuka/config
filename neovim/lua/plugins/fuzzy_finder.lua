@@ -135,6 +135,7 @@ return {
                             ["<cr>"] = actions.select_default,
                             ["<c-x>"] = actions.select_horizontal,
                             ["<c-v>"] = actions.select_vertical,
+                            ["<c-i>"] = function(prompt_bufnr) multiopen(prompt_bufnr, "tab") end,
                             ["<c-t>"] = function(prompt_bufnr) multiopen(prompt_bufnr, "tab") end,
                             ["<c-w>"] = actions.close,
                             ["<c-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
@@ -159,8 +160,9 @@ return {
                         "--no-ignore",
                     },
                     file_ignore_patterns = {
-                        "%.git",
-                        "node_modules",
+                        "^.git/",
+                        "^.github/",
+                        "^node_modules/",
                     },
                 },
             }

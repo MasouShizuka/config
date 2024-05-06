@@ -17,43 +17,24 @@ komorebic_stop() {
 }
 
 
-; ╭────────────────╮
-; │ Start komorebi │
-; ╰────────────────╯
+; ╭───────╮
+; │ Start │
+; ╰───────╯
 
 DirCreate(localappdata . "/komorebi")
-RunWait("komorebic.exe start --await-configuration", , "Hide")
-
-
-; ╭─────────╮
-; │ Setting │
-; ╰─────────╯
-
-RunWait("komorebic.exe window-hiding-behaviour cloak", , "Hide")
-
-RunWait("komorebic.exe cross-monitor-move-behaviour insert", , "Hide")
-
-RunWait("komorebic.exe active-window-border enable", , "Hide")
-RunWait("komorebic.exe active-window-border-colour 66 165 245 --window-kind single", , "Hide")
-RunWait("komorebic.exe active-window-border-colour 256 165 66 --window-kind stack", , "Hide")
-RunWait("komorebic.exe active-window-border-colour 255 51 153 --window-kind monocle", , "Hide")
-RunWait("komorebic.exe active-window-border-width 6", , "Hide")
-
-RunWait("komorebic.exe focus-follows-mouse disable --implementation windows", , "Hide")
-RunWait("komorebic.exe mouse-follows-focus enable", , "Hide")
+RunWait("komorebic.exe start --config komorebi.json --await-configuration", , "Hide")
 
 
 ; ╭─────────╮
 ; │ Monitor │
 ; ╰─────────╯
 
-monitor_count := SysGet(80)
-global main_monitor := monitor_count - 1
+global main_monitor := 0
 
 global monitor_key_value := Map(
-    "u", 0,
+    "o", 0,
     "i", 1,
-    "o", 2
+    "u", 2
 )
 
 global focus_monitor_prefix := "!"
@@ -72,33 +53,14 @@ For key, value in monitor_key_value {
 ; ╰───────────╯
 
 global workspace_key_value := Map(
-    "1", [0, " "],
-    "2", [1, " "],
-    "3", [2, " "],
-    "4", [3, " "],
-    "5", [4, " "],
-    "6", [5, " "],
-    "7", [6, " "]
+    "1", 0,
+    "2", 1,
+    "3", 2,
+    "4", 3,
+    "5", 4,
+    "6", 5,
+    "7", 6
 )
-
-global container_padding := 4
-global workspace_padding := 4
-
-RunWait(Format("komorebic.exe ensure-workspaces {} {}", main_monitor, workspace_key_value.Count), , "Hide")
-For key, value in workspace_key_value {
-    RunWait(Format("komorebic.exe workspace-name {} {} `"{}`"", main_monitor, value[1], value[2]), , "Hide")
-}
-
-For key, value in workspace_key_value {
-    RunWait(Format("komorebic.exe container-padding {} {} {}", main_monitor, value[1], container_padding), , "Hide")
-    RunWait(Format("komorebic.exe workspace-padding {} {} {}", main_monitor, value[1], workspace_padding), , "Hide")
-}
-For key, value in monitor_key_value {
-    If (value != main_monitor) {
-        RunWait(Format("komorebic.exe container-padding {} 0 {}", value, container_padding), , "Hide")
-        RunWait(Format("komorebic.exe workspace-padding {} 0 {}", value, workspace_padding), , "Hide")
-    }
-}
 
 global focus_monitor_workspace_prefix := "!"
 For key, value in workspace_key_value {
@@ -110,53 +72,10 @@ For key, value in workspace_key_value {
     Hotkey(send_to_monitor_workspace_prefix . key, send_to_monitor_workspace)
 }
 
-RunWait(Format("komorebic.exe workspace-rule exe `"QQ.exe`" {} 2", main_monitor), , "Hide")
-RunWait(Format("komorebic.exe workspace-rule exe `"WeChat.exe`" {} 2", main_monitor), , "Hide")
-RunWait(Format("komorebic.exe workspace-rule exe `"cloudmusic.exe`" {} 3", main_monitor), , "Hide")
-RunWait(Format("komorebic.exe workspace-rule exe `"foobar2000.exe`" {} 3", main_monitor), , "Hide")
-RunWait(Format("komorebic.exe workspace-rule exe `"Thunder.exe`" {} 4", main_monitor), , "Hide")
-RunWait(Format("komorebic.exe workspace-rule exe `"nekoray.exe`" {} 5", main_monitor), , "Hide")
 
-
-; ╭─────╮
-; │ APP │
-; ╰─────╯
-
-RunWait("komorebic.exe float-rule class `"ExplorerBrowserControl`"", , "Hide")
-RunWait("komorebic.exe float-rule class `"jsplitter_panel_container`"", , "Hide")
-RunWait("komorebic.exe float-rule class `"OperationStatusWindow`"", , "Hide")
-RunWait("komorebic.exe float-rule class `"SessionDragWnd`"", , "Hide")
-RunWait("komorebic.exe float-rule class `"TApplication`"", , "Hide")
-
-RunWait("komorebic.exe float-rule title `"Hotkey sink`"", , "Hide")
-
-RunWait("komorebic.exe float-rule exe `"ahk.exe`"", , "Hide")
-RunWait("komorebic.exe float-rule exe `"ApplicationFrameHost.exe`"", , "Hide")
-RunWait("komorebic.exe float-rule exe `"copyq.exe`"", , "Hide")
-RunWait("komorebic.exe float-rule exe `"Flow.Launcher.exe`"", , "Hide")
-RunWait("komorebic.exe float-rule exe `"MyKeymap.exe`"", , "Hide")
-RunWait("komorebic.exe float-rule exe `"yasb.exe`"", , "Hide")
-
-RunWait("komorebic.exe manage-rule exe `"QQ.exe`"", , "Hide")
-RunWait("komorebic.exe manage-rule exe `"TE64.exe`"", , "Hide")
-RunWait("komorebic.exe manage-rule exe `"WeChat.exe`"", , "Hide")
-RunWait("komorebic.exe manage-rule exe `"wezterm-gui.exe`"", , "Hide")
-
-RunWait("komorebic.exe identify-tray-application exe `"copyq.exe`"", , "Hide")
-RunWait("komorebic.exe identify-tray-application exe `"QQ.exe`"", , "Hide")
-RunWait("komorebic.exe identify-tray-application exe `"RemindMe.exe`"", , "Hide")
-RunWait("komorebic.exe identify-tray-application exe `"ShareX.exe`"", , "Hide")
-RunWait("komorebic.exe identify-tray-application exe `"WeChat.exe`"", , "Hide")
-
-RunWait("komorebic.exe float-rule class `"_WwB`"", , "Hide")
-RunWait("komorebic.exe identify-layered-application exe `"EXCEL.EXE`"", , "Hide")
-RunWait("komorebic.exe identify-layered-application exe `"POWERPNT.EXE`"", , "Hide")
-RunWait("komorebic.exe identify-layered-application exe `"WINWORD.EXE`"", , "Hide")
-
-
-; ╭────────────────╮
-; │ Start komorebi │
-; ╰────────────────╯
+; ╭────────────────────────╮
+; │ Complete Configuration │
+; ╰────────────────────────╯
 
 RunWait("komorebic.exe complete-configuration", , "Hide")
 
@@ -212,13 +131,13 @@ Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
 
 focus_monitor_workspace(ThisHotkey) {
     key := SubStr(ThisHotkey, StrLen(focus_monitor_workspace_prefix) + 1)
-    num := workspace_key_value[key][1]
+    num := workspace_key_value[key]
     RunWait(Format("komorebic.exe focus-monitor-workspace {} {}", main_monitor, num), , "Hide")
 }
 
 send_to_monitor_workspace(ThisHotkey) {
     key := SubStr(ThisHotkey, StrLen(send_to_monitor_workspace_prefix) + 1)
-    num := workspace_key_value[key][1]
+    num := workspace_key_value[key]
     RunWait(Format("komorebic.exe send-to-monitor-workspace {} {}", main_monitor, num), , "Hide")
 }
 
@@ -362,4 +281,8 @@ send_to_monitor(ThisHotkey) {
     } Else {
         Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
     }
+}
+
+!Enter:: {
+    Run("wezterm.exe", , "Hide")
 }

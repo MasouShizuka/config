@@ -35,6 +35,7 @@ use crate::STACKBAR_TAB_WIDTH;
 use crate::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
 use crate::WORKSPACE_RULES;
+use komorebi_core::StackbarMode;
 
 use color_eyre::Result;
 use crossbeam_channel::Receiver;
@@ -47,6 +48,7 @@ use komorebi_core::config_generation::IdWithIdentifier;
 use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::config_generation::MatchingStrategy;
 use komorebi_core::resolve_home_path;
+use komorebi_core::ActiveWindowBorderStyle;
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::DefaultLayout;
 use komorebi_core::FocusFollowsMouseImplementation;
@@ -80,17 +82,6 @@ pub struct ActiveWindowBorderColours {
     pub stack: Colour,
     /// Border colour when the container is in monocle mode
     pub monocle: Colour,
-}
-
-#[derive(Default, Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
-pub enum ActiveWindowBorderStyle {
-    #[default]
-    /// Use the system border style
-    System,
-    /// Use the Windows 11-style rounded borders
-    Rounded,
-    /// Use the Windows 10-style square borders
-    Square,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -231,7 +222,7 @@ impl From<&Monitor> for MonitorConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-/// The `komorebi.json` static configuration file reference for `v0.1.24`
+/// The `komorebi.json` static configuration file reference for `v0.1.25`
 pub struct StaticConfig {
     /// DEPRECATED from v0.1.22: no longer required
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -313,30 +304,31 @@ pub struct StaticConfig {
     /// Set display index preferences
     #[serde(skip_serializing_if = "Option::is_none")]
     pub display_index_preferences: Option<HashMap<usize, String>>,
+    /// Stackbar configuration options
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stackbar: Option<StackbarConfig>,
 }
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, JsonSchema)]
-pub enum StackbarMode {
-    Always,
-    Never,
-    OnStack,
-}
-
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct TabsConfig {
+    /// Width of a stackbar tab
     width: Option<i32>,
+    /// Focused tab text colour
     focused_text: Option<Colour>,
+    /// Unfocused tab text colour
     unfocused_text: Option<Colour>,
+    /// Tab background colour
     background: Option<Colour>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct StackbarConfig {
-    height: Option<i32>,
-    mode: Option<StackbarMode>,
-    tabs: Option<TabsConfig>,
+    /// Stackbar height
+    pub height: Option<i32>,
+    /// Stackbar mode
+    pub mode: Option<StackbarMode>,
+    /// Stackbar tab configuration options
+    pub tabs: Option<TabsConfig>,
 }
 
 impl From<&WindowManager> for StaticConfig {
@@ -534,10 +526,12 @@ impl StaticConfig {
             if let Some(height) = &stackbar.height {
                 STACKBAR_TAB_HEIGHT.store(*height, Ordering::SeqCst);
             }
+
             if let Some(mode) = &stackbar.mode {
                 let mut stackbar_mode = STACKBAR_MODE.lock();
                 *stackbar_mode = *mode;
             }
+
             if let Some(tabs) = &stackbar.tabs {
                 if let Some(background) = &tabs.background {
                     STACKBAR_TAB_BACKGROUND_COLOUR.store((*background).into(), Ordering::SeqCst);
@@ -740,6 +734,16 @@ impl StaticConfig {
         let mut value: Self = serde_json::from_str(&content)?;
 
         value.apply_globals()?;
+
+        let stackbar_mode = *STACKBAR_MODE.lock();
+
+        for m in wm.monitors_mut() {
+            for w in m.workspaces_mut() {
+                for c in w.containers_mut() {
+                    c.set_stackbar_mode(stackbar_mode);
+                }
+            }
+        }
 
         if let Some(monitors) = value.monitors {
             for (i, monitor) in monitors.iter().enumerate() {

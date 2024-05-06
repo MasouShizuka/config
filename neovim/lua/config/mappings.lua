@@ -13,6 +13,11 @@ vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
 vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
 vim.keymap.set({ "n", "x" }, "<c-c>", "<nop>", { silent = true })
 
+-- 不复制到 clipboard
+vim.keymap.set({ "n", "x" }, "C", '"_c', { silent = true })
+vim.keymap.set({ "n", "x" }, "D", '"_d', { silent = true })
+vim.keymap.set({ "n", "x" }, "X", '"_x', { silent = true })
+
 -- 跳到行首行尾不带空格
 vim.keymap.set({ "n", "x", "o" }, "H", "^", { desc = "Start of line (non-blank)", silent = true })
 vim.keymap.set({ "n", "x", "o" }, "L", "g_", { desc = "End of line (non-blank)", silent = true })

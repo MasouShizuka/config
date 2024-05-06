@@ -14,7 +14,8 @@ M.lsp = function(lspconfig, default_config)
             if environment.is_windows then
                 shellcheckPath = shellcheckPath .. ".exe"
             end
-            lspconfig.bashls.setup(vim.tbl_deep_extend("keep", {
+
+            lspconfig.bashls.setup(vim.tbl_deep_extend("force", default_config, {
                 filetypes = {
                     "sh",
                     "zsh",
@@ -24,7 +25,7 @@ M.lsp = function(lspconfig, default_config)
                         shellcheckPath = shellcheckPath,
                     },
                 },
-            }, default_config))
+            }))
         end,
         clangd = function()
             local fallbackFlags = {}
@@ -37,7 +38,7 @@ M.lsp = function(lspconfig, default_config)
                 fallbackFlags[#fallbackFlags + 1] = "--target=x86_64-w64-mingw32"
             end
 
-            lspconfig.clangd.setup(vim.tbl_deep_extend("keep", {
+            lspconfig.clangd.setup(vim.tbl_deep_extend("force", default_config, {
                 cmd = {
                     "clangd",
                     -- https://github.com/jose-elias-alvarez/null-ls.nvim/issues/428
@@ -46,10 +47,10 @@ M.lsp = function(lspconfig, default_config)
                 init_options = {
                     fallbackFlags = fallbackFlags,
                 },
-            }, default_config))
+            }))
         end,
         jsonls = function()
-            lspconfig.jsonls.setup(vim.tbl_deep_extend("keep", {}, default_config))
+            lspconfig.jsonls.setup(vim.tbl_deep_extend("force", default_config, {}))
         end,
         lua_ls = function()
             local library = {
@@ -67,7 +68,7 @@ M.lsp = function(lspconfig, default_config)
                 library[#library + 1] = path.config_path .. "/lua"
             end
 
-            lspconfig.lua_ls.setup(vim.tbl_deep_extend("keep", {
+            lspconfig.lua_ls.setup(vim.tbl_deep_extend("force", default_config, {
                 settings = {
                     Lua = {
                         completion = {
@@ -102,12 +103,12 @@ M.lsp = function(lspconfig, default_config)
                         },
                     },
                 },
-            }, default_config))
+            }))
         end,
         marksman = function()
-            lspconfig.marksman.setup(vim.tbl_deep_extend("keep", {
+            lspconfig.marksman.setup(vim.tbl_deep_extend("force", default_config, {
                 root_dir = function() return vim.fn.getcwd() end,
-            }, default_config))
+            }))
         end,
         pyright = function()
             local pythonPath = path.python_path
@@ -116,7 +117,7 @@ M.lsp = function(lspconfig, default_config)
                 vim.notify(("Activated:\n%s"):format(pythonPath), vim.log.levels.INFO, { title = "pyright" })
             end
 
-            lspconfig.pyright.setup(vim.tbl_deep_extend("keep", {
+            lspconfig.pyright.setup(vim.tbl_deep_extend("force", default_config, {
                 root_dir = function() return vim.fn.getcwd() end,
                 settings = {
                     python = {
@@ -128,11 +129,11 @@ M.lsp = function(lspconfig, default_config)
                         pythonPath = pythonPath,
                     },
                 },
-            }, default_config))
+            }))
         end,
         rust_analyzer = function()
             if not utils.is_available("rustaceanvim") then
-                lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("keep", {}, default_config))
+                lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("force", default_config, {}))
             end
         end,
         texlab = function()
@@ -147,7 +148,7 @@ M.lsp = function(lspconfig, default_config)
                 "%p",
             }
 
-            lspconfig.texlab.setup(vim.tbl_deep_extend("keep", {
+            lspconfig.texlab.setup(vim.tbl_deep_extend("force", default_config, {
                 root_dir = function() return vim.fn.getcwd() end,
                 settings = {
                     texlab = {
@@ -164,7 +165,7 @@ M.lsp = function(lspconfig, default_config)
                         },
                     },
                 },
-            }, default_config))
+            }))
 
             vim.api.nvim_create_user_command("TexlabCleanAuxiliary", function()
                 vim.lsp.buf.execute_command({ command = "texlab.cleanAuxiliary", arguments = { { uri = vim.uri_from_bufnr(0) } } })

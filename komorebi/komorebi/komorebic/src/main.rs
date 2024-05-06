@@ -478,6 +478,14 @@ pub struct SendToMonitorWorkspace {
     target_workspace: usize,
 }
 
+#[derive(Parser, AhkFunction)]
+pub struct MoveToMonitorWorkspace {
+    /// Target monitor index (zero-indexed)
+    target_monitor: usize,
+    /// Workspace index on the target monitor (zero-indexed)
+    target_workspace: usize,
+}
+
 macro_rules! gen_focused_workspace_padding_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
@@ -815,6 +823,8 @@ enum SubCommand {
     Whkdrc,
     /// Show a JSON representation of the current window manager state
     State,
+    /// Show a JSON representation of the current global state
+    GlobalState,
     /// Show a JSON representation of visible windows
     VisibleWindows,
     /// Query the current window manager state
@@ -916,6 +926,9 @@ enum SubCommand {
     /// Send the focused window to the specified monitor workspace
     #[clap(arg_required_else_help = true)]
     SendToMonitorWorkspace(SendToMonitorWorkspace),
+    /// Move the focused window to the specified monitor workspace
+    #[clap(arg_required_else_help = true)]
+    MoveToMonitorWorkspace(MoveToMonitorWorkspace),
     /// Focus the specified monitor
     #[clap(arg_required_else_help = true)]
     FocusMonitor(FocusMonitor),
@@ -1244,9 +1257,15 @@ fn main() -> Result<()> {
             let subcommands = cli.get_subcommands_mut();
             std::fs::create_dir_all("docs/cli")?;
 
+            let ignore = [
+                "docgen",
+                "alt-focus-hack",
+                "identify-border-overflow-application",
+            ];
+
             for cmd in subcommands {
                 let name = cmd.get_name().to_string();
-                if name != "docgen" {
+                if !ignore.contains(&name.as_str()) {
                     let help_text = cmd.render_long_help().to_string();
                     let outpath = format!("docs/cli/{name}.md");
                     let markdown = format!("# {name}\n\n```\n{help_text}\n```");
@@ -1388,6 +1407,11 @@ fn main() -> Result<()> {
                         }
                     }
                 }
+
+                // Check that this file adheres to the schema static config schema as the last step,
+                // so that more basic errors above can be shown to the error before schema-specific
+                // errors
+                let _ = serde_json::from_str::<komorebi_client::StaticConfig>(&config_source)?;
 
                 if config_whkd.exists() {
                     println!("Found {}; key bindings will be loaded from here when whkd is started, and you can start it automatically using the --whkd flag\n", config_whkd.to_string_lossy());
@@ -1537,6 +1561,15 @@ fn main() -> Result<()> {
         SubCommand::SendToMonitorWorkspace(arg) => {
             send_message(
                 &SocketMessage::SendContainerToMonitorWorkspaceNumber(
+                    arg.target_monitor,
+                    arg.target_workspace,
+                )
+                .as_bytes()?,
+            )?;
+        }
+        SubCommand::MoveToMonitorWorkspace(arg) => {
+            send_message(
+                &SocketMessage::MoveContainerToMonitorWorkspaceNumber(
                     arg.target_monitor,
                     arg.target_workspace,
                 )
@@ -1773,7 +1806,7 @@ fn main() -> Result<()> {
             };
 
             let mut flags = vec![];
-            if let Some(config) = arg.config {
+            if let Some(config) = &arg.config {
                 let path = resolve_home_path(config)?;
                 if !path.is_file() {
                     bail!("could not find file: {}", path.display());
@@ -1808,9 +1841,10 @@ fn main() -> Result<()> {
                 )
             };
 
+            let mut attempts = 0;
             let mut running = false;
 
-            while !running {
+            while !running && attempts <= 2 {
                 match powershell_script::run(&script) {
                     Ok(_) => {
                         println!("{script}");
@@ -1831,7 +1865,25 @@ fn main() -> Result<()> {
                     running = true;
                 } else {
                     println!("komorebi.exe did not start... Trying again");
+                    attempts += 1;
                 }
+            }
+
+            if !running {
+                println!("\nRunning komorebi.exe directly for detailed error output\n");
+                if let Some(config) = arg.config {
+                    let path = resolve_home_path(config)?;
+                    if let Ok(output) = Command::new("komorebi.exe")
+                        .arg(format!("'--config=\"{}\"'", path.display()))
+                        .output()
+                    {
+                        println!("{}", String::from_utf8(output.stderr)?);
+                    }
+                } else if let Ok(output) = Command::new("komorebi.exe").output() {
+                    println!("{}", String::from_utf8(output.stderr)?);
+                }
+
+                return Ok(());
             }
 
             if arg.whkd {
@@ -1895,6 +1947,34 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
             }
 
             send_message(&SocketMessage::Stop.as_bytes()?)?;
+            let mut system = sysinfo::System::new_all();
+            system.refresh_processes();
+
+            if system.processes_by_name("komorebi.exe").count() >= 1 {
+                println!("komorebi is still running, attempting to force-quit");
+
+                let script = r"
+Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
+                ";
+                match powershell_script::run(script) {
+                    Ok(_) => {
+                        println!("{script}");
+
+                        let hwnd_json = DATA_DIR.join("komorebi.hwnd.json");
+
+                        let file = File::open(hwnd_json)?;
+                        let reader = BufReader::new(file);
+                        let hwnds: Vec<isize> = serde_json::from_reader(reader)?;
+
+                        for hwnd in hwnds {
+                            restore_window(HWND(hwnd));
+                        }
+                    }
+                    Err(error) => {
+                        println!("Error: {error}");
+                    }
+                }
+            }
         }
         SubCommand::FloatRule(arg) => {
             send_message(&SocketMessage::FloatRule(arg.identifier, arg.id).as_bytes()?)?;
@@ -2025,6 +2105,9 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
         SubCommand::State => {
             print_query(&SocketMessage::State.as_bytes()?);
         }
+        SubCommand::GlobalState => {
+            print_query(&SocketMessage::GlobalState.as_bytes()?);
+        }
         SubCommand::VisibleWindows => {
             print_query(&SocketMessage::VisibleWindows.as_bytes()?);
         }
@@ -2139,10 +2222,10 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
             )?;
         }
         SubCommand::ActiveWindowBorderWidth(arg) => {
-            send_message(&SocketMessage::ActiveWindowBorderWidth(arg.width).as_bytes()?)?;
+            send_message(&SocketMessage::BorderWidth(arg.width).as_bytes()?)?;
         }
         SubCommand::ActiveWindowBorderOffset(arg) => {
-            send_message(&SocketMessage::ActiveWindowBorderOffset(arg.offset).as_bytes()?)?;
+            send_message(&SocketMessage::BorderOffset(arg.offset).as_bytes()?)?;
         }
         SubCommand::ResizeDelta(arg) => {
             send_message(&SocketMessage::ResizeDelta(arg.pixels).as_bytes()?)?;

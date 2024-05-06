@@ -36,12 +36,12 @@ use windows::Win32::UI::WindowsAndMessaging::WM_SETTINGCHANGE;
 use crate::container::Container;
 use crate::monitor::Monitor;
 use crate::ring::Ring;
+use crate::window::RuleDebug;
 use crate::window::Window;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::winevent::WinEvent;
 use crate::winevent_listener;
-use crate::ActiveWindowBorderStyle;
 use crate::ACTIVE_WINDOW_BORDER_STYLE;
 use crate::BORDER_COLOUR_CURRENT;
 use crate::BORDER_RECT;
@@ -50,6 +50,7 @@ use crate::DISPLAY_INDEX_PREFERENCES;
 use crate::MONITOR_INDEX_PREFERENCES;
 use crate::TRANSPARENCY_COLOUR;
 use crate::WINDOWS_11;
+use komorebi_core::ActiveWindowBorderStyle;
 
 pub extern "system" fn valid_display_monitors(
     hmonitor: HMONITOR,
@@ -157,7 +158,7 @@ pub extern "system" fn enum_window(hwnd: HWND, lparam: LPARAM) -> BOOL {
     if is_visible && is_window && !is_minimized {
         let window = Window { hwnd: hwnd.0 };
 
-        if let Ok(should_manage) = window.should_manage(None) {
+        if let Ok(should_manage) = window.should_manage(None, &mut RuleDebug::default()) {
             if should_manage {
                 if is_maximized {
                     WindowsApi::restore_window(hwnd);

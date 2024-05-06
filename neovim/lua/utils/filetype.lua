@@ -23,8 +23,6 @@ M.skip_filetype_list = {
     "aerial",
     "alpha",
     "dashboard",
-    "DiffviewFiles",
-    "DiffviewFileHistory",
     "edgy",
     "fidget",
     "minimap",
@@ -43,8 +41,6 @@ M.skip_filetype_list_to_main = {
     "dapui_stacks",
     "dapui_watches",
     "dapui_console",
-    "DiffviewFiles",
-    "DiffviewFileHistory",
     "edgy",
     "fidget",
     "help",
@@ -65,8 +61,6 @@ M.skip_filetype_list_of_panel = {
     "dapui_stacks",
     "dapui_watches",
     "dapui_console",
-    "DiffviewFiles",
-    "DiffviewFileHistory",
     "edgy",
     "fidget",
     "help",
@@ -80,6 +74,8 @@ M.skip_filetype_list_of_panel = {
 
 M.skip_filetype = function(skip_filetype_list, step)
     step = step or -1
+
+    local nvim_treesitter_context_available = utils.is_available("nvim-treesitter-context")
 
     local curr_winnr = vim.fn.winnr()
     local win_count = vim.fn.winnr("$")
@@ -98,12 +94,22 @@ M.skip_filetype = function(skip_filetype_list, step)
         end
 
         local win = vim.fn.win_getid(winnr)
+        -- 防止跳转到 nvim-treesitter-context 的窗口上
+        if
+            nvim_treesitter_context_available
+            and (vim.w[win].treesitter_context or vim.w[win].treesitter_context_line_number)
+        then
+            goto continue
+        end
+
         local buf = vim.api.nvim_win_get_buf(win)
         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
         if not vim.tbl_contains(skip_filetype_list, ft) then
             vim.api.nvim_set_current_win(win)
             break
         end
+
+        ::continue::
     end
 end
 
@@ -128,14 +134,6 @@ M.left_panel_filetype_list = {
     ["dapui_watches"] = {
         open = function() require("dapui").open() end,
         close = function() require("dapui").close() end,
-    },
-    ["DiffviewFiles"] = {
-        open = function() vim.api.nvim_command("DiffviewOpen") end,
-        close = function() vim.api.nvim_command("DiffviewClose") end,
-    },
-    ["DiffviewFileHistory"] = {
-        open = function() vim.api.nvim_command("DiffviewOpen") end,
-        close = function() vim.api.nvim_command("DiffviewClose") end,
     },
     ["edgy"] = {
         open = false,

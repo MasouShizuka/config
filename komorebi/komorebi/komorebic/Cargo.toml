@@ -1,6 +1,6 @@
 [package]
 name = "komorebic"
-version = "0.1.25-dev.0"
+version = "0.1.26-dev.0"
 authors = ["Jade Iqbal <jadeiqbal@fastmail.com>"]
 description = "The command-line interface for Komorebi, a tiling window manager for Windows"
 categories = ["cli", "tiling-window-manager", "windows"]
@@ -13,6 +13,7 @@ edition = "2021"
 [dependencies]
 derive-ahk = { path = "../derive-ahk" }
 komorebi-core = { path = "../komorebi-core" }
+komorebi-client = { path = "../komorebi-client" }
 
 clap = { version = "4", features = ["derive", "wrap_help"] }
 color-eyre = { workspace = true }
@@ -28,7 +29,7 @@ reqwest = { version = "0.12", features = ["blocking"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { workspace = true }
 serde_yaml = "0.9"
-sysinfo = "0.30"
+sysinfo = { workspace = true }
 thiserror = "1"
 uds_windows = "1"
 which = "6"
