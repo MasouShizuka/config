@@ -719,6 +719,7 @@ return {
         end,
     },
 
+    -- NOTE: 需要安装 im-select
     {
         "keaising/im-select.nvim",
         enabled = environment.is_windows,

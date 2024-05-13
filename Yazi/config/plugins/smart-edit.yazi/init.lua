@@ -8,7 +8,7 @@ return {
                 ya.manager_emit("enter", { hovered = true })
                 ya.manager_emit("shell", { "nvim", confirm = true, block = true })
             else
-                ya.manager_emit("shell", { "nvim " .. tostring(h.url):gsub("\\", "/"), confirm = true, block = true })
+                ya.manager_emit("shell", { string.format([[nvim "%s"]], tostring(h.url):gsub("\\", "/")), confirm = true, block = true })
             end
         end
     end,

@@ -69,16 +69,16 @@
     },
     {
       "Name": "WezTerm",
-      "Path": "run-hidden",
-      "FileArgument": "powershell -Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0022%d\u0022 -WindowStyle Hidden",
-      "DirectoryArgument": "powershell -Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0022%d\u0022 -WindowStyle Hidden",
+      "Path": "powershell",
+      "FileArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
+      "DirectoryArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
       "Editable": true
     },
     {
       "Name": "Yazi",
-      "Path": "run-hidden",
-      "FileArgument": "powershell -Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0022%d\u0022,\u0022yazi\u0022,\u0022%d\u0022 -WindowStyle Hidden",
-      "DirectoryArgument": "powershell -Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0022%d\u0022,\u0022yazi\u0022,\u0022%d\u0022 -WindowStyle Hidden",
+      "Path": "powershell",
+      "FileArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027,\u0022yazi\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
+      "DirectoryArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027,\u0022yazi\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
       "Editable": true
     }
   ],

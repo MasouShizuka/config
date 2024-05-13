@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 use std::convert::TryFrom;
 use std::ffi::c_void;
 use std::mem::size_of;
-use std::sync::atomic::Ordering;
 
 use color_eyre::eyre::anyhow;
 use color_eyre::eyre::Error;
@@ -34,7 +33,6 @@ use windows::Win32::Graphics::Gdi::CreateSolidBrush;
 use windows::Win32::Graphics::Gdi::EnumDisplayDevicesW;
 use windows::Win32::Graphics::Gdi::EnumDisplayMonitors;
 use windows::Win32::Graphics::Gdi::GetMonitorInfoW;
-use windows::Win32::Graphics::Gdi::InvalidateRect;
 use windows::Win32::Graphics::Gdi::MonitorFromPoint;
 use windows::Win32::Graphics::Gdi::MonitorFromWindow;
 use windows::Win32::Graphics::Gdi::Rectangle;
@@ -54,6 +52,7 @@ use windows::Win32::System::Threading::QueryFullProcessImageNameW;
 use windows::Win32::System::Threading::PROCESS_ACCESS_RIGHTS;
 use windows::Win32::System::Threading::PROCESS_NAME_WIN32;
 use windows::Win32::System::Threading::PROCESS_QUERY_INFORMATION;
+use windows::Win32::System::Threading::PROCESS_TERMINATE;
 use windows::Win32::UI::HiDpi::GetDpiForMonitor;
 use windows::Win32::UI::HiDpi::SetProcessDpiAwarenessContext;
 use windows::Win32::UI::HiDpi::DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
@@ -101,7 +100,6 @@ use windows::Win32::UI::WindowsAndMessaging::EDD_GET_DEVICE_INTERFACE_NAME;
 use windows::Win32::UI::WindowsAndMessaging::GWL_EXSTYLE;
 use windows::Win32::UI::WindowsAndMessaging::GWL_STYLE;
 use windows::Win32::UI::WindowsAndMessaging::GW_HWNDNEXT;
-use windows::Win32::UI::WindowsAndMessaging::HWND_BOTTOM;
 use windows::Win32::UI::WindowsAndMessaging::HWND_TOP;
 use windows::Win32::UI::WindowsAndMessaging::LWA_ALPHA;
 use windows::Win32::UI::WindowsAndMessaging::LWA_COLORKEY;
@@ -142,8 +140,6 @@ use crate::monitor::Monitor;
 use crate::ring::Ring;
 use crate::set_window_position::SetWindowPosition;
 use crate::windows_callbacks;
-use crate::BORDER_HWND;
-use crate::TRANSPARENCY_COLOUR;
 
 pub enum WindowsResult<T, E> {
     Err(E),
@@ -395,33 +391,9 @@ impl WindowsApi {
         Self::set_window_pos(hwnd, &Rect::default(), position, flags.bits())
     }
 
-    pub fn position_border_window(hwnd: HWND, layout: &Rect, activate: bool) -> Result<()> {
-        let flags = if activate {
-            SetWindowPosition::SHOW_WINDOW | SetWindowPosition::NO_ACTIVATE
-        } else {
-            SetWindowPosition::NO_ACTIVATE
-        };
-
-        // TODO(raggi): This leaves the window behind the active window, which
-        // can result e.g. single pixel window borders being invisible in the
-        // case of opaque window borders (e.g. EPIC Games Launcher). Ideally
-        // we'd be able to pass a parent window to place ourselves just in front
-        // of, however the SetWindowPos API explicitly ignores that parameter
-        // unless the window being positioned is being activated - and we don't
-        // want to activate the border window here. We can hopefully find a
-        // better workaround in the future.
-        // The trade-off chosen prevents the border window from sitting over the
-        // top of other pop-up dialogs such as a file picker dialog from
-        // Firefox. When adjusting this in the future, it's important to check
-        // those dialog cases.
-        Self::set_window_pos(hwnd, layout, HWND_TOP, flags.bits())
-    }
-
-    pub fn hide_border_window(hwnd: HWND) -> Result<()> {
-        let flags = SetWindowPosition::HIDE_WINDOW;
-
-        let position = HWND_BOTTOM;
-        Self::set_window_pos(hwnd, &Rect::default(), position, flags.bits())
+    pub fn set_border_pos(hwnd: HWND, layout: &Rect, position: HWND) -> Result<()> {
+        let flags = { SetWindowPosition::SHOW_WINDOW | SetWindowPosition::NO_ACTIVATE };
+        Self::set_window_pos(hwnd, layout, position, flags.bits())
     }
 
     /// set_window_pos calls SetWindowPos without any accounting for Window decorations.
@@ -704,7 +676,8 @@ impl WindowsApi {
     }
 
     pub fn process_handle(process_id: u32) -> Result<HANDLE> {
-        Self::open_process(PROCESS_QUERY_INFORMATION, false, process_id)
+        // NOTE: 允许终止进程
+        Self::open_process(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, false, process_id)
     }
 
     pub fn exe_path(handle: HANDLE) -> Result<String> {
@@ -963,7 +936,7 @@ impl WindowsApi {
                 None,
             );
 
-            SetLayeredWindowAttributes(hwnd, COLORREF(TRANSPARENCY_COLOUR), 0, LWA_COLORKEY)?;
+            SetLayeredWindowAttributes(hwnd, COLORREF(0), 0, LWA_COLORKEY)?;
 
             hwnd
         }
@@ -998,12 +971,6 @@ impl WindowsApi {
             )
         }
         .process()
-    }
-
-    pub fn invalidate_border_rect() -> Result<()> {
-        unsafe { InvalidateRect(HWND(BORDER_HWND.load(Ordering::SeqCst)), None, false) }
-            .ok()
-            .process()
     }
 
     pub fn alt_is_pressed() -> bool {

@@ -23,6 +23,7 @@ use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 
+use komorebi::border_manager;
 use komorebi::hidden::Hidden;
 use komorebi::load_configuration;
 use komorebi::process_command::listen_for_commands;
@@ -33,6 +34,7 @@ use komorebi::static_config::StaticConfig;
 use komorebi::window_manager::WindowManager;
 use komorebi::windows_api::WindowsApi;
 use komorebi::winevent_listener;
+use komorebi::workspace_reconciliator;
 use komorebi::CUSTOM_FFM;
 use komorebi::DATA_DIR;
 use komorebi::HOME_DIR;
@@ -252,6 +254,9 @@ fn main() -> Result<()> {
     if CUSTOM_FFM.load(Ordering::SeqCst) {
         listen_for_movements(wm.clone());
     }
+
+    border_manager::listen_for_notifications(wm.clone());
+    workspace_reconciliator::listen_for_notifications(wm.clone());
 
     let (ctrlc_sender, ctrlc_receiver) = crossbeam_channel::bounded(1);
     ctrlc::set_handler(move || {

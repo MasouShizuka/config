@@ -39,7 +39,8 @@ use komorebi_core::Rect;
 use komorebi_core::Sizing;
 use komorebi_core::WindowContainerBehaviour;
 
-use crate::border::Border;
+use crate::border_manager;
+use crate::border_manager::STYLE;
 use crate::container::Container;
 use crate::current_virtual_desktop;
 use crate::load_configuration;
@@ -55,14 +56,6 @@ use crate::ActiveWindowBorderColours;
 use crate::Colour;
 use crate::Rgb;
 use crate::WorkspaceRule;
-use crate::ACTIVE_WINDOW_BORDER_STYLE;
-use crate::BORDER_COLOUR_MONOCLE;
-use crate::BORDER_COLOUR_SINGLE;
-use crate::BORDER_COLOUR_STACK;
-use crate::BORDER_ENABLED;
-use crate::BORDER_HWND;
-use crate::BORDER_OFFSET;
-use crate::BORDER_WIDTH;
 use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
 use crate::DISPLAY_INDEX_PREFERENCES;
@@ -153,15 +146,24 @@ pub struct GlobalState {
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
-            active_window_border_enabled: BORDER_ENABLED.load(Ordering::SeqCst),
+            active_window_border_enabled: border_manager::BORDER_ENABLED.load(Ordering::SeqCst),
             active_window_border_colours: ActiveWindowBorderColours {
-                single: Colour::Rgb(Rgb::from(BORDER_COLOUR_SINGLE.load(Ordering::SeqCst))),
-                stack: Colour::Rgb(Rgb::from(BORDER_COLOUR_STACK.load(Ordering::SeqCst))),
-                monocle: Colour::Rgb(Rgb::from(BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst))),
+                single: Option::from(Colour::Rgb(Rgb::from(
+                    border_manager::FOCUSED.load(Ordering::SeqCst),
+                ))),
+                stack: Option::from(Colour::Rgb(Rgb::from(
+                    border_manager::STACK.load(Ordering::SeqCst),
+                ))),
+                monocle: Option::from(Colour::Rgb(Rgb::from(
+                    border_manager::MONOCLE.load(Ordering::SeqCst),
+                ))),
+                unfocused: Option::from(Colour::Rgb(Rgb::from(
+                    border_manager::UNFOCUSED.load(Ordering::SeqCst),
+                ))),
             },
-            active_window_border_style: *ACTIVE_WINDOW_BORDER_STYLE.lock(),
-            border_offset: BORDER_OFFSET.load(Ordering::SeqCst),
-            border_width: BORDER_WIDTH.load(Ordering::SeqCst),
+            active_window_border_style: *STYLE.lock(),
+            border_offset: border_manager::BORDER_OFFSET.load(Ordering::SeqCst),
+            border_width: border_manager::BORDER_WIDTH.load(Ordering::SeqCst),
             stackbar_mode: *STACKBAR_MODE.lock(),
             stackbar_focused_text_colour: Colour::Rgb(Rgb::from(
                 STACKBAR_FOCUSED_TEXT_COLOUR.load(Ordering::SeqCst),
@@ -284,28 +286,6 @@ impl WindowManager {
         tracing::info!("initialising");
         WindowsApi::load_monitor_information(&mut self.monitors)?;
         WindowsApi::load_workspace_information(&mut self.monitors)
-    }
-
-    #[tracing::instrument(skip(self))]
-    pub fn show_border(&self) -> Result<()> {
-        if self.focused_container().is_ok() {
-            let foreground = WindowsApi::foreground_window()?;
-            let foreground_window = Window { hwnd: foreground };
-
-            let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-            border.set_position(foreground_window, true)?;
-            WindowsApi::invalidate_border_rect()?;
-        }
-
-        Ok(())
-    }
-
-    #[tracing::instrument(skip(self))]
-    pub fn hide_border(&self) -> Result<()> {
-        let focused = self.focused_window()?;
-        let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-        border.hide()?;
-        focused.focus(false)
     }
 
     #[tracing::instrument]
@@ -566,7 +546,7 @@ impl WindowManager {
         target_workspace_idx: usize,
         to_move: &mut Vec<EnforceWorkspaceRuleOp>,
     ) -> () {
-        tracing::info!(
+        tracing::trace!(
             "{} should be on monitor {}, workspace {}",
             window_title,
             target_monitor_idx,
@@ -946,7 +926,7 @@ impl WindowManager {
         if !follow_focus && self.focused_container_mut().is_ok() {
             // and we have a stack with >1 windows
             if self.focused_container_mut()?.windows().len() > 1
-                // and we don't have a maxed window
+                // and we don't have a maxed window 
                 && self.focused_workspace()?.maximized_window().is_none()
                 // and we don't have a monocle container
                 && self.focused_workspace()?.monocle_container().is_none()
@@ -1205,6 +1185,7 @@ impl WindowManager {
         let monitor = self
             .focused_monitor_mut()
             .ok_or_else(|| anyhow!("there is no monitor"))?;
+
         let workspace = monitor
             .focused_workspace_mut()
             .ok_or_else(|| anyhow!("there is no workspace"))?;
@@ -1234,12 +1215,14 @@ impl WindowManager {
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
         target_monitor.add_container(container, workspace_idx)?;
+
         // NOTE: 若 follow 且 workspace_idx 不为 None，则改变目标 monitor 的 focused_workspace
         if follow {
-            if let Some(idx) = workspace_idx {
-                target_monitor.focus_workspace(idx)?;
+            if let Some(workspace_idx) = workspace_idx {
+                target_monitor.focus_workspace(workspace_idx)?;
             }
         }
+
         target_monitor.load_focused_workspace(mouse_follows_focus)?;
         target_monitor.update_focused_workspace(offset)?;
 
@@ -1302,6 +1285,11 @@ impl WindowManager {
 
         let workspace = self.focused_workspace()?;
 
+        // Do not proceed if we have a monocle container or maximized window
+        if workspace.monocle_container().is_some() || workspace.maximized_window().is_some() {
+            return Ok(());
+        }
+
         tracing::info!("focusing container");
 
         let new_idx = workspace.new_idx_for_direction(direction);
@@ -1362,6 +1350,11 @@ impl WindowManager {
             // If there is nowhere to move on the current workspace, try to move it onto the monitor
             // in that direction if there is one
             None => {
+                // Don't do anything if the user has set the MoveBehaviour to NoOp
+                if matches!(self.cross_monitor_move_behaviour, MoveBehaviour::NoOp) {
+                    return Ok(());
+                }
+
                 let target_monitor_idx = self
                     .monitor_idx_in_direction(direction)
                     .ok_or_else(|| anyhow!("there is no container or monitor in this direction"))?;
@@ -1374,6 +1367,8 @@ impl WindowManager {
                         .ok_or_else(|| {
                             anyhow!("could not remove container at given origin index")
                         })?;
+
+                    self.focused_workspace_mut()?.focus_previous_container();
 
                     // focus the target monitor
                     self.focus_monitor(target_monitor_idx)?;
@@ -2332,6 +2327,13 @@ impl WindowManager {
         }
 
         None
+    }
+
+    pub fn focused_workspace_idx(&self) -> Result<usize> {
+        Ok(self
+            .focused_monitor()
+            .ok_or_else(|| anyhow!("there is no monitor"))?
+            .focused_workspace_idx())
     }
 
     pub fn focused_workspace(&self) -> Result<&Workspace> {

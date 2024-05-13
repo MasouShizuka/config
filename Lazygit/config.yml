@@ -10,21 +10,19 @@ keybinding:
     nextItem: 'j' # go one line down
     prevItem-alt: '<up>' # go one line up
     nextItem-alt: '<down>' # go one line down
-    prevPage: '<pgup>' # go to next page in list
-    nextPage: '<pgdown>' # go to previous page in list
-    gotoTop: '<home>' # go to top of list
-    gotoBottom: '<end>' # go to bottom of list
-    prevBlock: '<c-k>' # goto the previous block / panel
-    nextBlock: '<c-j>' # goto the next block / panel
+    prevPage: '<c-u>' # go to next page in list
+    nextPage: '<c-d>' # go to previous page in list
+    gotoTop: 'g' # go to top of list
+    gotoBottom: 'G' # go to bottom of list
+    prevBlock: 'h' # goto the previous block / panel
+    nextBlock: 'l' # goto the next block / panel
     prevBlock-alt: '<left>' # goto the previous block / panel
     nextBlock-alt: '<right>' # goto the next block / panel
-    select: '<enter>'
-    goInto: 'l'
     openRecentRepos: '<c-o>'
-    scrollUpMain: '<c-u>' # main panel scroll up
-    scrollDownMain: '<c-d>' # main panel scroll down
-    scrollUpMain-alt1: '<disabled>' # main panel scroll up
-    scrollDownMain-alt1: '<disabled>' # main panel scroll down
+    scrollUpMain: '<c-k>' # main panel scroll up
+    scrollDownMain: '<c-j>' # main panel scroll down
+    scrollUpMain-alt1: '<pgup>' # main panel scroll up
+    scrollDownMain-alt1: '<pgdown>' # main panel scroll down
     scrollUpMain-alt2: '<disabled>' # main panel scroll up
     scrollDownMain-alt2: '<disabled>' # main panel scroll down
     nextTab: '.'
@@ -37,8 +35,11 @@ keybinding:
   files:
     copyFileInfoToClipboard: 'Y'
   commits:
+    viewResetOptions: '<backspace>'
     moveDownCommit: '>' # move commit down one
     moveUpCommit: '<' # move commit up one
     checkoutCommit: '<enter>'
     resetCherryPick: '<c-r>'
     copyCommitAttributeToClipboard: 'Y'
+  stash:
+    popStash: '<backspace>'

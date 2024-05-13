@@ -4,13 +4,16 @@
 return {
     entry = function(_, args)
         if args[1] == "cwd" then
-            os.execute(string.format([[start "" "%s"]], tostring(cx.active.current.cwd):gsub("/", "\\")))
+            local cwd = cx.active.current.cwd
+            if cwd then
+                os.execute(string.format([[start "" "%s"]], tostring(cx.active.current.cwd):gsub("/", "\\")))
+            end
         else
             local h = cx.active.current.hovered
-            if h and h.cha.is_dir then
+            if h then
+                -- yazi 自带的 open 命令无法打开 windows 平台的带有特殊符号的文件，例如：&
+                -- 因此，windows 平台统一使用 start 命令打开文件或文件夹
                 os.execute(string.format([[start "" "%s"]], tostring(h.url):gsub("/", "\\")))
-            else
-                ya.manager_emit("open", { hovered = true })
             end
         end
     end,

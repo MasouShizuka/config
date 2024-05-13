@@ -14,12 +14,12 @@ use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::config_generation::MatchingStrategy;
 use regex::Regex;
 use schemars::JsonSchema;
-use serde::ser::Error;
 use serde::ser::SerializeStruct;
 use serde::Deserialize;
 use serde::Serialize;
 use serde::Serializer;
 use windows::Win32::Foundation::HWND;
+use windows::Win32::System::Threading::TerminateProcess;
 
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::HidingBehaviour;
@@ -39,7 +39,7 @@ use crate::PERMAIGNORE_CLASSES;
 use crate::REGEX_IDENTIFIERS;
 use crate::WSL2_UI_PROCESSES;
 
-#[derive(Debug, Clone, Copy, Deserialize, JsonSchema)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, JsonSchema)]
 pub struct Window {
     pub hwnd: isize,
 }
@@ -97,24 +97,23 @@ impl Serialize for Window {
             "title",
             &self
                 .title()
-                .map_err(|_| S::Error::custom("could not get window title"))?,
+                .unwrap_or_else(|_| String::from("could not get window title")),
         )?;
         state.serialize_field(
             "exe",
             &self
                 .exe()
-                .map_err(|_| S::Error::custom("could not get window exe"))?,
+                .unwrap_or_else(|_| String::from("could not get window exe")),
         )?;
         state.serialize_field(
             "class",
             &self
                 .class()
-                .map_err(|_| S::Error::custom("could not get window class"))?,
+                .unwrap_or_else(|_| String::from("could not get window class")),
         )?;
         state.serialize_field(
             "rect",
-            &WindowsApi::window_rect(self.hwnd())
-                .map_err(|_| S::Error::custom("could not get window rect"))?,
+            &WindowsApi::window_rect(self.hwnd()).unwrap_or_default(),
         )?;
         state.end()
     }
@@ -194,7 +193,20 @@ impl Window {
     }
 
     pub fn close(self) -> Result<()> {
-        WindowsApi::close_window(self.hwnd())
+        // NOTE: 某些程序关闭窗口时关不掉，因此默认杀掉进程
+        let kill_exes = [
+            "wezterm-gui.exe".to_string(),
+            "WindowsTerminal.exe".to_string(),
+        ];
+        let exe = Window { hwnd: self.hwnd }.exe()?;
+        if kill_exes.contains(&exe) {
+            let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
+            let handle = WindowsApi::process_handle(process_id)?;
+            unsafe { let _ = TerminateProcess(handle, 0); };
+            WindowsApi::close_process(handle)
+        } else {
+            WindowsApi::close_window(self.hwnd())
+        }
     }
 
     pub fn maximize(self) {

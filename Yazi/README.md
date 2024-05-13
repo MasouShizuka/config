@@ -13,9 +13,9 @@
 ## 注意
 
 `Yazi` 需要配合一些程序使用：
-    - 文件类型检测：
-        - `file`：该文件在 `msys2` 下自带，或者安装 `git` 并设置环境变量 `YAZI_FILE_ONE=C:\Program Files\Git\usr\bin\file.exe`
-    - 搜索：
-        - `fd`
-        - `ripgrep`
-        - `fzf`
+- 文件类型检测：
+    - `file`：该文件在 `msys2` 下自带，或者安装 `git` 并设置环境变量 `YAZI_FILE_ONE=C:\Program Files\Git\usr\bin\file.exe`
+- 搜索：
+    - `fd`
+    - `ripgrep`
+    - `fzf`

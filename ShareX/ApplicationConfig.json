@@ -637,7 +637,7 @@
   "TrayLeftClickAction": "RectangleRegion",
   "TrayLeftDoubleClickAction": "OpenMainWindow",
   "TrayMiddleClickAction": "ClipboardUploadWithContentViewer",
-  "AutoCheckUpdate": true,
+  "AutoCheckUpdate": false,
   "CheckPreReleaseUpdates": false,
   "UseCustomTheme": true,
   "Themes": [

@@ -137,6 +137,7 @@ M.lsp = function(lspconfig, default_config)
             end
         end,
         texlab = function()
+            -- NOTE: 需要安装 sioyek，且需要把 sioyek 的安装路径添加到环境变量的 path
             local executable = "sioyek"
             local args = {
                 "--nofocus",

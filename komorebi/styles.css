@@ -150,6 +150,10 @@
     background: #cc241d;
 }
 
+.memory-widget .label.status-critical {
+    background: #fb4934;
+}
+
 .gpu-widget .label {
     background: #ec6b64;
 }
@@ -180,16 +184,4 @@
 
 .clock-widget .label {
     background: #d6acff;
-}
-
-.active-window-widget {
-    margin-left: 5px;
-}
-
-.active-window-widget .label {
-    background: #83a598;
-    border-radius: 3px;
-    margin: 2px;
-    margin-bottom: -1px;
-    padding: -5px 7px 0 7px;
 }

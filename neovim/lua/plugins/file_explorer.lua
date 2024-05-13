@@ -434,7 +434,7 @@ return {
                         local results = {
                             e = { val = extension, msg = "Extension only" },
                             f = { val = name, msg = "Filename" },
-                            b = { val = modify(name, ":r"), msg = "Filename w/o extension" },
+                            w = { val = modify(name, ":r"), msg = "Filename w/o extension" },
                             h = { val = modify(absolute_path, ":~"), msg = "Path relative to Home" },
                             r = { val = modify(absolute_path, ":."), msg = "Path relative to CWD" },
                             y = { val = absolute_path, msg = "Absolute path" },

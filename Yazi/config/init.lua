@@ -44,8 +44,18 @@ function Status:modified()
         return ui.Line({})
     end
 
+    local time = h.cha.modified
+    if time == nil then
+        return ui.Line({})
+    end
+
+    local date = os.date("%Y-%m-%d %H:%M:%S", time // 1)
+    if date == nil then
+        return ui.Line({})
+    end
+
     return ui.Line({
-        ui.Span(os.date("%Y-%m-%d %H:%M:%S", h.cha.modified // 1)):fg(self.style().bg),
+        ui.Span(date):fg(self.style().bg),
         ui.Span(" "),
     })
 end
@@ -75,6 +85,10 @@ function Status:render(area)
         table.unpack(Progress:render(area, right:width())),
     })
 end
+
+require("session"):setup({
+    sync_yanked = true,
+})
 
 require("projects"):setup({
     last = {

@@ -32,21 +32,31 @@ rules = [
 
     { mime = "application/json",                               use = [ "edit", "reveal" ] },
     { mime = "*/javascript",                                   use = [ "edit", "reveal" ] },
+    { mime = "application/x-tex",                              use = [ "edit", "reveal" ] },
 
     { mime = "*",                                              use = [ "open", "reveal" ] },
 ]
 
 [plugin]
 
-# 禁用 Pdf,Video 预览
 preloaders = [
-    { name = "*",       cond = "!mime", run = "mime", multi = true, prio = "high" },
+    { name = "*", cond = "!mime", run = "mime", multi = true, prio = "high" },
     # Image
-    { mime = "image/*", run = "image" },
+    { mime = "image/*",           run = "image" },
 ]
-prepend_previewers = [
-    # Video
-    { mime = "video/*",         run = "file" },
-    # PDF
-    { mime = "application/pdf", run = "file" },
+previewers = [
+    { name = "*/",                                             run = "folder", sync = true },
+    # Code
+    { mime = "text/*",                                         run = "code" },
+    { mime = "*/{xml,javascript,x-wine-extension-ini,x-tex}",  run = "code" },
+    # JSON
+    { mime = "application/json",                               run = "json" },
+    # Image
+    { mime = "image/vnd.djvu",                                 run = "noop" },
+    { mime = "image/*",                                        run = "image" },
+    # Archive
+    { mime = "application/*zip",                               run = "archive" },
+    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", run = "archive" },
+    # Fallback
+    { name = "*",                                              run = "file" },
 ]

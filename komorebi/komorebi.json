@@ -69,6 +69,11 @@
           "workspace_rules": [
             {
               "kind": "Exe",
+              "id": "Clash Verge.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
               "id": "nekoray.exe",
               "matching_strategy": "Equals"
             }
@@ -217,7 +222,6 @@
   ],
   "display_index_preferences": {
     "0": "DELF137-5&22795f3&0&UID4613",
-    "1": "DELD03B-5&22795f3&0&UID4612",
-    "2": "CSO1609-5&22795f3&0&UID4357"
+    "1": "DELD03B-5&22795f3&0&UID4612"
   }
 }

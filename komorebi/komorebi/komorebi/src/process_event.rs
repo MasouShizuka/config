@@ -11,7 +11,9 @@ use komorebi_core::Rect;
 use komorebi_core::Sizing;
 use komorebi_core::WindowContainerBehaviour;
 
-use crate::border::Border;
+use crate::border_manager;
+use crate::border_manager::BORDER_OFFSET;
+use crate::border_manager::BORDER_WIDTH;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
 use crate::window::should_act;
@@ -19,17 +21,10 @@ use crate::window::RuleDebug;
 use crate::window_manager::WindowManager;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
+use crate::winevent::WinEvent;
+use crate::workspace_reconciliator;
 use crate::Notification;
 use crate::NotificationEvent;
-use crate::BORDER_COLOUR_CURRENT;
-use crate::BORDER_COLOUR_MONOCLE;
-use crate::BORDER_COLOUR_SINGLE;
-use crate::BORDER_COLOUR_STACK;
-use crate::BORDER_ENABLED;
-use crate::BORDER_HIDDEN;
-use crate::BORDER_HWND;
-use crate::BORDER_OFFSET;
-use crate::BORDER_WIDTH;
 use crate::DATA_DIR;
 use crate::HIDDEN_HWNDS;
 use crate::REGEX_IDENTIFIERS;
@@ -70,28 +65,6 @@ impl WindowManager {
         let mut rule_debug = RuleDebug::default();
 
         let should_manage = event.window().should_manage(Some(event), &mut rule_debug)?;
-
-        // Hide or reposition the window based on whether the target is managed.
-        if BORDER_ENABLED.load(Ordering::SeqCst) {
-            if let WindowManagerEvent::FocusChange(_, window) = event {
-                let border_window = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-
-                if should_manage {
-                    border_window.set_position(window, true)?;
-                } else {
-                    let mut stackbar = false;
-                    if let Ok(class) = window.class() {
-                        if class == "komorebi_stackbar" {
-                            stackbar = true;
-                        }
-                    }
-
-                    if !stackbar {
-                        border_window.hide()?;
-                    }
-                }
-            }
-        }
 
         // All event handlers below this point should only be processed if the event is
         // related to a window that should be managed by the WindowManager.
@@ -287,29 +260,29 @@ impl WindowManager {
                     }
                 }
             }
-            WindowManagerEvent::Show(_, window) | WindowManagerEvent::Manage(window) => {
-                // NOTE: 提前跳出循环
-                let mut switch_to = None;
-                'outer: for (i, monitor) in self.monitors().iter().enumerate() {
-                    for (j, workspace) in monitor.workspaces().iter().enumerate() {
-                        if workspace.contains_window(window.hwnd) {
-                            switch_to = Some((i, j));
-                            break 'outer;
-                        }
-                    }
-                }
+            WindowManagerEvent::Show(_, window)
+            | WindowManagerEvent::Manage(window)
+            | WindowManagerEvent::Uncloak(_, window) => {
+                let focused_monitor_idx = self.focused_monitor_idx();
+                let focused_workspace_idx =
+                    self.focused_workspace_idx_for_monitor_idx(focused_monitor_idx)?;
 
-                if let Some((known_monitor_idx, known_workspace_idx)) = switch_to {
-                    if self.focused_monitor_idx() != known_monitor_idx
-                        || self
-                            .focused_monitor()
-                            .ok_or_else(|| anyhow!("there is no monitor"))?
-                            .focused_workspace_idx()
-                            != known_workspace_idx
-                    {
-                        self.focus_monitor(known_monitor_idx)?;
-                        self.focus_workspace(known_workspace_idx)?;
-                        return Ok(());
+                let focused_pair = (focused_monitor_idx, focused_workspace_idx);
+
+                let mut needs_reconciliation = false;
+
+                for (i, monitors) in self.monitors().iter().enumerate() {
+                    for (j, workspace) in monitors.workspaces().iter().enumerate() {
+                        if workspace.contains_window(window.hwnd) && focused_pair != (i, j) {
+                            workspace_reconciliator::event_tx().send(
+                                workspace_reconciliator::Notification {
+                                    monitor_idx: i,
+                                    workspace_idx: j,
+                                },
+                            )?;
+
+                            needs_reconciliation = true;
+                        }
                     }
                 }
 
@@ -318,6 +291,8 @@ impl WindowManager {
                 // result in them being associated with both the original workspace and the workspace
                 // being switched to. This loop is to try to ensure that we don't end up with
                 // duplicates across multiple workspaces, as it results in ghost layout tiles.
+                let mut proceed = true;
+
                 for (i, monitor) in self.monitors().iter().enumerate() {
                     for (j, workspace) in monitor.workspaces().iter().enumerate() {
                         if workspace.container_for_window(window.hwnd).is_some()
@@ -329,31 +304,35 @@ impl WindowManager {
                             );
 
                             window.hide();
-                            return Ok(());
+                            proceed = false;
                         }
                     }
                 }
 
-                // NOTE: 令新打开的 window 管理到 cursor 所在的 monitor
-                if let Some(i) = self.monitor_idx_from_current_pos() {
-                    self.focus_monitor(i).unwrap_or(());
-                }
-
-                let behaviour = self.window_container_behaviour;
-                let workspace = self.focused_workspace_mut()?;
-
-                if !workspace.contains_window(window.hwnd) {
-                    match behaviour {
-                        WindowContainerBehaviour::Create => {
-                            workspace.new_container_for_window(window);
-                            self.update_focused_workspace(false, false)?;
+                if proceed {
+                    // NOTE: 令新打开的 window 管理到 cursor 所在的 monitor
+                    if self.mouse_follows_focus {
+                        if let Some(i) = self.monitor_idx_from_current_pos() {
+                            self.focus_monitor(i).unwrap_or(());
                         }
-                        WindowContainerBehaviour::Append => {
-                            workspace
-                                .focused_container_mut()
-                                .ok_or_else(|| anyhow!("there is no focused container"))?
-                                .add_window(window);
-                            self.update_focused_workspace(true, false)?;
+                    }
+
+                    let behaviour = self.window_container_behaviour;
+                    let workspace = self.focused_workspace_mut()?;
+
+                    if !workspace.contains_window(window.hwnd) && !needs_reconciliation {
+                        match behaviour {
+                            WindowContainerBehaviour::Create => {
+                                workspace.new_container_for_window(window);
+                                self.update_focused_workspace(false, false)?;
+                            }
+                            WindowContainerBehaviour::Append => {
+                                workspace
+                                    .focused_container_mut()
+                                    .ok_or_else(|| anyhow!("there is no focused container"))?
+                                    .add_window(window);
+                                self.update_focused_workspace(true, false)?;
+                            }
                         }
                     }
                 }
@@ -594,136 +573,11 @@ impl WindowManager {
             WindowManagerEvent::DisplayChange(..)
             | WindowManagerEvent::MouseCapture(..)
             | WindowManagerEvent::Cloak(..) => {}
-            // NOTE: 当触发 uncloak 事件时，重新 focus 该窗口所在 workspace
-            WindowManagerEvent::Uncloak(_, window) => {
-                let mut switch_to = None;
-                'outer: for (i, monitor) in self.monitors().iter().enumerate() {
-                    for (j, workspace) in monitor.workspaces().iter().enumerate() {
-                        if workspace.contains_window(window.hwnd) {
-                            switch_to = Some((i, j));
-                            break 'outer;
-                        }
-                    }
-                }
-
-                if let Some((known_monitor_idx, known_workspace_idx)) = switch_to {
-                    if self.focused_monitor_idx() != known_monitor_idx
-                        || self
-                            .focused_monitor()
-                            .ok_or_else(|| anyhow!("there is no monitor"))?
-                            .focused_workspace_idx()
-                            != known_workspace_idx
-                    {
-                        self.focus_monitor(known_monitor_idx)?;
-                        self.focus_workspace(known_workspace_idx)?;
-
-                        if BORDER_ENABLED.load(Ordering::SeqCst) {
-                            self.show_border()?;
-                        };
-                    }
-                }
-            }
         };
-
-        // NOTE: 非 Tiling 状态时仍保留 border
-
-        if *self.focused_workspace()?.tile() && BORDER_ENABLED.load(Ordering::SeqCst) {
-            match event {
-                WindowManagerEvent::MoveResizeStart(_, _) => {
-                    let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-                    border.hide()?;
-                    BORDER_HIDDEN.store(true, Ordering::SeqCst);
-                }
-                // NOTE: 添加一些命令，使得 border 能够更新
-                WindowManagerEvent::MoveResizeEnd(_, window)
-                | WindowManagerEvent::Manage(window)
-                | WindowManagerEvent::Show(_, window)
-                | WindowManagerEvent::FocusChange(_, window)
-                | WindowManagerEvent::Hide(_, window)
-                | WindowManagerEvent::Uncloak(_, window)
-                | WindowManagerEvent::Minimize(_, window) => {
-                    let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-                    let mut target_window = None;
-                    let mut target_window_is_monocle = false;
-                    let mut container_size = 1;
-                    if self
-                        .focused_workspace()?
-                        .floating_windows()
-                        .iter()
-                        .any(|w| w.hwnd == window.hwnd)
-                    {
-                        target_window = Option::from(window);
-                        WindowsApi::raise_window(border.hwnd())?;
-                    };
-
-                    if let Some(monocle_container) = self.focused_workspace()?.monocle_container() {
-                        if let Some(window) = monocle_container.focused_window() {
-                            target_window = Option::from(*window);
-                            target_window_is_monocle = true;
-                        }
-                    }
-
-                    if target_window.is_none() {
-                        match self.focused_container() {
-                            // if there is no focused container, the desktop is empty
-                            Err(..) => {
-                                WindowsApi::hide_border_window(border.hwnd())?;
-                            }
-                            Ok(container) => {
-                                if !(matches!(event, WindowManagerEvent::Minimize(_, _))
-                                    && container.windows().len() == 1)
-                                {
-                                    container_size = self.focused_container()?.windows().len();
-                                    target_window = Option::from(*self.focused_window()?);
-                                }
-                            }
-                        }
-                    }
-
-                    if let Some(target_window) = target_window {
-                        // NOTE: 修正 border 颜色代码的位置，使之可以被执行
-                        if target_window_is_monocle {
-                            BORDER_COLOUR_CURRENT.store(
-                                BORDER_COLOUR_MONOCLE.load(Ordering::SeqCst),
-                                Ordering::SeqCst,
-                            );
-                        } else if container_size > 1 {
-                            BORDER_COLOUR_CURRENT.store(
-                                BORDER_COLOUR_STACK.load(Ordering::SeqCst),
-                                Ordering::SeqCst,
-                            );
-                        } else {
-                            BORDER_COLOUR_CURRENT.store(
-                                BORDER_COLOUR_SINGLE.load(Ordering::SeqCst),
-                                Ordering::SeqCst,
-                            );
-                        }
-
-                        let activate = BORDER_HIDDEN.load(Ordering::SeqCst);
-
-                        WindowsApi::invalidate_border_rect()?;
-                        // NOTE: 更新 border
-                        border.set_position(target_window, true)?;
-
-                        if activate {
-                            BORDER_HIDDEN.store(false, Ordering::SeqCst);
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
 
         // If we unmanaged a window, it shouldn't be immediately hidden behind managed windows
         if let WindowManagerEvent::Unmanage(window) = event {
             window.center(&self.focused_monitor_work_area()?)?;
-        }
-
-        // If there are no more windows on the workspace, we shouldn't show the border window
-        if self.focused_workspace()?.containers().is_empty() {
-            let border = Border::from(BORDER_HWND.load(Ordering::SeqCst));
-            border.hide()?;
-            BORDER_HIDDEN.store(true, Ordering::SeqCst);
         }
 
         tracing::trace!("updating list of known hwnds");
@@ -746,10 +600,21 @@ impl WindowManager {
             .open(hwnd_json)?;
 
         serde_json::to_writer_pretty(&file, &known_hwnds)?;
-        notify_subscribers(&serde_json::to_string(&Notification {
+
+        let notification = Notification {
             event: NotificationEvent::WindowManager(event),
             state: self.as_ref().into(),
-        })?)?;
+        };
+
+        // Avoid unnecessary updates, this fires every single time you interact
+        // with something on JetBrains IDEs
+        if !matches!(
+            event,
+            WindowManagerEvent::Show(WinEvent::ObjectNameChange, _)
+        ) {
+            notify_subscribers(&serde_json::to_string(&notification)?)?;
+            border_manager::event_tx().send(border_manager::Notification)?;
+        }
 
         tracing::info!("processed: {}", event.window().to_string());
         Ok(())

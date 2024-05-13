@@ -1,4 +1,4 @@
-pub mod border;
+pub mod border_manager;
 pub mod com;
 #[macro_use]
 pub mod ring;
@@ -21,6 +21,7 @@ pub mod windows_callbacks;
 pub mod winevent;
 pub mod winevent_listener;
 pub mod workspace;
+pub mod workspace_reconciliator;
 
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -53,7 +54,6 @@ use color_eyre::Result;
 use komorebi_core::config_generation::IdWithIdentifier;
 use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::config_generation::MatchingStrategy;
-use komorebi_core::ActiveWindowBorderStyle;
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::HidingBehaviour;
 use komorebi_core::Rect;
@@ -197,13 +197,6 @@ lazy_static! {
         )
     };
 
-    static ref ACTIVE_WINDOW_BORDER_STYLE: Arc<Mutex<ActiveWindowBorderStyle>> =
-        Arc::new(Mutex::new(ActiveWindowBorderStyle::System));
-
-    static ref BORDER_RECT: Arc<Mutex<Rect>> =
-        Arc::new(Mutex::new(Rect::default()));
-
-
     // Use app-specific titlebar removal options where possible
     // eg. Windows Terminal, IntelliJ IDEA, Firefox
     static ref NO_TITLEBAR: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
@@ -220,18 +213,7 @@ pub static DEFAULT_CONTAINER_PADDING: AtomicI32 = AtomicI32::new(10);
 pub static INITIAL_CONFIGURATION_LOADED: AtomicBool = AtomicBool::new(false);
 pub static CUSTOM_FFM: AtomicBool = AtomicBool::new(false);
 pub static SESSION_ID: AtomicU32 = AtomicU32::new(0);
-pub static BORDER_ENABLED: AtomicBool = AtomicBool::new(false);
-pub static BORDER_HWND: AtomicIsize = AtomicIsize::new(0);
-pub static BORDER_HIDDEN: AtomicBool = AtomicBool::new(false);
-pub static BORDER_COLOUR_SINGLE: AtomicU32 = AtomicU32::new(0);
-pub static BORDER_COLOUR_STACK: AtomicU32 = AtomicU32::new(0);
-pub static BORDER_COLOUR_MONOCLE: AtomicU32 = AtomicU32::new(0);
-pub static BORDER_COLOUR_CURRENT: AtomicU32 = AtomicU32::new(0);
-pub static BORDER_WIDTH: AtomicI32 = AtomicI32::new(8);
-pub static BORDER_OFFSET: AtomicI32 = AtomicI32::new(-1);
 
-// 0 0 0 aka pure black, I doubt anyone will want this as a border colour
-pub const TRANSPARENCY_COLOUR: u32 = 0;
 pub static REMOVE_TITLEBARS: AtomicBool = AtomicBool::new(false);
 
 pub static HIDDEN_HWND: AtomicIsize = AtomicIsize::new(0);

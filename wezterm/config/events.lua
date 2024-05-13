@@ -1,6 +1,8 @@
 local wezterm = require("wezterm")
 
 local function get_tab_title(tab_info, opts)
+    opts = opts or {}
+
     local tab_title = tab_info.tab_title
     if not (tab_title and #tab_title > 0) then
         tab_title = tab_info.active_pane.title
@@ -64,9 +66,5 @@ wezterm.on("format-window-title", function(tab, pane, tabs, panes, config)
         add_index = false,
     })
 
-    -- 有时关闭 wezterm 的某个进程实例时会导致其卡死且无法关闭
-    -- 因此在程序标题上添加 pid，以便直接 kill
-    local pid = wezterm.procinfo.pid()
-
-    return string.format("%s%s%s - %s", zoomed, index, tab_title, pid)
+    return string.format("%s%s%s", zoomed, index, tab_title)
 end)

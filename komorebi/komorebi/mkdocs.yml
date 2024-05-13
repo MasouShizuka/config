@@ -39,6 +39,10 @@ theme:
     - search.share
     - search.suggest
     - toc.follow
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
 plugins:
   - macros
   - search
@@ -50,6 +54,7 @@ nav:
   - Getting started:
       - Installation: installation.md
       - Example configurations: example-configurations.md
+      - Troubleshooting: troubleshooting.md
   - Common workflows:
       - common-workflows/komorebi-config-home.md
       - common-workflows/active-window-border.md
