@@ -61,13 +61,10 @@ fi
 # │ Setting │
 # ╰─────────╯
 
-# 命令补全
-autoload -Uz compinit && compinit
-
 # 历史文件和大小
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=10000
-SAVEHIST=10000
+SAVEHIST=$HISTSIZE
 
 # 历史设置
 setopt BANG_HIST              # Treat the '!' character specially during expansion.
@@ -130,8 +127,6 @@ zshaddhistory() {
 zstyle ":completion:*" matcher-list "" "m:{a-zA-Z}={A-Za-z}" "r:|[._-]=* r:|=*" "l:|=* r:|=*"
 # 启动使用方向键控制自动补全
 zstyle ":completion:*" menu select
-# 刷新自动补全
-zstyle ":completion:*" rehash true
 
 
 
@@ -142,11 +137,7 @@ zstyle ":completion:*" rehash true
 ZINIT_HOME="$HOME/.zinit/zinit.git"
 [[ ! -d $ZINIT_HOME ]] && mkdir -p "$(dirname "$ZINIT_HOME")"
 [[ ! -d $ZINIT_HOME/.git ]] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
-
 source "$ZINIT_HOME/zinit.zsh"
-
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
 
 
 
@@ -154,13 +145,12 @@ autoload -Uz _zinit
 # │ Plugin │
 # ╰────────╯
 
-zinit wait lucid for \
-    atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
-    zdharma-continuum/fast-syntax-highlighting \
-    blockf \
-    zsh-users/zsh-completions \
-    atload"!_zsh_autosuggest_start" \
-    zsh-users/zsh-autosuggestions
+zinit light zdharma-continuum/fast-syntax-highlighting
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-completions
+
+# 命令补全
+autoload -Uz compinit && compinit
 
 function zvm_config() {
     ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
@@ -172,19 +162,17 @@ zinit light jeffreytse/zsh-vi-mode
 # https://github.com/jeffreytse/zsh-vi-mode/issues/159
 setopt re_match_pcre
 
-# Shift+左右键移动到上/下一个单词
-bindkey "${terminfo[kLFT]}" backward-word
-bindkey "${terminfo[kRIT]}" forward-word
-
-# 切换前缀为当前命令开头到光标位置的历史命令
+# 切换历史命令为满足前缀等于当前光标到开头
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 
-function zvm_after_init() {
-    bindkey "^[[A" up-line-or-beginning-search
-    bindkey "^[[B" down-line-or-beginning-search
-}
+# Shift+左右键移动到上/下一个单词
+bindkey "${terminfo[kLFT]}" backward-word
+bindkey "${terminfo[kRIT]}" forward-word
+
+bindkey "^[[A" up-line-or-beginning-search
+bindkey "^[[B" down-line-or-beginning-search
 
 function zvm_after_lazy_keybindings() {
     zvm_bindkey vicmd "H" zle vi-first-non-blank
@@ -206,7 +194,6 @@ function zvm_after_lazy_keybindings() {
 
 export FZF_COMPLETION_TRIGGER="\\"
 export FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='cat {}'"
-
 # One Dark
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
     --color=dark

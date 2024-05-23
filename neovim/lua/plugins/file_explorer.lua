@@ -65,7 +65,8 @@ return {
     --                 if diff_Node and diff_Node ~= tostring(node.id) then
     --                     local current_Diff = node.id
     --                     require("neo-tree.utils").open_file(state, diff_Node, open)
-    --                     vim.cmd("vert diffs " .. current_Diff)
+    --                     vim.cmd.vert({ "diffs " .. current_Diff })
+    --                     vim.cmd.vert({ "diffs " .. current_Diff })
     --                     log.info("Diffing " .. diff_Name .. " against " .. node.name)
     --                     diff_Node = nil
     --                     current_Diff = nil
@@ -524,11 +525,11 @@ return {
                     vim.keymap.set("n", "M", api.marks.clear, opts("Clear Bookmark"))
                     vim.keymap.set("n", "J", function()
                         api.marks.toggle()
-                        vim.cmd("normal! j")
+                        vim.cmd.normal({ "j", bang = true })
                     end, opts("Toggle Bookmark Down"))
                     vim.keymap.set("n", "K", function()
                         api.marks.toggle()
-                        vim.cmd("normal! k")
+                        vim.cmd.normal({ "k", bang = true })
                     end, opts("Toggle Bookmark Up"))
                 end,
                 disable_netrw = true,

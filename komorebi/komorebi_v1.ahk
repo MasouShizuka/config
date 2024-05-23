@@ -278,3 +278,7 @@ Return
     ProcessCloseAll("yasb.exe")
     Run, %A_ScriptDir%/yasb/yasb.exe, , Hide
 Return
+
+!Enter::
+    Run, wezterm.exe, , Hide
+Return

@@ -139,7 +139,8 @@
         "DetectWindows": true,
         "DetectControls": true,
         "UseDimming": true,
-        "UseCustomInfoText": false,
+        "BackgroundDimStrength": 10,
+        "UseCustomInfoText": true,
         "CustomInfoText": "X: $x, Y: $y$nR: $r, G: $g, B: $b$nHex: $hex",
         "SnapSizes": [
           {
@@ -250,7 +251,8 @@
           "PixelateSize": 15,
           "HighlightColor": "Yellow",
           "CutOutEffectType": "None",
-          "CutOutEffectSize": 10
+          "CutOutEffectSize": 10,
+          "CutOutBackgroundColor": "Transparent"
         },
         "LastRegionTool": null,
         "LastAnnotationTool": null,
@@ -638,6 +640,7 @@
   "TrayLeftDoubleClickAction": "OpenMainWindow",
   "TrayMiddleClickAction": "ClipboardUploadWithContentViewer",
   "AutoCheckUpdate": false,
+  "UpdateChannel": "Release",
   "CheckPreReleaseUpdates": false,
   "UseCustomTheme": true,
   "Themes": [
@@ -953,5 +956,5 @@
   "DropAlignment": "BottomRight",
   "DropOpacity": 100,
   "DropHoverOpacity": 255,
-  "ApplicationVersion": "16.0.1"
+  "ApplicationVersion": "16.1.0"
 }

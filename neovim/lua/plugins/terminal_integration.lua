@@ -29,7 +29,7 @@ return {
                         direction = "float",
                         -- function to run on opening the terminal
                         on_open = function(term)
-                            vim.cmd("startinsert!")
+                            vim.cmd.startinsert({ bang = true })
                             vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = term.bufnr, silent = true })
 
                             -- 禁用 toggleterm 的 esc 映射
@@ -45,7 +45,7 @@ return {
                         end,
                         -- function to run on closing the terminal
                         on_close = function(term)
-                            vim.cmd("startinsert!")
+                            vim.cmd.startinsert({ bang = true })
 
                             -- 恢复 cellwidth 设置
                             if utils.is_available("cellwidths.nvim") and package.loaded["cellwidths"] then

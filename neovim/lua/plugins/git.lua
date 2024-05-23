@@ -56,8 +56,8 @@ return {
                 map("n", "<c-n>", function()
                     local diff = vim.api.nvim_get_option_value("diff", { scope = "local" })
                     if diff then
-                        vim.cmd("normal! ]c")
-                        vim.cmd("normal! zz")
+                        vim.cmd.normal({ "]c", bang = true })
+                        vim.cmd.normal({ "zz", bang = true })
                         return
                     end
                     vim.schedule(function() gs.next_hunk() end)
@@ -65,8 +65,8 @@ return {
                 map("n", keymap["<c-s-n>"], function()
                     local diff = vim.api.nvim_get_option_value("diff", { scope = "local" })
                     if diff then
-                        vim.cmd("normal! [c")
-                        vim.cmd("normal! zz")
+                        vim.cmd.normal({ "[c", bang = true })
+                        vim.cmd.normal({ "zz", bang = true })
                         return
                     end
                     vim.schedule(function() gs.prev_hunk() end)

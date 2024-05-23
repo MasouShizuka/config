@@ -1,6 +1,8 @@
 use std::fs::OpenOptions;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::time::Duration;
+use std::time::Instant;
 
 use color_eyre::eyre::anyhow;
 use color_eyre::Result;
@@ -16,6 +18,7 @@ use crate::border_manager::BORDER_OFFSET;
 use crate::border_manager::BORDER_WIDTH;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
+use crate::stackbar_manager;
 use crate::window::should_act;
 use crate::window::RuleDebug;
 use crate::window_manager::WindowManager;
@@ -23,6 +26,8 @@ use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::winevent::WinEvent;
 use crate::workspace_reconciliator;
+use crate::workspace_reconciliator::ALT_TAB_HWND;
+use crate::workspace_reconciliator::ALT_TAB_HWND_INSTANT;
 use crate::Notification;
 use crate::NotificationEvent;
 use crate::DATA_DIR;
@@ -68,7 +73,7 @@ impl WindowManager {
 
         // All event handlers below this point should only be processed if the event is
         // related to a window that should be managed by the WindowManager.
-        if !should_manage && !matches!(event, WindowManagerEvent::DisplayChange(_)) {
+        if !should_manage {
             return Ok(());
         }
 
@@ -88,61 +93,38 @@ impl WindowManager {
         match event {
             WindowManagerEvent::FocusChange(_, window)
             | WindowManagerEvent::Show(_, window)
-            | WindowManagerEvent::DisplayChange(window)
             | WindowManagerEvent::MoveResizeEnd(_, window) => {
-                self.reconcile_monitors()?;
-
-                let monitor_idx = self.monitor_idx_from_window(window)
-                    .ok_or_else(|| anyhow!("there is no monitor associated with this window, it may have already been destroyed"))?;
-
-                // This is a hidden window apparently associated with COM support mechanisms (based
-                // on a post from http://www.databaseteam.org/1-ms-sql-server/a5bb344836fb889c.htm)
-                //
-                // The hidden window, OLEChannelWnd, associated with this class (spawned by
-                // explorer.exe), after some debugging, is observed to always be tied to the primary
-                // display monitor, or (usually) monitor 0 in the WindowManager state.
-                //
-                // Due to this, at least one user in the Discord has witnessed behaviour where, when
-                // a MonitorPoll event is triggered by OLEChannelWnd, the focused monitor index gets
-                // set repeatedly to 0, regardless of where the current foreground window is actually
-                // located.
-                //
-                // This check ensures that we only update the focused monitor when the window
-                // triggering monitor reconciliation is known to not be tied to a specific monitor.
-                if window.class()? != "OleMainThreadWndClass"
-                    && self.focused_monitor_idx() != monitor_idx
-                {
-                    self.focus_monitor(monitor_idx)?;
+                if let Some(monitor_idx) = self.monitor_idx_from_window(window) {
+                    // This is a hidden window apparently associated with COM support mechanisms (based
+                    // on a post from http://www.databaseteam.org/1-ms-sql-server/a5bb344836fb889c.htm)
+                    //
+                    // The hidden window, OLEChannelWnd, associated with this class (spawned by
+                    // explorer.exe), after some debugging, is observed to always be tied to the primary
+                    // display monitor, or (usually) monitor 0 in the WindowManager state.
+                    //
+                    // Due to this, at least one user in the Discord has witnessed behaviour where, when
+                    // a MonitorPoll event is triggered by OLEChannelWnd, the focused monitor index gets
+                    // set repeatedly to 0, regardless of where the current foreground window is actually
+                    // located.
+                    //
+                    // This check ensures that we only update the focused monitor when the window
+                    // triggering monitor reconciliation is known to not be tied to a specific monitor.
+                    if let Ok(class) = window.class() {
+                        if class != "OleMainThreadWndClass"
+                            && self.focused_monitor_idx() != monitor_idx
+                        {
+                            self.focus_monitor(monitor_idx)?;
+                        }
+                    }
                 }
             }
             _ => {}
         }
 
-        let offset = self.work_area_offset;
-
-        for (i, monitor) in self.monitors_mut().iter_mut().enumerate() {
-            let work_area = *monitor.work_area_size();
-            let offset = if monitor.work_area_offset().is_some() {
-                monitor.work_area_offset()
-            } else {
-                offset
-            };
-
-            for (j, workspace) in monitor.workspaces_mut().iter_mut().enumerate() {
+        for monitor in self.monitors_mut() {
+            for workspace in monitor.workspaces_mut() {
                 if let WindowManagerEvent::FocusChange(_, window) = event {
                     let _ = workspace.focus_changed(window.hwnd);
-                }
-
-                let reaped_orphans = workspace.reap_orphans()?;
-                if reaped_orphans.0 > 0 || reaped_orphans.1 > 0 {
-                    workspace.update(&work_area, offset)?;
-                    tracing::info!(
-                        "reaped {} orphan window(s) and {} orphaned container(s) on monitor: {}, workspace: {}",
-                        reaped_orphans.0,
-                        reaped_orphans.1,
-                        i,
-                        j
-                    );
                 }
             }
         }
@@ -274,6 +256,24 @@ impl WindowManager {
                 for (i, monitors) in self.monitors().iter().enumerate() {
                     for (j, workspace) in monitors.workspaces().iter().enumerate() {
                         if workspace.contains_window(window.hwnd) && focused_pair != (i, j) {
+                            // At this point we know we are going to send a notification to the workspace reconciliator
+                            // So we get the topmost window returned by EnumWindows, which is almost always the window
+                            // that has been selected by alt-tab
+                            if let Ok(alt_tab_windows) = WindowsApi::alt_tab_windows() {
+                                if let Some(first) =
+                                    alt_tab_windows.iter().find(|w| w.title().is_ok())
+                                {
+                                    // If our record of this HWND hasn't been updated in over a minute
+                                    let mut instant = ALT_TAB_HWND_INSTANT.lock();
+                                    if instant.elapsed().gt(&Duration::from_secs(1)) {
+                                        // Update our record with the HWND we just found
+                                        ALT_TAB_HWND.store(Some(first.hwnd));
+                                        // Update the timestamp of our record
+                                        *instant = Instant::now();
+                                    }
+                                }
+                            }
+
                             workspace_reconciliator::event_tx().send(
                                 workspace_reconciliator::Notification {
                                     monitor_idx: i,
@@ -319,8 +319,10 @@ impl WindowManager {
 
                     let behaviour = self.window_container_behaviour;
                     let workspace = self.focused_workspace_mut()?;
+                    let workspace_contains_window = workspace.contains_window(window.hwnd);
+                    let monocle_container = workspace.monocle_container().clone();
 
-                    if !workspace.contains_window(window.hwnd) && !needs_reconciliation {
+                    if !workspace_contains_window && !needs_reconciliation {
                         match behaviour {
                             WindowContainerBehaviour::Create => {
                                 workspace.new_container_for_window(window);
@@ -333,6 +335,21 @@ impl WindowManager {
                                     .add_window(window);
                                 self.update_focused_workspace(true, false)?;
                             }
+                        }
+                    }
+
+                    if workspace_contains_window {
+                        let mut monocle_window_event = false;
+                        if let Some(ref monocle) = monocle_container {
+                            if let Some(monocle_window) = monocle.focused_window() {
+                                if monocle_window.hwnd == window.hwnd {
+                                    monocle_window_event = true;
+                                }
+                            }
+                        }
+
+                        if !monocle_window_event && monocle_container.is_some() {
+                            window.hide();
                         }
                     }
                 }
@@ -427,10 +444,7 @@ impl WindowManager {
 
                     // If we have moved across the monitors, use that override, otherwise determine
                     // if a move has taken place by ruling out a resize
-                    let right_bottom_constant = ((BORDER_WIDTH.load(Ordering::SeqCst)
-                        + BORDER_OFFSET.load(Ordering::SeqCst))
-                        * 2)
-                    .abs();
+                    let right_bottom_constant = 0;
 
                     let is_move = moved_across_monitors
                         || resize.right.abs() == right_bottom_constant
@@ -567,12 +581,9 @@ impl WindowManager {
                     }
                 }
             }
-            WindowManagerEvent::ForceUpdate(_) => {
-                self.update_focused_workspace(false, true)?;
-            }
-            WindowManagerEvent::DisplayChange(..)
-            | WindowManagerEvent::MouseCapture(..)
-            | WindowManagerEvent::Cloak(..) => {}
+            WindowManagerEvent::MouseCapture(..)
+            | WindowManagerEvent::Cloak(..)
+            | WindowManagerEvent::TitleUpdate(..) => {}
         };
 
         // If we unmanaged a window, it shouldn't be immediately hidden behind managed windows
@@ -606,17 +617,20 @@ impl WindowManager {
             state: self.as_ref().into(),
         };
 
-        // Avoid unnecessary updates, this fires every single time you interact
-        // with something on JetBrains IDEs
+        notify_subscribers(&serde_json::to_string(&notification)?)?;
+        border_manager::event_tx().send(border_manager::Notification)?;
+        stackbar_manager::event_tx().send(stackbar_manager::Notification)?;
+
+        // Too many spammy OBJECT_NAMECHANGE events from JetBrains IDEs
         if !matches!(
             event,
             WindowManagerEvent::Show(WinEvent::ObjectNameChange, _)
         ) {
-            notify_subscribers(&serde_json::to_string(&notification)?)?;
-            border_manager::event_tx().send(border_manager::Notification)?;
+            tracing::info!("processed: {}", event.window().to_string());
+        } else {
+            tracing::trace!("processed: {}", event.window().to_string());
         }
 
-        tracing::info!("processed: {}", event.window().to_string());
         Ok(())
     }
 }

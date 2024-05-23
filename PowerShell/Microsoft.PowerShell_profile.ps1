@@ -1,4 +1,3 @@
-Import-Module posh-git
 Import-Module PSReadLine
 
 # ╭─────────────────────╮
@@ -15,23 +14,14 @@ $is_vscode=$env:TERM_PROGRAM -eq "vscode"
 
 Set-Alias ll ls
 
+Set-Alias lg lazygit
+
 Set-Alias vi nvim
 Set-Alias vim nvim
 
-# 打开目录
-function open($path=".") {
-    Invoke-Item $Path
-}
-
-# 显示程序路径
 function which($command) {
     Get-Command -Name $command -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
-}
-
-# 打开 Zsh
-function zsh() {
-    C:/msys64/msys2_shell.cmd -ucrt64 -defterm -here -use-full-path -no-start -shell zsh
 }
 
 
@@ -78,18 +68,32 @@ Set-PSReadLineOption -AddToHistoryHandler {
     return "MemoryOnly"
 }
 
-Set-PSReadLineKeyHandler -Chord "Shift+RightArrow" -Function ForwardWord
-Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
-Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
+Set-PSReadLineKeyHandler -Chord Ctrl+u -Function BackwardDeleteLine
+Set-PSReadLineKeyHandler -Chord Shift+LeftArrow -Function BackwardWord
+Set-PSReadLineKeyHandler -Chord Shift+RightArrow -Function ForwardWord
+Set-PSReadlineKeyHandler -Chord UpArrow -Function HistorySearchBackward
+Set-PSReadlineKeyHandler -Chord DownArrow -Function HistorySearchForward
+Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
 
-Set-PSReadLineKeyHandler -Key "Tab" -Function MenuComplete
-Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
 
 
+# ╭───────────────────╮
+# │ Command Line Tool │
+# ╰───────────────────╯
 
-# ╭───────╮
-# │ Theme │
-# ╰───────╯
+# fzf
+
+$env:FZF_DEFAULT_OPTS="\\"
+$env:FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='cat {}'"
+
+# One Dark
+$env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
+    --color=dark
+    --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
+    --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef"
+
+
+# starship
 
 $env:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
@@ -107,7 +111,6 @@ if ($env:TERM_PROGRAM -eq "WezTerm") {
         $host.ui.Write($prompt)
     }
 }
-
 
 
 # ╭───────╮

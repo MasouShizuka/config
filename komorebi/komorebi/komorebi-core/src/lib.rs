@@ -59,6 +59,7 @@ pub enum SocketMessage {
     SendContainerToMonitorWorkspaceNumber(usize, usize),
     MoveContainerToMonitorWorkspaceNumber(usize, usize),
     SendContainerToNamedWorkspace(String),
+    CycleMoveWorkspaceToMonitor(CycleDirection),
     MoveWorkspaceToMonitorNumber(usize),
     SwapWorkspacesToMonitorNumber(usize),
     ForceFocus,
@@ -66,6 +67,7 @@ pub enum SocketMessage {
     Minimize,
     Promote,
     PromoteFocus,
+    PromoteWindow(OperationDirection),
     ToggleFloat,
     ToggleMonocle,
     ToggleMaximize,
@@ -130,13 +132,17 @@ pub enum SocketMessage {
     WatchConfiguration(bool),
     CompleteConfiguration,
     AltFocusHack(bool),
-    ActiveWindowBorder(bool),
-    ActiveWindowBorderColour(WindowKind, u32, u32, u32),
-    ActiveWindowBorderStyle(ActiveWindowBorderStyle),
+    #[serde(alias = "ActiveWindowBorder")]
+    Border(bool),
+    #[serde(alias = "ActiveWindowBorderColour")]
+    BorderColour(WindowKind, u32, u32, u32),
+    #[serde(alias = "ActiveWindowBorderStyle")]
+    BorderStyle(BorderStyle),
     BorderWidth(i32),
     BorderOffset(i32),
     InvisibleBorders(Rect),
     StackbarMode(StackbarMode),
+    StackbarLabel(StackbarLabel),
     StackbarFocusedTextColour(u32, u32, u32),
     StackbarUnfocusedTextColour(u32, u32, u32),
     StackbarBackgroundColour(u32, u32, u32),
@@ -199,9 +205,18 @@ pub enum StackbarMode {
 }
 
 #[derive(
+    Debug, Copy, Default, Clone, Eq, PartialEq, Display, Serialize, Deserialize, JsonSchema,
+)]
+pub enum StackbarLabel {
+    #[default]
+    Process,
+    Title,
+}
+
+#[derive(
     Default, Copy, Clone, Debug, Eq, PartialEq, Display, Serialize, Deserialize, JsonSchema,
 )]
-pub enum ActiveWindowBorderStyle {
+pub enum BorderStyle {
     #[default]
     /// Use the system border style
     System,

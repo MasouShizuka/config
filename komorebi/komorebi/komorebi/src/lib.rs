@@ -4,13 +4,14 @@ pub mod com;
 pub mod ring;
 pub mod colour;
 pub mod container;
-pub mod hidden;
 pub mod monitor;
+pub mod monitor_reconciliator;
 pub mod process_command;
 pub mod process_event;
 pub mod process_movement;
+pub mod reaper;
 pub mod set_window_position;
-pub mod stackbar;
+pub mod stackbar_manager;
 pub mod static_config;
 pub mod styles;
 pub mod window;
@@ -33,16 +34,13 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicI32;
-use std::sync::atomic::AtomicIsize;
 use std::sync::atomic::AtomicU32;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
 pub use colour::*;
-pub use hidden::*;
 pub use process_command::*;
 pub use process_event::*;
-pub use stackbar::*;
 pub use static_config::*;
 pub use window::*;
 pub use window_manager::*;
@@ -58,7 +56,6 @@ use komorebi_core::ApplicationIdentifier;
 use komorebi_core::HidingBehaviour;
 use komorebi_core::Rect;
 use komorebi_core::SocketMessage;
-use komorebi_core::StackbarMode;
 use os_info::Version;
 use parking_lot::Mutex;
 use regex::Regex;
@@ -201,7 +198,6 @@ lazy_static! {
     // eg. Windows Terminal, IntelliJ IDEA, Firefox
     static ref NO_TITLEBAR: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
 
-    static ref STACKBAR_MODE: Arc<Mutex<StackbarMode >> = Arc::new(Mutex::new(StackbarMode::Never));
     static ref WINDOWS_BY_BAR_HWNDS: Arc<Mutex<HashMap<isize, VecDeque<isize>>>> =
         Arc::new(Mutex::new(HashMap::new()));
 
@@ -215,14 +211,6 @@ pub static CUSTOM_FFM: AtomicBool = AtomicBool::new(false);
 pub static SESSION_ID: AtomicU32 = AtomicU32::new(0);
 
 pub static REMOVE_TITLEBARS: AtomicBool = AtomicBool::new(false);
-
-pub static HIDDEN_HWND: AtomicIsize = AtomicIsize::new(0);
-
-pub static STACKBAR_FOCUSED_TEXT_COLOUR: AtomicU32 = AtomicU32::new(16777215); // white
-pub static STACKBAR_UNFOCUSED_TEXT_COLOUR: AtomicU32 = AtomicU32::new(11776947); // gray text
-pub static STACKBAR_TAB_BACKGROUND_COLOUR: AtomicU32 = AtomicU32::new(3355443); // gray
-pub static STACKBAR_TAB_HEIGHT: AtomicI32 = AtomicI32::new(40);
-pub static STACKBAR_TAB_WIDTH: AtomicI32 = AtomicI32::new(200);
 
 #[must_use]
 pub fn current_virtual_desktop() -> Option<Vec<u8>> {

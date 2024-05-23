@@ -57,7 +57,7 @@ nav:
       - Troubleshooting: troubleshooting.md
   - Common workflows:
       - common-workflows/komorebi-config-home.md
-      - common-workflows/active-window-border.md
+      - common-workflows/borders.md
       - common-workflows/stackbar.md
       - common-workflows/remove-gaps.md
       - common-workflows/ignore-windows.md
@@ -67,7 +67,7 @@ nav:
       - common-workflows/mouse-follows-focus.md
       - common-workflows/custom-layouts.md
       - common-workflows/dynamic-layout-switching.md
-  #    - common-workflows/autohotkey.md
+      - common-workflows/autohotkey.md
   - Release notes:
       - release/v0-1-22.md
   - Configuration reference: https://komorebi.lgug2z.com/schema
@@ -80,6 +80,7 @@ nav:
       - cli/whkdrc.md
       - cli/state.md
       - cli/global-state.md
+      - cli/gui.md
       - cli/visible-windows.md
       - cli/query.md
       - cli/subscribe-socket.md
@@ -124,6 +125,7 @@ nav:
       - cli/cycle-monitor.md
       - cli/cycle-workspace.md
       - cli/move-workspace-to-monitor.md
+      - cli/cycle-move-workspace-to-monitor.md
       - cli/swap-workspaces-with-monitor.md
       - cli/new-workspace.md
       - cli/resize-delta.md
@@ -140,6 +142,7 @@ nav:
       - cli/flip-layout.md
       - cli/promote.md
       - cli/promote-focus.md
+      - cli/promote-window.md
       - cli/retile.md
       - cli/monitor-index-preference.md
       - cli/display-index-preference.md
@@ -189,10 +192,10 @@ nav:
       - cli/identify-layered-application.md
       - cli/remove-title-bar.md
       - cli/toggle-title-bars.md
-      - cli/active-window-border.md
-      - cli/active-window-border-colour.md
-      - cli/active-window-border-width.md
-      - cli/active-window-border-offset.md
+      - cli/border.md
+      - cli/border-colour.md
+      - cli/border-width.md
+      - cli/border-offset.md
       - cli/focus-follows-mouse.md
       - cli/toggle-focus-follows-mouse.md
       - cli/mouse-follows-focus.md

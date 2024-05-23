@@ -82,8 +82,8 @@ end
 
 function M.diffthis()
     vim.cmd.windo("diffthis")
-    vim.cmd("normal! gg")
-    vim.cmd("normal! ]c")
+    vim.cmd.normal({ "gg", bang = true })
+    vim.cmd.normal({ "]c", bang = true })
 end
 
 function M.get_char_from_string(str)
@@ -153,32 +153,17 @@ function M.is_longfile(buf, detect_all_lines)
 end
 
 function M.json_save(file, data)
-    local f = io.open(file, "w")
-    if not f then
+    local fd = vim.uv.fs_open(file, "w", 438)
+    if fd == nil then
         return
     end
 
     local ok, json = pcall(vim.json.encode, data)
     if ok then
-        f:write(json)
+        vim.uv.fs_write(fd, json, -1)
     end
 
-    io.close(f)
-
-    -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
-    -- ╭───────────────────────────────────────────────╮
-    -- │ local fd = vim.uv.fs_open(file, "w", 438)     │
-    -- │ if fd == nil then                             │
-    -- │     return                                    │
-    -- │ end                                           │
-    -- │                                               │
-    -- │ local ok, json = pcall(vim.json.encode, data) │
-    -- │ if ok then                                    │
-    -- │     vim.uv.fs_write(fd, json, -1)             │
-    -- │ end                                           │
-    -- │                                               │
-    -- │ vim.uv.fs_close(fd)                           │
-    -- ╰───────────────────────────────────────────────╯
+    vim.uv.fs_close(fd)
 end
 
 function M.json_load(file)
@@ -186,25 +171,14 @@ function M.json_load(file)
         return {}
     end
 
-    local f = io.open(file, "r")
-    if not f then
+    local fd = vim.uv.fs_open(file, "r", 438)
+    if fd == nil then
         return {}
     end
 
-    local json = f:read("*a")
-    io.close(f)
-
-    -- NOTE: 当 neovim 正式版 到 v0.10，改用以下
-    -- ╭───────────────────────────────────────────────╮
-    -- │ local fd = vim.uv.fs_open(file, "r", 438)     │
-    -- │ if fd == nil then                             │
-    -- │     return {}                                 │
-    -- │ end                                           │
-    -- │                                               │
-    -- │ local stat = vim.uv.fs_fstat(fd)              │
-    -- │ local json = vim.uv.fs_read(fd, stat.size, 0) │
-    -- │ vim.uv.fs_close(fd)                           │
-    -- ╰───────────────────────────────────────────────╯
+    local stat = vim.uv.fs_fstat(fd)
+    local json = vim.uv.fs_read(fd, stat.size, 0)
+    vim.uv.fs_close(fd)
 
     local ok, data = pcall(vim.json.decode, json)
     if not ok then

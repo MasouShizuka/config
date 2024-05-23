@@ -4,10 +4,8 @@ source "$PARENT_DIR/lib.sh"
 
 winget install aria2.aria2 --accept-source-agreements
 target="$HOME/.config/aria2"
-
 clean_target "$target"
 install_to_target "$DIR" "$target"
-
 echo "新建 $target/aria2.session"
 touch "$target/aria2.session"
 

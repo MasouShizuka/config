@@ -1,4 +1,5 @@
 local environment = require("utils.environment")
+local icons = require("utils.icons")
 local keymap = require("utils.keymap")
 
 return {
@@ -98,6 +99,42 @@ return {
                     separator_padding = 1,
                     outer_pipes = true,
                     mimic_alignment = true,
+                },
+            },
+        },
+    },
+
+    {
+        "MeanderingProgrammer/markdown.nvim",
+        cmd = {
+            "RenderMarkdownToggle",
+        },
+        dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+        },
+        enabled = not environment.is_vscode,
+        ft = {
+            "markdown",
+        },
+        name = "render-markdown", -- Only needed if you have another plugin named markdown.nvim
+        opts = {
+            -- Characters that will replace the # at the start of headings
+            headings = {
+                icons.misc.format_header_1,
+                icons.misc.format_header_2,
+                icons.misc.format_header_3,
+                icons.misc.format_header_4,
+                icons.misc.format_header_5,
+                icons.misc.format_header_6,
+            },
+            -- 禁用 fat_tables，因为某些 table 不能正常添加顶部和底部线
+            -- Add a line above and below tables to complete look, ends up like a window
+            fat_tables = false,
+            -- Define the highlight groups to use when rendering various components
+            highlights = {
+                heading = {
+                    -- Background of heading line
+                    backgrounds = { "DiffAdd" },
                 },
             },
         },

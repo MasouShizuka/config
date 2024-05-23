@@ -140,6 +140,10 @@ impl Window {
     }
 
     pub fn set_position(&self, layout: &Rect, top: bool) -> Result<()> {
+        if WindowsApi::window_rect(self.hwnd())?.eq(layout) {
+            return Ok(());
+        }
+
         let rect = *layout;
         WindowsApi::position_window(self.hwnd(), &rect, top)
     }
@@ -243,6 +247,11 @@ impl Window {
         // If the target window is already focused, do nothing.
         if let Ok(ihwnd) = WindowsApi::foreground_window() {
             if HWND(ihwnd) == self.hwnd() {
+                // Center cursor in Window
+                if mouse_follows_focus {
+                    WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(self.hwnd())?)?;
+                }
+
                 return Ok(());
             }
         }

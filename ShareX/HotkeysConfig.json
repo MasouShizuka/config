@@ -51,7 +51,8 @@
             "DetectWindows": true,
             "DetectControls": true,
             "UseDimming": true,
-            "UseCustomInfoText": false,
+            "BackgroundDimStrength": 10,
+            "UseCustomInfoText": true,
             "CustomInfoText": "X: $x, Y: $y$nR: $r, G: $g, B: $b$nHex: $hex",
             "SnapSizes": [
               {
@@ -162,7 +163,8 @@
               "PixelateSize": 15,
               "HighlightColor": "Yellow",
               "CutOutEffectType": "None",
-              "CutOutEffectSize": 10
+              "CutOutEffectSize": 10,
+              "CutOutBackgroundColor": "Transparent"
             },
             "LastRegionTool": "RegionRectangle",
             "LastAnnotationTool": "ToolSelect",
@@ -514,7 +516,8 @@
             "DetectWindows": true,
             "DetectControls": true,
             "UseDimming": true,
-            "UseCustomInfoText": false,
+            "BackgroundDimStrength": 10,
+            "UseCustomInfoText": true,
             "CustomInfoText": "X: $x, Y: $y$nR: $r, G: $g, B: $b$nHex: $hex",
             "SnapSizes": [
               {
@@ -625,7 +628,8 @@
               "PixelateSize": 15,
               "HighlightColor": "Yellow",
               "CutOutEffectType": "None",
-              "CutOutEffectSize": 10
+              "CutOutEffectSize": 10,
+              "CutOutBackgroundColor": "Transparent"
             },
             "LastRegionTool": "RegionRectangle",
             "LastAnnotationTool": "ToolSelect",
@@ -801,7 +805,8 @@
             "DetectWindows": true,
             "DetectControls": true,
             "UseDimming": true,
-            "UseCustomInfoText": false,
+            "BackgroundDimStrength": 10,
+            "UseCustomInfoText": true,
             "CustomInfoText": "X: $x, Y: $y$nR: $r, G: $g, B: $b$nHex: $hex",
             "SnapSizes": [
               {
@@ -912,7 +917,8 @@
               "PixelateSize": 15,
               "HighlightColor": "Yellow",
               "CutOutEffectType": "None",
-              "CutOutEffectSize": 10
+              "CutOutEffectSize": 10,
+              "CutOutBackgroundColor": "Transparent"
             },
             "LastRegionTool": "RegionRectangle",
             "LastAnnotationTool": "ToolSelect",
@@ -1038,5 +1044,5 @@
       }
     }
   ],
-  "ApplicationVersion": "16.0.1"
+  "ApplicationVersion": "16.1.0"
 }

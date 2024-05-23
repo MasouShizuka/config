@@ -27,8 +27,7 @@ pub enum WindowManagerEvent {
     Manage(Window),
     Unmanage(Window),
     Raise(Window),
-    DisplayChange(Window),
-    ForceUpdate(Window),
+    TitleUpdate(WinEvent, Window),
 }
 
 impl Display for WindowManagerEvent {
@@ -76,11 +75,8 @@ impl Display for WindowManagerEvent {
             Self::Raise(window) => {
                 write!(f, "Raise (Window: {window})")
             }
-            Self::DisplayChange(window) => {
-                write!(f, "DisplayChange (Window: {window})")
-            }
-            Self::ForceUpdate(window) => {
-                write!(f, "ForceUpdate (Window: {window})")
+            Self::TitleUpdate(winevent, window) => {
+                write!(f, "TitleUpdate (WinEvent: {winevent}, Window: {window})")
             }
         }
     }
@@ -101,9 +97,8 @@ impl WindowManagerEvent {
             | Self::MouseCapture(_, window)
             | Self::Raise(window)
             | Self::Manage(window)
-            | Self::DisplayChange(window)
             | Self::Unmanage(window)
-            | Self::ForceUpdate(window) => window,
+            | Self::TitleUpdate(_, window) => window,
         }
     }
 
@@ -146,7 +141,7 @@ impl WindowManagerEvent {
                 let class = &window.class().ok()?;
                 let path = &window.path().ok()?;
 
-                let should_trigger = should_act(
+                let should_trigger_show = should_act(
                     title,
                     exe_name,
                     class,
@@ -156,10 +151,10 @@ impl WindowManagerEvent {
                 )
                 .is_some();
 
-                if should_trigger {
+                if should_trigger_show {
                     Option::from(Self::Show(winevent, window))
                 } else {
-                    None
+                    Option::from(Self::TitleUpdate(winevent, window))
                 }
             }
             _ => None,

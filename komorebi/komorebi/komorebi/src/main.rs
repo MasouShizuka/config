@@ -24,12 +24,14 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 
 use komorebi::border_manager;
-use komorebi::hidden::Hidden;
 use komorebi::load_configuration;
+use komorebi::monitor_reconciliator;
 use komorebi::process_command::listen_for_commands;
 use komorebi::process_command::listen_for_commands_tcp;
 use komorebi::process_event::listen_for_events;
 use komorebi::process_movement::listen_for_movements;
+use komorebi::reaper;
+use komorebi::stackbar_manager;
 use komorebi::static_config::StaticConfig;
 use komorebi::window_manager::WindowManager;
 use komorebi::windows_api::WindowsApi;
@@ -52,8 +54,8 @@ fn setup() -> Result<(WorkerGuard, WorkerGuard)> {
         std::env::set_var("RUST_LOG", "info");
     }
 
-    let appender = tracing_appender::rolling::never(std::env::temp_dir(), "komorebi_plaintext.log");
-    let color_appender = tracing_appender::rolling::never(std::env::temp_dir(), "komorebi.log");
+    let appender = tracing_appender::rolling::daily(std::env::temp_dir(), "komorebi_plaintext.log");
+    let color_appender = tracing_appender::rolling::daily(std::env::temp_dir(), "komorebi.log");
     let (non_blocking, guard) = tracing_appender::non_blocking(appender);
     let (color_non_blocking, color_guard) = tracing_appender::non_blocking(color_appender);
 
@@ -188,8 +190,6 @@ fn main() -> Result<()> {
     #[cfg(feature = "deadlock_detection")]
     detect_deadlocks();
 
-    Hidden::create("komorebi-hidden")?;
-
     let static_config = opts.config.map_or_else(
         || {
             let komorebi_json = HOME_DIR.join("komorebi.json");
@@ -256,7 +256,10 @@ fn main() -> Result<()> {
     }
 
     border_manager::listen_for_notifications(wm.clone());
+    stackbar_manager::listen_for_notifications(wm.clone());
     workspace_reconciliator::listen_for_notifications(wm.clone());
+    monitor_reconciliator::listen_for_notifications(wm.clone())?;
+    reaper::watch_for_orphans(wm.clone());
 
     let (ctrlc_sender, ctrlc_receiver) = crossbeam_channel::bounded(1);
     ctrlc::set_handler(move || {

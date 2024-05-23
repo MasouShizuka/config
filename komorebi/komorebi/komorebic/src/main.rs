@@ -1,6 +1,7 @@
 #![warn(clippy::all, clippy::nursery, clippy::pedantic)]
 #![allow(clippy::missing_errors_doc)]
 
+use chrono::Local;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::BufRead;
@@ -40,6 +41,7 @@ use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
 
 use derive_ahk::AhkFunction;
 use derive_ahk::AhkLibrary;
+use komorebi_client::StaticConfig;
 use komorebi_core::config_generation::ApplicationConfigurationGenerator;
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::Axis;
@@ -160,6 +162,7 @@ gen_enum_subcommand_args! {
     CycleMoveToMonitor: CycleDirection,
     CycleMonitor: CycleDirection,
     CycleWorkspace: CycleDirection,
+    CycleMoveWorkspaceToMonitor: CycleDirection,
     Stack: OperationDirection,
     CycleStack: CycleDirection,
     FlipLayout: Axis,
@@ -171,6 +174,7 @@ gen_enum_subcommand_args! {
     WindowHidingBehaviour: HidingBehaviour,
     CrossMonitorMoveBehaviour: MoveBehaviour,
     UnmanagedWindowOperationBehaviour: OperationBehaviour,
+    PromoteWindow: OperationDirection,
 }
 
 macro_rules! gen_target_subcommand_args {
@@ -651,13 +655,13 @@ struct FocusFollowsMouse {
 }
 
 #[derive(Parser, AhkFunction)]
-struct ActiveWindowBorder {
+struct Border {
     #[clap(value_enum)]
     boolean_state: BooleanState,
 }
 
 #[derive(Parser, AhkFunction)]
-struct ActiveWindowBorderColour {
+struct BorderColour {
     #[clap(value_enum, short, long, default_value = "single")]
     window_kind: WindowKind,
     /// Red
@@ -669,14 +673,14 @@ struct ActiveWindowBorderColour {
 }
 
 #[derive(Parser, AhkFunction)]
-struct ActiveWindowBorderWidth {
-    /// Desired width of the active window border
+struct BorderWidth {
+    /// Desired width of the window border
     width: i32,
 }
 
 #[derive(Parser, AhkFunction)]
-struct ActiveWindowBorderOffset {
-    /// Desired offset of the active window border
+struct BorderOffset {
+    /// Desired offset of the window border
     offset: i32,
 }
 
@@ -825,6 +829,8 @@ enum SubCommand {
     State,
     /// Show a JSON representation of the current global state
     GlobalState,
+    /// Launch the komorebi-gui debugging tool
+    Gui,
     /// Show a JSON representation of visible windows
     VisibleWindows,
     /// Query the current window manager state
@@ -955,6 +961,9 @@ enum SubCommand {
     /// Move the focused workspace to the specified monitor
     #[clap(arg_required_else_help = true)]
     MoveWorkspaceToMonitor(MoveWorkspaceToMonitor),
+    /// Move the focused workspace monitor in the given cycle direction
+    #[clap(arg_required_else_help = true)]
+    CycleMoveWorkspaceToMonitor(CycleMoveWorkspaceToMonitor),
     /// Swap focused monitor workspaces with specified monitor
     #[clap(arg_required_else_help = true)]
     SwapWorkspacesWithMonitor(SwapWorkspacesWithMonitor),
@@ -1000,6 +1009,8 @@ enum SubCommand {
     Promote,
     /// Promote the user focus to the top of the tree
     PromoteFocus,
+    /// Promote the window in the specified direction
+    PromoteWindow(PromoteWindow),
     /// Force the retiling of all managed windows
     Retile,
     /// Set the monitor index preference for a monitor identified using its size
@@ -1141,18 +1152,22 @@ enum SubCommand {
     #[clap(hide = true)]
     #[clap(alias = "identify-border-overflow")]
     IdentifyBorderOverflowApplication(IdentifyBorderOverflowApplication),
-    /// Enable or disable the active window border
+    /// Enable or disable borders
     #[clap(arg_required_else_help = true)]
-    ActiveWindowBorder(ActiveWindowBorder),
-    /// Set the colour for the active window border
+    #[clap(alias = "active-window-border")]
+    Border(Border),
+    /// Set the colour for a window border kind
     #[clap(arg_required_else_help = true)]
-    ActiveWindowBorderColour(ActiveWindowBorderColour),
-    /// Set the width for the active window border
+    #[clap(alias = "active-window-border-colour")]
+    BorderColour(BorderColour),
+    /// Set the border width
     #[clap(arg_required_else_help = true)]
-    ActiveWindowBorderWidth(ActiveWindowBorderWidth),
-    /// Set the offset for the active window border
+    #[clap(alias = "active-window-border-width")]
+    BorderWidth(BorderWidth),
+    /// Set the border offset
     #[clap(arg_required_else_help = true)]
-    ActiveWindowBorderOffset(ActiveWindowBorderOffset),
+    #[clap(alias = "active-window-border-offset")]
+    BorderOffset(BorderOffset),
     /// Enable or disable focus follows mouse for the operating system
     #[clap(arg_required_else_help = true)]
     FocusFollowsMouse(FocusFollowsMouse),
@@ -1479,7 +1494,8 @@ fn main() -> Result<()> {
             println!("\n#Include komorebic.lib.ahk");
         }
         SubCommand::Log => {
-            let color_log = std::env::temp_dir().join("komorebi.log");
+            let timestamp = Local::now().format("%Y-%m-%d").to_string();
+            let color_log = std::env::temp_dir().join(format!("komorebi.log.{timestamp}"));
             let file = TailedFile::new(File::open(color_log)?);
             let locked = file.lock();
             #[allow(clippy::significant_drop_in_scrutinee, clippy::lines_filter_map_ok)]
@@ -1504,6 +1520,9 @@ fn main() -> Result<()> {
         }
         SubCommand::PromoteFocus => {
             send_message(&SocketMessage::PromoteFocus.as_bytes()?)?;
+        }
+        SubCommand::PromoteWindow(arg) => {
+            send_message(&SocketMessage::PromoteWindow(arg.operation_direction).as_bytes()?)?;
         }
         SubCommand::TogglePause => {
             send_message(&SocketMessage::TogglePause.as_bytes()?)?;
@@ -1578,6 +1597,11 @@ fn main() -> Result<()> {
         }
         SubCommand::MoveWorkspaceToMonitor(arg) => {
             send_message(&SocketMessage::MoveWorkspaceToMonitorNumber(arg.target).as_bytes()?)?;
+        }
+        SubCommand::CycleMoveWorkspaceToMonitor(arg) => {
+            send_message(
+                &SocketMessage::CycleMoveWorkspaceToMonitor(arg.cycle_direction).as_bytes()?,
+            )?;
         }
         SubCommand::SwapWorkspacesWithMonitor(arg) => {
             send_message(&SocketMessage::SwapWorkspacesToMonitorNumber(arg.target).as_bytes()?)?;
@@ -1930,6 +1954,26 @@ if (!(Get-Process whkd -ErrorAction SilentlyContinue))
                 "* Subscribe to https://youtube.com/@LGUG2Z - Live dev videos and feature previews"
             );
             println!("* Join the Discord https://discord.gg/mGkn66PHkx - Chat, ask questions, share your desktops");
+            println!("* Read the docs https://lgug2z.github.io/komorebi - Quickly search through all komorebic commands");
+
+            let static_config = arg.config.map_or_else(
+                || {
+                    let komorebi_json = HOME_DIR.join("komorebi.json");
+                    if komorebi_json.is_file() {
+                        Option::from(komorebi_json)
+                    } else {
+                        None
+                    }
+                },
+                Option::from,
+            );
+
+            if let Some(config) = static_config {
+                let path = resolve_home_path(config)?;
+                let raw = std::fs::read_to_string(path)?;
+                StaticConfig::aliases(&raw);
+                StaticConfig::deprecated(&raw);
+            }
         }
         SubCommand::Stop(arg) => {
             if arg.whkd {
@@ -2108,6 +2152,9 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
         SubCommand::GlobalState => {
             print_query(&SocketMessage::GlobalState.as_bytes()?);
         }
+        SubCommand::Gui => {
+            Command::new("komorebi-gui").spawn()?;
+        }
         SubCommand::VisibleWindows => {
             print_query(&SocketMessage::VisibleWindows.as_bytes()?);
         }
@@ -2212,19 +2259,18 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
         SubCommand::MouseFollowsFocus(arg) => {
             send_message(&SocketMessage::MouseFollowsFocus(arg.boolean_state.into()).as_bytes()?)?;
         }
-        SubCommand::ActiveWindowBorder(arg) => {
-            send_message(&SocketMessage::ActiveWindowBorder(arg.boolean_state.into()).as_bytes()?)?;
+        SubCommand::Border(arg) => {
+            send_message(&SocketMessage::Border(arg.boolean_state.into()).as_bytes()?)?;
         }
-        SubCommand::ActiveWindowBorderColour(arg) => {
+        SubCommand::BorderColour(arg) => {
             send_message(
-                &SocketMessage::ActiveWindowBorderColour(arg.window_kind, arg.r, arg.g, arg.b)
-                    .as_bytes()?,
+                &SocketMessage::BorderColour(arg.window_kind, arg.r, arg.g, arg.b).as_bytes()?,
             )?;
         }
-        SubCommand::ActiveWindowBorderWidth(arg) => {
+        SubCommand::BorderWidth(arg) => {
             send_message(&SocketMessage::BorderWidth(arg.width).as_bytes()?)?;
         }
-        SubCommand::ActiveWindowBorderOffset(arg) => {
+        SubCommand::BorderOffset(arg) => {
             send_message(&SocketMessage::BorderOffset(arg.offset).as_bytes()?)?;
         }
         SubCommand::ResizeDelta(arg) => {

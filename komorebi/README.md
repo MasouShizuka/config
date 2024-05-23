@@ -7,14 +7,16 @@
 
 ## 配置文件
 
-| 文件            | 路径                  | 说明                                             |
-| --------------- | --------------------- | ------------------------------------------------ |
-| komorebi        |                       | komorebi 源码，经过了**修改**                    |
-| yasb            |                       | Yet Another Status Bar 源码，经过了**修改**      |
-| config.yaml     | `$HOME/.config/yasb/` | Yet Another Status Bar 配置文件                  |
-| styles.css      | `$HOME/.config/yasb/` | Yet Another Status Bar 样式                      |
-| komorebi_v1.ahk |                       | komorebi 配置文件<br>可配合 MyKeymap 1 版本 使用 |
-| komorebi_v2.ahk |                       | komorebi 配置文件<br>可配合 MyKeymap 2 版本 使用 |
+| 文件              | 路径                  | 说明                                                   |
+| ----------------- | --------------------- | ------------------------------------------------------ |
+| komorebi          |                       | komorebi 源码，经过了**修改**                          |
+| komorebi.json     |                       | komorebi 配置文件                                      |
+| komorebi_v1.ahk   |                       | komorebi 快捷键配置文件<br>可配合 MyKeymap 1 版本 使用 |
+| komorebi_v2.ahk   |                       | komorebi 快捷键配置文件<br>可配合 MyKeymap 2 版本 使用 |
+| applications.yaml |                       | komorebi 窗口配置文件                                  |
+| yasb              |                       | Yet Another Status Bar 源码，经过了**修改**            |
+| config.yaml       | `$HOME/.config/yasb/` | Yet Another Status Bar 配置文件                        |
+| styles.css        | `$HOME/.config/yasb/` | Yet Another Status Bar 样式                            |
 
 ## 注意
 

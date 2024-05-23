@@ -1,3 +1,5 @@
+PORTABLE_DIR=/d/Tools
+
 clean_target() {
     target=$1
 

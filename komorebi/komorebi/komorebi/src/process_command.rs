@@ -43,6 +43,7 @@ use crate::border_manager::STYLE;
 use crate::colour::Rgb;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
+use crate::stackbar_manager;
 use crate::static_config::StaticConfig;
 use crate::window::RuleDebug;
 use crate::window::Window;
@@ -64,17 +65,18 @@ use crate::MONITOR_INDEX_PREFERENCES;
 use crate::NO_TITLEBAR;
 use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REMOVE_TITLEBARS;
-use crate::STACKBAR_FOCUSED_TEXT_COLOUR;
-use crate::STACKBAR_MODE;
-use crate::STACKBAR_TAB_BACKGROUND_COLOUR;
-use crate::STACKBAR_TAB_HEIGHT;
-use crate::STACKBAR_TAB_WIDTH;
-use crate::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::SUBSCRIPTION_PIPES;
 use crate::SUBSCRIPTION_SOCKETS;
 use crate::TCP_CONNECTIONS;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
 use crate::WORKSPACE_RULES;
+use stackbar_manager::STACKBAR_FOCUSED_TEXT_COLOUR;
+use stackbar_manager::STACKBAR_LABEL;
+use stackbar_manager::STACKBAR_MODE;
+use stackbar_manager::STACKBAR_TAB_BACKGROUND_COLOUR;
+use stackbar_manager::STACKBAR_TAB_HEIGHT;
+use stackbar_manager::STACKBAR_TAB_WIDTH;
+use stackbar_manager::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 
 #[tracing::instrument]
 pub fn listen_for_commands(wm: Arc<Mutex<WindowManager>>) {
@@ -185,6 +187,10 @@ impl WindowManager {
         match message {
             SocketMessage::Promote => self.promote_container_to_front()?,
             SocketMessage::PromoteFocus => self.promote_focus_to_front()?,
+            SocketMessage::PromoteWindow(direction) => {
+                self.focus_container_in_direction(direction)?;
+                self.promote_container_to_front()?
+            }
             SocketMessage::FocusWindow(direction) => {
                 self.focus_container_in_direction(direction)?;
             }
@@ -209,7 +215,7 @@ impl WindowManager {
                 WindowsApi::center_cursor_in_rect(&focused_window_rect)?;
                 WindowsApi::left_click();
             }
-            // NOTE: 关闭窗口时不会触发 Destroy 事件，因此添加 Destroy 事件的处理
+            // NOTE: 关闭窗口只关闭 komorebi 管理到的窗口
             SocketMessage::Close => {
                 let focused_window = self.focused_window()?;
                 let hwnd = focused_window.hwnd;
@@ -217,7 +223,12 @@ impl WindowManager {
                 self.focused_workspace_mut()?.remove_window(hwnd)?;
                 self.update_focused_workspace(true, true)?;
             }
-            SocketMessage::Minimize => self.focused_window()?.minimize(),
+            SocketMessage::Minimize => {
+                Window {
+                    hwnd: WindowsApi::foreground_window()?,
+                }
+                .minimize();
+            }
             SocketMessage::ToggleFloat => self.toggle_float()?,
             SocketMessage::ToggleMonocle => self.toggle_monocle()?,
             SocketMessage::ToggleMaximize => self.toggle_maximize()?,
@@ -470,6 +481,15 @@ impl WindowManager {
             }
 
             SocketMessage::MoveWorkspaceToMonitorNumber(monitor_idx) => {
+                self.move_workspace_to_monitor(monitor_idx)?;
+            }
+            SocketMessage::CycleMoveWorkspaceToMonitor(direction) => {
+                let monitor_idx = direction.next_idx(
+                    self.focused_monitor_idx(),
+                    NonZeroUsize::new(self.monitors().len())
+                        .ok_or_else(|| anyhow!("there must be at least one monitor"))?,
+                );
+
                 self.move_workspace_to_monitor(monitor_idx)?;
             }
             SocketMessage::TogglePause => {
@@ -767,13 +787,10 @@ impl WindowManager {
             SocketMessage::VisibleWindows => {
                 let mut monitor_visible_windows = HashMap::new();
 
-                for (index, monitor) in self.monitors().iter().enumerate() {
+                for monitor in self.monitors() {
                     if let Some(ws) = monitor.focused_workspace() {
                         monitor_visible_windows.insert(
-                            monitor
-                                .device_id()
-                                .clone()
-                                .unwrap_or_else(|| format!("{index}")),
+                            monitor.device_id().clone(),
                             ws.visible_window_details().clone(),
                         );
                     }
@@ -1212,10 +1229,10 @@ impl WindowManager {
             SocketMessage::UnmanagedWindowOperationBehaviour(behaviour) => {
                 self.unmanaged_window_operation_behaviour = behaviour;
             }
-            SocketMessage::ActiveWindowBorder(enable) => {
+            SocketMessage::Border(enable) => {
                 border_manager::BORDER_ENABLED.store(enable, Ordering::SeqCst);
             }
-            SocketMessage::ActiveWindowBorderColour(kind, r, g, b) => match kind {
+            SocketMessage::BorderColour(kind, r, g, b) => match kind {
                 WindowKind::Single => {
                     border_manager::FOCUSED.store(Rgb::new(r, g, b).into(), Ordering::SeqCst);
                 }
@@ -1229,9 +1246,9 @@ impl WindowManager {
                     border_manager::UNFOCUSED.store(Rgb::new(r, g, b).into(), Ordering::SeqCst);
                 }
             },
-            SocketMessage::ActiveWindowBorderStyle(style) => {
-                let mut active_window_border_style = STYLE.lock();
-                *active_window_border_style = style;
+            SocketMessage::BorderStyle(style) => {
+                let mut border_style = STYLE.lock();
+                *border_style = style;
             }
             SocketMessage::BorderWidth(width) => {
                 border_manager::BORDER_WIDTH.store(width, Ordering::SeqCst);
@@ -1240,16 +1257,10 @@ impl WindowManager {
                 border_manager::BORDER_OFFSET.store(offset, Ordering::SeqCst);
             }
             SocketMessage::StackbarMode(mode) => {
-                let mut stackbar_mode = STACKBAR_MODE.lock();
-                *stackbar_mode = mode;
-
-                for m in self.monitors_mut() {
-                    for w in m.workspaces_mut() {
-                        for c in w.containers_mut() {
-                            c.set_stackbar_mode(mode);
-                        }
-                    }
-                }
+                STACKBAR_MODE.store(mode);
+            }
+            SocketMessage::StackbarLabel(label) => {
+                STACKBAR_LABEL.store(label);
             }
             SocketMessage::StackbarFocusedTextColour(r, g, b) => {
                 let rgb = Rgb::new(r, g, b);
@@ -1336,6 +1347,7 @@ impl WindowManager {
 
         notify_subscribers(&serde_json::to_string(&notification)?)?;
         border_manager::event_tx().send(border_manager::Notification)?;
+        stackbar_manager::event_tx().send(stackbar_manager::Notification)?;
 
         tracing::info!("processed");
         Ok(())

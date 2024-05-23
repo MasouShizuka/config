@@ -112,13 +112,13 @@ return {
                                 jump(results[1])
                             end
 
-                            vim.cmd("normal! zt")
+                            vim.cmd.normal({ "zt", bang = true })
                         else
                             open(results)
                         end
                     end,
                     after_close = function()
-                        vim.cmd("normal! zt")
+                        vim.cmd.normal({ "zt", bang = true })
                     end,
                 },
                 folds = {
@@ -423,7 +423,7 @@ return {
 
                         local function lsp_codelens_refresh()
                             if vim.b[buf].codelens_enabled == nil and vim.g.codelens_enabled or vim.b[buf].codelens_enabled then
-                                vim.lsp.codelens.refresh()
+                                vim.lsp.codelens.refresh({ bufnr = buf })
                             end
                         end
 
@@ -452,7 +452,7 @@ return {
                             end)
                         end, { buffer = buf, desc = "Toggle LSP codelens (buffer)", silent = true })
 
-                        vim.keymap.set("n", "<leader>lc", function() vim.lsp.codelens.refresh() end, { buffer = buf, desc = "LSP CodeLens refresh", silent = true })
+                        vim.keymap.set("n", "<leader>lc", function() vim.lsp.codelens.refresh({ bufnr = buf }) end, { buffer = buf, desc = "LSP CodeLens refresh", silent = true })
                         vim.keymap.set("n", "<leader>lC", function() vim.lsp.codelens.run() end, { buffer = buf, desc = "LSP CodeLens run", silent = true })
                     end
 
@@ -518,10 +518,10 @@ return {
 
                             local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
                             -- check if we have any null-ls formatters for the current filetype
-                            local null_ls = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
+                            local null_ls_formatters = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
 
                             local clients = vim.lsp.get_clients({ bufnr = buf })
-                            if #null_ls > 0 then
+                            if #null_ls_formatters > 0 then
                                 for _, client in ipairs(clients) do
                                     if supports_format(client) and client.name == "null-ls" then
                                         formatters[#formatters + 1] = client
@@ -589,20 +589,20 @@ return {
                         end
 
                         if vim.b[buf].inlay_hints_enabled == nil and vim.g.inlay_hints_enabled or vim.b[buf].inlay_hints_enabled then
-                            vim.lsp.inlay_hint.enable(buf, true)
+                            vim.lsp.inlay_hint.enable(true, { bufnr = buf })
                         end
 
                         vim.keymap.set("n", "<leader>lti", function()
                             utils.toggle_global_setting("inlay_hints_enabled", function(enabled, prev_enabled, global_enabled)
                                 if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
-                                    vim.lsp.inlay_hint.enable(buf, enabled)
+                                    vim.lsp.inlay_hint.enable(enabled, { bufnr = buf })
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP inlay hints", silent = true })
                         vim.keymap.set("n", "<leader>ltI", function()
                             utils.toggle_buffer_setting("inlay_hints_enabled", function(enabled, prev_enabled)
                                 if enabled ~= vim.lsp.inlay_hint.get({ bufnr = buf }) then
-                                    vim.lsp.inlay_hint.enable(buf, enabled)
+                                    vim.lsp.inlay_hint.enable(enabled, { bufnr = buf })
                                 end
                             end)
                         end, { buffer = buf, desc = "Toggle LSP inlay hints (buffer)", silent = true })
@@ -885,5 +885,4 @@ return {
             },
         },
     },
-
 }

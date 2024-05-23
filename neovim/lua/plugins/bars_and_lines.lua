@@ -971,9 +971,9 @@ return {
                         local char = statuscolumn_clickargs(...).char
                         local fillchars = vim.opt_local.fillchars:get()
                         if char == (fillchars.foldopen or icons.fold.FoldOpened) then
-                            vim.cmd("normal! zc")
+                            vim.cmd.normal({ "zc", bang = true })
                         elseif char == (fillchars.foldcolse or icons.fold.FoldClosed) then
-                            vim.cmd("normal! zo")
+                            vim.cmd.normal({ "zo", bang = true })
                         end
                     end,
                     name = "heirline_fold_click",

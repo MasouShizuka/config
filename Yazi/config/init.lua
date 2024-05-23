@@ -95,6 +95,9 @@ require("projects"):setup({
         update_after_save = true,
         update_after_load = true,
     },
+    merge = {
+        quit_after_merge = true,
+    },
     notify = {
         enable = true,
         title = "Projects",

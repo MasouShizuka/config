@@ -41,4 +41,6 @@ local function entry(st)
     ya.app_emit("resize", {})
 end
 
-return { entry = entry }
+return {
+    entry = entry,
+}

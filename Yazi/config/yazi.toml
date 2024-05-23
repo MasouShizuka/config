@@ -14,6 +14,10 @@ edit = [
     { run = 'code "$@"',    orphan = true, desc = "code",         for = "unix" },
     { run = 'code -w "$@"', block = true,  desc = "code (block)", for = "unix" },
 ]
+extract = [
+    { run = 'ouch decompress "%1"', desc = "Extract here", for = "windows" },
+    { run = 'ouch decompress "$1"', desc = "Extract here", for = "unix" },
+]
 
 [open]
 
@@ -26,9 +30,9 @@ rules = [
     { mime = "{audio,video}/*",                                use = [ "play", "reveal" ] },
     { mime = "inode/x-empty",                                  use = [ "edit", "reveal" ] },
 
-    # windows 平台压缩文件优先打开
-    { mime = "application/*zip",                               use = [ "open", "extract", "reveal" ] },
-    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", use = [ "open", "extract", "reveal" ] },
+    { mime = "application/*zip",                               use = [ "extract", "reveal" ] },
+    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", use = [ "extract", "reveal" ] },
+    { mime = "application/vnd.rar",                            use = [ "extract", "reveal" ] },
 
     { mime = "application/json",                               use = [ "edit", "reveal" ] },
     { mime = "*/javascript",                                   use = [ "edit", "reveal" ] },
@@ -40,23 +44,44 @@ rules = [
 [plugin]
 
 preloaders = [
-    { name = "*", cond = "!mime", run = "mime", multi = true, prio = "high" },
+    { name = "*", cond = "!mime",             run = "mime", multi = true, prio = "high" },
     # Image
-    { mime = "image/*",           run = "image" },
+    { mime = "image/*",                       run = "image" },
+    { mime = "image/heic",                    run = "magick" },
+    { mime = "image/jxl",                     run = "magick" },
+    { mime = "image/*",                       run = "image" },
+    # # Video
+    # { mime = "video/*",                     run = "video" },
+    # # PDF
+    # { mime = "application/pdf",             run = "pdf" },
+    # # Font
+    # { mime = "font/*",                      run = "font" },
+    # { mime = "application/vnd.ms-opentype", run = "font" },
 ]
 previewers = [
     { name = "*/",                                             run = "folder", sync = true },
     # Code
     { mime = "text/*",                                         run = "code" },
-    { mime = "*/{xml,javascript,x-wine-extension-ini,x-tex}",  run = "code" },
+    { mime = "*/{xml,javascript,x-wine-extension-ini}",        run = "code" },
+    { mime = "*/x-tex",                                        run = "code" },
     # JSON
     { mime = "application/json",                               run = "json" },
     # Image
-    { mime = "image/vnd.djvu",                                 run = "noop" },
+    { mime = "image/svg+xml",                                  run = "magick" },
+    { mime = "image/heic",                                     run = "magick" },
+    { mime = "image/jxl",                                      run = "magick" },
     { mime = "image/*",                                        run = "image" },
+    # # Video
+    # { mime = "video/*",                                      run = "video" },
+    # # PDF
+    # { mime = "application/pdf",                              run = "pdf" },
     # Archive
-    { mime = "application/*zip",                               run = "archive" },
-    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", run = "archive" },
+    { mime = "application/*zip",                               run = "ouch" },
+    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", run = "ouch" },
+    { mime = "application/vnd.rar",                            run = "ouch" },
+    # # Font
+    # { mime = "font/*",                                       run = "font" },
+    # { mime = "application/vnd.ms-opentype",                  run = "font" },
     # Fallback
     { name = "*",                                              run = "file" },
 ]

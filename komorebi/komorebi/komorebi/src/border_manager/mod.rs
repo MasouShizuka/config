@@ -5,7 +5,7 @@ mod border;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use crossbeam_utils::atomic::AtomicConsume;
-use komorebi_core::ActiveWindowBorderStyle;
+use komorebi_core::BorderStyle;
 use lazy_static::lazy_static;
 use parking_lot::Mutex;
 use schemars::JsonSchema;
@@ -18,8 +18,11 @@ use std::sync::atomic::AtomicI32;
 use std::sync::atomic::AtomicU32;
 use std::sync::Arc;
 use std::sync::OnceLock;
+use std::time::Duration;
+use std::time::Instant;
 use windows::Win32::Foundation::HWND;
 
+use crate::workspace_reconciliator::ALT_TAB_HWND;
 use crate::Colour;
 use crate::Rect;
 use crate::Rgb;
@@ -36,8 +39,7 @@ pub static BORDER_ENABLED: AtomicBool = AtomicBool::new(true);
 
 lazy_static! {
     pub static ref Z_ORDER: Arc<Mutex<ZOrder>> = Arc::new(Mutex::new(ZOrder::Bottom));
-    pub static ref STYLE: Arc<Mutex<ActiveWindowBorderStyle>> =
-        Arc::new(Mutex::new(ActiveWindowBorderStyle::System));
+    pub static ref STYLE: Arc<Mutex<BorderStyle>> = Arc::new(Mutex::new(BorderStyle::System));
     pub static ref FOCUSED: AtomicU32 =
         AtomicU32::new(u32::from(Colour::Rgb(Rgb::new(66, 165, 245))));
     pub static ref UNFOCUSED: AtomicU32 =
@@ -121,29 +123,43 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
     tracing::info!("listening");
 
     let receiver = event_rx();
+    let mut instant: Option<Instant> = None;
+    event_tx().send(Notification)?;
 
     'receiver: for _ in receiver {
+        if let Some(instant) = instant {
+            if instant.elapsed().lt(&Duration::from_millis(50)) {
+                continue 'receiver;
+            }
+        }
+
+        instant = Some(Instant::now());
+
         let mut borders = BORDER_STATE.lock();
         let mut borders_monitors = BORDERS_MONITORS.lock();
 
         // Check the wm state every time we receive a notification
         let state = wm.lock();
 
-        if !BORDER_ENABLED.load_consume() || state.is_paused {
-            if !borders.is_empty() {
-                for (_, border) in borders.iter() {
-                    border.destroy()?;
-                }
-
-                borders.clear();
+        // If borders are disabled
+        if !BORDER_ENABLED.load_consume()
+           // Or if the wm is paused
+            || state.is_paused
+            // Or if we are handling an alt-tab across workspaces
+            || ALT_TAB_HWND.load().is_some()
+        {
+            // Destroy the borders we know about
+            for (_, border) in borders.iter() {
+                border.destroy()?;
             }
 
+            borders.clear();
             continue 'receiver;
         }
 
         let focused_monitor_idx = state.focused_monitor_idx();
 
-        'monitor: for (monitor_idx, m) in state.monitors.elements().iter().enumerate() {
+        'monitors: for (monitor_idx, m) in state.monitors.elements().iter().enumerate() {
             // Only operate on the focused workspace of each monitor
             if let Some(ws) = m.focused_workspace() {
                 // Workspaces with tiling disabled don't have borders
@@ -165,19 +181,6 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
 
                 // Handle the monocle container separately
                 if let Some(monocle) = ws.monocle_container() {
-                    let mut to_remove = vec![];
-                    for (id, border) in borders.iter() {
-                        // NOTE: 不销毁 monocle 的 border
-                        if id != monocle.id() && borders_monitors.get(id).copied().unwrap_or_default() == monitor_idx {
-                            border.destroy()?;
-                            to_remove.push(id.clone());
-                        }
-                    }
-
-                    for id in &to_remove {
-                        borders.remove(id);
-                    }
-
                     let border = match borders.entry(monocle.id().clone()) {
                         Entry::Occupied(entry) => entry.into_mut(),
                         Entry::Vacant(entry) => {
@@ -193,7 +196,14 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
 
                     {
                         let mut focus_state = FOCUS_STATE.lock();
-                        focus_state.insert(border.hwnd, WindowKind::Monocle);
+                        focus_state.insert(
+                            border.hwnd,
+                            if monitor_idx != focused_monitor_idx {
+                                WindowKind::Unfocused
+                            } else {
+                                WindowKind::Monocle
+                            },
+                        );
                     }
 
                     let rect = WindowsApi::window_rect(
@@ -202,8 +212,21 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
 
                     border.update(&rect)?;
 
-                    // NOTE: 当某个 monitor 存在 monocle window 时，也更新其他 monitor
-                    continue 'monitor;
+                    let border_hwnd = border.hwnd;
+                    let mut to_remove = vec![];
+                    for (id, b) in borders.iter() {
+                        if borders_monitors.get(id).copied().unwrap_or_default() == monitor_idx
+                            && border_hwnd != b.hwnd
+                        {
+                            b.destroy()?;
+                            to_remove.push(id.clone());
+                        }
+                    }
+
+                    for id in &to_remove {
+                        borders.remove(id);
+                    }
+                    continue 'monitors;
                 }
 
                 let is_maximized = WindowsApi::is_zoomed(HWND(
@@ -223,8 +246,7 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
                         borders.remove(id);
                     }
 
-                    // NOTE: 当某个 monitor 存在 maximized window 时，也更新其他 monitor
-                    continue 'monitor;
+                    continue 'monitors;
                 }
 
                 // Destroy any borders not associated with the focused workspace

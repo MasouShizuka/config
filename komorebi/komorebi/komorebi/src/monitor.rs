@@ -27,15 +27,19 @@ pub struct Monitor {
     #[getset(get = "pub", set = "pub")]
     name: String,
     #[getset(get = "pub", set = "pub")]
-    device: Option<String>,
+    device: String,
     #[getset(get = "pub", set = "pub")]
-    device_id: Option<String>,
+    device_id: String,
     #[getset(get = "pub", set = "pub")]
     size: Rect,
     #[getset(get = "pub", set = "pub")]
     work_area_size: Rect,
     #[getset(get_copy = "pub", set = "pub")]
     work_area_offset: Option<Rect>,
+    #[getset(get_copy = "pub", set = "pub")]
+    window_based_work_area_offset: Option<Rect>,
+    #[getset(get_copy = "pub", set = "pub")]
+    window_based_work_area_offset_limit: isize,
     workspaces: Ring<Workspace>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
@@ -46,18 +50,27 @@ pub struct Monitor {
 
 impl_ring_elements!(Monitor, Workspace);
 
-pub fn new(id: isize, size: Rect, work_area_size: Rect, name: String) -> Monitor {
+pub fn new(
+    id: isize,
+    size: Rect,
+    work_area_size: Rect,
+    name: String,
+    device: String,
+    device_id: String,
+) -> Monitor {
     let mut workspaces = Ring::default();
     workspaces.elements_mut().push_back(Workspace::default());
 
     Monitor {
         id,
         name,
-        device: None,
-        device_id: None,
+        device,
+        device_id,
         size,
         work_area_size,
         work_area_offset: None,
+        window_based_work_area_offset: None,
+        window_based_work_area_offset_limit: 1,
         workspaces,
         last_focused_workspace: None,
         workspace_names: HashMap::default(),
@@ -208,6 +221,11 @@ impl Monitor {
 
     pub fn update_focused_workspace(&mut self, offset: Option<Rect>) -> Result<()> {
         let work_area = *self.work_area_size();
+        let window_based_work_area_offset = (
+            self.window_based_work_area_offset_limit(),
+            self.window_based_work_area_offset(),
+        );
+
         let offset = if self.work_area_offset().is_some() {
             self.work_area_offset()
         } else {
@@ -216,7 +234,7 @@ impl Monitor {
 
         self.focused_workspace_mut()
             .ok_or_else(|| anyhow!("there is no workspace"))?
-            .update(&work_area, offset)?;
+            .update(&work_area, offset, window_based_work_area_offset)?;
 
         Ok(())
     }

@@ -588,7 +588,7 @@ widgets:
   input_method:
     type: "yasb.input_method.InputMethodWidget"
     options:
-      label: "\uea65 {language}"
+      label: "\uf11c  {language}"
       update_interval: 500
       language_dict:
         0x409: "EN"
