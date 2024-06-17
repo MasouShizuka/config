@@ -1,3 +1,4 @@
+local buftype = require("utils.buftype")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
 local lsp = require("utils.lsp")
@@ -41,6 +42,20 @@ function M.setup()
             desc = "Lsp file event",
             group = vim.api.nvim_create_augroup("LspFile", { clear = true }),
             pattern = lsp.lsp_filetype_list,
+        })
+        vim.api.nvim_create_autocmd("Filetype", {
+            callback = function(args)
+                local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                -- 防止在 lsp hover 等内嵌 markdown 中激活 markdown plugins
+                if not vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                    utils.event("MarkdownFile", true)
+                    utils.refresh_buf(args.buf, 1, true)
+                    vim.api.nvim_del_augroup_by_name("MarkdownFile")
+                end
+            end,
+            desc = "Markdown file event",
+            group = vim.api.nvim_create_augroup("MarkdownFile", { clear = true }),
+            pattern = "markdown",
         })
     end
 
@@ -246,7 +261,8 @@ function M.setup()
                     for _, panel in ipairs(panels) do
                         local open_func = panel.func.open
                         if type(open_func) == "function" then
-                            vim.schedule(function() open_func() end)
+                            -- vim.schedule(function() open_func() end)
+                            open_func()
                             is_opened = true
                         end
                     end

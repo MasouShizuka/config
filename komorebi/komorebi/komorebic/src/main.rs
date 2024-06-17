@@ -1,7 +1,7 @@
-#![warn(clippy::all, clippy::nursery, clippy::pedantic)]
-#![allow(clippy::missing_errors_doc)]
+#![warn(clippy::all)]
+#![allow(clippy::missing_errors_doc, clippy::doc_markdown)]
 
-use chrono::Local;
+use chrono::Utc;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::BufRead;
@@ -24,7 +24,6 @@ use color_eyre::eyre::bail;
 use color_eyre::Result;
 use dirs::data_local_dir;
 use fs_tail::TailedFile;
-use heck::ToKebabCase;
 use komorebi_core::resolve_home_path;
 use lazy_static::lazy_static;
 use miette::NamedSource;
@@ -39,8 +38,6 @@ use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
 use windows::Win32::UI::WindowsAndMessaging::SHOW_WINDOW_CMD;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
 
-use derive_ahk::AhkFunction;
-use derive_ahk::AhkLibrary;
 use komorebi_client::StaticConfig;
 use komorebi_core::config_generation::ApplicationConfigurationGenerator;
 use komorebi_core::ApplicationIdentifier;
@@ -102,14 +99,6 @@ lazy_static! {
     };
 }
 
-trait AhkLibrary {
-    fn generate_ahk_library() -> String;
-}
-
-trait AhkFunction {
-    fn generate_ahk_function() -> String;
-}
-
 #[derive(thiserror::Error, Debug, miette::Diagnostic)]
 #[error("{message}")]
 #[diagnostic(code(komorebi::configuration), help("try fixing this syntax error"))]
@@ -141,7 +130,7 @@ macro_rules! gen_enum_subcommand_args {
     ( $( $name:ident: $element:ty ),+ $(,)? ) => {
         $(
             paste! {
-                #[derive(clap::Parser, derive_ahk::AhkFunction)]
+                #[derive(clap::Parser)]
                 pub struct $name {
                     #[clap(value_enum)]
                     [<$element:snake>]: $element
@@ -181,7 +170,7 @@ macro_rules! gen_target_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 /// Target index (zero-indexed)
                 target: usize,
@@ -206,7 +195,7 @@ macro_rules! gen_named_target_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 /// Target workspace name
                 workspace: String,
@@ -230,7 +219,7 @@ macro_rules! gen_workspace_subcommand_args {
     ( $( $name:ident: $(#[enum] $(@$value_enum:tt)?)? $value:ty ),+ $(,)? ) => (
         paste! {
             $(
-                #[derive(clap::Parser, derive_ahk::AhkFunction)]
+                #[derive(clap::Parser)]
                 pub struct [<Workspace $name>] {
                     /// Monitor index (zero-indexed)
                     monitor: usize,
@@ -262,7 +251,7 @@ macro_rules! gen_named_workspace_subcommand_args {
     ( $( $name:ident: $(#[enum] $(@$value_enum:tt)?)? $value:ty ),+ $(,)? ) => (
         paste! {
             $(
-                #[derive(clap::Parser, derive_ahk::AhkFunction)]
+                #[derive(clap::Parser)]
                 pub struct [<NamedWorkspace $name>] {
                     /// Target workspace name
                     workspace: String,
@@ -284,7 +273,7 @@ gen_named_workspace_subcommand_args! {
     Tiling: #[enum] BooleanState,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct ClearWorkspaceLayoutRules {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -293,7 +282,7 @@ pub struct ClearWorkspaceLayoutRules {
     workspace: usize,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct WorkspaceCustomLayout {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -305,7 +294,7 @@ pub struct WorkspaceCustomLayout {
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct NamedWorkspaceCustomLayout {
     /// Target workspace name
     workspace: String,
@@ -314,7 +303,7 @@ pub struct NamedWorkspaceCustomLayout {
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct WorkspaceLayoutRule {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -329,7 +318,7 @@ pub struct WorkspaceLayoutRule {
     layout: DefaultLayout,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct NamedWorkspaceLayoutRule {
     /// Target workspace name
     workspace: String,
@@ -341,7 +330,7 @@ pub struct NamedWorkspaceLayoutRule {
     layout: DefaultLayout,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct WorkspaceCustomLayoutRule {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -356,7 +345,7 @@ pub struct WorkspaceCustomLayoutRule {
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct NamedWorkspaceCustomLayoutRule {
     /// Target workspace name
     workspace: String,
@@ -368,7 +357,7 @@ pub struct NamedWorkspaceCustomLayoutRule {
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct Resize {
     #[clap(value_enum)]
     edge: OperationDirection,
@@ -376,7 +365,7 @@ struct Resize {
     sizing: Sizing,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct ResizeAxis {
     #[clap(value_enum)]
     axis: Axis,
@@ -384,13 +373,13 @@ struct ResizeAxis {
     sizing: Sizing,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct ResizeDelta {
     /// The delta of pixels by which to increase or decrease window dimensions when resizing
     pixels: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct InvisibleBorders {
     /// Size of the left invisible border
     left: i32,
@@ -402,7 +391,7 @@ struct InvisibleBorders {
     bottom: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct GlobalWorkAreaOffset {
     /// Size of the left work area offset (set right to left * 2 to maintain right padding)
     left: i32,
@@ -414,7 +403,7 @@ struct GlobalWorkAreaOffset {
     bottom: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct MonitorWorkAreaOffset {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -428,7 +417,7 @@ struct MonitorWorkAreaOffset {
     bottom: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct MonitorIndexPreference {
     /// Preferred monitor index (zero-indexed)
     index_preference: usize,
@@ -442,7 +431,7 @@ struct MonitorIndexPreference {
     bottom: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct DisplayIndexPreference {
     /// Preferred monitor index (zero-indexed)
     index_preference: usize,
@@ -450,7 +439,7 @@ struct DisplayIndexPreference {
     display: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct EnsureWorkspaces {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -458,7 +447,7 @@ struct EnsureWorkspaces {
     workspace_count: usize,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct EnsureNamedWorkspaces {
     /// Monitor index (zero-indexed)
     monitor: usize,
@@ -466,7 +455,7 @@ struct EnsureNamedWorkspaces {
     names: Vec<String>,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct FocusMonitorWorkspace {
     /// Target monitor index (zero-indexed)
     target_monitor: usize,
@@ -474,7 +463,7 @@ struct FocusMonitorWorkspace {
     target_workspace: usize,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct SendToMonitorWorkspace {
     /// Target monitor index (zero-indexed)
     target_monitor: usize,
@@ -482,7 +471,7 @@ pub struct SendToMonitorWorkspace {
     target_workspace: usize,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 pub struct MoveToMonitorWorkspace {
     /// Target monitor index (zero-indexed)
     target_monitor: usize,
@@ -494,7 +483,7 @@ macro_rules! gen_focused_workspace_padding_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 /// Pixels size to set as an integer
                 size: i32,
@@ -512,7 +501,7 @@ macro_rules! gen_padding_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 /// Monitor index (zero-indexed)
                 monitor: usize,
@@ -534,7 +523,7 @@ macro_rules! gen_named_padding_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 /// Target workspace name
                 workspace: String,
@@ -555,7 +544,7 @@ macro_rules! gen_padding_adjustment_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 #[clap(value_enum)]
                 sizing: Sizing,
@@ -575,7 +564,7 @@ macro_rules! gen_application_target_subcommand_args {
     // SubCommand Pattern
     ( $( $name:ident ),+ $(,)? ) => {
         $(
-            #[derive(clap::Parser, derive_ahk::AhkFunction)]
+            #[derive(clap::Parser)]
             pub struct $name {
                 #[clap(value_enum)]
                 identifier: ApplicationIdentifier,
@@ -596,7 +585,7 @@ gen_application_target_subcommand_args! {
     RemoveTitleBar,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct InitialWorkspaceRule {
     #[clap(value_enum)]
     identifier: ApplicationIdentifier,
@@ -608,7 +597,7 @@ struct InitialWorkspaceRule {
     workspace: usize,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct InitialNamedWorkspaceRule {
     #[clap(value_enum)]
     identifier: ApplicationIdentifier,
@@ -618,7 +607,7 @@ struct InitialNamedWorkspaceRule {
     workspace: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct WorkspaceRule {
     #[clap(value_enum)]
     identifier: ApplicationIdentifier,
@@ -630,7 +619,7 @@ struct WorkspaceRule {
     workspace: usize,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct NamedWorkspaceRule {
     #[clap(value_enum)]
     identifier: ApplicationIdentifier,
@@ -640,13 +629,13 @@ struct NamedWorkspaceRule {
     workspace: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct ToggleFocusFollowsMouse {
     #[clap(value_enum, short, long, default_value = "windows")]
     implementation: FocusFollowsMouseImplementation,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct FocusFollowsMouse {
     #[clap(value_enum, short, long, default_value = "windows")]
     implementation: FocusFollowsMouseImplementation,
@@ -654,13 +643,25 @@ struct FocusFollowsMouse {
     boolean_state: BooleanState,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct Border {
     #[clap(value_enum)]
     boolean_state: BooleanState,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
+struct Transparency {
+    #[clap(value_enum)]
+    boolean_state: BooleanState,
+}
+
+#[derive(Parser)]
+struct TransparencyAlpha {
+    /// Alpha
+    alpha: u8,
+}
+
+#[derive(Parser)]
 struct BorderColour {
     #[clap(value_enum, short, long, default_value = "single")]
     window_kind: WindowKind,
@@ -672,19 +673,19 @@ struct BorderColour {
     b: u32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct BorderWidth {
     /// Desired width of the window border
     width: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct BorderOffset {
     /// Desired offset of the window border
     offset: i32,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 #[allow(clippy::struct_excessive_bools)]
 struct Start {
     /// Allow the use of komorebi's custom focus-follows-mouse implementation
@@ -707,56 +708,56 @@ struct Start {
     ahk: bool,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct Stop {
     /// Stop whkd if it is running as a background process
     #[clap(long)]
     whkd: bool,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct SaveResize {
     /// File to which the resize layout dimensions should be saved
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct LoadResize {
     /// File from which the resize layout dimensions should be loaded
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct LoadCustomLayout {
     /// JSON or YAML file from which the custom layout definition should be loaded
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct SubscribeSocket {
     /// Name of the socket to send event notifications to
     socket: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct UnsubscribeSocket {
     /// Name of the socket to stop sending event notifications to
     socket: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct SubscribePipe {
     /// Name of the pipe to send event notifications to (without "\\.\pipe\" prepended)
     named_pipe: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct UnsubscribePipe {
     /// Name of the pipe to stop sending event notifications to (without "\\.\pipe\" prepended)
     named_pipe: String,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct AhkAppSpecificConfiguration {
     /// YAML file from which the application-specific configurations should be loaded
     path: PathBuf,
@@ -764,7 +765,7 @@ struct AhkAppSpecificConfiguration {
     override_path: Option<PathBuf>,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct PwshAppSpecificConfiguration {
     /// YAML file from which the application-specific configurations should be loaded
     path: PathBuf,
@@ -772,19 +773,19 @@ struct PwshAppSpecificConfiguration {
     override_path: Option<PathBuf>,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct FormatAppSpecificConfiguration {
     /// YAML file from which the application-specific configurations should be loaded
     path: PathBuf,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct AltFocusHack {
     #[clap(value_enum)]
     boolean_state: BooleanState,
 }
 
-#[derive(Parser, AhkFunction)]
+#[derive(Parser)]
 struct EnableAutostart {
     /// Path to a static configuration JSON file
     #[clap(action, short, long)]
@@ -807,7 +808,7 @@ struct Opts {
     subcmd: SubCommand,
 }
 
-#[derive(Parser, AhkLibrary)]
+#[derive(Parser)]
 enum SubCommand {
     #[clap(hide = true)]
     Docgen,
@@ -833,6 +834,9 @@ enum SubCommand {
     Gui,
     /// Show a JSON representation of visible windows
     VisibleWindows,
+    /// Show information about connected monitors
+    #[clap(alias = "monitor-info")]
+    MonitorInformation,
     /// Query the current window manager state
     #[clap(arg_required_else_help = true)]
     Query(Query),
@@ -887,6 +891,10 @@ enum SubCommand {
     /// Stack the focused window in the specified direction
     #[clap(arg_required_else_help = true)]
     Stack(Stack),
+    /// Stack all windows on the focused workspace
+    StackAll,
+    /// Unstack all windows in the focused container
+    UnstackAll,
     /// Resize the focused window in the specified direction
     #[clap(arg_required_else_help = true)]
     #[clap(alias = "resize")]
@@ -1168,6 +1176,12 @@ enum SubCommand {
     #[clap(arg_required_else_help = true)]
     #[clap(alias = "active-window-border-offset")]
     BorderOffset(BorderOffset),
+    /// Enable or disable transparency for unfocused windows
+    #[clap(arg_required_else_help = true)]
+    Transparency(Transparency),
+    /// Set the alpha value for unfocused window transparency
+    #[clap(arg_required_else_help = true)]
+    TransparencyAlpha(TransparencyAlpha),
     /// Enable or disable focus follows mouse for the operating system
     #[clap(arg_required_else_help = true)]
     FocusFollowsMouse(FocusFollowsMouse),
@@ -1179,8 +1193,6 @@ enum SubCommand {
     MouseFollowsFocus(MouseFollowsFocus),
     /// Toggle mouse follows focus on all workspaces
     ToggleMouseFollowsFocus,
-    /// Generate a library of AutoHotKey helper functions
-    AhkLibrary,
     /// Generate common app-specific configurations and fixes to use in komorebi.ahk
     #[clap(arg_required_else_help = true)]
     #[clap(alias = "ahk-asc")]
@@ -1290,21 +1302,25 @@ fn main() -> Result<()> {
             }
         }
         SubCommand::Quickstart => {
-            let home_dir = dirs::home_dir().expect("could not find home dir");
-            let config_dir = home_dir.join(".config");
             let local_appdata_dir = data_local_dir().expect("could not find localdata dir");
             let data_dir = local_appdata_dir.join("komorebi");
-            std::fs::create_dir_all(&config_dir)?;
+            std::fs::create_dir_all(&*WHKD_CONFIG_DIR)?;
+            std::fs::create_dir_all(&*HOME_DIR)?;
             std::fs::create_dir_all(data_dir)?;
 
-            let komorebi_json = include_str!("../../docs/komorebi.example.json");
+            let mut komorebi_json = include_str!("../../docs/komorebi.example.json").to_string();
+            if std::env::var("KOMOREBI_CONFIG_HOME").is_ok() {
+                komorebi_json =
+                    komorebi_json.replace("Env:USERPROFILE", "Env:KOMOREBI_CONFIG_HOME");
+            }
+
             std::fs::write(HOME_DIR.join("komorebi.json"), komorebi_json)?;
 
             let applications_yaml = include_str!("../applications.yaml");
             std::fs::write(HOME_DIR.join("applications.yaml"), applications_yaml)?;
 
             let whkdrc = include_str!("../../docs/whkdrc.sample");
-            std::fs::write(config_dir.join("whkdrc"), whkdrc)?;
+            std::fs::write(WHKD_CONFIG_DIR.join("whkdrc"), whkdrc)?;
 
             println!("Example ~/komorebi.json, ~/.config/whkdrc and latest ~/applications.yaml files downloaded");
             println!("You can now run komorebic start --whkd");
@@ -1464,37 +1480,8 @@ fn main() -> Result<()> {
                 println!("{}", whkdrc.display());
             }
         }
-        SubCommand::AhkLibrary => {
-            let library = HOME_DIR.join("komorebic.lib.ahk");
-            let mut file = OpenOptions::new()
-                .write(true)
-                .create(true)
-                .truncate(true)
-                .open(library.clone())?;
-
-            let output: String = SubCommand::generate_ahk_library();
-            let fixed_id = output.replace("%id%", "\"%id%\"");
-            let fixed_stop_def = fixed_id.replace("Stop(whkd)", "Stop()");
-            let fixed_output =
-                fixed_stop_def.replace("komorebic.exe stop  --whkd %whkd%", "komorebic.exe stop");
-
-            file.write_all(fixed_output.as_bytes())?;
-
-            println!(
-                "\nAHKv1 helper library for komorebic written to {}",
-                library.to_string_lossy()
-            );
-
-            println!("\nYou can convert this file to AHKv2 syntax using https://github.com/mmikeww/AHK-v2-script-converter");
-
-            println!(
-                "\nYou can include the converted library at the top of your komorebi.ahk config with this line:"
-            );
-
-            println!("\n#Include komorebic.lib.ahk");
-        }
         SubCommand::Log => {
-            let timestamp = Local::now().format("%Y-%m-%d").to_string();
+            let timestamp = Utc::now().format("%Y-%m-%d").to_string();
             let color_log = std::env::temp_dir().join(format!("komorebi.log.{timestamp}"));
             let file = TailedFile::new(File::open(color_log)?);
             let locked = file.lock();
@@ -2058,8 +2045,14 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
         SubCommand::Stack(arg) => {
             send_message(&SocketMessage::StackWindow(arg.operation_direction).as_bytes()?)?;
         }
+        SubCommand::StackAll => {
+            send_message(&SocketMessage::StackAll.as_bytes()?)?;
+        }
         SubCommand::Unstack => {
             send_message(&SocketMessage::UnstackWindow.as_bytes()?)?;
+        }
+        SubCommand::UnstackAll => {
+            send_message(&SocketMessage::UnstackAll.as_bytes()?)?;
         }
         SubCommand::CycleStack(arg) => {
             send_message(&SocketMessage::CycleStack(arg.cycle_direction).as_bytes()?)?;
@@ -2157,6 +2150,9 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
         }
         SubCommand::VisibleWindows => {
             print_query(&SocketMessage::VisibleWindows.as_bytes()?);
+        }
+        SubCommand::MonitorInformation => {
+            print_query(&SocketMessage::MonitorInformation.as_bytes()?);
         }
         SubCommand::Query(arg) => {
             print_query(&SocketMessage::Query(arg.state_query).as_bytes()?);
@@ -2272,6 +2268,12 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
         }
         SubCommand::BorderOffset(arg) => {
             send_message(&SocketMessage::BorderOffset(arg.offset).as_bytes()?)?;
+        }
+        SubCommand::Transparency(arg) => {
+            send_message(&SocketMessage::Transparency(arg.boolean_state.into()).as_bytes()?)?;
+        }
+        SubCommand::TransparencyAlpha(arg) => {
+            send_message(&SocketMessage::TransparencyAlpha(arg.alpha).as_bytes()?)?;
         }
         SubCommand::ResizeDelta(arg) => {
             send_message(&SocketMessage::ResizeDelta(arg.pixels).as_bytes()?)?;
@@ -2415,6 +2417,11 @@ fn show_window(hwnd: HWND, command: SHOW_WINDOW_CMD) {
     unsafe { ShowWindow(hwnd, command) };
 }
 
+fn remove_transparency(hwnd: HWND) {
+    let _ = komorebi_client::Window::from(hwnd.0).opaque();
+}
+
 fn restore_window(hwnd: HWND) {
     show_window(hwnd, SW_RESTORE);
+    remove_transparency(hwnd);
 }

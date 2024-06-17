@@ -1,5 +1,5 @@
-#![warn(clippy::all, clippy::nursery, clippy::pedantic)]
-#![allow(clippy::missing_errors_doc, clippy::use_self)]
+#![warn(clippy::all)]
+#![allow(clippy::missing_errors_doc, clippy::use_self, clippy::doc_markdown)]
 
 use std::path::Path;
 use std::path::PathBuf;
@@ -43,6 +43,8 @@ pub enum SocketMessage {
     CycleFocusWindow(CycleDirection),
     CycleMoveWindow(CycleDirection),
     StackWindow(OperationDirection),
+    StackAll,
+    UnstackAll,
     ResizeWindowEdge(OperationDirection, Sizing),
     ResizeWindowAxis(Axis, Sizing),
     UnstackWindow,
@@ -140,6 +142,8 @@ pub enum SocketMessage {
     BorderStyle(BorderStyle),
     BorderWidth(i32),
     BorderOffset(i32),
+    Transparency(bool),
+    TransparencyAlpha(u8),
     InvisibleBorders(Rect),
     StackbarMode(StackbarMode),
     StackbarLabel(StackbarLabel),
@@ -164,6 +168,7 @@ pub enum SocketMessage {
     State,
     GlobalState,
     VisibleWindows,
+    MonitorInformation,
     Query(StateQuery),
     FocusFollowsMouse(FocusFollowsMouseImplementation, bool),
     ToggleFocusFollowsMouse(FocusFollowsMouseImplementation),
@@ -227,7 +232,16 @@ pub enum BorderStyle {
 }
 
 #[derive(
-    Copy, Clone, Debug, Serialize, Deserialize, Display, EnumString, ValueEnum, JsonSchema,
+    Copy,
+    Clone,
+    Debug,
+    Serialize,
+    Deserialize,
+    Display,
+    EnumString,
+    ValueEnum,
+    JsonSchema,
+    PartialEq,
 )]
 pub enum WindowKind {
     Single,

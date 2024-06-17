@@ -34,8 +34,8 @@ return {
             "MarkdownPreviewToggle",
         },
         enabled = not environment.is_vscode,
-        ft = {
-            "markdown",
+        event = {
+            "User MarkdownFile",
         },
     },
 
@@ -48,8 +48,6 @@ return {
                 callback = function(args)
                     vim.keymap.set({ "n", "x" }, keymap["<c-space>"], function() vim.api.nvim_command("MkdnToggleToDo") end, { buffer = args.buf, desc = "Toggle todo" })
                     vim.keymap.set("i", "<cr>", function() vim.api.nvim_command("MkdnNewListItem") end, { buffer = args.buf, desc = "New list item" })
-                    vim.keymap.set("n", "o", function() vim.api.nvim_command("MkdnNewListItemBelowInsert") end, { buffer = args.buf, desc = "New list item below insert" })
-                    vim.keymap.set("n", "O", function() vim.api.nvim_command("MkdnNewListItemAboveInsert") end, { buffer = args.buf, desc = "New list item above insert" })
                     vim.keymap.set({ "n", "i" }, "<tab>", function() vim.api.nvim_command("MkdnTableNextCell") end, { buffer = args.buf, desc = "Table next cell" })
                     vim.keymap.set({ "n", "i" }, "<s-tab>", function() vim.api.nvim_command("MkdnTablePrevCell") end, { buffer = args.buf, desc = "Table previous cell" })
                     vim.keymap.set({ "n", "i" }, "<s-down>", function() vim.api.nvim_command("MkdnTableNewRowBelow") end, { buffer = args.buf, desc = "Table new row below" })
@@ -63,8 +61,8 @@ return {
             })
         end,
         enabled = not environment.is_vscode,
-        ft = {
-            "markdown",
+        event = {
+            "User MarkdownFile",
         },
         opts = {
             modules = {
@@ -113,8 +111,8 @@ return {
             "nvim-treesitter/nvim-treesitter",
         },
         enabled = not environment.is_vscode,
-        ft = {
-            "markdown",
+        event = {
+            "User MarkdownFile",
         },
         name = "render-markdown", -- Only needed if you have another plugin named markdown.nvim
         opts = {
@@ -127,9 +125,6 @@ return {
                 icons.misc.format_header_5,
                 icons.misc.format_header_6,
             },
-            -- 禁用 fat_tables，因为某些 table 不能正常添加顶部和底部线
-            -- Add a line above and below tables to complete look, ends up like a window
-            fat_tables = false,
             -- Define the highlight groups to use when rendering various components
             highlights = {
                 heading = {

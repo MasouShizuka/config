@@ -122,8 +122,7 @@ return {
             {
                 "<c-u>",
                 function()
-                    local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
-                    require("neoscroll").scroll(-scroll, true, 100)
+                    require("neoscroll").ctrl_u({ duration = 100 })
                 end,
                 desc = "Scroll half page up",
                 mode = { "n", "x" },
@@ -131,15 +130,14 @@ return {
             {
                 "<c-d>",
                 function()
-                    local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
-                    require("neoscroll").scroll(scroll, true, 100)
+                    require("neoscroll").ctrl_d({ duration = 100 })
                 end,
                 desc = "Scroll half page down",
                 mode = { "n", "x" },
             },
-            { "zj", function() require("neoscroll").zt(100) end, desc = "Top this line",    mode = { "n", "x" } },
-            { "zz", function() require("neoscroll").zz(100) end, desc = "Center this line", mode = { "n", "x" } },
-            { "zk", function() require("neoscroll").zb(100) end, desc = "Bottom this line", mode = { "n", "x" } },
+            { "zj", function() require("neoscroll").zt({ half_win_duration = 100 }) end, desc = "Top this line",    mode = { "n", "x" } },
+            { "zz", function() require("neoscroll").zz({ half_win_duration = 100 }) end, desc = "Center this line", mode = { "n", "x" } },
+            { "zk", function() require("neoscroll").zb({ half_win_duration = 100 }) end, desc = "Bottom this line", mode = { "n", "x" } },
         },
         opts = {
             -- All these keys will be mapped to their corresponding default scrolling animation

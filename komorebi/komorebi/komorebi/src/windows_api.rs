@@ -221,7 +221,7 @@ impl WindowsApi {
     }
 
     pub fn valid_hmonitors() -> Result<Vec<(String, isize)>> {
-        Ok(win32_display_data::connected_displays()
+        Ok(win32_display_data::connected_displays_all()
             .flatten()
             .map(|d| {
                 let name = d.device_name.trim_start_matches(r"\\.\").to_string();
@@ -233,7 +233,7 @@ impl WindowsApi {
     }
 
     pub fn load_monitor_information(monitors: &mut Ring<Monitor>) -> Result<()> {
-        'read: for display in win32_display_data::connected_displays().flatten() {
+        'read: for display in win32_display_data::connected_displays_all().flatten() {
             let path = display.device_path.clone();
             let mut split: Vec<_> = path.split('#').collect();
             split.remove(0);
@@ -278,7 +278,7 @@ impl WindowsApi {
                 monitors.elements_mut().push_back(m);
             } else if let Some(preference) = index_preference {
                 let current_len = monitors.elements().len();
-                if *preference > current_len {
+                while *preference > current_len {
                     monitors.elements_mut().reserve(1);
                 }
 
@@ -793,7 +793,7 @@ impl WindowsApi {
     }
 
     pub fn monitor(hmonitor: isize) -> Result<Monitor> {
-        for display in win32_display_data::connected_displays().flatten() {
+        for display in win32_display_data::connected_displays_all().flatten() {
             if display.hmonitor == hmonitor {
                 let path = display.device_path;
                 let mut split: Vec<_> = path.split('#').collect();
@@ -982,11 +982,10 @@ impl WindowsApi {
         .process()
     }
 
-    pub fn set_transparent(hwnd: HWND) -> Result<()> {
+    pub fn set_transparent(hwnd: HWND, alpha: u8) -> Result<()> {
         unsafe {
             #[allow(clippy::cast_sign_loss)]
-            // TODO: alpha should be configurable
-            SetLayeredWindowAttributes(hwnd, COLORREF(-1i32 as u32), 150, LWA_ALPHA)?;
+            SetLayeredWindowAttributes(hwnd, COLORREF(-1i32 as u32), alpha, LWA_ALPHA)?;
         }
 
         Ok(())

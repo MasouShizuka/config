@@ -148,11 +148,11 @@ return {
             vim.opt.laststatus = 3
             -- Default splitting will cause your main splits to jump when opening an edgebar.
             -- To prevent this, set `splitkeep` to either `screen` or `topline`.
-            vim.opt.splitkeep = "screen"
+            -- vim.opt.splitkeep = "screen"
 
             -- edgy 自动激活
             local edgy_activate = vim.api.nvim_create_augroup("EdgyActivate", { clear = true })
-            vim.api.nvim_create_autocmd("BufAdd", {
+            vim.api.nvim_create_autocmd("BufNew", {
                 callback = function(args)
                     vim.schedule(function()
                         if vim.api.nvim_buf_is_valid(args.buf) then
@@ -187,6 +187,37 @@ return {
         opts = function()
             local left = {}
 
+            local bottom = {
+                {
+                    ft = "qf",
+                    size = { height = 0.3 },
+                },
+            }
+
+            local right = {
+                {
+                    ft = "help",
+                    -- only show help buffers
+                    filter = function(buf)
+                        return vim.api.nvim_get_option_value("buftype", { buf = buf }) == "help"
+                    end,
+                    size = { width = 0.5 },
+                },
+                {
+                    ft = "nvim-docs-view",
+                    size = { width = 0.3 },
+                    pinned = true,
+                    open = "DocsViewToggle",
+                },
+            }
+
+            if utils.is_available("nvim-dap") then
+                bottom[#bottom + 1] = {
+                    ft = "dap-repl",
+                    size = { height = 0.3 },
+                }
+            end
+
             if utils.is_available("nvim-dap-ui") then
                 local dap_left = {
                     {
@@ -209,6 +240,11 @@ return {
                 for _, value in ipairs(dap_left) do
                     left[#left + 1] = value
                 end
+
+                bottom[#bottom + 1] = {
+                    ft = "dapui_console",
+                    size = { height = 0.3 },
+                }
             end
 
             if utils.is_available("neo-tree.nvim") then
@@ -258,39 +294,6 @@ return {
                 }
             end
 
-            if utils.is_available("aerial.nvim") then
-                left[#left + 1] = {
-                    ft = "aerial",
-                    title = "Aerial",
-                    size = { width = 0.2 },
-                    pinned = true,
-                    open = function()
-                        vim.api.nvim_command("AerialOpen")
-                    end,
-                }
-            end
-
-            local bottom = {
-                {
-                    ft = "qf",
-                    size = { height = 0.3 },
-                },
-            }
-
-            if utils.is_available("nvim-dap") then
-                bottom[#bottom + 1] = {
-                    ft = "dap-repl",
-                    size = { height = 0.3 },
-                }
-            end
-
-            if utils.is_available("nvim-dap-ui") then
-                bottom[#bottom + 1] = {
-                    ft = "dapui_console",
-                    size = { height = 0.3 },
-                }
-            end
-
             if utils.is_available("toggleterm.nvim") then
                 bottom[#bottom + 1] = {
                     ft = "toggleterm",
@@ -306,27 +309,28 @@ return {
 
             if utils.is_available("trouble.nvim") then
                 bottom[#bottom + 1] = {
-                    ft = "Trouble",
+                    ft = "trouble",
+                    filter = function(_buf, win)
+                        return vim.w[win].trouble
+                            and vim.w[win].trouble.position == "bottom"
+                            and vim.w[win].trouble.type == "split"
+                            and vim.w[win].trouble.relative == "editor"
+                            and not vim.w[win].trouble_preview
+                    end,
                     size = { height = 0.3 },
                 }
-            end
-
-            local right = {
-                {
-                    ft = "help",
-                    -- only show help buffers
-                    filter = function(buf)
-                        return vim.api.nvim_get_option_value("buftype", { buf = buf }) == "help"
+                right[#right + 1] = {
+                    ft = "trouble",
+                    filter = function(_buf, win)
+                        return vim.w[win].trouble
+                            and vim.w[win].trouble.position == "right"
+                            and vim.w[win].trouble.type == "split"
+                            and vim.w[win].trouble.relative == "editor"
+                            and not vim.w[win].trouble_preview
                     end,
-                    size = { width = 0.5 },
-                },
-                {
-                    ft = "nvim-docs-view",
-                    size = { width = 0.2 },
-                    pinned = true,
-                    open = "DocsViewToggle",
-                },
-            }
+                    size = { width = 0.3 },
+                }
+            end
 
             return {
                 left = left,

@@ -132,7 +132,7 @@
   "CustomShortcuts": [],
   "DontPromptUpdateMsg": false,
   "EnableUpdateLog": false,
-  "StartFlowLauncherOnSystemStartup": false,
+  "StartFlowLauncherOnSystemStartup": true,
   "HideOnStartup": true,
   "HideNotifyIcon": false,
   "LeaveCmdOpen": false,

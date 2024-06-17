@@ -47,23 +47,14 @@ Set-PSReadLineOption -PredictionSource History
 Set-PSReadLineOption -PredictionViewStyle InlineView
 
 # 添加命令到历史文件前删除相同的历史命令
-$global:is_startup=$true
 Set-PSReadLineOption -AddToHistoryHandler {
     param([string]$line)
     $line_slash=$line.replace("\", "/")
     $line_trim=$line_slash.Trim()
 
-    # powershell 启动时会检查每条历史记录，跳过启动时的检查
-    $last_line=Get-Content $history -Tail 1
-    if ($global:is_startup) {
-        if ($line -eq $last_line) {
-            $global:is_startup=$false
-        }
-    } else {
-        $content=Get-Content $history
-        $content | Where-Object { $_ -ne ($line_trim) } | Set-Content $history
-        Add-Content -Path $history -Value $line_trim
-    }
+    $content=Get-Content $history
+    $content | Where-Object { $_ -ne ($line_trim) } | Set-Content $history
+    Add-Content -Path $history -Value $line_trim
 
     return "MemoryOnly"
 }

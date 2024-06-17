@@ -385,7 +385,6 @@
         "backspace",
         "delete"
     ],
-    "vscode-neovim.neovimExecutablePaths.win32": "C:\\Program Files\\Neovim\\bin\\nvim.exe",
     "window.density.editorTabHeight": "compact",
     "window.dialogStyle": "custom",
     "window.menuBarVisibility": "compact",

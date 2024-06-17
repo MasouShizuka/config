@@ -20,7 +20,6 @@ M.text_filetype_list = {
 
 -- plugins skip these
 M.skip_filetype_list = {
-    "aerial",
     "alpha",
     "dashboard",
     "edgy",
@@ -30,11 +29,10 @@ M.skip_filetype_list = {
     "NvimTree",
     "notify",
     "toggleterm",
-    "Trouble",
+    "trouble",
 }
 -- skip when <c-2>
 M.skip_filetype_list_to_main = {
-    "aerial",
     "dap-repl",
     "dapui_scopes",
     "dapui_breakpoints",
@@ -50,11 +48,10 @@ M.skip_filetype_list_to_main = {
     "notify",
     "nvim-docs-view",
     "toggleterm",
-    "Trouble",
+    "trouble",
 }
 -- skip when <c-j>, <c-k>
 M.skip_filetype_list_of_panel = {
-    "aerial",
     "dap-repl",
     "dapui_scopes",
     "dapui_breakpoints",
@@ -69,7 +66,7 @@ M.skip_filetype_list_of_panel = {
     "NvimTree",
     "nvim-docs-view",
     "toggleterm",
-    "Trouble",
+    "trouble",
 }
 
 M.skip_filetype = function(skip_filetype_list, step)
@@ -115,10 +112,6 @@ end
 
 -- left panel
 M.left_panel_filetype_list = {
-    ["aerial"] = {
-        open = function() vim.api.nvim_command("AerialOpen") end,
-        close = function() vim.api.nvim_command("AerialClose") end,
-    },
     ["dapui_scopes"] = {
         open = function() require("dapui").open() end,
         close = function() require("dapui").close() end,
@@ -173,9 +166,9 @@ M.bottom_panel_filetype_list = {
         open = function() vim.api.nvim_command("ToggleTerm") end,
         close = function() vim.api.nvim_command("ToggleTerm") end,
     },
-    ["Trouble"] = {
-        open = function() vim.api.nvim_command("Trouble") end,
-        close = function() vim.api.nvim_command("TroubleClose") end,
+    ["trouble"] = {
+        open = function() require("trouble").open({ mode = "last" }) end,
+        close = function() require("trouble").close() end,
     },
 }
 -- right panel
@@ -191,6 +184,10 @@ M.right_panel_filetype_list = {
     ["nvim-docs-view"] = {
         open = function() vim.api.nvim_command("DocsViewToggle") end,
         close = function() vim.api.nvim_command("DocsViewToggle") end,
+    },
+    ["trouble"] = {
+        open = function() require("trouble").open({ mode = "last" }) end,
+        close = function() require("trouble").close() end,
     },
 }
 M.panel_filetype_lists = {

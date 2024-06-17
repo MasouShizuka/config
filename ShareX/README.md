@@ -6,7 +6,7 @@
 
 ## 配置文件
 
-| 文件   | 路径                                            | 说明           |
-| ------ | ----------------------------------------------- | -------------- |
-| ShareX | `$HOME/Documents/ShareX/ApplicationConfig.json` | 配置文件       |
-| ShareX | `$HOME/Documents/ShareX/HotkeysConfig.json`     | 快捷键配置文件 |
+| 文件                   | 路径                                 | 说明           |
+| ---------------------- | ------------------------------------ | -------------- |
+| ApplicationConfig.json | `$HOME/scoop/persist/sharex/ShareX/` | 配置文件       |
+| HotkeysConfig.json     | `$HOME/scoop/persist/sharex/ShareX/` | 快捷键配置文件 |

@@ -30,8 +30,8 @@ M.lsp = function(lspconfig, default_config)
         clangd = function()
             local fallbackFlags = {}
             if environment.is_windows then
-                -- NOTE: 需要安装 msys2 中的 mingw-w64-ucrt-x86_64-gcc 或 mingw-w64-x86_64-gcc
-                -- msys64/ucrt64/bin 或 msys64/mingw/bin 需要添加到环境变量的用户变量和系统变量的 Path 的顶部
+                -- NOTE: 需要安装 gcc
+                -- 可安装 scoop 中的 gcc 或者 msys2 中的 mingw-w64-ucrt-x86_64-gcc
                 -- 同时需要检查是否有其他的环境变量路径是否含有 libstdc++-6.dll，若有则可能需要去除
                 -- 否则 gcc 编译出的程序可能无法执行
                 -- https://stackoverflow.com/questions/76495365/simple-hello-world-program-giving-segmentation-fault-in-vs-code
@@ -49,8 +49,13 @@ M.lsp = function(lspconfig, default_config)
                 },
             }))
         end,
+        -- 由 nvim-jdtls 设置
+        jdtls = function() end,
         jsonls = function()
             lspconfig.jsonls.setup(vim.tbl_deep_extend("force", default_config, {}))
+        end,
+        lemminx = function()
+            lspconfig.lemminx.setup(vim.tbl_deep_extend("force", default_config, {}))
         end,
         lua_ls = function()
             local library = {
@@ -186,6 +191,7 @@ M.lsp_list = vim.tbl_keys(M.lsp())
 M.lsp_filetype_list = {
     "bib",
     "cpp",
+    "java",
     "json",
     "lua",
     "markdown",
@@ -193,6 +199,7 @@ M.lsp_filetype_list = {
     "rust",
     "sh",
     "tex",
+    "xml",
     "zsh",
 }
 

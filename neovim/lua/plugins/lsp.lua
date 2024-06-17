@@ -7,168 +7,10 @@ local path = require("utils.path")
 local utils = require("utils")
 
 return {
-    -- NOTE: glance 通过 uri 比较来确定当前位置，但没有考虑到相同 uri 可能存在差异，导致定位失败
-    -- 比如转义：: <-> %3A
-    -- 比如路径的 uri 的大小写可能不同：d:/path <-> D:/path
-    -- 因此需要对 lua/glance/list.lua 的 is_starting_location 函数进行修改，将：
-    -- ╭──────────────────────────────────────────────────────────╮
-    -- │ if location_uri ~= position_params.textDocument.uri then │
-    -- │   return false                                           │
-    -- │ end                                                      │
-    -- ╰──────────────────────────────────────────────────────────╯
-    -- 修改为：
-    -- ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-    -- │ if vim.uri_to_fname(location_uri:lower()) ~= vim.uri_to_fname(position_params.textDocument.uri:lower()) then │
-    -- │   return false                                                                                               │
-    -- │ end                                                                                                          │
-    -- ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-    --
-    -- NOTE: glance 在进行相同的行为时可能会产生不同的顺序，需要在渲染前进行排序
-    -- 因此需要对 lua/glance/list.lua 的 List:render 函数进行修改，将：
-    -- ╭─────────────────────────────────────────╮
-    -- │ for filename, group in pairs(groups) do │
-    -- ╰─────────────────────────────────────────╯
-    -- 修改为：
-    -- ╭────────────────────────────────────╮
-    -- │ local keys = vim.tbl_keys(groups)  │
-    -- │ table.sort(keys)                   │
-    -- │ for _, filename in ipairs(keys) do │
-    -- │   local group = groups[filename]   │
-    -- ╰────────────────────────────────────╯
-    {
-        "dnlhc/glance.nvim",
-        cmd = {
-            "Glance references",
-            "Glance definitions",
-            "Glance type_definitions",
-            "Glance implementations",
-        },
-        enabled = not environment.is_vscode,
-        keys = {
-            { "gd", function() vim.api.nvim_command("Glance definitions") end,      desc = "Glance definitions",      mode = "n" },
-            { "gi", function() vim.api.nvim_command("Glance implementations") end,  desc = "Glance implementations",  mode = "n" },
-            { "gr", function() vim.api.nvim_command("Glance references") end,       desc = "Glance references",       mode = "n" },
-            { "gy", function() vim.api.nvim_command("Glance type_definitions") end, desc = "Glance type_definitions", mode = "n" },
-        },
-        opts = function()
-            local actions = require("glance").actions
-
-            return {
-                border = {
-                    enable = true, -- Show window borders. Only horizontal borders allowed
-                },
-                mappings = {
-                    list = {
-                        -- ["j"] = actions.next,     -- Bring the cursor to the next item in the list
-                        -- ["k"] = actions.previous, -- Bring the cursor to the previous item in the list
-                        -- ["<down>"] = actions.next,
-                        -- ["<up>"] = actions.previous,
-                        -- ["<tab>"] = actions.next_location,       -- Bring the cursor to the next location skipping groups in the list
-                        -- ["<s-tab>"] = actions.previous_location, -- Bring the cursor to the previous location skipping groups in the list
-                        -- ["<c-u>"] = actions.preview_scroll_win(5),
-                        -- ["<c-d>"] = actions.preview_scroll_win(-5),
-                        -- ["v"] = actions.jump_vsplit,
-                        -- ["s"] = actions.jump_split,
-                        ["s"] = false,
-                        ["V"] = actions.jump_split,
-                        -- ["t"] = actions.jump_tab,
-                        -- ["<cr>"] = actions.jump,
-                        -- ["o"] = actions.jump,
-                        -- ["l"] = actions.open_fold,
-                        ["l"] = actions.jump,
-                        -- ["h"] = actions.close_fold,
-                        -- ["<leader>l"] = actions.enter_win("preview"), -- Focus preview window
-                        ["<leader>l"] = false,
-                        ["<c-j>"] = actions.enter_win("preview"),
-                        -- ["q"] = actions.close,
-                        -- ["Q"] = actions.close,
-                        -- ["<esc>"] = actions.close,
-                        -- ["<c-q>"] = actions.quickfix,
-                        -- ["<esc>"] = false -- disable a mapping
-                    },
-                    preview = {
-                        -- ["Q"] = actions.close,
-                        -- ["<tab>"] = actions.next_location,
-                        -- ["<s-tab>"] = actions.previous_location,
-                        ["<f4>"] = actions.next_location,
-                        ["<s-f4>"] = actions.previous_location,
-                        -- ["<leader>l"] = actions.enter_win("list"), -- Focus list window
-                        ["<leader>l"] = false,
-                        ["<c-j>"] = actions.enter_win("list"),
-                    },
-                },
-                hooks = {
-                    before_open = function(results, open, jump, method)
-                        if #results == 1 then
-                            local target_uri = results[1].uri or results[1].targetUri
-                            local target_fname = vim.uri_to_fname(target_uri:lower())
-                            local curr_uri = vim.uri_from_bufnr(0)
-                            local curr_fname = vim.uri_to_fname(curr_uri:lower())
-
-                            if target_fname == curr_fname then
-                                jump(results[1])
-                            else
-                                vim.api.nvim_command("tab sbuffer")
-                                jump(results[1])
-                            end
-
-                            vim.cmd.normal({ "zt", bang = true })
-                        else
-                            open(results)
-                        end
-                    end,
-                    after_close = function()
-                        vim.cmd.normal({ "zt", bang = true })
-                    end,
-                },
-                folds = {
-                    folded = false, -- Automatically fold list on startup
-                },
-            }
-        end,
-    },
-
-    -- NOTE: trouble 无法在打开时 focus 与当前 cursor 最近的 item
-    -- 若想实现以上功能，需要对 lua/trouble/view.lua 的 View:setup 函数的末尾添加：
-    -- ╭────────────────────────────────────────────────────────────────────╮
-    -- │ local parent_bufnr = vim.api.nvim_win_get_buf(self.parent)         │
-    -- │ local parent_row = vim.api.nvim_win_get_cursor(self.parent)[1]     │
-    -- │ -- 其他 plugin 调用 trouble 可能会导致 self.items 不能及时更新     │
-    -- │ -- 因此使用 defer_fn 延迟对 self.items 的访问                      │
-    -- │ vim.defer_fn(function ()                                           │
-    -- │   local row = nil                                                  │
-    -- │                                                                    │
-    -- │   local min_distance = math.huge                                   │
-    -- │   for i = 1, vim.api.nvim_buf_line_count(self.buf), 1 do           │
-    -- │     local item = self.items[i]                                     │
-    -- │     if item == nil or (opts.skip_groups and item.is_file) then     │
-    -- │       goto continue                                                │
-    -- │     end                                                            │
-    -- │     if item.bufnr ~= parent_bufnr then                             │
-    -- │       goto continue                                                │
-    -- │     end                                                            │
-    -- │                                                                    │
-    -- │     local distance = math.abs(item.lnum - parent_row)              │
-    -- │     if distance < min_distance then                                │
-    -- │       row = i                                                      │
-    -- │       min_distance = distance                                      │
-    -- │     end                                                            │
-    -- │                                                                    │
-    -- │     ::continue::                                                   │
-    -- │   end                                                              │
-    -- │                                                                    │
-    -- │   if row then                                                      │
-    -- │     vim.api.nvim_win_set_cursor(self.win, { row, self:get_col() }) │
-    -- │   end                                                              │
-    -- │ end, 200)                                                          │
-    -- ╰────────────────────────────────────────────────────────────────────╯
     {
         "folke/trouble.nvim",
         cmd = {
             "Trouble",
-            "TroubleClose",
-            "TroubleRefresh",
-            "TroubleToggle",
         },
         dependencies = {
             "nvim-tree/nvim-web-devicons",
@@ -186,66 +28,236 @@ return {
             end
         end,
         keys = {
-            { "<leader>xx", function() vim.api.nvim_command("TroubleToggle") end,                       desc = "Trouble",               mode = "n" },
-            { "<leader>xw", function() vim.api.nvim_command("TroubleToggle workspace_diagnostics") end, desc = "Workspace diagnostics", mode = "n" },
-            { "<leader>xd", function() vim.api.nvim_command("TroubleToggle document_diagnostics") end,  desc = "Document diagnostics",  mode = "n" },
-            { "<leader>xl", function() vim.api.nvim_command("TroubleToggle loclist") end,               desc = "Loclist",               mode = "n" },
-            { "<leader>xq", function() vim.api.nvim_command("TroubleToggle quickfix") end,              desc = "Quickfix",              mode = "n" },
+            { "<leader>xx", function() require("trouble").toggle({ mode = "diagnostics", filter = { buf = 0 } }) end, desc = "Buffer Diagnostics (Trouble)",                 mode = "n" },
+            { "<leader>xw", function() require("trouble").toggle({ mode = "diagnostics" }) end,                       desc = "Diagnostics (Trouble)",                        mode = "n" },
+            { "<leader>xs", function() require("trouble").toggle({ mode = "symbols", focus = false }) end,            desc = "Symbols (Trouble)",                            mode = "n" },
+            { "<leader>xl", function() require("trouble").toggle({ mode = "lsp", focus = false }) end,                desc = "LSP Definitions / References / ... (Trouble)", mode = "n" },
+            { "<leader>xL", function() require("trouble").toggle({ mode = "loclist" }) end,                           desc = "Location List (Trouble)",                      mode = "n" },
+            { "<leader>xq", function() require("trouble").toggle({ mode = "qflist" }) end,                            desc = "Quickfix List (Trouble)",                      mode = "n" },
+            {
+                "gd",
+                function()
+                    local view = require("trouble").toggle({ mode = "lsp_definitions" })
+                    utils.defer(function() view.win:focus() end, 200, false)
+                end,
+                desc = "LSP Definitions (Trouble)",
+                mode = "n",
+            },
+            {
+                "gD",
+                function()
+                    local view = require("trouble").toggle({ mode = "lsp_declarations" })
+                    utils.defer(function() view.win:focus() end, 200, false)
+                end,
+                desc = "LSP Declarations (Trouble)",
+                mode = "n",
+            },
+            {
+                "gi",
+                function()
+                    local view = require("trouble").toggle({ mode = "lsp_implementations" })
+                    utils.defer(function() view.win:focus() end, 200, false)
+                end,
+                desc = "LSP Implementations (Trouble)",
+                mode = "n",
+            },
+            {
+                "gr",
+                function()
+                    local view = require("trouble").toggle({ mode = "lsp_references" })
+                    utils.defer(function() view.win:focus() end, 200, false)
+                end,
+                desc = "LSP References (Trouble)",
+                mode = "n",
+            },
+            {
+                "gy",
+                function()
+                    local view = require("trouble").toggle({ mode = "lsp_type_definitions" })
+                    utils.defer(function() view.win:focus() end, 200, false)
+                end,
+                desc = "LSP Type Definitions (Trouble)",
+                mode = "n",
+            },
             {
                 "<f8>",
-                function(...)
+                function()
                     if not require("trouble").is_open() then
-                        require("trouble").open(...)
+                        require("trouble").open({ mode = "diagnostics" })
+                    else
+                        require("trouble").next({ jump = true })
                     end
-                    require("trouble").next({ skip_groups = true, jump = true })
                 end,
-                desc = "Next",
+                desc = "Next diagnostic",
                 mode = "n",
             },
             {
                 "<s-f8>",
-                function(...)
+                function()
                     if not require("trouble").is_open() then
-                        require("trouble").open(...)
+                        require("trouble").open({ mode = "diagnostics" })
+                    else
+                        require("trouble").prev({ jump = true })
                     end
-                    require("trouble").previous({ skip_groups = true, jump = true })
                 end,
-                desc = "Previous",
+                desc = "Previous diagnostic",
                 mode = "n",
             },
         },
         opts = {
-            mode = "document_diagnostics", -- "workspace_diagnostics", "document_diagnostics", "quickfix", "lsp_references", "loclist"
-            action_keys = {
-                -- key mappings for actions in the trouble list
-                -- map to {} to remove a mapping, for example:
-                -- close = {},
-                -- close = "q",                                      -- close the list
-                -- cancel = "<esc>",                                 -- cancel the preview and get back to your last window / buffer / cursor
-                -- refresh = "r",                                    -- manually refresh
-                -- jump = { "<cr>", "<tab>", "<2-leftmouse>" },      -- jump to the diagnostic or open / close folds
-                jump = { "<cr>", "<tab>", "<2-leftmouse>", "l" }, -- jump to the diagnostic or open / close folds
-                -- open_split = { "<c-x>" },                         -- open buffer in new split
-                -- open_vsplit = { "<c-v>" },                        -- open buffer in new vsplit
-                -- open_tab = { "<c-t>" },                           -- open buffer in new tab
-                open_split = { "V", "<c-x>" },  -- open buffer in new split
-                open_vsplit = { "v", "<c-v>" }, -- open buffer in new vsplit
-                open_tab = { "t", "<c-t>" },    -- open buffer in new tab
-                -- jump_close = { "o" },                             -- jump to the diagnostic and close the list
-                -- toggle_mode = "m",                                -- toggle between "workspace" and "document" diagnostics mode
-                -- switch_severity = "s",                            -- switch "diagnostics" severity filter level to HINT / INFO / WARN / ERROR
-                -- toggle_preview = "P",                             -- toggle auto_preview
-                -- hover = "K",                                      -- opens a small popup with the full multiline message
-                -- preview = "p",                                    -- preview the diagnostic location
-                -- open_code_href = "c",                             -- if present, open a URI with more information about the diagnostic error
-                -- close_folds = { "zM", "zm" },                     -- close all folds
-                -- open_folds = { "zR", "zr" },                      -- open all folds
-                -- toggle_fold = { "zA", "za" },                     -- toggle fold of current file
-                -- previous = "k",                                   -- previous item
-                -- next = "j",                                       -- next item
-                -- help = "?",                                       -- help menu
+            -- Key mappings can be set to the name of a builtin action,
+            -- or you can define your own custom action.
+            ---@type table<string, string|trouble.Action>
+            keys = {
+                -- ["?"] = "help",
+                -- r = "refresh",
+                -- R = "toggle_refresh",
+                -- q = "close",
+                -- o = "jump_close",
+                -- ["<esc>"] = "cancel",
+                -- ["<cr>"] = "jump",
+                l = "jump",
+                -- ["<2-leftmouse>"] = "jump",
+                -- ["<c-s>"] = "jump_split",
+                -- ["<c-v>"] = "jump_vsplit",
+                V = "jump_split",
+                v = "jump_vsplit",
+                t = function(self, ctx)
+                    if ctx.item then
+                        vim.api.nvim_command("tab sbuffer")
+                        self:jump(ctx.item)
+                    end
+                end,
+                -- -- go down to next item (accepts count)
+                -- -- j = "next",
+                -- ["}"] = "next",
+                -- ["]]"] = "next",
+                -- -- go up to prev item (accepts count)
+                -- -- k = "prev",
+                -- ["{"] = "prev",
+                -- ["[["] = "prev",
+                -- i = "inspect",
+                -- p = "preview",
+                -- P = "toggle_preview",
+                -- zo = "fold_open",
+                -- zO = "fold_open_recursive",
+                -- zc = "fold_close",
+                -- zC = "fold_close_recursive",
+                -- za = "fold_toggle",
+                -- zA = "fold_toggle_recursive",
+                -- zm = "fold_more",
+                -- zM = "fold_close_all",
+                -- zr = "fold_reduce",
+                -- zR = "fold_open_all",
+                -- zx = "fold_update",
+                -- zX = "fold_update_all",
+                -- zn = "fold_disable",
+                -- zN = "fold_enable",
+                -- zi = "fold_toggle_enable",
+                -- gb = { -- example of a custom action that toggles the active view filter
+                --     action = function(view)
+                --         view.state.filter_buffer = not view.state.filter_buffer
+                --         view:filter(view.state.filter_buffer and { buf = 0 } or nil)
+                --     end,
+                --     desc = "Toggle Current Buffer Filter",
+                -- },
+                -- s = { -- example of a custom action that toggles the severity
+                --     action = function(view)
+                --         local f = view:get_filter("severity")
+                --         local severity = ((f and f.filter.severity or 0) + 1) % 5
+                --         view:filter({ severity = severity }, {
+                --             id = "severity",
+                --             template = "{hl:Title}Filter:{hl} {severity}",
+                --             del = severity == 0,
+                --         })
+                --     end,
+                --     desc = "Toggle Severity Filter",
+                -- },
             },
-            use_diagnostic_signs = true, -- enabling this will use the signs defined in your lsp client
+            ---@type table<string, trouble.Mode>
+            modes = {
+                lsp_preview = {
+                    mode = "lsp_base",
+                    params = {
+                        include_current = true,
+                    },
+                    restore = false,
+                    win = {
+                        type = "float",
+                        realtive = "editor",
+                        size = { width = 0.5, height = 0.5 },
+                        position = { 0.5, 1 },
+                        border = "rounded",
+                        title_pos = "center",
+                    },
+                    preview = {
+                        type = "float",
+                        realtive = "editor",
+                        size = { width = 0.5, height = 0.5 },
+                        position = { 0.5, 0 },
+                        border = "rounded",
+                        title = "Preview",
+                        title_pos = "center",
+                        wo = {
+                            number = true,
+                            statuscolumn = "%l",
+                        },
+                    },
+                    keys = {
+                        ["<esc>"] = "close",
+                        l = "jump_close",
+                        V = function(self, ctx)
+                            if ctx.item then
+                                self:jump(ctx.item, { split = true })
+                                self:close()
+                            end
+                        end,
+                        v = function(self, ctx)
+                            if ctx.item then
+                                self:jump(ctx.item, { vsplit = true })
+                                self:close()
+                            end
+                        end,
+                        t = function(self, ctx)
+                            if ctx.item then
+                                self:close()
+                                vim.api.nvim_command("tab sbuffer " .. self:main().buf)
+                                self:jump(ctx.item)
+                            end
+                        end,
+                    },
+                },
+                lsp_definitions = {
+                    mode = "lsp_preview",
+                    win = {
+                        title = "Definitions",
+                    },
+                },
+                lsp_declarations = {
+                    mode = "lsp_preview",
+                    win = {
+                        title = "Declarations",
+                    },
+                },
+                lsp_implementations = {
+                    mode = "lsp_preview",
+                    win = {
+                        title = "Implementations",
+                    },
+                },
+                lsp_references = {
+                    mode = "lsp_preview",
+                    win = {
+                        title = "References",
+                    },
+                },
+                lsp_type_definitions = {
+                    mode = "lsp_preview",
+                    win = {
+                        title = "Type Definitions",
+                    },
+                },
+            },
         },
     },
 
@@ -456,12 +468,33 @@ return {
                         vim.keymap.set("n", "<leader>lC", function() vim.lsp.codelens.run() end, { buffer = buf, desc = "LSP CodeLens run", silent = true })
                     end
 
-                    if client.supports_method("textDocument/declaration") then
-                        vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
-                    end
-                    if not utils.is_available("glance.nvim") then
+                    -- if client.supports_method("textDocument/declaration") then
+                    --     vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
+                    -- end
+                    -- if not utils.is_available("glance.nvim") then
+                    --     if client.supports_method("textDocument/definition") then
+                    --         vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
+                    --     end
+                    --
+                    --     if client.supports_method("textDocument/implementation") then
+                    --         vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, { buffer = buf, desc = "Implementation of current symbol", silent = true })
+                    --     end
+                    --
+                    --     if client.supports_method("textDocument/typeDefinition") then
+                    --         vim.keymap.set("n", "gy", function() vim.lsp.buf.type_definition() end, { buffer = buf, desc = "Definition of current type", silent = true })
+                    --     end
+                    --
+                    --     if client.supports_method("textDocument/references") then
+                    --         vim.keymap.set("n", "gr", function() vim.lsp.buf.references() end, { buffer = buf, desc = "References of current symbol", silent = true })
+                    --     end
+                    -- end
+                    if not utils.is_available("trouble.nvim") then
                         if client.supports_method("textDocument/definition") then
                             vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
+                        end
+
+                        if client.supports_method("textDocument/declaration") then
+                            vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
                         end
 
                         if client.supports_method("textDocument/implementation") then
@@ -686,15 +719,27 @@ return {
                 opts = function()
                     local lspconfig = require("lspconfig")
 
+                    local config = {}
+                    if utils.is_available("nvim-ufo") then
+                        config = {
+                            textDocument = {
+                                foldingRange = {
+                                    dynamicRegistration = false,
+                                    lineFoldingOnly = true,
+                                },
+                            },
+                        }
+                    end
+
                     local has_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
                     local cmp_nvim_lsp_capabilities = has_cmp and cmp_nvim_lsp.default_capabilities() or {}
+
                     local default_config = {
                         capabilities = vim.tbl_deep_extend(
                             "force",
-                            {},
+                            config,
                             vim.lsp.protocol.make_client_capabilities(),
-                            cmp_nvim_lsp_capabilities,
-                            {}
+                            cmp_nvim_lsp_capabilities
                         ),
                     }
 
@@ -724,84 +769,18 @@ return {
         },
         init = function()
             -- Change diagnostic symbols in the sign column (gutter)
-            for type, icon in pairs(icons.diagnostics) do
-                local hl = "DiagnosticSign" .. type
-                vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-            end
+            vim.diagnostic.config({
+                signs = {
+                    text = {
+                        [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+                        [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
+                        [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+                        [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
+                    },
+                },
+            })
         end,
     },
-
-    -- {
-    --     "stevearc/aerial.nvim",
-    --     cmd = {
-    --         "AerialToggle",
-    --         "AerialOpen",
-    --         "AerialOpenAll",
-    --         "AerialClose",
-    --         "AerialCloseAll",
-    --         "AerialNext",
-    --         "AerialPrev",
-    --         "AerialGo",
-    --         "AerialInfo",
-    --         "AerialNavToggle",
-    --         "AerialNavOpen",
-    --         "AerialNavClose",
-    --     },
-    --     dependencies = {
-    --         "nvim-treesitter/nvim-treesitter",
-    --         "nvim-tree/nvim-web-devicons",
-    --     },
-    --     enabled = not environment.is_vscode,
-    --     opts = {
-    --         keymaps = {
-    --             -- ["?"] = "actions.show_help",
-    --             -- ["g?"] = "actions.show_help",
-    --             -- ["<CR>"] = "actions.jump",
-    --             ["l"] = "actions.jump",
-    --             -- ["<2-leftmouse>"] = "actions.jump",
-    --             -- ["<C-v>"] = "actions.jump_vsplit",
-    --             -- ["<C-s>"] = "actions.jump_split",
-    --             ["<C-v>"] = false,
-    --             ["<C-s>"] = false,
-    --             ["V"] = "actions.jump_vsplit",
-    --             ["v"] = "actions.jump_split",
-    --             -- ["p"] = "actions.scroll",
-    --             -- ["<C-j>"] = "actions.down_and_scroll",
-    --             -- ["<C-k>"] = "actions.up_and_scroll",
-    --             ["<C-j>"] = false,
-    --             ["<C-k>"] = false,
-    --             ["J"] = "actions.down_and_scroll",
-    --             ["K"] = "actions.up_and_scroll",
-    --             -- ["{"] = "actions.prev",
-    --             -- ["}"] = "actions.next",
-    --             -- ["[["] = "actions.prev_up",
-    --             ["h"] = "actions.prev_up",
-    --             -- ["]]"] = "actions.next_up",
-    --             -- ["q"] = "actions.close",
-    --             -- ["o"] = "actions.tree_toggle",
-    --             -- ["za"] = "actions.tree_toggle",
-    --             -- ["O"] = "actions.tree_toggle_recursive",
-    --             -- ["zA"] = "actions.tree_toggle_recursive",
-    --             -- ["l"] = "actions.tree_open",
-    --             -- ["zo"] = "actions.tree_open",
-    --             -- ["L"] = false,
-    --             -- ["zO"] = "actions.tree_open_recursive",
-    --             -- ["h"] = "actions.tree_close",
-    --             -- ["zc"] = "actions.tree_close",
-    --             -- ["H"] = "actions.tree_close_recursive",
-    --             ["H"] = false,
-    --             -- ["zC"] = "actions.tree_close_recursive",
-    --             -- ["zr"] = "actions.tree_increase_fold_level",
-    --             -- ["zR"] = "actions.tree_open_all",
-    --             -- ["zm"] = "actions.tree_decrease_fold_level",
-    --             -- ["zM"] = "actions.tree_close_all",
-    --             -- ["zx"] = "actions.tree_sync_folds",
-    --             -- ["zX"] = "actions.tree_sync_folds",
-    --         },
-    --         highlight_on_hover = true,
-    --         show_guides = true,
-    --     },
-    -- },
 
     {
         "williamboman/mason.nvim",

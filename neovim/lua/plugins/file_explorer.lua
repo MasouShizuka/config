@@ -366,13 +366,14 @@ return {
                             vim.api.nvim_set_current_dir(node.absolute_path)
                         end
                     end, opts("CD"))
-                    vim.keymap.set("n", "H", function ()
+                    vim.keymap.set("n", "H", function()
                         api.tree.change_root_to_parent()
                         vim.api.nvim_set_current_dir(vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ":h"))
                     end, opts("Up"))
                     vim.keymap.set("n", "<c-f>", api.tree.search_node, opts("Search"))
                     vim.keymap.set("n", "zm", api.tree.collapse_all, opts("Collapse"))
                     vim.keymap.set("n", "zr", api.tree.expand_all, opts("Expand All"))
+                    vim.keymap.set("n", "R", api.tree.reload, opts("Refresh"))
                     vim.keymap.set("n", "Ti", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
                     vim.keymap.set("n", "Tc", api.tree.toggle_git_clean_filter, opts("Toggle Git Clean"))
                     vim.keymap.set("n", "Tb", api.tree.toggle_no_buffer_filter, opts("Toggle No Buffer"))
@@ -401,7 +402,7 @@ return {
                     end, opts("Delete File(s)"))
                     vim.keymap.set("n", "r", api.fs.rename, opts("Rename"))
                     vim.keymap.set("n", "e", api.fs.rename_basename, opts("Rename: Basename"))
-                    vim.keymap.set("n", "R", api.fs.rename_full, opts("Rename: Full Path"))
+                    vim.keymap.set("n", "u", api.fs.rename_full, opts("Rename: Full Path"))
                     vim.keymap.set("n", "x", function()
                         local marks = api.marks.list()
                         if #marks == 0 then
@@ -540,6 +541,7 @@ return {
                 },
                 view = {
                     centralize_selection = true,
+                    signcolumn = "no",
                     width = "20%",
                 },
                 renderer = {
@@ -550,6 +552,8 @@ return {
                     },
                     icons = {
                         git_placement = "after",
+                        diagnostics_placement = "after",
+                        bookmarks_placement = "before",
                         glyphs = {
                             git = {
                                 unstaged = icons.git.unstaged,

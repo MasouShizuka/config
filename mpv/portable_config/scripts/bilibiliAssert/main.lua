@@ -109,22 +109,21 @@ local function assprocess()
 	-- 保留底部多少高度的空白区域 (默认0, 取值0.0-1.0)
 	local percent = 0.75
 	-- choose to use python or .exe
-	-- local arg = { "python", py_path, "-d", directory,
-	-- 	-- 设置屏幕分辨率 （自动取值)
-	-- 	"-s", "" .. dw .. "x" .. dh,
-	-- 	-- 设置字体大小    (默认 37.0)
-	-- 	"-fs", "37.0",
-	-- 	-- 设置弹幕不透明度 (默认 0.95)
-	-- 	"-a", "0.95",
-	-- 	-- 滚动弹幕显示的持续时间 (默认 10秒)
-	-- 	"-dm", "10.0",
-	-- 	-- 静止弹幕显示的持续时间 (默认 5秒)
-	-- 	"-ds", "5.0",
-	-- 	"-p", tostring(math.floor(percent * dh)),
-	-- 	"-r",
-	-- 	cid,
-	-- }
-	local arg = { "" .. directory .. "/Danmu2Ass.exe", "-d", directory, cid }
+	local arg = { "python", py_path, "-d", directory,
+		-- 设置屏幕分辨率 （自动取值)
+		"-s", "" .. dw .. "x" .. dh,
+		-- 设置字体大小    (默认 37.0)
+		"-fs", "37.0",
+		-- 设置弹幕不透明度 (默认 0.95)
+		"-a", "0.95",
+		-- 滚动弹幕显示的持续时间 (默认 10秒)
+		"-dm", "10.0",
+		-- 静止弹幕显示的持续时间 (默认 5秒)
+		"-ds", "5.0",
+		"-p", tostring(math.floor(percent * dh)),
+		"-r",
+		cid,
+	}
 	log("弹幕正在上膛")
 	-- run python to get comments
 	mp.command_native_async({

@@ -7,11 +7,11 @@
 
 ## 配置文件
 
-| 文件          | 路径                 | 说明     |
-| ------------- | -------------------- | -------- |
-| Themes        | `$APPDATA/`          | 配色主题 |
-| Plugins       | `$APPDATA/Settings/` | 插件配置 |
-| Settings.json | `$APPDATA/Settings/` | 配置文件 |
+| 文件          | 路径                                                   | 说明     |
+| ------------- | ------------------------------------------------------ | -------- |
+| Themes        | `$HOME/scoop/persist/flow-launcher/UserData/`          | 配色主题 |
+| Plugins       | `$HOME/scoop/persist/flow-launcher/UserData/Settings/` | 插件配置 |
+| Settings.json | `$HOME/scoop/persist/flow-launcher/UserData/Settings/` | 配置文件 |
 
 ## 注意
 

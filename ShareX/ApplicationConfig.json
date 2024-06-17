@@ -628,7 +628,7 @@
   "PreviewSplitterDistance": 335,
   "Language": "Automatic",
   "ShowTray": true,
-  "SilentRun": false,
+  "SilentRun": true,
   "TrayIconProgressEnabled": true,
   "TaskbarProgressEnabled": true,
   "UseWhiteShareXIcon": false,

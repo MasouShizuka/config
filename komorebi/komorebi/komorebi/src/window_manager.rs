@@ -55,6 +55,7 @@ use crate::stackbar_manager::STACKBAR_TAB_HEIGHT;
 use crate::stackbar_manager::STACKBAR_TAB_WIDTH;
 use crate::stackbar_manager::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::static_config::StaticConfig;
+use crate::transparency_manager;
 use crate::window::Window;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
@@ -163,7 +164,7 @@ impl Default for GlobalState {
                     border_manager::UNFOCUSED.load(Ordering::SeqCst),
                 ))),
             },
-            border_style: *STYLE.lock(),
+            border_style: STYLE.load(),
             border_offset: border_manager::BORDER_OFFSET.load(Ordering::SeqCst),
             border_width: border_manager::BORDER_WIDTH.load(Ordering::SeqCst),
             stackbar_mode: STACKBAR_MODE.load(),
@@ -519,7 +520,7 @@ impl WindowManager {
 
             // Hide the window we are about to remove if it is on the currently focused workspace
             if op.is_origin(focused_monitor_idx, focused_workspace_idx) {
-                Window { hwnd: op.hwnd }.hide();
+                Window::from(op.hwnd).hide();
                 should_update_focused_workspace = true;
             }
 
@@ -549,7 +550,7 @@ impl WindowManager {
                 .get_mut(op.target_workspace_idx)
                 .ok_or_else(|| anyhow!("there is no workspace with that index"))?;
 
-            target_workspace.new_container_for_window(Window { hwnd: op.hwnd });
+            target_workspace.new_container_for_window(Window::from(op.hwnd));
         }
 
         // Only re-tile the focused workspace if we need to
@@ -597,14 +598,14 @@ impl WindowManager {
     #[tracing::instrument(skip(self))]
     pub fn manage_focused_window(&mut self) -> Result<()> {
         let hwnd = WindowsApi::foreground_window()?;
-        let event = WindowManagerEvent::Manage(Window { hwnd });
+        let event = WindowManagerEvent::Manage(Window::from(hwnd));
         Ok(winevent_listener::event_tx().send(event)?)
     }
 
     #[tracing::instrument(skip(self))]
     pub fn unmanage_focused_window(&mut self) -> Result<()> {
         let hwnd = WindowsApi::foreground_window()?;
-        let event = WindowManagerEvent::Unmanage(Window { hwnd });
+        let event = WindowManagerEvent::Unmanage(Window::from(hwnd));
         Ok(winevent_listener::event_tx().send(event)?)
     }
 
@@ -632,15 +633,13 @@ impl WindowManager {
                 return Ok(());
             }
 
-            let event = WindowManagerEvent::Raise(Window { hwnd });
+            let event = WindowManagerEvent::Raise(Window::from(hwnd));
             self.has_pending_raise_op = true;
             winevent_listener::event_tx().send(event)?;
         } else {
             tracing::debug!(
                 "not raising unknown window: {}",
-                Window {
-                    hwnd: WindowsApi::window_at_cursor_pos()?
-                }
+                Window::from(WindowsApi::window_at_cursor_pos()?)
             );
         }
 
@@ -764,9 +763,7 @@ impl WindowManager {
                     window.focus(self.mouse_follows_focus)?;
                 }
             } else {
-                let desktop_window = Window {
-                    hwnd: WindowsApi::desktop_window()?,
-                };
+                let desktop_window = Window::from(WindowsApi::desktop_window()?);
 
                 let rect = self.focused_monitor_size()?;
                 WindowsApi::center_cursor_in_rect(&rect)?;
@@ -907,6 +904,7 @@ impl WindowManager {
         tracing::info!("restoring all hidden windows");
 
         let no_titlebar = NO_TITLEBAR.lock();
+        let known_transparent_hwnds = transparency_manager::known_hwnds();
 
         for monitor in self.monitors_mut() {
             for workspace in monitor.workspaces_mut() {
@@ -914,6 +912,10 @@ impl WindowManager {
                     for window in containers.windows_mut() {
                         if no_titlebar.contains(&window.exe()?) {
                             window.add_title_bar()?;
+                        }
+
+                        if known_transparent_hwnds.contains(&window.hwnd) {
+                            window.opaque()?;
                         }
 
                         window.restore();
@@ -1037,6 +1039,14 @@ impl WindowManager {
 
         tracing::info!("moving container");
 
+        let focused_monitor_idx = self.focused_monitor_idx();
+
+        if focused_monitor_idx == monitor_idx {
+            if let Some(workspace_idx) = workspace_idx {
+                return self.move_container_to_workspace(workspace_idx, follow);
+            }
+        }
+
         let offset = self.work_area_offset;
         let mouse_follows_focus = self.mouse_follows_focus;
 
@@ -1065,6 +1075,12 @@ impl WindowManager {
             .remove_focused_container()
             .ok_or_else(|| anyhow!("there is no container"))?;
 
+        let container_hwnds = container
+            .windows()
+            .iter()
+            .map(|w| w.hwnd)
+            .collect::<Vec<_>>();
+
         monitor.update_focused_workspace(offset)?;
 
         let target_monitor = self
@@ -1074,17 +1090,34 @@ impl WindowManager {
 
         target_monitor.add_container(container, workspace_idx)?;
 
-        // NOTE: 若 follow 且 workspace_idx 不为 None，则改变目标 monitor 的 focused_workspace
-        if follow {
-            if let Some(workspace_idx) = workspace_idx {
-                target_monitor.focus_workspace(workspace_idx)?;
+        if let Some(workspace_idx) = workspace_idx {
+            target_monitor.focus_workspace(workspace_idx)?;
+        }
+
+        if let Some(workspace) = target_monitor.focused_workspace() {
+            if !*workspace.tile() {
+                for hwnd in container_hwnds {
+                    Window::from(hwnd).center(target_monitor.work_area_size())?;
+                }
             }
         }
 
         target_monitor.load_focused_workspace(mouse_follows_focus)?;
         target_monitor.update_focused_workspace(offset)?;
 
+        // this second one is for DPI changes when the target is another monitor
+        // if we don't do this the layout on the other monitor could look funny
+        // until it is interacted with again
+        target_monitor.update_focused_workspace(offset)?;
+
         if follow {
+            if let Some(workspace_idx) = workspace_idx {
+                target_monitor.focus_workspace(workspace_idx)?;
+            }
+
+            target_monitor.load_focused_workspace(mouse_follows_focus)?;
+            target_monitor.update_focused_workspace(offset)?;
+
             self.focus_monitor(monitor_idx)?;
         }
 
@@ -1129,7 +1162,7 @@ impl WindowManager {
                 .ok_or_else(|| anyhow!("there is no monitor"))?;
 
             target_monitor.workspaces_mut().push_back(workspace);
-            target_monitor.focus_workspace(target_monitor.workspaces().len() - 1)?;
+            target_monitor.focus_workspace(target_monitor.workspaces().len().saturating_sub(1))?;
             target_monitor.load_focused_workspace(mouse_follows_focus)?;
         }
 
@@ -1264,10 +1297,9 @@ impl WindowManager {
                         let origin_workspace =
                             self.focused_workspace_for_monitor_idx_mut(origin_monitor_idx)?;
 
-                        if origin_workspace.focused_container_idx() != 0 {
-                            origin_workspace
-                                .focus_container(origin_workspace.focused_container_idx() - 1);
-                        }
+                        origin_workspace.focus_container(
+                            origin_workspace.focused_container_idx().saturating_sub(1),
+                        );
                     }
                 }
 
@@ -1419,6 +1451,67 @@ impl WindowManager {
     }
 
     #[tracing::instrument(skip(self))]
+    pub fn stack_all(&mut self) -> Result<()> {
+        self.handle_unmanaged_window_behaviour()?;
+        tracing::info!("stacking all windows on workspace");
+
+        let workspace = self.focused_workspace_mut()?;
+
+        let mut focused_hwnd = None;
+        if let Some(container) = workspace.focused_container() {
+            if let Some(window) = container.focused_window() {
+                focused_hwnd = Some(window.hwnd);
+            }
+        }
+
+        workspace.focus_container(workspace.containers().len().saturating_sub(1));
+        while workspace.focused_container_idx() > 0 {
+            workspace.move_window_to_container(0)?;
+            workspace.focus_container(workspace.containers().len().saturating_sub(1));
+        }
+
+        if let Some(hwnd) = focused_hwnd {
+            workspace.focus_container_by_window(hwnd)?;
+        }
+
+        self.update_focused_workspace(self.mouse_follows_focus, true)
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn unstack_all(&mut self) -> Result<()> {
+        self.handle_unmanaged_window_behaviour()?;
+        tracing::info!("unstacking all windows in container");
+
+        let workspace = self.focused_workspace_mut()?;
+
+        let mut focused_hwnd = None;
+        if let Some(container) = workspace.focused_container() {
+            if let Some(window) = container.focused_window() {
+                focused_hwnd = Some(window.hwnd);
+            }
+        }
+
+        let initial_focused_container_index = workspace.focused_container_idx();
+        let mut focused_container = workspace.focused_container().cloned();
+
+        while let Some(focused) = &focused_container {
+            if focused.windows().len() > 1 {
+                workspace.new_container_for_focused_window()?;
+                workspace.focus_container(initial_focused_container_index);
+                focused_container = workspace.focused_container().cloned();
+            } else {
+                focused_container = None;
+            }
+        }
+
+        if let Some(hwnd) = focused_hwnd {
+            workspace.focus_container_by_window(hwnd)?;
+        }
+
+        self.update_focused_workspace(self.mouse_follows_focus, true)
+    }
+
+    #[tracing::instrument(skip(self))]
     pub fn add_window_to_container(&mut self, direction: OperationDirection) -> Result<()> {
         self.handle_unmanaged_window_behaviour()?;
 
@@ -1449,12 +1542,20 @@ impl WindowManager {
                     Layout::Default(DefaultLayout::Grid)
                         | Layout::Default(DefaultLayout::UltrawideVerticalStack)
                 ) {
-                new_idx - 1
+                new_idx.saturating_sub(1)
             } else {
                 new_idx
             };
 
-            workspace.move_window_to_container(adjusted_new_index)?;
+            if let Some(current) = workspace.focused_container() {
+                if current.windows().len() > 1 {
+                    workspace.focus_container(adjusted_new_index);
+                    workspace.move_window_to_container(current_container_idx)?;
+                } else {
+                    workspace.move_window_to_container(adjusted_new_index)?;
+                }
+            }
+
             self.update_focused_workspace(self.mouse_follows_focus, false)?;
         }
 

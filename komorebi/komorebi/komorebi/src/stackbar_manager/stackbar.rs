@@ -27,6 +27,7 @@ use windows::Win32::Foundation::WPARAM;
 use windows::Win32::Graphics::Gdi::CreateFontIndirectW;
 use windows::Win32::Graphics::Gdi::CreatePen;
 use windows::Win32::Graphics::Gdi::CreateSolidBrush;
+use windows::Win32::Graphics::Gdi::DeleteObject;
 use windows::Win32::Graphics::Gdi::DrawTextW;
 use windows::Win32::Graphics::Gdi::GetDC;
 use windows::Win32::Graphics::Gdi::Rectangle;
@@ -197,7 +198,7 @@ impl Stackbar {
                     bottom: height,
                 };
 
-                match *STYLE.lock() {
+                match STYLE.load() {
                     BorderStyle::System => {
                         if *WINDOWS_11 {
                             RoundRect(hdc, rect.left, rect.top, rect.right, rect.bottom, 20, 20);
@@ -235,6 +236,9 @@ impl Stackbar {
             }
 
             ReleaseDC(self.hwnd(), hdc);
+            DeleteObject(hpen);
+            DeleteObject(hbrush);
+            DeleteObject(hfont);
         }
 
         Ok(())

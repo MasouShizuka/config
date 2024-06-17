@@ -45,6 +45,7 @@ use crate::current_virtual_desktop;
 use crate::notify_subscribers;
 use crate::stackbar_manager;
 use crate::static_config::StaticConfig;
+use crate::transparency_manager;
 use crate::window::RuleDebug;
 use crate::window::Window;
 use crate::window_manager;
@@ -80,26 +81,33 @@ use stackbar_manager::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 
 #[tracing::instrument]
 pub fn listen_for_commands(wm: Arc<Mutex<WindowManager>>) {
-    let listener = wm
-        .lock()
-        .command_listener
-        .try_clone()
-        .expect("could not clone unix listener");
+    std::thread::spawn(move || loop {
+        let wm = wm.clone();
 
-    std::thread::spawn(move || {
-        tracing::info!("listening on komorebi.sock");
-        for client in listener.incoming() {
-            match client {
-                Ok(stream) => match read_commands_uds(&wm, stream) {
-                    Ok(()) => {}
-                    Err(error) => tracing::error!("{}", error),
-                },
-                Err(error) => {
-                    tracing::error!("{}", error);
-                    break;
+        let _ = std::thread::spawn(move || {
+            let listener = wm
+                .lock()
+                .command_listener
+                .try_clone()
+                .expect("could not clone unix listener");
+
+            tracing::info!("listening on komorebi.sock");
+            for client in listener.incoming() {
+                match client {
+                    Ok(stream) => match read_commands_uds(&wm, stream) {
+                        Ok(()) => {}
+                        Err(error) => tracing::error!("{}", error),
+                    },
+                    Err(error) => {
+                        tracing::error!("{}", error);
+                        break;
+                    }
                 }
             }
-        }
+        })
+        .join();
+
+        tracing::error!("restarting failed thread");
     });
 }
 
@@ -205,6 +213,8 @@ impl WindowManager {
             }
             SocketMessage::StackWindow(direction) => self.add_window_to_container(direction)?,
             SocketMessage::UnstackWindow => self.remove_window_from_container()?,
+            SocketMessage::StackAll => self.stack_all()?,
+            SocketMessage::UnstackAll => self.unstack_all()?,
             SocketMessage::CycleStack(direction) => {
                 self.cycle_container_window_in_direction(direction)?;
                 self.focused_window()?.focus(self.mouse_follows_focus)?;
@@ -224,10 +234,7 @@ impl WindowManager {
                 self.update_focused_workspace(true, true)?;
             }
             SocketMessage::Minimize => {
-                Window {
-                    hwnd: WindowsApi::foreground_window()?,
-                }
-                .minimize();
+                Window::from(WindowsApi::foreground_window()?).minimize();
             }
             SocketMessage::ToggleFloat => self.toggle_float()?,
             SocketMessage::ToggleMonocle => self.toggle_monocle()?,
@@ -796,15 +803,22 @@ impl WindowManager {
                     }
                 }
 
-                let visible_windows_state =
-                    match serde_json::to_string_pretty(&monitor_visible_windows) {
-                        Ok(state) => state,
-                        Err(error) => error.to_string(),
-                    };
+                let visible_windows_state = serde_json::to_string_pretty(&monitor_visible_windows)
+                    .unwrap_or_else(|error| error.to_string());
 
                 reply.write_all(visible_windows_state.as_bytes())?;
             }
+            SocketMessage::MonitorInformation => {
+                let mut monitors = HashMap::new();
+                for monitor in self.monitors() {
+                    monitors.insert(monitor.device_id(), monitor.size());
+                }
 
+                let monitors_state = serde_json::to_string_pretty(&monitors)
+                    .unwrap_or_else(|error| error.to_string());
+
+                reply.write_all(monitors_state.as_bytes())?;
+            }
             SocketMessage::Query(query) => {
                 let response = match query {
                     StateQuery::FocusedMonitorIndex => self.focused_monitor_idx(),
@@ -1247,14 +1261,19 @@ impl WindowManager {
                 }
             },
             SocketMessage::BorderStyle(style) => {
-                let mut border_style = STYLE.lock();
-                *border_style = style;
+                STYLE.store(style);
             }
             SocketMessage::BorderWidth(width) => {
                 border_manager::BORDER_WIDTH.store(width, Ordering::SeqCst);
             }
             SocketMessage::BorderOffset(offset) => {
                 border_manager::BORDER_OFFSET.store(offset, Ordering::SeqCst);
+            }
+            SocketMessage::Transparency(enable) => {
+                transparency_manager::TRANSPARENCY_ENABLED.store(enable, Ordering::SeqCst);
+            }
+            SocketMessage::TransparencyAlpha(alpha) => {
+                transparency_manager::TRANSPARENCY_ALPHA.store(alpha, Ordering::SeqCst);
             }
             SocketMessage::StackbarMode(mode) => {
                 STACKBAR_MODE.store(mode);
@@ -1328,7 +1347,7 @@ impl WindowManager {
                 self.update_focused_workspace(false, false)?;
             }
             SocketMessage::DebugWindow(hwnd) => {
-                let window = Window { hwnd };
+                let window = Window::from(hwnd);
                 let mut rule_debug = RuleDebug::default();
                 let _ = window.should_manage(None, &mut rule_debug);
                 let schema = serde_json::to_string_pretty(&rule_debug)?;
@@ -1347,6 +1366,7 @@ impl WindowManager {
 
         notify_subscribers(&serde_json::to_string(&notification)?)?;
         border_manager::event_tx().send(border_manager::Notification)?;
+        transparency_manager::event_tx().send(transparency_manager::Notification)?;
         stackbar_manager::event_tx().send(stackbar_manager::Notification)?;
 
         tracing::info!("processed");

@@ -19,7 +19,16 @@ use crate::ring::Ring;
 use crate::workspace::Workspace;
 
 #[derive(
-    Debug, Clone, Serialize, Deserialize, Getters, CopyGetters, MutGetters, Setters, JsonSchema,
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    Getters,
+    CopyGetters,
+    MutGetters,
+    Setters,
+    JsonSchema,
+    PartialEq,
 )]
 pub struct Monitor {
     #[getset(get_copy = "pub", set = "pub")]
@@ -123,7 +132,7 @@ impl Monitor {
         if idx == 0 {
             self.workspaces_mut().push_back(Workspace::default());
         } else {
-            self.focus_workspace(idx - 1).ok()?;
+            self.focus_workspace(idx.saturating_sub(1)).ok()?;
         };
 
         None

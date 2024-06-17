@@ -1,14 +1,13 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     -- NOTE: 需要安装 fd
     {
         "linux-cultist/venv-selector.nvim",
+        branch = "regexp",
         cmd = {
             "VenvSelect",
-            "VenvSelectCached",
         },
         dependencies = {
             {
@@ -35,7 +34,8 @@ return {
                 callback = function(args)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
-                        utils.defer(function() require("venv-selector").retrieve_from_cache() end, 1000, false)
+                        -- utils.defer(function() require("venv-selector").retrieve_from_cache() end, 1000, false)
+                        require("venv-selector")
                         vim.api.nvim_del_augroup_by_name("VenvActivate")
                     end
                 end,
@@ -48,22 +48,36 @@ return {
                 callback = function(args)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
-                        vim.keymap.set("n", "<leader>lv", function() require("venv-selector").open() end, { buffer = args.buf, desc = "Open VenvSelector to pick a venv", silent = true })
+                        vim.keymap.set("n", "<leader>lv", function() vim.api.nvim_command("VenvSelect") end, { buffer = args.buf, desc = "Open VenvSelector to pick a venv", silent = true })
                     end
                 end,
                 desc = "Venv selector keymap",
                 group = vim.api.nvim_create_augroup("VenvKeymap", { clear = true }),
             })
         end,
-        opts = {
-            anaconda_base_path = path.conda_path,
-            anaconda_envs_path = path.conda_path .. "/envs",
-            anaconda = {
-                python_parent_dir = "",
-            },
-            cache_file = path.data_path .. "/lazy/venv-selector.nvim/venv-selector/venvs.json",
-            cache_dir = path.data_path .. "/lazy/venv-selector.nvim/venv-selector",
-            dap_enabled = true,
-        },
+        opts = function()
+            local config = {
+                settings = {
+                    cache = {
+                        file = path.data_path .. "/venvs2.json",
+                    },
+                },
+            }
+
+            if environment.is_windows then
+                config.settings.search = {
+                    anaconda_envs = {
+                        command = string.format([[$FD python.exe$ %s --full-path -a -E Lib]], path.conda_path .. "/envs"),
+                        type = "anaconda",
+                    },
+                    anaconda_base = {
+                        command = string.format([[$FD python.exe$ %s --full-path -a --color never -d 1]], path.conda_path),
+                        type = "anaconda",
+                    },
+                }
+            end
+
+            return config
+        end,
     },
 }

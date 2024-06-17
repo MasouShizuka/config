@@ -38,7 +38,16 @@ use crate::REMOVE_TITLEBARS;
 
 #[allow(clippy::struct_field_names)]
 #[derive(
-    Debug, Clone, Serialize, Deserialize, Getters, CopyGetters, MutGetters, Setters, JsonSchema,
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    Getters,
+    CopyGetters,
+    MutGetters,
+    Setters,
+    JsonSchema,
+    PartialEq,
 )]
 pub struct Workspace {
     #[getset(get = "pub", set = "pub")]
@@ -397,6 +406,28 @@ impl Workspace {
     pub fn reap_orphans(&mut self) -> Result<(usize, usize)> {
         let mut hwnds = vec![];
         let mut floating_hwnds = vec![];
+        let mut remove_monocle = false;
+        let mut remove_maximized = false;
+
+        if let Some(monocle) = &self.monocle_container {
+            let window_count = monocle.windows().len();
+            let mut orphan_count = 0;
+            for window in monocle.windows() {
+                if !window.is_window() {
+                    hwnds.push(window.hwnd);
+                    orphan_count += 1;
+                }
+            }
+
+            remove_monocle = orphan_count == window_count;
+        }
+
+        if let Some(window) = &self.maximized_window {
+            if !window.is_window() {
+                hwnds.push(window.hwnd);
+                remove_maximized = true;
+            }
+        }
 
         for window in self.visible_windows_mut().into_iter().flatten() {
             if !window.is_window() {
@@ -430,6 +461,14 @@ impl Workspace {
 
         self.containers_mut()
             .retain(|c| !container_ids.contains(c.id()));
+
+        if remove_monocle {
+            self.set_monocle_container(None);
+        }
+
+        if remove_maximized {
+            self.set_maximized_window(None);
+        }
 
         Ok((hwnds.len() + floating_hwnds.len(), container_ids.len()))
     }
@@ -763,7 +802,7 @@ impl Workspace {
             self.resize_dimensions_mut().remove(focused_idx);
 
             if focused_idx < target_container_idx {
-                target_container_idx - 1
+                target_container_idx.saturating_sub(1)
             } else {
                 target_container_idx
             }
@@ -885,8 +924,8 @@ impl Workspace {
                 self.containers_mut().remove(focused_idx);
                 self.resize_dimensions_mut().remove(focused_idx);
 
-                if focused_idx == self.containers().len() && focused_idx != 0 {
-                    self.focus_container(focused_idx - 1);
+                if focused_idx == self.containers().len() {
+                    self.focus_container(focused_idx.saturating_sub(1));
                 }
             } else {
                 container.load_focused_window();
@@ -1290,7 +1329,8 @@ impl Workspace {
             .ok_or_else(|| anyhow!("there is no monocle container"))?;
 
         let window = *window;
-        if !self.containers().is_empty() && restore_idx > self.containers().len() - 1 {
+        if !self.containers().is_empty() && restore_idx > self.containers().len().saturating_sub(1)
+        {
             self.containers_mut()
                 .resize(restore_idx, Container::default());
         }
@@ -1379,13 +1419,10 @@ impl Workspace {
 
     pub fn focus_previous_container(&mut self) {
         let focused_idx = self.focused_container_idx();
-
-        if focused_idx != 0 {
-            self.focus_container(focused_idx - 1);
-        }
+        self.focus_container(focused_idx.saturating_sub(1));
     }
 
     fn focus_last_container(&mut self) {
-        self.focus_container(self.containers().len() - 1);
+        self.focus_container(self.containers().len().saturating_sub(1));
     }
 }

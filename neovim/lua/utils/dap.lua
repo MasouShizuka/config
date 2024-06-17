@@ -41,6 +41,10 @@ M.dap = function(mason_nvim_dap)
 
             mason_nvim_dap.default_setup(config)
         end,
+        -- 由 nvim-jdtls 设置
+        javadbg = function(config) end,
+        -- 由 nvim-jdtls 设置
+        javatest = function(config) end,
         python = function(config)
             if not utils.is_available("nvim-dap-python") then
                 local adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/bin/python"

@@ -1,6 +1,7 @@
 local dap = require("utils.dap")
 local environment = require("utils.environment")
 local icons = require("utils.icons")
+local utils = require("utils")
 
 return {
     {
@@ -102,7 +103,20 @@ return {
             end
         end,
         keys = {
-            { "<f5>",       function() require("dap").continue() end,          desc = "Continue",          mode = "n" },
+            {
+                "<f5>",
+                function()
+                    local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+                    -- nvim-dap-python 会优先使用 CONDA_PREFIX 而忽略 venv-selector 切换环境时设置的 resolve_python
+                    -- 因此，每次执行 dap 时清除 CONDA_PREFIX
+                    if ft == "python" and utils.is_available("nvim-dap-python") and utils.is_available("venv-selector.nvim") then
+                        vim.fn.setenv("CONDA_PREFIX", nil)
+                    end
+                    require("dap").continue()
+                end,
+                desc = "Continue",
+                mode = "n",
+            },
             { "<leader>dr", function() require("dap").restart() end,           desc = "Restart",           mode = "n" },
             { "<f9>",       function() require("dap").toggle_breakpoint() end, desc = "Toggle breakpoint", mode = "n" },
             { "<f10>",      function() require("dap").step_over() end,         desc = "Step over",         mode = "n" },
@@ -111,8 +125,16 @@ return {
             { "<f6>",       function() require("dap").pause() end,             desc = "Pause",             mode = "n" },
             { "<leader>dk", function() require("dap").up() end,                desc = "Up",                mode = "n" },
             { "<leader>dj", function() require("dap").down() end,              desc = "Down",              mode = "n" },
-            { "<s-f5>",     function() require("dap").disconnect() end,        desc = "Disconnent",        mode = "n" },
-            { "<leader>dh", function() require("dap.ui.widgets").hover() end,  desc = "Hover",             mode = "n" },
+            {
+                "<s-f5>",
+                function()
+                    require("dap").disconnect()
+                    require("dapui").close()
+                end,
+                desc = "Disconnent",
+                mode = "n"
+            },
+            { "<leader>dh", function() require("dap.ui.widgets").hover() end, desc = "Hover", mode = "n" },
         },
     },
 }

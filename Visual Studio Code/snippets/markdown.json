@@ -140,7 +140,7 @@
             "。。c"
         ],
         "body": [
-            "```${1|python,c,c++,c#,ruby,go,java,php,htm,css,javascript,json,markdown,console|}",
+            "```${1|autohotkey,bash,c,cpp,csharp,css,diff,go,html,java,javascript,json,lua,markdown,php,python,ruby,sql,tex,text|}",
             "${TM_SELECTED_TEXT}$0",
             "```"
         ],
@@ -227,6 +227,24 @@
             "${TM_SELECTED_TEXT}$0",
             "",
             "</center>"
+        ],
+        "description": "Insert html center block",
+        "luasnip": {
+            "autotrigger": true
+        }
+    },
+    "Insert html details block": {
+        "prefix": [
+            ".hd",
+            "。hd"
+        ],
+        "body": [
+            "<details>",
+            "<summary>${1:详情}</summary>",
+            "",
+            "${TM_SELECTED_TEXT}$0",
+            "",
+            "</details>"
         ],
         "description": "Insert html center block",
         "luasnip": {

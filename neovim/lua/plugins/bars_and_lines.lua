@@ -441,11 +441,9 @@ return {
                 end,
                 provider = function(self)
                     local venv_name = "base"
-                    local active_venv = require("venv-selector").get_active_venv()
-                    if active_venv ~= nil then
-                        if active_venv:find("envs") then
-                            venv_name = vim.fn.fnamemodify(active_venv, ":t")
-                        end
+                    local active_venv = require("venv-selector").python()
+                    if active_venv ~= nil and active_venv:find("envs") then
+                        venv_name = vim.fn.fnamemodify(active_venv, ":h:t")
                     end
                     return icons.languages.python .. venv_name
                 end,

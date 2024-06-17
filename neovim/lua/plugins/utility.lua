@@ -101,15 +101,13 @@ return {
             { "zm", function(...) require("ufo").closeFoldsWith(...) end,       desc = "Close folds with",        mode = "n" },
         },
         opts = {
-            provider_selector = function(bufnr, filetype, buftype)
-                return { "treesitter", "indent" }
-            end,
+            -- 由于 treesitter 太慢，因此禁用
+            -- provider_selector = function(bufnr, filetype, buftype)
+            --     return { "treesitter", "indent" }
+            -- end,
             preview = {
                 win_config = {
-                    border = "rounded",
                     winblend = 0,
-                    winhighlight = "Normal:Normal",
-                    maxheight = 20,
                 },
                 mappings = {
                     scrollB = "",

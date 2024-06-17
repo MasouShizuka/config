@@ -345,6 +345,13 @@ function M.setup()
                     vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"']], curr_file, output, output, output))
                 elseif ft == "lua" then
                     vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
+                elseif ft == "java" then
+                    local out_path = vim.fn.fnamemodify(curr_file:gsub("src/", "target/"), ":h")
+                    if vim.fn.isdirectory(out_path) == 0 then
+                        vim.fn.mkdir(out_path, "p")
+                    end
+                    local class_name = vim.fn.fnamemodify(curr_file, ":t:r")
+                    vim.api.nvim_command(string.format([[TermExec cmd='javac -d "%s" "%s" && java -classpath "%s" "%s"']], out_path, curr_file, out_path, class_name))
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")
@@ -366,17 +373,24 @@ function M.setup()
                 if ft == "cpp" then
                     vim.api.nvim_command(string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output))
                 elseif ft == "lua" then
-                    vim.api.nvim_command(string.format("luafile %s", curr_file))
+                    vim.api.nvim_command(string.format([[luafile "%s"]], curr_file))
+                elseif ft == "java" then
+                    local out_path = vim.fn.fnamemodify(curr_file:gsub("src/", "target/"), ":h")
+                    if vim.fn.isdirectory(out_path) == 0 then
+                        vim.fn.mkdir(out_path, "p")
+                    end
+                    local class_name = vim.fn.fnamemodify(curr_file, ":t:r")
+                    vim.api.nvim_command(string.format([[javac -d "%s" "%s" && java -classpath "%s" "%s"]], out_path, curr_file, out_path, class_name))
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")
                     end
                 elseif ft == "python" then
-                    vim.api.nvim_command(string.format("python -u %s", curr_file))
+                    vim.api.nvim_command(string.format([[python -u "%s"]], curr_file))
                 elseif ft == "rust" then
                     vim.api.nvim_command("cargo run")
                 elseif ft == "sh" then
-                    vim.api.nvim_command(string.format("bash %s", curr_file))
+                    vim.api.nvim_command(string.format([[bash "%s"]], curr_file))
                 elseif ft == "tex" then
                     if vim.tbl_contains(lsp.lsp_list, "texlab") then
                         vim.api.nvim_command("TexlabBuild")
