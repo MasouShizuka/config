@@ -1,0 +1,230 @@
+watch_stylesheet: true
+watch_config: true
+
+bars:
+  yasb-bar:
+    enabled: true
+    screens: ['*']
+    class_name: "yasb-bar"
+    alignment:
+      position: "top"
+      center: true
+    blur_effect:
+      enabled: false
+      acrylic: false
+      dark: false
+    window_flags:
+      always_on_top: false
+      windows_app_bar: true
+    dimensions:
+      width: "100%"
+      height: 32
+    padding:
+      top: 0
+      left: 5
+      bottom: 0
+      right: 5
+    widgets:
+      left:   ["komorebi_workspaces", "komorebi_active_layout"]
+      center: ["komorebi_multi_window"]
+      right:  ["input_method", "wifi", "traffic", "cpu", "memory", "gpu", "battery", "clock"]
+
+widgets:
+  komorebi_workspaces:
+    type: "komorebi.workspaces.WorkspaceWidget"
+    options:
+      label_offline: "Komorebi Offline"
+      label_workspace_btn: "{name}"
+      label_default_name: "{index}"
+      label_zero_index: false
+      hide_empty_workspaces: false
+
+  komorebi_active_layout:
+    type: "komorebi.active_layout.ActiveLayoutWidget"
+    options:
+      hide_if_offline: false
+      label: "{icon}"
+      layout_icons:
+        bsp: "[\\\\]"
+        columns: "[||]"
+        rows: "[==]"
+        vertical_stack: "[V]="
+        horizontal_stack: "[H]="
+        ultrawide_vertical_stack: "||="
+        grid: "[G]"
+        monocle: "[M]"
+        maximised: "[X]"
+        floating: "><>"
+        paused: "[P]"
+      callbacks:
+        on_left: 'next_layout'
+        on_middle: 'toggle_monocle'
+        on_right: 'prev_layout'
+
+  komorebi_multi_window:
+    type: "komorebi.multi_window.MultiWindowWidget"
+    options:
+      label: "{win[title]}"
+      label_alt: "class={win[class]} exe={win[exe]} hwnd={win[hwnd]} pid={win[pid]}"
+      show_icon: true
+      min_update_interval: 200
+      update_title:
+        live_update: true
+        update_interval: 1000
+      callbacks:
+        on_left: "do_nothing"
+        on_middle: "do_nothing"
+        on_right: "toggle_label"
+
+  input_method:
+    type: "yasb.input_method.InputMethodWidget"
+    options:
+      label: "\uf11c  {language}"
+      update_interval: 500
+      language_dict:
+        0x409: "EN"
+        0x804: "\u4e2d"
+      callbacks:
+        on_left: "do_nothing"
+        on_middle: "do_nothing"
+        on_right: "do_nothing"
+
+  wifi:
+    type: "yasb.wifi.WifiWidget"
+    options:
+        label: "{wifi_icon} {wifi_name}"
+        label_alt: "{wifi_icon}"
+        update_interval: 5000
+        wifi_icons:
+          - "\udb82\udd2e"  # 0% strength (no wifi)
+          - "\udb82\udd1f"  # 1-25% strength
+          - "\udb82\udd22"  # 26-50% strength
+          - "\udb82\udd25"  # 51-75% strength
+          - "\udb82\udd28"  # 76-100% strength. Alternate theming: \uf1eb
+        callbacks:
+          on_left: "toggle_label"
+          on_middle: "do_nothing"
+          on_right: "exec cmd.exe /c start ms-settings:network"
+
+  traffic:
+    type: "yasb.traffic.TrafficWidget"
+    options:
+        label: "\uf093 {upload_speed} \uf019 {download_speed}"
+        label_alt: "\uf019 {download_speed} \uf093 {upload_speed}"
+        update_interval: 1000
+        callbacks:
+          on_left: "toggle_label"
+          on_middle: "do_nothing"
+          on_right: "exec cmd.exe /c start ms-settings:network"
+
+  cpu:
+    type: "yasb.cpu.CpuWidget"
+    options:
+      label: "\uf4bc {info[percent][total]}%"
+      label_alt: "\uf4bc {info[histograms][cpu_percent]} | freq: {info[freq][current]:.2f} Mhz"
+      update_interval: 1000
+      histogram_icons:
+        - '\u2581' # 0%
+        - '\u2581' # 10%
+        - '\u2582' # 20%
+        - '\u2583' # 30%
+        - '\u2584' # 40%
+        - '\u2585' # 50%
+        - '\u2586' # 60%
+        - '\u2587' # 70%
+        - '\u2588' # 80%+
+      histogram_num_columns: 10
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "exec cmd /c Taskmgr"
+
+  memory:
+    type: "yasb.memory.MemoryWidget"
+    options:
+      label: "\uf51e {virtual_mem_percent}%"
+      label_alt: "\U000f035b {virtual_mem_free}"
+      update_interval: 5000
+      memory_thresholds:
+        low: 30
+        medium: 60
+        high: 90
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "exec cmd /c Taskmgr"
+
+  gpu:
+    type: "yasb.gpu.GpuWidget"
+    options:
+      label: "\uf2db {info[percent][total]}%"
+      label_alt: "\uf2db {info[histograms][gpu_percent]}"
+      update_interval: 1000
+      histogram_icons:
+        - '\u2581' # 0%
+        - '\u2581' # 10%
+        - '\u2582' # 20%
+        - '\u2583' # 30%
+        - '\u2584' # 40%
+        - '\u2585' # 50%
+        - '\u2586' # 60%
+        - '\u2587' # 70%
+        - '\u2588' # 80%+
+      histogram_num_columns: 10
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "exec cmd /c Taskmgr"
+
+  battery:
+    type: "yasb.battery.BatteryWidget"
+    options:
+      label: "{icon} {percent}%"
+      label_alt: "{percent}% {time_remaining}"
+      update_interval: 5000
+      time_remaining_natural: false
+      charging_options:
+        icon_format: "{charging_icon} {icon}"
+        blink_charging_icon: False
+      status_thresholds:
+        critical: 10
+        low: 30
+        medium: 70
+        high: 90
+        full: 100
+      status_icons:
+        icon_charging: "\uf0e7"
+        icon_critical: "\uf244"
+        icon_low: "\uf243"
+        icon_medium: "\uf242"
+        icon_high: "\uf241"
+        icon_full: "\uf240"
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "do_nothing"
+
+  clock:
+    type: "yasb.clock.ClockWidget"
+    options:
+      label: "{icon} %Y-%m-%d %H:%M:%S %a"
+      label_alt: "{icon} %H:%M:%S"
+      update_interval: 1000
+      timezones: ["Asia/Shanghai"]
+      status_icons:
+        icon_0: "\ue381"
+        icon_1: "\ue382"
+        icon_2: "\ue383"
+        icon_3: "\ue384"
+        icon_4: "\ue385"
+        icon_5: "\ue386"
+        icon_6: "\ue387"
+        icon_7: "\ue388"
+        icon_8: "\ue389"
+        icon_9: "\ue38a"
+        icon_10: "\ue38b"
+        icon_11: "\ue38c"
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "exec explorer.exe shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"
+        on_right: "next_timezone"

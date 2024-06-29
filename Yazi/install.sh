@@ -1,6 +1,7 @@
 DIR=$(dirname "$(readlink -f "$0")")
 PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
+CONFIG_DIR=$DIR/config
 
 scoop install yazi --no-cache
 
@@ -12,4 +13,4 @@ scoop install ripgrep --no-cache
 
 target="$APPDATA/yazi"
 clean_target "$target"
-install_to_target "$DIR" "$target"
+install_to_target "$CONFIG_DIR" "$target"

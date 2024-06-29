@@ -1,0 +1,95 @@
+{
+  "cross_monitor_move_behaviour": "Insert",
+  "app_specific_configuration_path": "applications.yaml",
+  "border_width": 6,
+  "border": true,
+  "border_colours": {
+    "single": "#61afef",
+    "stack": "#98c379",
+    "monocle": "#e06c75"
+  },
+  "default_workspace_padding": 4,
+  "default_container_padding": 4,
+  "monitors": [
+    {
+      "workspaces": [
+        {
+          "name": " ",
+          "layout": "BSP"
+        },
+        {
+          "name": " ",
+          "layout": "BSP"
+        },
+        {
+          "name": " ",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "QQ.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "WeChat.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": " ",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "cloudmusic.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "foobar2000.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": " ",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "Thunder.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": " ",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "Clash Verge.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "nekoray.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": " ",
+          "layout": "BSP"
+        }
+      ]
+    }
+  ],
+  "window_hiding_behaviour": "Cloak",
+  "display_index_preferences": {
+    "0": "DELF137-5&22795f3&0&UID4613",
+    "1": "DELD03B-5&22795f3&0&UID4612"
+  }
+}

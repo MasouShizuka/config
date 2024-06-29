@@ -1,0 +1,1344 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StaticConfig",
+  "description": "The `komorebi.json` static configuration file reference for `v0.1.27`",
+  "type": "object",
+  "properties": {
+    "app_specific_configuration_path": {
+      "description": "Path to applications.yaml from komorebi-application-specific-configurations (default: None)",
+      "type": "string"
+    },
+    "border": {
+      "description": "Display an active window border (default: false)",
+      "type": "boolean"
+    },
+    "border_colours": {
+      "description": "Active window border colours for different container types",
+      "type": "object",
+      "properties": {
+        "monocle": {
+          "description": "Border colour when the container is in monocle mode",
+          "anyOf": [
+            {
+              "description": "Colour represented as RGB",
+              "type": "object",
+              "required": [
+                "b",
+                "g",
+                "r"
+              ],
+              "properties": {
+                "b": {
+                  "description": "Blue",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "g": {
+                  "description": "Green",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "r": {
+                  "description": "Red",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                }
+              }
+            },
+            {
+              "description": "Colour represented as Hex",
+              "type": "string"
+            }
+          ]
+        },
+        "single": {
+          "description": "Border colour when the container contains a single window",
+          "anyOf": [
+            {
+              "description": "Colour represented as RGB",
+              "type": "object",
+              "required": [
+                "b",
+                "g",
+                "r"
+              ],
+              "properties": {
+                "b": {
+                  "description": "Blue",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "g": {
+                  "description": "Green",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "r": {
+                  "description": "Red",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                }
+              }
+            },
+            {
+              "description": "Colour represented as Hex",
+              "type": "string"
+            }
+          ]
+        },
+        "stack": {
+          "description": "Border colour when the container contains multiple windows",
+          "anyOf": [
+            {
+              "description": "Colour represented as RGB",
+              "type": "object",
+              "required": [
+                "b",
+                "g",
+                "r"
+              ],
+              "properties": {
+                "b": {
+                  "description": "Blue",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "g": {
+                  "description": "Green",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "r": {
+                  "description": "Red",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                }
+              }
+            },
+            {
+              "description": "Colour represented as Hex",
+              "type": "string"
+            }
+          ]
+        },
+        "unfocused": {
+          "description": "Border colour when the container is unfocused",
+          "anyOf": [
+            {
+              "description": "Colour represented as RGB",
+              "type": "object",
+              "required": [
+                "b",
+                "g",
+                "r"
+              ],
+              "properties": {
+                "b": {
+                  "description": "Blue",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "g": {
+                  "description": "Green",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                },
+                "r": {
+                  "description": "Red",
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0.0
+                }
+              }
+            },
+            {
+              "description": "Colour represented as Hex",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "border_offset": {
+      "description": "Offset of the window border (default: -1)",
+      "type": "integer",
+      "format": "int32"
+    },
+    "border_overflow_applications": {
+      "description": "Identify border overflow applications",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Exe",
+                  "Class",
+                  "Title",
+                  "Path"
+                ]
+              },
+              "matching_strategy": {
+                "type": "string",
+                "enum": [
+                  "Legacy",
+                  "Equals",
+                  "StartsWith",
+                  "EndsWith",
+                  "Contains",
+                  "Regex",
+                  "DoesNotEndWith",
+                  "DoesNotStartWith",
+                  "DoesNotEqual",
+                  "DoesNotContain"
+                ]
+              }
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "Exe",
+                    "Class",
+                    "Title",
+                    "Path"
+                  ]
+                },
+                "matching_strategy": {
+                  "type": "string",
+                  "enum": [
+                    "Legacy",
+                    "Equals",
+                    "StartsWith",
+                    "EndsWith",
+                    "Contains",
+                    "Regex",
+                    "DoesNotEndWith",
+                    "DoesNotStartWith",
+                    "DoesNotEqual",
+                    "DoesNotContain"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "border_style": {
+      "description": "Active window border style (default: System)",
+      "oneOf": [
+        {
+          "description": "Use the system border style",
+          "type": "string",
+          "enum": [
+            "System"
+          ]
+        },
+        {
+          "description": "Use the Windows 11-style rounded borders",
+          "type": "string",
+          "enum": [
+            "Rounded"
+          ]
+        },
+        {
+          "description": "Use the Windows 10-style square borders",
+          "type": "string",
+          "enum": [
+            "Square"
+          ]
+        }
+      ]
+    },
+    "border_width": {
+      "description": "Width of the window border (default: 8)",
+      "type": "integer",
+      "format": "int32"
+    },
+    "border_z_order": {
+      "description": "Active window border z-order (default: System)",
+      "type": "string",
+      "enum": [
+        "Top",
+        "NoTopMost",
+        "Bottom",
+        "TopMost"
+      ]
+    },
+    "cross_monitor_move_behaviour": {
+      "description": "Determine what happens when a window is moved across a monitor boundary (default: Swap)",
+      "oneOf": [
+        {
+          "description": "Swap the window container with the window container at the edge of the adjacent monitor",
+          "type": "string",
+          "enum": [
+            "Swap"
+          ]
+        },
+        {
+          "description": "Insert the window container into the focused workspace on the adjacent monitor",
+          "type": "string",
+          "enum": [
+            "Insert"
+          ]
+        },
+        {
+          "description": "Do nothing if trying to move a window container in the direction of an adjacent monitor",
+          "type": "string",
+          "enum": [
+            "NoOp"
+          ]
+        }
+      ]
+    },
+    "default_container_padding": {
+      "description": "Global default container padding (default: 10)",
+      "type": "integer",
+      "format": "int32"
+    },
+    "default_workspace_padding": {
+      "description": "Global default workspace padding (default: 10)",
+      "type": "integer",
+      "format": "int32"
+    },
+    "display_index_preferences": {
+      "description": "Set display index preferences",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "float_rules": {
+      "description": "Individual window floating rules",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Exe",
+                  "Class",
+                  "Title",
+                  "Path"
+                ]
+              },
+              "matching_strategy": {
+                "type": "string",
+                "enum": [
+                  "Legacy",
+                  "Equals",
+                  "StartsWith",
+                  "EndsWith",
+                  "Contains",
+                  "Regex",
+                  "DoesNotEndWith",
+                  "DoesNotStartWith",
+                  "DoesNotEqual",
+                  "DoesNotContain"
+                ]
+              }
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "Exe",
+                    "Class",
+                    "Title",
+                    "Path"
+                  ]
+                },
+                "matching_strategy": {
+                  "type": "string",
+                  "enum": [
+                    "Legacy",
+                    "Equals",
+                    "StartsWith",
+                    "EndsWith",
+                    "Contains",
+                    "Regex",
+                    "DoesNotEndWith",
+                    "DoesNotStartWith",
+                    "DoesNotEqual",
+                    "DoesNotContain"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "focus_follows_mouse": {
+      "description": "Determine focus follows mouse implementation (default: None)",
+      "oneOf": [
+        {
+          "description": "A custom FFM implementation (slightly more CPU-intensive)",
+          "type": "string",
+          "enum": [
+            "Komorebi"
+          ]
+        },
+        {
+          "description": "The native (legacy) Windows FFM implementation",
+          "type": "string",
+          "enum": [
+            "Windows"
+          ]
+        }
+      ]
+    },
+    "global_work_area_offset": {
+      "description": "Global work area (space used for tiling) offset (default: None)",
+      "type": "object",
+      "required": [
+        "bottom",
+        "left",
+        "right",
+        "top"
+      ],
+      "properties": {
+        "bottom": {
+          "description": "The bottom point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        },
+        "left": {
+          "description": "The left point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        },
+        "right": {
+          "description": "The right point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        },
+        "top": {
+          "description": "The top point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "invisible_borders": {
+      "description": "DEPRECATED from v0.1.22: no longer required",
+      "type": "object",
+      "required": [
+        "bottom",
+        "left",
+        "right",
+        "top"
+      ],
+      "properties": {
+        "bottom": {
+          "description": "The bottom point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        },
+        "left": {
+          "description": "The left point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        },
+        "right": {
+          "description": "The right point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        },
+        "top": {
+          "description": "The top point in a Win32 Rect",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "layered_applications": {
+      "description": "Identify applications that have the WS_EX_LAYERED extended window style",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Exe",
+                  "Class",
+                  "Title",
+                  "Path"
+                ]
+              },
+              "matching_strategy": {
+                "type": "string",
+                "enum": [
+                  "Legacy",
+                  "Equals",
+                  "StartsWith",
+                  "EndsWith",
+                  "Contains",
+                  "Regex",
+                  "DoesNotEndWith",
+                  "DoesNotStartWith",
+                  "DoesNotEqual",
+                  "DoesNotContain"
+                ]
+              }
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "Exe",
+                    "Class",
+                    "Title",
+                    "Path"
+                  ]
+                },
+                "matching_strategy": {
+                  "type": "string",
+                  "enum": [
+                    "Legacy",
+                    "Equals",
+                    "StartsWith",
+                    "EndsWith",
+                    "Contains",
+                    "Regex",
+                    "DoesNotEndWith",
+                    "DoesNotStartWith",
+                    "DoesNotEqual",
+                    "DoesNotContain"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "manage_rules": {
+      "description": "Individual window force-manage rules",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Exe",
+                  "Class",
+                  "Title",
+                  "Path"
+                ]
+              },
+              "matching_strategy": {
+                "type": "string",
+                "enum": [
+                  "Legacy",
+                  "Equals",
+                  "StartsWith",
+                  "EndsWith",
+                  "Contains",
+                  "Regex",
+                  "DoesNotEndWith",
+                  "DoesNotStartWith",
+                  "DoesNotEqual",
+                  "DoesNotContain"
+                ]
+              }
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "Exe",
+                    "Class",
+                    "Title",
+                    "Path"
+                  ]
+                },
+                "matching_strategy": {
+                  "type": "string",
+                  "enum": [
+                    "Legacy",
+                    "Equals",
+                    "StartsWith",
+                    "EndsWith",
+                    "Contains",
+                    "Regex",
+                    "DoesNotEndWith",
+                    "DoesNotStartWith",
+                    "DoesNotEqual",
+                    "DoesNotContain"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "monitor_index_preferences": {
+      "description": "Set monitor index preferences",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "bottom",
+          "left",
+          "right",
+          "top"
+        ],
+        "properties": {
+          "bottom": {
+            "description": "The bottom point in a Win32 Rect",
+            "type": "integer",
+            "format": "int32"
+          },
+          "left": {
+            "description": "The left point in a Win32 Rect",
+            "type": "integer",
+            "format": "int32"
+          },
+          "right": {
+            "description": "The right point in a Win32 Rect",
+            "type": "integer",
+            "format": "int32"
+          },
+          "top": {
+            "description": "The top point in a Win32 Rect",
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "monitors": {
+      "description": "Monitor and workspace configurations",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "workspaces"
+        ],
+        "properties": {
+          "window_based_work_area_offset": {
+            "description": "Window based work area offset (default: None)",
+            "type": "object",
+            "required": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ],
+            "properties": {
+              "bottom": {
+                "description": "The bottom point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              },
+              "left": {
+                "description": "The left point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              },
+              "right": {
+                "description": "The right point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              },
+              "top": {
+                "description": "The top point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          "window_based_work_area_offset_limit": {
+            "description": "Open window limit after which the window based work area offset will no longer be applied (default: 1)",
+            "type": "integer",
+            "format": "int"
+          },
+          "work_area_offset": {
+            "description": "Monitor-specific work area offset (default: None)",
+            "type": "object",
+            "required": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ],
+            "properties": {
+              "bottom": {
+                "description": "The bottom point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              },
+              "left": {
+                "description": "The left point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              },
+              "right": {
+                "description": "The right point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              },
+              "top": {
+                "description": "The top point in a Win32 Rect",
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          "workspaces": {
+            "description": "Workspace configurations",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "container_padding": {
+                  "description": "Container padding (default: global)",
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "custom_layout": {
+                  "description": "Custom Layout (default: None)",
+                  "type": "string"
+                },
+                "custom_layout_rules": {
+                  "description": "Layout rules (default: None)",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "initial_workspace_rules": {
+                  "description": "Initial workspace application rules",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "kind"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "Exe",
+                          "Class",
+                          "Title",
+                          "Path"
+                        ]
+                      },
+                      "matching_strategy": {
+                        "type": "string",
+                        "enum": [
+                          "Legacy",
+                          "Equals",
+                          "StartsWith",
+                          "EndsWith",
+                          "Contains",
+                          "Regex",
+                          "DoesNotEndWith",
+                          "DoesNotStartWith",
+                          "DoesNotEqual",
+                          "DoesNotContain"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "layout": {
+                  "description": "Layout (default: BSP)",
+                  "type": "string",
+                  "enum": [
+                    "BSP",
+                    "Columns",
+                    "Rows",
+                    "VerticalStack",
+                    "HorizontalStack",
+                    "UltrawideVerticalStack",
+                    "Grid",
+                    "RightMainVerticalStack"
+                  ]
+                },
+                "layout_rules": {
+                  "description": "Layout rules (default: None)",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "enum": [
+                      "BSP",
+                      "Columns",
+                      "Rows",
+                      "VerticalStack",
+                      "HorizontalStack",
+                      "UltrawideVerticalStack",
+                      "Grid",
+                      "RightMainVerticalStack"
+                    ]
+                  }
+                },
+                "name": {
+                  "description": "Name",
+                  "type": "string"
+                },
+                "workspace_padding": {
+                  "description": "Container padding (default: global)",
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "workspace_rules": {
+                  "description": "Permanent workspace application rules",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "kind"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "Exe",
+                          "Class",
+                          "Title",
+                          "Path"
+                        ]
+                      },
+                      "matching_strategy": {
+                        "type": "string",
+                        "enum": [
+                          "Legacy",
+                          "Equals",
+                          "StartsWith",
+                          "EndsWith",
+                          "Contains",
+                          "Regex",
+                          "DoesNotEndWith",
+                          "DoesNotStartWith",
+                          "DoesNotEqual",
+                          "DoesNotContain"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mouse_follows_focus": {
+      "description": "Enable or disable mouse follows focus (default: true)",
+      "type": "boolean"
+    },
+    "object_name_change_applications": {
+      "description": "Identify applications that send EVENT_OBJECT_NAMECHANGE on launch (very rare)",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Exe",
+                  "Class",
+                  "Title",
+                  "Path"
+                ]
+              },
+              "matching_strategy": {
+                "type": "string",
+                "enum": [
+                  "Legacy",
+                  "Equals",
+                  "StartsWith",
+                  "EndsWith",
+                  "Contains",
+                  "Regex",
+                  "DoesNotEndWith",
+                  "DoesNotStartWith",
+                  "DoesNotEqual",
+                  "DoesNotContain"
+                ]
+              }
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "Exe",
+                    "Class",
+                    "Title",
+                    "Path"
+                  ]
+                },
+                "matching_strategy": {
+                  "type": "string",
+                  "enum": [
+                    "Legacy",
+                    "Equals",
+                    "StartsWith",
+                    "EndsWith",
+                    "Contains",
+                    "Regex",
+                    "DoesNotEndWith",
+                    "DoesNotStartWith",
+                    "DoesNotEqual",
+                    "DoesNotContain"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "resize_delta": {
+      "description": "Delta to resize windows by (default 50)",
+      "type": "integer",
+      "format": "int32"
+    },
+    "stackbar": {
+      "description": "Stackbar configuration options",
+      "type": "object",
+      "properties": {
+        "height": {
+          "description": "Stackbar height",
+          "type": "integer",
+          "format": "int32"
+        },
+        "label": {
+          "description": "Stackbar height",
+          "type": "string",
+          "enum": [
+            "Process",
+            "Title"
+          ]
+        },
+        "mode": {
+          "description": "Stackbar mode",
+          "type": "string",
+          "enum": [
+            "Always",
+            "Never",
+            "OnStack"
+          ]
+        },
+        "tabs": {
+          "description": "Stackbar tab configuration options",
+          "type": "object",
+          "properties": {
+            "background": {
+              "description": "Tab background colour",
+              "anyOf": [
+                {
+                  "description": "Colour represented as RGB",
+                  "type": "object",
+                  "required": [
+                    "b",
+                    "g",
+                    "r"
+                  ],
+                  "properties": {
+                    "b": {
+                      "description": "Blue",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    },
+                    "g": {
+                      "description": "Green",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    },
+                    "r": {
+                      "description": "Red",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    }
+                  }
+                },
+                {
+                  "description": "Colour represented as Hex",
+                  "type": "string"
+                }
+              ]
+            },
+            "focused_text": {
+              "description": "Focused tab text colour",
+              "anyOf": [
+                {
+                  "description": "Colour represented as RGB",
+                  "type": "object",
+                  "required": [
+                    "b",
+                    "g",
+                    "r"
+                  ],
+                  "properties": {
+                    "b": {
+                      "description": "Blue",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    },
+                    "g": {
+                      "description": "Green",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    },
+                    "r": {
+                      "description": "Red",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    }
+                  }
+                },
+                {
+                  "description": "Colour represented as Hex",
+                  "type": "string"
+                }
+              ]
+            },
+            "unfocused_text": {
+              "description": "Unfocused tab text colour",
+              "anyOf": [
+                {
+                  "description": "Colour represented as RGB",
+                  "type": "object",
+                  "required": [
+                    "b",
+                    "g",
+                    "r"
+                  ],
+                  "properties": {
+                    "b": {
+                      "description": "Blue",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    },
+                    "g": {
+                      "description": "Green",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    },
+                    "r": {
+                      "description": "Red",
+                      "type": "integer",
+                      "format": "uint32",
+                      "minimum": 0.0
+                    }
+                  }
+                },
+                {
+                  "description": "Colour represented as Hex",
+                  "type": "string"
+                }
+              ]
+            },
+            "width": {
+              "description": "Width of a stackbar tab",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      }
+    },
+    "transparency": {
+      "description": "Add transparency to unfocused windows (default: false)",
+      "type": "boolean"
+    },
+    "transparency_alpha": {
+      "description": "Alpha value for unfocused window transparency [[0-255]] (default: 200)",
+      "type": "integer",
+      "format": "uint8",
+      "minimum": 0.0
+    },
+    "tray_and_multi_window_applications": {
+      "description": "Identify tray and multi-window applications",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Exe",
+                  "Class",
+                  "Title",
+                  "Path"
+                ]
+              },
+              "matching_strategy": {
+                "type": "string",
+                "enum": [
+                  "Legacy",
+                  "Equals",
+                  "StartsWith",
+                  "EndsWith",
+                  "Contains",
+                  "Regex",
+                  "DoesNotEndWith",
+                  "DoesNotStartWith",
+                  "DoesNotEqual",
+                  "DoesNotContain"
+                ]
+              }
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "Exe",
+                    "Class",
+                    "Title",
+                    "Path"
+                  ]
+                },
+                "matching_strategy": {
+                  "type": "string",
+                  "enum": [
+                    "Legacy",
+                    "Equals",
+                    "StartsWith",
+                    "EndsWith",
+                    "Contains",
+                    "Regex",
+                    "DoesNotEndWith",
+                    "DoesNotStartWith",
+                    "DoesNotEqual",
+                    "DoesNotContain"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "unmanaged_window_operation_behaviour": {
+      "description": "Determine what happens when commands are sent while an unmanaged window is in the foreground (default: Op)",
+      "oneOf": [
+        {
+          "description": "Process komorebic commands on temporarily unmanaged/floated windows",
+          "type": "string",
+          "enum": [
+            "Op"
+          ]
+        },
+        {
+          "description": "Ignore komorebic commands on temporarily unmanaged/floated windows",
+          "type": "string",
+          "enum": [
+            "NoOp"
+          ]
+        }
+      ]
+    },
+    "window_container_behaviour": {
+      "description": "Determine what happens when a new window is opened (default: Create)",
+      "oneOf": [
+        {
+          "description": "Create a new container for each new window",
+          "type": "string",
+          "enum": [
+            "Create"
+          ]
+        },
+        {
+          "description": "Append new windows to the focused window container",
+          "type": "string",
+          "enum": [
+            "Append"
+          ]
+        }
+      ]
+    },
+    "window_hiding_behaviour": {
+      "description": "Which Windows signal to use when hiding windows (default: minimize)",
+      "oneOf": [
+        {
+          "description": "Use the SW_HIDE flag to hide windows when switching workspaces (has issues with Electron apps)",
+          "type": "string",
+          "enum": [
+            "Hide"
+          ]
+        },
+        {
+          "description": "Use the SW_MINIMIZE flag to hide windows when switching workspaces (has issues with frequent workspace switching)",
+          "type": "string",
+          "enum": [
+            "Minimize"
+          ]
+        },
+        {
+          "description": "Use the undocumented SetCloak Win32 function to hide windows when switching workspaces (has foregrounding issues)",
+          "type": "string",
+          "enum": [
+            "Cloak"
+          ]
+        }
+      ]
+    }
+  }
+}

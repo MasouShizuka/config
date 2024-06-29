@@ -1,0 +1,53 @@
+[package]
+name = "komorebi"
+version = "0.1.28-dev.0"
+authors = ["Jade Iqbal <jadeiqbal@fastmail.com>"]
+description = "A tiling window manager for Windows"
+categories = ["tiling-window-manager", "windows"]
+repository = "https://github.com/LGUG2Z/komorebi"
+license = "MIT"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+komorebi-core = { path = "../komorebi-core" }
+
+bitflags = { version = "2", features = ["serde"] }
+clap = { version = "4", features = ["derive"] }
+color-eyre = { workspace = true }
+crossbeam-channel = "0.5"
+crossbeam-utils = "0.8"
+ctrlc = { version = "3", features = ["termination"] }
+dirs = { workspace = true }
+getset = "0.1"
+hex_color = { version = "3", features = ["serde"] }
+hotwatch = "0.5"
+lazy_static = "1"
+miow = "0.6"
+nanoid = "0.4"
+net2 = "0.2"
+os_info = "3.8"
+parking_lot = "0.12"
+paste = "1"
+regex = "1"
+schemars = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = { workspace = true }
+strum = { version = "0.26", features = ["derive"] }
+sysinfo = { workspace = true }
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uds_windows = "1"
+which = "6"
+widestring = "1"
+win32-display-data = { workspace = true }
+windows = { workspace = true }
+windows-implement = { workspace = true }
+windows-interface = { workspace = true }
+winput = "0.2"
+winreg = "0.52"
+
+[features]
+deadlock_detection = ["parking_lot/deadlock_detection"]

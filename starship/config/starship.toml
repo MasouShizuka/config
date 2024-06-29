@@ -1,0 +1,102 @@
+# Configure the format of the prompt
+format = '$os $all$fill$battery$time$line_break$character'
+
+# Right prompt which renders on the same line as the input
+right_format = ''
+
+# Timeout for starship to scan files (in milliseconds)
+scan_timeout = 30
+
+# Timeout for commands executed by starship (in milliseconds)
+command_timeout = 5000
+
+# Inserts blank line between shell prompts
+add_newline = false
+
+# Sets which color palette from palettes to use.
+# palette = ''
+
+# Collection of color palettes that assign colors to user-defined names. Note that color palettes cannot reference their own color definitions
+# palettes = {}
+
+
+
+[battery]
+full_symbol = ' '
+charging_symbol = ' '
+discharging_symbol = '  '
+unknown_symbol = ' '
+empty_symbol = ' '
+
+[[battery.display]]
+threshold = 10
+style = 'bold #f44747'
+discharging_symbol = ' '
+
+[[battery.display]]
+threshold = 30
+style = 'bold #e06c75'
+discharging_symbol = ' '
+
+[[battery.display]]
+threshold = 70
+style = 'bold #d19a66'
+discharging_symbol = ' '
+
+[[battery.display]]
+threshold = 90
+style = 'bold #e5c07b'
+discharging_symbol = ' '
+
+[[battery.display]]
+threshold = 100
+style = 'bold #98c379'
+discharging_symbol = ' '
+
+
+
+[character]
+success_symbol = '[>>](bold #98c379)'
+error_symbol = '[xx](bold #e06c75)'
+vimcmd_symbol = '[<<](bold #98c379)'
+vimcmd_replace_one_symbol = '[<<](bold #c678dd)'
+vimcmd_replace_symbol = '[<<](bold #c678dd)'
+vimcmd_visual_symbol = '[<<](bold #e5c07b)'
+
+
+
+[conda]
+symbol = ' '
+
+
+
+[directory]
+truncation_length = 0
+read_only = ' 󰌾'
+use_os_path_sep = false
+
+
+
+[fill]
+symbol = ' '
+
+
+
+[os]
+style = '#61afef'
+disabled = false
+
+[os.symbols]
+Arch = " "
+Windows = " "
+
+
+
+[time]
+style = 'bold #c678dd'
+disabled = false
+
+
+
+[username]
+disabled = true
