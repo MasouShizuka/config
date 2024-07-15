@@ -7,31 +7,25 @@ return {
     -- 最好选择安装 mingw-w64-ucrt-x86_64-curl，并记得将环境变量中 msys64/ucrt64/bin 放在 msys64/usr/bin 之上
     {
         "kawre/leetcode.nvim",
-        build = ":TSUpdate html",
+        build = {
+            ":TSUpdate html",
+        },
         cmd = {
             "Leet",
         },
         config = function(_, opts)
             require("leetcode").setup(opts)
 
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>L"] = {
-                        name = "+leet",
-                    },
-                    ["<leader>Lp"] = {
-                        name = "+problem",
-                    },
-                    ["<leader>LS"] = {
-                        name = "+session",
-                    },
-                    ["<leader>Ld"] = {
-                        name = "+desc",
-                    },
-                    ["<leader>LO"] = {
-                        name = "+cookie",
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    {
+                        mode = "n",
+                        { "<leader>L",  group = "leet" },
+                        { "<leader>Lp", group = "problem" },
+                        { "<leader>LS", group = "session" },
+                        { "<leader>Ld", group = "desc" },
+                        { "<leader>LO", group = "cookie" },
                     },
                 })
             end

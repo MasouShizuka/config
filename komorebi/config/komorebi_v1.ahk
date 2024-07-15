@@ -96,6 +96,38 @@ Return
     RunWait, komorebic.exe stop, , Hide
 Return
 
+!left::
+    RunWait, komorebic.exe focus left, , Hide
+Return
+
+!right::
+    RunWait, komorebic.exe focus right, , Hide
+Return
+
+!up::
+    RunWait, komorebic.exe focus up, , Hide
+Return
+
+!down::
+    RunWait, komorebic.exe focus down, , Hide
+Return
+
+!+left::
+    RunWait, komorebic.exe move left, , Hide
+Return
+
+!+right::
+    RunWait, komorebic.exe move right, , Hide
+Return
+
+!+up::
+    RunWait, komorebic.exe move up, , Hide
+Return
+
+!+down::
+    RunWait, komorebic.exe move down, , Hide
+Return
+
 !j::
     RunWait, komorebic.exe cycle-focus next, , Hide
 Return

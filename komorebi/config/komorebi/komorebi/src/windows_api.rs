@@ -18,6 +18,7 @@ use windows::Win32::Foundation::HMODULE;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::Foundation::LPARAM;
 use windows::Win32::Foundation::POINT;
+use windows::Win32::Foundation::RECT;
 use windows::Win32::Foundation::WPARAM;
 use windows::Win32::Graphics::Dwm::DwmGetWindowAttribute;
 use windows::Win32::Graphics::Dwm::DwmSetWindowAttribute;
@@ -34,6 +35,7 @@ use windows::Win32::Graphics::Dwm::DWM_CLOAKED_SHELL;
 use windows::Win32::Graphics::Gdi::CreateSolidBrush;
 use windows::Win32::Graphics::Gdi::EnumDisplayMonitors;
 use windows::Win32::Graphics::Gdi::GetMonitorInfoW;
+use windows::Win32::Graphics::Gdi::InvalidateRect;
 use windows::Win32::Graphics::Gdi::MonitorFromPoint;
 use windows::Win32::Graphics::Gdi::MonitorFromWindow;
 use windows::Win32::Graphics::Gdi::Rectangle;
@@ -85,6 +87,7 @@ use windows::Win32::UI::WindowsAndMessaging::IsIconic;
 use windows::Win32::UI::WindowsAndMessaging::IsWindow;
 use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
 use windows::Win32::UI::WindowsAndMessaging::IsZoomed;
+use windows::Win32::UI::WindowsAndMessaging::MoveWindow;
 use windows::Win32::UI::WindowsAndMessaging::PostMessageW;
 use windows::Win32::UI::WindowsAndMessaging::RealGetWindowClassW;
 use windows::Win32::UI::WindowsAndMessaging::RegisterClassW;
@@ -237,11 +240,17 @@ impl WindowsApi {
     pub fn load_monitor_information(monitors: &mut Ring<Monitor>) -> Result<()> {
         'read: for display in win32_display_data::connected_displays_all().flatten() {
             let path = display.device_path.clone();
-            let mut split: Vec<_> = path.split('#').collect();
-            split.remove(0);
-            split.remove(split.len() - 1);
-            let device = split[0].to_string();
-            let device_id = split.join("-");
+
+            let (device, device_id) = if path.is_empty() {
+                (String::from("UNKNOWN"), String::from("UNKNOWN"))
+            } else {
+                let mut split: Vec<_> = path.split('#').collect();
+                split.remove(0);
+                split.remove(split.len() - 1);
+                let device = split[0].to_string();
+                let device_id = split.join("-");
+                (device, device_id)
+            };
 
             let name = display.device_name.trim_start_matches(r"\\.\").to_string();
             let name = name.split('\\').collect::<Vec<_>>()[0].to_string();
@@ -279,8 +288,7 @@ impl WindowsApi {
             if monitors.elements().is_empty() {
                 monitors.elements_mut().push_back(m);
             } else if let Some(preference) = index_preference {
-                let current_len = monitors.elements().len();
-                while *preference > current_len {
+                while *preference > monitors.elements().len() {
                     monitors.elements_mut().reserve(1);
                 }
 
@@ -429,6 +437,17 @@ impl WindowsApi {
             )
         }
         .process()
+    }
+
+    pub fn move_window(hwnd: HWND, layout: &Rect, repaint: bool) -> Result<()> {
+        let shadow_rect = Self::shadow_rect(hwnd).unwrap_or_default();
+        let rect = Rect {
+            left: layout.left + shadow_rect.left,
+            top: layout.top + shadow_rect.top,
+            right: layout.right + shadow_rect.right,
+            bottom: layout.bottom + shadow_rect.bottom,
+        };
+        unsafe { MoveWindow(hwnd, rect.left, rect.top, rect.right, rect.bottom, repaint) }.process()
     }
 
     pub fn show_window(hwnd: HWND, command: SHOW_WINDOW_CMD) {
@@ -798,11 +817,17 @@ impl WindowsApi {
         for display in win32_display_data::connected_displays_all().flatten() {
             if display.hmonitor == hmonitor {
                 let path = display.device_path;
-                let mut split: Vec<_> = path.split('#').collect();
-                split.remove(0);
-                split.remove(split.len() - 1);
-                let device = split[0].to_string();
-                let device_id = split.join("-");
+
+                let (device, device_id) = if path.is_empty() {
+                    (String::from("UNKNOWN"), String::from("UNKNOWN"))
+                } else {
+                    let mut split: Vec<_> = path.split('#').collect();
+                    split.remove(0);
+                    split.remove(split.len() - 1);
+                    let device = split[0].to_string();
+                    let device_id = split.join("-");
+                    (device, device_id)
+                };
 
                 let name = display.device_name.trim_start_matches(r"\\.\").to_string();
                 let name = name.split('\\').collect::<Vec<_>>()[0].to_string();
@@ -1024,6 +1049,11 @@ impl WindowsApi {
             )
         }
         .process()
+    }
+
+    pub fn invalidate_rect(hwnd: HWND, rect: Option<&Rect>, erase: bool) -> bool {
+        let rect = rect.map(|rect| &rect.rect() as *const RECT);
+        unsafe { InvalidateRect(hwnd, rect, erase) }.as_bool()
     }
 
     pub fn alt_is_pressed() -> bool {

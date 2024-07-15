@@ -90,7 +90,6 @@ return {
                 sources = cmp.config.sources({
                     { name = "luasnip" },
                     { name = "nvim_lsp" },
-                    { name = "nvim_lsp_signature_help" },
                     { name = "buffer" },
                     { name = "path" },
                     { name = "dotenv" },
@@ -134,7 +133,6 @@ return {
                 sources = cmp.config.sources({
                     { name = "luasnip" },
                     { name = "nvim_lsp" },
-                    { name = "nvim_lsp_signature_help" },
                     {
                         name = "latex_symbols",
                         option = {
@@ -161,7 +159,6 @@ return {
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-nvim-lsp",
-            "hrsh7th/cmp-nvim-lsp-signature-help",
             "hrsh7th/cmp-path",
             "kdheepak/cmp-latex-symbols",
 

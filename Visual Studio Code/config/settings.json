@@ -229,7 +229,7 @@
             "MdTableEditor.sortTextAsc.ignore",
             "MdTableEditor.sortTextDesc.ignore"
         ],
-        "toolbar": [ ]
+        "toolbar": []
     },
     "mdtableeditor.isHighlighterEnabled": false,
     "notebook.cellToolbarLocation": {
@@ -256,7 +256,7 @@
     "shellcheck.exclude": [
         "2148"
     ],
-    "sshfs.configs": [ ],
+    "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.fontSize": 14,
     "terminal.integrated.persistentSessionReviveProcess": "never",
@@ -413,6 +413,7 @@
         "*.md": "default",
         "{git,gitlens}:/**/*.{md,csv}": "default"
     },
+    "workbench.experimental.enableNewProfilesUI": true,
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,
     "workbench.startupEditor": "none",

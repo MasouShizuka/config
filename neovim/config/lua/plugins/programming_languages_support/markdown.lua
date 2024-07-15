@@ -80,25 +80,6 @@ return {
                 cmp = false,
             },
             silent = true,
-            to_do = {
-                symbols = { " ", "-", "X" },
-                update_parents = true,
-                not_started = " ",
-                in_progress = "-",
-                complete = "X",
-            },
-            tables = {
-                trim_whitespace = true,
-                format_on_move = true,
-                auto_extend_rows = false,
-                auto_extend_cols = false,
-                style = {
-                    cell_padding = 1,
-                    separator_padding = 1,
-                    outer_pipes = true,
-                    mimic_alignment = true,
-                },
-            },
         },
     },
 
@@ -116,23 +97,56 @@ return {
             "User MarkdownFile",
         },
         name = "render-markdown", -- Only needed if you have another plugin named markdown.nvim
-        opts = {
-            -- Characters that will replace the # at the start of headings
-            headings = {
-                icons.misc.format_header_1,
-                icons.misc.format_header_2,
-                icons.misc.format_header_3,
-                icons.misc.format_header_4,
-                icons.misc.format_header_5,
-                icons.misc.format_header_6,
-            },
-            -- Define the highlight groups to use when rendering various components
-            highlights = {
-                heading = {
-                    -- Background of heading line
-                    backgrounds = { "DiffAdd" },
+        opts = function()
+            -- https://github.com/OXY2DEV/markview.nvim
+            vim.api.nvim_set_hl(0, "MarkdownHeading1", { bg = "#453244", fg = "#f38ba8" })
+            vim.api.nvim_set_hl(0, "MarkdownHeading2", { bg = "#46393e", fg = "#fab387" })
+            vim.api.nvim_set_hl(0, "MarkdownHeading3", { bg = "#464245", fg = "#f9e2af" })
+            vim.api.nvim_set_hl(0, "MarkdownHeading4", { bg = "#374243", fg = "#a6e3a1" })
+            vim.api.nvim_set_hl(0, "MarkdownHeading5", { bg = "#2e3d51", fg = "#74c7ec" })
+            vim.api.nvim_set_hl(0, "MarkdownHeading6", { bg = "#393b54", fg = "#b4befe" })
+
+            return {
+                latex = {
+                    -- Whether LaTeX should be rendered, mainly used for health check
+                    enabled = false,
                 },
-            },
-        },
+                heading = {
+                    -- Replaces '#+' of 'atx_h._marker'
+                    -- The number of '#' in the heading determines the 'level'
+                    -- The 'level' is used to index into the array using a cycle
+                    -- The result is left padded with spaces to hide any additional '#'
+                    icons = {
+                        icons.misc.format_header_1,
+                        icons.misc.format_header_2,
+                        icons.misc.format_header_3,
+                        icons.misc.format_header_4,
+                        icons.misc.format_header_5,
+                        icons.misc.format_header_6,
+                    },
+                    -- The 'level' is used to index into the array using a clamp
+                    -- Highlight for the heading icon and extends through the entire line
+                    backgrounds = {
+                        "MarkdownHeading1",
+                        "MarkdownHeading2",
+                        "MarkdownHeading3",
+                        "MarkdownHeading4",
+                        "MarkdownHeading5",
+                        "MarkdownHeading6",
+                    },
+                },
+                pipe_table = {
+                    -- Characters used to replace table boarder
+                    -- Correspond to top(3), delimiter(3), bottom(3), vertical, & horizontal
+                    -- stylua: ignore
+                    border = {
+                        "╭", "┬", "╮",
+                        "├", "┼", "┤",
+                        "╰", "┴", "╯",
+                        "│", "─",
+                    },
+                },
+            }
+        end,
     },
 }

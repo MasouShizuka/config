@@ -167,28 +167,6 @@ return {
         "LunarVim/bigfile.nvim",
         enabled = not environment.is_vscode,
         init = function()
-            -- bigfile 自动激活
-            vim.api.nvim_create_autocmd("BufReadPre", {
-                callback = function(args)
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
-                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
-                        return
-                    end
-
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
-                        return
-                    end
-
-                    if utils.is_bigfile(args.buf) then
-                        require("bigfile")
-                        vim.api.nvim_del_augroup_by_name("BigFile")
-                    end
-                end,
-                desc = "Big file event",
-                group = vim.api.nvim_create_augroup("BigFile", { clear = true }),
-            })
-
             local bigfile_features = {
                 "syntax",
                 "matchparen",
@@ -223,58 +201,87 @@ return {
             }
             vim.list_extend(longfile_features, bigfile_features)
 
-            vim.api.nvim_create_autocmd("BufReadPost", {
-                callback = function(args)
-                    local buf = args.buf
+            local function disable_features(features, buf)
+                buf = buf or vim.api.nvim_get_current_buf()
 
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                local matched_features = vim.tbl_map(function(feature)
+                    return require("bigfile.features").get_feature(feature)
+                end, features)
+
+                local matched_deferred_features = {}
+                for _, feature in ipairs(matched_features) do
+                    feature.disable(buf)
+                    if feature.opts.defer then
+                        matched_deferred_features[#matched_deferred_features + 1] = feature
+                    end
+                end
+
+                vim.api.nvim_create_autocmd("BufReadPost", {
+                    buffer = buf,
+                    callback = function()
+                        for _, feature in ipairs(matched_deferred_features) do
+                            feature.disable(buf)
+                        end
+                    end,
+                })
+            end
+
+            -- bigfile 自动激活
+            vim.api.nvim_create_autocmd("BufReadPre", {
+                callback = function(args)
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
                     if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                         return
                     end
 
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if vim.tbl_contains(filetype.skip_filetype_list, ft) then
                         return
                     end
 
-                    if vim.b[buf].bigfile_detected and vim.b[buf].bigfile_detected == 1 then
+                    if utils.is_bigfile(args.buf) then
+                        vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
+
+                        vim.b[args.buf].bigfile_detected = 1
+                        disable_features(bigfile_features, args.buf)
+
+                        vim.api.nvim_del_augroup_by_name("BigFile")
+                    end
+                end,
+                desc = "Big file event",
+                group = vim.api.nvim_create_augroup("BigFile", { clear = true }),
+            })
+
+            vim.api.nvim_create_autocmd("BufReadPost", {
+                callback = function(args)
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                         return
                     end
 
-                    if vim.b[buf].longfile_detected then
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
                         return
                     end
 
-                    if not utils.is_longfile(buf) then
-                        vim.b[buf].longfile_detected = 0
+                    if vim.b[args.buf].bigfile_detected and vim.b[args.buf].bigfile_detected == 1 then
+                        return
+                    end
+
+                    if vim.b[args.buf].longfile_detected then
+                        return
+                    end
+
+                    if not utils.is_longfile(args.buf) then
+                        vim.b[args.buf].longfile_detected = 0
                         return
                     end
 
                     vim.notify("Long file detected!", vim.log.levels.WARN, { title = "bigfile" })
 
-                    vim.b[buf].bigfile_detected = 1
-                    vim.b[buf].longfile_detected = 1
-
-                    local matched_features = vim.tbl_map(function(feature)
-                        return require("bigfile.features").get_feature(feature)
-                    end, longfile_features)
-
-                    local matched_deferred_features = {}
-                    for _, feature in ipairs(matched_features) do
-                        feature.disable(buf)
-                        if feature.opts.defer then
-                            matched_deferred_features[#matched_deferred_features + 1] = feature
-                        end
-                    end
-
-                    vim.api.nvim_create_autocmd("BufReadPost", {
-                        buffer = buf,
-                        callback = function()
-                            for _, feature in ipairs(matched_deferred_features) do
-                                feature.disable(buf)
-                            end
-                        end,
-                    })
+                    vim.b[args.buf].bigfile_detected = 1
+                    vim.b[args.buf].longfile_detected = 1
+                    disable_features(longfile_features, args.buf)
                 end,
                 desc = "Long file event",
                 group = vim.api.nvim_create_augroup("LongFile", { clear = true }),
@@ -314,12 +321,6 @@ return {
             "FencAutoDetect",
             "FencView",
         },
-        init = function()
-            vim.api.nvim_create_user_command("FencAutoDetectWithoutEcho", function()
-                vim.api.nvim_command("FencAutoDetect")
-                vim.cmd.redraw()
-            end, { desc = "Toggle wrap" })
-        end,
         enabled = not environment.is_vscode,
     },
 

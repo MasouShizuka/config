@@ -1,6 +1,5 @@
 [manager]
 
-ratio       = [ 1, 4, 4 ]
 sort_by     = "natural"
 show_hidden = true
 
@@ -15,8 +14,8 @@ edit = [
     { run = 'code -w "$@"', block = true,  desc = "code (block)", for = "unix" },
 ]
 extract = [
-    { run = 'ouch decompress "%1"', desc = "Extract here", for = "windows" },
-    { run = 'ouch decompress "$1"', desc = "Extract here", for = "unix" },
+    { run = 'ouch d -y "%*"', desc = "Extract here with ouch", for = "windows" },
+    { run = 'ouch d -y "$@"', desc = "Extract here with ouch", for = "unix" },
 ]
 
 [open]
@@ -56,27 +55,27 @@ preloaders = [
     # { mime = "application/vnd.ms-opentype", run = "font" },
 ]
 previewers = [
-    { name = "*/",                                             run = "folder", sync = true },
+    { name = "*/",                                                           run = "folder", sync = true },
     # Code
-    { mime = "text/*",                                         run = "code" },
-    { mime = "*/{xml,javascript,x-wine-extension-ini}",        run = "code" },
-    { mime = "text/x-tex",                                        run = "code" },
+    { mime = "text/*",                                                       run = "bat" },
+    { mime = "*/{xml,javascript,x-wine-extension-ini}",                      run = "bat" },
+    { mime = "text/x-tex",                                                   run = "bat" },
     # JSON
-    { mime = "application/{json,x-ndjson}",                    run = "json" },
+    { mime = "application/{json,x-ndjson}",                                  run = "bat" },
     # Image
-    { mime = "image/{heic,jxl,svg+xml}",                       run = "magick" },
-    { mime = "image/*",                                        run = "image" },
+    { mime = "image/{heic,jxl,svg+xml}",                                     run = "magick" },
+    { mime = "image/*",                                                      run = "image" },
     # # Video
-    # { mime = "video/*",                                      run = "video" },
+    # { mime = "video/*",                                                    run = "video" },
     # # PDF
-    # { mime = "application/pdf",                              run = "pdf" },
+    # { mime = "application/pdf",                                            run = "pdf" },
     # Archive
-    { mime = "application/{,g}zip",                            run = "ouch" },
-    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", run = "ouch" },
-    { mime = "application/vnd.rar",                            run = "ouch" },
+    { mime = "application/{,g}zip",                                          run = "ouch" },
+    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar,iso9660-image}", run = "ouch" },
+    { mime = "application/vnd.rar",                                          run = "ouch" },
     # # Font
-    # { mime = "font/*",                                       run = "font" },
-    # { mime = "application/vnd.ms-opentype",                  run = "font" },
+    # { mime = "font/*",                                                     run = "font" },
+    # { mime = "application/vnd.ms-opentype",                                run = "font" },
     # Fallback
-    { name = "*",                                              run = "file" },
+    { name = "*",                                                            run = "file" },
 ]

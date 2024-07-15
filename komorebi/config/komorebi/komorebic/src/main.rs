@@ -99,6 +99,8 @@ lazy_static! {
     };
 }
 
+shadow_rs::shadow!(build);
+
 #[derive(thiserror::Error, Debug, miette::Diagnostic)]
 #[error("{message}")]
 #[diagnostic(code(komorebi::configuration), help("try fixing this syntax error"))]
@@ -630,6 +632,20 @@ struct NamedWorkspaceRule {
 }
 
 #[derive(Parser)]
+struct ClearWorkspaceRules {
+    /// Monitor index (zero-indexed)
+    monitor: usize,
+    /// Workspace index on the specified monitor (zero-indexed)
+    workspace: usize,
+}
+
+#[derive(Parser)]
+struct ClearNamedWorkspaceRules {
+    /// Name of a workspace
+    workspace: String,
+}
+
+#[derive(Parser)]
 struct ToggleFocusFollowsMouse {
     #[clap(value_enum, short, long, default_value = "windows")]
     implementation: FocusFollowsMouseImplementation,
@@ -696,6 +712,31 @@ struct BorderImplementation {
     /// Desired border implementation
     #[clap(value_enum)]
     style: komorebi_core::BorderImplementation,
+}
+
+#[derive(Parser)]
+struct Animation {
+    #[clap(value_enum)]
+    boolean_state: BooleanState,
+}
+
+#[derive(Parser)]
+struct AnimationDuration {
+    /// Desired animation durations in ms
+    duration: u64,
+}
+
+#[derive(Parser)]
+struct AnimationFps {
+    /// Desired animation frames per second
+    fps: u64,
+}
+
+#[derive(Parser)]
+struct AnimationStyle {
+    /// Desired ease function for animation
+    #[clap(value_enum, short, long, default_value = "linear")]
+    style: komorebi_core::AnimationStyle,
 }
 
 #[derive(Parser)]
@@ -815,7 +856,7 @@ struct EnableAutostart {
 }
 
 #[derive(Parser)]
-#[clap(author, about, version)]
+#[clap(author, about, version = build::CLAP_LONG_VERSION)]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -1155,6 +1196,14 @@ enum SubCommand {
     /// Add a rule to associate an application with a named workspace
     #[clap(arg_required_else_help = true)]
     NamedWorkspaceRule(NamedWorkspaceRule),
+    /// Remove all application association rules for a workspace by monitor and workspace index
+    #[clap(arg_required_else_help = true)]
+    ClearWorkspaceRules(ClearWorkspaceRules),
+    /// Remove all application association rules for a named workspace
+    #[clap(arg_required_else_help = true)]
+    ClearNamedWorkspaceRules(ClearNamedWorkspaceRules),
+    /// Remove all application association rules for all workspaces
+    ClearAllWorkspaceRules,
     /// Identify an application that sends EVENT_OBJECT_NAMECHANGE on launch
     #[clap(arg_required_else_help = true)]
     IdentifyObjectNameChangeApplication(IdentifyObjectNameChangeApplication),
@@ -1201,6 +1250,18 @@ enum SubCommand {
     /// Set the alpha value for unfocused window transparency
     #[clap(arg_required_else_help = true)]
     TransparencyAlpha(TransparencyAlpha),
+    /// Enable or disable the window move animation
+    #[clap(arg_required_else_help = true)]
+    Animation(Animation),
+    /// Set the duration for the window move animation in ms
+    #[clap(arg_required_else_help = true)]
+    AnimationDuration(AnimationDuration),
+    /// Set the frames per second for the window move animation
+    #[clap(arg_required_else_help = true)]
+    AnimationFps(AnimationFps),
+    /// Set the ease function for the window move animation
+    #[clap(arg_required_else_help = true)]
+    AnimationStyle(AnimationStyle),
     /// Enable or disable focus follows mouse for the operating system
     #[clap(arg_required_else_help = true)]
     FocusFollowsMouse(FocusFollowsMouse),
@@ -2061,6 +2122,17 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
                     .as_bytes()?,
             )?;
         }
+        SubCommand::ClearWorkspaceRules(arg) => {
+            send_message(
+                &SocketMessage::ClearWorkspaceRules(arg.monitor, arg.workspace).as_bytes()?,
+            )?;
+        }
+        SubCommand::ClearNamedWorkspaceRules(arg) => {
+            send_message(&SocketMessage::ClearNamedWorkspaceRules(arg.workspace).as_bytes()?)?;
+        }
+        SubCommand::ClearAllWorkspaceRules => {
+            send_message(&SocketMessage::ClearAllWorkspaceRules.as_bytes()?)?;
+        }
         SubCommand::Stack(arg) => {
             send_message(&SocketMessage::StackWindow(arg.operation_direction).as_bytes()?)?;
         }
@@ -2300,6 +2372,19 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
         SubCommand::TransparencyAlpha(arg) => {
             send_message(&SocketMessage::TransparencyAlpha(arg.alpha).as_bytes()?)?;
         }
+        SubCommand::Animation(arg) => {
+            send_message(&SocketMessage::Animation(arg.boolean_state.into()).as_bytes()?)?;
+        }
+        SubCommand::AnimationDuration(arg) => {
+            send_message(&SocketMessage::AnimationDuration(arg.duration).as_bytes()?)?;
+        }
+        SubCommand::AnimationFps(arg) => {
+            send_message(&SocketMessage::AnimationFps(arg.fps).as_bytes()?)?;
+        }
+        SubCommand::AnimationStyle(arg) => {
+            send_message(&SocketMessage::AnimationStyle(arg.style).as_bytes()?)?;
+        }
+
         SubCommand::ResizeDelta(arg) => {
             send_message(&SocketMessage::ResizeDelta(arg.pixels).as_bytes()?)?;
         }

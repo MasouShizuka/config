@@ -90,7 +90,7 @@ return {
             { "i?",  mode = { "x", "o" } },
             { "at",  mode = { "x", "o" } },
             { "it",  mode = { "x", "o" } },
-            -- nvim-treesitter-textobjects
+            -- 由 nvim-treesitter-textobjects 设置
             -- { "af",  mode = { "x", "o" } },
             -- { "if",  mode = { "x", "o" } },
             -- { "aa",  mode = { "x", "o" } },
@@ -366,21 +366,15 @@ return {
             "CBcatalog",
         },
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = { "n", "x" },
-                    ["<leader>gc"] = {
-                        name = "+comment box",
-                    },
-                    ["<leader>gcb"] = {
-                        name = "+boxes",
-                    },
-                    ["<leader>gct"] = {
-                        name = "+titled lines",
-                    },
-                    ["<leader>gcl"] = {
-                        name = "+lines",
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    {
+                        mode = { "n", "x" },
+                        { "<leader>gc",  group = "comment box" },
+                        { "<leader>gcb", group = "boxes" },
+                        { "<leader>gct", group = "titled lines" },
+                        { "<leader>gcl", group = "lines" },
                     },
                 })
             end
@@ -751,15 +745,15 @@ return {
                 -- You can use `im-select` or `fcitx5-remote -n` to get the IM's name
                 default_im_select       = default_im_select,
 
-                -- Can be binary's name or binary's full path,
-                -- e.g. 'im-select' or '/usr/local/bin/im-select'
+                -- Can be binary's name, binary's full path, or a table, e.g. 'im-select',
+                -- '/usr/local/bin/im-select' for binary without extra arguments,
+                -- or { "AIMSwitcher.exe", "--imm" } for binary need extra arguments to work.
                 -- For Windows/WSL, default: "im-select.exe"
                 -- For macOS, default: "im-select"
                 -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
                 default_command         = default_command,
 
                 -- Restore the default input method state when the following events are triggered
-                -- set_default_events      = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
                 set_default_events      = { "InsertLeave" },
 
                 -- Restore the previous used input method state when the following events

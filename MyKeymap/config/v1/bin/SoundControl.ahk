@@ -41,7 +41,7 @@ class CLayout
         Gui, Font, s12, 等线
         ; modified
         ; Gui Add, Text, x6 y296 w590 h20 +0x200, EDSF调节音量、AG上一首下一首、空格切换静音、C暂停/播放、V设置、X退出
-        Gui Add, Text, x6 y296 w590 h20 +0x200, WSAD调节音量、QE上一首下一首、空格切换静音、C暂停/播放、V设置、X退出
+        Gui Add, Text, x6 y296 w590 h20 +0x200, WSAD调节音量、QE上一首下一首、M切换静音、空格暂停/播放、V设置、X退出
 
         this.initSound()
     }
@@ -181,15 +181,15 @@ class Sound
         SoundSet, this.brightness
         this.setVolumeText(this.brightness)
     }
-	limitBrightness(b) {
-		if (b <= 0) {
-			return 0
-		}
-		if (b >= 100) {
-			return 100
-		}
-		return b
-	}
+    limitBrightness(b) {
+        if (b <= 0) {
+            return 0
+        }
+        if (b >= 100) {
+            return 100
+        }
+        return b
+    }
 }
 
 WM_KEYDOWN(wParam, lParam)
@@ -207,7 +207,7 @@ WM_KEYDOWN(wParam, lParam)
         case "v":
             run, ms-settings:apps-volume
             ExitApp
-        case "c": send {Media_Play_Pause}
+        case "Space": send {Media_Play_Pause}
         ; case "s": layout.decVolume(1)
         ; case "f": layout.incVolume(1)
         ; case "d": layout.decVolume(5)
@@ -218,7 +218,7 @@ WM_KEYDOWN(wParam, lParam)
         case "w": layout.incVolume(5)
         ; case "w": layout.prev()
         ; case "r": layout.next()
-        case "Space":
+        case "m":
             SoundSet, +1,, Mute
             SoundGet, val, MASTER, MUTE
             layout.mute(val)

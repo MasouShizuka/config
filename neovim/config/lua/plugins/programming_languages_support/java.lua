@@ -43,14 +43,10 @@ return {
 
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    local is_which_key_available, which_key = pcall(require, "which-key")
-                    if is_which_key_available then
-                        which_key.register({
-                            mode = "n",
-                            buffer = args.buf,
-                            ["<leader>ll"] = {
-                                name = "+java keymap",
-                            },
+                    local is_wk_available, wk = pcall(require, "which-key")
+                    if is_wk_available then
+                        wk.add({
+                            { "<leader>ll", buffer = args.buf, group = "java keymap", mode = "n" },
                         })
                     end
 

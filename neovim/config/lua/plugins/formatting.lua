@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
+local format = require("utils.format")
 
 return {
     {
@@ -73,5 +74,31 @@ return {
             "BufReadPost",
         },
         opts = {},
+    },
+
+    {
+        "stevearc/conform.nvim",
+        cmd = {
+            "ConformInfo",
+        },
+        enabled = not environment.is_vscode,
+        lazy = true,
+        opts = function()
+            local formatters = {}
+            for formatter, config in pairs(format.format) do
+                if config then
+                    formatters[formatter] = config
+                end
+            end
+
+            return {
+                -- Map of filetype to formatters
+                formatters_by_ft = format.formatters_by_ft,
+                -- Set the log level. Use `:ConformInfo` to see the location of the log file.
+                log_level = vim.log.levels.OFF,
+                -- Custom formatters and overrides for built-in formatters
+                formatters = formatters,
+            }
+        end,
     },
 }

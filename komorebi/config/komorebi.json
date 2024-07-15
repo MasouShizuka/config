@@ -91,5 +91,8 @@
   "display_index_preferences": {
     "0": "DELF137-5&22795f3&0&UID4613",
     "1": "DELD03B-5&22795f3&0&UID4612"
+  },
+  "animation": {
+    "enabled": true
   }
 }

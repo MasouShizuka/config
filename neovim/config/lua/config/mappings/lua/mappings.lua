@@ -47,7 +47,7 @@ function M.setup()
         end
 
         if count == 0 and not vim.fn.mode():find("V") then
-            vim.cmd.normal(string.format("g%s%s", key, postfix))
+            vim.cmd.normal({ string.format("g%s%s", key, postfix), bang = true })
         else
             vim.cmd.normal({ string.format("%s%s%s", prefix, key, postfix), bang = true })
         end

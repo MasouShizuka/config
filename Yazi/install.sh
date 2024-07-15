@@ -5,9 +5,9 @@ CONFIG_DIR=$DIR/config
 
 scoop install yazi --no-cache
 
+scoop install bat --no-cache
 scoop install fd --no-cache
 scoop install fzf --no-cache
-scoop install jq --no-cache
 scoop install ouch --no-cache
 scoop install ripgrep --no-cache
 

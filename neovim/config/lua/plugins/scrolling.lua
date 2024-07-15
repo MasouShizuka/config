@@ -28,13 +28,10 @@ return {
             "BufReadPost",
         },
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>m"] = {
-                        name = "+minimap",
-                    },
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "<leader>m", group = "minimap", mode = "n" },
                 })
             end
         end,

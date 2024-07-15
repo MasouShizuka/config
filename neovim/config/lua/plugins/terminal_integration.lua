@@ -58,6 +58,12 @@ return {
                 list[name]:toggle()
             end
 
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "<leader>T", group = "command line tool", mode = "n" },
+                })
+            end
             vim.keymap.set("n", "<leader>Tl", function() toggle_func("lazygit") end, { desc = "Open lazygit", silent = true })
             vim.keymap.set("n", "<leader>Ty", function() toggle_func("yazi", string.format([[yazi "%s"]], vim.fn.getcwd())) end, { desc = "Open yazi", silent = true })
         end,

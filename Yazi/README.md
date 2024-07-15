@@ -20,5 +20,5 @@
         - `fzf`
         - `ripgrep`
     - 预览：
-        - `jq`
+        - `bat`
         - `ouch`

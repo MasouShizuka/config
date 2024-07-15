@@ -67,7 +67,7 @@ Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
 # fzf
 
 $env:FZF_DEFAULT_OPTS="\\"
-$env:FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='cat {}'"
+$env:FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='bat --theme=TwoDark --color=always --style=numbers --line-range=:500 {}'"
 
 # One Dark
 $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS

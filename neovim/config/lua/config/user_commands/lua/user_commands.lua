@@ -5,24 +5,18 @@ local utils = require("utils")
 local M = {}
 
 function M.setup()
-    local is_which_key_available, which_key = pcall(require, "which-key")
-    if is_which_key_available then
-        which_key.register({
-            mode = "n",
-            ["<leader>c"] = {
-                name = "+user commands",
-            },
+    local is_wk_available, wk = pcall(require, "which-key")
+    if is_wk_available then
+        wk.add({
+            { "<leader>c", group = "user commands", mode = "n" },
         })
     end
 
     -- toggle
 
-    if is_which_key_available then
-        which_key.register({
-            mode = "n",
-            ["<leader>ct"] = {
-                name = "+toggle",
-            },
+    if is_wk_available then
+        wk.add({
+            { "<leader>ct", group = "toggle", mode = "n" },
         })
     end
 
@@ -108,13 +102,10 @@ function M.setup()
     if not environment.is_vscode then
         -- diff
 
-        is_which_key_available, which_key = pcall(require, "which-key")
-        if is_which_key_available then
-            which_key.register({
-                mode = "n",
-                ["<leader>cd"] = {
-                    name = "+diff",
-                },
+        is_wk_available, wk = pcall(require, "which-key")
+        if is_wk_available then
+            wk.add({
+                { "<leader>cd", group = "diff", mode = "n" },
             })
         end
 

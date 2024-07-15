@@ -1,25 +1,26 @@
-# Created by modifying catppuccin.yazi based on the differences between catppuccin.nvim and onedarkpro.nvim
+# : Manager {{{
 
 [manager]
-cwd = { fg = "#98c379" }
+cwd = { fg = "#56b6c2" }
 
 # Hovered
 hovered         = { fg = "#282c34", bg = "#61afef" }
 preview_hovered = { underline = true }
 
 # Find
-find_keyword  = { fg = "#e2be7d", italic = true }
-find_position = { fg = "#c678dd", bg = "reset", italic = true }
+find_keyword  = { fg = "#e2be7d", bold = true, italic = true, underline = true }
+find_position = { fg = "#c678dd", bg = "reset", bold = true, italic = true }
 
 # Marker
 marker_copied   = { fg = "#98c379", bg = "#98c379" }
 marker_cut      = { fg = "#e06c75", bg = "#e06c75" }
+marker_marked   = { fg = "#56b6c2",   bg = "#56b6c2" }
 marker_selected = { fg = "#61afef", bg = "#61afef" }
 
 # Tab
-tab_active   = { fg = "#282c34", bg = "#abb2bf" }
+tab_active   = { fg = "#282c34", bg = "#61afef" }
 tab_inactive = { fg = "#abb2bf", bg = "#5c6370" }
-tab_width    = 1
+tab_width    = 30
 
 # Count
 count_copied   = { fg = "#282c34", bg = "#98c379" }
@@ -31,7 +32,12 @@ border_symbol = "│"
 border_style  = { fg = "#abb2bf" }
 
 # Highlighting
-syntect_theme = "~/.config/yazi/Catppuccin-mocha.tmTheme"
+syntect_theme = ""
+
+# : }}}
+
+
+# : Status {{{
 
 [status]
 separator_open  = ""
@@ -44,7 +50,7 @@ mode_select = { fg = "#282c34", bg = "#98c379", bold = true }
 mode_unset  = { fg = "#282c34", bg = "#e06c75", bold = true }
 
 # Progress
-progress_label  = { fg = "#ffffff", bold = true }
+progress_label  = { bold = true }
 progress_normal = { fg = "#61afef", bg = "#5c6370" }
 progress_error  = { fg = "#e06c75", bg = "#5c6370" }
 
@@ -55,57 +61,122 @@ permissions_w = { fg = "#e06c75" }
 permissions_x = { fg = "#98c379" }
 permissions_s = { fg = "#abb2bf" }
 
+# : }}}
+
+
+# : Select {{{
+
+[select]
+border   = { fg = "#61afef" }
+active   = { fg = "#c678dd", bold = true }
+inactive = {}
+
+# : }}}
+
+
+# : Input {{{
+
 [input]
 border   = { fg = "#61afef" }
 title    = {}
 value    = {}
 selected = { reversed = true }
 
-[select]
+# : }}}
+
+
+# : Completion {{{
+
+[completion]
 border   = { fg = "#61afef" }
-active   = { fg = "#c678dd" }
+active   = { fg = "#282c34", bg = "#61afef" }
 inactive = {}
+
+# Icons
+icon_file    = ""
+icon_folder  = ""
+icon_command = ""
+
+# : }}}
+
+
+# : Tasks {{{
 
 [tasks]
 border  = { fg = "#61afef" }
 title   = {}
-hovered = { underline = true }
+hovered = { fg = "#282c34", bg = "#61afef" }
+
+# : }}}
+
+
+# : Which {{{
 
 [which]
-mask            = { bg = "#2d313b" }
-cand            = { fg = "#98c379" }
+cols            = 3
+mask            = { bg = "#282c34" }
+cand            = { fg = "#56b6c2" }
 rest            = { fg = "#abb2bf" }
 desc            = { fg = "#c678dd" }
-separator       = "  "
-separator_style = { fg = "#2d313b" }
+separator       = "   "
+separator_style = { fg = "#5c6370" }
+
+# : }}}
+
+
+# : Help {{{
 
 [help]
 on      = { fg = "#c678dd" }
-run     = { fg = "#98c379" }
+run     = { fg = "#56b6c2" }
 desc    = { fg = "#abb2bf" }
-hovered = { bg = "#2d313b", bold = true }
-footer  = { fg = "#5c6370", bg = "#abb2bf" }
+hovered = { bg = "#5c6370", bold = true }
+footer  = { fg = "#282c34", bg = "#abb2bf" }
+
+# : }}}
+
+
+# : Notify {{{
+
+[notify]
+title_info  = { fg = "#61afef" }
+title_warn  = { fg = "#e5c07b" }
+title_error = { fg = "#e06c75" }
+
+# Icons
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
+
+# : }}}
+
+
+# : File-specific styles {{{
 
 [filetype]
 
 rules = [
     # Images
-    { mime = "image/*", fg = "#98c379" },
+    { mime = "image/*", fg = "#56b6c2" },
 
-    # Videos
-    { mime = "video/*", fg = "#e5c07b" },
-    { mime = "audio/*", fg = "#e5c07b" },
+    # Media
+    { mime = "{audio,video}/*", fg = "#e5c07b" },
 
     # Archives
-    { mime = "application/zip",             fg = "#c678dd" },
-    { mime = "application/gzip",            fg = "#c678dd" },
-    { mime = "application/x-tar",           fg = "#c678dd" },
-    { mime = "application/x-bzip",          fg = "#c678dd" },
-    { mime = "application/x-bzip2",         fg = "#c678dd" },
-    { mime = "application/x-7z-compressed", fg = "#c678dd" },
-    { mime = "application/x-rar",           fg = "#c678dd" },
+    { mime = "application/{,g}zip", fg = "#c678dd" },
+    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "#c678dd" },
+
+    # Documents
+    { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#d19a66" },
+
+    # Empty files
+    { mime = "inode/x-empty", fg = "#e06c75" },
+
+    # Special files
+    { name = "*", is = "orphan", bg = "#e06c75" },
+    { name = "*", is = "exec"  , fg = "#98c379" },
 
     # Fallback
-    { name = "*", fg = "#abb2bf" },
+    { name = "*",  fg = "#abb2bf" },
     { name = "*/", fg = "#61afef" }
 ]

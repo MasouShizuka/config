@@ -10,20 +10,10 @@ M.lsp = function(lspconfig, default_config)
         -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
         -- https://github.com/williamboman/mason.nvim/issues/1315
         bashls = function()
-            local shellcheckPath = path.mason_install_root_path .. "/packages/shellcheck/shellcheck"
-            if environment.is_windows then
-                shellcheckPath = shellcheckPath .. ".exe"
-            end
-
             lspconfig.bashls.setup(vim.tbl_deep_extend("force", default_config, {
                 filetypes = {
                     "sh",
                     "zsh",
-                },
-                settings = {
-                    bashIde = {
-                        shellcheckPath = shellcheckPath,
-                    },
                 },
             }))
         end,
@@ -39,10 +29,9 @@ M.lsp = function(lspconfig, default_config)
             end
 
             lspconfig.clangd.setup(vim.tbl_deep_extend("force", default_config, {
-                cmd = {
-                    "clangd",
-                    -- https://github.com/jose-elias-alvarez/null-ls.nvim/issues/428
-                    "--offset-encoding=utf-16",
+                -- https://github.com/jose-elias-alvarez/null-ls.nvim/issues/428
+                capabilities = {
+                    offsetEncoding = "utf-16",
                 },
                 init_options = {
                     fallbackFlags = fallbackFlags,
@@ -58,27 +47,19 @@ M.lsp = function(lspconfig, default_config)
             lspconfig.lemminx.setup(vim.tbl_deep_extend("force", default_config, {}))
         end,
         lua_ls = function()
-            local library = {
-                vim.env.VIMRUNTIME,
-            }
-
             local cwd = vim.fn.getcwd()
             if environment.is_windows then
                 cwd = cwd:gsub("\\", "/")
             end
-            if cwd:match(path.config_path) then
-                if utils.is_available("neodev.nvim") then
-                    require("neodev")
+            if cwd == path.config_path then
+                if utils.is_available("lazydev.nvim") then
+                    require("lazydev")
                 end
-                library[#library + 1] = path.config_path .. "/lua"
             end
 
             lspconfig.lua_ls.setup(vim.tbl_deep_extend("force", default_config, {
                 settings = {
                     Lua = {
-                        completion = {
-                            callSnippet = "Replace",
-                        },
                         diagnostics = {
                             globals = {
                                 "mp",
@@ -92,16 +73,6 @@ M.lsp = function(lspconfig, default_config)
                                 trailing_table_separator = "smart",
                             },
                             enable = true,
-                        },
-                        runtime = {
-                            -- Tell the language server which version of Lua you're using
-                            -- (most likely LuaJIT in the case of Neovim)
-                            version = "LuaJIT",
-                        },
-                        -- Make the server aware of Neovim runtime files
-                        workspace = {
-                            checkThirdParty = "Disable",
-                            library = library,
                         },
                         telemetry = {
                             enable = false,

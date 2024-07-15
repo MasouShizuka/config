@@ -554,7 +554,6 @@ function Menu:back()
 	local current = self.current
 	local parent = current.parent_menu
 
-
 	-- modified
 	if Menu:is_open('open-file') then
 		self.callback(current.items[1].value, { modifiers = self.modifiers or {} })
@@ -1226,6 +1225,15 @@ function Menu:render()
 					opacity = highlight_opacity * menu_opacity,
 					clip = item_clip,
 				})
+
+				-- Selected item indicator line
+				if is_selected then
+					local size = round(2 * state.scale)
+					local v_padding = math.min(state.radius, math.ceil(self.item_height / 3))
+					ass:rect(ax + self.padding - size - 1, item_ay + v_padding, ax + self.padding - 1, item_by - v_padding, {
+						radius = 1, color = fg, opacity = menu_opacity, clip = item_clip,
+					})
+				end
 			end
 
 			-- Icon

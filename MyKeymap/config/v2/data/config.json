@@ -164,6 +164,13 @@
             "keysToSend": "{Blind}1"
           }
         ],
+        "*c": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{Blind}{Media_Next}"
+          }
+        ],
         "*d": [
           {
             "windowGroupID": 0,
@@ -295,6 +302,20 @@
             "windowGroupID": 0,
             "actionTypeID": 6,
             "keysToSend": "{Blind}`"
+          }
+        ],
+        "*x": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{Blind}{Media_Play_Pause}"
+          }
+        ],
+        "*z": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{Blind}{Media_Prev}"
           }
         ],
         "singlePress": [

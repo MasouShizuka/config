@@ -11,6 +11,8 @@ install_to_target "$CONFIG_DIR" "$target"
 echo "新建 $target/aria2.session"
 touch "$target/aria2.session"
 
+scoop install jq --no-cache
+
 download_github_latest "mayswind" "AriaNg" "AllInOne" "$CONFIG_DIR/AriaNg.zip"
 clean_target "$target/AriaNg"
 mkdir "$CONFIG_DIR/AriaNg"

@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/autoload.lua
-COMMIT_ b1491bed28ffad2adb23d704241ca4cbfcae8df3
+COMMIT_ a1caa001870985f36ae3c0082181e4e708ebdd73
 SOURCE_ https://github.com/rossy/mpv-open-file-dialog/blob/master/open-file-dialog.lua
 COMMIT_ 04fe818fc703d8c5dcc3a6aabe1caeed8286bdbb
 文档_ https://github.com/hooke007/MPV_lazy/discussions/106
@@ -32,8 +32,9 @@ opt = {
 	image = false,
 	image_ext = "default",
 	skip_hidden = true,
-	max_entries = "unlimited",
-	directory_mode = "ignore"
+	max_entries = 150,
+	directory_mode = "ignore",
+	ignore_pattern = "$^",
 }
 options.read_options(opt)
 
@@ -244,9 +245,14 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
 	table.filter(files, function (v)
 		-- The current file could be a hidden file, ignoring it doesn't load other
 		-- files from the current directory.
-		if (opt.skip_hidden and not (prefix .. v == current_file) and string.match(v, "^%.")) then
+		local current = prefix .. v == current_file
+		if (opt.skip_hidden and not current and string.match(v, "^%.")) then
 			return false
 		end
+		if (not current and string.match(v, opt.ignore_pattern)) then
+			return false
+		end
+
 		local ext = get_extension(v)
 		if ext == nil then
 			return false
@@ -376,13 +382,7 @@ function find_and_add_entries()
 
 	local append = {[-1] = {}, [1] = {}}
 	for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
-        local max_entries
-        if opt.max_entries == "unlimited" then
-            max_entries = #files
-        else
-            max_entries = opt.max_entries
-        end
-		for i = 1, max_entries do
+		for i = 1, opt.max_entries do
 			local pos = current + i * direction
 			local file = files[pos]
 			if file == nil or file[1] == "." then
@@ -540,6 +540,8 @@ function append_sid()
 end
 
 
+
+mp.register_event("end-file", remove_vfSub)
 
 mp.register_event("start-file", find_and_add_entries)
 

@@ -88,19 +88,14 @@ pub fn new(
 
 impl Monitor {
     pub fn load_focused_workspace(&mut self, mouse_follows_focus: bool) -> Result<()> {
-        // NOTE: 令 focused_workspace 最后 restore
-        // 保证从 monocle workspace 切换时隐藏 monocle window
         let focused_idx = self.focused_workspace_idx();
         for (i, workspace) in self.workspaces_mut().iter_mut().enumerate() {
-            if i != focused_idx {
+            if i == focused_idx {
+                workspace.restore(mouse_follows_focus)?;
+            } else {
                 workspace.hide(None);
             }
         }
-        let focused_workspace = self
-            .workspaces_mut()
-            .get_mut(focused_idx)
-            .ok_or_else(|| anyhow!("there is no workspace at index {}", focused_idx))?;
-        focused_workspace.restore(mouse_follows_focus)?;
 
         Ok(())
     }

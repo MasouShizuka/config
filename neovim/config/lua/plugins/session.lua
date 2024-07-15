@@ -28,13 +28,10 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>s"] = {
-                        name = "+neovim-session-manager",
-                    },
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "<leader>s", group = "neovim-session-manager", mode = "n" },
                 })
             end
 

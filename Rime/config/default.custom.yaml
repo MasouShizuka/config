@@ -1,35 +1,35 @@
 patch:
   schema_list:
-    - schema: luna_pinyin_simp    # 朙月拼音
-    - schema: double_pinyin_flypy # 小鹤双拼
-    # - schema: double_pinyin       # 自然码双拼
-    - schema: easy_en             # Easy English
-    - schema: numbers             # 大写数字
-    - schema: terra_pinyin        # 地球拼音
-
-  switcher:
-    hotkeys:
-      - Control+grave # Ctrl+` 切换状态
+    - schema: rime_ice
+    # - schema: t9
+    # - schema: double_pinyin
+    # - schema: double_pinyin_abc
+    # - schema: double_pinyin_mspy
+    # - schema: double_pinyin_sogou
+    - schema: double_pinyin_flypy
+    # - schema: double_pinyin_ziguang
+    - schema: melt_eng
 
   menu:
-    page_size: 9 # 候选词个数
-
-  key_binder:
-    bindings:
-      - { when: composing, accept: Left, send: Shift+Left }   # Left 向左选拼音分词
-      - { when: composing, accept: Right, send: Shift+Right } # Right 向右选拼音分词
-      - { when: composing, accept: Shift+Left, send: Left }   # Shift+Left 光标向左移
-      - { when: composing, accept: Shift+Right, send: Right } # Shift+Right 光标向右移
-
-      # paging_with_minus_equal
-      - { when: has_menu, accept: minus, send: Page_Up }      # - 上一页
-      - { when: has_menu, accept: equal, send: Page_Down }    # = 下一页
+    page_size: 9
 
   ascii_composer:
     switch_key:
-      Shift_L: commit_code # 左 Shift 已输入的编码字符上屏并切换至西文输入模式
-      Shift_R: commit_text # 右 Shift 已输入的候选文字上屏并切换至西文输入模式
+      Caps_Lock: noop
+      Shift_L: commit_code
+      Shift_R: commit_text
       Control_L: noop
       Control_R: noop
-      Caps_Lock: noop
-      Eisu_toggle: noop
+
+  key_binder:
+    select_first_character: "Control+j"
+    select_last_character: "Control+k"
+
+    bindings:
+      - { when: composing, accept: Left, send: Shift+Left }
+      - { when: composing, accept: Right, send: Shift+Right }
+      - { when: composing, accept: Shift+Left, send: Left }
+      - { when: composing, accept: Shift+Right, send: Right }
+
+      - { when: has_menu, accept: minus, send: Page_Up }
+      - { when: has_menu, accept: equal, send: Page_Down }

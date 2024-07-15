@@ -2,7 +2,9 @@ local buftype = require("utils.buftype")
 local colors = require("utils.colors")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
+local format = require("utils.format")
 local icons = require("utils.icons")
+local lint = require("utils.lint")
 local lsp = require("utils.lsp")
 local utils = require("utils")
 
@@ -222,9 +224,7 @@ return {
 
                 surround(
                     { icons.surround.left_half_circle_thick, icons.surround.right_half_circle_thick },
-                    function(self)
-                        return self:mode_color()
-                    end,
+                    function(self) return self:mode_color() end,
                     {
                         init = function(self)
                             self.mode = vim.fn.mode(1)
@@ -244,6 +244,7 @@ return {
                     local file_encoding = fileencoding ~= "" and fileencoding or encoding
                     return icons.misc.code_braces .. file_encoding:upper()
                 end,
+                update = { "BufEnter", "OptionSet" },
             }
 
             local file_format = {
@@ -255,6 +256,7 @@ return {
                         return icons.platforms.linux .. "LF"
                     end
                 end,
+                update = { "BufEnter", "OptionSet" },
             }
 
             local file_icon = {
@@ -286,6 +288,7 @@ return {
                 provider = function(self)
                     return self.icon .. self.tabstop
                 end,
+                update = { "BufEnter", "OptionSet" },
             }
 
             local file_modified = {
@@ -380,6 +383,7 @@ return {
                     local i = math.floor((math.log(fsize) / math.log(1024)))
                     return string.format("%.1f%s", fsize / (1024 ^ i), suffix[i + 1])
                 end,
+                update = { "BufEnter", "BufWrite" },
             }
 
             local ruler = {
@@ -435,9 +439,7 @@ return {
 
             local python_venv = {
                 condition = function(self)
-                    return utils.is_available("venv-selector.nvim")
-                        and package.loaded["venv-selector"]
-                        and vim.api.nvim_get_option_value("filetype", { scope = "local" }) == "python"
+                    return utils.is_available("venv-selector.nvim") and package.loaded["venv-selector"] and vim.api.nvim_get_option_value("filetype", { scope = "local" }) == "python"
                 end,
                 provider = function(self)
                     local venv_name = "base"
@@ -447,7 +449,7 @@ return {
                     end
                     return icons.languages.python .. venv_name
                 end,
-                hl = { fg = colors.yellow },
+                hl = { fg = colors.green },
                 on_click = {
                     callback = function()
                         require("venv-selector").open()
@@ -460,24 +462,12 @@ return {
                 provider = function(self)
                     local names = {}
                     for _, server in pairs(vim.lsp.get_clients({ bufnr = 0 })) do
-                        if server.name == "null-ls" then
-                            local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
-                            local null_ls_sources = require("null-ls.sources").get_available(ft)
-                            for _, source in ipairs(null_ls_sources) do
-                                local name = source.name
-                                -- null-ls 的相同的 source 可能有不同的功能，导致重复
-                                if names[#names] ~= name then
-                                    names[#names + 1] = source.name
-                                end
-                            end
-                        else
-                            names[#names + 1] = server.name
-                        end
+                        names[#names + 1] = server.name
                     end
                     return icons.misc.gear .. table.concat(names, ",")
                 end,
-                hl       = { fg = colors.green },
-                update   = { "LspAttach", "LspDetach" },
+                hl = { fg = colors.green },
+                update = { "LspAttach", "LspDetach" },
             }
 
             local lsp_info = heirline_utils.insert(
@@ -485,6 +475,49 @@ return {
                 padding_after(python_venv),
                 lsp_server
             )
+
+            local linter = {
+                condition = function(self)
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    self.ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                    return utils.is_available("nvim-lint") and package.loaded["lint"] and vim.tbl_contains(lint.lint_filetype_list, self.ft)
+                end,
+                provider = function(self)
+                    local nvim_lint = require("lint")
+
+                    local icon
+                    if #nvim_lint.get_running() == 0 then
+                        icon = icons.misc.progress_check
+                    else
+                        icon = icons.misc.magnify_scan
+                    end
+
+                    local names = {}
+                    for _, linter in ipairs(nvim_lint._resolve_linter_by_ft(self.ft)) do
+                        names[#names + 1] = linter
+                    end
+
+                    return icon .. table.concat(names, ",")
+                end,
+                hl = { fg = colors.red },
+            }
+
+            local formatter = {
+                condition = function(self)
+                    local buf = self.buf or vim.api.nvim_get_current_buf()
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                    return utils.is_available("conform.nvim") and package.loaded["conform"] and vim.tbl_contains(format.format_filetype_list, ft)
+                end,
+                provider = function(self)
+                    local names = {}
+                    for _, formatter in ipairs(require("conform").list_formatters(0)) do
+                        names[#names + 1] = formatter.name
+                    end
+                    return icons.misc.format_list_text .. table.concat(names, ",")
+                end,
+                hl = { fg = colors.yellow },
+                update = "BufEnter",
+            }
 
             local navic = {
                 condition = function(self)
@@ -578,8 +611,6 @@ return {
                 padding_before(get_diagnostic_severity("hint", true))
             )
 
-            local lsp_diagnostic = insert_with_child_condition({}, lsp_info, diagnostic)
-
             local git_branch = {
                 condition = function(self)
                     if not herrline_conditions.is_git_repo then
@@ -602,11 +633,9 @@ return {
                 padding_before(get_git_status("removed", true))
             )
 
-            local git = insert_with_child_condition({}, git_branch, git_status)
-
             local dap = {
                 condition = function(self)
-                    if not utils.is_available("nvim-dap") or not package.loaded["dap"] then
+                    if not (utils.is_available("nvim-dap") and package.loaded["dap"]) then
                         return false
                     end
 
@@ -1036,10 +1065,10 @@ return {
                 end,
                 on_click = {
                     callback = function(...)
-                        local dap_avail, dap = pcall(require, "dap")
+                        local args = statuscolumn_clickargs(...)
                         if args.mods:find("c") then
-                            if dap_avail then
-                                vim.schedule(dap.toggle_breakpoint)
+                            if utils.is_available("nvim-dap") then
+                                require("dap").toggle_breakpoint()
                             end
                         end
                     end,
@@ -1102,9 +1131,6 @@ return {
                 on_click = {
                     callback = function(...)
                         local args = statuscolumn_clickargs(...)
-                        if args.sign and args.sign.name and sign_handlers[args.sign.name] then
-                            sign_handlers[args.sign.name](args)
-                        end
                         if args.sign then
                             local handler = args.sign.name ~= "" and sign_handlers[args.sign.name]
                             if not handler then
@@ -1151,8 +1177,18 @@ return {
 
             local default_statusline = {
                 padding_after(mode, 2),
-                padding_after(insert_with_child_condition({ flexible = 2 }, git, git_status), 2),
-                padding_after(insert_with_child_condition({ flexible = 1 }, lsp_diagnostic, diagnostic), 2),
+                padding_after(insert_with_child_condition(
+                    { flexible = 2 },
+                    insert_with_child_condition({}, git_branch, git_status),
+                    git_status
+                ), 2),
+                padding_after(insert_with_child_condition(
+                    { flexible = 1 },
+                    insert_with_child_condition({}, lsp_info, padding_before(linter), diagnostic),
+                    insert_with_child_condition({}, lsp_info, diagnostic),
+                    diagnostic
+                ), 2),
+                padding_after(formatter, 2),
                 padding_after(dap, 2),
                 padding_after(file_size, 2),
                 padding_after(search_count, 2),

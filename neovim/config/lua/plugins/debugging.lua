@@ -92,13 +92,10 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>d"] = {
-                        name = "+dap",
-                    },
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "<leader>d", group = "dap", mode = "n" },
                 })
             end
         end,
@@ -132,7 +129,7 @@ return {
                     require("dapui").close()
                 end,
                 desc = "Disconnent",
-                mode = "n"
+                mode = "n",
             },
             { "<leader>dh", function() require("dap.ui.widgets").hover() end, desc = "Hover", mode = "n" },
         },

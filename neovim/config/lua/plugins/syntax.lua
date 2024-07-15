@@ -19,13 +19,10 @@ return {
             { "sn", desc = "Update n_lines",                             mode = { "n", "x" } },
         },
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["s"] = {
-                        name = "+mini.surround",
-                    },
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "s", group = "mini.surround", mode = "n" },
                 })
             end
         end,

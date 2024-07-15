@@ -98,7 +98,6 @@
     id: QQ.exe
     matching_strategy: Equals
   options:
-  - force
   - tray_and_multi_window
   float_identifiers:
   - kind: Title
@@ -109,6 +108,9 @@
     matching_strategy: Legacy
   - kind: Title
     id: 语音通话
+    matching_strategy: Legacy
+  - kind: Title
+    id: QQEdit
     matching_strategy: Legacy
 - name: WeChat
   identifier:

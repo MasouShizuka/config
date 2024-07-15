@@ -9,6 +9,8 @@ use crate::monitor::Monitor;
 use crate::monitor_reconciliator;
 use crate::ring::Ring;
 use crate::stackbar_manager::STACKBAR_FOCUSED_TEXT_COLOUR;
+use crate::stackbar_manager::STACKBAR_FONT_FAMILY;
+use crate::stackbar_manager::STACKBAR_FONT_SIZE;
 use crate::stackbar_manager::STACKBAR_LABEL;
 use crate::stackbar_manager::STACKBAR_MODE;
 use crate::stackbar_manager::STACKBAR_TAB_BACKGROUND_COLOUR;
@@ -16,10 +18,15 @@ use crate::stackbar_manager::STACKBAR_TAB_HEIGHT;
 use crate::stackbar_manager::STACKBAR_TAB_WIDTH;
 use crate::stackbar_manager::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::transparency_manager;
+use crate::window;
 use crate::window_manager::WindowManager;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::workspace::Workspace;
+use crate::ANIMATION_DURATION;
+use crate::ANIMATION_ENABLED;
+use crate::ANIMATION_FPS;
+use crate::ANIMATION_STYLE;
 use crate::DATA_DIR;
 use crate::DEFAULT_CONTAINER_PADDING;
 use crate::DEFAULT_WORKSPACE_PADDING;
@@ -32,6 +39,7 @@ use crate::MONITOR_INDEX_PREFERENCES;
 use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REGEX_IDENTIFIERS;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
+use crate::WINDOWS_11;
 use crate::WORKSPACE_RULES;
 use komorebi_core::BorderImplementation;
 use komorebi_core::StackbarLabel;
@@ -48,6 +56,7 @@ use komorebi_core::config_generation::IdWithIdentifier;
 use komorebi_core::config_generation::MatchingRule;
 use komorebi_core::config_generation::MatchingStrategy;
 use komorebi_core::resolve_home_path;
+use komorebi_core::AnimationStyle;
 use komorebi_core::ApplicationIdentifier;
 use komorebi_core::BorderStyle;
 use komorebi_core::DefaultLayout;
@@ -114,6 +123,9 @@ pub struct WorkspaceConfig {
     /// Permanent workspace application rules
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace_rules: Option<Vec<IdWithIdentifier>>,
+    /// Apply this monitor's window-based work area offset (default: true)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_window_based_work_area_offset: Option<bool>,
 }
 
 impl From<&Workspace> for WorkspaceConfig {
@@ -196,6 +208,7 @@ impl From<&Workspace> for WorkspaceConfig {
             workspace_padding,
             initial_workspace_rules: initial_ws_rules,
             workspace_rules: ws_rules,
+            apply_window_based_work_area_offset: Some(value.apply_window_based_work_area_offset()),
         }
     }
 }
@@ -237,6 +250,12 @@ pub struct StaticConfig {
     /// DEPRECATED from v0.1.22: no longer required
     #[serde(skip_serializing_if = "Option::is_none")]
     pub invisible_borders: Option<Rect>,
+    /// DISCOURAGED: Minimum width for a window to be eligible for tiling
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub minimum_window_width: Option<i32>,
+    /// DISCOURAGED: Minimum height for a window to be eligible for tiling
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub minimum_window_height: Option<i32>,
     /// Delta to resize windows by (default 50)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resize_delta: Option<i32>,
@@ -299,7 +318,7 @@ pub struct StaticConfig {
     /// Monitor and workspace configurations
     #[serde(skip_serializing_if = "Option::is_none")]
     pub monitors: Option<Vec<MonitorConfig>>,
-    /// Which Windows signal to use when hiding windows (default: minimize)
+    /// Which Windows signal to use when hiding windows (default: Cloak)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window_hiding_behaviour: Option<HidingBehaviour>,
     /// Global work area (space used for tiling) offset (default: None)
@@ -332,6 +351,21 @@ pub struct StaticConfig {
     /// Stackbar configuration options
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stackbar: Option<StackbarConfig>,
+    /// Animations configuration options
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub animation: Option<AnimationsConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct AnimationsConfig {
+    /// Enable or disable animations (default: false)
+    enabled: bool,
+    /// Set the animation duration in ms (default: 250)
+    duration: Option<u64>,
+    /// Set the animation style (default: Linear)
+    style: Option<AnimationStyle>,
+    /// Set the animation FPS (default: 60)
+    fps: Option<u64>,
 }
 
 impl StaticConfig {
@@ -366,11 +400,23 @@ impl StaticConfig {
     }
 
     pub fn deprecated(raw: &str) {
-        let deprecated = ["invisible_borders"];
+        let deprecated_options = ["invisible_borders"];
+        let deprecated_variants = vec![
+            ("Hide", "window_hiding_behaviour", "Cloak"),
+            ("Minimize", "window_hiding_behaviour", "Cloak"),
+        ];
 
-        for option in deprecated {
+        for option in deprecated_options {
             if raw.contains(option) {
                 println!(r#""{option}" is deprecated and can be removed"#);
+            }
+        }
+
+        for (variant, option, recommended) in deprecated_variants {
+            if raw.contains(option) && raw.contains(variant) {
+                println!(
+                    r#"The "{variant}" option for "{option}" is deprecated and can be removed or replaced with "{recommended}""#
+                );
             }
         }
     }
@@ -386,7 +432,12 @@ pub struct TabsConfig {
     unfocused_text: Option<Colour>,
     /// Tab background colour
     background: Option<Colour>,
+    /// Font family
+    font_family: Option<String>,
+    /// Font size
+    font_size: Option<i32>,
 }
+
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct StackbarConfig {
     /// Stackbar height
@@ -408,6 +459,8 @@ impl From<&WindowManager> for StaticConfig {
         }
 
         let mut to_remove = vec![];
+        let mut to_add_initial = vec![];
+        let mut to_add_persistent = vec![];
 
         let workspace_rules = WORKSPACE_RULES.lock();
         for (m_idx, m) in monitors.iter().enumerate() {
@@ -424,6 +477,12 @@ impl From<&WindowManager> for StaticConfig {
                     }
                 }
 
+                for (identifier, (monitor_idx, workspace_idx, initial)) in &*workspace_rules {
+                    if *initial && (*monitor_idx == m_idx && *workspace_idx == w_idx) {
+                        to_add_initial.push((m_idx, w_idx, identifier.clone()));
+                    }
+                }
+
                 if let Some(rules) = &w.workspace_rules {
                     for wsr in rules {
                         for (identifier, (monitor_idx, workspace_idx, _)) in &*workspace_rules {
@@ -435,18 +494,54 @@ impl From<&WindowManager> for StaticConfig {
                         }
                     }
                 }
+
+                for (identifier, (monitor_idx, workspace_idx, initial)) in &*workspace_rules {
+                    if !*initial && (*monitor_idx == m_idx && *workspace_idx == w_idx) {
+                        to_add_persistent.push((m_idx, w_idx, identifier.clone()));
+                    }
+                }
             }
         }
 
         for (m_idx, w_idx, id) in to_remove {
             if let Some(monitor) = monitors.get_mut(m_idx) {
                 if let Some(workspace) = monitor.workspaces.get_mut(w_idx) {
+                    if workspace.workspace_rules.is_none() {
+                        workspace.workspace_rules = Some(vec![]);
+                    }
+
                     if let Some(rules) = &mut workspace.workspace_rules {
                         rules.retain(|r| r.id != id);
+                        for (monitor_idx, workspace_idx, id) in &to_add_persistent {
+                            if m_idx == *monitor_idx && w_idx == *workspace_idx {
+                                rules.push(IdWithIdentifier {
+                                    kind: ApplicationIdentifier::Exe,
+                                    id: id.clone(),
+                                    matching_strategy: None,
+                                })
+                            }
+                        }
+
+                        rules.dedup();
+                    }
+
+                    if workspace.initial_workspace_rules.is_none() {
+                        workspace.workspace_rules = Some(vec![]);
                     }
 
                     if let Some(rules) = &mut workspace.initial_workspace_rules {
                         rules.retain(|r| r.id != id);
+                        for (monitor_idx, workspace_idx, id) in &to_add_initial {
+                            if m_idx == *monitor_idx && w_idx == *workspace_idx {
+                                rules.push(IdWithIdentifier {
+                                    kind: ApplicationIdentifier::Exe,
+                                    id: id.clone(),
+                                    matching_strategy: None,
+                                })
+                            }
+                        }
+
+                        rules.dedup();
                     }
                 }
             }
@@ -473,6 +568,8 @@ impl From<&WindowManager> for StaticConfig {
             unmanaged_window_operation_behaviour: Option::from(
                 value.unmanaged_window_operation_behaviour,
             ),
+            minimum_window_height: Some(window::MINIMUM_HEIGHT.load(Ordering::SeqCst)),
+            minimum_window_width: Some(window::MINIMUM_WIDTH.load(Ordering::SeqCst)),
             focus_follows_mouse: value.focus_follows_mouse,
             mouse_follows_focus: Option::from(value.mouse_follows_focus),
             app_specific_configuration_path: None,
@@ -507,6 +604,7 @@ impl From<&WindowManager> for StaticConfig {
             monitor_index_preferences: Option::from(MONITOR_INDEX_PREFERENCES.lock().clone()),
             display_index_preferences: Option::from(DISPLAY_INDEX_PREFERENCES.lock().clone()),
             stackbar: None,
+            animation: None,
         }
     }
 }
@@ -527,6 +625,22 @@ impl StaticConfig {
         if let Some(behaviour) = self.window_hiding_behaviour {
             let mut window_hiding_behaviour = HIDING_BEHAVIOUR.lock();
             *window_hiding_behaviour = behaviour;
+        }
+
+        if let Some(height) = self.minimum_window_height {
+            window::MINIMUM_HEIGHT.store(height, Ordering::SeqCst);
+        }
+
+        if let Some(width) = self.minimum_window_width {
+            window::MINIMUM_WIDTH.store(width, Ordering::SeqCst);
+        }
+
+        if let Some(animations) = &self.animation {
+            ANIMATION_ENABLED.store(animations.enabled, Ordering::SeqCst);
+            ANIMATION_DURATION.store(animations.duration.unwrap_or(250), Ordering::SeqCst);
+            ANIMATION_FPS.store(animations.fps.unwrap_or(60), Ordering::SeqCst);
+            let mut animation_style = ANIMATION_STYLE.lock();
+            *animation_style = animations.style.unwrap_or(AnimationStyle::Linear);
         }
 
         if let Some(container) = self.default_container_padding {
@@ -563,17 +677,29 @@ impl StaticConfig {
         }
 
         STYLE.store(self.border_style.unwrap_or_default());
-        IMPLEMENTATION.store(self.border_implementation.unwrap_or_default());
-        match IMPLEMENTATION.load() {
-            BorderImplementation::Komorebi => {
-                border_manager::destroy_all_borders()?;
-            }
-            BorderImplementation::Windows => {
-                // TODO: figure out how to call wm.remove_all_accents here
-            }
-        }
 
-        border_manager::send_notification();
+        if !*WINDOWS_11
+            && matches!(
+                self.border_implementation.unwrap_or_default(),
+                BorderImplementation::Windows
+            )
+        {
+            tracing::error!(
+                "BorderImplementation::Windows is only supported on Windows 11 and above"
+            );
+        } else {
+            IMPLEMENTATION.store(self.border_implementation.unwrap_or_default());
+            match IMPLEMENTATION.load() {
+                BorderImplementation::Komorebi => {
+                    border_manager::destroy_all_borders()?;
+                }
+                BorderImplementation::Windows => {
+                    // TODO: figure out how to call wm.remove_all_accents here
+                }
+            }
+
+            border_manager::send_notification();
+        }
 
         transparency_manager::TRANSPARENCY_ENABLED
             .store(self.transparency.unwrap_or(false), Ordering::SeqCst);
@@ -628,6 +754,7 @@ impl StaticConfig {
                 STACKBAR_MODE.store(*mode);
             }
 
+            #[allow(clippy::assigning_clones)]
             if let Some(tabs) = &stackbar.tabs {
                 if let Some(background) = &tabs.background {
                     STACKBAR_TAB_BACKGROUND_COLOUR.store((*background).into(), Ordering::SeqCst);
@@ -644,6 +771,9 @@ impl StaticConfig {
                 if let Some(width) = &tabs.width {
                     STACKBAR_TAB_WIDTH.store(*width, Ordering::SeqCst);
                 }
+
+                STACKBAR_FONT_SIZE.store(tabs.font_size.unwrap_or(0), Ordering::SeqCst);
+                *STACKBAR_FONT_FAMILY.lock() = tabs.font_family.clone();
             }
         }
 

@@ -334,8 +334,8 @@ impl WindowManager {
                 if proceed {
                     // NOTE: 令新打开的 window 管理到 cursor 所在的 monitor
                     if self.mouse_follows_focus {
-                        if let Some(i) = self.monitor_idx_from_current_pos() {
-                            self.focus_monitor(i).unwrap_or(());
+                        if let Some(monitor_idx) = self.monitor_idx_from_current_pos() {
+                            self.focus_monitor(monitor_idx).unwrap_or(());
                         }
                     }
 
@@ -616,7 +616,7 @@ impl WindowManager {
         };
 
         // If we unmanaged a window, it shouldn't be immediately hidden behind managed windows
-        if let WindowManagerEvent::Unmanage(window) = event {
+        if let WindowManagerEvent::Unmanage(mut window) = event {
             window.center(&self.focused_monitor_work_area()?)?;
         }
 

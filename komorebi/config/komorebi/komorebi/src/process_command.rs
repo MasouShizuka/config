@@ -46,6 +46,8 @@ use crate::colour::Rgb;
 use crate::current_virtual_desktop;
 use crate::notify_subscribers;
 use crate::stackbar_manager;
+use crate::stackbar_manager::STACKBAR_FONT_FAMILY;
+use crate::stackbar_manager::STACKBAR_FONT_SIZE;
 use crate::static_config::StaticConfig;
 use crate::transparency_manager;
 use crate::window::RuleDebug;
@@ -56,6 +58,10 @@ use crate::windows_api::WindowsApi;
 use crate::GlobalState;
 use crate::Notification;
 use crate::NotificationEvent;
+use crate::ANIMATION_DURATION;
+use crate::ANIMATION_ENABLED;
+use crate::ANIMATION_FPS;
+use crate::ANIMATION_STYLE;
 use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
 use crate::DISPLAY_INDEX_PREFERENCES;
@@ -72,6 +78,7 @@ use crate::SUBSCRIPTION_PIPES;
 use crate::SUBSCRIPTION_SOCKETS;
 use crate::TCP_CONNECTIONS;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
+use crate::WINDOWS_11;
 use crate::WORKSPACE_RULES;
 use stackbar_manager::STACKBAR_FOCUSED_TEXT_COLOUR;
 use stackbar_manager::STACKBAR_LABEL;
@@ -280,6 +287,40 @@ impl WindowManager {
                 {
                     self.handle_definitive_workspace_rules(id, monitor_idx, workspace_idx)?;
                 }
+            }
+            SocketMessage::ClearWorkspaceRules(monitor_idx, workspace_idx) => {
+                let mut workspace_rules = WORKSPACE_RULES.lock();
+                let mut to_remove = vec![];
+                for (id, (m_idx, w_idx, _)) in workspace_rules.iter() {
+                    if monitor_idx == *m_idx && workspace_idx == *w_idx {
+                        to_remove.push(id.clone());
+                    }
+                }
+
+                for rule in to_remove {
+                    workspace_rules.remove(&rule);
+                }
+            }
+            SocketMessage::ClearNamedWorkspaceRules(ref workspace) => {
+                if let Some((monitor_idx, workspace_idx)) =
+                    self.monitor_workspace_index_by_name(workspace)
+                {
+                    let mut workspace_rules = WORKSPACE_RULES.lock();
+                    let mut to_remove = vec![];
+                    for (id, (m_idx, w_idx, _)) in workspace_rules.iter() {
+                        if monitor_idx == *m_idx && workspace_idx == *w_idx {
+                            to_remove.push(id.clone());
+                        }
+                    }
+
+                    for rule in to_remove {
+                        workspace_rules.remove(&rule);
+                    }
+                }
+            }
+            SocketMessage::ClearAllWorkspaceRules => {
+                let mut workspace_rules = WORKSPACE_RULES.lock();
+                workspace_rules.clear();
             }
             SocketMessage::ManageRule(identifier, ref id) => {
                 let mut manage_identifiers = MANAGE_IDENTIFIERS.lock();
@@ -529,6 +570,7 @@ impl WindowManager {
                 self.update_focused_workspace(self.mouse_follows_focus, true)?;
             }
             SocketMessage::Retile => {
+                border_manager::BORDER_TEMPORARILY_DISABLED.store(false, Ordering::SeqCst);
                 border_manager::destroy_all_borders()?;
                 self.retile_all(false)?
             }
@@ -1249,17 +1291,23 @@ impl WindowManager {
                 border_manager::BORDER_ENABLED.store(enable, Ordering::SeqCst);
             }
             SocketMessage::BorderImplementation(implementation) => {
-                IMPLEMENTATION.store(implementation);
-                match IMPLEMENTATION.load() {
-                    BorderImplementation::Komorebi => {
-                        self.remove_all_accents()?;
+                if !*WINDOWS_11 && matches!(implementation, BorderImplementation::Windows) {
+                    tracing::error!(
+                        "BorderImplementation::Windows is only supported on Windows 11 and above"
+                    );
+                } else {
+                    IMPLEMENTATION.store(implementation);
+                    match IMPLEMENTATION.load() {
+                        BorderImplementation::Komorebi => {
+                            self.remove_all_accents()?;
+                        }
+                        BorderImplementation::Windows => {
+                            border_manager::destroy_all_borders()?;
+                        }
                     }
-                    BorderImplementation::Windows => {
-                        border_manager::destroy_all_borders()?;
-                    }
-                }
 
-                border_manager::send_notification();
+                    border_manager::send_notification();
+                }
             }
             SocketMessage::BorderColour(kind, r, g, b) => match kind {
                 WindowKind::Single => {
@@ -1283,6 +1331,18 @@ impl WindowManager {
             }
             SocketMessage::BorderOffset(offset) => {
                 border_manager::BORDER_OFFSET.store(offset, Ordering::SeqCst);
+            }
+            SocketMessage::Animation(enable) => {
+                ANIMATION_ENABLED.store(enable, Ordering::SeqCst);
+            }
+            SocketMessage::AnimationDuration(duration) => {
+                ANIMATION_DURATION.store(duration, Ordering::SeqCst);
+            }
+            SocketMessage::AnimationFps(fps) => {
+                ANIMATION_FPS.store(fps, Ordering::SeqCst);
+            }
+            SocketMessage::AnimationStyle(style) => {
+                *ANIMATION_STYLE.lock() = style;
             }
             SocketMessage::Transparency(enable) => {
                 transparency_manager::TRANSPARENCY_ENABLED.store(enable, Ordering::SeqCst);
@@ -1313,6 +1373,13 @@ impl WindowManager {
             }
             SocketMessage::StackbarTabWidth(width) => {
                 STACKBAR_TAB_WIDTH.store(width, Ordering::SeqCst);
+            }
+            SocketMessage::StackbarFontSize(size) => {
+                STACKBAR_FONT_SIZE.store(size, Ordering::SeqCst);
+            }
+            #[allow(clippy::assigning_clones)]
+            SocketMessage::StackbarFontFamily(ref font_family) => {
+                *STACKBAR_FONT_FAMILY.lock() = font_family.clone();
             }
             SocketMessage::ApplicationSpecificConfigurationSchema => {
                 let asc = schema_for!(Vec<ApplicationConfiguration>);

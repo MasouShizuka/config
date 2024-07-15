@@ -193,7 +193,7 @@ function zvm_after_lazy_keybindings() {
 # fzf
 
 export FZF_COMPLETION_TRIGGER="\\"
-export FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='cat {}'"
+export FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='bat --number --color always --theme TwoDark --line-range :500 {}'"
 # One Dark
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
     --color=dark

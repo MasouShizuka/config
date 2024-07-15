@@ -65,6 +65,7 @@ use crate::BorderColours;
 use crate::Colour;
 use crate::Rgb;
 use crate::WorkspaceRule;
+use crate::ANIMATION_TEMPORARY_DISABLED;
 use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
 use crate::DISPLAY_INDEX_PREFERENCES;
@@ -1108,6 +1109,7 @@ impl WindowManager {
         follow: bool,
     ) -> Result<()> {
         self.handle_unmanaged_window_behaviour()?;
+        ANIMATION_TEMPORARY_DISABLED.store(true, Ordering::SeqCst);
 
         tracing::info!("moving container");
 
@@ -1183,22 +1185,20 @@ impl WindowManager {
         target_monitor.update_focused_workspace(offset)?;
 
         if follow {
-            if let Some(workspace_idx) = workspace_idx {
-                target_monitor.focus_workspace(workspace_idx)?;
-            }
-
-            target_monitor.load_focused_workspace(mouse_follows_focus)?;
-            target_monitor.update_focused_workspace(offset)?;
-
             self.focus_monitor(monitor_idx)?;
         }
 
-        self.update_focused_workspace(self.mouse_follows_focus, true)
+        self.update_focused_workspace(self.mouse_follows_focus, true)?;
+
+        ANIMATION_TEMPORARY_DISABLED.store(false, Ordering::SeqCst);
+
+        Ok(())
     }
 
     #[tracing::instrument(skip(self))]
     pub fn move_container_to_workspace(&mut self, idx: usize, follow: bool) -> Result<()> {
         self.handle_unmanaged_window_behaviour()?;
+        ANIMATION_TEMPORARY_DISABLED.store(true, Ordering::SeqCst);
 
         tracing::info!("moving container");
 
@@ -1210,7 +1210,11 @@ impl WindowManager {
         monitor.move_container_to_workspace(idx, follow)?;
         monitor.load_focused_workspace(mouse_follows_focus)?;
 
-        self.update_focused_workspace(mouse_follows_focus, true)
+        self.update_focused_workspace(mouse_follows_focus, true)?;
+
+        ANIMATION_TEMPORARY_DISABLED.store(false, Ordering::SeqCst);
+
+        Ok(())
     }
 
     pub fn remove_focused_workspace(&mut self) -> Option<Workspace> {
@@ -1312,6 +1316,13 @@ impl WindowManager {
         let origin_container_idx = workspace.focused_container_idx();
         let origin_monitor_idx = self.focused_monitor_idx();
         let target_container_idx = workspace.new_idx_for_direction(direction);
+
+        let animation_temporarily_disabled = if target_container_idx.is_none() {
+            ANIMATION_TEMPORARY_DISABLED.store(true, Ordering::SeqCst);
+            true
+        } else {
+            false
+        };
 
         match target_container_idx {
             // If there is nowhere to move on the current workspace, try to move it onto the monitor
@@ -1437,7 +1448,13 @@ impl WindowManager {
             }
         }
 
-        self.update_focused_workspace(self.mouse_follows_focus, true)
+        self.update_focused_workspace(self.mouse_follows_focus, true)?;
+
+        if animation_temporarily_disabled {
+            ANIMATION_TEMPORARY_DISABLED.store(false, Ordering::SeqCst);
+        }
+
+        Ok(())
     }
 
     #[tracing::instrument(skip(self))]

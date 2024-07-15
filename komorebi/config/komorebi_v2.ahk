@@ -97,6 +97,38 @@ Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
     RunWait("komorebic.exe stop", , "Hide")
 }
 
+!left:: {
+    RunWait("komorebic.exe focus left", , "Hide")
+}
+
+!right:: {
+    RunWait("komorebic.exe focus right", , "Hide")
+}
+
+!up:: {
+    RunWait("komorebic.exe focus up", , "Hide")
+}
+
+!down:: {
+    RunWait("komorebic.exe focus down", , "Hide")
+}
+
+!+left:: {
+    RunWait("komorebic.exe move left", , "Hide")
+}
+
+!+right:: {
+    RunWait("komorebic.exe move right", , "Hide")
+}
+
+!+up:: {
+    RunWait("komorebic.exe move up", , "Hide")
+}
+
+!+down:: {
+    RunWait("komorebic.exe move down", , "Hide")
+}
+
 !j:: {
     RunWait("komorebic.exe cycle-focus next", , "Hide")
 }

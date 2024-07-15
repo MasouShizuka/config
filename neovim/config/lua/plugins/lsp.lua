@@ -1,12 +1,25 @@
 local environment = require("utils.environment")
+local format = require("utils.format")
 local icons = require("utils.icons")
 local keymap = require("utils.keymap")
+local lint = require("utils.lint")
 local lsp = require("utils.lsp")
-local null_ls = require("utils.null_ls")
 local path = require("utils.path")
 local utils = require("utils")
 
 return {
+    {
+        "aznhe21/actions-preview.nvim",
+        dependencies = {
+            "nvim-telescope/telescope.nvim",
+        },
+        enabled = not environment.is_vscode,
+        lazy = true,
+        opts = {
+            telescope = {},
+        },
+    },
+
     {
         "folke/trouble.nvim",
         cmd = {
@@ -17,13 +30,10 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>x"] = {
-                        name = "+trouble",
-                    },
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "<leader>x", group = "trouble", mode = "n" },
                 })
             end
         end,
@@ -262,40 +272,71 @@ return {
     },
 
     {
-        "nvimtools/none-ls.nvim",
-        dependencies = {
-            {
-                "jay-babu/mason-null-ls.nvim",
-                cmd = {
-                    "NullLsInstall",
-                    "NullLsUninstall",
-                },
-                dependencies = {
-                    "williamboman/mason.nvim",
-                },
-                opts = function()
-                    local handlers = {
-                        function() end, -- disables automatic setup of all null-ls sources
-                    }
-                    for null_ls_builtin, setup in pairs(null_ls.null_ls_builtins(require("null-ls"))) do
-                        handlers[null_ls_builtin] = setup
+        "mfussenegger/nvim-lint",
+        config = function(_, opt)
+            local nvim_lint = require("lint")
+
+            for linter, config in pairs(lint.lint) do
+                if not config then
+                    goto continue
+                end
+
+                for key, value in pairs(config) do
+                    nvim_lint.linters[linter][key] = value
+                end
+
+                ::continue::
+            end
+
+            nvim_lint.linters_by_ft = lint.linters_by_ft
+
+            vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
+                callback = function(args)
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+
+                    -- Use nvim-lint's logic first:
+                    -- * checks if linters exist for the full filetype first
+                    -- * otherwise will split filetype by "." and add all those linters
+                    -- * this differs from conform.nvim which only uses the first filetype that has a formatter
+                    local names = nvim_lint._resolve_linter_by_ft(ft)
+
+                    -- Create a copy of the names table to avoid modifying the original.
+                    names = vim.list_extend({}, names)
+
+                    -- Add fallback linters.
+                    if #names == 0 then
+                        vim.list_extend(names, nvim_lint.linters_by_ft["_"] or {})
                     end
 
-                    return {
-                        ensure_installed = null_ls.null_ls_builtins_list,
-                        automatic_installation = true,
-                        handlers = handlers,
-                    }
-                end,
-            },
+                    -- Add global linters.
+                    vim.list_extend(names, nvim_lint.linters_by_ft["*"] or {})
 
-            "nvim-lua/plenary.nvim",
-        },
+                    -- Filter out linters that don't exist or don't match the condition.
+                    local ctx = { filename = vim.api.nvim_buf_get_name(args.buf) }
+                    ctx.dirname = vim.fn.fnamemodify(ctx.filename, ":h")
+                    names = vim.tbl_filter(function(name)
+                        local linter = nvim_lint.linters[name]
+                        if not linter then
+                            vim.notify("Linter not found: " .. name, vim.log.levels.WARN, { title = "nvim-lint" })
+                        end
+                        return linter and not (type(linter) == "table" and linter.condition and not linter.condition(ctx))
+                    end, names)
+
+                    -- Run linters.
+                    if #names > 0 then
+                        utils.defer(function()
+                            if vim.api.nvim_get_current_buf() == args.buf then
+                                nvim_lint.try_lint(names)
+                            end
+                        end, 100, false)
+                    end
+                end,
+                desc = "Lint buffer",
+                group = vim.api.nvim_create_augroup("nvim-lint", { clear = true }),
+            })
+        end,
         enabled = not environment.is_vscode,
-        ft = lsp.lsp_filetype_list,
-        opts = {
-            border = "rounded",
-        },
+        ft = lint.lint_filetype_list,
     },
 
     {
@@ -329,21 +370,15 @@ return {
                     local client = vim.lsp.get_client_by_id(args.data.client_id)
                     local buf = args.buf
 
-                    local is_which_key_available, which_key = pcall(require, "which-key")
-                    if is_which_key_available then
-                        which_key.register({
-                            mode = "n",
-                            ["<leader>l"] = {
-                                name = "+lsp",
+                    local is_wk_available, wk = pcall(require, "which-key")
+                    if is_wk_available then
+                        wk.add({
+                            {
+                                buffer = args.buf,
+                                mode = "n",
+                                { "<leader>l",  group = "lsp" },
+                                { "<leader>lt", group = "lsp toggle" },
                             },
-                            buffer = buf,
-                        })
-                        which_key.register({
-                            mode = "n",
-                            ["<leader>lt"] = {
-                                name = "+lsp toggle",
-                            },
-                            buffer = buf,
                         })
                     end
 
@@ -400,7 +435,11 @@ return {
                     end, { buffer = buf, desc = "Toggle LSP (buffer)", silent = true })
 
                     if client.supports_method("textDocument/codeAction") then
-                        vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() vim.lsp.buf.code_action() end, { buffer = buf, desc = "LSP code action", silent = true })
+                        if utils.is_available("actions-preview.nvim") then
+                            vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() require("actions-preview").code_actions() end, { buffer = buf, desc = "LSP code action", silent = true })
+                        else
+                            vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() vim.lsp.buf.code_action() end, { buffer = buf, desc = "LSP code action", silent = true })
+                        end
                     end
 
                     if client.supports_method("textDocument/codeLens") then
@@ -443,26 +482,6 @@ return {
                         vim.keymap.set("n", "<leader>lC", function() vim.lsp.codelens.run() end, { buffer = buf, desc = "LSP CodeLens run", silent = true })
                     end
 
-                    -- if client.supports_method("textDocument/declaration") then
-                    --     vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
-                    -- end
-                    -- if not utils.is_available("glance.nvim") then
-                    --     if client.supports_method("textDocument/definition") then
-                    --         vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
-                    --     end
-                    --
-                    --     if client.supports_method("textDocument/implementation") then
-                    --         vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, { buffer = buf, desc = "Implementation of current symbol", silent = true })
-                    --     end
-                    --
-                    --     if client.supports_method("textDocument/typeDefinition") then
-                    --         vim.keymap.set("n", "gy", function() vim.lsp.buf.type_definition() end, { buffer = buf, desc = "Definition of current type", silent = true })
-                    --     end
-                    --
-                    --     if client.supports_method("textDocument/references") then
-                    --         vim.keymap.set("n", "gr", function() vim.lsp.buf.references() end, { buffer = buf, desc = "References of current symbol", silent = true })
-                    --     end
-                    -- end
                     if not utils.is_available("trouble.nvim") then
                         if client.supports_method("textDocument/definition") then
                             vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
@@ -505,68 +524,30 @@ return {
                         })
                     end
 
-                    if client.supports_method("textDocument/formatting") or client.supports_method("textDocument/rangeFormatting") then
-                        -- Gets all lsp clients that support formatting
-                        -- and have not disabled it in their client config
-                        local function supports_format(client)
-                            if
-                                client.config
-                                and client.config.capabilities
-                                and client.config.capabilities.documentFormattingProvider == false
-                            then
-                                return false
+                    if
+                        client.supports_method("textDocument/formatting") or
+                        client.supports_method("textDocument/rangeFormatting") or
+                        utils.is_available("conform.nvim")
+                    then
+                        local buf_format
+                        if utils.is_available("conform.nvim") then
+                            buf_format = function()
+                                require("conform").format({
+                                    timeout_ms = 5000,
+                                    bufnr = buf,
+                                    lsp_format = "fallback",
+                                })
                             end
-                            return client.supports_method("textDocument/formatting") or client.supports_method("textDocument/rangeFormatting")
+                        else
+                            buf_format = function()
+                                vim.lsp.buf.format({
+                                    timeout_ms = 5000,
+                                    bufnr = buf,
+                                })
+                            end
                         end
 
-                        -- When a null-ls formatter is available for the current filetype,
-                        -- only null-ls formatters are returned.
-                        local function get_formatters()
-                            local formatters = {}
-
-                            local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                            -- check if we have any null-ls formatters for the current filetype
-                            local null_ls_formatters = package.loaded["null-ls"] and require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") or {}
-
-                            local clients = vim.lsp.get_clients({ bufnr = buf })
-                            if #null_ls_formatters > 0 then
-                                for _, client in ipairs(clients) do
-                                    if supports_format(client) and client.name == "null-ls" then
-                                        formatters[#formatters + 1] = client
-                                    end
-                                end
-                            else
-                                for _, client in ipairs(clients) do
-                                    if supports_format(client) then
-                                        formatters[#formatters + 1] = client
-                                    end
-                                end
-                            end
-
-                            return formatters
-                        end
-
-                        -- 若 lsp 和 null-ls 都有 formatter，则优先使用 null-ls 的 formatter
-                        local format = function()
-                            local formatters = get_formatters()
-                            local client_ids = vim.tbl_map(function(client)
-                                return client.id
-                            end, formatters)
-
-                            if #client_ids == 0 then
-                                return
-                            end
-
-                            vim.lsp.buf.format({
-                                timeout_ms = 5000,
-                                bufnr = buf,
-                                filter = function(client)
-                                    return vim.tbl_contains(client_ids, client.id)
-                                end,
-                            })
-                        end
-
-                        vim.keymap.set({ "n", "x" }, "<leader>f", format, { buffer = buf, desc = "Format buffer", silent = true })
+                        vim.keymap.set({ "n", "x" }, "<leader>f", buf_format, { buffer = buf, desc = "Format buffer", silent = true })
 
                         if vim.g.autoformat_enabled == nil then
                             vim.g.autoformat_enabled = false
@@ -576,7 +557,7 @@ return {
                             buffer = buf,
                             callback = function()
                                 if vim.b[buf].autoformat_enabled == nil and vim.g.autoformat_enabled or vim.b[buf].autoformat_enabled then
-                                    format()
+                                    buf_format()
                                 end
                             end,
                             desc = "Autoformat on save",
@@ -658,9 +639,6 @@ return {
                     end
 
                     vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
-                    if utils.is_available("none-ls.nvim") then
-                        vim.keymap.set("n", "<leader>lI", function() vim.api.nvim_command("NullLsInfo") end, { buffer = buf, desc = "Null-ls information", silent = true })
-                    end
 
                     vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
                     if not utils.is_available("trouble.nvim") then
@@ -739,9 +717,6 @@ return {
             },
         },
         enabled = not environment.is_vscode,
-        -- event = {
-        --     "User LspFile",
-        -- },
         ft = lsp.lsp_filetype_list,
         init = function()
             -- Change diagnostic symbols in the sign column (gutter)
@@ -825,6 +800,50 @@ return {
                 end
             end))
         end,
+        dependencies = {
+            {
+                "WhoIsSethDaniel/mason-tool-installer.nvim",
+                cmd = {
+                    "MasonToolsInstall",
+                    "MasonToolsInstallSync",
+                    "MasonToolsUpdate",
+                    "MasonToolsUpdateSync",
+                    "MasonToolsClean",
+                },
+                config = function(_, opts)
+                    local mason_tool_installer = require("mason-tool-installer")
+                    mason_tool_installer.setup(opts)
+
+                    mason_tool_installer.run_on_start()
+                end,
+                dependencies = {
+                    "williamboman/mason.nvim",
+                },
+                enabled = not environment.is_vscode,
+                opts = function()
+                    return {
+                        -- a list of all tools you want to ensure are installed upon
+                        -- start
+                        -- ensure_installed = format.format_list,
+                        ensure_installed = utils.table_concat(format.format_list, lint.lint_list),
+
+                        -- By default all integrations are enabled. If you turn on an integration
+                        -- and you have the required module(s) installed this means you can use
+                        -- alternative names, supplied by the modules, for the thing that you want
+                        -- to install. If you turn off the integration (by setting it to false) you
+                        -- cannot use these alternative names. It also suppresses loading of those
+                        -- module(s) (assuming any are installed) which is sometimes wanted when
+                        -- doing lazy loading.
+                        integrations = {
+                            ["mason-lspconfig"] = false,
+                            ["mason-null-ls"] = false,
+                            ["mason-nvim-dap"] = false,
+                        },
+                    }
+                end,
+            },
+
+        },
         enabled = not environment.is_vscode,
         keys = {
             { "<leader>lm", function() vim.api.nvim_command("Mason") end, desc = "Mason information", mode = "n" },

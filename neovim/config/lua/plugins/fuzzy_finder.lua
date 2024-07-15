@@ -13,13 +13,10 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_which_key_available, which_key = pcall(require, "which-key")
-            if is_which_key_available then
-                which_key.register({
-                    mode = "n",
-                    ["<leader>t"] = {
-                        name = "+telescope",
-                    },
+            local is_wk_available, wk = pcall(require, "which-key")
+            if is_wk_available then
+                wk.add({
+                    { "<leader>t", group = "telescope", mode = "n" },
                 })
             end
         end,

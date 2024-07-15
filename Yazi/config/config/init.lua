@@ -1,45 +1,63 @@
--- 将 "\" 替换成 "/"
-function Header:cwd(max)
-    local cwd = cx.active.current.cwd
-    local readable = ya.readable_path(tostring(cwd):gsub("\\", "/"))
+-- ╭─────────────────────────────────────────────────────────╮
+-- │ Header                                                  │
+-- ╰─────────────────────────────────────────────────────────╯
 
-    local text = cwd.is_search and string.format("%s (search: %s)", readable, cwd:frag()) or readable
-    return ui.Span(ya.truncate(text, { max = max, rtl = true })):style(THEME.manager.cwd)
+-- 将 cwd 中的 "\" 替换成 "/"
+function Header:cwd(max)
+    local s = ya.readable_path(tostring(self._tab.current.cwd)):gsub("\\", "/") .. self:flags()
+    return ui.Span(ya.truncate(s, { max = max, rtl = true })):style(THEME.manager.cwd)
 end
 
--- Full border
-function Manager:render(area)
-    local chunks = self:layout(area)
-
-    local bar = function(c, x, y)
-        x, y = math.max(0, x), math.max(0, y)
-        return ui.Bar(ui.Rect { x = x, y = y, w = ya.clamp(0, area.w - x, 1), h = math.min(1, area.h) }, ui.Bar.TOP)
-            :symbol(c)
+-- 修改 tabs 样式
+function Header:tabs()
+    local tabs = #cx.tabs
+    if tabs == 1 then
+        return ui.Line {}
     end
 
-    return ya.flat {
-        -- Borders
-        ui.Border(area, ui.Border.ALL):type(ui.Border.ROUNDED),
-        ui.Bar(chunks[1], ui.Bar.RIGHT),
-        ui.Bar(chunks[3], ui.Bar.LEFT),
-
-        bar("┬", chunks[1].right - 1, chunks[1].y),
-        bar("┴", chunks[1].right - 1, chunks[1].bottom - 1),
-        bar("┬", chunks[2].right, chunks[2].y),
-        bar("┴", chunks[2].right, chunks[1].bottom - 1),
-
-        -- Parent
-        Parent:render(chunks[1]:padding(ui.Padding.xy(1))),
-        -- Current
-        Current:render(chunks[2]:padding(ui.Padding.y(1))),
-        -- Preview
-        Preview:render(chunks[3]:padding(ui.Padding.xy(1))),
-    }
+    local spans = {}
+    for i = 1, tabs do
+        local text = i
+        if THEME.manager.tab_width > 2 then
+            text = ya.truncate(text .. " " .. cx.tabs[i]:name(), { max = THEME.manager.tab_width })
+            if i ~= 1 then
+                spans[#spans + 1] = ui.Span(" ")
+            end
+        end
+        if i == cx.tabs.idx then
+            spans[#spans + 1] = ui.Span(THEME.status.separator_open):fg(THEME.manager.tab_active.bg)
+            spans[#spans + 1] = ui.Span(text):style(THEME.manager.tab_active)
+            spans[#spans + 1] = ui.Span(THEME.status.separator_close):fg(THEME.manager.tab_active.bg)
+        else
+            spans[#spans + 1] = ui.Span(THEME.status.separator_open):fg(THEME.manager.tab_inactive.bg)
+            spans[#spans + 1] = ui.Span(text):style(THEME.manager.tab_inactive)
+            spans[#spans + 1] = ui.Span(THEME.status.separator_close):fg(THEME.manager.tab_inactive.bg)
+        end
+    end
+    return ui.Line(spans)
 end
 
--- 显示修改时间
+-- ╭─────────────────────────────────────────────────────────╮
+-- │ Status                                                  │
+-- ╰─────────────────────────────────────────────────────────╯
+
+-- Show symlink in status bar
+function Status:name()
+    local h = self._tab.current.hovered
+    if not h then
+        return ui.Line("")
+    end
+
+    local linked = ""
+    if h.link_to ~= nil then
+        linked = " -> " .. tostring(h.link_to)
+    end
+    return ui.Line(" " .. h.name .. linked)
+end
+
+-- 修改时间
 function Status:modified()
-    local h = cx.active.current.hovered
+    local h = self._tab.current.hovered
     if h == nil then
         return ui.Line({})
     end
@@ -55,40 +73,21 @@ function Status:modified()
     end
 
     return ui.Line({
-        ui.Span(date):fg(self.style().bg),
+        ui.Span(date):fg(self:style().bg),
         ui.Span(" "),
     })
 end
 
--- Show symlink in status bar
-function Status:name()
-    local h = cx.active.current.hovered
-    if not h then
-        return ui.Span("")
-    end
+Status:children_remove(3, Status.LEFT)
+Status:children_add(Status.name, 3000, Status.LEFT)
+Status:children_add(Status.modified, 500, Status.RIGHT)
 
-    local linked = ""
-    if h.link_to ~= nil then
-        linked = " -> " .. tostring(h.link_to)
-    end
-    return ui.Span(" " .. h.name .. linked)
-end
+-- ╭─────────────────────────────────────────────────────────╮
+-- │ plugin                                                  │
+-- ╰─────────────────────────────────────────────────────────╯
 
-function Status:render(area)
-    self.area = area
-
-    local left = ui.Line({ self:mode(), self:size(), self:name() })
-    local right = ui.Line({ self:modified(), self:permissions(), self:percentage(), self:position() })
-    return ({
-        ui.Paragraph(area, { left }),
-        ui.Paragraph(area, { right }):align(ui.Paragraph.RIGHT),
-        table.unpack(Progress:render(area, right:width())),
-    })
-end
-
-require("session"):setup({
-    sync_yanked = true,
-})
+-- ya pack -a yazi-rs/plugins#full-border
+require("full-border"):setup()
 
 require("projects"):setup({
     last = {
@@ -104,4 +103,8 @@ require("projects"):setup({
         timeout = 3,
         level = "info",
     },
+})
+
+require("session"):setup({
+    sync_yanked = true,
 })

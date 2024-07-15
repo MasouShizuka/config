@@ -22,7 +22,7 @@ class CLayout extends Gui {
         this.curr := 1
 
         super.SetFont("s12")
-        super.AddText("x6 y296 w590 h20", "WSAD调节音量、QE上一首下一首、空格切换静音、C暂停/播放、V设置、X退出")
+        super.AddText("x6 y296 w590 h20", "WSAD调节音量、QE上一首下一首、M切换静音、空格暂停/播放、V设置、X退出")
 
         this.initSound()
     }
@@ -170,12 +170,12 @@ WM_KEYDOWN(wParam, lParam, msg, hwnd) {
         case "v":
             Run("ms-settings:apps-volume")
             ExitApp
-        case "c": send("{Media_Play_Pause}")
+        case "Space": send("{Media_Play_Pause}")
         case "a": layout.decVolume(1)
         case "d": layout.incVolume(1)
         case "s": layout.decVolume(5)
         case "w": layout.incVolume(5)
-        case "Space":
+        case "m":
             SoundSetMute(-1)
             val := SoundGetMute()
             layout.mute(val)
