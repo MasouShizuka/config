@@ -30,7 +30,7 @@ return {
                         -- function to run on opening the terminal
                         on_open = function(term)
                             vim.cmd.startinsert({ bang = true })
-                            vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = term.bufnr, silent = true })
+                            vim.keymap.set("n", "q", function() vim.cmd.quit({ bang = true }) end, { buffer = term.bufnr, silent = true })
 
                             -- 禁用 toggleterm 的 esc 映射
                             vim.keymap.set("t", "<esc>", function()
@@ -58,9 +58,8 @@ return {
                 list[name]:toggle()
             end
 
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "<leader>T", group = "command line tool", mode = "n" },
                 })
             end

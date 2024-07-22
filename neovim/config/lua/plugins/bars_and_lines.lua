@@ -22,11 +22,24 @@ return {
             local herrline_conditions = require("heirline.conditions")
             local heirline_utils = require("heirline.utils")
 
-            local heirline_colors = {}
-            for _, name in ipairs(vim.tbl_values(colors)) do
-                heirline_colors[name] = heirline_utils.get_highlight(name).fg
+            local function load_colors()
+                heirline_utils.on_colorscheme(function()
+                    local heirline_colors = {}
+                    for color, _ in pairs(colors.colors) do
+                        heirline_colors[color] = colors.get_color(color)
+                    end
+                    return heirline_colors
+                end)
             end
-            require("heirline").load_colors(heirline_colors)
+
+            load_colors()
+            vim.api.nvim_create_autocmd("ColorScheme", {
+                callback = function()
+                    load_colors()
+                end,
+                desc = "Change the colors automatically whenever change the colorscheme",
+                group = vim.api.nvim_create_augroup("Heirline", { clear = true }),
+            })
 
             local align = { provider = "%=" }
 
@@ -94,16 +107,16 @@ return {
                 local icon, hl
                 if severity == "ERROR" then
                     icon = icons.diagnostics.Error
-                    hl = { fg = colors.red }
+                    hl = { fg = colors.colors.red }
                 elseif severity == "WARN" then
                     icon = icons.diagnostics.Warn
-                    hl = { fg = colors.yellow }
+                    hl = { fg = colors.colors.yellow }
                 elseif severity == "INFO" then
                     icon = icons.diagnostics.Info
-                    hl = { fg = colors.blue }
+                    hl = { fg = colors.colors.blue }
                 elseif severity == "HINT" then
                     icon = icons.diagnostics.Hint
-                    hl = { fg = colors.cyan }
+                    hl = { fg = colors.colors.cyan }
                 end
 
                 return {
@@ -128,13 +141,13 @@ return {
                 local icon, hl
                 if status == "added" then
                     icon = icons.git.added
-                    hl = { fg = colors.git_add }
+                    hl = { fg = colors.colors.git_add }
                 elseif status == "changed" then
                     icon = icons.git.modified
-                    hl = { fg = colors.git_change }
+                    hl = { fg = colors.colors.git_change }
                 elseif status == "removed" then
                     icon = icons.git.deleted
-                    hl = { fg = colors.git_delete }
+                    hl = { fg = colors.colors.git_delete }
                 end
 
                 return {
@@ -197,19 +210,19 @@ return {
                         t = "TERMINAL",
                     },
                     mode_colors_map = {
-                        n = colors.green,
-                        i = colors.blue,
-                        v = colors.yellow,
-                        V = colors.yellow,
-                        ["\22"] = colors.yellow,
-                        c = colors.purple,
-                        s = colors.yellow,
-                        S = colors.yellow,
-                        ["\19"] = colors.yellow,
-                        R = colors.red,
-                        r = colors.red,
-                        ["!"] = colors.green,
-                        t = colors.blue,
+                        n = colors.colors.green,
+                        i = colors.colors.blue,
+                        v = colors.colors.yellow,
+                        V = colors.colors.yellow,
+                        ["\22"] = colors.colors.yellow,
+                        c = colors.colors.purple,
+                        s = colors.colors.yellow,
+                        S = colors.colors.yellow,
+                        ["\19"] = colors.colors.yellow,
+                        R = colors.colors.red,
+                        r = colors.colors.red,
+                        ["!"] = colors.colors.green,
+                        t = colors.colors.blue,
                     },
                     mode_color = function(self)
                         local mode = herrline_conditions.is_active() and vim.fn.mode() or "n"
@@ -232,7 +245,7 @@ return {
                         provider = function(self)
                             return icons.misc.circle .. self.mode_names[self.mode]
                         end,
-                        hl = { fg = colors.black },
+                        hl = { fg = colors.colors.black },
                     }
                 ),
             }
@@ -297,7 +310,7 @@ return {
                     return vim.api.nvim_get_option_value("modified", { buf = buf })
                 end,
                 provider = icons.dap.Breakpoint,
-                hl = { fg = colors.green },
+                hl = { fg = colors.colors.green },
                 update = "BufModifiedSet",
             }
 
@@ -344,7 +357,7 @@ return {
 
                     if self.tabpage and self.is_active then
                         if hl == nil then
-                            hl = { fg = heirline_utils.get_highlight("TabLineSel").bg }
+                            hl = { fg = colors.colors.purple }
                         end
                         hl["bold"] = true
                     end
@@ -367,7 +380,7 @@ return {
                         return icons.misc.lock
                     end
                 end,
-                hl = { fg = colors.orange },
+                hl = { fg = colors.colors.orange },
             }
 
             local file_size = {
@@ -433,7 +446,7 @@ return {
                     local i = math.floor((self.row - 1) / self.line_count * #self.sbar) + 1
                     return self.sbar[i]:rep(2)
                 end,
-                hl = { fg = colors.blue, bg = colors.gray },
+                hl = { fg = colors.colors.blue, bg = colors.colors.gray },
                 update = "CursorMoved",
             }
 
@@ -449,7 +462,7 @@ return {
                     end
                     return icons.languages.python .. venv_name
                 end,
-                hl = { fg = colors.green },
+                hl = { fg = colors.colors.green },
                 on_click = {
                     callback = function()
                         require("venv-selector").open()
@@ -466,7 +479,7 @@ return {
                     end
                     return icons.misc.gear .. table.concat(names, ",")
                 end,
-                hl = { fg = colors.green },
+                hl = { fg = colors.colors.green },
                 update = { "LspAttach", "LspDetach" },
             }
 
@@ -499,7 +512,7 @@ return {
 
                     return icon .. table.concat(names, ",")
                 end,
-                hl = { fg = colors.red },
+                hl = { fg = colors.colors.red },
             }
 
             local formatter = {
@@ -515,7 +528,7 @@ return {
                     end
                     return icons.misc.format_list_text .. table.concat(names, ",")
                 end,
-                hl = { fg = colors.yellow },
+                hl = { fg = colors.colors.yellow },
                 update = "BufEnter",
             }
 
@@ -623,7 +636,7 @@ return {
                 provider = function(self)
                     return icons.git.branch .. self.status_dict.head
                 end,
-                hl = { fg = colors.orange },
+                hl = { fg = colors.colors.orange },
             }
 
             local git_status = insert_with_child_condition(
@@ -645,7 +658,7 @@ return {
                 provider = function(self)
                     return icons.misc.bug .. self.dap.status()
                 end,
-                hl = colors.blue,
+                hl = colors.colors.blue,
             }
 
             local search_count = {
@@ -672,7 +685,7 @@ return {
                         math.min(search.total, search.maxcount)
                     )
                 end,
-                hl = { fg = colors.yellow },
+                hl = { fg = colors.colors.yellow },
             }
 
             local macro = {
@@ -683,13 +696,13 @@ return {
 
                 {
                     provider = icons.misc.record,
-                    hl = { fg = colors.orange, bold = true },
+                    hl = { fg = colors.colors.orange, bold = true },
                 },
                 surround({ "[", "]" }, nil, {
                     provider = function(self)
                         return vim.fn.reg_recording()
                     end,
-                    hl = { fg = colors.green, bold = true },
+                    hl = { fg = colors.colors.green, bold = true },
                 }),
             }
 
@@ -741,7 +754,7 @@ return {
                 end,
                 on_click = {
                     callback = function(_, minwid, _, button)
-                        if (button == "m") then
+                        if button == "m" then
                             vim.schedule(function()
                                 vim.api.nvim_command("tabclose " .. minwid)
                                 vim.cmd.redrawtabline()
@@ -792,7 +805,7 @@ return {
                 ),
                 padding_before({
                     provider = icons.misc.close,
-                    hl = { fg = colors.gray },
+                    hl = { fg = colors.colors.gray },
                     on_click = {
                         callback = function(_, minwid)
                             vim.schedule(function()
@@ -892,8 +905,8 @@ return {
 
             local tablist = make_tablist(
                 surround({ " ", " " }, nil, tab),
-                { provider = icons.surround.chevron_left, hl = { fg = colors.gray } },
-                { provider = icons.surround.chevron_right, hl = { fg = colors.gray } }
+                { provider = icons.surround.chevron_left, hl = { fg = colors.colors.gray } },
+                { provider = icons.surround.chevron_right, hl = { fg = colors.colors.gray } }
             )
 
             --- A helper function for decoding statuscolumn click events with mouse click pressed, modifier keys, as well as which signcolumn sign was clicked if any
@@ -1205,7 +1218,7 @@ return {
 
             return {
                 statusline = {
-                    hl = { bg = colors.black },
+                    hl = { bg = colors.colors.black },
                     fallthrough = false,
 
                     terminal_statusline,

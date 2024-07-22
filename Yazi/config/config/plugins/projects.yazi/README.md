@@ -82,6 +82,10 @@ The following are the default configurations:
 
 ```lua
 require("projects"):setup({
+    save = {
+        method = "yazi", -- yazi | native
+        native_path = "", -- windows: "%APPDATA%/yazi/state/projects.json", unix: "~/.config/yazi/state/projects.json"
+    },
     last = {
         update_after_save = true,
         update_after_load = true,
@@ -97,6 +101,19 @@ require("projects"):setup({
     },
 })
 ```
+
+### `save`
+
+> [!NOTE]
+> Yazi's api sometimes doesn't work on Windows, which is why the `native` method is proposed
+
+`method` means the method of saving projects:
+- `yazi`: using `yazi` api to save to `.dds` file
+- `native`: using Lua to save
+
+`native_path` means the path of saved file, the defalut is
+- `Windows`: `%APPDATA%/yazi/state/projects.json`
+- `Unix`: `~/.config/yazi/state/projects.json`
 
 ### `last`
 

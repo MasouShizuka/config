@@ -2,17 +2,11 @@
 -- │ Header                                                  │
 -- ╰─────────────────────────────────────────────────────────╯
 
--- 将 cwd 中的 "\" 替换成 "/"
-function Header:cwd(max)
-    local s = ya.readable_path(tostring(self._tab.current.cwd)):gsub("\\", "/") .. self:flags()
-    return ui.Span(ya.truncate(s, { max = max, rtl = true })):style(THEME.manager.cwd)
-end
-
 -- 修改 tabs 样式
 function Header:tabs()
     local tabs = #cx.tabs
     if tabs == 1 then
-        return ui.Line {}
+        return ui.Line({})
     end
 
     local spans = {}
@@ -37,6 +31,9 @@ function Header:tabs()
     return ui.Line(spans)
 end
 
+Header:children_remove(2, Header.RIGHT)
+Header:children_add(Header.tabs, 2000, Header.RIGHT)
+
 -- ╭─────────────────────────────────────────────────────────╮
 -- │ Status                                                  │
 -- ╰─────────────────────────────────────────────────────────╯
@@ -59,17 +56,17 @@ end
 function Status:modified()
     local h = self._tab.current.hovered
     if h == nil then
-        return ui.Line({})
+        return ui.Line("")
     end
 
     local time = h.cha.modified
     if time == nil then
-        return ui.Line({})
+        return ui.Line("")
     end
 
     local date = os.date("%Y-%m-%d %H:%M:%S", time // 1)
     if date == nil then
-        return ui.Line({})
+        return ui.Line("")
     end
 
     return ui.Line({
@@ -80,28 +77,27 @@ end
 
 Status:children_remove(3, Status.LEFT)
 Status:children_add(Status.name, 3000, Status.LEFT)
+
 Status:children_add(Status.modified, 500, Status.RIGHT)
 
 -- ╭─────────────────────────────────────────────────────────╮
 -- │ plugin                                                  │
 -- ╰─────────────────────────────────────────────────────────╯
 
+-- ya pack -a ndtoan96/ouch
 -- ya pack -a yazi-rs/plugins#full-border
-require("full-border"):setup()
+
+require("full-border"):setup({
+    -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
+    type = ui.Border.ROUNDED,
+})
 
 require("projects"):setup({
-    last = {
-        update_after_save = true,
-        update_after_load = true,
+    save = {
+        method = "native",
     },
     merge = {
         quit_after_merge = true,
-    },
-    notify = {
-        enable = true,
-        title = "Projects",
-        timeout = 3,
-        level = "info",
     },
 })
 

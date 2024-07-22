@@ -28,9 +28,8 @@ return {
             "BufReadPost",
         },
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "<leader>m", group = "minimap", mode = "n" },
                 })
             end
@@ -38,7 +37,7 @@ return {
         keys = {
             { "<leader>mm", function() require("mini.map").open() end,         desc = "Open map window",                 mode = "n" },
             { "<leader>mr", function() require("mini.map").refresh() end,      desc = "Refresh map window",              mode = "n" },
-            { "<leader>mc", function() require("mini.map").close() end,        desc = "Close map window",                mode = "n" },
+            { "<leader>mq", function() require("mini.map").close() end,        desc = "Close map window",                mode = "n" },
             { "<leader>mt", function() require("mini.map").toggle() end,       desc = "Toggle map window",               mode = "n" },
             { "<leader>mf", function() require("mini.map").toggle_focus() end, desc = "Toggle focus to/from map window", mode = "n" },
             { "<leader>ms", function() require("mini.map").toggle_side() end,  desc = "Toggle side of map window",       mode = "n" },
@@ -78,13 +77,29 @@ return {
                 end
             end
 
+            local minimap_search = "MiniMapSearch"
+            local minimap_spell = "MiniMapSpell"
+            local function set_hl()
+                vim.api.nvim_set_hl(0, minimap_search, { fg = colors.get_color(colors.colors.green) })
+                vim.api.nvim_set_hl(0, minimap_spell, { fg = colors.get_color(colors.colors.purple) })
+            end
+
+            set_hl()
+            vim.api.nvim_create_autocmd("ColorScheme", {
+                callback = function()
+                    set_hl()
+                end,
+                desc = "Set hl for minimap",
+                group = vim.api.nvim_create_augroup("MiniMapHighlight", { clear = true }),
+            })
+
             local integrations = {
-                map.gen_integration.builtin_search({ search = colors.green }),
+                map.gen_integration.builtin_search({ search = minimap_search }),
                 map.gen_integration.diagnostic({
                     error = "DiagnosticError",
                     warn  = "DiagnosticWarn",
                 }),
-                spell({ spell = colors.purple }),
+                spell({ spell = minimap_spell }),
             }
             if utils.is_git() then
                 table.insert(integrations, 4, map.gen_integration.gitsigns())

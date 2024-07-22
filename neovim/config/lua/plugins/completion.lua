@@ -1,4 +1,3 @@
-local colors = require("utils.colors")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
 local icons = require("utils.icons")
@@ -11,8 +10,6 @@ return {
         config = function()
             local cmp = require("cmp")
             local luasnip = require("luasnip")
-
-            vim.api.nvim_set_hl(0, "CmpItemMenu", { link = colors.purple })
 
             cmp.setup({
                 mapping = cmp.mapping.preset.insert({

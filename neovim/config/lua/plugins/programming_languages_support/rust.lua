@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
+local utils = require("utils")
 
 return {
     {
@@ -39,9 +40,8 @@ return {
 
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    local is_wk_available, wk = pcall(require, "which-key")
-                    if is_wk_available then
-                        wk.add({
+                    if utils.is_available("which-key.nvim") then
+                        require("which-key").add({
                             { "<leader>ll", buffer = args.buf, group = "rust keymap", mode = "n" },
                         })
                     end

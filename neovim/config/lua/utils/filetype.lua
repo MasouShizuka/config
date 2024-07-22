@@ -14,15 +14,20 @@ M.text_filetype_list = {
 
 -- plugins skip these
 M.skip_filetype_list = {
-    "alpha",
+    "dap-repl",
+    "dapui_scopes",
+    "dapui_breakpoints",
+    "dapui_stacks",
+    "dapui_watches",
+    "dapui_console",
     "dashboard",
     "edgy",
-    "fidget",
     "minimap",
-    "neo-tree",
     "NvimTree",
     "notify",
+    "nvim-docs-view",
     "toggleterm",
+    "Trans",
     "trouble",
 }
 -- skip when <c-2>
@@ -34,14 +39,13 @@ M.skip_filetype_list_to_main = {
     "dapui_watches",
     "dapui_console",
     "edgy",
-    "fidget",
     "help",
     "minimap",
-    "neo-tree",
     "NvimTree",
     "notify",
     "nvim-docs-view",
     "toggleterm",
+    "Trans",
     "trouble",
 }
 -- skip when <c-j>, <c-k>
@@ -53,13 +57,12 @@ M.skip_filetype_list_of_panel = {
     "dapui_watches",
     "dapui_console",
     "edgy",
-    "fidget",
     "help",
     "minimap",
-    "neo-tree",
     "NvimTree",
     "nvim-docs-view",
     "toggleterm",
+    "Trans",
     "trouble",
 }
 
@@ -126,13 +129,6 @@ M.left_panel_filetype_list = {
         open = false,
         close = false,
     },
-    ["neo-tree"] = {
-        open = function()
-            require("neo-tree.sources.manager").close_all()
-            require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
-        end,
-        close = function() require("neo-tree.command").execute({ action = "close" }) end,
-    },
     ["NvimTree"] = {
         open = function() require("nvim-tree.api").tree.open() end,
         close = function() require("nvim-tree.api").tree.close() end,
@@ -178,6 +174,17 @@ M.right_panel_filetype_list = {
     ["nvim-docs-view"] = {
         open = function() vim.api.nvim_command("DocsViewToggle") end,
         close = function() vim.api.nvim_command("DocsViewToggle") end,
+    },
+    ["Trans"] = {
+        open = function() vim.api.nvim_command("Translate") end,
+        close = function()
+            local queue = require("Trans.frontend.hover").queue
+            for i = #queue, 1, -1 do
+                queue[i]:destroy()
+                table.remove(queue, i)
+            end
+            utils.table_clear(require("Trans").cache)
+        end,
     },
     ["trouble"] = {
         open = function() require("trouble").open({ mode = "last" }) end,

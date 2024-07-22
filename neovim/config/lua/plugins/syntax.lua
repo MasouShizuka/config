@@ -1,4 +1,3 @@
-local colors = require("utils.colors")
 local environment = require("utils.environment")
 local treesitter = require("utils.treesitter")
 local utils = require("utils")
@@ -19,9 +18,8 @@ return {
             { "sn", desc = "Update n_lines",                             mode = { "n", "x" } },
         },
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "s", group = "mini.surround", mode = "n" },
                 })
             end
@@ -217,12 +215,6 @@ return {
             "TSContextDisable",
             "TSContextToggle",
         },
-        config = function(_, opts)
-            require("treesitter-context").setup(opts)
-
-            vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { link = colors.purple })
-            vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true })
-        end,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },

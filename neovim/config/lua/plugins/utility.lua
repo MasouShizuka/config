@@ -1,6 +1,7 @@
 local buftype = require("utils.buftype")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
+local path = require("utils.path")
 local treesitter = require("utils.treesitter")
 local utils = require("utils")
 
@@ -94,6 +95,54 @@ return {
                         find = "written",
                     },
                     opts = { skip = true },
+                },
+            },
+        },
+    },
+
+    {
+        "JuanZoran/Trans.nvim",
+        build = function()
+            require("Trans").install()
+        end,
+        cmd = {
+            "Translate",
+            "TransPlay",
+            "TranslateInput",
+        },
+        dependencies = {
+            {
+                "kkharji/sqlite.lua",
+                config = function(_, opts)
+                    vim.g.sqlite_clib_path = path.home_path .. "/scoop/apps/sqlite-with-dll/current/sqlite3.dll"
+                end,
+            },
+        },
+        enabled = not environment.is_vscode,
+        opts = {
+            debug = false,
+            frontend = {
+                default = {
+                    ---@type {open: string | boolean, close: string | boolean, interval: integer} Hover Window Animation
+                    animation = {
+                        open = false, -- 'fold', 'slid'
+                        close = false,
+                    },
+                },
+                hover = {
+                    ---@type string[] auto close events
+                    auto_close_events = false,
+                    ---@type table<string, string[]> order to display translate result
+                    order = {
+                        offline = {
+                            "title",
+                            "translation",
+                            "exchange",
+                            "pos",
+                            "tag",
+                            "definition",
+                        },
+                    },
                 },
             },
         },

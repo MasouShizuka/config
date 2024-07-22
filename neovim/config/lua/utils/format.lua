@@ -60,10 +60,11 @@ M.format_list = vim.tbl_keys(M.format)
 M.formatters_by_ft = {
     cpp = { "clang-format" },
     java = { "clang-format" },
-    markdown = { "autocorrect", "markdownlint-cli2" },
+    markdown = { "autocorrect", "markdownlint-cli2", "trim_newlines", "trim_whitespace" },
     python = { "black", "isort" },
     sh = { "shfmt" },
     zsh = { "shfmt" },
+    ["_"] = { "trim_newlines", "trim_whitespace" },
 }
 
 M.format_filetype_list = vim.tbl_keys(M.formatters_by_ft)

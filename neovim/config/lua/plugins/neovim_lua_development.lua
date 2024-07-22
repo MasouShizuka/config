@@ -8,6 +8,13 @@ return {
         },
         enabled = not environment.is_vscode,
         lazy = true,
-        opts = {},
+        opts = {
+            integrations = {
+                -- add the cmp source for completion of:
+                -- `require "modname"`
+                -- `---@module "modname"`
+                cmp = false,
+            },
+        },
     },
 }

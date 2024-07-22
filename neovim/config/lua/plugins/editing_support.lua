@@ -206,27 +206,6 @@ return {
             },
         },
     },
-    {
-        "echasnovski/mini.trailspace",
-        config = function(_, opts)
-            require("mini.trailspace").setup(opts)
-        end,
-        init = function()
-            if environment.is_vscode then
-                vim.api.nvim_create_autocmd("InsertLeave", {
-                    callback = function()
-                        -- 新行不清空空格
-                        if vim.api.nvim_get_current_line():match("^%s*$") == nil then
-                            require("mini.trailspace").trim()
-                        end
-                    end,
-                    desc = "Trail space when insert leave",
-                    group = vim.api.nvim_create_augroup("TrailSpace", { clear = true }),
-                })
-            end
-        end,
-        lazy = true,
-    },
 
     -- NOTE: 需要安装 ripgrep
     {
@@ -238,7 +217,6 @@ return {
             "TodoTelescope",
         },
         dependencies = {
-            "folke/trouble.nvim",
             "nvim-lua/plenary.nvim",
         },
         enabled = not environment.is_vscode,
@@ -248,13 +226,13 @@ return {
         },
         opts = function()
             local keywords = {
-                FIX = { icon = icons.misc.bug, color = colors.red, alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                TODO = { icon = icons.misc.check, color = colors.green },
-                HACK = { icon = icons.misc.flame, color = colors.orange },
-                WARN = { icon = icons.diagnostics.Warn, color = colors.yellow, alt = { "WARNING", "XXX" } },
-                PERF = { icon = icons.misc.clock, color = colors.purple, alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                NOTE = { icon = icons.diagnostics.Info, color = colors.blue, alt = { "INFO" } },
-                TEST = { icon = icons.misc.beaker, color = colors.cyan, alt = { "TESTING", "PASSED", "FAILED" } },
+                FIX = { icon = icons.misc.bug, color = colors.get_color(colors.colors.red), alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+                TODO = { icon = icons.misc.check, color = colors.get_color(colors.colors.green) },
+                HACK = { icon = icons.misc.flame, color = colors.get_color(colors.colors.orange) },
+                WARN = { icon = icons.diagnostics.Warn, color = colors.get_color(colors.colors.yellow), alt = { "WARNING", "XXX" } },
+                PERF = { icon = icons.misc.clock, color = colors.get_color(colors.colors.purple), alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+                NOTE = { icon = icons.diagnostics.Info, color = colors.get_color(colors.colors.blue), alt = { "INFO" } },
+                TEST = { icon = icons.misc.beaker, color = colors.get_color(colors.colors.cyan), alt = { "TESTING", "PASSED", "FAILED" } },
             }
             -- 忽略大小写
             for key, value in pairs(keywords) do
@@ -275,18 +253,6 @@ return {
                 -- * after: highlights after the keyword (todo text)
                 highlight = {
                     keyword = "bg",
-                },
-                -- list of named colors where we try to extract the guifg from the
-                -- list of highlight groups or use the hex color if hl not found as a fallback
-                colors = {
-                    [colors.red] = { colors.red },
-                    [colors.green] = { colors.green },
-                    [colors.orange] = { colors.orange },
-                    [colors.yellow] = { colors.yellow },
-                    [colors.purple] = { colors.purple },
-                    [colors.blue] = { colors.blue },
-                    [colors.cyan] = { colors.cyan },
-                    default = { colors.gray },
                 },
             }
         end,
@@ -366,9 +332,8 @@ return {
             "CBcatalog",
         },
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     {
                         mode = { "n", "x" },
                         { "<leader>gc",  group = "comment box" },
@@ -922,13 +887,15 @@ return {
         config = function(_, opts)
             require("auto-save").setup(opts)
 
-            local function trailspace()
-                if not utils.is_available("mini.trailspace") then
-                    return
+            local ts
+            if utils.is_available("mini.trailspace") then
+                ts = function()
+                    require("mini.trailspace").trim()
                 end
+            end
 
-                local is_mini_trailspace_available, mini_trailspace = pcall(require, "mini.trailspace")
-                if not is_mini_trailspace_available then
+            local function trailspace()
+                if ts == nil then
                     return
                 end
 
@@ -938,9 +905,8 @@ return {
                 end
 
                 -- 当处于 LuaSnip 的 snippet 时，不清空尾随空格
-                if utils.is_available("LuaSnip") then
-                    local luasnip = require("luasnip")
-                    if luasnip.in_snippet() then
+                if utils.is_available("LuaSnip") and package.loaded["luasnip"] then
+                    if require("luasnip").in_snippet() then
                         return
                     end
                 end
@@ -951,7 +917,8 @@ return {
                     return
                 end
 
-                mini_trailspace.trim()
+                ts()
+
                 vim.g.prev_trailspace_time = trailspace_time
             end
 

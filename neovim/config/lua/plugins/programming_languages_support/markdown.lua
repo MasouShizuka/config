@@ -1,3 +1,4 @@
+local buftype = require("utils.buftype")
 local environment = require("utils.environment")
 local icons = require("utils.icons")
 local keymap = require("utils.keymap")
@@ -99,14 +100,29 @@ return {
         name = "render-markdown", -- Only needed if you have another plugin named markdown.nvim
         opts = function()
             -- https://github.com/OXY2DEV/markview.nvim
-            vim.api.nvim_set_hl(0, "MarkdownHeading1", { bg = "#453244", fg = "#f38ba8" })
-            vim.api.nvim_set_hl(0, "MarkdownHeading2", { bg = "#46393e", fg = "#fab387" })
-            vim.api.nvim_set_hl(0, "MarkdownHeading3", { bg = "#464245", fg = "#f9e2af" })
-            vim.api.nvim_set_hl(0, "MarkdownHeading4", { bg = "#374243", fg = "#a6e3a1" })
-            vim.api.nvim_set_hl(0, "MarkdownHeading5", { bg = "#2e3d51", fg = "#74c7ec" })
-            vim.api.nvim_set_hl(0, "MarkdownHeading6", { bg = "#393b54", fg = "#b4befe" })
+            local function set_hl()
+                vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = "#453244", fg = "#f38ba8" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = "#46393e", fg = "#fab387" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = "#464245", fg = "#f9e2af" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = "#374243", fg = "#a6e3a1" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = "#2e3d51", fg = "#74c7ec" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = "#393b54", fg = "#b4befe" })
+            end
+
+            set_hl()
+            vim.api.nvim_create_autocmd("ColorScheme", {
+                callback = function()
+                    set_hl()
+                end,
+                desc = "Set hl for render-markdown",
+                group = vim.api.nvim_create_augroup("RenderMarkdownHighlight", { clear = true }),
+            })
 
             return {
+                exclude = {
+                    -- Buftypes ignored by this plugin, see :h 'buftype'
+                    buftypes = buftype.skip_buftype_list,
+                },
                 latex = {
                     -- Whether LaTeX should be rendered, mainly used for health check
                     enabled = false,
@@ -123,16 +139,6 @@ return {
                         icons.misc.format_header_4,
                         icons.misc.format_header_5,
                         icons.misc.format_header_6,
-                    },
-                    -- The 'level' is used to index into the array using a clamp
-                    -- Highlight for the heading icon and extends through the entire line
-                    backgrounds = {
-                        "MarkdownHeading1",
-                        "MarkdownHeading2",
-                        "MarkdownHeading3",
-                        "MarkdownHeading4",
-                        "MarkdownHeading5",
-                        "MarkdownHeading6",
                     },
                 },
                 pipe_table = {

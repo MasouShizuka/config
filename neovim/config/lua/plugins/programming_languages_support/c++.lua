@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
+local utils = require("utils")
 
 return {
     -- NOTE: leetcode.nvim 使用 curl 来 post 数据，需要安装 curl
@@ -16,9 +17,8 @@ return {
         config = function(_, opts)
             require("leetcode").setup(opts)
 
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     {
                         mode = "n",
                         { "<leader>L",  group = "leet" },

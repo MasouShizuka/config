@@ -6,10 +6,16 @@ local utils = require("utils")
 
 local M = {}
 
-function M.setup()
+function M.setup(opts)
     -- 清除原有 keymap
-    vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
-    vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
+    if utils.is_available("which-key.nvim") then
+        local wk = require("which-key")
+        vim.keymap.set("n", "s", function() wk.show({ mode = "n", keys = "s" }) end, { desc = "Show s keymaps" })
+        vim.keymap.set("x", "s", function() wk.show({ mode = "x", keys = "s" }) end, { desc = "Show s keymaps" })
+    else
+        vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
+        vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
+    end
     vim.keymap.set({ "n", "x" }, "<c-c>", "<nop>", { silent = true })
 
     -- 不复制到 clipboard
@@ -195,10 +201,7 @@ function M.setup()
             -- 聚焦 left panel
             vim.keymap.set("n", keymap["<c-1>"], function()
                 if not filetype.toggle_panel("left") then
-                    if utils.is_available("neo-tree.nvim") then
-                        require("neo-tree.sources.manager").close_all()
-                        require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
-                    elseif utils.is_available("nvim-tree.lua") then
+                    if utils.is_available("nvim-tree.lua") then
                         require("nvim-tree.api").tree.open()
                     end
                 end

@@ -92,9 +92,8 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "<leader>d", group = "dap", mode = "n" },
                 })
             end

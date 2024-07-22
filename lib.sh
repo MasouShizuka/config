@@ -35,5 +35,27 @@ download_github_latest() {
     file=$3
     output=$4
 
-    curl -kL -o "$output"  "$(curl -ks "https://api.github.com/repos/$author/$repo/releases/latest" | grep "browser_download_url" | cut -d \" -f 4 | grep "$file")"
+    curl -kL -o "$output" "$(curl -ks "https://api.github.com/repos/$author/$repo/releases/latest" | grep "browser_download_url" | cut -d \" -f 4 | grep "$file")"
+}
+
+execute_scripts_of_subdirectories() {
+    parent_dir=$1
+    script_name=$2
+    description=$3
+
+    for d in "$parent_dir"/*; do
+        if [[ -d $d ]]; then
+            name=${d##*/}
+            cd "$d" || continue
+
+            if [[ -f $script_name ]]; then
+                echo "开始：$name $description"
+                bash "$script_name"
+                echo "结束：$name $description"
+                echo "----------------------------------------"
+            fi
+
+            cd "$DIR" || continue
+        fi
+    done
 }

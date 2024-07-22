@@ -8,9 +8,16 @@ return {
         },
         enabled = not environment.is_vscode,
         keys = {
-            { "<leader>?", function() require("which-key").show({ global = false }) end, desc = "Buffer Local Keymaps (which-key)",  mode = "n" },
+            { "<leader>?", function() require("which-key").show({ global = false }) end, desc = "Buffer Local Keymaps (which-key)", mode = "n" },
         },
         lazy = true,
-        opts = {},
+        opts = {
+            -- Start hidden and wait for a key to be pressed before showing the popup
+            -- Only used by enabled xo mapping modes.
+            ---@param ctx { mode: string, operator: string }
+            defer = function(ctx)
+              return vim.list_contains({ "<C-V>", "V", "v" }, ctx.mode)
+            end,
+        },
     },
 }

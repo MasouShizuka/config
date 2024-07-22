@@ -410,8 +410,7 @@
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
-        "*.md": "default",
-        "{git,gitlens}:/**/*.{md,csv}": "default"
+        "*.md": "default"
     },
     "workbench.experimental.enableNewProfilesUI": true,
     "workbench.iconTheme": "material-icon-theme",

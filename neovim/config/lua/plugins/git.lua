@@ -1,6 +1,7 @@
 local environment = require("utils.environment")
 local icons = require("utils.icons")
 local keymap = require("utils.keymap")
+local utils = require("utils")
 
 return {
     {
@@ -10,9 +11,8 @@ return {
             "User GitFile",
         },
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "<leader>g", group = "gitsigns", mode = "n" },
                 })
             end

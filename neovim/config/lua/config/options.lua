@@ -4,7 +4,7 @@ local utils = require("utils")
 
 local M = {}
 
-function M.setup()
+function M.setup(opts)
     -- Char
     vim.opt.list = true                                                                                     -- show <Tab> and <EOL>
     vim.opt.listchars:append({

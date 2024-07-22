@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
+local utils = require("utils")
 
 return {
     {
@@ -13,24 +14,32 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "<leader>t", group = "telescope", mode = "n" },
                 })
             end
         end,
         keys = {
-            { "<c-p>",      function() require("telescope.builtin").find_files({ hidden = true, no_ignore = true }) end, desc = "Find files",      mode = "n" },
             { "<leader>/",  function() require("telescope.builtin").live_grep() end,                                     desc = "Live grep",       mode = "n" },
-            { "<leader>tb", function() require("telescope.builtin").buffers() end,                                       desc = "Buffers",         mode = "n" },
+            { "<c-p>",      function() require("telescope.builtin").find_files({ hidden = true, no_ignore = true }) end, desc = "Find files",      mode = "n" },
             { "<leader>to", function() require("telescope.builtin").oldfiles() end,                                      desc = "Old files",       mode = "n" },
             { "<leader>t:", function() require("telescope.builtin").command_history() end,                               desc = "Command history", mode = "n" },
             { "<leader>t/", function() require("telescope.builtin").search_history() end,                                desc = "Search history",  mode = "n" },
-            { "<leader>th", function() require("telescope.builtin").help_tags() end,                                     desc = "Help tags",       mode = "n" },
             { "<leader>tv", function() require("telescope.builtin").vim_options() end,                                   desc = "Vim options",     mode = "n" },
-            { "<leader>tr", function() require("telescope.builtin").registers() end,                                     desc = "Registers",       mode = "n" },
-            { "<leader>tn", function() require("telescope").extensions.notify.notify() end,                              desc = "Notify",          mode = "n" },
+            { "<leader>tb", function() require("telescope.builtin").buffers() end,                                       desc = "Buffers",         mode = "n" },
+            {
+                "<leader>tc",
+                function()
+                    utils.event("ColorschemePre", true)
+                    require("telescope.builtin").colorscheme({ enable_preview = true })
+                end,
+                desc = "Colorscheme",
+                mode = "n",
+            },
+            { "<leader>t\"", function() require("telescope.builtin").registers() end,        desc = "Registers",  mode = "n" },
+            { "<leader>th",  function() require("telescope.builtin").highlights() end,       desc = "Highlights", mode = "n" },
+            { "<leader>tn",  function() require("telescope").extensions.notify.notify() end, desc = "Notify",     mode = "n" },
         },
         opts = function()
             local actions = require("telescope.actions")

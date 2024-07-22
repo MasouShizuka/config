@@ -21,23 +21,23 @@ use schemars::gen::SchemaSettings;
 use schemars::schema_for;
 use uds_windows::UnixStream;
 
-use komorebi_core::config_generation::ApplicationConfiguration;
-use komorebi_core::config_generation::IdWithIdentifier;
-use komorebi_core::config_generation::MatchingRule;
-use komorebi_core::config_generation::MatchingStrategy;
-use komorebi_core::ApplicationIdentifier;
-use komorebi_core::Axis;
-use komorebi_core::BorderImplementation;
-use komorebi_core::FocusFollowsMouseImplementation;
-use komorebi_core::Layout;
-use komorebi_core::MoveBehaviour;
-use komorebi_core::OperationDirection;
-use komorebi_core::Rect;
-use komorebi_core::Sizing;
-use komorebi_core::SocketMessage;
-use komorebi_core::StateQuery;
-use komorebi_core::WindowContainerBehaviour;
-use komorebi_core::WindowKind;
+use crate::core::config_generation::ApplicationConfiguration;
+use crate::core::config_generation::IdWithIdentifier;
+use crate::core::config_generation::MatchingRule;
+use crate::core::config_generation::MatchingStrategy;
+use crate::core::ApplicationIdentifier;
+use crate::core::Axis;
+use crate::core::BorderImplementation;
+use crate::core::FocusFollowsMouseImplementation;
+use crate::core::Layout;
+use crate::core::MoveBehaviour;
+use crate::core::OperationDirection;
+use crate::core::Rect;
+use crate::core::Sizing;
+use crate::core::SocketMessage;
+use crate::core::StateQuery;
+use crate::core::WindowContainerBehaviour;
+use crate::core::WindowKind;
 
 use crate::border_manager;
 use crate::border_manager::IMPLEMENTATION;
@@ -1343,6 +1343,10 @@ impl WindowManager {
             }
             SocketMessage::AnimationStyle(style) => {
                 *ANIMATION_STYLE.lock() = style;
+            }
+            SocketMessage::ToggleTransparency => {
+                let current = transparency_manager::TRANSPARENCY_ENABLED.load(Ordering::SeqCst);
+                transparency_manager::TRANSPARENCY_ENABLED.store(!current, Ordering::SeqCst);
             }
             SocketMessage::Transparency(enable) => {
                 transparency_manager::TRANSPARENCY_ENABLED.store(enable, Ordering::SeqCst);

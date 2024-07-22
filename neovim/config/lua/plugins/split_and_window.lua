@@ -185,6 +185,7 @@ return {
             local bottom = {
                 {
                     ft = "qf",
+                    title = "QuickFix",
                     size = { height = 0.3 },
                 },
             }
@@ -202,7 +203,7 @@ return {
                     ft = "nvim-docs-view",
                     size = { width = 0.3 },
                     pinned = true,
-                    open = "DocsViewToggle",
+                    open = filetype.right_panel_filetype_list["nvim-docs-view"].open,
                 },
             }
 
@@ -242,50 +243,12 @@ return {
                 }
             end
 
-            if utils.is_available("neo-tree.nvim") then
-                local neo_tree = {
-                    {
-                        ft = "neo-tree",
-                        filter = function(buf)
-                            return vim.b[buf].neo_tree_source == "filesystem"
-                        end,
-                        title = "Neo-Tree",
-                        size = { width = 0.2, height = 0.7 },
-                        pinned = true,
-                        open = function()
-                            require("neo-tree.sources.manager").close_all()
-                            require("neo-tree.command").execute({ dir = vim.fn.getcwd() })
-                        end,
-                    },
-                    -- {
-                    --     ft = "neo-tree",
-                    --     filter = function(buf)
-                    --         return vim.b[buf].neo_tree_source == "document_symbols"
-                    --     end,
-                    --     title = "Neo-Tree Document Symbols",
-                    --     size = { width = 0.2 },
-                    --     pinned = true,
-                    --     open = function()
-                    --         require("neo-tree.command").execute({
-                    --             position = "top",
-                    --             source = "document_symbols",
-                    --         })
-                    --     end,
-                    -- },
-                }
-                for _, value in ipairs(neo_tree) do
-                    left[#left + 1] = value
-                end
-            end
-
             if utils.is_available("nvim-tree.lua") then
                 left[#left + 1] = {
                     ft = "NvimTree",
                     size = { width = 0.2, height = 0.7 },
                     pinned = true,
-                    open = function()
-                        require("nvim-tree.api").tree.open()
-                    end,
+                    open = filetype.left_panel_filetype_list["NvimTree"].open,
                 }
             end
 
@@ -298,7 +261,16 @@ return {
                     end,
                     size = { height = 0.3 },
                     pinned = true,
-                    open = "ToggleTerm",
+                    open = filetype.bottom_panel_filetype_list["toggleterm"].open,
+                }
+            end
+
+            if utils.is_available("Trans.nvim") then
+                right[#right + 1] = {
+                    ft = "Trans",
+                    size = { width = 0.3 },
+                    pinned = true,
+                    open = filetype.right_panel_filetype_list["Trans"].open,
                 }
             end
 

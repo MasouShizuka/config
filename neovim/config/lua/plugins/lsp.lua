@@ -30,9 +30,8 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
-            local is_wk_available, wk = pcall(require, "which-key")
-            if is_wk_available then
-                wk.add({
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
                     { "<leader>x", group = "trouble", mode = "n" },
                 })
             end
@@ -273,7 +272,7 @@ return {
 
     {
         "mfussenegger/nvim-lint",
-        config = function(_, opt)
+        config = function(_, opts)
             local nvim_lint = require("lint")
 
             for linter, config in pairs(lint.lint) do
@@ -354,25 +353,13 @@ return {
 
             require("lspconfig.ui.windows").default_options.border = "rounded"
 
-            -- Customizing how diagnostics are displayed
-            vim.diagnostic.config({
-                virtual_text = {
-                    source = "if_many",
-                    spacing = 4,
-                    prefix = icons.dap.Breakpoint,
-                },
-                update_in_insert = true,
-                severity_sort = true,
-            })
-
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     local client = vim.lsp.get_client_by_id(args.data.client_id)
                     local buf = args.buf
 
-                    local is_wk_available, wk = pcall(require, "which-key")
-                    if is_wk_available then
-                        wk.add({
+                    if utils.is_available("which-key.nvim") then
+                        require("which-key").add({
                             {
                                 buffer = args.buf,
                                 mode = "n",
@@ -719,16 +706,23 @@ return {
         enabled = not environment.is_vscode,
         ft = lsp.lsp_filetype_list,
         init = function()
-            -- Change diagnostic symbols in the sign column (gutter)
+            -- Customizing how diagnostics are displayed
             vim.diagnostic.config({
+                virtual_text = {
+                    source = "if_many",
+                    spacing = 4,
+                    prefix = icons.dap.Breakpoint,
+                },
                 signs = {
                     text = {
                         [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
-                        [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
                         [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
                         [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
+                        [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
                     },
                 },
+                update_in_insert = true,
+                severity_sort = true,
             })
         end,
     },

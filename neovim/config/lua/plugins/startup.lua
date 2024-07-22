@@ -100,14 +100,10 @@ return {
                 },
             }
 
-            vim.api.nvim_set_hl(0, "DashboardHeader", { link = colors.yellow })
             for _, button in ipairs(opts.config.center) do
                 button.desc = button.desc .. string.rep(" ", 48 - #button.desc)
-                button.icon_hl = colors.purple
-                button.key_hl = colors.red
                 button.key_format = " %s"
             end
-            vim.api.nvim_set_hl(0, "DashboardFooter", { link = colors.blue })
 
             return opts
         end,
