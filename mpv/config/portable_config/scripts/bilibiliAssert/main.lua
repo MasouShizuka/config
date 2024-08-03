@@ -3,8 +3,29 @@
 -- note to escape path for winodws (c:\\users\\user\\...)
 
 local utils = require "mp.utils"
+local options = require "mp.options"
+
+local o = {
+	--弹幕字体
+	fontname = mp.get_property("sub-font"),
+	--弹幕字体大小
+	fontsize = "50",
+	--弹幕不透明度(0-1)
+	opacity = "0.95",
+	--滚动弹幕显示的持续时间 (秒)
+	duration_marquee = "10",
+	--静止弹幕显示的持续时间 (秒)
+	duration_still = "5",
+	--保留底部多少高度的空白区域 (取值0.0-1.0)
+	percent = "0.75",
+	--弹幕屏蔽的关键词文件路径，支持绝对和相对路径
+	filter_file = "",
+}
+
+options.read_options(o, _, function() end)
 
 local danmu_file = nil
+local danmu_open = false
 local sec_sub_visibility = mp.get_property_native("secondary-sub-visibility")
 local sec_sub_ass_override = mp.get_property_native("secondary-sub-ass-override")
 
@@ -35,10 +56,9 @@ end
 local function file_exists(path)
 	if path then
 		local meta = utils.file_info(path)
-		return meta.is_file
-	else
-		return false
+		return meta and meta.is_file
 	end
+	return false
 end
 
 -- Log function: log to both terminal and MPV OSD (On-Screen Display)
@@ -52,6 +72,7 @@ end
 local function load_danmu(danmu_file)
 	if not file_exists(danmu_file) then return end
 	log("开火")
+	danmu_open = true
 	-- 如果可用将弹幕挂载为次字幕
 	if sec_sub_ass_override then
 		mp.commandv("sub-add", danmu_file, "auto")
@@ -84,10 +105,9 @@ local function assprocess()
 	end
 	if cid == nil then return end
 
-	local python_path = "python" -- path to python bin
-
 	-- get script directory
 	local directory = mp.get_script_directory()
+	local danmaku_dir = utils.split_path(os.tmpname())
 	local py_path = "" .. directory .. "/Danmu2Ass.py"
 
 	-- under windows platform, convert path format
@@ -96,34 +116,28 @@ local function assprocess()
 		string.gsub(directory, "/", "\\")
 		py_path = "" .. directory .. "\\Danmu2Ass.py"
 	end
-	local dw = mp.get_property_osd("display-width")
-	local dh = mp.get_property_osd("display-height")
-	local dw = mp.get_property_number("display-width", 1920)
-	local dh = mp.get_property_number("display-height", 1080)
+	local dw = "1920"
+	local dh = "1080"
 	local aspect = mp.get_property_number("width", 16) / mp.get_property_number("height", 9)
 	if aspect > dw / dh then
 		dh = math.floor(dw / aspect)
 	elseif aspect < dw / dh then
 		dw = math.floor(dh * aspect)
 	end
-	-- 保留底部多少高度的空白区域 (默认0, 取值0.0-1.0)
-	local percent = 0.75
 	-- choose to use python or .exe
-	local arg = { "python", py_path, "-d", directory,
-		-- 设置屏幕分辨率 （自动取值)
+	local arg = { "python", py_path, "-d", danmaku_dir,
 		"-s", "" .. dw .. "x" .. dh,
-		-- 设置字体大小    (默认 37.0)
-		"-fs", "37.0",
-		-- 设置弹幕不透明度 (默认 0.95)
-		"-a", "0.95",
-		-- 滚动弹幕显示的持续时间 (默认 10秒)
-		"-dm", "10.0",
-		-- 静止弹幕显示的持续时间 (默认 5秒)
-		"-ds", "5.0",
-		"-p", tostring(math.floor(percent * dh)),
+		"-fn", o.fontname,
+		"-fs", o.fontsize,
+		"-a", o.opacity,
+		"-dm", o.duration_marquee,
+		"-ds", o.duration_still,
+		"-flf", mp.command_native({ "expand-path", o.filter_file }),
+		"-p", tostring(math.floor(o.percent * dh)),
 		"-r",
 		cid,
 	}
+	-- local arg = { ''..directory..'\\Danmu2Ass.exe', '-d', directory, cid}
 	log("弹幕正在上膛")
 	-- run python to get comments
 	mp.command_native_async({
@@ -131,11 +145,10 @@ local function assprocess()
 		playback_only = false,
 		capture_stdout = true,
 		args = arg,
-		capture_stdout = true,
 	}, function(res, val, err)
 		if err == nil
 		then
-			danmu_file = "" .. directory .. "/bilibili.ass"
+			danmu_file = "" .. danmaku_dir .. "/bilibili.ass"
 			load_danmu(danmu_file)
 		else
 			log(err)
@@ -144,39 +157,40 @@ local function assprocess()
 end
 
 -- toggle function
-function asstoggle()
+function asstoggle(event)
 	if not file_exists(danmu_file) then return end
-	local sec_visibility = mp.get_property_bool("secondary-sub-visibility")
-	if sec_sub_ass_override and sec_visibility then
+	if danmu_open then
 		log("停火")
-		mp.set_property_native("secondary-sub-visibility", false)
-		return
-	elseif sec_sub_ass_override == nil then
-		-- if exists @danmu filter， remove it
-		for _, f in ipairs(mp.get_property_native("vf")) do
-			if f.label == "danmu" then
-				log("停火")
-				mp.commandv("vf", "remove", "@danmu")
-				return
+		danmu_open = false
+		if sec_sub_ass_override then
+			if event then
+				mp.set_property_native("secondary-sub-visibility", sec_sub_visibility)
+			else
+				mp.set_property_native("secondary-sub-visibility", false)
+			end
+			mp.set_property_native("secondary-sub-ass-override", sec_sub_ass_override)
+			return
+		elseif sec_sub_ass_override == nil then
+			-- if exists @danmaku filter， remove it
+			for _, f in ipairs(mp.get_property_native("vf")) do
+				if f.label == "danmu" then
+					mp.commandv("vf", "remove", "@danmu")
+					return
+				end
 			end
 		end
 	end
 	-- otherwise, load danmu
-	if file_exists(danmu_file) then load_danmu(danmu_file) end
+	if not event and file_exists(danmu_file) then
+		load_danmu(danmu_file)
+	end
 end
 
--- modified
--- mp.add_key_binding("b", "toggle", asstoggle)
+mp.add_key_binding("b", "toggle", asstoggle)
 mp.register_event("file-loaded", assprocess)
 mp.register_event("end-file", function()
-	asstoggle()
-	if sec_sub_ass_override then
-		mp.set_property_native("secondary-sub-visibility", sec_sub_visibility)
-		mp.set_property_native("secondary-sub-ass-override", sec_sub_ass_override)
+	asstoggle(true)
+	if file_exists(danmu_file) then
+		os.remove(danmu_file)
 	end
-
-	-- modified
-	local directory = mp.get_script_directory()
-	local danmu_file = "" .. directory .. "/bilibili.ass"
-	os.remove(danmu_file)
 end)

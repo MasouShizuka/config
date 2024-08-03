@@ -1,6 +1,8 @@
+local colors = require("utils.colors")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
 local format = require("utils.format")
+local utils = require("utils")
 
 return {
     {
@@ -34,25 +36,35 @@ return {
 
     {
         "lukas-reineke/indent-blankline.nvim",
-        -- 严重影响性能，因此不启用 rainbow-delimiters integration
-        -- config = function(_, opts)
-        --     if utils.is_available("rainbow-delimiters.nvim") then
-        --         local highlight = {
-        --             "RainbowDelimiterRed",
-        --             "RainbowDelimiterYellow",
-        --             "RainbowDelimiterBlue",
-        --             "RainbowDelimiterOrange",
-        --             "RainbowDelimiterGreen",
-        --             "RainbowDelimiterViolet",
-        --             "RainbowDelimiterCyan",
-        --         }
-        --         opts["scope"] = { highlight = highlight }
+        config = function(_, opts)
+            if utils.is_available("rainbow-delimiters.nvim") then
+                local highlight = {
+                    "RainbowDelimiterRed",
+                    "RainbowDelimiterYellow",
+                    "RainbowDelimiterBlue",
+                    "RainbowDelimiterOrange",
+                    "RainbowDelimiterGreen",
+                    "RainbowDelimiterViolet",
+                    "RainbowDelimiterCyan",
+                }
+                opts.scope = { highlight = highlight }
 
-        --         local hooks = require("ibl.hooks")
-        --         hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
-        --     end
-        --     require("ibl").setup(opts)
-        -- end,
+                local hooks = require("ibl.hooks")
+                -- create the highlight groups in the highlight setup hook, so they are reset
+                -- every time the colorscheme changes
+                hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterRed", { fg = colors.get_color("red") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterYellow", { fg = colors.get_color("yellow") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterBlue", { fg = colors.get_color("blue") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterOrange", { fg = colors.get_color("orange") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterGreen", { fg = colors.get_color("green") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterViolet", { fg = colors.get_color("purple") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterCyan", { fg = colors.get_color("cyan") })
+                end)
+                hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
+            end
+            require("ibl").setup(opts)
+        end,
         enabled = not environment.is_vscode,
         event = {
             "BufNewFile",

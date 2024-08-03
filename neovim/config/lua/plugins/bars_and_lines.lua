@@ -341,11 +341,11 @@ return {
                     return filename
                 end,
                 hl = function(self)
-                    local hl
-
                     if self.tabpage and not self.is_active then
-                        return hl
+                        return { fg = colors.colors.white }
                     end
+
+                    local hl
 
                     local error = get_diagnostic_severity("error")
                     local warn = get_diagnostic_severity("warn")
@@ -359,7 +359,7 @@ return {
                         if hl == nil then
                             hl = { fg = colors.colors.purple }
                         end
-                        hl["bold"] = true
+                        hl.bold = true
                     end
 
                     return hl
@@ -579,6 +579,7 @@ return {
                     for token in filename:gmatch("([^/]+)/?") do
                         children[#children + 1] = {
                             provider = token,
+                            hl = { fg = colors.colors.white },
                         }
                         children[#children + 1] = {
                             provider = separator,
@@ -602,6 +603,7 @@ return {
                                 },
                                 {
                                     provider = d.name:gsub("%%", "%%%%"):gsub("%s*->%s*", ""),
+                                    hl = { fg = colors.colors.white },
                                 },
                             }
                             children[#children + 1] = child

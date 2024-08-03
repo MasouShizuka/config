@@ -349,12 +349,20 @@ function M.setup(opts)
                 elseif ft == "lua" then
                     vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
                 elseif ft == "java" then
-                    local out_path = vim.fn.fnamemodify(curr_file:gsub("src/", "target/"), ":h")
+                    local curr_dir = vim.fn.fnamemodify(curr_file, ":h")
+                    local out_path = curr_dir:gsub("src/", "target/")
                     if vim.fn.isdirectory(out_path) == 0 then
                         vim.fn.mkdir(out_path, "p")
                     end
-                    local class_name = vim.fn.fnamemodify(curr_file, ":t:r")
-                    vim.api.nvim_command(string.format([[TermExec cmd='javac -d "%s" "%s" && java -classpath "%s" "%s"']], out_path, curr_file, out_path, class_name))
+
+                    vim.api.nvim_command(string.format(
+                        [[TermExec cmd='javac --class-path "%s" -d "%s" -encoding utf-8 "%s" && java --class-path "%s" "%s"']],
+                        curr_dir:match(".*src"),
+                        "target",
+                        curr_file,
+                        "target",
+                        vim.fn.fnamemodify(curr_file:match(".*src/(.*)"), ":r"):gsub("/", ".")
+                    ))
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")
@@ -364,7 +372,7 @@ function M.setup(opts)
                 elseif ft == "rust" then
                     vim.api.nvim_command([[TermExec cmd='cargo run']])
                 elseif ft == "sh" then
-                    vim.api.nvim_command(string.format([[TermExec cmd='bash "%s"']], curr_file))
+                    vim.api.nvim_command(string.format([[TermExec cmd='sh "%s"']], curr_file))
                 elseif ft == "tex" then
                     if vim.tbl_contains(lsp.lsp_list, "texlab") then
                         vim.api.nvim_command("TexlabBuild")
@@ -378,12 +386,20 @@ function M.setup(opts)
                 elseif ft == "lua" then
                     vim.api.nvim_command(string.format([[luafile "%s"]], curr_file))
                 elseif ft == "java" then
-                    local out_path = vim.fn.fnamemodify(curr_file:gsub("src/", "target/"), ":h")
+                    local curr_dir = vim.fn.fnamemodify(curr_file, ":h")
+                    local out_path = curr_dir:gsub("src/", "target/")
                     if vim.fn.isdirectory(out_path) == 0 then
                         vim.fn.mkdir(out_path, "p")
                     end
-                    local class_name = vim.fn.fnamemodify(curr_file, ":t:r")
-                    vim.api.nvim_command(string.format([[javac -d "%s" "%s" && java -classpath "%s" "%s"]], out_path, curr_file, out_path, class_name))
+
+                    vim.api.nvim_command(string.format(
+                        [[javac --class-path "%s" -d "%s" -encoding utf-8 "%s" && java --class-path "%s" "%s"]],
+                        curr_dir:match(".*src"),
+                        "target",
+                        curr_file,
+                        "target",
+                        vim.fn.fnamemodify(curr_file:match(".*src/(.*)"), ":r"):gsub("/", ".")
+                    ))
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")
@@ -393,7 +409,7 @@ function M.setup(opts)
                 elseif ft == "rust" then
                     vim.api.nvim_command("cargo run")
                 elseif ft == "sh" then
-                    vim.api.nvim_command(string.format([[bash "%s"]], curr_file))
+                    vim.api.nvim_command(string.format([[sh "%s"]], curr_file))
                 elseif ft == "tex" then
                     if vim.tbl_contains(lsp.lsp_list, "texlab") then
                         vim.api.nvim_command("TexlabBuild")

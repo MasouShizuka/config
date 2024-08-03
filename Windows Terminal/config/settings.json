@@ -582,10 +582,7 @@
         }
     ],
     "copyFormatting": "none",
-    "copyOnSelect": false,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-    "experimental.rendering.forceFullRepaint": false,
-    "experimental.rendering.software": false,
     "language": "zh-Hans-CN",
     "newTabMenu": 
     [
@@ -600,14 +597,15 @@
             "colorScheme": "One Dark Pro",
             "cursorShape": "filledBox",
             "elevate": true,
-            "experimental.retroTerminalEffect": false,
             "font": 
             {
-                "face": "\u7b49\u8ddd\u66f4\u7eb1\u9ed1\u4f53 SC Nerd Font",
-                "size": 16.0
+                "cellHeight": "1.1",
+                "face": "Iosevka Nerd Font",
+                "size": 17.0
             },
             "opacity": 75,
-            "useAcrylic": true
+            "useAcrylic": true,
+            "useAtlasEngine": true
         },
         "list": 
         [
@@ -620,10 +618,10 @@
                 "source": "Windows.Terminal.PowershellCore"
             },
             {
-                "commandline": "C:/msys64/msys2_shell.cmd -ucrt64 -defterm -here -use-full-path -no-start -shell zsh",
+                "commandline": "ucrt64.cmd -shell zsh",
                 "guid": "{6cd0cda5-4186-4502-befb-f5e7caaff682}",
                 "hidden": false,
-                "icon": "C:/msys64/ucrt64.ico",
+                "icon": "%USERPROFILE%/scoop/apps/msys2/current/ucrt64.ico",
                 "name": "UCRT64 / MSYS2",
                 "startingDirectory": "%USERPROFILE%"
             },
@@ -632,13 +630,6 @@
                 "hidden": false,
                 "name": "Arch",
                 "source": "Windows.Terminal.Wsl"
-            },
-            {
-                "commandline": "C:/Program Files/Git/bin/bash.exe -li",
-                "guid": "{6c6fa2ca-edb6-4489-9346-61ce302a091a}",
-                "icon": "C:/Program Files/Git/mingw64/share/git/git-for-windows.ico",
-                "name": "Git Bash",
-                "startingDirectory": "%USERPROFILE%"
             },
             {
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
@@ -724,12 +715,14 @@
             "brightRed": "#E06C75",
             "brightWhite": "#FFFFFF",
             "brightYellow": "#D19A66",
+            "cursorColor": "#FFFFFF",
             "cyan": "#56B6C2",
             "foreground": "#ABB2BF",
             "green": "#98C379",
             "name": "One Dark Pro",
             "purple": "#C678DD",
             "red": "#E06C75",
+            "selectionBackground": "#FFFFFF",
             "white": "#ABB2BF",
             "yellow": "#D19A66"
         },
@@ -895,10 +888,6 @@
             "yellow": "#808000"
         }
     ],
-    "showTerminalTitleInTitlebar": true,
-    "tabWidthMode": "equal",
     "themes": [],
-    "trimBlockSelection": true,
-    "useAcrylicInTabRow": true,
-    "windowingBehavior": "useNew"
+    "useAcrylicInTabRow": true
 }

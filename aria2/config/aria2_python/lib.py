@@ -21,7 +21,7 @@ def execute_script(script_name, args):
     script_path = join(current_dir, script_name)
 
     Popen(
-        ["bash", script_path, *(args[1:])],
+        ["sh", script_path, *(args[1:])],
         shell=True,
     )
 

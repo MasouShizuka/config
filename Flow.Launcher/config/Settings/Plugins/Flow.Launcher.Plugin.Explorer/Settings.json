@@ -22,7 +22,7 @@
   "IndexSearchEngine": 1,
   "PathEnumerationEngine": 1,
   "ContentSearchEngine": 1,
-  "EverythingInstalledPath": "C:\\Program Files\\Everything\\Everything.exe",
+  "EverythingInstalledPath": "C:\\Users\\MasouShizuka\\scoop\\shims\\everything.exe",
   "SortOption": 3,
   "EnableEverythingContentSearch": false,
   "EverythingEnabled": true,

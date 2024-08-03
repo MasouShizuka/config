@@ -17,7 +17,7 @@ return {
             vim.api.nvim_create_autocmd("BufReadPost", {
                 callback = function()
                     require("ccc")
-                    vim.api.nvim_del_augroup_by_name("CccActivate")
+                    pcall(vim.api.nvim_del_augroup_by_name, "CccActivate")
                 end,
                 desc = "Activate ccc",
                 group = ccc_activate,

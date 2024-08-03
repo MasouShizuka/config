@@ -238,7 +238,7 @@ function y() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
     yazi "$@" --cwd-file="$tmp"
     if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-        cd -- "$cwd"
+        builtin cd -- "$cwd"
     fi
     rm -f -- "$tmp"
 }
@@ -250,8 +250,8 @@ function y() {
 # ╰───────╯
 
 if ((is_windows)); then
-    if [[ -f "$HOME/mambaforge/Scripts/conda.exe" ]]; then
-        eval "$("$HOME"/mambaforge/Scripts/conda.exe 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2>/dev/null
+    if [[ -f "$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe" ]]; then
+        eval "$("$HOME"/scoop/apps/mambaforge/current/Scripts/conda.exe 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2>/dev/null
     fi
 elif ((is_linux)); then
     __conda_setup=$("$HOME/mambaforge/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)

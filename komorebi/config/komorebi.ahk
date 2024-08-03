@@ -82,7 +82,7 @@ RunWait("komorebic.exe complete-configuration", , "Hide")
 While (ProcessExist("yasb.exe")) {
     ProcessClose("yasb.exe")
 }
-Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
+Run(Format("yasb.exe", A_ScriptDir), , "Hide")
 
 
 ; ╭─────────╮
@@ -311,7 +311,7 @@ send_to_monitor(ThisHotkey) {
     While (ProcessExist("yasb.exe")) {
         ProcessClose("yasb.exe")
     } Else {
-        Run(Format("{}/yasb/yasb.exe", A_ScriptDir), , "Hide")
+        Run(Format("yasb.exe", A_ScriptDir), , "Hide")
     }
 }
 

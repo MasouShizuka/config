@@ -46,6 +46,17 @@ return require("lazy").setup({
 
         {
             config = function(_, opts)
+                require("config.neovide").setup(opts)
+            end,
+            dir = path.config_path .. "/lua/config/neovide",
+            enabled = environment.is_neovide,
+            lazy = false,
+            name = "config.neovide",
+            opts = {},
+        },
+
+        {
+            config = function(_, opts)
                 require("config.mappings").setup(opts)
             end,
             dir = path.config_path .. "/lua/config/mappings",
@@ -212,14 +223,21 @@ return require("lazy").setup({
             end,
             keys = function()
                 local keys = {
-                    { "<leader>ctc", function() require("config.user_commands.toggle").toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
-                    { "<leader>ctC", function() require("config.user_commands.toggle").toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
-                    { "<leader>ctf", function() require("config.user_commands.toggle").toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
-                    { "<leader>ctw", function() require("config.user_commands.toggle").toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
+                    { "<leader>ctc", function() require("config.user_commands.toggle").common.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
+                    { "<leader>ctC", function() require("config.user_commands.toggle").common.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
                 }
-                if not environment.is_vscode then
-                    keys[#keys + 1] = { "<leader>cts", function() require("config.user_commands.toggle").toggle_spell() end, desc = "Toggle spell", mode = "n" }
-                    keys[#keys + 1] = { "<leader>ctS", function() require("config.user_commands.toggle").toggle_syntax() end, desc = "Toggle syntax", mode = "n" }
+                if environment.is_vscode then
+                    keys = utils.table_concat(keys, {
+                        { "<leader>ctf", function() require("config.user_commands.toggle").vscode.toggle_fileformat() end, desc = "Toggle fileformat", mode = "n" },
+                        { "<leader>ctw", function() require("config.user_commands.toggle").vscode.toggle_wrap() end,       desc = "Toggle wrap",       mode = "n" },
+                    })
+                else
+                    keys = utils.table_concat(keys, {
+                        { "<leader>ctf", function() require("config.user_commands.toggle").nvim.toggle_fileformat() end, desc = "Toggle fileformat", mode = "n" },
+                        { "<leader>cts", function() require("config.user_commands.toggle").nvim.toggle_spell() end,      desc = "Toggle spell",      mode = "n" },
+                        { "<leader>ctS", function() require("config.user_commands.toggle").nvim.toggle_syntax() end,     desc = "Toggle syntax",     mode = "n" },
+                        { "<leader>ctw", function() require("config.user_commands.toggle").nvim.toggle_wrap() end,       desc = "Toggle wrap",       mode = "n" },
+                    })
                 end
                 return keys
             end,

@@ -87,7 +87,7 @@ return {
     {
         "MeanderingProgrammer/markdown.nvim",
         cmd = {
-            "RenderMarkdownToggle",
+            "RenderMarkdown",
         },
         dependencies = {
             "nvim-tree/nvim-web-devicons",
@@ -118,11 +118,15 @@ return {
                 group = vim.api.nvim_create_augroup("RenderMarkdownHighlight", { clear = true }),
             })
 
+            local overrides = {
+                buftype = {},
+            }
+            for _, bt in ipairs(buftype.skip_buftype_list) do
+                overrides.buftype[bt] = {}
+                overrides.buftype[bt].enabled = false
+            end
+
             return {
-                exclude = {
-                    -- Buftypes ignored by this plugin, see :h 'buftype'
-                    buftypes = buftype.skip_buftype_list,
-                },
                 latex = {
                     -- Whether LaTeX should be rendered, mainly used for health check
                     enabled = false,
@@ -152,6 +156,12 @@ return {
                         "│", "─",
                     },
                 },
+                -- More granular configuration mechanism, allows different aspects of buffers
+                -- to have their own behavior. Values default to the top level configuration
+                -- if no override is provided. Supports the following fields:
+                --   enabled, max_file_size, render_modes, anti_conceal, heading, code, dash, bullet,
+                --   checkbox, quote, pipe_table, callout, link, sign, win_options
+                overrides = overrides,
             }
         end,
     },

@@ -887,6 +887,9 @@ return {
         config = function(_, opts)
             require("auto-save").setup(opts)
 
+            local trailspace_interval = 3
+            local prev_trailspace_time = os.time()
+
             local ts
             if utils.is_available("mini.trailspace") then
                 ts = function()
@@ -913,13 +916,13 @@ return {
 
                 -- 间隔小于指定间隔时，不清空尾随空格
                 local trailspace_time = os.time()
-                if trailspace_time - vim.g.prev_trailspace_time <= vim.g.trailspace_interval then
+                if trailspace_time - prev_trailspace_time <= trailspace_interval then
                     return
                 end
 
                 ts()
 
-                vim.g.prev_trailspace_time = trailspace_time
+                prev_trailspace_time = trailspace_time
             end
 
             local last_paste_start = vim.fn.getpos("'[")
@@ -952,22 +955,21 @@ return {
                 desc = "AutoSaveWritePost event",
                 pattern = "AutoSaveWritePost",
             })
-
+        end,
+        enabled = not environment.is_vscode,
+        init = function()
             if vim.g.autosave_enabled == nil then
                 vim.g.autosave_enabled = true
             end
 
-            vim.keymap.set("n", "<leader>cta", function() utils.toggle_global_setting("autosave_enabled", function(enabled, prev_enabled, global_enabled) end) end, { desc = "Toggle autoSave", silent = true })
-            vim.keymap.set("n", "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(enabled, prev_enabled) end) end, { desc = "Toggle autoSave (buffer)", silent = true })
-        end,
-        enabled = not environment.is_vscode,
-        init = function()
-            vim.g.trailspace_interval = 3
-            vim.g.prev_trailspace_time = os.time()
-
             -- auto-save 自动激活
             vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertLeave", "TextChanged" }, {
                 callback = function(args)
+                    if package.loaded["auto-save"] then
+                        pcall(vim.api.nvim_del_augroup_by_name, "AutoSaveActivate")
+                        return
+                    end
+
                     local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
                     local is_modifiable = vim.api.nvim_get_option_value("modifiable", { buf = args.buf })
                     local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
@@ -981,6 +983,10 @@ return {
                 group = vim.api.nvim_create_augroup("AutoSaveActivate", { clear = true }),
             })
         end,
+        keys = {
+            { "<leader>cta", function() utils.toggle_global_setting("autosave_enabled", function(enabled, prev_enabled, global_enabled) end) end, desc = "Toggle autoSave",          mode = "n" },
+            { "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(enabled, prev_enabled) end) end,                 desc = "Toggle autoSave (buffer)", mode = "n" },
+        },
         opts = {
             execution_message = {
                 enabled = false,

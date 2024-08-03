@@ -1,5 +1,6 @@
-﻿#Include ../bin/lib/InputTipWindow.ahk
-#Include ../bin/lib/Functions.ahk
+﻿#Include ../bin/lib/Functions.ahk
+#Include ../bin/lib/InputTipWindow.ahk
+#Include ../bin/lib/KeymapManager.ahk
 
 ; 自定义的函数写在这个文件里,  然后能在 MyKeymap 中调用
 
@@ -205,6 +206,14 @@ close_or_run_script(path, args := "") {
         RunWait(cmd)
     }
     DetectHiddenWindows(false)
+}
+
+
+; Task Switch
+
+task_switch() {
+    Send("^!{tab}")
+    KeymapManager.SetLockRequest(TaskSwitchKeymap("w", "s", "a", "d", "x", "space"), false, false)
 }
 
 

@@ -22,7 +22,9 @@ M.lsp = function(lspconfig, default_config)
             if environment.is_windows then
                 -- NOTE: 需要安装 gcc
                 -- 可安装 msys2 中的 mingw-w64-ucrt-x86_64-gcc
-                -- 同时需要检查是否有其他的环境变量路径是否含有 libstdc++-6.dll，若有则可能需要去除
+                --
+                -- 需要检查是否有其他的环境变量路径是否含有 libstdc++-6.dll
+                -- 若有则需要去除
                 -- 否则 gcc 编译出的程序可能无法执行
                 -- https://stackoverflow.com/questions/76495365/simple-hello-world-program-giving-segmentation-fault-in-vs-code
                 fallbackFlags[#fallbackFlags + 1] = "--target=x86_64-w64-mingw32"

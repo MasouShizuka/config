@@ -119,6 +119,6 @@ function y {
 # │ Conda │
 # ╰───────╯
 
-if (Test-Path "$HOME/mambaforge/Scripts/conda.exe") {
-    (& "$HOME/mambaforge/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null
+if (Test-Path "$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe") {
+    (& "$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null
 }

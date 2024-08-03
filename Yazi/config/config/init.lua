@@ -94,7 +94,7 @@ require("full-border"):setup({
 
 require("projects"):setup({
     save = {
-        method = "native",
+        method = "lua",
     },
     merge = {
         quit_after_merge = true,

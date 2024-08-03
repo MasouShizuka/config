@@ -11,9 +11,9 @@ patch:
 
   style:
     color_scheme: win11dark
-    font_face: Sarasa Mono SC Nerd Font
-    label_font_face: Sarasa Mono SC Nerd Font
-    comment_font_face: Sarasa Mono SC Nerd Font
+    font_face: Sarasa Mono SC
+    label_font_face: Sarasa Mono SC
+    comment_font_face: Sarasa Mono SC
     font_point: 20
     label_font_point: 20
     comment_font_point: 20

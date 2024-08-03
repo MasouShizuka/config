@@ -514,6 +514,75 @@ local SUPPORTED_KEYS = {
     { on = "z" },
 }
 
+local _load_config = ya.sync(function(state, args)
+    state.save = {
+        method = "yazi",
+        lua_save_path = "",
+    }
+    if type(args.save) == "table" then
+        if type(args.save.method) == "string" then
+            state.save.method = args.save.method
+        end
+        if type(args.save.lua_save_path) == "string" then
+            state.save.lua_save_path = args.save.lua_save_path
+        else
+            local lua_save_path
+            local appdata = os.getenv("APPDATA")
+            local postfix = "/yazi/state/projects.json"
+            if appdata then
+                lua_save_path = appdata:gsub("\\", "/") .. postfix
+            else
+                lua_save_path = os.getenv("HOME") .. postfix
+            end
+
+            state.save.lua_save_path = lua_save_path
+        end
+    end
+
+    state.last = {
+        update_after_save = true,
+        update_after_load = true,
+    }
+    if type(args.last) == "table" then
+        if type(args.last.update_after_save) == "boolean" then
+            state.last.update_after_save = args.last.update_after_save
+        end
+        if type(args.last.update_after_load) == "boolean" then
+            state.last.update_after_load = args.last.update_after_load
+        end
+    end
+
+    state.merge = {
+        quit_after_merge = false,
+    }
+    if type(args.merge) == "table" then
+        if type(args.merge.quit_after_merge) == "boolean" then
+            state.merge.quit_after_merge = args.merge.quit_after_merge
+        end
+    end
+
+    state.notify = {
+        enable = true,
+        title = "Projects",
+        timeout = 3,
+        level = "info",
+    }
+    if type(args.notify) == "table" then
+        if type(args.notify.enable) == "boolean" then
+            state.notify.enable = args.notify.enable
+        end
+        if type(args.notify.title) == "string" then
+            state.notify.title = args.notify.title
+        end
+        if type(args.notify.timeout) == "number" then
+            state.notify.timeout = args.notify.timeout
+        end
+        if type(args.notify.level) == "string" then
+            state.notify.level = args.notify.level
+        end
+    end
+end)
+
 local _notify = ya.sync(function(state, message)
     ya.notify({
         title = state.notify.title,
@@ -535,8 +604,8 @@ local _save_projects = ya.sync(function(state, projects)
 
     if state.save.method == "yazi" then
         ps.pub_to(0, "@projects", projects)
-    elseif state.save.method == "native" then
-        local f = io.open(state.save.native_path, "w")
+    elseif state.save.method == "lua" then
+        local f = io.open(state.save.lua_save_path, "w")
         if not f then
             return
         end
@@ -558,8 +627,8 @@ local _load_projects = ya.sync(function(state)
                 state.projects.last = body.last
             end
         end)
-    elseif state.save.method == "native" then
-        local f = io.open(state.save.native_path, "r")
+    elseif state.save.method == "lua" then
+        local f = io.open(state.save.lua_save_path, "r")
         if not f then
             return
         end
@@ -833,74 +902,8 @@ return {
             delete_project(selected_idx)
         end
     end,
-    setup = function(state, args)
-        state.save = {
-            method = "yazi",
-            native_path = "",
-        }
-        if type(args.save) == "table" then
-            if type(args.save.method) == "string" then
-                state.save.method = args.save.method
-            end
-            if type(args.save.native_path) == "string" then
-                state.save.native_path = args.save.native_path
-            else
-                local native_path
-                local appdata = os.getenv("APPDATA")
-                local postfix = "/yazi/state/projects.json"
-                if appdata then
-                    native_path = appdata:gsub("\\", "/") .. postfix
-                else
-                    native_path = os.getenv("HOME") .. postfix
-                end
-
-                state.save.native_path = native_path
-            end
-        end
-
-        state.last = {
-            update_after_save = true,
-            update_after_load = true,
-        }
-        if type(args.last) == "table" then
-            if type(args.last.update_after_save) == "boolean" then
-                state.last.update_after_save = args.last.update_after_save
-            end
-            if type(args.last.update_after_load) == "boolean" then
-                state.last.update_after_load = args.last.update_after_load
-            end
-        end
-
-        state.merge = {
-            quit_after_merge = false,
-        }
-        if type(args.merge) == "table" then
-            if type(args.merge.quit_after_merge) == "boolean" then
-                state.merge.quit_after_merge = args.merge.quit_after_merge
-            end
-        end
-
-        state.notify = {
-            enable = true,
-            title = "Projects",
-            timeout = 3,
-            level = "info",
-        }
-        if type(args.notify) == "table" then
-            if type(args.notify.enable) == "boolean" then
-                state.notify.enable = args.notify.enable
-            end
-            if type(args.notify.title) == "string" then
-                state.notify.title = args.notify.title
-            end
-            if type(args.notify.timeout) == "number" then
-                state.notify.timeout = args.notify.timeout
-            end
-            if type(args.notify.level) == "string" then
-                state.notify.level = args.notify.level
-            end
-        end
-
+    setup = function(_, args)
+        _load_config(args)
         _load_projects()
         _merge_event()
     end,

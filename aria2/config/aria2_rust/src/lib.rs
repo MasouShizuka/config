@@ -21,7 +21,7 @@ pub fn execute_script(script_name: &str, args: &Vec<String>) {
 
     let filtered_env: HashMap<String, String> = vars().filter(|&(ref k, _)| k == "PATH").collect();
 
-    let mut command = Command::new("bash");
+    let mut command = Command::new("sh");
     command
         .envs(&filtered_env)
         .current_dir(current_dir)

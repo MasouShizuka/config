@@ -1,0 +1,10 @@
+frame = "none"
+no-multigrid = true
+
+[font]
+# normal = [ "Iosevka Nerd Font", "Sarasa Mono SC" ]
+normal = [ "Maple Mono NF CN", "Sarasa Mono SC" ]
+size = 17.0
+
+[font.features]
+"Maple Mono NF CN" = [ "+cv01", "+cv03", "+ss03" ]

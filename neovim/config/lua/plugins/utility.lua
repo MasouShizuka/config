@@ -1,8 +1,8 @@
 local buftype = require("utils.buftype")
 local environment = require("utils.environment")
 local filetype = require("utils.filetype")
+local lsp = require("utils.lsp")
 local path = require("utils.path")
-local treesitter = require("utils.treesitter")
 local utils = require("utils")
 
 return {
@@ -72,7 +72,6 @@ return {
                 override = {
                     ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
                     ["vim.lsp.util.stylize_markdown"] = true,
-                    ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
                 },
             },
             -- you can enable a preset for easier configuration
@@ -114,7 +113,7 @@ return {
             {
                 "kkharji/sqlite.lua",
                 config = function(_, opts)
-                    vim.g.sqlite_clib_path = path.home_path .. "/scoop/apps/sqlite-with-dll/current/sqlite3.dll"
+                    vim.g.sqlite_clib_path = path.scoop_app_path .. "/sqlite-with-dll/current/sqlite3.dll"
                 end,
             },
         },
@@ -152,10 +151,9 @@ return {
         "kevinhwang91/nvim-ufo",
         dependencies = {
             "kevinhwang91/promise-async",
-            "nvim-treesitter/nvim-treesitter",
         },
         enabled = not environment.is_vscode,
-        ft = treesitter.treesitter_filetype_list,
+        ft = lsp.lsp_filetype_list,
         keys = {
             { "zR", function() require("ufo").openAllFolds() end,               desc = "Open all folds",          mode = "n" },
             { "zM", function() require("ufo").closeAllFolds() end,              desc = "Close all folds",         mode = "n" },
@@ -294,11 +292,11 @@ return {
                         vim.b[args.buf].bigfile_detected = 1
                         disable_features(bigfile_features, args.buf)
 
-                        vim.api.nvim_del_augroup_by_name("BigFile")
+                        pcall(vim.api.nvim_del_augroup_by_name, "BigFileActivate")
                     end
                 end,
                 desc = "Big file event",
-                group = vim.api.nvim_create_augroup("BigFile", { clear = true }),
+                group = vim.api.nvim_create_augroup("BigFileActivate", { clear = true }),
             })
 
             vim.api.nvim_create_autocmd("BufReadPost", {

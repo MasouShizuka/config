@@ -286,6 +286,7 @@ impl Window {
     pub fn close(self) -> Result<()> {
         // NOTE: 某些程序关闭窗口时关不掉，因此默认杀掉进程
         let kill_exes = [
+            "neovide.exe".to_string(),
             "wezterm-gui.exe".to_string(),
             "WindowsTerminal.exe".to_string(),
         ];

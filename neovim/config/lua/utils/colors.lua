@@ -17,7 +17,7 @@ M.colors = {
     git_delete = "git_delete",
 }
 
-M.highlights = {
+M.color_highlight_map = {
     [M.colors.black]      = "EndOfBuffer",
     [M.colors.blue]       = "DiagnosticInfo",
     [M.colors.cyan]       = "DiagnosticHint",
@@ -29,9 +29,9 @@ M.highlights = {
     [M.colors.white]      = "Conceal",
     [M.colors.yellow]     = "DiagnosticWarn",
 
-    [M.colors.git_add]    = "diffAdded",
-    [M.colors.git_change] = "diffChanged",
-    [M.colors.git_delete] = "diffRemoved",
+    [M.colors.git_add]    = { "diffAdded", "DiffAdd" },
+    [M.colors.git_change] = { "diffChanged", "DiffChange" },
+    [M.colors.git_delete] = { "diffRemoved", "DiffDelete" },
 }
 
 M.colorscheme = {
@@ -46,6 +46,20 @@ M.colorscheme = {
             white  = "text",
         },
         package_name = "catppuccin",
+    },
+    github = {
+        func = function(name)
+            local color = require("github-theme.palette").load(vim.g.colors_name)[name]
+            if type(color) == "table" and color.base then
+                return color.bright
+            elseif type(color) == "string" then
+                return color
+            end
+        end,
+        map = {
+            purple = "magenta",
+        },
+        package_name = "github-theme",
     },
     gruvbox = {
         func = function(name) return require("gruvbox").palette[name] end,
@@ -81,7 +95,7 @@ M.colorscheme = {
     },
 }
 
-M.get_colorscheme_color_name = function(colorscheme, color_name)
+M.get_colorscheme_color = function(colorscheme, color_name)
     local t = M.colorscheme[colorscheme]
     if t then
         local colorscheme_color_name = t.map[color_name]
@@ -93,32 +107,42 @@ M.get_colorscheme_color_name = function(colorscheme, color_name)
     return M.colors[color_name]
 end
 
-M.get_color = function(name)
-    local colors_name = string.lower(vim.g.colors_name)
-    for colorscheme, t in pairs(M.colorscheme) do
-        if colors_name:match(colorscheme) then
-            name = M.get_colorscheme_color_name(colorscheme, name)
+M.get_color = function(color, colorscheme)
+    colorscheme = colorscheme or vim.g.colors_name
 
-            local func = t.func
-            if func then
-                local color = func(name)
-                if color then
-                    return color
-                end
-            end
-
+    local spec
+    for c, s in pairs(M.colorscheme) do
+        if colorscheme:match(c) then
+            colorscheme = c
+            spec = s
             break
         end
     end
 
-    local hl = vim.api.nvim_get_hl(0, { name = M.highlights[name], link = false })
-    if hl.fg then
-        return string.format("#%06x", hl.fg)
-    elseif hl.bg then
-        return string.format("#%06x", hl.bg)
+    if spec then
+        local func = spec.func
+        if func then
+            local color_value = func(M.get_colorscheme_color(colorscheme, color))
+            if color_value then
+                return color_value
+            end
+        end
     end
 
-    return name
+    local hls = M.color_highlight_map[color]
+    if type(hls) == "string" then
+        hls = { hls }
+    end
+    for _, hl in ipairs(hls) do
+        local highlight = vim.api.nvim_get_hl(0, { name = hl, link = false })
+        if highlight.fg then
+            return string.format("#%06x", highlight.fg)
+        elseif highlight.bg then
+            return string.format("#%06x", highlight.bg)
+        end
+    end
+
+    return color
 end
 
 return M

@@ -211,9 +211,7 @@ function M.toggle_local_option(option, option_list, callback, silent)
     local enabled = vim.api.nvim_get_option_value(option, { scope = "local" })
     local prev_enabled = enabled
 
-    if option_list == nil or #option_list == 0 then
-        enabled = not enabled
-    else
+    if vim.islist(option_list) then
         local prev_index = 1
         for index, value in ipairs(option_list) do
             if value == prev_enabled then
@@ -228,6 +226,8 @@ function M.toggle_local_option(option, option_list, callback, silent)
         end
 
         enabled = option_list[index]
+    else
+        enabled = not enabled
     end
     vim.api.nvim_set_option_value(option, enabled, { scope = "local" })
 
@@ -236,9 +236,11 @@ function M.toggle_local_option(option, option_list, callback, silent)
     end
 
     if not silent then
-        local status = enabled
-        if option_list == nil then
+        local status
+        if type(status) == "boolean" then
             status = M.bool2str(enabled)
+        else
+            status = enabled
         end
         vim.notify(string.format("%s: %s", option, status), vim.log.levels.INFO, { title = "Local Option" })
     end

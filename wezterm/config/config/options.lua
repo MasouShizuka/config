@@ -16,8 +16,15 @@ return {
     color_scheme = "custom",
 
     command_palette_font_size = 20.0,
-    font = wezterm.font("Sarasa Mono SC Nerd Font"),
-    font_size = 16.0,
+    font = wezterm.font_with_fallback({
+        {
+            family = "Maple Mono NF CN",
+            harfbuzz_features = { "+cv01", "+cv03", "+ss03" },
+        },
+        -- "Iosevka Nerd Font",
+        "Sarasa Mono SC",
+    }),
+    font_size = 17.0,
 
     webgpu_power_preference = "HighPerformance",
 
@@ -31,10 +38,6 @@ return {
     window_background_opacity = 0.6,
     window_close_confirmation = "NeverPrompt",
     window_decorations = "RESIZE",
-    window_frame = {
-        font = wezterm.font("Sarasa Mono SC Nerd Font", { weight = "Bold" }),
-        font_size = 14.0,
-    },
     window_padding = {
         left = 2,
         right = 2,

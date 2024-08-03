@@ -50,7 +50,7 @@ execute_scripts_of_subdirectories() {
 
             if [[ -f $script_name ]]; then
                 echo "开始：$name $description"
-                bash "$script_name"
+                sh "$script_name"
                 echo "结束：$name $description"
                 echo "----------------------------------------"
             fi

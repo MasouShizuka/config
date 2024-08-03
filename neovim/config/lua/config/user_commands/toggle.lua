@@ -1,9 +1,8 @@
-local environment = require("utils.environment")
 local utils = require("utils")
 
 local M = {}
 
-local both = {
+local common = {
     toggle_cursor_center = function(buf)
         local toggle_setting
         if buf then
@@ -70,18 +69,9 @@ M.setup = function(opts)
         vim.g.cursor_center_enabled = false
     end
 
-    for name, func in pairs(both) do
-        M[name] = func
-    end
-    if environment.is_vscode then
-        for name, func in pairs(vscode_only) do
-            M[name] = func
-        end
-    else
-        for name, func in pairs(neovim_only) do
-            M[name] = func
-        end
-    end
+    M.common = common
+    M.vscode = vscode_only
+    M.nvim = neovim_only
 end
 
 return M

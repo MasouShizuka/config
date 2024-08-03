@@ -3,12 +3,7 @@ local M = {}
 M.zsh = {
     label = "Zsh",
     args = {
-        "C:/msys64/msys2_shell.cmd",
-        "-ucrt64",
-        "-defterm",
-        "-here",
-        "-use-full-path",
-        "-no-start",
+        "ucrt64.cmd",
         "-shell",
         "zsh",
     },

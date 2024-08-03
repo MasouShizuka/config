@@ -26,6 +26,7 @@ use crate::core::config_generation::MatchingRule;
 use crate::core::custom_layout::CustomLayout;
 use crate::core::Arrangement;
 use crate::core::Axis;
+use crate::core::BorderImplementation;
 use crate::core::BorderStyle;
 use crate::core::CycleDirection;
 use crate::core::DefaultLayout;
@@ -953,6 +954,7 @@ impl WindowManager {
 
         let no_titlebar = NO_TITLEBAR.lock();
         let known_transparent_hwnds = transparency_manager::known_hwnds();
+        let border_implementation = border_manager::IMPLEMENTATION.load();
 
         for monitor in self.monitors_mut() {
             for workspace in monitor.workspaces_mut() {
@@ -966,7 +968,9 @@ impl WindowManager {
                             window.opaque()?;
                         }
 
-                        window.remove_accent()?;
+                        if matches!(border_implementation, BorderImplementation::Windows) {
+                            window.remove_accent()?;
+                        }
 
                         window.restore();
                     }
@@ -1534,6 +1538,31 @@ impl WindowManager {
         let next_idx = direction.next_idx(current_idx, len);
 
         container.focus_window(next_idx);
+        container.load_focused_window();
+
+        self.update_focused_workspace(self.mouse_follows_focus, true)
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn focus_container_window(&mut self, idx: usize) -> Result<()> {
+        self.handle_unmanaged_window_behaviour()?;
+
+        tracing::info!("focusing container window at index {idx}");
+
+        let container = self.focused_container_mut()?;
+
+        let len = NonZeroUsize::new(container.windows().len())
+            .ok_or_else(|| anyhow!("there must be at least one window in a container"))?;
+
+        if len.get() == 1 {
+            bail!("there is only one window in this container");
+        }
+
+        if container.windows().get(idx).is_none() {
+            bail!("there is no window in this container at index {idx}");
+        }
+
+        container.focus_window(idx);
         container.load_focused_window();
 
         self.update_focused_workspace(self.mouse_follows_focus, true)

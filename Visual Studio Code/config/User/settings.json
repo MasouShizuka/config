@@ -40,10 +40,10 @@
         "cpp": "cd $dirWithoutTrailingSlash && g++ -static-libstdc++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
         "java": "cd $dirWithoutTrailingSlash && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
         "rust": "cargo run # $fileName",
-        "shellscript": "cd $dirWithoutTrailingSlash && bash $fileName"
+        "shellscript": "cd $dirWithoutTrailingSlash && sh $fileName"
     },
     "code-runner.runInTerminal": true,
-    "debug.console.fontSize": 14,
+    "debug.console.fontSize": 15,
     "debug.showBreakpointsInOverviewRuler": true,
     "diffEditor.diffAlgorithm": "advanced",
     "diffEditor.ignoreTrimWhitespace": false,
@@ -54,9 +54,9 @@
     "editor.detectIndentation": false,
     "editor.find.autoFindInSelection": "multiline",
     "editor.find.seedSearchStringFromSelection": "selection",
-    "editor.fontFamily": "Sarasa Mono SC Nerd Font",
-    "editor.fontLigatures": true,
-    "editor.fontSize": 14,
+    "editor.fontFamily": "Maple Mono NF CN, Sarasa Mono SC",
+    "editor.fontLigatures": "'cv01', 'cv03', 'ss03'",
+    "editor.fontSize": 15,
     "editor.guides.bracketPairs": true,
     "editor.lineNumbers": "relative",
     "editor.linkedEditing": true,
@@ -195,7 +195,7 @@
     "markdown.marp.enableHtml": true,
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
-    "markdown.preview.fontSize": 14,
+    "markdown.preview.fontSize": 15,
     "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
     "markdownConverter.ChromiumExecutablePath": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
@@ -258,7 +258,7 @@
     ],
     "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
-    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.fontSize": 15,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.tabs.location": "left",
     "todo-tree.general.tagGroups": {
@@ -410,7 +410,8 @@
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
-        "*.md": "default"
+        "*.md": "default",
+        "{git,gitlens}:/**/*.{md,csv,svg}": "default"
     },
     "workbench.experimental.enableNewProfilesUI": true,
     "workbench.iconTheme": "material-icon-theme",

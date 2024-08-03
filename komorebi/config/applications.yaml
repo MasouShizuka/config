@@ -37,14 +37,6 @@
     id: Hotkey sink
     matching_strategy: Equals
 
-- name: foobar2000
-  identifier:
-    kind: Title
-    id: foobar2000
-    matching_strategy: Contains
-  options:
-  - force
-
 - name: Microsoft Excel
   identifier:
     kind: Exe

@@ -152,7 +152,7 @@
   "AnimationSpeed": "Medium",
   "CustomAnimationLength": 360,
   "PluginSettings": {
-    "PythonExecutablePath": "C:\\Users\\MasouShizuka\\mambaforge\\python.exe",
+    "PythonExecutablePath": "C:\\Users\\MasouShizuka\\scoop\\shims\\python.exe",
     "NodeExecutablePath": "",
     "Plugins": {
       "0ECADE17459B49F587BF81DC3A125110": {
