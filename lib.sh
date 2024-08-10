@@ -24,7 +24,7 @@ install_to_target() {
 
         name=${f##*/}
         if [[ ! ${exclusion_list[*]} =~ $name ]]; then
-            cp -r "$f" "$target"
+            cp -rf "$f" "$target"
         fi
     done
 }

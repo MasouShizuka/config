@@ -2,24 +2,54 @@ local utils = require("utils")
 
 local M = {}
 
-local common = {
-    toggle_cursor_center = function(buf)
-        local toggle_setting
-        if buf then
-            toggle_setting = utils.toggle_buffer_setting
-        else
-            toggle_setting = utils.toggle_global_setting
+local function toggle_cursor_center(curr_buf_only, center_cursor)
+    local curr_buf
+    local toggle_setting
+    if curr_buf_only then
+        curr_buf = vim.api.nvim_get_current_buf()
+        toggle_setting = utils.toggle_buffer_setting
+    else
+        toggle_setting = utils.toggle_global_setting
+    end
+
+    toggle_setting("cursor_center_enabled", function(enabled, prev_enabled, global_enabled)
+        local augroup = "CursorCenter"
+        if curr_buf_only then
+            augroup = string.format("%s%s", augroup, curr_buf)
         end
 
-        toggle_setting("cursor_center_enabled", function(enabled, prev_enabled, global_enabled)
-            if enabled then
-                vim.cmd.normal({ "zz", bang = true })
+        if enabled then
+            center_cursor()
+            if curr_buf_only then
+                vim.api.nvim_create_autocmd("CursorMoved", {
+                    buffer = curr_buf,
+                    callback = function()
+                        center_cursor()
+                    end,
+                    desc = "Center cursor",
+                    group = vim.api.nvim_create_augroup(augroup, { clear = true }),
+                })
+            else
+                vim.api.nvim_create_autocmd("CursorMoved", {
+                    callback = function()
+                        center_cursor()
+                    end,
+                    desc = "Center cursor",
+                    group = vim.api.nvim_create_augroup(augroup, { clear = true }),
+                })
             end
-        end)
-    end,
-}
+        else
+            vim.api.nvim_del_augroup_by_name(augroup)
+        end
+    end)
+end
 
 local vscode_only = {
+    toggle_cursor_center = function(curr_buf_only)
+        toggle_cursor_center(curr_buf_only, function()
+            vim.cmd.normal("zz")
+        end)
+    end,
     toggle_fileformat = function()
         require("vscode-neovim").action("workbench.action.editor.changeEOL")
     end,
@@ -29,6 +59,11 @@ local vscode_only = {
 }
 
 local neovim_only = {
+    toggle_cursor_center = function(curr_buf_only)
+        toggle_cursor_center(curr_buf_only, function()
+            vim.cmd.normal({ "zz", bang = true })
+        end)
+    end,
     toggle_fileformat = function()
         utils.toggle_local_option("fileformat", { "dos", "unix" }, function(enabled, prev_enabled)
             vim.cmd.write()
@@ -69,7 +104,6 @@ M.setup = function(opts)
         vim.g.cursor_center_enabled = false
     end
 
-    M.common = common
     M.vscode = vscode_only
     M.nvim = neovim_only
 end

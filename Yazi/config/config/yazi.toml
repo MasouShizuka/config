@@ -6,17 +6,17 @@ show_hidden = true
 [opener]
 
 edit = [
-    { run = 'nvim "%*"',    block = true,  desc = "nvim",                   for = "windows" },
-    { run = 'neovide "%*"', orphan = true, desc = "neovide",                for = "windows" },
-    { run = 'code "%*"',    orphan = true, desc = "code",                   for = "windows" },
-    { run = 'code -w "%*"', block = true,  desc = "code (block)",           for = "windows" },
+    { run = 'nvim %*',      block = true,  desc = "nvim",                   for = "windows" },
+    { run = 'neovide %*',   orphan = true, desc = "neovide",                for = "windows" },
+    { run = 'code %*',      orphan = true, desc = "code",                   for = "windows" },
+    { run = 'code -w %*',   block = true,  desc = "code (block)",           for = "windows" },
     { run = 'nvim "$@"',    block = true,  desc = "nvim",                   for = "unix" },
     { run = 'code "$@"',    orphan = true, desc = "code",                   for = "unix" },
     { run = 'code -w "$@"', block = true,  desc = "code (block)",           for = "unix" },
 ]
 
 extract = [
-    { run = 'ouch d -y "%*"',              desc = "Extract here with ouch", for = "windows" },
+    { run = 'ouch d -y %*',                desc = "Extract here with ouch", for = "windows" },
     { run = 'ouch d -y "$@"',              desc = "Extract here with ouch", for = "unix" },
 ]
 
@@ -47,7 +47,7 @@ rules = [
 
 preloaders = [
     # Image
-    # { mime = "image/{avif,heic,jxl,svg+xml}",                run = "magick" },
+    # { mime = "image/{avif,hei?,jxl,svg+xml}",                run = "magick" },
     { mime = "image/*",                                        run = "image" },
     # # Video
     # { mime = "video/*",                                      run = "video" },
@@ -66,7 +66,7 @@ previewers = [
     # JSON
     { mime = "application/{json,x-ndjson}",                    run = "bat" },
     # Image
-    # { mime = "image/{avif,heic,jxl,svg+xml}",                run = "magick" },
+    # { mime = "image/{avif,hei?,jxl,svg+xml}",                run = "magick" },
     { mime = "image/*",                                        run = "image" },
     # # Video
     # { mime = "video/*",                                      run = "video" },

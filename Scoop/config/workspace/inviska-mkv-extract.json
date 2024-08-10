@@ -14,11 +14,15 @@
             "hash": "14ff79ccda9eaac80d0f4da80d4d61aef3e183e340d863139d3d5ff1bb67a56a"
         }
     },
-    "pre_install": "New-Item \"$dir\\InviskaMKVExtract.ini\" | Out-Null",
+    "pre_install": [
+        "if (!(Test-Path \"$persist_dir\\InviskaMKVExtract.ini\")) {",
+        "    New-Item \"$dir\\InviskaMKVExtract.ini\" | Out-Null",
+        "}"
+    ],
     "installer": {
         "script": [
-            "Move-Item \"$dir\\Inviska MKV Extract\\InviskaMKVExtract.exe\" \"$dir\" -Force",
-            "Remove-Item \"$dir\\Inviska MKV Extract\" -Force -Recurse"
+            "Move-Item \"$dir\\Inviska MKV Extract\\InviskaMKVExtract.exe\" \"$dir\"",
+            "Remove-Item \"$dir\\Inviska MKV Extract\""
         ]
     },
     "shortcuts": [

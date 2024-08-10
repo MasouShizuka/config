@@ -6,9 +6,10 @@
         {
             "command": 
             {
-                "action": "prevTab"
+                "action": "sendInput",
+                "input": "\u001b[1;5R"
             },
-            "keys": "ctrl+shift+h"
+            "keys": "ctrl+3"
         },
         {
             "command": 
@@ -21,24 +22,17 @@
         {
             "command": 
             {
-                "action": "sendInput",
-                "input": "\u001b[1;5R"
+                "action": "prevTab"
             },
-            "keys": "ctrl+3"
-        },
-        {
-            "command": 
-            {
-                "action": "quakeMode"
-            }
+            "keys": "ctrl+shift+h"
         },
         {
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[1;5Q"
+                "input": "\u001b[18;5~"
             },
-            "keys": "ctrl+2"
+            "keys": "ctrl+period"
         },
         {
             "command": 
@@ -52,9 +46,15 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[18;5~"
+                "input": "\u001b[1;5Q"
             },
-            "keys": "ctrl+period"
+            "keys": "ctrl+2"
+        },
+        {
+            "command": 
+            {
+                "action": "quakeMode"
+            }
         },
         {
             "command": 
@@ -610,7 +610,7 @@
         "list": 
         [
             {
-                "commandline": "C:/Program Files/PowerShell/7/pwsh.exe -NoLogo",
+                "commandline": "pwsh.exe -NoLogo",
                 "elevate": true,
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,

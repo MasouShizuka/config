@@ -63,132 +63,6 @@ turn_off_monitor() {
 }
 
 
-; Mouse
-
-MouseMovePrompt := InputTipWindow("🖱️")
-FASTMODE := false
-SLOWMODE := false
-VERYSLOWMODE := false
-fastMoveSingle := 60
-fastMoveRepeat := 60
-slowMoveSingle := 10
-slowMoveRepeat := 10
-moveDelay1 := "T0.1"
-moveDelay2 := "T0.01"
-scrollOnceLineCount := 1
-scrollDelay1 := "T0.2"
-scrollDelay2 := "T0.03"
-
-show_mouse_move_prompt() {
-    If (WinExist("ahk_class AutoHotkeyGUI")) {
-        WinSetAlwaysOnTop(true, "ahk_class AutoHotkeyGUI")
-    }
-    global MouseMovePrompt
-    MouseMovePrompt.show("")
-}
-
-hide_mouse_move_prompt() {
-    global MouseMovePrompt
-    MouseMovePrompt.hide()
-}
-
-enter_mouse_mode() {
-    global SLOWMODE := true
-    show_mouse_move_prompt()
-}
-
-exit_mouse_mode() {
-    global FASTMODE := false, SLOWMODE := false, VERYSLOWMODE := false
-    hide_mouse_move_prompt()
-}
-
-exit_mouse_mode_with_left_click_up() {
-    exit_mouse_mode()
-    Send("{Blind}{LButton Up}")
-}
-
-click_down(button := "L") {
-    Send("{Blind}{" . button . "Button Down}")
-}
-
-click_up_without_hide_mouse_move_prompt(button := "L") {
-    Send("{Blind}{" . button . "Button Up}")
-}
-
-click_up(button := "L") {
-    click_up_without_hide_mouse_move_prompt(button)
-    exit_mouse_mode()
-}
-
-move_mouse(key, direction := "left", mode := "fast") {
-    global moveDelay1, moveDelay2
-
-    direction_x := 0
-    direction_y := 0
-    If (direction == "up") {
-        direction_y := -1
-    } Else If (direction == "down") {
-        direction_y := 1
-    } Else If (direction == "left") {
-        direction_x := -1
-    } Else If (direction == "right") {
-        direction_x := 1
-    }
-
-    move_single := 0
-    move_repeat := 0
-    If (mode == "fast") {
-        global fastMoveSingle, fastMoveRepeat, FASTMODE := true, SLOWMODE := false, VERYSLOWMODE := false
-        move_single := fastMoveSingle
-        move_repeat := fastMoveRepeat
-    } Else If (mode == "slow") {
-        global slowMoveSingle, slowMoveRepeat, FASTMODE := false, VERYSLOWMODE := false
-        move_single := slowMoveSingle
-        move_repeat := slowMoveRepeat
-    } Else If (mode == "veryslow") {
-        global FASTMODE := false, SLOWMODE := false, VERYSLOWMODE := true
-        move_single := 1
-        move_repeat := 1
-    }
-
-    single_x := direction_x * move_single
-    single_y := direction_y * move_single
-    MouseMove(single_x, single_y, 0, "R")
-    show_mouse_move_prompt()
-    errorlevel := KeyWait(key, moveDelay1)
-
-    repeat_x := direction_x * move_repeat
-    repeat_y := direction_y * move_repeat
-    While (!errorlevel) {
-        MouseMove(repeat_x, repeat_y, 0, "R")
-        show_mouse_move_prompt()
-        errorlevel := KeyWait(key, moveDelay2)
-    }
-}
-
-scroll_wheel(key, direction) {
-    global scrollOnceLineCount, scrollDelay1, scrollDelay2
-
-    WhichButton := ""
-    If (direction == "up") {
-        WhichButton := "WheelUp"
-    } Else If (direction == "down") {
-        WhichButton := "WheelDown"
-    } Else If (direction == "left") {
-        WhichButton := "WheelLeft"
-    } Else If (direction == "right") {
-        WhichButton := "WheelRight"
-    }
-    MouseClick(WhichButton, , , scrollOnceLineCount)
-    errorlevel := keywait(key, scrollDelay1)
-
-    while (!errorlevel) {
-        MouseClick(WhichButton, , , scrollOnceLineCount)
-        errorlevel := keywait(key, scrollDelay2)
-    }
-}
-
-
 ; Script
 
 close_or_run_script(path, args := "") {
@@ -197,7 +71,7 @@ close_or_run_script(path, args := "") {
 
     DetectHiddenWindows(true)
     SetTitleMatchMode("RegEx")
-    running_script := "i)" . name . ".* ahk_class AutoHotkey"
+    running_script := "i" . name . ".* ahk_class AutoHotkey"
     If (WinExist(running_script)) {
         WinClose
         WinWaitClose(running_script, , 2)
@@ -222,7 +96,6 @@ task_switch() {
 is_taskbar_hide := false
 
 hide_taskbar() {
-    global is_taskbar_hide
     If (is_taskbar_hide) {
         WinSetTransparent(255, "ahk_class Shell_TrayWnd")
         WinSetTransparent("Off", "ahk_class Shell_TrayWnd")
@@ -257,22 +130,229 @@ center_window() {
     }
 }
 
-change_window_size(direction := "left", size := 40) {
-    WinGetPos(&x, &y, &w, &h, "A")
-    If (direction == "up") {
-        h := h - size
-    } Else If (direction == "down") {
-        h := h + size
-    } Else If (direction == "left") {
-        w := w - size
-    } Else If (direction == "right") {
-        w := w + size
+
+; Map
+
+global mouse_direction := Map(
+    "up", "i",
+    "down", "k",
+    "left", "j",
+    "right", "l",
+)
+
+global scroll_direction := Map(
+    "up", "u",
+    "down", "o",
+    "left", "y",
+    "right", "p",
+)
+
+global window_direction := Map(
+    "up", "w",
+    "down", "s",
+    "left", "a",
+    "right", "d",
+)
+
+FASTMODE := false
+SLOWMODE := false
+VERYSLOWMODE := false
+
+global MouseMovePrompt := InputTipWindow("🖱️")
+
+global fast_move_single := 60
+global fast_move_repeat := 60
+global slow_move_single := 10
+global slow_move_repeat := 10
+global move_delay1 := "T0.1"
+global move_delay2 := "T0.01"
+
+global click_count := 1
+global scroll_delay1 := "T0.2"
+global scroll_delay2 := "T0.03"
+
+global fast_resize_delta := 40
+global slow_resize_delta := 10
+
+show_mouse_move_prompt() {
+    If (WinExist("ahk_class AutoHotkeyGUI")) {
+        WinSetAlwaysOnTop(true, "ahk_class AutoHotkeyGUI")
     }
+    MouseMovePrompt.show("")
+}
+
+hide_mouse_move_prompt() {
+    MouseMovePrompt.hide()
+}
+
+enter_mouse_mode() {
+    global SLOWMODE := true
+    show_mouse_move_prompt()
+}
+
+exit_mouse_mode() {
+    global FASTMODE := false
+    global SLOWMODE := false
+    global VERYSLOWMODE := false
+    hide_mouse_move_prompt()
+}
+
+exit_mouse_mode_with_left_click_up() {
+    exit_mouse_mode()
+    Send("{Blind}{LButton Up}")
+}
+
+click_down(button := "L") {
+    Send("{Blind}{" . button . "Button Down}")
+}
+
+click_up_without_hide_mouse_move_prompt(button := "L") {
+    Send("{Blind}{" . button . "Button Up}")
+}
+
+click_up(button := "L") {
+    click_up_without_hide_mouse_move_prompt(button)
+    exit_mouse_mode()
+}
+
+get_mouse_move_state() {
+    x := 0
+    y := 0
+
+    If (GetKeyState(mouse_direction["left"], "P") || GetKeyState(mouse_direction["right"], "P")) {
+        If (GetKeyState(mouse_direction["left"], "P")) {
+            x := -1
+        } Else {
+            x := 1
+        }
+    }
+
+    If (GetKeyState(mouse_direction["up"], "P") || GetKeyState(mouse_direction["down"], "P")) {
+        If (GetKeyState(mouse_direction["up"], "P")) {
+            y := -1
+        } Else {
+            y := 1
+        }
+    }
+
+    return {x: x, y: y}
+}
+
+move_mouse(key, move_single := 0, move_repeat := 0) {
+    key := StrReplace(key, "*")
+
+    mouse_move_state := get_mouse_move_state()
+    single_x := mouse_move_state.x * move_single
+    single_y := mouse_move_state.y * move_single
+
+    MouseMove(single_x, single_y, 0, "R")
+    show_mouse_move_prompt()
+    errorlevel := KeyWait(key, move_delay1)
+
+    While (!errorlevel) {
+        mouse_move_state := get_mouse_move_state()
+        repeat_x := mouse_move_state.x * move_repeat
+        repeat_y := mouse_move_state.y * move_repeat
+
+        MouseMove(repeat_x, repeat_y, 0, "R")
+        show_mouse_move_prompt()
+        errorlevel := KeyWait(key, move_delay2)
+    }
+}
+
+fast_move_mouse(key) {
+    global FASTMODE := true
+    global SLOWMODE := false
+    global VERYSLOWMODE := false
+    move_mouse(key, fast_move_single, fast_move_repeat)
+}
+
+slow_move_mouse(key) {
+    global FASTMODE := false
+    global VERYSLOWMODE := false
+    move_mouse(key, slow_move_single, slow_move_repeat)
+}
+
+veryslow_move_mouse(key) {
+    global FASTMODE := false
+    global SLOWMODE := false
+    global VERYSLOWMODE := true
+    move_mouse(key, 1, 1)
+}
+
+get_scroll_button() {
+    WhichButton := ""
+    If (GetKeyState(scroll_direction["up"], "P")) {
+        WhichButton := "WheelUp"
+    } Else If (GetKeyState(scroll_direction["down"], "P")) {
+        WhichButton := "WheelDown"
+    } Else If (GetKeyState(scroll_direction["left"], "P")) {
+        WhichButton := "WheelLeft"
+    } Else If (GetKeyState(scroll_direction["right"], "P")) {
+        WhichButton := "WheelRight"
+    }
+
+    return WhichButton
+}
+
+scroll(key) {
+    key := StrReplace(key, "*")
+
+    WhichButton := get_scroll_button()
+    MouseClick(WhichButton, , , click_count)
+    errorlevel := keywait(key, scroll_delay1)
+
+    while (!errorlevel) {
+        WhichButton := get_scroll_button()
+        MouseClick(WhichButton, , , click_count)
+        errorlevel := keywait(key, scroll_delay2)
+    }
+}
+
+get_window_resize_status() {
+    w := 0
+    h := 0
+
+    If (GetKeyState(window_direction["left"], "P") || GetKeyState(window_direction["right"], "P")) {
+        If (GetKeyState(window_direction["left"], "P")) {
+            w := 1
+        } Else {
+            w := -1
+        }
+    }
+
+    If (GetKeyState(window_direction["up"], "P") || GetKeyState(window_direction["down"], "P")) {
+        If (GetKeyState(window_direction["up"], "P")) {
+            h := 1
+        } Else {
+            h := -1
+        }
+    }
+
+    return {w: w, h: h}
+}
+
+resize_window(size := 40) {
+    WinGetPos(&x, &y, &w, &h, "A")
+
+    window_resize_status := get_window_resize_status()
+    w := w - window_resize_status.w * size
+    h := h - window_resize_status.h * size
+
     WinMove(x, y, w, h, "A")
 }
 
+fast_resize_window(key) {
+    resize_window(fast_resize_delta)
+}
 
-; Map
+slow_resize_window(key) {
+    resize_window(slow_resize_delta)
+}
+
+veryslow_resize_window(key) {
+    resize_window(1)
+}
 
 *CapsLock Up:: {
     If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
@@ -287,26 +367,19 @@ change_window_size(direction := "left", size := 40) {
 }
 #HotIf
 
-#HotIf GetKeyState("Capslock", "P") && GetKeyState("Alt", "P")
-*W:: change_window_size("up", 60)
-*S:: change_window_size("down", 60)
-*A:: change_window_size("left", 60)
-*D:: change_window_size("right", 60)
-*I:: move_mouse("I", "up", "veryslow")
-*J:: move_mouse("J", "left", "veryslow")
-*K:: move_mouse("K", "down", "veryslow")
-*L:: move_mouse("L", "right", "veryslow")
+#HotIf GetKeyState("Capslock", "P") and GetKeyState("Alt", "P")
 #HotIf
 
+HotIf 'GetKeyState("Capslock", "P") and GetKeyState("Alt", "P")'
+For key, value in mouse_direction {
+    Hotkey("*" . value, veryslow_move_mouse)
+}
+For key, value in window_direction {
+    Hotkey("*" . value, fast_resize_window)
+}
+HotIf
+
 #HotIf GetKeyState("Capslock", "P")
-*I:: move_mouse("I", "up", "fast")
-*J:: move_mouse("J", "left", "fast")
-*K:: move_mouse("K", "down", "fast")
-*L:: move_mouse("L", "right", "fast")
-*U:: scroll_wheel("U", "up")
-*H:: scroll_wheel("H", "left")
-*O:: scroll_wheel("O", "down")
-*`;:: scroll_wheel(";", "right")
 *N:: click_down("L")
 *N Up:: click_up("L")
 *M:: click_down("R")
@@ -317,19 +390,16 @@ change_window_size(direction := "left", size := 40) {
 */:: MakeWindowDraggable()
 #HotIf
 
+HotIf 'GetKeyState("Capslock", "P")'
+For key, value in mouse_direction {
+    Hotkey("*" . value, fast_move_mouse)
+}
+For key, value in scroll_direction {
+    Hotkey("*" . value, scroll)
+}
+HotIf
+
 #HotIf SLOWMODE
-*W:: change_window_size("up", 10)
-*S:: change_window_size("down", 10)
-*A:: change_window_size("left", 10)
-*D:: change_window_size("right", 10)
-*I:: move_mouse("I", "up", "slow")
-*J:: move_mouse("J", "left", "slow")
-*K:: move_mouse("K", "down", "slow")
-*L:: move_mouse("L", "right", "slow")
-*U:: scroll_wheel("U", "up")
-*H:: scroll_wheel("H", "left")
-*O:: scroll_wheel("O", "down")
-*`;:: scroll_wheel(";", "right")
 *N:: click_down("L")
 *N Up:: click_up_without_hide_mouse_move_prompt("L")
 *M:: click_down("R")
@@ -347,19 +417,19 @@ change_window_size(direction := "left", size := 40) {
 }
 #HotIf
 
+HotIf 'SLOWMODE'
+For key, value in mouse_direction {
+    Hotkey("*" . value, slow_move_mouse)
+}
+For key, value in scroll_direction {
+    Hotkey("*" . value, scroll)
+}
+For key, value in window_direction {
+    Hotkey("*" . value, slow_resize_window)
+}
+HotIf
+
 #HotIf VERYSLOWMODE
-*W:: change_window_size("up", 1)
-*S:: change_window_size("down", 1)
-*A:: change_window_size("left", 1)
-*D:: change_window_size("right", 1)
-*I:: move_mouse("I", "up", "veryslow")
-*J:: move_mouse("J", "left", "veryslow")
-*K:: move_mouse("K", "down", "veryslow")
-*L:: move_mouse("L", "right", "veryslow")
-*U:: scroll_wheel("U", "up")
-*H:: scroll_wheel("H", "left")
-*O:: scroll_wheel("O", "down")
-*`;:: scroll_wheel(";", "right")
 *N:: click_down("L")
 *N Up:: click_up_without_hide_mouse_move_prompt("L")
 *M:: click_down("R")
@@ -376,3 +446,15 @@ change_window_size(direction := "left", size := 40) {
     }
 }
 #HotIf
+
+HotIf 'VERYSLOWMODE'
+For key, value in mouse_direction {
+    Hotkey("*" . value, veryslow_move_mouse)
+}
+For key, value in scroll_direction {
+    Hotkey("*" . value, scroll)
+}
+For key, value in window_direction {
+    Hotkey("*" . value, veryslow_resize_window)
+}
+HotIf

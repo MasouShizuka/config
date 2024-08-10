@@ -85,7 +85,7 @@ return {
     },
 
     {
-        "MeanderingProgrammer/markdown.nvim",
+        "MeanderingProgrammer/render-markdown.nvim",
         cmd = {
             "RenderMarkdown",
         },
@@ -97,7 +97,6 @@ return {
         event = {
             "User MarkdownFile",
         },
-        name = "render-markdown", -- Only needed if you have another plugin named markdown.nvim
         opts = function()
             -- https://github.com/OXY2DEV/markview.nvim
             local function set_hl()
@@ -107,6 +106,13 @@ return {
                 vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = "#374243", fg = "#a6e3a1" })
                 vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = "#2e3d51", fg = "#74c7ec" })
                 vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = "#393b54", fg = "#b4befe" })
+
+                vim.api.nvim_set_hl(0, "RenderMarkdownH1", { fg = "#f38ba8" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH2", { fg = "#fab387" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH3", { fg = "#f9e2af" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH4", { fg = "#a6e3a1" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH5", { fg = "#74c7ec" })
+                vim.api.nvim_set_hl(0, "RenderMarkdownH6", { fg = "#b4befe" })
             end
 
             set_hl()

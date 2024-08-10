@@ -9,7 +9,7 @@ return {
         else
             local h = cx.active.current.hovered.url
             if h then
-                path = tostring(h):gsub("\\", "/")
+                path = tostring(h):gsub("/", "\\")
             end
         end
 

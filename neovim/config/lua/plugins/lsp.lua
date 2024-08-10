@@ -47,7 +47,21 @@ return {
                 "gd",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_definitions" })
-                    utils.defer(function() view.win:focus() end, 200, false)
+                    view.first_render:next(function()
+                        local buf = view.win.buf
+                        if not buf or not vim.api.nvim_buf_is_valid(buf) then
+                            return
+                        end
+
+                        vim.api.nvim_buf_attach(buf, false, {
+                            on_lines = function(...)
+                                vim.schedule(function()
+                                    view.win:focus()
+                                end)
+                                vim.api.nvim_buf_detach(buf)
+                            end,
+                        })
+                    end)
                 end,
                 desc = "LSP Definitions (Trouble)",
                 mode = "n",
@@ -56,7 +70,21 @@ return {
                 "gD",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_declarations" })
-                    utils.defer(function() view.win:focus() end, 200, false)
+                    view.first_render:next(function()
+                        local buf = view.win.buf
+                        if not buf or not vim.api.nvim_buf_is_valid(buf) then
+                            return
+                        end
+
+                        vim.api.nvim_buf_attach(buf, false, {
+                            on_lines = function(...)
+                                vim.schedule(function()
+                                    view.win:focus()
+                                end)
+                                vim.api.nvim_buf_detach(buf)
+                            end,
+                        })
+                    end)
                 end,
                 desc = "LSP Declarations (Trouble)",
                 mode = "n",
@@ -65,7 +93,21 @@ return {
                 "gi",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_implementations" })
-                    utils.defer(function() view.win:focus() end, 200, false)
+                    view.first_render:next(function()
+                        local buf = view.win.buf
+                        if not buf or not vim.api.nvim_buf_is_valid(buf) then
+                            return
+                        end
+
+                        vim.api.nvim_buf_attach(buf, false, {
+                            on_lines = function(...)
+                                vim.schedule(function()
+                                    view.win:focus()
+                                end)
+                                vim.api.nvim_buf_detach(buf)
+                            end,
+                        })
+                    end)
                 end,
                 desc = "LSP Implementations (Trouble)",
                 mode = "n",
@@ -74,7 +116,21 @@ return {
                 "gr",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_references" })
-                    utils.defer(function() view.win:focus() end, 200, false)
+                    view.first_render:next(function()
+                        local buf = view.win.buf
+                        if not buf or not vim.api.nvim_buf_is_valid(buf) then
+                            return
+                        end
+
+                        vim.api.nvim_buf_attach(buf, false, {
+                            on_lines = function(...)
+                                vim.schedule(function()
+                                    view.win:focus()
+                                end)
+                                vim.api.nvim_buf_detach(buf)
+                            end,
+                        })
+                    end)
                 end,
                 desc = "LSP References (Trouble)",
                 mode = "n",
@@ -83,7 +139,21 @@ return {
                 "gy",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_type_definitions" })
-                    utils.defer(function() view.win:focus() end, 200, false)
+                    view.first_render:next(function()
+                        local buf = view.win.buf
+                        if not buf or not vim.api.nvim_buf_is_valid(buf) then
+                            return
+                        end
+
+                        vim.api.nvim_buf_attach(buf, false, {
+                            on_lines = function(...)
+                                vim.schedule(function()
+                                    view.win:focus()
+                                end)
+                                vim.api.nvim_buf_detach(buf)
+                            end,
+                        })
+                    end)
                 end,
                 desc = "LSP Type Definitions (Trouble)",
                 mode = "n",

@@ -8,6 +8,14 @@
       "parentID": 0,
       "delay": 0,
       "hotkeys": {
+        "*;": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:6",
+            "actionValueID": 6
+          }
+        ],
         "*a": [
           {
             "windowGroupID": 0,
@@ -59,11 +67,12 @@
             "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi.ahk\")"
           }
         ],
-        "*p": [
+        "*h": [
           {
             "windowGroupID": 0,
             "actionTypeID": 3,
-            "actionValueID": 6
+            "comment": "label:5",
+            "actionValueID": 5
           }
         ],
         "*q": [
@@ -117,13 +126,6 @@
             "actionTypeID": 3,
             "comment": "移动窗口到下一个显示器",
             "actionValueID": 7
-          }
-        ],
-        "*y": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 3,
-            "actionValueID": 5
           }
         ],
         "*z": [

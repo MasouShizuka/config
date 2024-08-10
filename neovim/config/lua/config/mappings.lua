@@ -31,18 +31,7 @@ function M.setup(opts)
     local function move(key, set_jumps)
         set_jumps = set_jumps == nil or set_jumps
 
-        local buf = vim.api.nvim_get_current_buf()
-        local cursor_center_enabled = vim.g.cursor_center_enabled or false
-        if vim.b[buf].cursor_center_enabled ~= nil then
-            cursor_center_enabled = vim.b[buf].cursor_center_enabled
-        end
-
         local prefix = ""
-        local postfix = ""
-
-        if cursor_center_enabled then
-            postfix = postfix .. "zz"
-        end
 
         local count = vim.v.count
         if count > 0 then
@@ -53,9 +42,9 @@ function M.setup(opts)
         end
 
         if count == 0 and not vim.fn.mode():find("V") then
-            vim.cmd.normal({ string.format("g%s%s", key, postfix), bang = true })
+            vim.cmd.normal({ string.format("g%s", key), bang = true })
         else
-            vim.cmd.normal({ string.format("%s%s%s", prefix, key, postfix), bang = true })
+            vim.cmd.normal({ string.format("%s%s", prefix, key), bang = true })
         end
     end
     vim.keymap.set({ "n", "x" }, "j", function() move("j") end, { desc = "Down", silent = true })

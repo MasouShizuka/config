@@ -124,6 +124,34 @@ return require("lazy").setup({
 
         {
             config = function(_, opts)
+                require("config.autocommands.hlsearch").setup(opts)
+            end,
+            dir = path.config_path .. "/lua/config/autocommands/hlsearch",
+            keys = {
+                { "/", desc = "Search forward",  mode = { "n", "x" } },
+                { "?", desc = "Search backward", mode = { "n", "x" } },
+                { "*", desc = "Next",            mode = { "n", "x" } },
+                { "#", desc = "Previous",        mode = { "n", "x" } },
+                { "n", desc = "Next",            mode = { "n", "x" } },
+                { "N", desc = "Previous",        mode = { "n", "x" } },
+            },
+            name = "config.autocommands.hlsearch",
+            opts = {
+                pre_hook = function()
+                    if utils.is_available("mini.map") then
+                        require("mini.map").refresh()
+                    end
+                end,
+                post_hook = function()
+                    if utils.is_available("mini.map") then
+                        require("mini.map").refresh()
+                    end
+                end,
+            },
+        },
+
+        {
+            config = function(_, opts)
                 require("config.autocommands.panel-synchronize").setup(opts)
             end,
             dir = path.config_path .. "/lua/config/autocommands/panel-synchronize",
@@ -222,21 +250,22 @@ return require("lazy").setup({
                 end
             end,
             keys = function()
-                local keys = {
-                    { "<leader>ctc", function() require("config.user_commands.toggle").common.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
-                    { "<leader>ctC", function() require("config.user_commands.toggle").common.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
-                }
+                local keys = {}
                 if environment.is_vscode then
                     keys = utils.table_concat(keys, {
-                        { "<leader>ctf", function() require("config.user_commands.toggle").vscode.toggle_fileformat() end, desc = "Toggle fileformat", mode = "n" },
-                        { "<leader>ctw", function() require("config.user_commands.toggle").vscode.toggle_wrap() end,       desc = "Toggle wrap",       mode = "n" },
+                        { "<leader>ctc", function() require("config.user_commands.toggle").vscode.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
+                        { "<leader>ctC", function() require("config.user_commands.toggle").vscode.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
+                        { "<leader>ctf", function() require("config.user_commands.toggle").vscode.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
+                        { "<leader>ctw", function() require("config.user_commands.toggle").vscode.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
                     })
                 else
                     keys = utils.table_concat(keys, {
-                        { "<leader>ctf", function() require("config.user_commands.toggle").nvim.toggle_fileformat() end, desc = "Toggle fileformat", mode = "n" },
-                        { "<leader>cts", function() require("config.user_commands.toggle").nvim.toggle_spell() end,      desc = "Toggle spell",      mode = "n" },
-                        { "<leader>ctS", function() require("config.user_commands.toggle").nvim.toggle_syntax() end,     desc = "Toggle syntax",     mode = "n" },
-                        { "<leader>ctw", function() require("config.user_commands.toggle").nvim.toggle_wrap() end,       desc = "Toggle wrap",       mode = "n" },
+                        { "<leader>ctc", function() require("config.user_commands.toggle").nvim.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
+                        { "<leader>ctC", function() require("config.user_commands.toggle").nvim.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
+                        { "<leader>ctf", function() require("config.user_commands.toggle").nvim.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
+                        { "<leader>cts", function() require("config.user_commands.toggle").nvim.toggle_spell() end,             desc = "Toggle spell",                  mode = "n" },
+                        { "<leader>ctS", function() require("config.user_commands.toggle").nvim.toggle_syntax() end,            desc = "Toggle syntax",                 mode = "n" },
+                        { "<leader>ctw", function() require("config.user_commands.toggle").nvim.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
                     })
                 end
                 return keys

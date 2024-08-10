@@ -9,11 +9,14 @@
             "hash": "3aa8642a192ad91c4c563daa30c35c1b34425f7a08a730f97ebfd0b63f84ab42"
         }
     },
-    "pre_install": "New-Item \"$dir\\hotkey.json\" -Value '{}' | Out-Null",
+    "pre_install": [
+        "if (!(Test-Path \"$persist_dir\\hotkey.json\")) {",
+        "    New-Item \"$dir\\hotkey.json\" | Out-Null",
+        "}"
+    ],
     "installer": {
         "script": "Expand-7zipArchive \"$dir\\aegisub-portable-64.zip\" \"$dir\" -ExtractDir 'aegisub-portable' -Removal"
     },
-    "post_install": "Remove-Item \"$dir\\hotkey.json\"",
     "persist": [
         "config.json",
         "hotkey.json"
