@@ -12,6 +12,11 @@
 
  <KEY>   script-binding input_plus/chap_skip_toggle    # 启用/禁用强制自动跳过章节（片头片尾）
 
+ <KEY>   script-binding input_plus/import_files        # 打开文件（唤起一个打开文件的窗口，下面三项同理 仅Windows可用）
+ <KEY>   script-binding input_plus/import_url          # 打开地址（不可取消）
+ <KEY>   script-binding input_plus/append_aid          # 追加其它音轨（不切换）
+ <KEY>   script-binding input_plus/append_sid          # 追加其它字幕（切换）
+
  <KEY>   script-binding input_plus/info_toggle         # 启用/禁用仿Pot的OSD常驻显示简要信息
 
  <KEY>   script-binding input_plus/load_cbd            # 加载剪贴板地址
@@ -227,6 +232,119 @@ function cycle_cmds(...)
 	local cur_cmd = table.concat(cmds_list, "|")
 	cmds_sqnum[cur_cmd] = (cmds_sqnum[cur_cmd] or 0) % #cmds_list + 1
 	mp.command(cmds_list[cmds_sqnum[cur_cmd]])
+end
+
+
+function import_files()
+	local was_ontop = mp.get_property_native("ontop")
+	if was_ontop then mp.set_property_native("ontop", false) end
+	local res = utils.subprocess({
+		args = {'powershell', '-NoProfile', '-Command', [[& {
+			Trap {
+				Write-Error -ErrorRecord $_
+				Exit 1
+			}
+			Add-Type -AssemblyName PresentationFramework
+			$u8 = [System.Text.Encoding]::UTF8
+			$out = [Console]::OpenStandardOutput()
+			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+			$ofd.Multiselect = $true
+			If ($ofd.ShowDialog() -eq $true) {
+				ForEach ($filename in $ofd.FileNames) {
+					$u8filename = $u8.GetBytes("$filename`n")
+					$out.Write($u8filename, 0, $u8filename.Length)
+				}
+			}
+		}]]},
+		cancellable = false,
+	})
+	if was_ontop then mp.set_property_native("ontop", true) end
+	if (res.status ~= 0) then return end
+	local first_file = true
+	for filename in string.gmatch(res.stdout, '[^\n]+') do
+		mp.commandv("loadfile", filename, first_file and "replace" or "append")
+		first_file = false
+	end
+end
+function import_url()
+	local was_ontop = mp.get_property_native("ontop")
+	if was_ontop then mp.set_property_native("ontop", false) end
+	local res = utils.subprocess({
+		args = {'powershell', '-NoProfile', '-Command', [[& {
+			Trap {
+				Write-Error -ErrorRecord $_
+				Exit 1
+			}
+			Add-Type -AssemblyName Microsoft.VisualBasic
+			$u8 = [System.Text.Encoding]::UTF8
+			$out = [Console]::OpenStandardOutput()
+			$urlname = [Microsoft.VisualBasic.Interaction]::InputBox("输入地址", "打开", "https://")
+			$u8urlname = $u8.GetBytes("$urlname")
+			$out.Write($u8urlname, 0, $u8urlname.Length)
+		}]]},
+		cancellable = false,
+	})
+	if was_ontop then mp.set_property_native("ontop", true) end
+	if (res.status ~= 0) then return end
+	mp.commandv("loadfile", res.stdout)
+end
+function import_append_aid()
+	local was_ontop = mp.get_property_native("ontop")
+	if was_ontop then mp.set_property_native("ontop", false) end
+	local res = utils.subprocess({
+		args = {'powershell', '-NoProfile', '-Command', [[& {
+			Trap {
+				Write-Error -ErrorRecord $_
+				Exit 1
+			}
+			Add-Type -AssemblyName PresentationFramework
+			$u8 = [System.Text.Encoding]::UTF8
+			$out = [Console]::OpenStandardOutput()
+			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+			$ofd.Multiselect = $false
+			If ($ofd.ShowDialog() -eq $true) {
+				ForEach ($filename in $ofd.FileNames) {
+					$u8filename = $u8.GetBytes("$filename")
+					$out.Write($u8filename, 0, $u8filename.Length)
+				}
+			}
+		}]]},
+		cancellable = false,
+	})
+	if was_ontop then mp.set_property_native("ontop", true) end
+	if (res.status ~= 0) then return end
+	for filename in string.gmatch(res.stdout, '[^\n]+') do
+		mp.commandv("audio-add", filename, "auto")
+	end
+end
+function import_append_sid()
+	local was_ontop = mp.get_property_native("ontop")
+	if was_ontop then mp.set_property_native("ontop", false) end
+	local res = utils.subprocess({
+		args = {'powershell', '-NoProfile', '-Command', [[& {
+			Trap {
+				Write-Error -ErrorRecord $_
+				Exit 1
+			}
+			Add-Type -AssemblyName PresentationFramework
+			$u8 = [System.Text.Encoding]::UTF8
+			$out = [Console]::OpenStandardOutput()
+			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+			$ofd.Multiselect = $false
+			If ($ofd.ShowDialog() -eq $true) {
+				ForEach ($filename in $ofd.FileNames) {
+					$u8filename = $u8.GetBytes("$filename")
+					$out.Write($u8filename, 0, $u8filename.Length)
+				}
+			}
+		}]]},
+		cancellable = false,
+	})
+	if was_ontop then mp.set_property_native("ontop", true) end
+	if (res.status ~= 0) then return end
+	for filename in string.gmatch(res.stdout, '[^\n]+') do
+		mp.commandv("sub-add", filename, "cached")
+	end
 end
 
 
@@ -809,6 +927,11 @@ mp.add_key_binding(nil, "adevice_all_back", function() adevicelist = mp.get_prop
 mp.add_key_binding(nil, "adevice_all_next", function() adevicelist = mp.get_property_native("audio-device-list") adevicelist_fin(1, #adevicelist, 1, true) end)
 
 mp.add_key_binding(nil, "chap_skip_toggle", chap_skip_toggle)
+
+mp.add_key_binding(nil, "import_files", import_files)
+mp.add_key_binding(nil, "import_url", import_url)
+mp.add_key_binding(nil, "import_append_aid", import_append_aid)
+mp.add_key_binding(nil, "import_append_sid", import_append_sid)
 
 mp.add_key_binding(nil, "info_toggle", info_toggle)
 

@@ -1,15 +1,33 @@
 {
-    "Module template": {
-        "prefix": "M",
+    "M": {
         "body": [
             "local M = {}",
             "${TM_SELECTED_TEXT}$0",
             "return M"
         ],
-        "description": "Module template"
+        "prefix": "M"
     },
-    "Plugin template": {
-        "prefix": "plugin_template",
+    "autocmd": {
+        "body": [
+            "vim.api.nvim_create_autocmd(\"${1:event}\", {",
+            "    callback = function()",
+            "        $0",
+            "    end,",
+            "    desc = \"${2:description}\",",
+            "    group = vim.api.nvim_create_augroup(\"${3:augroup}\", { clear = true }),",
+            "})"
+        ],
+        "prefix": "autocmd"
+    },
+    "keymap": {
+        "body": "vim.keymap.set(${1:\"n\"}, \"${2:key}\", ${3|function() end,\"\"|}, { desc = \"${4:description}\", silent = true })",
+        "prefix": "keymap"
+    },
+    "lazy keymap": {
+        "body": "{ \"${1:key}\", ${2|function() end,\"\"|}, desc = \"${3:description}\", mode = \"${4:n}\" },",
+        "prefix": "lazy keymap"
+    },
+    "plugin template": {
         "body": [
             "local M = {}",
             "",
@@ -21,10 +39,9 @@
             "",
             "return M"
         ],
-        "description": "Plugin template"
+        "prefix": "plugin template"
     },
-    "Plugin template with config": {
-        "prefix": "plugin_template_with_config",
+    "plugin template with config": {
         "body": [
             "local M = {}",
             "",
@@ -39,6 +56,6 @@
             "",
             "return M"
         ],
-        "description": "Plugin template with config"
+        "prefix": "plugin template with config"
     }
 }

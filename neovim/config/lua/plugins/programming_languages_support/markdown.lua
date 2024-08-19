@@ -141,7 +141,6 @@ return {
                     -- Replaces '#+' of 'atx_h._marker'
                     -- The number of '#' in the heading determines the 'level'
                     -- The 'level' is used to index into the array using a cycle
-                    -- The result is left padded with spaces to hide any additional '#'
                     icons = {
                         icons.misc.format_header_1,
                         icons.misc.format_header_2,
@@ -152,15 +151,10 @@ return {
                     },
                 },
                 pipe_table = {
-                    -- Characters used to replace table boarder
-                    -- Correspond to top(3), delimiter(3), bottom(3), vertical, & horizontal
-                    -- stylua: ignore
-                    border = {
-                        "╭", "┬", "╮",
-                        "├", "┼", "┤",
-                        "╰", "┴", "╯",
-                        "│", "─",
-                    },
+                    -- Pre configured settings largely for setting table border easier
+                    --  round: use round border characters rather than right angles
+                    --  none: does nothing
+                    preset = "round",
                 },
                 -- More granular configuration mechanism, allows different aspects of buffers
                 -- to have their own behavior. Values default to the top level configuration

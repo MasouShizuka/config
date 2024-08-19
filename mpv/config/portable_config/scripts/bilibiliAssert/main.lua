@@ -7,7 +7,7 @@ local options = require "mp.options"
 
 local o = {
 	--弹幕字体
-	fontname = mp.get_property("sub-font"),
+	fontname = "sans-serif",
 	--弹幕字体大小
 	fontsize = "50",
 	--弹幕不透明度(0-1)
@@ -105,10 +105,11 @@ local function assprocess()
 	end
 	if cid == nil then return end
 
+	-- get danmaku directory
+	local danmaku_dir = os.getenv("TEMP") or "/tmp/"
 	-- get script directory
 	local directory = mp.get_script_directory()
-	local danmaku_dir = utils.split_path(os.tmpname())
-	local py_path = "" .. directory .. "/Danmu2Ass.py"
+	local py_path = utils.join_path(directory, "Danmu2Ass.py")
 
 	-- under windows platform, convert path format
 	if string.find(directory, "\\")
@@ -137,7 +138,18 @@ local function assprocess()
 		"-r",
 		cid,
 	}
-	-- local arg = { ''..directory..'\\Danmu2Ass.exe', '-d', directory, cid}
+	-- local arg = { "" .. directory .. "\\Danmu2Ass.exe", py_path, "-d", danmaku_dir,
+	-- 	"-s", "" .. dw .. "x" .. dh,
+	-- 	"-fn", o.fontname,
+	-- 	"-fs", o.fontsize,
+	-- 	"-a", o.opacity,
+	-- 	"-dm", o.duration_marquee,
+	-- 	"-ds", o.duration_still,
+	-- 	"-flf", mp.command_native({ "expand-path", o.filter_file }),
+	-- 	"-p", tostring(math.floor(o.percent * dh)),
+	-- 	"-r",
+	-- 	cid,
+	-- }
 	log("弹幕正在上膛")
 	-- run python to get comments
 	mp.command_native_async({
@@ -148,7 +160,7 @@ local function assprocess()
 	}, function(res, val, err)
 		if err == nil
 		then
-			danmu_file = "" .. danmaku_dir .. "/bilibili.ass"
+			danmu_file = utils.join_path(danmaku_dir, "bilibili.ass")
 			load_danmu(danmu_file)
 		else
 			log(err)

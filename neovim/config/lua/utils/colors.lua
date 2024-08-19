@@ -35,32 +35,6 @@ M.color_highlight_map = {
 }
 
 M.colorscheme = {
-    catppuccin = {
-        func = function(name) return require("catppuccin.palettes").get_palette()[name] end,
-        map = {
-            black  = "base",
-            cyan   = "teal",
-            gray   = "surface1",
-            orange = "peach",
-            purple = "mauve",
-            white  = "text",
-        },
-        package_name = "catppuccin",
-    },
-    github = {
-        func = function(name)
-            local color = require("github-theme.palette").load(vim.g.colors_name)[name]
-            if type(color) == "table" and color.base then
-                return color.bright
-            elseif type(color) == "string" then
-                return color
-            end
-        end,
-        map = {
-            purple = "magenta",
-        },
-        package_name = "github-theme",
-    },
     gruvbox = {
         func = function(name) return require("gruvbox").palette[name] end,
         map = {
@@ -108,7 +82,7 @@ M.get_colorscheme_color = function(colorscheme, color_name)
 end
 
 M.get_color = function(color, colorscheme)
-    colorscheme = colorscheme or vim.g.colors_name
+    colorscheme = colorscheme or vim.g.colors_name or "default"
 
     local spec
     for c, s in pairs(M.colorscheme) do

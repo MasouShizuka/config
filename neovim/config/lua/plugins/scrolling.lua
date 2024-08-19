@@ -9,11 +9,20 @@ return {
             local map = require("mini.map")
             require("mini.map").setup(opts)
 
-            local function open_map()
-                vim.schedule(function() map.open() end)
+            if vim.g.minimap_enabled == nil then
+                vim.g.minimap_enabled = true
             end
-            open_map()
 
+            local function open_map()
+                local buf = vim.api.nvim_get_current_buf()
+                if vim.b[buf].minimap_enabled == nil and vim.g.minimap_enabled or vim.b[buf].minimap_enabled then
+                    vim.schedule(function() map.open() end)
+                else
+                    vim.schedule(function() map.close() end)
+                end
+            end
+
+            open_map()
             vim.api.nvim_create_autocmd("TabEnter", {
                 callback = function()
                     open_map()
@@ -35,10 +44,89 @@ return {
             end
         end,
         keys = {
-            { "<leader>mm", function() require("mini.map").open() end,         desc = "Open map window",                 mode = "n" },
+            {
+                "<leader>mm",
+                function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    vim.g.minimap_enabled = true
+                    if vim.b[buf].minimap_enabled ~= false then
+                        require("mini.map").open()
+                    end
+                end,
+                desc = "Open map window",
+                mode = "n",
+            },
+            {
+                "<leader>mM",
+                function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    vim.b[buf].minimap_enabled = true
+                    require("mini.map").open()
+                end,
+                desc = "Open map window (buffer)",
+                mode = "n",
+            },
             { "<leader>mr", function() require("mini.map").refresh() end,      desc = "Refresh map window",              mode = "n" },
-            { "<leader>mq", function() require("mini.map").close() end,        desc = "Close map window",                mode = "n" },
-            { "<leader>mt", function() require("mini.map").toggle() end,       desc = "Toggle map window",               mode = "n" },
+            {
+                "<leader>mq",
+                function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    vim.g.minimap_enabled = false
+                    if vim.b[buf].minimap_enabled ~= true then
+                        require("mini.map").close()
+                    end
+                end,
+                desc = "Close map window",
+                mode = "n",
+            },
+            {
+                "<leader>mQ",
+                function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    vim.b[buf].minimap_enabled = false
+                    require("mini.map").close()
+                end,
+                desc = "Close map window (buffer)",
+                mode = "n",
+            },
+            {
+                "<leader>mt",
+                function()
+                    local map = require("mini.map")
+                    utils.toggle_global_setting("minimap_enabled", function(enabled, prev_enabled, global_enabled)
+                        if prev_enabled == enabled then
+                            return
+                        end
+
+                        if enabled then
+                            vim.schedule(function() map.open() end)
+                        else
+                            vim.schedule(function() map.close() end)
+                        end
+                    end)
+                end,
+                desc = "Toggle map window",
+                mode = "n",
+            },
+            {
+                "<leader>mT",
+                function()
+                    local map = require("mini.map")
+                    utils.toggle_buffer_setting("minimap_enabled", function(enabled, prev_enabled)
+                        if prev_enabled == enabled then
+                            return
+                        end
+
+                        if enabled then
+                            vim.schedule(function() map.open() end)
+                        else
+                            vim.schedule(function() map.close() end)
+                        end
+                    end)
+                end,
+                desc = "Toggle map window (buffer)",
+                mode = "n",
+            },
             { "<leader>mf", function() require("mini.map").toggle_focus() end, desc = "Toggle focus to/from map window", mode = "n" },
             { "<leader>ms", function() require("mini.map").toggle_side() end,  desc = "Toggle side of map window",       mode = "n" },
         },

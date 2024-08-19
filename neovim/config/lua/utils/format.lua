@@ -37,7 +37,13 @@ M.format = {
         end,
     },
     isort = {
-        append_args = {
+        -- isort: error: argument --le/--line-ending: expected one argument
+        -- https://github.com/stevearc/conform.nvim/issues/423
+        args = {
+            "--stdout",
+            "--filename",
+            "$FILENAME",
+            "-",
             "--multi-line", "3",
             "--trailing-comma",
             "--profile", "black",
@@ -45,7 +51,7 @@ M.format = {
     },
     ["markdownlint-cli2"] = {
         append_args = {
-            "--config", path.config_path .. "/lua/config/package/.markdownlint.yaml",
+            "--config", path.config_path .. "/package_config/.markdownlint.yaml",
         },
     },
     shfmt = {

@@ -34,10 +34,10 @@ return {
         },
         opts = {
             name = "default",
-            -- name = "empty",          -- 空の設定です。
-            -- name = "default",        -- vim-ambiwidth のデフォルトです。
-            -- name = "cica",           -- vim-ambiwidth の Cica 用設定です。
-            -- name = "sfmono_square",  -- SF Mono Square 用設定です。
+            -- name = "empty",         -- 空の設定です。
+            -- name = "default",       -- vim-ambiwidth のデフォルトです。
+            -- name = "cica",          -- vim-ambiwidth の Cica 用設定です。
+            -- name = "sfmono_square", -- SF Mono Square 用設定です。
         },
     },
 
@@ -217,7 +217,17 @@ return {
             local bigfile_features = {
                 "syntax",
                 "matchparen",
-                "vimopts",
+                -- "vimopts",
+                {
+                    name = "vimopts",
+                    disable = function()
+                        vim.opt_local.swapfile = false
+                        vim.opt_local.foldmethod = "manual"
+                        -- vim.opt_local.undolevels = -1
+                        vim.opt_local.undoreload = 0
+                        vim.opt_local.list = false
+                    end,
+                },
                 "filetype",
             }
             if utils.is_available("indent-blankline.nvim") then

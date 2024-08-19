@@ -71,7 +71,7 @@ close_or_run_script(path, args := "") {
 
     DetectHiddenWindows(true)
     SetTitleMatchMode("RegEx")
-    running_script := "i" . name . ".* ahk_class AutoHotkey"
+    running_script := name . " ahk_class AutoHotkey"
     If (WinExist(running_script)) {
         WinClose
         WinWaitClose(running_script, , 2)

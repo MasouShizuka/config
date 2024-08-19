@@ -19,11 +19,10 @@ local function load_colorscheme()
     for installed_colorscheme, value in pairs(colors.colorscheme) do
         if colorscheme:match(installed_colorscheme) then
             require(value.package_name)
+            vim.cmd.colorscheme(colorscheme)
             break
         end
     end
-
-    vim.cmd.colorscheme(colorscheme)
 end
 
 M.setup = function(opts)
@@ -35,7 +34,7 @@ M.setup = function(opts)
     vim.api.nvim_create_autocmd("VimLeave", {
         callback = function()
             local data = {
-                colorscheme = vim.g.colors_name,
+                colorscheme = vim.g.colors_name or "default",
             }
             utils.json_save(config.colorscheme_file, data)
         end,

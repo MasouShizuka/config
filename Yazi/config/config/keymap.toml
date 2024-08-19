@@ -32,7 +32,7 @@ prepend_keymap = [
     { on = [ "T", "." ],      run = "hidden toggle",                                                desc = "Toggle the visibility of hidden files" },
     { on = [ "s", "f" ],      run = "search fd",                                                    desc = "Search files by name using fd" },
     { on = [ "s", "r" ],      run = "search rg",                                                    desc = "Search files by content using ripgrep" },
-    { on = [ "s", "n" ],      run = "search none",                                                  desc = "Cancel the ongoing search" },
+    { on = [ "s", "n" ],      run = "escape --search",                                              desc = "Cancel the ongoing search" },
     { on = [ "s", "F" ],      run = "plugin fzf",                                                   desc = "Jump to a directory or reveal a file using fzf" },
     { on = [ "s", "R" ],      run = "plugin fzf-rg",                                                desc = "Reveal a file using fzf by content" },
 

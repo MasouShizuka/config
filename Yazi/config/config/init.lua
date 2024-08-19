@@ -85,7 +85,7 @@ Status:children_add(Status.modified, 500, Status.RIGHT)
 -- ╰─────────────────────────────────────────────────────────╯
 
 -- ya pack -a ndtoan96/ouch
--- ya pack -a yazi-rs/plugins#full-border
+-- ya pack -a yazi-rs/plugins:full-border
 
 require("full-border"):setup({
     -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED

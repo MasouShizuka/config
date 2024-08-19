@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
+local utils = require("utils")
 
 return {
     -- NOTE: 需要安装 fd
@@ -50,6 +51,7 @@ return {
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
                         require("venv-selector")
+                        utils.refresh_buf(args.buf, 1, false)
                         vim.api.nvim_del_augroup_by_name("VenvActivate")
                     end
                 end,

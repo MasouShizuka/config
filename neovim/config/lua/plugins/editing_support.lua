@@ -56,9 +56,6 @@ return {
 
     {
         "echasnovski/mini.ai",
-        config = function(_, opts)
-            require("mini.ai").setup(opts)
-        end,
         keys = {
             { "a(",  mode = { "x", "o" } },
             { "i(",  mode = { "x", "o" } },
@@ -146,9 +143,6 @@ return {
     },
     {
         "echasnovski/mini.operators",
-        config = function(_, opts)
-            require("mini.operators").setup(opts)
-        end,
         keys = {
             { "se",    desc = "Evaluate text and replace with output", mode = { "n", "x" } },
             { "sx",    desc = "Exchange text regions",                 mode = { "n", "x" } },
@@ -191,9 +185,6 @@ return {
     },
     {
         "echasnovski/mini.splitjoin",
-        config = function(_, opts)
-            require("mini.splitjoin").setup(opts)
-        end,
         keys = {
             { "gs", desc = "Split join", mode = "n" },
         },
@@ -293,11 +284,7 @@ return {
         },
         enabled = not environment.is_vscode,
         ft = treesitter.treesitter_filetype_list,
-        opts = {
-            log = {
-                level = vim.log.levels.OFF,
-            },
-        },
+        opts = {},
     },
 
     {

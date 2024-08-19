@@ -4,38 +4,6 @@ local utils = require("utils")
 
 return {
     {
-        "catppuccin/nvim",
-        enabled = not environment.is_vscode,
-        event = {
-            "User ColorschemePre",
-        },
-        name = "catppuccin",
-        opts = {
-            transparent_background = true, -- disables setting the background color.
-            no_italic = true,              -- Force no italic
-            custom_highlights = function(C)
-                local ch = {}
-                if environment.is_undercurl_available then
-                    ch = vim.tbl_deep_extend("force", ch, {
-                        DiagnosticUnderlineError = { style = { "undercurl" } },
-                        DiagnosticUnderlineHint = { style = { "undercurl" } },
-                        DiagnosticUnderlineInfo = { style = { "undercurl" } },
-                        DiagnosticUnderlineWarn = { style = { "undercurl" } },
-                    })
-                else
-                    ch = vim.tbl_deep_extend("force", ch, {
-                        SpellBad = { style = { "underline" } },
-                        SpellCap = { style = { "underline" } },
-                        SpellLocal = { style = { "underline" } },
-                        SpellRare = { style = { "underline" } },
-                    })
-                end
-                return ch
-            end,
-        },
-    },
-
-    {
         "ellisonleao/gruvbox.nvim",
         enabled = not environment.is_vscode,
         event = {
@@ -45,6 +13,7 @@ return {
             local overrides = {
                 CursorLineNr = { bg = "none" },
                 LspReferenceRead = { bg = colors.get_color("gray", "gruvbox") },
+                LspReferenceText = { bg = colors.get_color("gray", "gruvbox") },
                 LspReferenceWrite = { bg = colors.get_color("gray", "gruvbox") },
                 TabLineFill = { bg = "none" },
                 WinBar = { bg = "none" },
@@ -64,6 +33,9 @@ return {
             if utils.is_available("flash.nvim") then
                 overrides.FlashBackdrop = { link = "Comment" }
                 overrides.FlashLabel = { bg = colors.get_color("red", "gruvbox"), bold = true }
+            end
+            if utils.is_available("mini.indentscope") then
+                overrides.MiniIndentscopeSymbol = { fg = colors.get_color("orange", "gruvbox") }
             end
             if utils.is_available("nvim-tree.lua") then
                 overrides.NvimTreeOpenedFile = { fg = colors.get_color("orange", "gruvbox") }
@@ -201,67 +173,6 @@ return {
                     cursorline = true,
                     transparency = true,
                 },
-            }
-        end,
-    },
-
-    {
-        "projekt0n/github-nvim-theme",
-        config = function(_, opts)
-            require("github-theme").setup(opts)
-        end,
-        enabled = not environment.is_vscode,
-        event = {
-            "User ColorschemePre",
-        },
-        lazy = true,
-        opts = function()
-            local groups = {
-                all = {
-                    TabLineFill = { bg = "none" },
-                },
-            }
-            if not environment.is_undercurl_available then
-                groups = vim.tbl_deep_extend("force", groups,
-                    {
-                        all = {
-                            DiagnosticUnderlineError = { style = "underline" },
-                            DiagnosticUnderlineWarn = { style = "underline" },
-                            DiagnosticUnderlineInfo = { style = "underline" },
-                            DiagnosticUnderlineHint = { style = "underline" },
-                            SpellBad = { style = "underline" },
-                            SpellCap = { style = "underline" },
-                            SpellLocal = { style = "underline" },
-                            SpellRare = { style = "underline" },
-                        },
-                    }
-                )
-            end
-            if utils.is_available("nvim-tree.lua") then
-                groups = vim.tbl_deep_extend("force", groups,
-                    {
-                        all = {
-                            NvimTreeOpenedHL = { link = "NvimTreeOpenedFile" },
-                        },
-                    }
-                )
-            end
-            if utils.is_available("nvim-treesitter-context") then
-                groups = vim.tbl_deep_extend("force", groups,
-                    {
-                        all = {
-                            TreesitterContextBottom = { style = "underline" },
-                            TreesitterContextLineNumber = { fg = "palette." .. colors.get_colorscheme_color("github", "purple") },
-                        },
-                    }
-                )
-            end
-
-            return {
-                options = {
-                    transparent = true, -- Disable setting bg (make neovim's background transparent)
-                },
-                groups = groups,
             }
         end,
     },

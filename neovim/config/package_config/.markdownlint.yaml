@@ -124,7 +124,7 @@ MD013:
 # MD027: true
 #
 # # MD028/no-blanks-blockquote : Blank line inside blockquote : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md028.md
-# MD028: true
+MD028: false
 #
 # # MD029/ol-prefix : Ordered list item prefix : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md029.md
 # MD029:
@@ -156,7 +156,7 @@ MD032: false
 #   allowed_elements: []
 #
 # # MD034/no-bare-urls : Bare URL used : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md034.md
-# MD034: true
+MD034: false
 #
 # # MD035/hr-style : Horizontal rule style : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md035.md
 # MD035:

@@ -47,7 +47,7 @@ return {
                 "gd",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_definitions" })
-                    view.first_render:next(function()
+                    view:wait(function()
                         local buf = view.win.buf
                         if not buf or not vim.api.nvim_buf_is_valid(buf) then
                             return
@@ -70,7 +70,7 @@ return {
                 "gD",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_declarations" })
-                    view.first_render:next(function()
+                    view:wait(function()
                         local buf = view.win.buf
                         if not buf or not vim.api.nvim_buf_is_valid(buf) then
                             return
@@ -93,7 +93,7 @@ return {
                 "gi",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_implementations" })
-                    view.first_render:next(function()
+                    view:wait(function()
                         local buf = view.win.buf
                         if not buf or not vim.api.nvim_buf_is_valid(buf) then
                             return
@@ -116,7 +116,7 @@ return {
                 "gr",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_references" })
-                    view.first_render:next(function()
+                    view:wait(function()
                         local buf = view.win.buf
                         if not buf or not vim.api.nvim_buf_is_valid(buf) then
                             return
@@ -139,7 +139,7 @@ return {
                 "gy",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_type_definitions" })
-                    view.first_render:next(function()
+                    view:wait(function()
                         local buf = view.win.buf
                         if not buf or not vim.api.nvim_buf_is_valid(buf) then
                             return
@@ -411,8 +411,6 @@ return {
     {
         "neovim/nvim-lspconfig",
         config = function(_, opts)
-            vim.lsp.set_log_level("OFF")
-
             -- Borders
             local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
             function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
@@ -582,26 +580,17 @@ return {
                     end
 
                     if
-                        client.supports_method("textDocument/formatting") or
-                        client.supports_method("textDocument/rangeFormatting") or
-                        utils.is_available("conform.nvim")
+                        not utils.is_available("conform.nvim")
+                        and (
+                            client.supports_method("textDocument/formatting")
+                            or client.supports_method("textDocument/rangeFormatting")
+                        )
                     then
-                        local buf_format
-                        if utils.is_available("conform.nvim") then
-                            buf_format = function()
-                                require("conform").format({
-                                    timeout_ms = 5000,
-                                    bufnr = buf,
-                                    lsp_format = "fallback",
-                                })
-                            end
-                        else
-                            buf_format = function()
-                                vim.lsp.buf.format({
-                                    timeout_ms = 5000,
-                                    bufnr = buf,
-                                })
-                            end
+                        local buf_format = function()
+                            vim.lsp.buf.format({
+                                timeout_ms = 5000,
+                                bufnr = buf,
+                            })
                         end
 
                         vim.keymap.set({ "n", "x" }, "<leader>f", buf_format, { buffer = buf, desc = "Format buffer", silent = true })
@@ -711,7 +700,12 @@ return {
             {
                 "kosayoda/nvim-lightbulb",
                 opts = {
+                    -- Autocmd configuration.
+                    -- If enabled, automatically defines an autocmd to show the lightbulb.
+                    -- If disabled, you will have to manually call |NvimLightbulb.update_lightbulb|.
+                    -- Only works if configured during NvimLightbulb.setup
                     autocmd = {
+                        -- Whether or not to enable autocmd creation.
                         enabled = true,
                     },
                 },
@@ -915,9 +909,6 @@ return {
         opts = {
             -- The directory in which to install packages.
             install_root_dir = path.mason_install_root_path,
-            -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
-            -- debugging issues with package installations.
-            log_level = vim.log.levels.OFF,
             ui = {
                 border = "rounded",
             },

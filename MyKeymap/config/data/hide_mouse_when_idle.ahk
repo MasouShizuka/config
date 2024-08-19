@@ -1,3 +1,4 @@
+#SingleInstance Force
 #NoTrayIcon
 Persistent
 OnExit((*) => unhide_mouse())

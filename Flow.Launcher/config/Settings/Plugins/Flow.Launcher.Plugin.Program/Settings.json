@@ -19,6 +19,7 @@
   "EnableStartMenuSource": true,
   "EnableDescription": false,
   "HideAppsPath": true,
+  "HideUninstallers": false,
   "EnableRegistrySource": true,
   "EnablePathSource": false,
   "EnableUWP": true

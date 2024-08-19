@@ -5,9 +5,6 @@ local utils = require("utils")
 return {
     {
         "echasnovski/mini.surround",
-        config = function(_, opts)
-            require("mini.surround").setup(opts)
-        end,
         keys = {
             { "sa", desc = "Add surrounding in Normal and Visual modes", mode = { "n", "x" } },
             { "sd", desc = "Delete surrounding",                         mode = { "n", "x" } },

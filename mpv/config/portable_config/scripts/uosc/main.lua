@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ 9fa7220da45815855df6c6d62adf82ee7d9df5e3
+COMMIT_ 8346db433f12608495dc9cd1bd27129990810e0e
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -405,6 +405,7 @@ state = {
 	idlescreen = options.idlescreen,
 	idlemsg = options.idlemsg,
 }
+buttons = require('lib/buttons')
 thumbnail = {width = 0, height = 0, disabled = false}
 external = {} -- Properties set by external scripts
 key_binding_overwrites = {} -- Table of key_binding:mpv_command

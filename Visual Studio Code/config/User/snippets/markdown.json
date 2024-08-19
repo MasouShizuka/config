@@ -1,226 +1,128 @@
 {
-    "Insert heading level 1": {
-        "prefix": [
-            ".1",
-            "。1"
-        ],
-        "body": "# ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 1",
+    "insert bold italic text": {
+        "body": "***${1:${TM_SELECTED_TEXT}}***$0",
         "luasnip": {
             "autotrigger": true
-        }
-    },
-    "Insert heading level 2": {
-        "prefix": [
-            ".2",
-            "。2"
-        ],
-        "body": "## ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 2",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert heading level 3": {
-        "prefix": [
-            ".3",
-            "。3"
-        ],
-        "body": "### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 3",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert heading level 4": {
-        "prefix": [
-            ".4",
-            "。4"
-        ],
-        "body": "#### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert heading level 5": {
-        "prefix": [
-            ".5",
-            "。5"
-        ],
-        "body": "##### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert heading level 6": {
-        "prefix": [
-            ".6",
-            "。6"
-        ],
-        "body": "###### ${TM_SELECTED_TEXT}",
-        "description": "Insert heading level 6",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-
-    "Insert bold text": {
-        "prefix": [
-            ".b",
-            "。b"
-        ],
-        "body": "**${1:${TM_SELECTED_TEXT}}**$0",
-        "description": "Insert bold text",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert italic text": {
-        "prefix": [
-            ".i",
-            "。i"
-        ],
-        "body": "*${1:${TM_SELECTED_TEXT}}*$0",
-        "description": "Insert italic text",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert bold italic text": {
+        },
         "prefix": [
             ".e",
             "。e"
-        ],
-        "body": "***${1:${TM_SELECTED_TEXT}}***$0",
-        "description": "Insert bold italic text",
+        ]
+    },
+    "insert bold text": {
+        "body": "**${1:${TM_SELECTED_TEXT}}**$0",
         "luasnip": {
             "autotrigger": true
-        }
-    },
-    "Insert strikethrough": {
+        },
         "prefix": [
-            ".s",
-            "。s"
-        ],
-        "body": "~~${1:${TM_SELECTED_TEXT}}~~$0",
-        "description": "Insert strikethrough",
-        "luasnip": {
-            "autotrigger": true
-        }
+            ".b",
+            "。b"
+        ]
     },
-
-    "Insert quoted text": {
-        "prefix": [
-            ".q",
-            "。q"
-        ],
-        "body": "> ${TM_SELECTED_TEXT}",
-        "description": "Insert quoted text",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-
-    "Insert inline code": {
-        "prefix": [
-            ".c",
-            "。c"
-        ],
-        "body": "`${1:${TM_SELECTED_TEXT}}`$0",
-        "description": "Insert inline code",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert fenced code block": {
-        "prefix": [
-            "..c",
-            "。。c"
-        ],
+    "insert fenced code block": {
         "body": [
             "```${1|autohotkey,bash,c,cpp,csharp,css,diff,go,html,java,javascript,json,lua,markdown,php,python,ruby,sql,tex,text|}",
             "${TM_SELECTED_TEXT}$0",
             "```"
         ],
-        "description": "Insert fenced code block",
         "luasnip": {
-            "priority": 2000,
-            "autotrigger": true
-        }
-    },
-    "Insert inline math": {
+            "autotrigger": true,
+            "priority": 2000
+        },
         "prefix": [
-            ".m",
-            "。m"
-        ],
-        "body": "\\$${1:${TM_SELECTED_TEXT}}\\$$0",
-        "description": "Insert inline math",
-        "luasnip": {
-            "autotrigger": true
-        }
+            "..c",
+            "。。c"
+        ]
     },
-    "Insert fenced math": {
-        "prefix": [
-            "..m",
-            "。。m"
-        ],
+    "insert fenced math": {
         "body": [
             "\\$\\$",
             "${TM_SELECTED_TEXT}$0",
             "\\$\\$"
         ],
-        "description": "Insert fenced math",
         "luasnip": {
-            "priority": 2000,
-            "autotrigger": true
-        }
-    },
-
-    "Insert horizontal rule": {
+            "autotrigger": true,
+            "priority": 2000
+        },
         "prefix": [
-            ".n",
-            "。n"
-        ],
+            "..m",
+            "。。m"
+        ]
+    },
+    "insert heading level 1": {
+        "body": "# ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".1",
+            "。1"
+        ]
+    },
+    "insert heading level 2": {
+        "body": "## ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".2",
+            "。2"
+        ]
+    },
+    "insert heading level 3": {
+        "body": "### ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".3",
+            "。3"
+        ]
+    },
+    "insert heading level 4": {
+        "body": "#### ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".4",
+            "。4"
+        ]
+    },
+    "insert heading level 5": {
+        "body": "##### ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".5",
+            "。5"
+        ]
+    },
+    "insert heading level 6": {
+        "body": "###### ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".6",
+            "。6"
+        ]
+    },
+    "insert horizontal rule": {
         "body": [
             "---",
             "$0"
         ],
-        "description": "Insert horizontal rule",
         "luasnip": {
             "autotrigger": true
-        }
-    },
-
-    "Insert link": {
+        },
         "prefix": [
-            ".l",
-            "。l"
-        ],
-        "body": "[${1:text}](${2:https://})$0",
-        "description": "Insert link",
-        "luasnip": {
-            "autotrigger": true
-        }
+            ".n",
+            "。n"
+        ]
     },
-    "Insert image": {
-        "prefix": [
-            ".p",
-            "。p"
-        ],
-        "body": "![${1:text}](${2:https://})$0",
-        "description": "Insert image",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-
-    "Insert html center block": {
-        "prefix": [
-            ".hc",
-            "。hc"
-        ],
+    "insert html center block": {
         "body": [
             "<center>",
             "",
@@ -228,16 +130,15 @@
             "",
             "</center>"
         ],
-        "description": "Insert html center block",
         "luasnip": {
             "autotrigger": true
-        }
-    },
-    "Insert html details block": {
+        },
         "prefix": [
-            ".hd",
-            "。hd"
-        ],
+            ".hc",
+            "。hc"
+        ]
+    },
+    "insert html details block": {
         "body": [
             "<details>",
             "<summary>${1:详情}</summary>",
@@ -246,72 +147,138 @@
             "",
             "</details>"
         ],
-        "description": "Insert html center block",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": [
+            ".hd",
+            "。hd"
+        ]
     },
-    "Insert html font color block": {
+    "insert html font color block": {
+        "body": "<font color=${1|red,yellow,blue,green|}>${2:${TM_SELECTED_TEXT}}</font>$0",
+        "luasnip": {
+            "autotrigger": true
+        },
         "prefix": [
             ".hf",
             "。hf"
-        ],
-        "body": "<font color=${1|red,yellow,blue,green|}>${2:${TM_SELECTED_TEXT}}</font>$0",
-        "description": "Insert html font block",
+        ]
+    },
+    "insert html mark block": {
+        "body": "<mark>${1:${TM_SELECTED_TEXT}}</mark>$0",
         "luasnip": {
             "autotrigger": true
-        }
-    },
-    "Insert html mark block": {
+        },
         "prefix": [
             ".hm",
             "。hm"
-        ],
-        "body": "<mark>${1:${TM_SELECTED_TEXT}}</mark>$0",
-        "description": "Insert html mark block",
+        ]
+    },
+    "insert html underline block": {
+        "body": "<u>${1:${TM_SELECTED_TEXT}}</u>$0",
         "luasnip": {
             "autotrigger": true
-        }
-    },
-    "Insert html underline block": {
+        },
         "prefix": [
             ".hu",
             "。hu"
-        ],
-        "body": "<u>${1:${TM_SELECTED_TEXT}}</u>$0",
-        "description": "Insert html underline block",
+        ]
+    },
+    "insert image": {
+        "body": "![${1:text}](${2:https://})$0",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": [
+            ".p",
+            "。p"
+        ]
     },
-
-    "Insert table 1x1": {
-        "prefix": "1x1",
+    "insert inline code": {
+        "body": "`${1:${TM_SELECTED_TEXT}}`$0",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".c",
+            "。c"
+        ]
+    },
+    "insert inline math": {
+        "body": "\\$${1:${TM_SELECTED_TEXT}}\\$$0",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".m",
+            "。m"
+        ]
+    },
+    "insert italic text": {
+        "body": "*${1:${TM_SELECTED_TEXT}}*$0",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".i",
+            "。i"
+        ]
+    },
+    "insert link": {
+        "body": "[${1:text}](${2:https://})$0",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".l",
+            "。l"
+        ]
+    },
+    "insert quoted text": {
+        "body": "> ${TM_SELECTED_TEXT}",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".q",
+            "。q"
+        ]
+    },
+    "insert strikethrough": {
+        "body": "~~${1:${TM_SELECTED_TEXT}}~~$0",
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": [
+            ".s",
+            "。s"
+        ]
+    },
+    "insert table 1x1": {
         "body": [
             "$0|   |",
             "|---|",
             "|   |"
         ],
-        "description": "Insert table 1x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "1x1"
     },
-    "Insert table 1x2": {
-        "prefix": "1x2",
+    "insert table 1x2": {
         "body": [
             "$0|   |",
             "|---|",
             "|   |",
             "|   |"
         ],
-        "description": "Insert table 1x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "1x2"
     },
-    "Insert table 1x3": {
-        "prefix": "1x3",
+    "insert table 1x3": {
         "body": [
             "$0|   |",
             "|---|",
@@ -319,98 +286,26 @@
             "|   |",
             "|   |"
         ],
-        "description": "Insert table 1x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "1x3"
     },
-    "Insert table 1x4": {
-        "prefix": "1x4",
-        "body": [
-            "$0|   |",
-            "|---|",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |"
-        ],
-        "description": "Insert table 1x4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 1x5": {
-        "prefix": "1x5",
-        "body": [
-            "$0|   |",
-            "|---|",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |"
-        ],
-        "description": "Insert table 1x5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 1x6": {
-        "prefix": "1x6",
-        "body": [
-            "$0|   |",
-            "|---|",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |"
-        ],
-        "description": "Insert table 1x6",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 1x7": {
-        "prefix": "1x7",
-        "body": [
-            "$0|   |",
-            "|---|",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |"
-        ],
-        "description": "Insert table 1x7",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 1x8": {
-        "prefix": "1x8",
+    "insert table 1x4": {
         "body": [
             "$0|   |",
             "|---|",
             "|   |",
             "|   |",
             "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
-            "|   |",
             "|   |"
         ],
-        "description": "Insert table 1x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "1x4"
     },
-    "Insert table 1x9": {
-        "prefix": "1x9",
+    "insert table 1x5": {
         "body": [
             "$0|   |",
             "|---|",
@@ -418,44 +313,107 @@
             "|   |",
             "|   |",
             "|   |",
+            "|   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "1x5"
+    },
+    "insert table 1x6": {
+        "body": [
+            "$0|   |",
+            "|---|",
+            "|   |",
             "|   |",
             "|   |",
             "|   |",
             "|   |",
             "|   |"
         ],
-        "description": "Insert table 1x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "1x6"
     },
-    "Insert table 2x1": {
-        "prefix": "2x1",
+    "insert table 1x7": {
+        "body": [
+            "$0|   |",
+            "|---|",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "1x7"
+    },
+    "insert table 1x8": {
+        "body": [
+            "$0|   |",
+            "|---|",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "1x8"
+    },
+    "insert table 1x9": {
+        "body": [
+            "$0|   |",
+            "|---|",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |",
+            "|   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "1x9"
+    },
+    "insert table 2x1": {
         "body": [
             "$0|   |   |",
             "|---|---|",
             "|   |   |"
         ],
-        "description": "Insert table 2x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "2x1"
     },
-    "Insert table 2x2": {
-        "prefix": "2x2",
+    "insert table 2x2": {
         "body": [
             "$0|   |   |",
             "|---|---|",
             "|   |   |",
             "|   |   |"
         ],
-        "description": "Insert table 2x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "2x2"
     },
-    "Insert table 2x3": {
-        "prefix": "2x3",
+    "insert table 2x3": {
         "body": [
             "$0|   |   |",
             "|---|---|",
@@ -463,98 +421,41 @@
             "|   |   |",
             "|   |   |"
         ],
-        "description": "Insert table 2x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "2x3"
     },
-    "Insert table 2x4": {
-        "prefix": "2x4",
-        "body": [
-            "$0|   |   |",
-            "|---|---|",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |"
-        ],
-        "description": "Insert table 2x4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 2x5": {
-        "prefix": "2x5",
-        "body": [
-            "$0|   |   |",
-            "|---|---|",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |"
-        ],
-        "description": "Insert table 2x5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 2x6": {
-        "prefix": "2x6",
-        "body": [
-            "$0|   |   |",
-            "|---|---|",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |"
-        ],
-        "description": "Insert table 2x6",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 2x7": {
-        "prefix": "2x7",
-        "body": [
-            "$0|   |   |",
-            "|---|---|",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |",
-            "|   |   |"
-        ],
-        "description": "Insert table 2x7",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 2x8": {
-        "prefix": "2x8",
+    "insert table 2x4": {
         "body": [
             "$0|   |   |",
             "|---|---|",
             "|   |   |",
             "|   |   |",
             "|   |   |",
+            "|   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "2x4"
+    },
+    "insert table 2x5": {
+        "body": [
+            "$0|   |   |",
+            "|---|---|",
             "|   |   |",
             "|   |   |",
             "|   |   |",
             "|   |   |",
             "|   |   |"
         ],
-        "description": "Insert table 2x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "2x5"
     },
-    "Insert table 2x9": {
-        "prefix": "2x9",
+    "insert table 2x6": {
         "body": [
             "$0|   |   |",
             "|---|---|",
@@ -563,43 +464,91 @@
             "|   |   |",
             "|   |   |",
             "|   |   |",
+            "|   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "2x6"
+    },
+    "insert table 2x7": {
+        "body": [
+            "$0|   |   |",
+            "|---|---|",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
             "|   |   |",
             "|   |   |",
             "|   |   |",
             "|   |   |"
         ],
-        "description": "Insert table 2x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "2x7"
     },
-    "Insert table 3x1": {
-        "prefix": "3x1",
+    "insert table 2x8": {
+        "body": [
+            "$0|   |   |",
+            "|---|---|",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "2x8"
+    },
+    "insert table 2x9": {
+        "body": [
+            "$0|   |   |",
+            "|---|---|",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |",
+            "|   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "2x9"
+    },
+    "insert table 3x1": {
         "body": [
             "$0|   |   |   |",
             "|---|---|---|",
             "|   |   |   |"
         ],
-        "description": "Insert table 3x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "3x1"
     },
-    "Insert table 3x2": {
-        "prefix": "3x2",
+    "insert table 3x2": {
         "body": [
             "$0|   |   |   |",
             "|---|---|---|",
             "|   |   |   |",
             "|   |   |   |"
         ],
-        "description": "Insert table 3x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "3x2"
     },
-    "Insert table 3x3": {
-        "prefix": "3x3",
+    "insert table 3x3": {
         "body": [
             "$0|   |   |   |",
             "|---|---|---|",
@@ -607,79 +556,41 @@
             "|   |   |   |",
             "|   |   |   |"
         ],
-        "description": "Insert table 3x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "3x3"
     },
-    "Insert table 3x4": {
-        "prefix": "3x4",
-        "body": [
-            "$0|   |   |   |",
-            "|---|---|---|",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |"
-        ],
-        "description": "Insert table 3x4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 3x5": {
-        "prefix": "3x5",
-        "body": [
-            "$0|   |   |   |",
-            "|---|---|---|",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |"
-        ],
-        "description": "Insert table 3x5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 3x6": {
-        "prefix": "3x6",
-        "body": [
-            "$0|   |   |   |",
-            "|---|---|---|",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |"
-        ],
-        "description": "Insert table 3x6",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 3x7": {
-        "prefix": "3x7",
+    "insert table 3x4": {
         "body": [
             "$0|   |   |   |",
             "|---|---|---|",
             "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |",
+            "|   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "3x4"
+    },
+    "insert table 3x5": {
+        "body": [
+            "$0|   |   |   |",
+            "|---|---|---|",
+            "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |"
         ],
-        "description": "Insert table 3x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "3x5"
     },
-    "Insert table 3x8": {
-        "prefix": "3x8",
+    "insert table 3x6": {
         "body": [
             "$0|   |   |   |",
             "|---|---|---|",
@@ -688,17 +599,14 @@
             "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |",
-            "|   |   |   |",
-            "|   |   |   |",
             "|   |   |   |"
         ],
-        "description": "Insert table 3x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "3x6"
     },
-    "Insert table 3x9": {
-        "prefix": "3x9",
+    "insert table 3x7": {
         "body": [
             "$0|   |   |   |",
             "|---|---|---|",
@@ -708,42 +616,74 @@
             "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |",
+            "|   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "3x7"
+    },
+    "insert table 3x8": {
+        "body": [
+            "$0|   |   |   |",
+            "|---|---|---|",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |",
             "|   |   |   |"
         ],
-        "description": "Insert table 3x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "3x8"
     },
-    "Insert table 4x1": {
-        "prefix": "4x1",
+    "insert table 3x9": {
+        "body": [
+            "$0|   |   |   |",
+            "|---|---|---|",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |",
+            "|   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "3x9"
+    },
+    "insert table 4x1": {
         "body": [
             "$0|   |   |   |   |",
             "|---|---|---|---|",
             "|   |   |   |   |"
         ],
-        "description": "Insert table 4x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "4x1"
     },
-    "Insert table 4x2": {
-        "prefix": "4x2",
+    "insert table 4x2": {
         "body": [
             "$0|   |   |   |   |",
             "|---|---|---|---|",
             "|   |   |   |   |",
             "|   |   |   |   |"
         ],
-        "description": "Insert table 4x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "4x2"
     },
-    "Insert table 4x3": {
-        "prefix": "4x3",
+    "insert table 4x3": {
         "body": [
             "$0|   |   |   |   |",
             "|---|---|---|---|",
@@ -751,79 +691,41 @@
             "|   |   |   |   |",
             "|   |   |   |   |"
         ],
-        "description": "Insert table 4x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "4x3"
     },
-    "Insert table 4x4": {
-        "prefix": "4x4",
-        "body": [
-            "$0|   |   |   |   |",
-            "|---|---|---|---|",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |"
-        ],
-        "description": "Insert table 4x4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 4x5": {
-        "prefix": "4x5",
-        "body": [
-            "$0|   |   |   |   |",
-            "|---|---|---|---|",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |"
-        ],
-        "description": "Insert table 4x5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 4x6": {
-        "prefix": "4x6",
-        "body": [
-            "$0|   |   |   |   |",
-            "|---|---|---|---|",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |"
-        ],
-        "description": "Insert table 4x6",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 4x7": {
-        "prefix": "4x7",
+    "insert table 4x4": {
         "body": [
             "$0|   |   |   |   |",
             "|---|---|---|---|",
             "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |",
+            "|   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "4x4"
+    },
+    "insert table 4x5": {
+        "body": [
+            "$0|   |   |   |   |",
+            "|---|---|---|---|",
+            "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |"
         ],
-        "description": "Insert table 4x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "4x5"
     },
-    "Insert table 4x8": {
-        "prefix": "4x8",
+    "insert table 4x6": {
         "body": [
             "$0|   |   |   |   |",
             "|---|---|---|---|",
@@ -832,17 +734,14 @@
             "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |",
-            "|   |   |   |   |",
-            "|   |   |   |   |",
             "|   |   |   |   |"
         ],
-        "description": "Insert table 4x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "4x6"
     },
-    "Insert table 4x9": {
-        "prefix": "4x9",
+    "insert table 4x7": {
         "body": [
             "$0|   |   |   |   |",
             "|---|---|---|---|",
@@ -852,42 +751,74 @@
             "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |",
+            "|   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "4x7"
+    },
+    "insert table 4x8": {
+        "body": [
+            "$0|   |   |   |   |",
+            "|---|---|---|---|",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |",
             "|   |   |   |   |"
         ],
-        "description": "Insert table 4x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "4x8"
     },
-    "Insert table 5x1": {
-        "prefix": "5x1",
+    "insert table 4x9": {
+        "body": [
+            "$0|   |   |   |   |",
+            "|---|---|---|---|",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |",
+            "|   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "4x9"
+    },
+    "insert table 5x1": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x1"
     },
-    "Insert table 5x2": {
-        "prefix": "5x2",
+    "insert table 5x2": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x2"
     },
-    "Insert table 5x3": {
-        "prefix": "5x3",
+    "insert table 5x3": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
@@ -895,61 +826,41 @@
             "|   |   |   |   |   |",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x3"
     },
-    "Insert table 5x4": {
-        "prefix": "5x4",
-        "body": [
-            "$0|   |   |   |   |   |",
-            "|---|---|---|---|---|",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |"
-        ],
-        "description": "Insert table 5x4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 5x5": {
-        "prefix": "5x5",
-        "body": [
-            "$0|   |   |   |   |   |",
-            "|---|---|---|---|---|",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
-            "|   |   |   |   |   |"
-        ],
-        "description": "Insert table 5x5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 5x6": {
-        "prefix": "5x6",
+    "insert table 5x4": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
+            "|   |   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "5x4"
+    },
+    "insert table 5x5": {
+        "body": [
+            "$0|   |   |   |   |   |",
+            "|---|---|---|---|---|",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x6",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x5"
     },
-    "Insert table 5x7": {
-        "prefix": "5x7",
+    "insert table 5x6": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
@@ -958,16 +869,14 @@
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x6"
     },
-    "Insert table 5x8": {
-        "prefix": "5x8",
+    "insert table 5x7": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
@@ -977,16 +886,14 @@
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
-            "|   |   |   |   |   |",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x7"
     },
-    "Insert table 5x9": {
-        "prefix": "5x9",
+    "insert table 5x8": {
         "body": [
             "$0|   |   |   |   |   |",
             "|---|---|---|---|---|",
@@ -997,41 +904,56 @@
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |",
+            "|   |   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "5x8"
+    },
+    "insert table 5x9": {
+        "body": [
+            "$0|   |   |   |   |   |",
+            "|---|---|---|---|---|",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
+            "|   |   |   |   |   |",
             "|   |   |   |   |   |",
             "|   |   |   |   |   |"
         ],
-        "description": "Insert table 5x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "5x9"
     },
-    "Insert table 6x1": {
-        "prefix": "6x1",
+    "insert table 6x1": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x1"
     },
-    "Insert table 6x2": {
-        "prefix": "6x2",
+    "insert table 6x2": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x2"
     },
-    "Insert table 6x3": {
-        "prefix": "6x3",
+    "insert table 6x3": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
@@ -1039,61 +961,41 @@
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x3"
     },
-    "Insert table 6x4": {
-        "prefix": "6x4",
-        "body": [
-            "$0|   |   |   |   |   |   |",
-            "|---|---|---|---|---|---|",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |"
-        ],
-        "description": "Insert table 6x4",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 6x5": {
-        "prefix": "6x5",
-        "body": [
-            "$0|   |   |   |   |   |   |",
-            "|---|---|---|---|---|---|",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |"
-        ],
-        "description": "Insert table 6x5",
-        "luasnip": {
-            "autotrigger": true
-        }
-    },
-    "Insert table 6x6": {
-        "prefix": "6x6",
+    "insert table 6x4": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "6x4"
+    },
+    "insert table 6x5": {
+        "body": [
+            "$0|   |   |   |   |   |   |",
+            "|---|---|---|---|---|---|",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x6",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x5"
     },
-    "Insert table 6x7": {
-        "prefix": "6x7",
+    "insert table 6x6": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
@@ -1102,16 +1004,14 @@
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x6"
     },
-    "Insert table 6x8": {
-        "prefix": "6x8",
+    "insert table 6x7": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
@@ -1121,16 +1021,14 @@
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
-            "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x7"
     },
-    "Insert table 6x9": {
-        "prefix": "6x9",
+    "insert table 6x8": {
         "body": [
             "$0|   |   |   |   |   |   |",
             "|---|---|---|---|---|---|",
@@ -1141,41 +1039,56 @@
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |"
+        ],
+        "luasnip": {
+            "autotrigger": true
+        },
+        "prefix": "6x8"
+    },
+    "insert table 6x9": {
+        "body": [
+            "$0|   |   |   |   |   |   |",
+            "|---|---|---|---|---|---|",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
+            "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |",
             "|   |   |   |   |   |   |"
         ],
-        "description": "Insert table 6x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "6x9"
     },
-    "Insert table 7x1": {
-        "prefix": "7x1",
+    "insert table 7x1": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x1"
     },
-    "Insert table 7x2": {
-        "prefix": "7x2",
+    "insert table 7x2": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x2"
     },
-    "Insert table 7x3": {
-        "prefix": "7x3",
+    "insert table 7x3": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1183,13 +1096,12 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x3"
     },
-    "Insert table 7x4": {
-        "prefix": "7x4",
+    "insert table 7x4": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1198,13 +1110,12 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x4",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x4"
     },
-    "Insert table 7x5": {
-        "prefix": "7x5",
+    "insert table 7x5": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1214,13 +1125,12 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x5",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x5"
     },
-    "Insert table 7x6": {
-        "prefix": "7x6",
+    "insert table 7x6": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1231,13 +1141,12 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x6",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x6"
     },
-    "Insert table 7x7": {
-        "prefix": "7x7",
+    "insert table 7x7": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1249,13 +1158,12 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x7"
     },
-    "Insert table 7x8": {
-        "prefix": "7x8",
+    "insert table 7x8": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1268,13 +1176,12 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x8"
     },
-    "Insert table 7x9": {
-        "prefix": "7x9",
+    "insert table 7x9": {
         "body": [
             "$0|   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|",
@@ -1288,38 +1195,35 @@
             "|   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 7x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "7x9"
     },
-    "Insert table 8x1": {
-        "prefix": "8x1",
+    "insert table 8x1": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x1"
     },
-    "Insert table 8x2": {
-        "prefix": "8x2",
+    "insert table 8x2": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x2"
     },
-    "Insert table 8x3": {
-        "prefix": "8x3",
+    "insert table 8x3": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1327,13 +1231,12 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x3"
     },
-    "Insert table 8x4": {
-        "prefix": "8x4",
+    "insert table 8x4": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1342,13 +1245,12 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x4",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x4"
     },
-    "Insert table 8x5": {
-        "prefix": "8x5",
+    "insert table 8x5": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1358,13 +1260,12 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x5",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x5"
     },
-    "Insert table 8x6": {
-        "prefix": "8x6",
+    "insert table 8x6": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1375,13 +1276,12 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x6",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x6"
     },
-    "Insert table 8x7": {
-        "prefix": "8x7",
+    "insert table 8x7": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1393,13 +1293,12 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x7"
     },
-    "Insert table 8x8": {
-        "prefix": "8x8",
+    "insert table 8x8": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1412,13 +1311,12 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x8"
     },
-    "Insert table 8x9": {
-        "prefix": "8x9",
+    "insert table 8x9": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|",
@@ -1432,38 +1330,35 @@
             "|   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 8x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "8x9"
     },
-    "Insert table 9x1": {
-        "prefix": "9x1",
+    "insert table 9x1": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x1",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x1"
     },
-    "Insert table 9x2": {
-        "prefix": "9x2",
+    "insert table 9x2": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x2",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x2"
     },
-    "Insert table 9x3": {
-        "prefix": "9x3",
+    "insert table 9x3": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1471,13 +1366,12 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x3",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x3"
     },
-    "Insert table 9x4": {
-        "prefix": "9x4",
+    "insert table 9x4": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1486,13 +1380,12 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x4",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x4"
     },
-    "Insert table 9x5": {
-        "prefix": "9x5",
+    "insert table 9x5": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1502,13 +1395,12 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x5",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x5"
     },
-    "Insert table 9x6": {
-        "prefix": "9x6",
+    "insert table 9x6": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1519,13 +1411,12 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x6",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x6"
     },
-    "Insert table 9x7": {
-        "prefix": "9x7",
+    "insert table 9x7": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1537,13 +1428,12 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x7",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x7"
     },
-    "Insert table 9x8": {
-        "prefix": "9x8",
+    "insert table 9x8": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1556,13 +1446,12 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x8",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x8"
     },
-    "Insert table 9x9": {
-        "prefix": "9x9",
+    "insert table 9x9": {
         "body": [
             "$0|   |   |   |   |   |   |   |   |   |",
             "|---|---|---|---|---|---|---|---|---|",
@@ -1576,9 +1465,9 @@
             "|   |   |   |   |   |   |   |   |   |",
             "|   |   |   |   |   |   |   |   |   |"
         ],
-        "description": "Insert table 9x9",
         "luasnip": {
             "autotrigger": true
-        }
+        },
+        "prefix": "9x9"
     }
 }
