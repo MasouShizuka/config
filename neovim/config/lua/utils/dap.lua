@@ -76,8 +76,9 @@ M.dap = function(mason_nvim_dap)
                 end
 
                 local python_path = path.python_path
-                if path.python_envs_path then
-                    python_path = path.python_envs_path
+                local python_envs_path = path.get_python_envs_path()
+                if python_envs_path then
+                    python_path = python_envs_path
                 end
                 config.configurations = {
                     {

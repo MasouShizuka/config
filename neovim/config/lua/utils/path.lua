@@ -15,6 +15,7 @@ end
 M.wsl_data_path = "/mnt/c/Users/MasouShizuka/AppData/Local/nvim-data"
 
 M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
+M.package_config_path = M.config_path .. "/package_config"
 
 M.home_path = vim.env.HOME
 if environment.is_windows then
@@ -47,28 +48,22 @@ if environment.is_windows then
     M.conda_path = M.scoop_app_path .. "/mambaforge/current"
     M.python_path = M.conda_path .. "/python.exe"
 end
-M.python_envs_path = nil
-if not utils.is_available("venv-selector.nvim") then
-    local function get_python_envs_path(envs)
-        local python_envs_path
-
-        local conda_envs_path = M.conda_path .. "/envs"
-        local envs_path = conda_envs_path .. "/" .. envs
-        if vim.fn.isdirectory(envs_path) ~= 0 then
-            python_envs_path = envs_path .. "/bin/python"
-            if environment.is_windows then
-                python_envs_path = envs_path .. "/python.exe"
-            end
-        end
-
+M.get_python_envs_path = function()
+    local python_envs_path
+    if utils.is_available("venv-selector.nvim") then
         return python_envs_path
     end
 
-    local envs = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-    local python_envs_path = get_python_envs_path(envs)
-    if python_envs_path then
-        M.python_envs_path = python_envs_path
+    local conda_envs_path = M.conda_path .. "/envs"
+    local envs_path = conda_envs_path .. "/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+    if vim.fn.isdirectory(envs_path) ~= 0 then
+        python_envs_path = envs_path .. "/bin/python"
+        if environment.is_windows then
+            python_envs_path = envs_path .. "/python.exe"
+        end
     end
+
+    return python_envs_path
 end
 
 return M

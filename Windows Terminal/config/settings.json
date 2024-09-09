@@ -9,7 +9,16 @@
                 "action": "sendInput",
                 "input": "\u001b[1;5R"
             },
+            "id": "User.sendInput.6C85BA19",
             "keys": "ctrl+3"
+        },
+        {
+            "command": 
+            {
+                "action": "prevTab"
+            },
+            "id": "User.prevTab.0",
+            "keys": "ctrl+shift+h"
         },
         {
             "command": 
@@ -17,22 +26,8 @@
                 "action": "sendInput",
                 "input": "\u001b[1;5P"
             },
+            "id": "User.sendInput.D97C9F86",
             "keys": "ctrl+1"
-        },
-        {
-            "command": 
-            {
-                "action": "prevTab"
-            },
-            "keys": "ctrl+shift+h"
-        },
-        {
-            "command": 
-            {
-                "action": "sendInput",
-                "input": "\u001b[18;5~"
-            },
-            "keys": "ctrl+period"
         },
         {
             "command": 
@@ -40,7 +35,24 @@
                 "action": "sendInput",
                 "input": "\u001b[21;5~"
             },
+            "id": "User.sendInput.5C2FE848",
             "keys": "ctrl+shift+t"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b[18;5~"
+            },
+            "id": "User.sendInput.422ABE55",
+            "keys": "ctrl+period"
+        },
+        {
+            "command": 
+            {
+                "action": "quakeMode"
+            },
+            "id": "User.quakeMode.F1E129A4"
         },
         {
             "command": 
@@ -48,13 +60,8 @@
                 "action": "sendInput",
                 "input": "\u001b[1;5Q"
             },
+            "id": "User.sendInput.2BFD5600",
             "keys": "ctrl+2"
-        },
-        {
-            "command": 
-            {
-                "action": "quakeMode"
-            }
         },
         {
             "command": 
@@ -62,7 +69,15 @@
                 "action": "sendInput",
                 "input": "\u001b[1;5S"
             },
+            "id": "User.sendInput.B040523C",
             "keys": "ctrl+4"
+        },
+        {
+            "command": 
+            {
+                "action": "globalSummon"
+            },
+            "id": "User.globalSummon.51A3D78C"
         },
         {
             "command": 
@@ -70,13 +85,12 @@
                 "action": "sendInput",
                 "input": "\u001b[15;5~"
             },
+            "id": "User.sendInput.F6854EB3",
             "keys": "ctrl+space"
         },
         {
-            "command": 
-            {
-                "action": "globalSummon"
-            }
+            "command": "duplicateTab",
+            "id": "User.duplicateTab"
         },
         {
             "command": 
@@ -84,10 +98,8 @@
                 "action": "sendInput",
                 "input": "\u001b[17;5~"
             },
+            "id": "User.sendInput.38C90572",
             "keys": "ctrl+comma"
-        },
-        {
-            "command": "duplicateTab"
         },
         {
             "command": 
@@ -95,6 +107,7 @@
                 "action": "sendInput",
                 "input": "\u001b[19;5~"
             },
+            "id": "User.sendInput.AA2AB5E1",
             "keys": "ctrl+;"
         },
         {
@@ -103,7 +116,17 @@
                 "action": "sendInput",
                 "input": "\u001b[20;5~"
             },
+            "id": "User.sendInput.2AFEE807",
             "keys": "ctrl+shift+n"
+        },
+        {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "right"
+            },
+            "id": "User.resizePane.87C324ED",
+            "keys": "ctrl+shift+right"
         },
         {
             "command": 
@@ -111,7 +134,15 @@
                 "action": "splitPane",
                 "split": "left",
                 "splitMode": "duplicate"
-            }
+            },
+            "id": "User.splitPane.652D529A"
+        },
+        {
+            "command": 
+            {
+                "action": "commandPalette"
+            },
+            "id": "User.commandPalette.D3F0B923"
         },
         {
             "command": 
@@ -119,18 +150,16 @@
                 "action": "splitPane",
                 "split": "auto",
                 "splitMode": "duplicate"
-            }
+            },
+            "id": "User.splitPane.A6751878"
         },
         {
             "command": 
             {
                 "action": "scrollDown"
             },
+            "id": "User.scrollDown.0",
             "keys": "ctrl+shift+d"
-        },
-        {
-            "command": "find",
-            "keys": "ctrl+shift+f"
         },
         {
             "command": 
@@ -138,13 +167,17 @@
                 "action": "resizePane",
                 "direction": "left"
             },
+            "id": "User.resizePane.2A0DA8E0",
             "keys": "ctrl+shift+left"
         },
         {
-            "command": "paste"
+            "command": "find",
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
         },
         {
-            "command": "openSystemMenu"
+            "command": "paste",
+            "id": "User.paste"
         },
         {
             "command": 
@@ -152,14 +185,12 @@
                 "action": "resizePane",
                 "direction": "up"
             },
+            "id": "User.resizePane.6CD791B",
             "keys": "ctrl+shift+up"
         },
         {
-            "command": 
-            {
-                "action": "copy",
-                "singleLine": false
-            }
+            "command": "openSystemMenu",
+            "id": "User.openSystemMenu"
         },
         {
             "command": 
@@ -167,7 +198,16 @@
                 "action": "moveTab",
                 "direction": "forward"
             },
+            "id": "User.moveTab.793E2350",
             "keys": "ctrl+shift+period"
+        },
+        {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "id": "User.copy.644BA8F2"
         },
         {
             "command": 
@@ -175,18 +215,22 @@
                 "action": "swapPane",
                 "direction": "previous"
             },
+            "id": "User.swapPane.75247157",
             "keys": "ctrl+shift+e"
         },
         {
             "command": "scrollToTop",
+            "id": "User.scrollToTop",
             "keys": "ctrl+home"
         },
         {
-            "command": "toggleSplitOrientation"
+            "command": "closePane",
+            "id": "User.closePane",
+            "keys": "ctrl+shift+w"
         },
         {
-            "command": "closePane",
-            "keys": "ctrl+shift+w"
+            "command": "toggleSplitOrientation",
+            "id": "User.toggleSplitOrientation"
         },
         {
             "command": 
@@ -194,6 +238,7 @@
                 "action": "resizePane",
                 "direction": "down"
             },
+            "id": "User.resizePane.F747588A",
             "keys": "ctrl+shift+down"
         },
         {
@@ -471,25 +516,24 @@
         {
             "command": 
             {
-                "action": "resizePane",
-                "direction": "right"
-            },
-            "keys": "ctrl+shift+right"
-        },
-        {
-            "command": 
-            {
                 "action": "splitPane",
                 "split": "right",
                 "splitMode": "duplicate"
-            }
+            },
+            "id": "User.splitPane.FEF0D40B"
         },
         {
             "command": 
             {
                 "action": "scrollUp"
             },
+            "id": "User.scrollUp.0",
             "keys": "ctrl+shift+u"
+        },
+        {
+            "command": "scrollUpPage",
+            "id": "User.scrollUpPage",
+            "keys": "ctrl+pgup"
         },
         {
             "command": 
@@ -497,16 +541,16 @@
                 "action": "splitPane",
                 "split": "down",
                 "splitMode": "duplicate"
-            }
+            },
+            "id": "User.splitPane.10B260D2"
         },
         {
-            "command": "openNewTabDropdown"
+            "command": "openNewTabDropdown",
+            "id": "User.openNewTabDropdown"
         },
         {
-            "command": "toggleBlockSelection"
-        },
-        {
-            "command": "toggleFocusMode"
+            "command": "toggleBlockSelection",
+            "id": "User.toggleBlockSelection"
         },
         {
             "command": 
@@ -514,18 +558,20 @@
                 "action": "moveFocus",
                 "direction": "nextInOrder"
             },
+            "id": "User.moveFocus.D7681B66",
             "keys": "ctrl+shift+j"
         },
         {
-            "command": "closeWindow"
+            "command": "toggleFocusMode",
+            "id": "User.toggleFocusMode"
         },
         {
-            "command": 
-            {
-                "action": "moveTab",
-                "direction": "backward"
-            },
-            "keys": "ctrl+shift+comma"
+            "command": "closeWindow",
+            "id": "User.closeWindow"
+        },
+        {
+            "command": "togglePaneZoom",
+            "id": "User.togglePaneZoom"
         },
         {
             "command": 
@@ -533,13 +579,21 @@
                 "action": "moveFocus",
                 "direction": "previousInOrder"
             },
+            "id": "User.moveFocus.787314EB",
             "keys": "ctrl+shift+k"
         },
         {
-            "command": "togglePaneZoom"
+            "command": 
+            {
+                "action": "moveTab",
+                "direction": "backward"
+            },
+            "id": "User.moveTab.EF07D31B",
+            "keys": "ctrl+shift+comma"
         },
         {
-            "command": "identifyWindow"
+            "command": "identifyWindow",
+            "id": "User.identifyWindow"
         },
         {
             "command": 
@@ -547,37 +601,32 @@
                 "action": "splitPane",
                 "split": "up",
                 "splitMode": "duplicate"
-            }
+            },
+            "id": "User.splitPane.7A967A9"
         },
         {
             "command": 
             {
                 "action": "nextTab"
             },
+            "id": "User.nextTab.0",
             "keys": "ctrl+shift+l"
         },
         {
             "command": "scrollDownPage",
+            "id": "User.scrollDownPage",
             "keys": "ctrl+pgdn"
         },
         {
             "command": 
             {
-                "action": "commandPalette"
-            }
-        },
-        {
-            "command": "scrollUpPage",
-            "keys": "ctrl+pgup"
-        },
-        {
-            "command": 
-            {
                 "action": "splitPane"
-            }
+            },
+            "id": "User.splitPane.91AB55B1"
         },
         {
             "command": "scrollToBottom",
+            "id": "User.scrollToBottom",
             "keys": "ctrl+end"
         }
     ],
@@ -596,16 +645,19 @@
         {
             "colorScheme": "One Dark Pro",
             "cursorShape": "filledBox",
-            "elevate": true,
             "font": 
             {
-                "cellHeight": "1.1",
-                "face": "Iosevka Nerd Font",
-                "size": 17.0
+                "face": "Maple Mono NF CN, Sarasa Mono SC",
+                "features": 
+                {
+                    "cv01": 1,
+                    "cv03": 1,
+                    "ss03": 1
+                },
+                "size": 17
             },
             "opacity": 75,
-            "useAcrylic": true,
-            "useAtlasEngine": true
+            "useAcrylic": true
         },
         "list": 
         [
@@ -660,52 +712,6 @@
         {
             "background": "#0C0C0C",
             "black": "#0C0C0C",
-            "blue": "#0037DA",
-            "brightBlack": "#767676",
-            "brightBlue": "#3B78FF",
-            "brightCyan": "#61D6D6",
-            "brightGreen": "#16C60C",
-            "brightPurple": "#B4009E",
-            "brightRed": "#E74856",
-            "brightWhite": "#F2F2F2",
-            "brightYellow": "#F9F1A5",
-            "cursorColor": "#FFFFFF",
-            "cyan": "#3A96DD",
-            "foreground": "#CCCCCC",
-            "green": "#13A10E",
-            "name": "Campbell",
-            "purple": "#881798",
-            "red": "#C50F1F",
-            "selectionBackground": "#FFFFFF",
-            "white": "#CCCCCC",
-            "yellow": "#C19C00"
-        },
-        {
-            "background": "#012456",
-            "black": "#0C0C0C",
-            "blue": "#0037DA",
-            "brightBlack": "#767676",
-            "brightBlue": "#3B78FF",
-            "brightCyan": "#61D6D6",
-            "brightGreen": "#16C60C",
-            "brightPurple": "#B4009E",
-            "brightRed": "#E74856",
-            "brightWhite": "#F2F2F2",
-            "brightYellow": "#F9F1A5",
-            "cursorColor": "#FFFFFF",
-            "cyan": "#3A96DD",
-            "foreground": "#CCCCCC",
-            "green": "#13A10E",
-            "name": "Campbell Powershell",
-            "purple": "#881798",
-            "red": "#C50F1F",
-            "selectionBackground": "#FFFFFF",
-            "white": "#CCCCCC",
-            "yellow": "#C19C00"
-        },
-        {
-            "background": "#0C0C0C",
-            "black": "#0C0C0C",
             "blue": "#61AFEF",
             "brightBlack": "#5C6370",
             "brightBlue": "#61AFEF",
@@ -725,167 +731,6 @@
             "selectionBackground": "#FFFFFF",
             "white": "#ABB2BF",
             "yellow": "#D19A66"
-        },
-        {
-            "background": "#282C34",
-            "black": "#282C34",
-            "blue": "#61AFEF",
-            "brightBlack": "#5A6374",
-            "brightBlue": "#61AFEF",
-            "brightCyan": "#56B6C2",
-            "brightGreen": "#98C379",
-            "brightPurple": "#C678DD",
-            "brightRed": "#E06C75",
-            "brightWhite": "#DCDFE4",
-            "brightYellow": "#E5C07B",
-            "cursorColor": "#FFFFFF",
-            "cyan": "#56B6C2",
-            "foreground": "#DCDFE4",
-            "green": "#98C379",
-            "name": "One Half Dark",
-            "purple": "#C678DD",
-            "red": "#E06C75",
-            "selectionBackground": "#FFFFFF",
-            "white": "#DCDFE4",
-            "yellow": "#E5C07B"
-        },
-        {
-            "background": "#FAFAFA",
-            "black": "#383A42",
-            "blue": "#0184BC",
-            "brightBlack": "#4F525D",
-            "brightBlue": "#61AFEF",
-            "brightCyan": "#56B5C1",
-            "brightGreen": "#98C379",
-            "brightPurple": "#C577DD",
-            "brightRed": "#DF6C75",
-            "brightWhite": "#FFFFFF",
-            "brightYellow": "#E4C07A",
-            "cursorColor": "#4F525D",
-            "cyan": "#0997B3",
-            "foreground": "#383A42",
-            "green": "#50A14F",
-            "name": "One Half Light",
-            "purple": "#A626A4",
-            "red": "#E45649",
-            "selectionBackground": "#FFFFFF",
-            "white": "#FAFAFA",
-            "yellow": "#C18301"
-        },
-        {
-            "background": "#002B36",
-            "black": "#002B36",
-            "blue": "#268BD2",
-            "brightBlack": "#073642",
-            "brightBlue": "#839496",
-            "brightCyan": "#93A1A1",
-            "brightGreen": "#586E75",
-            "brightPurple": "#6C71C4",
-            "brightRed": "#CB4B16",
-            "brightWhite": "#FDF6E3",
-            "brightYellow": "#657B83",
-            "cursorColor": "#FFFFFF",
-            "cyan": "#2AA198",
-            "foreground": "#839496",
-            "green": "#859900",
-            "name": "Solarized Dark",
-            "purple": "#D33682",
-            "red": "#DC322F",
-            "selectionBackground": "#FFFFFF",
-            "white": "#EEE8D5",
-            "yellow": "#B58900"
-        },
-        {
-            "background": "#FDF6E3",
-            "black": "#002B36",
-            "blue": "#268BD2",
-            "brightBlack": "#073642",
-            "brightBlue": "#839496",
-            "brightCyan": "#93A1A1",
-            "brightGreen": "#586E75",
-            "brightPurple": "#6C71C4",
-            "brightRed": "#CB4B16",
-            "brightWhite": "#FDF6E3",
-            "brightYellow": "#657B83",
-            "cursorColor": "#002B36",
-            "cyan": "#2AA198",
-            "foreground": "#657B83",
-            "green": "#859900",
-            "name": "Solarized Light",
-            "purple": "#D33682",
-            "red": "#DC322F",
-            "selectionBackground": "#FFFFFF",
-            "white": "#EEE8D5",
-            "yellow": "#B58900"
-        },
-        {
-            "background": "#000000",
-            "black": "#000000",
-            "blue": "#3465A4",
-            "brightBlack": "#555753",
-            "brightBlue": "#729FCF",
-            "brightCyan": "#34E2E2",
-            "brightGreen": "#8AE234",
-            "brightPurple": "#AD7FA8",
-            "brightRed": "#EF2929",
-            "brightWhite": "#EEEEEC",
-            "brightYellow": "#FCE94F",
-            "cursorColor": "#FFFFFF",
-            "cyan": "#06989A",
-            "foreground": "#D3D7CF",
-            "green": "#4E9A06",
-            "name": "Tango Dark",
-            "purple": "#75507B",
-            "red": "#CC0000",
-            "selectionBackground": "#FFFFFF",
-            "white": "#D3D7CF",
-            "yellow": "#C4A000"
-        },
-        {
-            "background": "#FFFFFF",
-            "black": "#000000",
-            "blue": "#3465A4",
-            "brightBlack": "#555753",
-            "brightBlue": "#729FCF",
-            "brightCyan": "#34E2E2",
-            "brightGreen": "#8AE234",
-            "brightPurple": "#AD7FA8",
-            "brightRed": "#EF2929",
-            "brightWhite": "#EEEEEC",
-            "brightYellow": "#FCE94F",
-            "cursorColor": "#000000",
-            "cyan": "#06989A",
-            "foreground": "#555753",
-            "green": "#4E9A06",
-            "name": "Tango Light",
-            "purple": "#75507B",
-            "red": "#CC0000",
-            "selectionBackground": "#FFFFFF",
-            "white": "#D3D7CF",
-            "yellow": "#C4A000"
-        },
-        {
-            "background": "#000000",
-            "black": "#000000",
-            "blue": "#000080",
-            "brightBlack": "#808080",
-            "brightBlue": "#0000FF",
-            "brightCyan": "#00FFFF",
-            "brightGreen": "#00FF00",
-            "brightPurple": "#FF00FF",
-            "brightRed": "#FF0000",
-            "brightWhite": "#FFFFFF",
-            "brightYellow": "#FFFF00",
-            "cursorColor": "#FFFFFF",
-            "cyan": "#008080",
-            "foreground": "#C0C0C0",
-            "green": "#008000",
-            "name": "Vintage",
-            "purple": "#800080",
-            "red": "#800000",
-            "selectionBackground": "#FFFFFF",
-            "white": "#C0C0C0",
-            "yellow": "#808000"
         }
     ],
     "themes": [],

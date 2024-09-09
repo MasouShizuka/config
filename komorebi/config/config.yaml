@@ -1,71 +1,133 @@
 watch_stylesheet: true
-watch_config: true
+watch_config: false
+debug: false # Enable debug mode to see more logs
 
+# This komorebi setting will be used for tray context menu.
+# If you don't use komorebi, you can remove this section.
+komorebi:
+  start_command: "komorebic start --whkd"
+  stop_command: "komorebic stop --whkd"
+  reload_command: "komorebic reload-configuration"
+
+# This is the main configuration file for Yet Another Status Bar (YASB)
 bars:
-  yasb-bar:
+  status-bar:
     enabled: true
-    screens: ['*']
+    #screens: ['DELL P2419H (1)'] # If you want to show on specific screen
+    screens: ["*"]
     class_name: "yasb-bar"
     alignment:
       position: "top"
-      center: true
+      center: false
     blur_effect:
-      enabled: false
-      acrylic: false
-      dark: false
+      enabled: false # Blur effect will be applied to the bar
+      acrylic: false # Acrylic effect will be applied to the bar
+      dark_mode: false # Dark mode will add more shadow to the bar
+      round_corners: false # Default radius from OS
+      border_color: System # None, System or HEX color (this option is related to round_corners=true)
     window_flags:
       always_on_top: false
       windows_app_bar: true
     dimensions:
       width: "100%"
-      height: 32
+      height: 40
     padding:
       top: 0
-      left: 5
+      left: 0
       bottom: 0
-      right: 5
+      right: 0
     widgets:
-      left:   ["komorebi_workspaces", "komorebi_active_layout"]
-      center: ["komorebi_multi_window"]
-      right:  ["input_method", "wifi", "traffic", "cpu", "memory", "gpu", "battery", "clock"]
+      left: [
+          "komorebi_workspaces",
+          "komorebi_active_layout",
+          "media",
+      ]
+      center: [
+          "komorebi_multi_window",
+      ]
+      right: [
+          "language",
+          "wifi",
+          "traffic",
+          "cpu",
+          "memory",
+          "gpu",
+          "volume",
+          "battery",
+          "clock",
+      ]
 
 widgets:
   komorebi_workspaces:
     type: "komorebi.workspaces.WorkspaceWidget"
     options:
-      label_offline: "Komorebi Offline"
-      label_workspace_btn: "{name}"
-      label_default_name: "{index}"
-      label_zero_index: false
-      hide_empty_workspaces: false
+        label_offline: "Komorebi Offline"
+        label_workspace_btn: "{name}"
+        label_workspace_active_btn: "{name}"
+        label_default_name: "{index}"
+        hide_if_offline: false
+        label_zero_index: false
+        hide_empty_workspaces: false
+        container_padding:
+          top: 0
+          left: 0
+          bottom: 0
+          right: 0
 
   komorebi_active_layout:
     type: "komorebi.active_layout.ActiveLayoutWidget"
     options:
-      hide_if_offline: false
+      hide_if_offline: true
       label: "{icon}"
+      layouts: ["bsp", "columns", "rows", "grid", "vertical_stack", "horizontal_stack", "ultrawide_vertical_stack","right_main_vertical_stack"]
       layout_icons:
         bsp: "[\\\\]"
         columns: "[||]"
         rows: "[==]"
+        grid: "[G]"
         vertical_stack: "[V]="
         horizontal_stack: "[H]="
         ultrawide_vertical_stack: "||="
-        grid: "[G]"
+        right_main_vertical_stack: "=[V]"
         monocle: "[M]"
         maximised: "[X]"
         floating: "><>"
         paused: "[P]"
       callbacks:
-        on_left: 'next_layout'
-        on_middle: 'toggle_monocle'
-        on_right: 'prev_layout'
+        on_left: "next_layout"
+        on_middle: "toggle_monocle"
+        on_right: "prev_layout"
+
+  media:
+    type: "yasb.media.MediaWidget"
+    options:
+      label: "{title} - {artist}"
+      label_alt: "{title}"
+      hide_empty: true
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "do_nothing"
+      max_field_size:
+        label: 20
+        label_alt: 30
+      show_thumbnail: true
+      controls_only: false
+      controls_left: true
+      thumbnail_alpha: 80
+      thumbnail_padding: 8
+      thumbnail_corner_radius: 16 # Set to 0 for square corners
+      icons:
+        prev_track: "\U000f04ae"
+        next_track: "\U000f04ad"
+        play: "\U000f040a"
+        pause: "\U000f03e4"
 
   komorebi_multi_window:
     type: "komorebi.multi_window.MultiWindowWidget"
     options:
       label: "{win[title]}"
-      label_alt: "class={win[class]} exe={win[exe]} hwnd={win[hwnd]} pid={win[pid]}"
+      label_alt: "class='{win[class]}' exe='{win[exe]}' hwnd={win[hwnd]} pid={win[pid]}"
       show_icon: true
       min_update_interval: 200
       update_title:
@@ -76,52 +138,51 @@ widgets:
         on_middle: "do_nothing"
         on_right: "toggle_label"
 
-  input_method:
-    type: "yasb.input_method.InputMethodWidget"
+  language:
+    type: "yasb.language.LanguageWidget"
     options:
-      label: "\uf11c  {language}"
-      update_interval: 500
-      language_dict:
-        0x409: "EN"
-        0x804: "\u4e2d"
+      label: "<span>\uf11c</span>{lang[language_code]}-{lang[country_code]}"
+      label_alt: "{lang[full_name]}"
+      update_interval: 1
       callbacks:
-        on_left: "do_nothing"
+        on_left: "toggle_label"
         on_middle: "do_nothing"
         on_right: "do_nothing"
 
   wifi:
     type: "yasb.wifi.WifiWidget"
     options:
-        label: "{wifi_icon} {wifi_name}"
-        label_alt: "{wifi_icon}"
-        update_interval: 5000
-        wifi_icons:
-          - "\udb82\udd2e"  # 0% strength (no wifi)
-          - "\udb82\udd1f"  # 1-25% strength
-          - "\udb82\udd22"  # 26-50% strength
-          - "\udb82\udd25"  # 51-75% strength
-          - "\udb82\udd28"  # 76-100% strength. Alternate theming: \uf1eb
-        callbacks:
-          on_left: "toggle_label"
-          on_middle: "do_nothing"
-          on_right: "exec cmd.exe /c start ms-settings:network"
+      label: "<span>{wifi_icon}</span>"
+      label_alt: "<span>{wifi_icon}</span>{wifi_name} {wifi_strength}%"
+      update_interval: 5000
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "exec cmd.exe /c start ms-settings:network"
+      wifi_icons:
+        - "\U000f092d " # Icon for 0% strength
+        - "\U000f091f " # Icon for 1-25% strength
+        - "\U000f0922 " # Icon for 26-50% strength
+        - "\U000f0925 " # Icon for 51-75% strength
+        - "\U000f0928 " # Icon for 76-100% strength
+      ethernet_icon: "\ueba9 "
 
   traffic:
     type: "yasb.traffic.TrafficWidget"
     options:
-        label: "\uf093 {upload_speed} \uf019 {download_speed}"
-        label_alt: "\uf019 {download_speed} \uf093 {upload_speed}"
-        update_interval: 1000
-        callbacks:
-          on_left: "toggle_label"
-          on_middle: "do_nothing"
-          on_right: "exec cmd.exe /c start ms-settings:network"
+      label: "\U000f0552 {upload_speed} \U000f01da {download_speed}"
+      label_alt: "\U000f01da {download_speed} \U000f0552 {upload_speed}"
+      update_interval: 1000 # Update interval should be a multiple of 1000
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "exec cmd.exe /c start ms-settings:network"
 
   cpu:
     type: "yasb.cpu.CpuWidget"
     options:
-      label: "\uf4bc {info[percent][total]}%"
-      label_alt: "\uf4bc {info[histograms][cpu_percent]} | freq: {info[freq][current]:.2f} Mhz"
+      label: "<span>\uf4bc</span>{info[percent][total]}%"
+      label_alt: "<span>\uf437</span>{info[histograms][cpu_percent]}"
       update_interval: 1000
       histogram_icons:
         - '\u2581' # 0%
@@ -133,7 +194,7 @@ widgets:
         - '\u2586' # 60%
         - '\u2587' # 70%
         - '\u2588' # 80%+
-      histogram_num_columns: 10
+      histogram_num_columns: 8
       callbacks:
         on_left: "toggle_label"
         on_middle: "do_nothing"
@@ -142,50 +203,55 @@ widgets:
   memory:
     type: "yasb.memory.MemoryWidget"
     options:
-      label: "\uf51e {virtual_mem_percent}%"
-      label_alt: "\U000f035b {virtual_mem_free}"
+      label: "<span>\uf51e</span>{virtual_mem_percent}%"
+      label_alt: "<span>\uf51e</span>{virtual_mem_free}"
       update_interval: 5000
-      memory_thresholds:
-        low: 30
-        medium: 60
-        high: 90
       callbacks:
         on_left: "toggle_label"
         on_middle: "do_nothing"
         on_right: "exec cmd /c Taskmgr"
 
   gpu:
-    type: "yasb.gpu.GpuWidget"
+    type: "yasb.custom.CustomWidget"
     options:
-      label: "\uf2db {info[percent][total]}%"
-      label_alt: "\uf2db {info[histograms][gpu_percent]}"
-      update_interval: 1000
-      histogram_icons:
-        - '\u2581' # 0%
-        - '\u2581' # 10%
-        - '\u2582' # 20%
-        - '\u2583' # 30%
-        - '\u2584' # 40%
-        - '\u2585' # 50%
-        - '\u2586' # 60%
-        - '\u2587' # 70%
-        - '\u2588' # 80%+
-      histogram_num_columns: 10
+      class_name: "gpu-widget"
+      label: "<span>\uf4bc</span>{data}%"
+      label_alt: "<span>\uf4bc</span>{data}%"
+      exec_options:
+        run_cmd: "powershell nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits"
+        run_once: false
+        run_interval: 1000
+        return_format: "string"
       callbacks:
         on_left: "toggle_label"
         on_middle: "do_nothing"
         on_right: "exec cmd /c Taskmgr"
 
+  volume:
+    type: "yasb.volume.VolumeWidget"
+    options:
+      label: "<span>{icon}</span>{level}"
+      label_alt: "{volume}"
+      volume_icons:
+        - "\ueee8" # Icon for muted
+        - "\uf026" # Icon for 0-10% volume
+        - "\uf027" # Icon for 11-30% volume
+        - "\uf027" # Icon for 31-60% volume
+        - "\uf028" # Icon for 61-100% volume
+      callbacks:
+        on_middle: "do_nothing"
+        on_right: "exec cmd.exe /c start ms-settings:sound"
+
   battery:
     type: "yasb.battery.BatteryWidget"
     options:
-      label: "{icon} {percent}%"
-      label_alt: "{percent}% {time_remaining}"
+      label: "<span>{icon}</span>{percent}%"
+      label_alt: "{icon} {percent}% | time: {time_remaining}"
       update_interval: 5000
       time_remaining_natural: false
       charging_options:
-        icon_format: "{charging_icon} {icon}"
-        blink_charging_icon: False
+        icon_format: "{charging_icon}"
+        blink_charging_icon: true
       status_thresholds:
         critical: 10
         low: 30
@@ -207,24 +273,12 @@ widgets:
   clock:
     type: "yasb.clock.ClockWidget"
     options:
-      label: "{icon} %Y-%m-%d %H:%M:%S %a"
-      label_alt: "{icon} %H:%M:%S"
+      label: "<span>\uf017</span>{%Y-%m-%d %H:%M:%S %a}"
+      label_alt: "<span>\uf017</span>{%H:%M:%S}"
       update_interval: 1000
-      timezones: ["Asia/Shanghai"]
-      status_icons:
-        icon_0: "\ue381"
-        icon_1: "\ue382"
-        icon_2: "\ue383"
-        icon_3: "\ue384"
-        icon_4: "\ue385"
-        icon_5: "\ue386"
-        icon_6: "\ue387"
-        icon_7: "\ue388"
-        icon_8: "\ue389"
-        icon_9: "\ue38a"
-        icon_10: "\ue38b"
-        icon_11: "\ue38c"
+      locale: "en_EN" # Langugae for date, you can set your own, example fr_FR
+      timezones: [] #Looking up time zone info from registry
       callbacks:
         on_left: "toggle_label"
-        on_middle: "exec explorer.exe shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"
+        on_middle: "do_nothing"
         on_right: "next_timezone"

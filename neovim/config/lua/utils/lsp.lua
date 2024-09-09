@@ -90,8 +90,9 @@ M.lsp = function(lspconfig, default_config)
         end,
         pyright = function()
             local pythonPath = path.python_path
-            if path.python_envs_path then
-                pythonPath = path.python_envs_path
+            local python_envs_path = path.get_python_envs_path()
+            if python_envs_path then
+                pythonPath = python_envs_path
                 vim.notify(("Activated:\n%s"):format(pythonPath), vim.log.levels.INFO, { title = "pyright" })
             end
 

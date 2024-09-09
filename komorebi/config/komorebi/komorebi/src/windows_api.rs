@@ -289,7 +289,7 @@ impl WindowsApi {
                 monitors.elements_mut().push_back(m);
             } else if let Some(preference) = index_preference {
                 while *preference > monitors.elements().len() {
-                    monitors.elements_mut().reserve(1);
+                    monitors.elements_mut().push_back(Monitor::placeholder());
                 }
 
                 monitors.elements_mut().insert(*preference, m);
@@ -297,6 +297,10 @@ impl WindowsApi {
                 monitors.elements_mut().push_back(m);
             }
         }
+
+        monitors
+            .elements_mut()
+            .retain(|m| m.name().ne("PLACEHOLDER"));
 
         Ok(())
     }

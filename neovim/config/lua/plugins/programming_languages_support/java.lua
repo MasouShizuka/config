@@ -138,7 +138,7 @@ return {
                     ["$/progress"] = function() end, -- disable progress updates.
                 },
                 filetypes = { "java" },
-                on_attach = function()
+                on_attach = function(client, bufnr)
                     require("jdtls").setup_dap({
                         config_overrides = {
                             console = "internalConsole",

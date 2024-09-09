@@ -150,17 +150,25 @@ return {
                         icons.misc.format_header_6,
                     },
                 },
+                code = {
+                    -- Width of the code block background:
+                    --  block: width of the code block
+                    --  full:  full width of the window
+                    width = "block",
+                },
                 pipe_table = {
                     -- Pre configured settings largely for setting table border easier
-                    --  round: use round border characters rather than right angles
-                    --  none: does nothing
+                    --  heavy:  use thicker border characters
+                    --  double: use double line border characters
+                    --  round:  use round border corners
+                    --  none:   does nothing
                     preset = "round",
                 },
                 -- More granular configuration mechanism, allows different aspects of buffers
                 -- to have their own behavior. Values default to the top level configuration
                 -- if no override is provided. Supports the following fields:
-                --   enabled, max_file_size, render_modes, anti_conceal, heading, code, dash, bullet,
-                --   checkbox, quote, pipe_table, callout, link, sign, win_options
+                --   enabled, max_file_size, debounce, render_modes, anti_conceal, heading, code,
+                --   dash, bullet, checkbox, quote, pipe_table, callout, link, sign, indent, win_options
                 overrides = overrides,
             }
         end,

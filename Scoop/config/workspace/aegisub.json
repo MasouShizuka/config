@@ -10,17 +10,29 @@
         }
     },
     "pre_install": [
-        "if (!(Test-Path \"$persist_dir\\hotkey.json\")) {",
+        "if (Test-Path \"$persist_dir\\config.json\") {",
+        "    Copy-Item \"$persist_dir\\config.json\" \"$dir\"",
+        "} else {",
+        "    New-Item \"$dir\\config.json\" | Out-Null",
+        "}",
+        "if (Test-Path \"$persist_dir\\hotkey.json\") {",
+        "    Copy-Item \"$persist_dir\\hotkey.json\" \"$dir\"",
+        "} else {",
         "    New-Item \"$dir\\hotkey.json\" | Out-Null",
         "}"
     ],
     "installer": {
         "script": "Expand-7zipArchive \"$dir\\aegisub-portable-64.zip\" \"$dir\" -ExtractDir 'aegisub-portable' -Removal"
     },
-    "persist": [
-        "config.json",
-        "hotkey.json"
-    ],
+    "uninstaller": {
+        "script": [
+            "if (!(Test-Path \"$persist_dir\")) {",
+            "    New-Item -ItemType Directory -Path \"$persist_dir\" | Out-Null",
+            "}",
+            "Copy-Item \"$dir\\config.json\" \"$persist_dir\" -ErrorAction 'SilentlyContinue' -Force",
+            "Copy-Item \"$dir\\hotkey.json\" \"$persist_dir\" -ErrorAction 'SilentlyContinue' -Force"
+        ]
+    },
     "checkver": {
         "github": "https://github.com/arch1t3cht/Aegisub",
         "regex": "feature_([\\d]+)"

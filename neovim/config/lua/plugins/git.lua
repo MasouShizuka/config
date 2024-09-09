@@ -26,15 +26,10 @@ return {
                 changedelete = { text = icons.misc.left_half_medium_shade },
                 untracked    = { text = icons.misc.left_half_block },
             },
-            signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
-            numhl = true,      -- Toggle with `:Gitsigns toggle_numhl`
-            linehl = false,    -- Toggle with `:Gitsigns toggle_linehl`
-            word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
             current_line_blame = true,
             current_line_blame_opts = {
                 virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
                 delay = 100,
-                ignore_whitespace = false,
             },
             preview_config = {
                 -- Options passed to nvim_open_win

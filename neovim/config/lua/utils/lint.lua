@@ -5,7 +5,7 @@ local M = {}
 M.lint = {
     ["markdownlint-cli2"] = {
         args = {
-            "--config", path.config_path .. "/package_config/.markdownlint.yaml",
+            "--config", path.package_config_path .. "/.markdownlint.yaml",
         },
     },
     shellcheck = {

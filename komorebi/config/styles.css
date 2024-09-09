@@ -1,139 +1,212 @@
 * {
-    color: #282c34;
+    color: #cdd6f4;
     font-family: "Iosevka NF", "Sarasa Mono SC";
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
 }
 
-.bar {
-    background: rgba(40, 44, 52, 0);
+.yasb-bar {
+    margin: 0;
+    padding: 0;
 }
 
-.ws-btn {
-    background: rgba(92, 99, 112, 0.4);
-    border: 2px solid rgba(171, 178, 191, 0.4);
-    border-radius: 12px;
-    margin: 2px 2px;
-    padding: 0 8px;
+.widget {
+    background-color: #1e1e2e;
+    margin: 0;
+    padding: 0 4px;
+}
+.widget .label {
+    padding: 1px 2px 1px 2px;
+}
+.widget .label.alt {
+    padding: 1px 8px 1px 8px;
 }
 
-.ws-btn.active {
-    background: #ebdbb2;
-    color: #282c34;
+.container-left,
+.container-center,
+.container-right {
+    margin: 0;
+    padding: 0;
 }
 
-.ws-btn.empty {
-    color: #abb2bf;
+.komorebi-workspaces .widget-container,
+.komorebi-active-layout .widget-container,
+.wifi-widget .widget-container {
+    background-color: #313244;
+    border-radius: 14px;
+    margin: 4px 0;
 }
 
-.ws-btn:hover {
-    font-weight: bold;
+.komorebi-workspaces {
+    border-bottom-left-radius: 18px;
+    border-top-left-radius: 18px;
+}
+.komorebi-workspaces .ws-btn {
+    background-color: transparent;
+    border: none;
+    color: #6c7086;
+    margin: 0 4px;
+}
+.komorebi-workspaces .ws-btn.populated {
+    color: #89b4fa;
+}
+.komorebi-workspaces .ws-btn:hover,
+.komorebi-workspaces .ws-btn.populated:hover,
+.komorebi-workspaces .ws-btn.active {
+    color: #fab387;
 }
 
-.ws-btn.populated {
-    border: 2px solid rgba(171, 178, 191, 0.4);
-    color: #ebdbb2;
+.komorebi-active-layout {
+    border-bottom-right-radius: 18px;
+    border-top-right-radius: 18px;
+    padding-left: 0;
 }
-
 .komorebi-active-layout .label {
-    background: rgba(92, 99, 112, 0.4);
-    color: #ebdbb2;
-    margin: 2px 2px;
+    padding: 0;
+}
+
+.media-widget {
+    border-radius: 18px;
+    margin-left: 8px;
+    padding: 0;
+}
+.media-widget .label {
+    background-color: transparent;
+}
+.media-widget .btn {
+    margin: 4px 0;
+    padding: 0 4px;
+}
+.media-widget .btn:hover {
+    color: #89b4fa;
+}
+.media-widget .btn.play {
+    background-color: #313244;
+    border-radius: 14px;
+}
+.media-widget .btn.disabled:hover,
+.media-widget .btn.disabled {
+    background-color: transparent;
+    color: #45475a;
+}
+
+.komorebi-multi-window {
+    background-color: transparent; 
+    margin: 0 8px;
 }
 
 .komorebi-multi-window .window,
 .komorebi-multi-window .window-focused,
 .komorebi-multi-window .window-monocle {
-    border-radius: 12px;
-    margin: 2px 2px;
-    padding: 2px 8px;
+    border-radius: 18px;
+    height: 100%;
+    margin: 0 4px;
+    padding: 0px 8px;
     text-align: left;
 }
 
 .komorebi-multi-window .window {
-    background: #98c379;
+    background-color: #313244;
 }
 
 .komorebi-multi-window .window-focused {
-    background: #e5c07b;
+    background: #89b4fa;
+    color: #1e1e2e;
 }
 
 .komorebi-multi-window .window-monocle {
-    background: #e06c75;
+    background: #cba6f7;
+    color: #1e1e2e;
 }
 
-.input-method-widget .label,
-.wifi-widget .label,
-.traffic-widget .label,
-.cpu-widget .label,
-.memory-widget .label,
-.gpu-widget .label,
-.battery-widget .label,
-.clock-widget .label {
-    border-radius: 12px;
-    margin: 2px 2px;
-    padding: 0 4px;
+.language-widget {
+    border-radius: 18px;
+    margin-right: 8px;
+}
+.language-widget .icon {
+    color: #fab387;
+    margin-right: 6px;
 }
 
-.input-method-widget .label {
-    background: #d19a66;
+.wifi-widget {
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+    padding-right: 0;
 }
-
+.wifi-widget .icon {
+    color: #89b4fa;
+    padding: 0 6px;
+}
 .wifi-widget .label {
-    background: #98c379;
+    padding-right: 8px;
+}
+.cpu-widget .icon {
+    color: #f38ba8;
+    margin-right: 6px;
+}
+.memory-widget .icon {
+    color: #cba6f7;
+    margin-right: 6px;
+}
+.memory-widget.status-low .icon {
+    color: #a6e3a1;
+}
+.memory-widget.status-medium .icon {
+    color: #f9e2af;
+}
+.memory-widget.status-high .icon {
+    color: #fab387;
+}
+.memory-widget.status-critical .icon {
+    color: #f38ba8;
+}
+.gpu-widget {
+    border-bottom-right-radius: 18px;
+    border-top-right-radius: 18px;
+    margin-right: 8px;
+}
+.gpu-widget .icon {
+    color: #f5c2e7;
+    margin-right: 6px;
 }
 
-.traffic-widget .label {
-    background: #98c379;
+.volume-widget {
+    border-bottom-left-radius: 18px;
+    border-top-left-radius: 18px;
 }
-
-.cpu-widget .label {
-    background: #e06c75;
+.volume-widget .icon {
+    color: #89b4fa;
+    margin-right: 2px;
 }
-
-.memory-widget .label.status-low {
-    background: #98c379;
+.battery-widget .icon {
+    margin-right: 6px;
 }
-
-.memory-widget .label.status-medium {
-    background: #e5c07b;
+.battery-widget.status-charging .icon {
+    color: #74c7ec;
 }
-
-.memory-widget .label.status-high {
-    background: #e06c75;
+.battery-widget.status-full .icon {
+    color: #94e2d5;
 }
-
-.memory-widget .label.status-critical {
-    background: #f44747;
+.battery-widget.status-high .icon {
+    color: #a6e3a1;
 }
-
-.gpu-widget .label {
-    background: #e06c75;
+.battery-widget.status-medium .icon {
+    color: #f9e2af;
 }
-
-.battery-widget .label.status-critical {
-    background: #f44747;
+.battery-widget.status-low .icon {
+    color: #fab387;
 }
-
-.battery-widget .label.status-low {
-    background: #e06c75;
+.battery-widget.status-critical .icon {
+    color: #f38ba8;
 }
-
-.battery-widget .label.status-medium {
-    background: #d19a66;
+.clock-widget {
+    border-bottom-right-radius: 18px;
+    border-top-right-radius: 18px;
+    padding-right: 6px;
 }
-
-.battery-widget .label.status-high {
-    background: #e5c07b;
-}
-
-.battery-widget .label.status-full {
-    background: #98c379;
-}
-
-.battery-widget .label.status-charging {
-    background: #98c379;
-}
-
-.clock-widget .label {
-    background: #c678dd;
+.clock-widget .icon {
+    color: #cba6f7;
+    margin-right: 6px;
 }

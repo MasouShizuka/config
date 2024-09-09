@@ -7,7 +7,7 @@ Add a full border to Yazi to make it look fancier.
 ## Installation
 
 ```sh
-ya pack -a yazi-rs/plugins#full-border
+ya pack -a yazi-rs/plugins:full-border
 ```
 
 ## Usage
@@ -23,6 +23,6 @@ Or you can customize the border type:
 ```lua
 require("full-border"):setup {
 	-- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
-	type = ui.Border.PLAIN,
+	type = ui.Border.ROUNDED,
 }
 ```

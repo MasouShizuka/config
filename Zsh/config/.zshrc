@@ -145,12 +145,16 @@ source "$ZINIT_HOME/zinit.zsh"
 # │ Plugin │
 # ╰────────╯
 
-zinit light zdharma-continuum/fast-syntax-highlighting
-zinit light zsh-users/zsh-autosuggestions
-zinit light zsh-users/zsh-completions
-
-# 命令补全
-autoload -Uz compinit && compinit
+zinit for \
+    light-mode \
+  zdharma-continuum/fast-syntax-highlighting \
+    light-mode \
+  zsh-users/zsh-autosuggestions \
+    atload"zicompinit; zicdreplay" \
+    blockf \
+    lucid \
+    wait \
+  zsh-users/zsh-completions
 
 function zvm_config() {
     ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
@@ -162,12 +166,12 @@ zinit light jeffreytse/zsh-vi-mode
 # https://github.com/jeffreytse/zsh-vi-mode/issues/159
 setopt re_match_pcre
 
-# 切换历史命令为满足前缀等于当前光标到开头
+# 切换历史命令为前缀等于当前命令的历史命令
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 
-# Shift+左右键移动到上/下一个单词
+# 移动到上/下一个单词
 bindkey "${terminfo[kLFT]}" backward-word
 bindkey "${terminfo[kRIT]}" forward-word
 
