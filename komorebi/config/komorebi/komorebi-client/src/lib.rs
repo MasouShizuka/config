@@ -3,6 +3,7 @@
 
 pub use komorebi::colour::Colour;
 pub use komorebi::colour::Rgb;
+pub use komorebi::config_generation::ApplicationConfiguration;
 pub use komorebi::container::Container;
 pub use komorebi::core::config_generation::ApplicationConfigurationGenerator;
 pub use komorebi::core::resolve_home_path;
@@ -36,6 +37,7 @@ pub use komorebi::window_manager_event::WindowManagerEvent;
 pub use komorebi::workspace::Workspace;
 pub use komorebi::BorderColours;
 pub use komorebi::GlobalState;
+pub use komorebi::KomorebiTheme;
 pub use komorebi::Notification;
 pub use komorebi::NotificationEvent;
 pub use komorebi::RuleDebug;

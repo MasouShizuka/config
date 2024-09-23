@@ -31,19 +31,19 @@ prepend_keymap = [
     { on = [ ";", ":" ],      run = "shell --block --interactive",                                  desc = "Run a shell command" },
     { on = [ ";", "l" ],      run = "shell lazygit --block --confirm",                              desc = "Open lazygit" },
     { on = [ "T", "." ],      run = "hidden toggle",                                                desc = "Toggle the visibility of hidden files" },
-    { on = [ "s", "f" ],      run = 'search fd --args="--hidden --no-ignore"',                      desc = "Search files by name using fd" },
-    { on = [ "s", "r" ],      run = 'search rg --args="--hidden --no-ignore"',                      desc = "Search files by content using ripgrep" },
+    { on = [ "s", "f" ],      run = 'search fd --args="--hidden --no-ignore"',                      desc = "Search files by name via fd" },
+    { on = [ "s", "r" ],      run = 'search rg --args="--hidden --no-ignore"',                      desc = "Search files by content via ripgrep" },
     { on = [ "s", "n" ],      run = "escape --search",                                              desc = "Cancel the ongoing search" },
-    { on = [ "s", "F" ],      run = "plugin fzf",                                                   desc = "Jump to a directory or reveal a file using fzf" },
+    { on = [ "s", "F" ],      run = "plugin fzf",                                                   desc = "Jump to a file/directory via fzf" },
     { on = [ "s", "R" ],      run = "plugin fzf-rg",                                                desc = "Reveal a file using fzf by content" },
 
     # Linemode
-    { on = [ "T", "m", "s" ], run = "linemode size",                                                desc = "Set linemode to size" },
-    { on = [ "T", "m", "p" ], run = "linemode permissions",                                         desc = "Set linemode to permissions" },
-    { on = [ "T", "m", "c" ], run = "linemode ctime",                                               desc = "Set linemode to ctime" },
-    { on = [ "T", "m", "m" ], run = "linemode mtime",                                               desc = "Set linemode to mtime" },
-    { on = [ "T", "m", "o" ], run = "linemode owner",                                               desc = "Set linemode to owner" },
-    { on = [ "T", "m", "n" ], run = "linemode none",                                                desc = "Set linemode to none" },
+    { on = [ "T", "m", "s" ], run = "linemode size",                                                desc = "Linemode: size" },
+    { on = [ "T", "m", "p" ], run = "linemode permissions",                                         desc = "Linemode: permissions" },
+    { on = [ "T", "m", "c" ], run = "linemode ctime",                                               desc = "Linemode: ctime" },
+    { on = [ "T", "m", "m" ], run = "linemode mtime",                                               desc = "Linemode: mtime" },
+    { on = [ "T", "m", "o" ], run = "linemode owner",                                               desc = "Linemode: owner" },
+    { on = [ "T", "m", "n" ], run = "linemode none",                                                desc = "Linemode: none" },
 
     # Copy
     { on = [ "y", "y" ],      run = "copy path",                                                    desc = "Copy the file path" },
@@ -67,7 +67,7 @@ prepend_keymap = [
     { on = [ "T", "s", "r" ], run = [ "sort random --reverse", "linemode none" ],                   desc = "Sort randomly" },
 
     # Goto
-    { on = [ "g", ";" ],      run = "cd --interactive",                                             desc = "Go to a directory interactively" },
+    { on = [ "g", ";" ],      run = "cd --interactive",                                             desc = "Jump interactively" },
     { on = [ "g", "w", "c" ], run = "cd C:/",                                                       desc = "Go to C:" },
     { on = [ "g", "w", "d" ], run = "cd D:/",                                                       desc = "Go to D:" },
     { on = [ "g", "w", "a" ], run = "cd '%APPDATA%'",                                               desc = "Go to $APPDATA" },

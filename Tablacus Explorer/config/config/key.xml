@@ -7,7 +7,7 @@ if (api.PathIsDirectory(path)) {
     // cmd = "wezterm start --cwd \"" + current_dir + "\" -- nvim " + "\"" + path + "\"";
     cmd = "neovide " + "\"" + path + "\"";
 }
-api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">VSCode</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
+api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">Open with &amp;Code</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
     FV.SelectItem(0, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
 }</List><List Key="Shift+G" Type="JScript">let count = FV.ItemCount(SVGIO_ALLVIEW);
 if (count &gt; 0) {

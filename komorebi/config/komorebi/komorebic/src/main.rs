@@ -25,12 +25,17 @@ use fs_tail::TailedFile;
 use komorebi_client::resolve_home_path;
 use komorebi_client::send_message;
 use komorebi_client::send_query;
+use komorebi_client::ApplicationConfiguration;
+use komorebi_client::Notification;
 use lazy_static::lazy_static;
 use miette::NamedSource;
 use miette::Report;
 use miette::SourceOffset;
 use miette::SourceSpan;
 use paste::paste;
+use schemars::gen::SchemaSettings;
+use schemars::schema_for;
+use sysinfo::ProcessesToUpdate;
 use which::which;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
@@ -760,6 +765,9 @@ struct Start {
     /// Start autohotkey configuration file
     #[clap(long)]
     ahk: bool,
+    /// Start komorebi-bar in a background process
+    #[clap(long)]
+    bar: bool,
 }
 
 #[derive(Parser)]
@@ -767,6 +775,9 @@ struct Stop {
     /// Stop whkd if it is running as a background process
     #[clap(long)]
     whkd: bool,
+    /// Stop komorebi-bar if it is running as a background process
+    #[clap(long)]
+    bar: bool,
 }
 
 #[derive(Parser)]
@@ -853,6 +864,15 @@ struct EnableAutostart {
     /// Enable autostart of ahk
     #[clap(long)]
     ahk: bool,
+    /// Enable autostart of komorebi-bar
+    #[clap(long)]
+    bar: bool,
+}
+
+#[derive(Parser)]
+struct ReplaceConfiguration {
+    /// Static configuration JSON file from which the configuration should be loaded
+    path: PathBuf,
 }
 
 #[derive(Parser)]
@@ -877,6 +897,9 @@ enum SubCommand {
     /// Show the path to komorebi.json
     #[clap(alias = "config")]
     Configuration,
+    #[clap(alias = "bar-config")]
+    #[clap(alias = "bconfig")]
+    BarConfiguration,
     /// Show the path to whkdrc
     #[clap(alias = "whkd")]
     Whkdrc,
@@ -1159,12 +1182,15 @@ enum SubCommand {
     Manage,
     /// Unmanage a window that was forcibly managed
     Unmanage,
-    /// Reload ~/komorebi.ahk (if it exists)
+    /// Replace the configuration of a running instance of komorebi from a static configuration file
+    #[clap(arg_required_else_help = true)]
+    ReplaceConfiguration(ReplaceConfiguration),
+    /// Reload legacy komorebi.ahk or komorebi.ps1 configurations (if they exist)
     ReloadConfiguration,
-    /// Enable or disable watching of ~/komorebi.ahk (if it exists)
+    /// Enable or disable watching of legacy komorebi.ahk or komorebi.ps1 configurations (if they exist)
     #[clap(arg_required_else_help = true)]
     WatchConfiguration(WatchConfiguration),
-    /// Signal that the final configuration option has been sent
+    /// For legacy komorebi.ahk or komorebi.ps1 configurations, signal that the final configuration option has been sent
     CompleteConfiguration,
     /// DEPRECATED since v0.1.22
     #[clap(arg_required_else_help = true)]
@@ -1372,12 +1398,16 @@ fn main() -> Result<()> {
             std::fs::create_dir_all(data_dir)?;
 
             let mut komorebi_json = include_str!("../../docs/komorebi.example.json").to_string();
+            let komorebi_bar_json =
+                include_str!("../../docs/komorebi.bar.example.json").to_string();
+
             if std::env::var("KOMOREBI_CONFIG_HOME").is_ok() {
                 komorebi_json =
                     komorebi_json.replace("Env:USERPROFILE", "Env:KOMOREBI_CONFIG_HOME");
             }
 
             std::fs::write(HOME_DIR.join("komorebi.json"), komorebi_json)?;
+            std::fs::write(HOME_DIR.join("komorebi.bar.json"), komorebi_bar_json)?;
 
             let applications_yaml = include_str!("../applications.yaml");
             std::fs::write(HOME_DIR.join("applications.yaml"), applications_yaml)?;
@@ -1385,7 +1415,7 @@ fn main() -> Result<()> {
             let whkdrc = include_str!("../../docs/whkdrc.sample");
             std::fs::write(WHKD_CONFIG_DIR.join("whkdrc"), whkdrc)?;
 
-            println!("Example ~/komorebi.json, ~/.config/whkdrc and latest ~/applications.yaml files downloaded");
+            println!("Example komorebi.json, komorebi.bar.json, whkdrc and latest applications.yaml files created");
             println!("You can now run komorebic start --whkd");
         }
         SubCommand::EnableAutostart(args) => {
@@ -1409,6 +1439,10 @@ fn main() -> Result<()> {
                 arguments.push_str(" --ffm");
             }
 
+            if args.bar {
+                arguments.push_str(" --bar");
+            }
+
             if args.whkd {
                 arguments.push_str(" --whkd");
             } else if args.ahk {
@@ -1422,6 +1456,10 @@ fn main() -> Result<()> {
                 .env("TARGET_PATH", komorebic_exe.as_os_str())
                 .env("TARGET_ARGS", arguments)
                 .output()?;
+
+            println!("NOTE: If your komorebi.json file contains a reference to $Env:KOMOREBI_CONFIG_HOME,");
+            println!("you need to add this to System Properties > Environment Variables > User Variables");
+            println!("in order for the autostart command to work properly");
         }
         SubCommand::DisableAutostart => {
             let startup_dir = startup_dir()?;
@@ -1505,7 +1543,7 @@ fn main() -> Result<()> {
                 // Check that this file adheres to the schema static config schema as the last step,
                 // so that more basic errors above can be shown to the error before schema-specific
                 // errors
-                let _ = serde_json::from_str::<komorebi_client::StaticConfig>(&config_source)?;
+                let _ = serde_json::from_str::<StaticConfig>(&config_source)?;
 
                 if config_whkd.exists() {
                     println!("Found {}; key bindings will be loaded from here when whkd is started, and you can start it automatically using the --whkd flag\n", config_whkd.to_string_lossy());
@@ -1531,6 +1569,13 @@ fn main() -> Result<()> {
         }
         SubCommand::Configuration => {
             let static_config = HOME_DIR.join("komorebi.json");
+
+            if static_config.exists() {
+                println!("{}", static_config.display());
+            }
+        }
+        SubCommand::BarConfiguration => {
+            let static_config = HOME_DIR.join("komorebi.bar.json");
 
             if static_config.exists() {
                 println!("{}", static_config.display());
@@ -1909,9 +1954,13 @@ fn main() -> Result<()> {
                 std::thread::sleep(Duration::from_secs(3));
 
                 let mut system = sysinfo::System::new_all();
-                system.refresh_processes();
+                system.refresh_processes(ProcessesToUpdate::All);
 
-                if system.processes_by_name("komorebi.exe").next().is_some() {
+                if system
+                    .processes_by_name("komorebi.exe".as_ref())
+                    .next()
+                    .is_some()
+                {
                     println!("Started!");
                     running = true;
                 } else {
@@ -1975,6 +2024,23 @@ if (!(Get-Process whkd -ErrorAction SilentlyContinue))
                 }
             }
 
+            if arg.bar {
+                let script = r"
+if (!(Get-Process komorebi-bar -ErrorAction SilentlyContinue))
+{
+  Start-Process komorebi-bar -WindowStyle hidden
+}
+                ";
+                match powershell_script::run(script) {
+                    Ok(_) => {
+                        println!("{script}");
+                    }
+                    Err(error) => {
+                        println!("Error: {error}");
+                    }
+                }
+            }
+
             println!("\nThank you for using komorebi!\n");
             println!("* Become a sponsor https://github.com/sponsors/LGUG2Z - Even $1/month makes a big difference");
             println!(
@@ -2017,11 +2083,25 @@ Stop-Process -Name:whkd -ErrorAction SilentlyContinue
                 }
             }
 
+            if arg.bar {
+                let script = r"
+Stop-Process -Name:komorebi-bar -ErrorAction SilentlyContinue
+                ";
+                match powershell_script::run(script) {
+                    Ok(_) => {
+                        println!("{script}");
+                    }
+                    Err(error) => {
+                        println!("Error: {error}");
+                    }
+                }
+            }
+
             send_message(&SocketMessage::Stop)?;
             let mut system = sysinfo::System::new_all();
-            system.refresh_processes();
+            system.refresh_processes(ProcessesToUpdate::All);
 
-            if system.processes_by_name("komorebi.exe").count() >= 1 {
+            if system.processes_by_name("komorebi.exe".as_ref()).count() >= 1 {
                 println!("komorebi is still running, attempting to force-quit");
 
                 let script = r"
@@ -2231,6 +2311,9 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
                 arg.implementation,
                 arg.boolean_state.into(),
             ))?;
+        }
+        SubCommand::ReplaceConfiguration(arg) => {
+            send_message(&SocketMessage::ReplaceConfiguration(arg.path))?;
         }
         SubCommand::ReloadConfiguration => {
             send_message(&SocketMessage::ReloadConfiguration)?;
@@ -2465,16 +2548,31 @@ Stop-Process -Name:komorebi -ErrorAction SilentlyContinue
             );
         }
         SubCommand::ApplicationSpecificConfigurationSchema => {
-            print_query(&SocketMessage::ApplicationSpecificConfigurationSchema);
+            let asc = schema_for!(Vec<ApplicationConfiguration>);
+            let schema = serde_json::to_string_pretty(&asc)?;
+            println!("{schema}");
         }
         SubCommand::NotificationSchema => {
-            print_query(&SocketMessage::NotificationSchema);
+            let notification = schema_for!(Notification);
+            let schema = serde_json::to_string_pretty(&notification)?;
+            println!("{schema}");
         }
         SubCommand::SocketSchema => {
-            print_query(&SocketMessage::SocketSchema);
+            let socket_message = schema_for!(SocketMessage);
+            let schema = serde_json::to_string_pretty(&socket_message)?;
+            println!("{schema}");
         }
         SubCommand::StaticConfigSchema => {
-            print_query(&SocketMessage::StaticConfigSchema);
+            let settings = SchemaSettings::default().with(|s| {
+                s.option_nullable = false;
+                s.option_add_null_type = false;
+                s.inline_subschemas = true;
+            });
+
+            let gen = settings.into_generator();
+            let socket_message = gen.into_root_schema_for::<StaticConfig>();
+            let schema = serde_json::to_string_pretty(&socket_message)?;
+            println!("{schema}");
         }
         SubCommand::GenerateStaticConfig => {
             print_query(&SocketMessage::GenerateStaticConfig);

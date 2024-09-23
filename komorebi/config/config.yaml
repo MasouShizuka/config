@@ -64,15 +64,17 @@ widgets:
         label_offline: "Komorebi Offline"
         label_workspace_btn: "{name}"
         label_workspace_active_btn: "{name}"
+        label_workspace_populated_btn: "{name}"
         label_default_name: "{index}"
         hide_if_offline: false
         label_zero_index: false
         hide_empty_workspaces: false
+        animation: false
         container_padding:
           top: 0
-          left: 0
+          left: 8
           bottom: 0
-          right: 0
+          right: 8
 
   komorebi_active_layout:
     type: "komorebi.active_layout.ActiveLayoutWidget"
@@ -93,6 +95,11 @@ widgets:
         maximised: "[X]"
         floating: "><>"
         paused: "[P]"
+      container_padding:
+        top: 0
+        left: 8
+        bottom: 0
+        right: 8
       callbacks:
         on_left: "next_layout"
         on_middle: "toggle_monocle"
@@ -246,7 +253,7 @@ widgets:
     type: "yasb.battery.BatteryWidget"
     options:
       label: "<span>{icon}</span>{percent}%"
-      label_alt: "{icon} {percent}% | time: {time_remaining}"
+      label_alt: "<span>{icon}</span>{percent}% {time_remaining}"
       update_interval: 5000
       time_remaining_natural: false
       charging_options:

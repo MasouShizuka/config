@@ -358,6 +358,9 @@ pub struct StaticConfig {
     /// Animations configuration options
     #[serde(skip_serializing_if = "Option::is_none")]
     pub animation: Option<AnimationsConfig>,
+    /// Theme configuration options
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub theme: Option<KomorebiTheme>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -370,6 +373,52 @@ pub struct AnimationsConfig {
     style: Option<AnimationStyle>,
     /// Set the animation FPS (default: 60)
     fps: Option<u64>,
+}
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "palette")]
+pub enum KomorebiTheme {
+    /// A theme from catppuccin-egui
+    Catppuccin {
+        /// Name of the Catppuccin theme
+        name: komorebi_themes::Catppuccin,
+        /// Border colour when the container contains a single window (default: Blue)
+        single_border: Option<komorebi_themes::CatppuccinValue>,
+        /// Border colour when the container contains multiple windows (default: Green)
+        stack_border: Option<komorebi_themes::CatppuccinValue>,
+        /// Border colour when the container is in monocle mode (default: Pink)
+        monocle_border: Option<komorebi_themes::CatppuccinValue>,
+        /// Border colour when the container is unfocused (default: Base)
+        unfocused_border: Option<komorebi_themes::CatppuccinValue>,
+        /// Stackbar focused tab text colour (default: Green)
+        stackbar_focused_text: Option<komorebi_themes::CatppuccinValue>,
+        /// Stackbar unfocused tab text colour (default: Text)
+        stackbar_unfocused_text: Option<komorebi_themes::CatppuccinValue>,
+        /// Stackbar tab background colour (default: Base)
+        stackbar_background: Option<komorebi_themes::CatppuccinValue>,
+        /// Komorebi status bar accent (default: Blue)
+        bar_accent: Option<komorebi_themes::CatppuccinValue>,
+    },
+    /// A theme from base16-egui-themes
+    Base16 {
+        /// Name of the Base16 theme
+        name: komorebi_themes::Base16,
+        /// Border colour when the container contains a single window (default: Base0D)
+        single_border: Option<komorebi_themes::Base16Value>,
+        /// Border colour when the container contains multiple windows (default: Base0B)
+        stack_border: Option<komorebi_themes::Base16Value>,
+        /// Border colour when the container is in monocle mode (default: Base0F)
+        monocle_border: Option<komorebi_themes::Base16Value>,
+        /// Border colour when the container is unfocused (default: Base01)
+        unfocused_border: Option<komorebi_themes::Base16Value>,
+        /// Stackbar focused tab text colour (default: Base0B)
+        stackbar_focused_text: Option<komorebi_themes::Base16Value>,
+        /// Stackbar unfocused tab text colour (default: Base05)
+        stackbar_unfocused_text: Option<komorebi_themes::Base16Value>,
+        /// Stackbar tab background colour (default: Base01)
+        stackbar_background: Option<komorebi_themes::Base16Value>,
+        /// Komorebi status bar accent (default: Base0D)
+        bar_accent: Option<komorebi_themes::Base16Value>,
+    },
 }
 
 impl StaticConfig {
@@ -446,7 +495,7 @@ pub struct TabsConfig {
 pub struct StackbarConfig {
     /// Stackbar height
     pub height: Option<i32>,
-    /// Stackbar height
+    /// Stackbar label
     pub label: Option<StackbarLabel>,
     /// Stackbar mode
     pub mode: Option<StackbarMode>,
@@ -610,6 +659,7 @@ impl From<&WindowManager> for StaticConfig {
             display_index_preferences: Option::from(DISPLAY_INDEX_PREFERENCES.lock().clone()),
             stackbar: None,
             animation: None,
+            theme: None,
         }
     }
 }
@@ -782,6 +832,139 @@ impl StaticConfig {
             }
         }
 
+        if let Some(theme) = &self.theme {
+            let (
+                single_border,
+                stack_border,
+                monocle_border,
+                unfocused_border,
+                stackbar_focused_text,
+                stackbar_unfocused_text,
+                stackbar_background,
+            ) = match theme {
+                KomorebiTheme::Catppuccin {
+                    name,
+                    single_border,
+                    stack_border,
+                    monocle_border,
+                    unfocused_border,
+                    stackbar_focused_text,
+                    stackbar_unfocused_text,
+                    stackbar_background,
+                    ..
+                } => {
+                    let single_border = single_border
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Blue)
+                        .color32(name.as_theme());
+
+                    let stack_border = stack_border
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Green)
+                        .color32(name.as_theme());
+
+                    let monocle_border = monocle_border
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Pink)
+                        .color32(name.as_theme());
+
+                    let unfocused_border = unfocused_border
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Base)
+                        .color32(name.as_theme());
+
+                    let stackbar_focused_text = stackbar_focused_text
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Green)
+                        .color32(name.as_theme());
+
+                    let stackbar_unfocused_text = stackbar_unfocused_text
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Text)
+                        .color32(name.as_theme());
+
+                    let stackbar_background = stackbar_background
+                        .unwrap_or(komorebi_themes::CatppuccinValue::Base)
+                        .color32(name.as_theme());
+
+                    (
+                        single_border,
+                        stack_border,
+                        monocle_border,
+                        unfocused_border,
+                        stackbar_focused_text,
+                        stackbar_unfocused_text,
+                        stackbar_background,
+                    )
+                }
+                KomorebiTheme::Base16 {
+                    name,
+                    single_border,
+                    stack_border,
+                    monocle_border,
+                    unfocused_border,
+                    stackbar_focused_text,
+                    stackbar_unfocused_text,
+                    stackbar_background,
+                    ..
+                } => {
+                    let single_border = single_border
+                        .unwrap_or(komorebi_themes::Base16Value::Base0D)
+                        .color32(*name);
+
+                    let stack_border = stack_border
+                        .unwrap_or(komorebi_themes::Base16Value::Base0B)
+                        .color32(*name);
+
+                    let monocle_border = monocle_border
+                        .unwrap_or(komorebi_themes::Base16Value::Base0F)
+                        .color32(*name);
+
+                    let unfocused_border = unfocused_border
+                        .unwrap_or(komorebi_themes::Base16Value::Base01)
+                        .color32(*name);
+
+                    let stackbar_focused_text = stackbar_focused_text
+                        .unwrap_or(komorebi_themes::Base16Value::Base0B)
+                        .color32(*name);
+
+                    let stackbar_unfocused_text = stackbar_unfocused_text
+                        .unwrap_or(komorebi_themes::Base16Value::Base05)
+                        .color32(*name);
+
+                    let stackbar_background = stackbar_background
+                        .unwrap_or(komorebi_themes::Base16Value::Base01)
+                        .color32(*name);
+
+                    (
+                        single_border,
+                        stack_border,
+                        monocle_border,
+                        unfocused_border,
+                        stackbar_focused_text,
+                        stackbar_unfocused_text,
+                        stackbar_background,
+                    )
+                }
+            };
+
+            border_manager::FOCUSED.store(u32::from(Colour::from(single_border)), Ordering::SeqCst);
+            border_manager::MONOCLE
+                .store(u32::from(Colour::from(monocle_border)), Ordering::SeqCst);
+            border_manager::STACK.store(u32::from(Colour::from(stack_border)), Ordering::SeqCst);
+            border_manager::UNFOCUSED
+                .store(u32::from(Colour::from(unfocused_border)), Ordering::SeqCst);
+
+            STACKBAR_TAB_BACKGROUND_COLOUR.store(
+                u32::from(Colour::from(stackbar_background)),
+                Ordering::SeqCst,
+            );
+
+            STACKBAR_FOCUSED_TEXT_COLOUR.store(
+                u32::from(Colour::from(stackbar_focused_text)),
+                Ordering::SeqCst,
+            );
+
+            STACKBAR_UNFOCUSED_TEXT_COLOUR.store(
+                u32::from(Colour::from(stackbar_unfocused_text)),
+                Ordering::SeqCst,
+            );
+        }
+
         if let Some(path) = &self.app_specific_configuration_path {
             let path = resolve_home_path(path)?;
             let content = std::fs::read_to_string(path)?;
@@ -834,29 +1017,41 @@ impl StaticConfig {
         Ok(())
     }
 
+    pub fn read(path: &PathBuf) -> Result<Self> {
+        let content = std::fs::read_to_string(path)?;
+        let value: Self = serde_json::from_str(&content)?;
+        Ok(value)
+    }
+
     #[allow(clippy::too_many_lines)]
     pub fn preload(
         path: &PathBuf,
         incoming: Receiver<WindowManagerEvent>,
+        unix_listener: Option<UnixListener>,
     ) -> Result<WindowManager> {
         let content = std::fs::read_to_string(path)?;
         let mut value: Self = serde_json::from_str(&content)?;
         value.apply_globals()?;
 
-        let socket = DATA_DIR.join("komorebi.sock");
+        let listener = match unix_listener {
+            Some(listener) => listener,
+            None => {
+                let socket = DATA_DIR.join("komorebi.sock");
 
-        match std::fs::remove_file(&socket) {
-            Ok(()) => {}
-            Err(error) => match error.kind() {
-                // Doing this because ::exists() doesn't work reliably on Windows via IntelliJ
-                ErrorKind::NotFound => {}
-                _ => {
-                    return Err(error.into());
-                }
-            },
+                match std::fs::remove_file(&socket) {
+                    Ok(()) => {}
+                    Err(error) => match error.kind() {
+                        // Doing this because ::exists() doesn't work reliably on Windows via IntelliJ
+                        ErrorKind::NotFound => {}
+                        _ => {
+                            return Err(error.into());
+                        }
+                    },
+                };
+
+                UnixListener::bind(&socket)?
+            }
         };
-
-        let listener = UnixListener::bind(&socket)?;
 
         let mut wm = WindowManager {
             monitors: Ring::default(),
@@ -978,7 +1173,9 @@ impl StaticConfig {
             for (i, monitor) in monitors.iter().enumerate() {
                 if let Some(m) = wm.monitors_mut().get_mut(i) {
                     m.ensure_workspace_count(monitor.workspaces.len());
-                    m.set_work_area_offset(monitor.work_area_offset);
+                    if m.work_area_offset().is_none() {
+                        m.set_work_area_offset(monitor.work_area_offset);
+                    }
                     m.set_window_based_work_area_offset(monitor.window_based_work_area_offset);
                     m.set_window_based_work_area_offset_limit(
                         monitor.window_based_work_area_offset_limit.unwrap_or(1),
@@ -1020,6 +1217,10 @@ impl StaticConfig {
 
         if let Some(val) = value.cross_monitor_move_behaviour {
             wm.cross_monitor_move_behaviour = val;
+        }
+
+        if let Some(val) = value.cross_boundary_behaviour {
+            wm.cross_boundary_behaviour = val;
         }
 
         if let Some(val) = value.unmanaged_window_operation_behaviour {

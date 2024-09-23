@@ -410,6 +410,24 @@ return {
     },
 
     {
+        "rlychrisg/truncateline.nvim",
+        cmd = {
+            "TemporaryToggle",
+            "ToggleTruncate",
+        },
+        enabled = not environment.is_vscode,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        keys = {
+            { "<leader>ctT", function() vim.api.nvim_command("TemporaryToggle") end, desc = "TruncateLine temporary toggle", mode = "n" },
+            { "<leader>ctt", function() vim.api.nvim_command("ToggleTruncate") end,  desc = "TruncateLine toggle",           mode = "n" },
+        },
+        opts = {},
+    },
+
+    {
         "stevearc/dressing.nvim",
         enabled = not environment.is_vscode,
         init = function()

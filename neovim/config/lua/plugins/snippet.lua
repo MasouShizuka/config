@@ -1,5 +1,6 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
+local utils = require("utils")
 
 return {
     {
@@ -12,6 +13,13 @@ return {
             "nvim-telescope/telescope.nvim",
         },
         enabled = not environment.is_vscode,
+        init = function()
+            if utils.is_available("which-key.nvim") then
+                require("which-key").add({
+                    { "<leader>S", group = "scissors", mode = "n" },
+                })
+            end
+        end,
         keys = {
             { "<leader>Sa", function() require("scissors").addNewSnippet() end, desc = "Scissors add new snippet", mode = { "n", "x" } },
             { "<leader>Se", function() require("scissors").editSnippet() end,   desc = "Scissors edit snippet",    mode = "n" },
