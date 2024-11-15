@@ -423,7 +423,7 @@ return {
                     end,
                 }),
                 {
-                    provider = icons.misc.text .. "%l:%c %P",
+                    provider = icons.misc.text .. "%l:%v %P",
                 },
             }
 

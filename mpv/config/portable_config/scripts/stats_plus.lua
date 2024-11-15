@@ -1,26 +1,41 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/player/lua/stats.lua
-COMMIT_ e7f153db58bba3c48099d1058615171483ff51dd
+COMMIT_ 1c55d600ab7df360acf1403d9586892600371166
 文档_ stats_plus.conf
 
 mpv.conf的（可选）前置条件 --load-stats-overlay=no
 可用的快捷键示例（在 input.conf 中写入）：
 
- <KEY>   script-binding stats_plus/display-stats          # 临时显示统计信息
- <KEY>   script-binding stats_plus/display-stats-toggle   # 常驻显示统计信息
- <KEY>   script-binding stats_plus/display-page-1         # 显示第一页的信息（亦可在显示时按12340跳转至对应页面）
- <KEY>   script-binding stats_plus/display-page-2         # ...
- <KEY>   script-binding stats_plus/display-page-3         # ...
- <KEY>   script-binding stats_plus/display-page-4         # ...
- <KEY>   script-binding stats_plus/display-page-0         # ...
+ <KEY>   script-binding stats_plus/display-stats           # 临时显示统计信息
+ <KEY>   script-binding stats_plus/display-stats-toggle    # 常驻显示统计信息
+ <KEY>   script-binding stats_plus/display-page-1          # 临时显示第一页的信息
+ <KEY>   script-binding stats_plus/display-page-2          # ...
+ <KEY>   script-binding stats_plus/display-page-3          # ...
+ <KEY>   script-binding stats_plus/display-page-4          # ...
+ <KEY>   script-binding stats_plus/display-page-5          # ...
+ <KEY>   script-binding stats_plus/display-page-0          # ...
+ <KEY>   script-binding stats_plus/display-page-1-toggle   # 常驻显示第一页的信息
+ <KEY>   script-binding stats_plus/display-page-2-toggle   # ...
+ <KEY>   script-binding stats_plus/display-page-3-toggle   # ...
+ <KEY>   script-binding stats_plus/display-page-4-toggle   # ...
+ <KEY>   script-binding stats_plus/display-page-5-toggle   # ...
+ <KEY>   script-binding stats_plus/display-page-0-toggle   # ...
 
- <KEY>   script-message-to stats_plus display-stats          # 同上
- <KEY>   script-message-to stats_plus display-stats-toggle   # ...
- <KEY>   script-message-to stats_plus display-page-1         # ...
- <KEY>   script-message-to stats_plus display-page-2         # ...
- <KEY>   script-message-to stats_plus display-page-3         # ...
- <KEY>   script-message-to stats_plus display-page-4         # ...
- <KEY>   script-message-to stats_plus display-page-0         # ...
+ <KEY>   script-message-to stats_plus display-stats           # 同上
+ <KEY>   script-message-to stats_plus display-stats-toggle    # ...
+ <KEY>   script-message-to stats_plus display-page-1          # ...
+ <KEY>   script-message-to stats_plus display-page-2          # ...
+ <KEY>   script-message-to stats_plus display-page-3          # ...
+ <KEY>   script-message-to stats_plus display-page-4          # ...
+ <KEY>   script-message-to stats_plus display-page-5          # ...
+ <KEY>   script-message-to stats_plus display-page-0          # ...
+ <KEY>   script-message-to stats_plus display-page-1-toggle   # ...
+ <KEY>   script-message-to stats_plus display-page-2-toggle   # ...
+ <KEY>   script-message-to stats_plus display-page-3-toggle   # ...
+ <KEY>   script-message-to stats_plus display-page-4-toggle   # ...
+ <KEY>   script-message-to stats_plus display-page-5-toggle   # ...
+ <KEY>   script-message-to stats_plus display-page-0-toggle   # ...
+
 ]]
 
 local mp = require 'mp'
@@ -498,7 +513,7 @@ local function get_kbinfo_lines()
            and bind.section ~= "input_forced_console"
            and (
                searched_text == nil or
-               (bind.key .. bind.cmd):lower():find(searched_text, 1, true)
+               (bind.key .. bind.cmd .. (bind.comment or "")):lower():find(searched_text, 1, true)
            )
         then
             active[bind.key] = bind
@@ -1019,6 +1034,21 @@ local function add_video(s)
             local attrs = has_prefix and {indent=" ", nl="", prefix_sep=""}
                                       or {prefix="当前帧类型："}
             append(s, "Interlaced", attrs)
+        end
+
+        local timecodes = {
+            ["gop-timecode"] = "GOP",
+            ["smpte-timecode"] = "SMPTE",
+            ["estimated-smpte-timecode"] = "预估的SMPTE",
+        }
+        for prop, name in pairs(timecodes) do
+            if frame_info and frame_info[prop] then
+                local attrs = has_prefix and {prefix=name .. " 时间码：",
+                                              indent=o.prefix_sep .. o.prefix_sep, nl=""}
+                                          or {prefix=name .. " 时间码："}
+                append(s, frame_info[prop], attrs)
+                break
+            end
         end
     end
 
@@ -1628,6 +1658,7 @@ local function filter_bindings()
                 end
             end
         end,
+        dont_bind_up_down = true,
     })
 end
 
@@ -1758,14 +1789,20 @@ mp.add_key_binding(nil, "display-stats", function() process_key_binding(true) en
 mp.add_key_binding(nil, "display-stats-toggle", function() process_key_binding(false) end,
     {repeatable=false})
 
--- Single invocation bindings without key, can be used in input.conf to create
--- bindings for a specific page: "e script-binding stats/display-page-2"
 for k, _ in pairs(pages) do
-    mp.add_key_binding(nil, "display-page-" .. k,
-        function()
-            curr_page = k
-            process_key_binding(true)
-        end, {repeatable=true})
+    -- Single invocation key bindings for specific pages, e.g.:
+    -- "e script-binding stats/display-page-2"
+    mp.add_key_binding(nil, "display-page-" .. k, function()
+        curr_page = k
+        process_key_binding(true)
+    end, {repeatable=true})
+
+    -- Key bindings to toggle a specific page, e.g.:
+    -- "h script-binding stats/display-page-4-toggle".
+    mp.add_key_binding(nil, "display-page-" .. k .. "-toggle", function()
+        curr_page = k
+        process_key_binding(false)
+    end, {repeatable=true})
 end
 
 -- Reprint stats immediately when VO was reconfigured, only when toggled

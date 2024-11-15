@@ -28,7 +28,7 @@ class LanguageWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(int(update_interval * 1000), class_name="language-widget")
+        super().__init__(update_interval, class_name="language-widget")
 
         self._show_alt_label = False
         self._label_content = label

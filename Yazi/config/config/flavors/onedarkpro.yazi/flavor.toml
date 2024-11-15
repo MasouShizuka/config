@@ -64,9 +64,9 @@ permissions_s = { fg = "#abb2bf" }
 # : }}}
 
 
-# : Select {{{
+# : Pick {{{
 
-[select]
+[pick]
 border   = { fg = "#61afef" }
 active   = { fg = "#c678dd", bold = true }
 inactive = {}
@@ -81,6 +81,20 @@ border   = { fg = "#61afef" }
 title    = {}
 value    = {}
 selected = { reversed = true }
+
+# : }}}
+
+
+# : Confirm {{{
+
+[confirm]
+border     = { fg = "#61afef" }
+title      = { fg = "#61afef" }
+content    = {}
+list       = {}
+btn_yes    = { reversed = true }
+btn_no     = {}
+btn_labels = [ "  [Y]es  ", "  (N)o  " ]
 
 # : }}}
 

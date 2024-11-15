@@ -20,6 +20,7 @@ use crate::stackbar_manager::STACKBAR_TAB_BACKGROUND_COLOUR;
 use crate::stackbar_manager::STACKBAR_TAB_HEIGHT;
 use crate::stackbar_manager::STACKBAR_TAB_WIDTH;
 use crate::stackbar_manager::STACKBAR_UNFOCUSED_TEXT_COLOUR;
+use crate::theme_manager;
 use crate::transparency_manager;
 use crate::window;
 use crate::window_manager::WindowManager;
@@ -35,26 +36,31 @@ use crate::DATA_DIR;
 use crate::DEFAULT_CONTAINER_PADDING;
 use crate::DEFAULT_WORKSPACE_PADDING;
 use crate::DISPLAY_INDEX_PREFERENCES;
-use crate::FLOAT_IDENTIFIERS;
+use crate::FLOATING_APPLICATIONS;
 use crate::HIDING_BEHAVIOUR;
+use crate::IGNORE_IDENTIFIERS;
 use crate::LAYERED_WHITELIST;
 use crate::MANAGE_IDENTIFIERS;
 use crate::MONITOR_INDEX_PREFERENCES;
 use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REGEX_IDENTIFIERS;
+use crate::SLOW_APPLICATION_COMPENSATION_TIME;
+use crate::SLOW_APPLICATION_IDENTIFIERS;
+use crate::TRANSPARENCY_BLACKLIST;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
 use crate::WINDOWS_11;
-use crate::WORKSPACE_RULES;
+use crate::WORKSPACE_MATCHING_RULES;
 
+use crate::asc::ApplicationSpecificConfiguration;
+use crate::asc::AscApplicationRulesOrSchema;
+use crate::config_generation::WorkspaceMatchingRule;
 use crate::core::config_generation::ApplicationConfiguration;
 use crate::core::config_generation::ApplicationConfigurationGenerator;
 use crate::core::config_generation::ApplicationOptions;
-use crate::core::config_generation::IdWithIdentifier;
 use crate::core::config_generation::MatchingRule;
 use crate::core::config_generation::MatchingStrategy;
 use crate::core::resolve_home_path;
 use crate::core::AnimationStyle;
-use crate::core::ApplicationIdentifier;
 use crate::core::BorderStyle;
 use crate::core::DefaultLayout;
 use crate::core::FocusFollowsMouseImplementation;
@@ -65,6 +71,7 @@ use crate::core::OperationBehaviour;
 use crate::core::Rect;
 use crate::core::SocketMessage;
 use crate::core::WindowContainerBehaviour;
+use crate::core::WindowManagementBehaviour;
 use color_eyre::Result;
 use crossbeam_channel::Receiver;
 use hotwatch::EventKind;
@@ -92,6 +99,8 @@ pub struct BorderColours {
     pub stack: Option<Colour>,
     /// Border colour when the container is in monocle mode
     pub monocle: Option<Colour>,
+    /// Border colour when the container is in floating mode
+    pub floating: Option<Colour>,
     /// Border colour when the container is unfocused
     pub unfocused: Option<Colour>,
 }
@@ -103,13 +112,13 @@ pub struct WorkspaceConfig {
     /// Layout (default: BSP)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub layout: Option<DefaultLayout>,
-    /// Custom Layout (default: None)
+    /// END OF LIFE FEATURE: Custom Layout (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_layout: Option<PathBuf>,
     /// Layout rules (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub layout_rules: Option<HashMap<usize, DefaultLayout>>,
-    /// Layout rules (default: None)
+    /// END OF LIFE FEATURE: Custom layout rules (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_layout_rules: Option<HashMap<usize, PathBuf>>,
     /// Container padding (default: global)
@@ -120,13 +129,20 @@ pub struct WorkspaceConfig {
     pub workspace_padding: Option<i32>,
     /// Initial workspace application rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub initial_workspace_rules: Option<Vec<IdWithIdentifier>>,
+    pub initial_workspace_rules: Option<Vec<MatchingRule>>,
     /// Permanent workspace application rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workspace_rules: Option<Vec<IdWithIdentifier>>,
+    pub workspace_rules: Option<Vec<MatchingRule>>,
     /// Apply this monitor's window-based work area offset (default: true)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub apply_window_based_work_area_offset: Option<bool>,
+    /// Determine what happens when a new window is opened (default: Create)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub window_container_behaviour: Option<WindowContainerBehaviour>,
+    /// Enable or disable float override, which makes it so every new window opens in floating mode
+    /// (default: false)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub float_override: Option<bool>,
 }
 
 impl From<&Workspace> for WorkspaceConfig {
@@ -140,37 +156,6 @@ impl From<&Workspace> for WorkspaceConfig {
                 Layout::Custom(_) => {}
             }
         }
-
-        let workspace_rules = WORKSPACE_RULES.lock();
-        let mut initial_ws_rules = vec![];
-        let mut ws_rules = vec![];
-
-        for (identifier, (_, _, is_initial)) in &*workspace_rules {
-            if identifier.ends_with("exe") {
-                let rule = IdWithIdentifier {
-                    kind: ApplicationIdentifier::Exe,
-                    id: identifier.clone(),
-                    matching_strategy: None,
-                };
-
-                if *is_initial {
-                    initial_ws_rules.push(rule);
-                } else {
-                    ws_rules.push(rule);
-                }
-            }
-        }
-
-        let initial_ws_rules = if initial_ws_rules.is_empty() {
-            None
-        } else {
-            Option::from(initial_ws_rules)
-        };
-        let ws_rules = if ws_rules.is_empty() {
-            None
-        } else {
-            Option::from(ws_rules)
-        };
 
         let default_container_padding = DEFAULT_CONTAINER_PADDING.load(Ordering::SeqCst);
         let default_workspace_padding = DEFAULT_WORKSPACE_PADDING.load(Ordering::SeqCst);
@@ -207,9 +192,11 @@ impl From<&Workspace> for WorkspaceConfig {
             custom_layout_rules: None,
             container_padding,
             workspace_padding,
-            initial_workspace_rules: initial_ws_rules,
-            workspace_rules: ws_rules,
+            initial_workspace_rules: None,
+            workspace_rules: None,
             apply_window_based_work_area_offset: Some(value.apply_window_based_work_area_offset()),
+            window_container_behaviour: *value.window_container_behaviour(),
+            float_override: *value.float_override(),
         }
     }
 }
@@ -246,7 +233,7 @@ impl From<&Monitor> for MonitorConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-/// The `komorebi.json` static configuration file reference for `v0.1.28`
+/// The `komorebi.json` static configuration file reference for `v0.1.31`
 pub struct StaticConfig {
     /// DEPRECATED from v0.1.22: no longer required
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -263,6 +250,10 @@ pub struct StaticConfig {
     /// Determine what happens when a new window is opened (default: Create)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window_container_behaviour: Option<WindowContainerBehaviour>,
+    /// Enable or disable float override, which makes it so every new window opens in floating mode
+    /// (default: false)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub float_override: Option<bool>,
     /// Determine what happens when a window is moved across a monitor boundary (default: Swap)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cross_monitor_move_behaviour: Option<MoveBehaviour>,
@@ -272,13 +263,13 @@ pub struct StaticConfig {
     /// Determine what happens when commands are sent while an unmanaged window is in the foreground (default: Op)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unmanaged_window_operation_behaviour: Option<OperationBehaviour>,
-    /// Determine focus follows mouse implementation (default: None)
+    /// END OF LIFE FEATURE: Determine focus follows mouse implementation (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub focus_follows_mouse: Option<FocusFollowsMouseImplementation>,
     /// Enable or disable mouse follows focus (default: true)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mouse_follows_focus: Option<bool>,
-    /// Path to applications.yaml from komorebi-application-specific-configurations (default: None)
+    /// Path to applications.json from komorebi-application-specific-configurations (default: None)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub app_specific_configuration_path: Option<PathBuf>,
     /// Width of the window border (default: 8)
@@ -313,6 +304,9 @@ pub struct StaticConfig {
     /// Alpha value for unfocused window transparency [[0-255]] (default: 200)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transparency_alpha: Option<u8>,
+    /// Individual window transparency ignore rules
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transparency_ignore_rules: Option<Vec<MatchingRule>>,
     /// Global default workspace padding (default: 10)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_workspace_padding: Option<i32>,
@@ -330,10 +324,14 @@ pub struct StaticConfig {
     pub global_work_area_offset: Option<Rect>,
     /// Individual window floating rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub float_rules: Option<Vec<MatchingRule>>,
+    #[serde(alias = "float_rules")]
+    pub ignore_rules: Option<Vec<MatchingRule>>,
     /// Individual window force-manage rules
     #[serde(skip_serializing_if = "Option::is_none")]
     pub manage_rules: Option<Vec<MatchingRule>>,
+    /// Identify applications which should be managed as floating windows
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub floating_applications: Option<Vec<MatchingRule>>,
     /// Identify border overflow applications
     #[serde(skip_serializing_if = "Option::is_none")]
     pub border_overflow_applications: Option<Vec<MatchingRule>>,
@@ -361,6 +359,16 @@ pub struct StaticConfig {
     /// Theme configuration options
     #[serde(skip_serializing_if = "Option::is_none")]
     pub theme: Option<KomorebiTheme>,
+    /// Identify applications which are slow to send initial event notifications
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub slow_application_identifiers: Option<Vec<MatchingRule>>,
+    /// How long to wait when compensating for slow applications, in milliseconds (default: 20)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub slow_application_compensation_time: Option<u64>,
+    /// Komorebi status bar configuration files for multiple instances on different monitors
+    #[serde(skip_serializing_if = "Option::is_none")]
+    // this option is a little special because it is only consumed by komorebic
+    pub bar_configurations: Option<Vec<PathBuf>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -379,7 +387,7 @@ pub struct AnimationsConfig {
 pub enum KomorebiTheme {
     /// A theme from catppuccin-egui
     Catppuccin {
-        /// Name of the Catppuccin theme
+        /// Name of the Catppuccin theme (theme previews: https://github.com/catppuccin/catppuccin)
         name: komorebi_themes::Catppuccin,
         /// Border colour when the container contains a single window (default: Blue)
         single_border: Option<komorebi_themes::CatppuccinValue>,
@@ -387,6 +395,8 @@ pub enum KomorebiTheme {
         stack_border: Option<komorebi_themes::CatppuccinValue>,
         /// Border colour when the container is in monocle mode (default: Pink)
         monocle_border: Option<komorebi_themes::CatppuccinValue>,
+        /// Border colour when the window is floating (default: Yellow)
+        floating_border: Option<komorebi_themes::CatppuccinValue>,
         /// Border colour when the container is unfocused (default: Base)
         unfocused_border: Option<komorebi_themes::CatppuccinValue>,
         /// Stackbar focused tab text colour (default: Green)
@@ -400,7 +410,7 @@ pub enum KomorebiTheme {
     },
     /// A theme from base16-egui-themes
     Base16 {
-        /// Name of the Base16 theme
+        /// Name of the Base16 theme (theme previews: https://tinted-theming.github.io/base16-gallery)
         name: komorebi_themes::Base16,
         /// Border colour when the container contains a single window (default: Base0D)
         single_border: Option<komorebi_themes::Base16Value>,
@@ -408,6 +418,8 @@ pub enum KomorebiTheme {
         stack_border: Option<komorebi_themes::Base16Value>,
         /// Border colour when the container is in monocle mode (default: Base0F)
         monocle_border: Option<komorebi_themes::Base16Value>,
+        /// Border colour when the window is floating (default: Base09)
+        floating_border: Option<komorebi_themes::Base16Value>,
         /// Border colour when the container is unfocused (default: Base01)
         unfocused_border: Option<komorebi_themes::Base16Value>,
         /// Stackbar focused tab text colour (default: Base0B)
@@ -422,6 +434,31 @@ pub enum KomorebiTheme {
 }
 
 impl StaticConfig {
+    pub fn end_of_life(raw: &str) {
+        let features = vec![
+            "focus_follows_mouse",
+            "custom_layout",
+            "custom_layout_rules",
+        ];
+
+        let mut display = false;
+
+        for feature in features {
+            if raw.contains(feature) {
+                if !display {
+                    display = true;
+                    println!("\n\"{feature}\" is now end-of-life");
+                } else {
+                    println!(r#""{feature}" is now end-of-life"#);
+                }
+            }
+        }
+
+        if display {
+            println!("\nEnd-of-life features will not receive any further bug fixes or updates; they should not be used\n")
+        }
+    }
+
     pub fn aliases(raw: &str) {
         let mut map = HashMap::new();
         map.insert("border", ["active_window_border"]);
@@ -429,6 +466,8 @@ impl StaticConfig {
         map.insert("border_offset", ["active_window_border_offset"]);
         map.insert("border_colours", ["active_window_border_colours"]);
         map.insert("border_style", ["active_window_border_style"]);
+        map.insert("applications.json", ["applications.yaml"]);
+        map.insert("ignore_rules", ["float_rules"]);
 
         let mut display = false;
 
@@ -511,95 +550,6 @@ impl From<&WindowManager> for StaticConfig {
             monitors.push(MonitorConfig::from(m));
         }
 
-        let mut to_remove = vec![];
-        let mut to_add_initial = vec![];
-        let mut to_add_persistent = vec![];
-
-        let workspace_rules = WORKSPACE_RULES.lock();
-        for (m_idx, m) in monitors.iter().enumerate() {
-            for (w_idx, w) in m.workspaces.iter().enumerate() {
-                if let Some(rules) = &w.initial_workspace_rules {
-                    for iwsr in rules {
-                        for (identifier, (monitor_idx, workspace_idx, _)) in &*workspace_rules {
-                            if iwsr.id.eq(identifier)
-                                && (*monitor_idx != m_idx || *workspace_idx != w_idx)
-                            {
-                                to_remove.push((m_idx, w_idx, iwsr.id.clone()));
-                            }
-                        }
-                    }
-                }
-
-                for (identifier, (monitor_idx, workspace_idx, initial)) in &*workspace_rules {
-                    if *initial && (*monitor_idx == m_idx && *workspace_idx == w_idx) {
-                        to_add_initial.push((m_idx, w_idx, identifier.clone()));
-                    }
-                }
-
-                if let Some(rules) = &w.workspace_rules {
-                    for wsr in rules {
-                        for (identifier, (monitor_idx, workspace_idx, _)) in &*workspace_rules {
-                            if wsr.id.eq(identifier)
-                                && (*monitor_idx != m_idx || *workspace_idx != w_idx)
-                            {
-                                to_remove.push((m_idx, w_idx, wsr.id.clone()));
-                            }
-                        }
-                    }
-                }
-
-                for (identifier, (monitor_idx, workspace_idx, initial)) in &*workspace_rules {
-                    if !*initial && (*monitor_idx == m_idx && *workspace_idx == w_idx) {
-                        to_add_persistent.push((m_idx, w_idx, identifier.clone()));
-                    }
-                }
-            }
-        }
-
-        for (m_idx, w_idx, id) in to_remove {
-            if let Some(monitor) = monitors.get_mut(m_idx) {
-                if let Some(workspace) = monitor.workspaces.get_mut(w_idx) {
-                    if workspace.workspace_rules.is_none() {
-                        workspace.workspace_rules = Some(vec![]);
-                    }
-
-                    if let Some(rules) = &mut workspace.workspace_rules {
-                        rules.retain(|r| r.id != id);
-                        for (monitor_idx, workspace_idx, id) in &to_add_persistent {
-                            if m_idx == *monitor_idx && w_idx == *workspace_idx {
-                                rules.push(IdWithIdentifier {
-                                    kind: ApplicationIdentifier::Exe,
-                                    id: id.clone(),
-                                    matching_strategy: None,
-                                })
-                            }
-                        }
-
-                        rules.dedup();
-                    }
-
-                    if workspace.initial_workspace_rules.is_none() {
-                        workspace.workspace_rules = Some(vec![]);
-                    }
-
-                    if let Some(rules) = &mut workspace.initial_workspace_rules {
-                        rules.retain(|r| r.id != id);
-                        for (monitor_idx, workspace_idx, id) in &to_add_initial {
-                            if m_idx == *monitor_idx && w_idx == *workspace_idx {
-                                rules.push(IdWithIdentifier {
-                                    kind: ApplicationIdentifier::Exe,
-                                    id: id.clone(),
-                                    matching_strategy: None,
-                                })
-                            }
-                        }
-
-                        rules.dedup();
-                    }
-                }
-            }
-        }
-
         let border_colours = if border_manager::FOCUSED.load(Ordering::SeqCst) == 0 {
             None
         } else {
@@ -607,6 +557,9 @@ impl From<&WindowManager> for StaticConfig {
                 single: Option::from(Colour::from(border_manager::FOCUSED.load(Ordering::SeqCst))),
                 stack: Option::from(Colour::from(border_manager::STACK.load(Ordering::SeqCst))),
                 monocle: Option::from(Colour::from(border_manager::MONOCLE.load(Ordering::SeqCst))),
+                floating: Option::from(Colour::from(
+                    border_manager::FLOATING.load(Ordering::SeqCst),
+                )),
                 unfocused: Option::from(Colour::from(
                     border_manager::UNFOCUSED.load(Ordering::SeqCst),
                 )),
@@ -616,7 +569,10 @@ impl From<&WindowManager> for StaticConfig {
         Self {
             invisible_borders: None,
             resize_delta: Option::from(value.resize_delta),
-            window_container_behaviour: Option::from(value.window_container_behaviour),
+            window_container_behaviour: Option::from(
+                value.window_management_behaviour.current_behaviour,
+            ),
+            float_override: Option::from(value.window_management_behaviour.float_override),
             cross_monitor_move_behaviour: Option::from(value.cross_monitor_move_behaviour),
             cross_boundary_behaviour: Option::from(value.cross_boundary_behaviour),
             unmanaged_window_operation_behaviour: Option::from(
@@ -637,6 +593,7 @@ impl From<&WindowManager> for StaticConfig {
             transparency_alpha: Option::from(
                 transparency_manager::TRANSPARENCY_ALPHA.load(Ordering::SeqCst),
             ),
+            transparency_ignore_rules: None,
             border_style: Option::from(STYLE.load()),
             border_z_order: Option::from(Z_ORDER.load()),
             border_implementation: Option::from(IMPLEMENTATION.load()),
@@ -649,7 +606,8 @@ impl From<&WindowManager> for StaticConfig {
             monitors: Option::from(monitors),
             window_hiding_behaviour: Option::from(*HIDING_BEHAVIOUR.lock()),
             global_work_area_offset: value.work_area_offset,
-            float_rules: None,
+            ignore_rules: None,
+            floating_applications: None,
             manage_rules: None,
             border_overflow_applications: None,
             tray_and_multi_window_applications: None,
@@ -660,6 +618,11 @@ impl From<&WindowManager> for StaticConfig {
             stackbar: None,
             animation: None,
             theme: None,
+            slow_application_compensation_time: Option::from(
+                SLOW_APPLICATION_COMPENSATION_TIME.load(Ordering::SeqCst),
+            ),
+            slow_application_identifiers: Option::from(SLOW_APPLICATION_IDENTIFIERS.lock().clone()),
+            bar_configurations: None,
         }
     }
 }
@@ -726,6 +689,10 @@ impl StaticConfig {
                 border_manager::MONOCLE.store(u32::from(monocle), Ordering::SeqCst);
             }
 
+            if let Some(floating) = colours.floating {
+                border_manager::FLOATING.store(u32::from(floating), Ordering::SeqCst);
+            }
+
             if let Some(unfocused) = colours.unfocused {
                 border_manager::UNFOCUSED.store(u32::from(unfocused), Ordering::SeqCst);
             }
@@ -753,7 +720,7 @@ impl StaticConfig {
                 }
             }
 
-            border_manager::send_notification();
+            border_manager::send_notification(None);
         }
 
         transparency_manager::TRANSPARENCY_ENABLED
@@ -761,15 +728,22 @@ impl StaticConfig {
         transparency_manager::TRANSPARENCY_ALPHA
             .store(self.transparency_alpha.unwrap_or(200), Ordering::SeqCst);
 
-        let mut float_identifiers = FLOAT_IDENTIFIERS.lock();
+        let mut ignore_identifiers = IGNORE_IDENTIFIERS.lock();
         let mut regex_identifiers = REGEX_IDENTIFIERS.lock();
         let mut manage_identifiers = MANAGE_IDENTIFIERS.lock();
         let mut tray_and_multi_window_identifiers = TRAY_AND_MULTI_WINDOW_IDENTIFIERS.lock();
         let mut object_name_change_identifiers = OBJECT_NAME_CHANGE_ON_LAUNCH.lock();
         let mut layered_identifiers = LAYERED_WHITELIST.lock();
+        let mut transparency_blacklist = TRANSPARENCY_BLACKLIST.lock();
+        let mut slow_application_identifiers = SLOW_APPLICATION_IDENTIFIERS.lock();
+        let mut floating_applications = FLOATING_APPLICATIONS.lock();
 
-        if let Some(rules) = &mut self.float_rules {
-            populate_rules(rules, &mut float_identifiers, &mut regex_identifiers)?;
+        if let Some(rules) = &mut self.ignore_rules {
+            populate_rules(rules, &mut ignore_identifiers, &mut regex_identifiers)?;
+        }
+
+        if let Some(rules) = &mut self.floating_applications {
+            populate_rules(rules, &mut floating_applications, &mut regex_identifiers)?;
         }
 
         if let Some(rules) = &mut self.manage_rules {
@@ -792,6 +766,18 @@ impl StaticConfig {
             populate_rules(
                 rules,
                 &mut tray_and_multi_window_identifiers,
+                &mut regex_identifiers,
+            )?;
+        }
+
+        if let Some(rules) = &mut self.transparency_ignore_rules {
+            populate_rules(rules, &mut transparency_blacklist, &mut regex_identifiers)?;
+        }
+
+        if let Some(rules) = &mut self.slow_application_identifiers {
+            populate_rules(
+                rules,
+                &mut slow_application_identifiers,
                 &mut regex_identifiers,
             )?;
         }
@@ -833,184 +819,144 @@ impl StaticConfig {
         }
 
         if let Some(theme) = &self.theme {
-            let (
-                single_border,
-                stack_border,
-                monocle_border,
-                unfocused_border,
-                stackbar_focused_text,
-                stackbar_unfocused_text,
-                stackbar_background,
-            ) = match theme {
-                KomorebiTheme::Catppuccin {
-                    name,
-                    single_border,
-                    stack_border,
-                    monocle_border,
-                    unfocused_border,
-                    stackbar_focused_text,
-                    stackbar_unfocused_text,
-                    stackbar_background,
-                    ..
-                } => {
-                    let single_border = single_border
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Blue)
-                        .color32(name.as_theme());
-
-                    let stack_border = stack_border
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Green)
-                        .color32(name.as_theme());
-
-                    let monocle_border = monocle_border
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Pink)
-                        .color32(name.as_theme());
-
-                    let unfocused_border = unfocused_border
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Base)
-                        .color32(name.as_theme());
-
-                    let stackbar_focused_text = stackbar_focused_text
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Green)
-                        .color32(name.as_theme());
-
-                    let stackbar_unfocused_text = stackbar_unfocused_text
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Text)
-                        .color32(name.as_theme());
-
-                    let stackbar_background = stackbar_background
-                        .unwrap_or(komorebi_themes::CatppuccinValue::Base)
-                        .color32(name.as_theme());
-
-                    (
-                        single_border,
-                        stack_border,
-                        monocle_border,
-                        unfocused_border,
-                        stackbar_focused_text,
-                        stackbar_unfocused_text,
-                        stackbar_background,
-                    )
-                }
-                KomorebiTheme::Base16 {
-                    name,
-                    single_border,
-                    stack_border,
-                    monocle_border,
-                    unfocused_border,
-                    stackbar_focused_text,
-                    stackbar_unfocused_text,
-                    stackbar_background,
-                    ..
-                } => {
-                    let single_border = single_border
-                        .unwrap_or(komorebi_themes::Base16Value::Base0D)
-                        .color32(*name);
-
-                    let stack_border = stack_border
-                        .unwrap_or(komorebi_themes::Base16Value::Base0B)
-                        .color32(*name);
-
-                    let monocle_border = monocle_border
-                        .unwrap_or(komorebi_themes::Base16Value::Base0F)
-                        .color32(*name);
-
-                    let unfocused_border = unfocused_border
-                        .unwrap_or(komorebi_themes::Base16Value::Base01)
-                        .color32(*name);
-
-                    let stackbar_focused_text = stackbar_focused_text
-                        .unwrap_or(komorebi_themes::Base16Value::Base0B)
-                        .color32(*name);
-
-                    let stackbar_unfocused_text = stackbar_unfocused_text
-                        .unwrap_or(komorebi_themes::Base16Value::Base05)
-                        .color32(*name);
-
-                    let stackbar_background = stackbar_background
-                        .unwrap_or(komorebi_themes::Base16Value::Base01)
-                        .color32(*name);
-
-                    (
-                        single_border,
-                        stack_border,
-                        monocle_border,
-                        unfocused_border,
-                        stackbar_focused_text,
-                        stackbar_unfocused_text,
-                        stackbar_background,
-                    )
-                }
-            };
-
-            border_manager::FOCUSED.store(u32::from(Colour::from(single_border)), Ordering::SeqCst);
-            border_manager::MONOCLE
-                .store(u32::from(Colour::from(monocle_border)), Ordering::SeqCst);
-            border_manager::STACK.store(u32::from(Colour::from(stack_border)), Ordering::SeqCst);
-            border_manager::UNFOCUSED
-                .store(u32::from(Colour::from(unfocused_border)), Ordering::SeqCst);
-
-            STACKBAR_TAB_BACKGROUND_COLOUR.store(
-                u32::from(Colour::from(stackbar_background)),
-                Ordering::SeqCst,
-            );
-
-            STACKBAR_FOCUSED_TEXT_COLOUR.store(
-                u32::from(Colour::from(stackbar_focused_text)),
-                Ordering::SeqCst,
-            );
-
-            STACKBAR_UNFOCUSED_TEXT_COLOUR.store(
-                u32::from(Colour::from(stackbar_unfocused_text)),
-                Ordering::SeqCst,
-            );
+            theme_manager::send_notification(*theme);
         }
 
         if let Some(path) = &self.app_specific_configuration_path {
-            let path = resolve_home_path(path)?;
-            let content = std::fs::read_to_string(path)?;
-            let asc = ApplicationConfigurationGenerator::load(&content)?;
+            match path.extension() {
+                None => {}
+                Some(ext) => match ext.to_string_lossy().to_string().as_str() {
+                    "yaml" => {
+                        tracing::info!("loading applications.yaml from: {}", path.display());
+                        let path = resolve_home_path(path)?;
+                        let content = std::fs::read_to_string(path)?;
+                        let asc = ApplicationConfigurationGenerator::load(&content)?;
 
-            for mut entry in asc {
-                if let Some(rules) = &mut entry.float_identifiers {
-                    populate_rules(rules, &mut float_identifiers, &mut regex_identifiers)?;
-                }
+                        for mut entry in asc {
+                            if let Some(rules) = &mut entry.ignore_identifiers {
+                                populate_rules(
+                                    rules,
+                                    &mut ignore_identifiers,
+                                    &mut regex_identifiers,
+                                )?;
+                            }
 
-                if let Some(ref options) = entry.options {
-                    let options = options.clone();
-                    for o in options {
-                        match o {
-                            ApplicationOptions::ObjectNameChange => {
-                                populate_option(
-                                    &mut entry,
-                                    &mut object_name_change_identifiers,
-                                    &mut regex_identifiers,
-                                )?;
+                            if let Some(ref options) = entry.options {
+                                let options = options.clone();
+                                for o in options {
+                                    match o {
+                                        ApplicationOptions::ObjectNameChange => {
+                                            populate_option(
+                                                &mut entry,
+                                                &mut object_name_change_identifiers,
+                                                &mut regex_identifiers,
+                                            )?;
+                                        }
+                                        ApplicationOptions::Layered => {
+                                            populate_option(
+                                                &mut entry,
+                                                &mut layered_identifiers,
+                                                &mut regex_identifiers,
+                                            )?;
+                                        }
+                                        ApplicationOptions::TrayAndMultiWindow => {
+                                            populate_option(
+                                                &mut entry,
+                                                &mut tray_and_multi_window_identifiers,
+                                                &mut regex_identifiers,
+                                            )?;
+                                        }
+                                        ApplicationOptions::Force => {
+                                            populate_option(
+                                                &mut entry,
+                                                &mut manage_identifiers,
+                                                &mut regex_identifiers,
+                                            )?;
+                                        }
+                                        ApplicationOptions::BorderOverflow => {} // deprecated
+                                    }
+                                }
                             }
-                            ApplicationOptions::Layered => {
-                                populate_option(
-                                    &mut entry,
-                                    &mut layered_identifiers,
-                                    &mut regex_identifiers,
-                                )?;
-                            }
-                            ApplicationOptions::TrayAndMultiWindow => {
-                                populate_option(
-                                    &mut entry,
-                                    &mut tray_and_multi_window_identifiers,
-                                    &mut regex_identifiers,
-                                )?;
-                            }
-                            ApplicationOptions::Force => {
-                                populate_option(
-                                    &mut entry,
-                                    &mut manage_identifiers,
-                                    &mut regex_identifiers,
-                                )?;
-                            }
-                            ApplicationOptions::BorderOverflow => {} // deprecated
                         }
                     }
-                }
+                    "json" => {
+                        tracing::info!("loading applications.json from: {}", path.display());
+                        let path = resolve_home_path(path)?;
+                        let mut asc = ApplicationSpecificConfiguration::load(&path)?;
+
+                        for entry in asc.values_mut() {
+                            match entry {
+                                AscApplicationRulesOrSchema::Schema(_) => {}
+                                AscApplicationRulesOrSchema::AscApplicationRules(entry) => {
+                                    if let Some(rules) = &mut entry.ignore {
+                                        populate_rules(
+                                            rules,
+                                            &mut ignore_identifiers,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.manage {
+                                        populate_rules(
+                                            rules,
+                                            &mut manage_identifiers,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.floating {
+                                        populate_rules(
+                                            rules,
+                                            &mut floating_applications,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.transparency_ignore {
+                                        populate_rules(
+                                            rules,
+                                            &mut transparency_blacklist,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.tray_and_multi_window {
+                                        populate_rules(
+                                            rules,
+                                            &mut tray_and_multi_window_identifiers,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.layered {
+                                        populate_rules(
+                                            rules,
+                                            &mut layered_identifiers,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.object_name_change {
+                                        populate_rules(
+                                            rules,
+                                            &mut object_name_change_identifiers,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+
+                                    if let Some(rules) = &mut entry.slow_application {
+                                        populate_rules(
+                                            rules,
+                                            &mut slow_application_identifiers,
+                                            &mut regex_identifiers,
+                                        )?;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                },
             }
         }
 
@@ -1019,7 +965,34 @@ impl StaticConfig {
 
     pub fn read(path: &PathBuf) -> Result<Self> {
         let content = std::fs::read_to_string(path)?;
-        let value: Self = serde_json::from_str(&content)?;
+        let mut value: Self = serde_json::from_str(&content)?;
+
+        if let Some(path) = &mut value.app_specific_configuration_path {
+            *path = resolve_home_path(&*path)?;
+        }
+
+        if let Some(monitors) = &mut value.monitors {
+            for m in monitors {
+                for w in &mut m.workspaces {
+                    if let Some(path) = &mut w.custom_layout {
+                        *path = resolve_home_path(&*path)?;
+                    }
+
+                    if let Some(map) = &mut w.custom_layout_rules {
+                        for path in map.values_mut() {
+                            *path = resolve_home_path(&*path)?;
+                        }
+                    }
+                }
+            }
+        }
+
+        if let Some(bar_configurations) = &mut value.bar_configurations {
+            for path in bar_configurations {
+                *path = resolve_home_path(&*path)?;
+            }
+        }
+
         Ok(value)
     }
 
@@ -1029,8 +1002,7 @@ impl StaticConfig {
         incoming: Receiver<WindowManagerEvent>,
         unix_listener: Option<UnixListener>,
     ) -> Result<WindowManager> {
-        let content = std::fs::read_to_string(path)?;
-        let mut value: Self = serde_json::from_str(&content)?;
+        let mut value = Self::read(path)?;
         value.apply_globals()?;
 
         let listener = match unix_listener {
@@ -1060,9 +1032,12 @@ impl StaticConfig {
             is_paused: false,
             virtual_desktop_id: current_virtual_desktop(),
             work_area_offset: value.global_work_area_offset,
-            window_container_behaviour: value
-                .window_container_behaviour
-                .unwrap_or(WindowContainerBehaviour::Create),
+            window_management_behaviour: WindowManagementBehaviour {
+                current_behaviour: value
+                    .window_container_behaviour
+                    .unwrap_or(WindowContainerBehaviour::Create),
+                float_override: value.float_override.unwrap_or_default(),
+            },
             cross_monitor_move_behaviour: value
                 .cross_monitor_move_behaviour
                 .unwrap_or(MoveBehaviour::Swap),
@@ -1077,8 +1052,9 @@ impl StaticConfig {
             mouse_follows_focus: value.mouse_follows_focus.unwrap_or(true),
             hotwatch: Hotwatch::new()?,
             has_pending_raise_op: false,
-            pending_move_op: None,
+            pending_move_op: Arc::new(None),
             already_moved_window_handles: Arc::new(Mutex::new(HashSet::new())),
+            uncloack_to_ignore: 0,
         };
 
         match value.focus_follows_mouse {
@@ -1109,8 +1085,7 @@ impl StaticConfig {
     }
 
     pub fn postload(path: &PathBuf, wm: &Arc<Mutex<WindowManager>>) -> Result<()> {
-        let content = std::fs::read_to_string(path)?;
-        let value: Self = serde_json::from_str(&content)?;
+        let value = Self::read(path)?;
         let mut wm = wm.lock();
 
         if let Some(monitors) = value.monitors {
@@ -1131,30 +1106,40 @@ impl StaticConfig {
                     );
 
                     for (j, ws) in m.workspaces_mut().iter_mut().enumerate() {
-                        ws.load_static_config(
-                            monitor
-                                .workspaces
-                                .get(j)
-                                .expect("no static workspace config"),
-                        )?;
+                        if let Some(workspace_config) = monitor.workspaces.get(j) {
+                            ws.load_static_config(workspace_config)?;
+                        }
                     }
                 }
 
+                let mut workspace_matching_rules = WORKSPACE_MATCHING_RULES.lock();
                 for (j, ws) in monitor.workspaces.iter().enumerate() {
                     if let Some(rules) = &ws.workspace_rules {
                         for r in rules {
-                            wm.handle_workspace_rules(&r.id, i, j, false)?;
+                            workspace_matching_rules.push(WorkspaceMatchingRule {
+                                monitor_index: i,
+                                workspace_index: j,
+                                matching_rule: r.clone(),
+                                initial_only: false,
+                            });
                         }
                     }
 
                     if let Some(rules) = &ws.initial_workspace_rules {
                         for r in rules {
-                            wm.handle_workspace_rules(&r.id, i, j, true)?;
+                            workspace_matching_rules.push(WorkspaceMatchingRule {
+                                monitor_index: i,
+                                workspace_index: j,
+                                matching_rule: r.clone(),
+                                initial_only: true,
+                            });
                         }
                     }
                 }
             }
         }
+
+        wm.enforce_workspace_rules()?;
 
         if value.border == Some(true) {
             border_manager::BORDER_ENABLED.store(true, Ordering::SeqCst);
@@ -1164,8 +1149,7 @@ impl StaticConfig {
     }
 
     pub fn reload(path: &PathBuf, wm: &mut WindowManager) -> Result<()> {
-        let content = std::fs::read_to_string(path)?;
-        let mut value: Self = serde_json::from_str(&content)?;
+        let mut value = Self::read(path)?;
 
         value.apply_globals()?;
 
@@ -1182,37 +1166,52 @@ impl StaticConfig {
                     );
 
                     for (j, ws) in m.workspaces_mut().iter_mut().enumerate() {
-                        ws.load_static_config(
-                            monitor
-                                .workspaces
-                                .get(j)
-                                .expect("no static workspace config"),
-                        )?;
+                        if let Some(workspace_config) = monitor.workspaces.get(j) {
+                            ws.load_static_config(workspace_config)?;
+                        }
                     }
                 }
 
+                let mut workspace_matching_rules = WORKSPACE_MATCHING_RULES.lock();
+                workspace_matching_rules.clear();
                 for (j, ws) in monitor.workspaces.iter().enumerate() {
                     if let Some(rules) = &ws.workspace_rules {
                         for r in rules {
-                            wm.handle_workspace_rules(&r.id, i, j, false)?;
+                            workspace_matching_rules.push(WorkspaceMatchingRule {
+                                monitor_index: i,
+                                workspace_index: j,
+                                matching_rule: r.clone(),
+                                initial_only: false,
+                            });
                         }
                     }
 
                     if let Some(rules) = &ws.initial_workspace_rules {
                         for r in rules {
-                            wm.handle_workspace_rules(&r.id, i, j, true)?;
+                            workspace_matching_rules.push(WorkspaceMatchingRule {
+                                monitor_index: i,
+                                workspace_index: j,
+                                matching_rule: r.clone(),
+                                initial_only: true,
+                            });
                         }
                     }
                 }
             }
         }
 
+        wm.enforce_workspace_rules()?;
+
         if let Some(enabled) = value.border {
             border_manager::BORDER_ENABLED.store(enabled, Ordering::SeqCst);
         }
 
         if let Some(val) = value.window_container_behaviour {
-            wm.window_container_behaviour = val;
+            wm.window_management_behaviour.current_behaviour = val;
+        }
+
+        if let Some(val) = value.float_override {
+            wm.window_management_behaviour.float_override = val;
         }
 
         if let Some(val) = value.cross_monitor_move_behaviour {

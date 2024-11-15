@@ -150,7 +150,7 @@ widgets:
     options:
       label: "<span>\uf11c</span>{lang[language_code]}-{lang[country_code]}"
       label_alt: "{lang[full_name]}"
-      update_interval: 1
+      update_interval: 500
       callbacks:
         on_left: "toggle_label"
         on_middle: "do_nothing"

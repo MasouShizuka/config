@@ -35,9 +35,6 @@ return require("lazy").setup({
         { import = "plugins" },
 
         {
-            config = function(_, opts)
-                require("config.options").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/options",
             lazy = false,
             name = "config.options",
@@ -45,9 +42,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.neovide").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/neovide",
             enabled = environment.is_neovide,
             lazy = false,
@@ -56,9 +50,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.mappings").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/mappings",
             event = {
                 "VeryLazy",
@@ -68,9 +59,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.autocommands.colorscheme-persist").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/autocommands/colorscheme-persist",
             enabled = not environment.is_vscode,
             lazy = false,
@@ -80,9 +68,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.autocommands.macro-persist").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/autocommands/macro-persist",
             event = {
                 "RecordingLeave",
@@ -96,9 +81,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.autocommands.file-event").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/autocommands/file-event",
             enabled = not environment.is_vscode,
             event = {
@@ -110,9 +92,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.autocommands.focus-left-tab-after-closing").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/autocommands/focus-left-tab-after-closing",
             enabled = not environment.is_vscode,
             event = {
@@ -123,9 +102,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.autocommands.hlsearch").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/autocommands/hlsearch",
             keys = {
                 { "/", desc = "Search forward",  mode = { "n", "x" } },
@@ -151,9 +127,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.autocommands.panel-synchronize").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/autocommands/panel-synchronize",
             enabled = not environment.is_vscode,
             event = {
@@ -166,13 +139,115 @@ return require("lazy").setup({
 
         {
             cmd = {
+                "CBllbox",
+                "CBlcbox",
+                "CBlrbox",
+                "CBclbox",
+                "CBccbox",
+                "CBcrbox",
+                "CBrlbox",
+                "CBrcbox",
+                "CBrrbox",
+                "CBlabox",
+                "CBcabox",
+                "CBrabox",
+                "CBllline",
+                "CBlcline",
+                "CBlrline",
+                "CBclline",
+                "CBccline",
+                "CBcrline",
+                "CBrlline",
+                "CBrcline",
+                "CBrrline",
+                "CBline",
+                "CBlline",
+                "CBcline",
+                "CBrline",
+                "CBd",
+                "CBy",
+                "CBcatalog",
+            },
+            dir = path.config_path .. "/lua/config/user_commands/comment-box",
+            init = function()
+                if utils.is_available("which-key.nvim") then
+                    require("which-key").add({
+                        {
+                            mode = { "n", "x" },
+                            { "<leader>gc",  group = "comment box" },
+                            { "<leader>gcb", group = "boxes" },
+                            { "<leader>gct", group = "titled lines" },
+                            { "<leader>gcl", group = "lines" },
+                        },
+                    })
+                end
+            end,
+            keys = {
+                { "<leader>gcbll", function() require("comment-box").box({ position = "left", justification = "left" }) end,                                              desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
+                { "<leader>gcblc", function() require("comment-box").box({ position = "left", justification = "center" }) end,                                            desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
+                { "<leader>gcblr", function() require("comment-box").box({ position = "left", justification = "right" }) end,                                             desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
+                { "<leader>gcbcl", function() require("comment-box").box({ position = "center", justification = "left" }) end,                                            desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
+                { "<leader>gcbcc", function() require("comment-box").box({ position = "center", justification = "center" }) end,                                          desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
+                { "<leader>gcbcr", function() require("comment-box").box({ position = "center", justification = "right" }) end,                                           desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
+                { "<leader>gcbrl", function() require("comment-box").box({ position = "right", justification = "left" }) end,                                             desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
+                { "<leader>gcbrc", function() require("comment-box").box({ position = "right", justification = "center" }) end,                                           desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
+                { "<leader>gcbrr", function() require("comment-box").box({ position = "right", justification = "right" }) end,                                            desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
+                { "<leader>gcbla", function() require("comment-box").box({ position = "left", justification = "adapted" }, { doc_width = 10000, box_width = 10000 }) end, desc = "Left aligned adapted box",                                mode = { "n", "x" } },
+                { "<leader>gcbca", function() require("comment-box").box({ position = "center", justification = "adapted" }) end,                                         desc = "Centered adapted box",                                    mode = { "n", "x" } },
+                { "<leader>gcbra", function() require("comment-box").box({ position = "right", justification = "adapted" }) end,                                          desc = "Right aligned adapted box",                               mode = { "n", "x" } },
+                { "<leader>gctll", function() require("comment-box").titled_line({ position = "left", justification = "left" }) end,                                      desc = "Left aligned titled line with Left aligned text",         mode = { "n", "x" } },
+                { "<leader>gctlc", function() require("comment-box").titled_line({ position = "left", justification = "center" }) end,                                    desc = "Left aligned titled line with Centered text",             mode = { "n", "x" } },
+                { "<leader>gctlr", function() require("comment-box").titled_line({ position = "left", justification = "right" }) end,                                     desc = "Left aligned titled line with Right aligned text",        mode = { "n", "x" } },
+                { "<leader>gctcl", function() require("comment-box").titled_line({ position = "center", justification = "left" }) end,                                    desc = "Centered titled line with Left aligned text",             mode = { "n", "x" } },
+                { "<leader>gctcc", function() require("comment-box").titled_line({ position = "center", justification = "center" }) end,                                  desc = "Centered titled line with Centered text",                 mode = { "n", "x" } },
+                { "<leader>gctcr", function() require("comment-box").titled_line({ position = "center", justification = "right" }) end,                                   desc = "Centered titled line with Right aligned text",            mode = { "n", "x" } },
+                { "<leader>gctrl", function() require("comment-box").titled_line({ position = "right", justification = "left" }) end,                                     desc = "Right aligned titled line with Left aligned text",        mode = { "n", "x" } },
+                { "<leader>gctrc", function() require("comment-box").titled_line({ position = "right", justification = "center" }) end,                                   desc = "Right aligned titled line with Centered text",            mode = { "n", "x" } },
+                { "<leader>gctrr", function() require("comment-box").titled_line({ position = "right", justification = "right" }) end,                                    desc = "Right aligned titled line with Right aligned text",       mode = { "n", "x" } },
+                { "<leader>gcll",  function() require("comment-box").line({ position = "left" }) end,                                                                     desc = "Left aligned line",                                       mode = { "n", "x" } },
+                { "<leader>gclc",  function() require("comment-box").line({ position = "center" }) end,                                                                   desc = "Centered line",                                           mode = { "n", "x" } },
+                { "<leader>gclr",  function() require("comment-box").line({ position = "right" }) end,                                                                    desc = "Right aligned line",                                      mode = { "n", "x" } },
+                { "<leader>gcd",   function() require("comment-box").dbox() end,                                                                                          desc = "Remove a box or titled line, keeping its content",        mode = { "n", "x" } },
+                { "<leader>gcy",   function() require("comment-box").yank() end,                                                                                          desc = "Yank the content of a box or titled line",                mode = { "n", "x" } },
+                -- { "<leader>gcbll", function() require("comment-box").box({ position = "left", justification = "left" }, { doc_width = 80, box_width = 60 }) end,             desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
+                -- { "<leader>gcblc", function() require("comment-box").box({ position = "left", justification = "center" }, { doc_width = 80, box_width = 60 }) end,           desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
+                -- { "<leader>gcblr", function() require("comment-box").box({ position = "left", justification = "right" }, { doc_width = 80, box_width = 60 }) end,            desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
+                -- { "<leader>gcbcl", function() require("comment-box").box({ position = "center", justification = "left" }, { doc_width = 80, box_width = 60 }) end,           desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
+                -- { "<leader>gcbcc", function() require("comment-box").box({ position = "center", justification = "center" }, { doc_width = 80, box_width = 60 }) end,         desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
+                -- { "<leader>gcbcr", function() require("comment-box").box({ position = "center", justification = "right" }, { doc_width = 80, box_width = 60 }) end,          desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
+                -- { "<leader>gcbrl", function() require("comment-box").box({ position = "right", justification = "left" }, { doc_width = 80, box_width = 60 }) end,            desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
+                -- { "<leader>gcbrc", function() require("comment-box").box({ position = "right", justification = "center" }, { doc_width = 80, box_width = 60 }) end,          desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
+                -- { "<leader>gcbrr", function() require("comment-box").box({ position = "right", justification = "right" }, { doc_width = 80, box_width = 60 }) end,           desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
+                -- { "<leader>gcbla", function() require("comment-box").box({ position = "left", justification = "adapted" }, { doc_width = 10000, box_width = 10000 }) end,    desc = "Left aligned adapted box",                                mode = { "n", "x" } },
+                -- { "<leader>gcbca", function() require("comment-box").box({ position = "center", justification = "adapted" }, { doc_width = 80, box_width = 60 }) end,        desc = "Centered adapted box",                                    mode = { "n", "x" } },
+                -- { "<leader>gcbra", function() require("comment-box").box({ position = "right", justification = "adapted" }, { doc_width = 80, box_width = 60 }) end,         desc = "Right aligned adapted box",                               mode = { "n", "x" } },
+                -- { "<leader>gctll", function() require("comment-box").titled_line({ position = "left", justification = "left" }, { doc_width = 80, box_width = 60 }) end,     desc = "Left aligned titled line with Left aligned text",         mode = { "n", "x" } },
+                -- { "<leader>gctlc", function() require("comment-box").titled_line({ position = "left", justification = "center" }, { doc_width = 80, box_width = 60 }) end,   desc = "Left aligned titled line with Centered text",             mode = { "n", "x" } },
+                -- { "<leader>gctlr", function() require("comment-box").titled_line({ position = "left", justification = "right" }, { doc_width = 80, box_width = 60 }) end,    desc = "Left aligned titled line with Right aligned text",        mode = { "n", "x" } },
+                -- { "<leader>gctcl", function() require("comment-box").titled_line({ position = "center", justification = "left" }, { doc_width = 80, box_width = 60 }) end,   desc = "Centered titled line with Left aligned text",             mode = { "n", "x" } },
+                -- { "<leader>gctcc", function() require("comment-box").titled_line({ position = "center", justification = "center" }, { doc_width = 80, box_width = 60 }) end, desc = "Centered titled line with Centered text",                 mode = { "n", "x" } },
+                -- { "<leader>gctcr", function() require("comment-box").titled_line({ position = "center", justification = "right" }, { doc_width = 80, box_width = 60 }) end,  desc = "Centered titled line with Right aligned text",            mode = { "n", "x" } },
+                -- { "<leader>gctrl", function() require("comment-box").titled_line({ position = "right", justification = "left" }, { doc_width = 80, box_width = 60 }) end,    desc = "Right aligned titled line with Left aligned text",        mode = { "n", "x" } },
+                -- { "<leader>gctrc", function() require("comment-box").titled_line({ position = "right", justification = "center" }, { doc_width = 80, box_width = 60 }) end,  desc = "Right aligned titled line with Centered text",            mode = { "n", "x" } },
+                -- { "<leader>gctrr", function() require("comment-box").titled_line({ position = "right", justification = "right" }, { doc_width = 80, box_width = 60 }) end,   desc = "Right aligned titled line with Right aligned text",       mode = { "n", "x" } },
+                -- { "<leader>gcll",  function() require("comment-box").line({ position = "left" }, { doc_width = 80, box_width = 60 }) end,                                    desc = "Left aligned line",                                       mode = { "n", "x" } },
+                -- { "<leader>gclc",  function() require("comment-box").line({ position = "center" }, { doc_width = 80, box_width = 60 }) end,                                  desc = "Centered line",                                           mode = { "n", "x" } },
+                -- { "<leader>gclr",  function() require("comment-box").line({ position = "right" }, { doc_width = 80, box_width = 60 }) end,                                   desc = "Right aligned line",                                      mode = { "n", "x" } },
+                -- { "<leader>gcd",   function() require("comment-box").dbox() end,                                                                                             desc = "Remove a box or titled line, keeping its content",        mode = { "n", "x" } },
+                -- { "<leader>gcy",   function() require("comment-box").yank() end,                                                                                             desc = "Yank the content of a box or titled line",                mode = { "n", "x" } },
+            },
+            name = "config.user_commands.comment-box",
+            opts = {
+                keep_indent = true,
+            },
+        },
+
+        {
+            cmd = {
                 "DiffWithClipboard",
                 "DiffWithNextTab",
                 "DiffWithPrevTab",
             },
-            config = function(_, opts)
-                require("config.user_commands.diff").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/user_commands/diff",
             enabled = not environment.is_vscode,
             init = function()
@@ -183,9 +258,9 @@ return require("lazy").setup({
                 end
             end,
             keys = {
-                { "<leader>cdc", function() require("config.user_commands.diff").diff_with_clipboard() end,    desc = "Diff with clipboard",    mode = "n" },
-                { "<leader>cdn", function() require("config.user_commands.diff").diff_with_next_tab() end,     desc = "Diff with next tab",     mode = "n" },
-                { "<leader>cdp", function() require("config.user_commands.diff").diff_with_previous_tab() end, desc = "Diff with previous tab", mode = "n" },
+                { "<leader>cdc", function() require("diff").diff_with_clipboard() end,    desc = "Diff with clipboard",    mode = "n" },
+                { "<leader>cdn", function() require("diff").diff_with_next_tab() end,     desc = "Diff with next tab",     mode = "n" },
+                { "<leader>cdp", function() require("diff").diff_with_previous_tab() end, desc = "Diff with previous tab", mode = "n" },
             },
             name = "config.user_commands.diff",
             opts = {},
@@ -196,7 +271,7 @@ return require("lazy").setup({
                 "DocsViewToggle",
             },
             config = function(_, opts)
-                local extra_view = require("config.user_commands.extra-view")
+                local extra_view = require("extra-view")
                 extra_view.setup(opts)
 
                 vim.api.nvim_create_user_command("DocsViewToggle", function()
@@ -238,9 +313,6 @@ return require("lazy").setup({
         },
 
         {
-            config = function(_, opts)
-                require("config.user_commands.toggle").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/user_commands/toggle",
             init = function()
                 if utils.is_available("which-key.nvim") then
@@ -253,19 +325,19 @@ return require("lazy").setup({
                 local keys = {}
                 if environment.is_vscode then
                     keys = utils.table_concat(keys, {
-                        { "<leader>ctc", function() require("config.user_commands.toggle").vscode.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
-                        { "<leader>ctC", function() require("config.user_commands.toggle").vscode.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
-                        { "<leader>ctf", function() require("config.user_commands.toggle").vscode.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
-                        { "<leader>ctw", function() require("config.user_commands.toggle").vscode.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
+                        { "<leader>ctc", function() require("toggle").vscode.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
+                        { "<leader>ctC", function() require("toggle").vscode.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
+                        { "<leader>ctf", function() require("toggle").vscode.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
+                        { "<leader>ctw", function() require("toggle").vscode.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
                     })
                 else
                     keys = utils.table_concat(keys, {
-                        { "<leader>ctc", function() require("config.user_commands.toggle").nvim.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
-                        { "<leader>ctC", function() require("config.user_commands.toggle").nvim.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
-                        { "<leader>ctf", function() require("config.user_commands.toggle").nvim.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
-                        { "<leader>cts", function() require("config.user_commands.toggle").nvim.toggle_spell() end,             desc = "Toggle spell",                  mode = "n" },
-                        { "<leader>ctS", function() require("config.user_commands.toggle").nvim.toggle_syntax() end,            desc = "Toggle syntax",                 mode = "n" },
-                        { "<leader>ctw", function() require("config.user_commands.toggle").nvim.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
+                        { "<leader>ctc", function() require("toggle").nvim.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
+                        { "<leader>ctC", function() require("toggle").nvim.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
+                        { "<leader>ctf", function() require("toggle").nvim.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
+                        { "<leader>cts", function() require("toggle").nvim.toggle_spell() end,             desc = "Toggle spell",                  mode = "n" },
+                        { "<leader>ctS", function() require("toggle").nvim.toggle_syntax() end,            desc = "Toggle syntax",                 mode = "n" },
+                        { "<leader>ctw", function() require("toggle").nvim.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
                     })
                 end
                 return keys
@@ -279,17 +351,14 @@ return require("lazy").setup({
                 "Undoquit",
                 "UndoquitTab",
             },
-            config = function(_, opts)
-                require("config.user_commands.undoquit").setup(opts)
-            end,
             dir = path.config_path .. "/lua/config/user_commands/undoquit",
             enabled = not environment.is_vscode,
             event = {
                 "QuitPre",
             },
             keys = {
-                { keymap["<c-s-t>"],               function() require("config.user_commands.undoquit").restore_window() end, desc = "Undo quit",     mode = "n" },
-                { "<leader>" .. keymap["<c-s-t>"], function() require("config.user_commands.undoquit").restore_tab() end,    desc = "Undo quit tab", mode = "n" },
+                { keymap["<c-s-t>"],               function() require("undoquit").restore_window() end, desc = "Undo quit",     mode = "n" },
+                { "<leader>" .. keymap["<c-s-t>"], function() require("undoquit").restore_tab() end,    desc = "Undo quit tab", mode = "n" },
             },
             name = "config.user_commands.undoquit",
             opts = {},

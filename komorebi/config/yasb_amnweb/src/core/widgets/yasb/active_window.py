@@ -12,9 +12,9 @@ from PIL import Image
 import win32gui
 from core.utils.win32.app_icons import get_window_icon
 
-IGNORED_TITLES = ['', ' ', 'FolderView', 'Program Manager', 'python3', 'pythonw3', 'YasbBar', 'Search', 'Start']
+IGNORED_TITLES = ['', ' ', 'FolderView', 'Program Manager', 'python3', 'pythonw3', 'YasbBar', 'Search', 'Start', 'yasb']
 IGNORED_CLASSES = ['WorkerW', 'TopLevelWindowForOverflowXamlIsland', 'Shell_TrayWnd', 'Shell_SecondaryTrayWnd']
-IGNORED_PROCESSES = ['SearchHost.exe', 'komorebi.exe']
+IGNORED_PROCESSES = ['SearchHost.exe', 'komorebi.exe', 'yasb.exe']
 IGNORED_YASB_TITLES = [APP_BAR_TITLE]
 IGNORED_YASB_CLASSES = [
     'Qt662QWindowIcon',
@@ -33,6 +33,7 @@ except ImportError:
 class ActiveWindowWidget(BaseWidget):
     foreground_change = pyqtSignal(int, WinEvent)
     window_name_change = pyqtSignal(int, WinEvent)
+    focus_change_workspaces = pyqtSignal(str)
     validation_schema = VALIDATION_SCHEMA
     event_listener = SystemEventListener
 
@@ -114,12 +115,35 @@ class ActiveWindowWidget(BaseWidget):
         self._event_service.register_event(WinEvent.EventObjectNameChange, self.window_name_change)
         self._event_service.register_event(WinEvent.EventObjectStateChange, self.window_name_change)
 
+        self.focus_change_workspaces.connect(self._on_focus_change_workspaces)
+        self._event_service.register_event("workspace_update", self.focus_change_workspaces)
+ 
+
+    def _on_focus_change_workspaces(self, event: str) -> None:
+        # Temporary fix for MoveWindow event from Komorebi: MoveWindow event is not sending enough data to know on which monitor the window is being moved also animation is a problem and because of that we are using singleShot to try catch the window after the animation is done and this will run only on MoveWindow event
+        if event in ['Hide', 'Destroy']:
+            self.hide()
+            return
+        hwnd = win32gui.GetForegroundWindow()
+        if hwnd != 0:
+            self._on_focus_change_event(hwnd, WinEvent.WinEventOutOfContext)
+            if self._update_retry_count < 3 and event in ['MoveWindow']:
+                self._update_retry_count += 1
+                QTimer.singleShot(200, lambda: self._on_focus_change_event(hwnd, WinEvent.WinEventOutOfContext))
+                return
+            else:
+                self._update_retry_count = 0
+        else:
+            self.hide()
+            
+        
     def _toggle_title_text(self) -> None:
         self._show_alt = not self._show_alt
         self._active_label = self._label_alt if self._show_alt else self._label
         self._update_text()
 
     def _on_focus_change_event(self, hwnd: int, event: WinEvent) -> None:
+         
         win_info = get_hwnd_info(hwnd)
         if (not win_info or not hwnd or
                 not win_info['title'] or
@@ -130,11 +154,10 @@ class ActiveWindowWidget(BaseWidget):
         monitor_name = win_info['monitor_info'].get('device', None)
 
         if self._monitor_exclusive and self.screen().name() != monitor_name and win_info.get('monitor_hwnd', 'Unknown') != self.monitor_hwnd:
-            self.hide()
+            self.hide() 
         else:
-            self.show()
             self._update_window_title(hwnd, win_info, event)
-
+            
         # Check if the window title is in the list of ignored titles
         if(win_info['title'] in IGNORED_TITLES):
             self.hide()
@@ -198,6 +221,8 @@ class ActiveWindowWidget(BaseWidget):
 
                 if self._window_title_text.isHidden():
                     self._window_title_text.show()
+                if self.isHidden():
+                    self.show()
         except Exception:
             logging.exception(
                 f"Failed to update active window title for window with HWND {hwnd} emitted by event {event}"

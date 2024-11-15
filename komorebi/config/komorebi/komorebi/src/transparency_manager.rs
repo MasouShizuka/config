@@ -8,11 +8,13 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU8;
 use std::sync::Arc;
 use std::sync::OnceLock;
-use windows::Win32::Foundation::HWND;
 
+use crate::should_act;
 use crate::Window;
 use crate::WindowManager;
 use crate::WindowsApi;
+use crate::REGEX_IDENTIFIERS;
+use crate::TRANSPARENCY_BLACKLIST;
 
 pub static TRANSPARENCY_ENABLED: AtomicBool = AtomicBool::new(false);
 pub static TRANSPARENCY_ALPHA: AtomicU8 = AtomicU8::new(200);
@@ -123,7 +125,7 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
                 }
 
                 let foreground_hwnd = WindowsApi::foreground_window().unwrap_or_default();
-                let is_maximized = WindowsApi::is_zoomed(HWND(foreground_hwnd));
+                let is_maximized = WindowsApi::is_zoomed(foreground_hwnd);
 
                 if is_maximized {
                     if let Err(error) = Window::from(foreground_hwnd).opaque() {
@@ -133,6 +135,9 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
 
                     continue 'monitors;
                 }
+
+                let transparency_blacklist = TRANSPARENCY_BLACKLIST.lock();
+                let regex_identifiers = REGEX_IDENTIFIERS.lock();
 
                 for (idx, c) in ws.containers().iter().enumerate() {
                     // Update the transparency for all containers on this workspace
@@ -144,15 +149,37 @@ pub fn handle_notifications(wm: Arc<Mutex<WindowManager>>) -> color_eyre::Result
                         let focused_window_idx = c.focused_window_idx();
                         for (window_idx, window) in c.windows().iter().enumerate() {
                             if window_idx == focused_window_idx {
-                                match window.transparent() {
-                                    Err(error) => {
-                                        let hwnd = foreground_hwnd;
-                                        tracing::error!(
-                                    "failed to make unfocused window {hwnd} transparent: {error}"
-                                )
+                                let mut should_make_transparent = true;
+                                if !transparency_blacklist.is_empty() {
+                                    if let (Ok(title), Ok(exe_name), Ok(class), Ok(path)) = (
+                                        window.title(),
+                                        window.exe(),
+                                        window.class(),
+                                        window.path(),
+                                    ) {
+                                        let is_blacklisted = should_act(
+                                            &title,
+                                            &exe_name,
+                                            &class,
+                                            &path,
+                                            &transparency_blacklist,
+                                            &regex_identifiers,
+                                        )
+                                        .is_some();
+
+                                        should_make_transparent = !is_blacklisted;
                                     }
-                                    Ok(..) => {
-                                        known_hwnds.lock().push(window.hwnd);
+                                }
+
+                                if should_make_transparent {
+                                    match window.transparent() {
+                                        Err(error) => {
+                                            let hwnd = foreground_hwnd;
+                                            tracing::error!("failed to make unfocused window {hwnd} transparent: {error}" )
+                                        }
+                                        Ok(..) => {
+                                            known_hwnds.lock().push(window.hwnd);
+                                        }
                                     }
                                 }
                             } else {

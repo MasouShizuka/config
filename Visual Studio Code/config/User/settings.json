@@ -1,14 +1,26 @@
 {
+    "Lua.diagnostics.globals": [
+        "mp",
+        "vim"
+    ],
+    "Lua.format.defaultConfig": {
+        "max_line_length": "unset",
+        "quote_style": "double",
+        "trailing_table_separator": "smart"
+    },
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one",
         "editor.quickSuggestions": {
             "comments": false,
             "other": true,
             "strings": true
-        }
+        },
+        "editor.wordWrap": "on"
     },
     "[plaintext]": {
-        "files.encoding": "gbk"
+        "editor.unicodeHighlight.ambiguousCharacters": false,
+        "editor.unicodeHighlight.invisibleCharacters": false,
+        "editor.wordWrap": "on"
     },
     "[python]": {
         "editor.codeActionsOnSave": {
@@ -71,7 +83,6 @@
     "editor.stickyScroll.enabled": true,
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
-    "editor.wordWrap": "on",
     "explorer.confirmDragAndDrop": false,
     "extensions.experimental.affinity": {
         "asvetliakov.vscode-neovim": 1
@@ -182,15 +193,6 @@
         }
     ],
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
-    "Lua.diagnostics.globals": [
-        "mp",
-        "vim"
-    ],
-    "Lua.format.defaultConfig": {
-        "max_line_length": "unset",
-        "quote_style": "double",
-        "trailing_table_separator": "smart"
-    },
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.enableHtml": true,
     "markdown.occurrencesHighlight.enabled": true,
@@ -198,7 +200,7 @@
     "markdown.preview.fontSize": 15,
     "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
-    "markdownConverter.ChromiumExecutablePath": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+    "markdownConverter.ChromiumExecutablePath": "brave.exe",
     "markdownConverter.ConversionType": [
         "PDF",
         "HTML"
@@ -258,8 +260,17 @@
     ],
     "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
+    "terminal.integrated.defaultProfile.windows": "Pwsh",
     "terminal.integrated.fontSize": 15,
     "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.profiles.windows": {
+        "Pwsh": {
+            "args": [
+                "-NoLogo"
+            ],
+            "path": "pwsh.exe"
+        }
+    },
     "terminal.integrated.tabs.location": "left",
     "todo-tree.general.tagGroups": {
         "FIX": [
@@ -316,12 +327,6 @@
         "[x]",
     ],
     "todo-tree.highlights.customHighlight": {
-        "[ ]": {
-            "icon": "issue-draft"
-        },
-        "[x]": {
-            "icon": "issue-closed"
-        },
         "FIX": {
             "background": "#e06c75",
             "foreground": "black",
@@ -356,6 +361,12 @@
             "background": "#e5c07b",
             "foreground": "black",
             "icon": "alert"
+        },
+        "[ ]": {
+            "icon": "issue-draft"
+        },
+        "[x]": {
+            "icon": "issue-closed"
         }
     },
     "vscode-neovim.ctrlKeysForNormalMode": [
@@ -413,9 +424,9 @@
         "*.md": "default",
         "{git,gitlens}:/**/*.{md,csv,svg}": "default"
     },
-    "workbench.experimental.enableNewProfilesUI": true,
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,
+    "workbench.panel.showLabels": false,
     "workbench.startupEditor": "none",
     "workbench.tree.enableStickyScroll": true
 }

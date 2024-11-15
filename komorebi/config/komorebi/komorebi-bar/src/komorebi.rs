@@ -5,6 +5,7 @@ use crate::widget::BarWidget;
 use crate::MAX_LABEL_WIDTH;
 use crate::WIDGET_SPACING;
 use crossbeam_channel::Receiver;
+use crossbeam_channel::TryRecvError;
 use eframe::egui::text::LayoutJob;
 use eframe::egui::Color32;
 use eframe::egui::ColorImage;
@@ -12,6 +13,7 @@ use eframe::egui::Context;
 use eframe::egui::FontId;
 use eframe::egui::Image;
 use eframe::egui::Label;
+use eframe::egui::RichText;
 use eframe::egui::SelectableLabel;
 use eframe::egui::Sense;
 use eframe::egui::TextStyle;
@@ -29,6 +31,8 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
+use std::fmt::Display;
+use std::fmt::Formatter;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
@@ -81,14 +85,6 @@ impl From<&KomorebiConfig> for Komorebi {
             if let Some(configuration_switcher) = &value.configuration_switcher {
                 let mut configuration_switcher = configuration_switcher.clone();
                 for (_, location) in configuration_switcher.configurations.iter_mut() {
-                    if let Ok(expanded) = std::env::var("KOMOREBI_CONFIG_HOME") {
-                        *location = location.replace("$Env:KOMOREBI_CONFIG_HOME", &expanded);
-                    }
-
-                    if let Ok(expanded) = std::env::var("USERPROFILE") {
-                        *location = location.replace("$Env:USERPROFILE", &expanded);
-                    }
-
                     *location = dunce::simplified(&PathBuf::from(location.clone()))
                         .to_string_lossy()
                         .to_string();
@@ -101,12 +97,13 @@ impl From<&KomorebiConfig> for Komorebi {
         Self {
             komorebi_notification_state: Rc::new(RefCell::new(KomorebiNotificationState {
                 selected_workspace: String::new(),
-                layout: String::new(),
+                layout: KomorebiLayout::Default(komorebi_client::DefaultLayout::BSP),
                 workspaces: vec![],
                 hide_empty_workspaces: value.workspaces.hide_empty_workspaces,
                 mouse_follows_focus: true,
                 work_area_offset: None,
                 focused_container_information: (vec![], vec![], 0),
+                containers: vec![],
                 stack_accent: None,
             })),
             workspaces: value.workspaces,
@@ -134,14 +131,20 @@ impl BarWidget for Komorebi {
             let mut update = None;
 
             for (i, ws) in komorebi_notification_state.workspaces.iter().enumerate() {
-                if ui
-                    .add(SelectableLabel::new(
-                        komorebi_notification_state.selected_workspace.eq(ws),
-                        ws.to_string(),
-                    ))
-                    .clicked()
+                let title = &ws.title;
+                // NOTE: 将 empty workspace 设置为灰色
+                let title_rich = if ws.is_empty {
+                    RichText::new(title).color(Color32::DARK_GRAY)
+                } else {
+                    RichText::new(title)
+                };
+
+                if ws.should_show
+                    && ui
+                        .add(SelectableLabel::new(ws.is_focused_workspace, title_rich))
+                        .clicked()
                 {
-                    update = Some(ws.to_string());
+                    update = Some(title.to_owned());
                     let mut proceed = true;
 
                     if komorebi_client::send_message(&SocketMessage::MouseFollowsFocus(false))
@@ -169,7 +172,10 @@ impl BarWidget for Komorebi {
                         proceed = false;
                     }
 
-                    if proceed && komorebi_client::send_message(&SocketMessage::Retile).is_err() {
+                    if proceed
+                        && komorebi_client::send_message(&SocketMessage::RetileWithResizeDimensions)
+                            .is_err()
+                    {
                         tracing::error!("could not send message to komorebi: Retile");
                     }
                 }
@@ -184,19 +190,38 @@ impl BarWidget for Komorebi {
 
         if let Some(layout) = self.layout {
             if layout.enable {
+                // NOTE: 给 layout 添加 []
                 if ui
                     .add(
-                        Label::new(&komorebi_notification_state.layout)
+                        Label::new(format!("[{}]", komorebi_notification_state.layout))
                             .selectable(false)
                             .sense(Sense::click()),
                     )
                     .clicked()
-                    && komorebi_client::send_message(&SocketMessage::CycleLayout(
-                        CycleDirection::Next,
-                    ))
-                    .is_err()
                 {
-                    tracing::error!("could not send message to komorebi: CycleLayout");
+                    match komorebi_notification_state.layout {
+                        KomorebiLayout::Default(_) => {
+                            if komorebi_client::send_message(&SocketMessage::CycleLayout(
+                                CycleDirection::Next,
+                            ))
+                            .is_err()
+                            {
+                                tracing::error!("could not send message to komorebi: CycleLayout");
+                            }
+                        }
+                        KomorebiLayout::Floating => {
+                            if komorebi_client::send_message(&SocketMessage::ToggleTiling).is_err()
+                            {
+                                tracing::error!("could not send message to komorebi: ToggleTiling");
+                            }
+                        }
+                        KomorebiLayout::Paused => {
+                            if komorebi_client::send_message(&SocketMessage::TogglePause).is_err() {
+                                tracing::error!("could not send message to komorebi: TogglePause");
+                            }
+                        }
+                        KomorebiLayout::Custom => {}
+                    }
                 }
 
                 ui.add_space(WIDGET_SPACING);
@@ -263,110 +288,123 @@ impl BarWidget for Komorebi {
 
         if let Some(focused_window) = self.focused_window {
             if focused_window.enable {
-                let titles = &komorebi_notification_state.focused_container_information.0;
-                let icons = &komorebi_notification_state.focused_container_information.1;
-                let focused_window_idx =
-                    komorebi_notification_state.focused_container_information.2;
+                // NOTE: 显示当前 workspace 的所有窗口
+                for container in &komorebi_notification_state.containers {
+                    let titles = &container.titles;
+                    let icons = &container.icons;
+                    let focused_window_idx = container.focused_window_idx;
+                    let is_focused_container = container.is_focused_container;
 
-                let iter = titles.iter().zip(icons.iter());
+                    let iter = titles.iter().zip(icons.iter());
 
-                for (i, (title, icon)) in iter.enumerate() {
-                    if focused_window.show_icon {
-                        if let Some(img) = icon {
-                            ui.add(
-                                Image::from(&img_to_texture(ctx, img))
-                                    .maintain_aspect_ratio(true)
-                                    .max_height(15.0),
-                            );
+                    for (i, (title, icon)) in iter.enumerate() {
+                        if focused_window.show_icon {
+                            if let Some(img) = icon {
+                                ui.add(
+                                    Image::from(&img_to_texture(ctx, img))
+                                        .maintain_aspect_ratio(true)
+                                        .max_height(15.0),
+                                );
+                            }
                         }
-                    }
 
-                    if i == focused_window_idx {
-                        let font_id = ctx
-                            .style()
-                            .text_styles
-                            .get(&TextStyle::Body)
-                            .cloned()
-                            .unwrap_or_else(FontId::default);
+                        // NOTE: 将 focused_container 设置为 active color
+                        let title_rich = if is_focused_container {
+                            RichText::new(title)
+                                .color(ctx.style().visuals.widgets.active.fg_stroke.color)
+                        } else {
+                            RichText::new(title)
+                        };
 
-                        let layout_job = LayoutJob::simple(
-                            title.to_string(),
-                            font_id.clone(),
-                            komorebi_notification_state
-                                .stack_accent
-                                .unwrap_or(ctx.style().visuals.selection.stroke.color),
-                            100.0,
-                        );
+                        if i == focused_window_idx {
+                            let font_id = ctx
+                                .style()
+                                .text_styles
+                                .get(&TextStyle::Body)
+                                .cloned()
+                                .unwrap_or_else(FontId::default);
 
-                        if titles.len() > 1 {
-                            let available_height = ui.available_height();
-                            let mut custom_ui = CustomUi(ui);
-                            custom_ui.add_sized_left_to_right(
-                                Vec2::new(
-                                    MAX_LABEL_WIDTH.load(Ordering::SeqCst) as f32,
-                                    available_height,
-                                ),
-                                Label::new(layout_job).selectable(false).truncate(),
+                            let layout_job = LayoutJob::simple(
+                                title.to_string(),
+                                font_id.clone(),
+                                komorebi_notification_state
+                                    .stack_accent
+                                    .unwrap_or(ctx.style().visuals.selection.stroke.color),
+                                100.0,
                             );
+
+                            if titles.len() > 1 {
+                                let available_height = ui.available_height();
+                                let mut custom_ui = CustomUi(ui);
+                                custom_ui.add_sized_left_to_right(
+                                    Vec2::new(
+                                        MAX_LABEL_WIDTH.load(Ordering::SeqCst) as f32,
+                                        available_height,
+                                    ),
+                                    Label::new(layout_job).selectable(false).truncate(),
+                                );
+                            } else {
+                                let available_height = ui.available_height();
+                                let mut custom_ui = CustomUi(ui);
+                                custom_ui.add_sized_left_to_right(
+                                    Vec2::new(
+                                        MAX_LABEL_WIDTH.load(Ordering::SeqCst) as f32,
+                                        available_height,
+                                    ),
+                                    Label::new(title_rich).selectable(false).truncate(),
+                                );
+                            }
                         } else {
                             let available_height = ui.available_height();
                             let mut custom_ui = CustomUi(ui);
-                            custom_ui.add_sized_left_to_right(
-                                Vec2::new(
-                                    MAX_LABEL_WIDTH.load(Ordering::SeqCst) as f32,
-                                    available_height,
-                                ),
-                                Label::new(title).selectable(false).truncate(),
-                            );
-                        }
-                    } else {
-                        let available_height = ui.available_height();
-                        let mut custom_ui = CustomUi(ui);
 
-                        if custom_ui
-                            .add_sized_left_to_right(
-                                Vec2::new(
-                                    MAX_LABEL_WIDTH.load(Ordering::SeqCst) as f32,
-                                    available_height,
-                                ),
-                                Label::new(title)
-                                    .selectable(false)
-                                    .sense(Sense::click())
-                                    .truncate(),
-                            )
-                            .clicked()
-                        {
-                            if komorebi_client::send_message(&SocketMessage::MouseFollowsFocus(
-                                false,
-                            ))
-                            .is_err()
+                            if custom_ui
+                                .add_sized_left_to_right(
+                                    Vec2::new(
+                                        MAX_LABEL_WIDTH.load(Ordering::SeqCst) as f32,
+                                        available_height,
+                                    ),
+                                    Label::new(title_rich)
+                                        .selectable(false)
+                                        .sense(Sense::click())
+                                        .truncate(),
+                                )
+                                .clicked()
                             {
-                                tracing::error!(
-                                    "could not send message to komorebi: MouseFollowsFocus"
-                                );
-                            }
-
-                            if komorebi_client::send_message(&SocketMessage::FocusStackWindow(i))
+                                if komorebi_client::send_message(&SocketMessage::MouseFollowsFocus(
+                                    false,
+                                ))
                                 .is_err()
-                            {
-                                tracing::error!(
-                                    "could not send message to komorebi: FocusStackWindow"
-                                );
-                            }
+                                {
+                                    tracing::error!(
+                                        "could not send message to komorebi: MouseFollowsFocus"
+                                    );
+                                }
 
-                            if komorebi_client::send_message(&SocketMessage::MouseFollowsFocus(
-                                komorebi_notification_state.mouse_follows_focus,
-                            ))
-                            .is_err()
-                            {
-                                tracing::error!(
-                                    "could not send message to komorebi: MouseFollowsFocus"
-                                );
+                                if komorebi_client::send_message(&SocketMessage::FocusStackWindow(
+                                    i,
+                                ))
+                                .is_err()
+                                {
+                                    tracing::error!(
+                                        "could not send message to komorebi: FocusStackWindow"
+                                    );
+                                }
+
+                                if komorebi_client::send_message(&SocketMessage::MouseFollowsFocus(
+                                    komorebi_notification_state.mouse_follows_focus,
+                                ))
+                                .is_err()
+                                {
+                                    tracing::error!(
+                                        "could not send message to komorebi: MouseFollowsFocus"
+                                    );
+                                }
                             }
                         }
-                    }
 
-                    ui.add_space(WIDGET_SPACING);
+                        ui.add_space(WIDGET_SPACING);
+                    }
                 }
             }
 
@@ -384,14 +422,52 @@ fn img_to_texture(ctx: &Context, rgba_image: &RgbaImage) -> TextureHandle {
 
 #[derive(Clone, Debug)]
 pub struct KomorebiNotificationState {
-    pub workspaces: Vec<String>,
+    pub workspaces: Vec<Workspace>,
     pub selected_workspace: String,
+    pub containers: Vec<Container>,
     pub focused_container_information: (Vec<String>, Vec<Option<RgbaImage>>, usize),
-    pub layout: String,
+    pub layout: KomorebiLayout,
     pub hide_empty_workspaces: bool,
     pub mouse_follows_focus: bool,
     pub work_area_offset: Option<Rect>,
     pub stack_accent: Option<Color32>,
+}
+
+// NOTE: 保存 workspace 的相关信息
+#[derive(Clone, Debug)]
+pub struct Workspace {
+    pub title: String,
+    pub should_show: bool,
+    pub is_empty: bool,
+    pub is_focused_workspace: bool,
+}
+
+// NOTE: 保存 container 的相关信息
+#[derive(Clone, Debug)]
+pub struct Container {
+    pub titles: Vec<String>,
+    pub icons: Vec<Option<RgbaImage>>,
+    pub focused_window_idx: usize,
+    pub is_focused_container: bool,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum KomorebiLayout {
+    Default(komorebi_client::DefaultLayout),
+    Floating,
+    Paused,
+    Custom,
+}
+
+impl Display for KomorebiLayout {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            KomorebiLayout::Default(layout) => write!(f, "{layout}"),
+            KomorebiLayout::Floating => write!(f, "Floating"),
+            KomorebiLayout::Paused => write!(f, "Paused"),
+            KomorebiLayout::Custom => write!(f, "Custom"),
+        }
+    }
 }
 
 impl KomorebiNotificationState {
@@ -406,85 +482,142 @@ impl KomorebiNotificationState {
         rx_gui: Receiver<komorebi_client::Notification>,
         bg_color: Rc<RefCell<Color32>>,
     ) {
-        if let Ok(notification) = rx_gui.try_recv() {
-            if let NotificationEvent::Socket(SocketMessage::ReloadStaticConfiguration(path)) =
-                notification.event
-            {
-                if let Ok(config) = komorebi_client::StaticConfig::read(&path) {
-                    if let Some(theme) = config.theme {
-                        apply_theme(ctx, KomobarTheme::from(theme), bg_color);
-                        tracing::info!("applied theme from updated komorebi.json");
-                    }
+        match rx_gui.try_recv() {
+            Err(error) => match error {
+                TryRecvError::Empty => {}
+                TryRecvError::Disconnected => {
+                    tracing::error!(
+                        "failed to receive komorebi notification on gui thread: {error}"
+                    );
                 }
-            }
+            },
+            Ok(notification) => {
+                match notification.event {
+                    NotificationEvent::WindowManager(_) => {}
+                    NotificationEvent::Socket(message) => match message {
+                        SocketMessage::ReloadStaticConfiguration(path) => {
+                            if let Ok(config) = komorebi_client::StaticConfig::read(&path) {
+                                if let Some(theme) = config.theme {
+                                    apply_theme(ctx, KomobarTheme::from(theme), bg_color.clone());
+                                    tracing::info!("applied theme from updated komorebi.json");
+                                }
+                            }
+                        }
+                        SocketMessage::Theme(theme) => {
+                            apply_theme(ctx, KomobarTheme::from(theme), bg_color);
+                            tracing::info!("applied theme from komorebi socket message");
+                        }
+                        _ => {}
+                    },
+                }
 
-            self.mouse_follows_focus = notification.state.mouse_follows_focus;
+                self.mouse_follows_focus = notification.state.mouse_follows_focus;
 
-            let monitor = &notification.state.monitors.elements()[monitor_index];
-            self.work_area_offset =
-                notification.state.monitors.elements()[monitor_index].work_area_offset();
+                let monitor = &notification.state.monitors.elements()[monitor_index];
+                self.work_area_offset =
+                    notification.state.monitors.elements()[monitor_index].work_area_offset();
 
-            let focused_workspace_idx = monitor.focused_workspace_idx();
+                let focused_workspace_idx = monitor.focused_workspace_idx();
 
-            let mut workspaces = vec![];
-            self.selected_workspace = monitor.workspaces()[focused_workspace_idx]
-                .name()
-                .to_owned()
-                .unwrap_or_else(|| format!("{}", focused_workspace_idx + 1));
+                let mut workspaces = vec![];
+                self.selected_workspace = monitor.workspaces()[focused_workspace_idx]
+                    .name()
+                    .to_owned()
+                    .unwrap_or_else(|| format!("{}", focused_workspace_idx + 1));
 
-            for (i, ws) in monitor.workspaces().iter().enumerate() {
-                let should_add = if self.hide_empty_workspaces {
-                    focused_workspace_idx == i || !ws.containers().is_empty()
-                } else {
-                    true
+                for (i, ws) in monitor.workspaces().iter().enumerate() {
+                    let should_show = if self.hide_empty_workspaces {
+                        focused_workspace_idx == i || !ws.containers().is_empty()
+                    } else {
+                        true
+                    };
+
+                    workspaces.push(Workspace {
+                        title: ws.name().to_owned().unwrap_or_else(|| format!("{}", i + 1)),
+                        should_show,
+                        is_empty: ws.containers().is_empty(),
+                        is_focused_workspace: i == focused_workspace_idx,
+                    });
+                }
+
+                self.workspaces = workspaces;
+                self.layout = match monitor.workspaces()[focused_workspace_idx].layout() {
+                    komorebi_client::Layout::Default(layout) => KomorebiLayout::Default(*layout),
+                    komorebi_client::Layout::Custom(_) => KomorebiLayout::Custom,
                 };
 
-                if should_add {
-                    workspaces.push(ws.name().to_owned().unwrap_or_else(|| format!("{}", i + 1)));
+                if !*monitor.workspaces()[focused_workspace_idx].tile() {
+                    self.layout = KomorebiLayout::Floating;
                 }
-            }
 
-            self.workspaces = workspaces;
-            self.layout = match monitor.workspaces()[focused_workspace_idx].layout() {
-                komorebi_client::Layout::Default(layout) => layout.to_string(),
-                komorebi_client::Layout::Custom(_) => String::from("Custom"),
-            };
+                if notification.state.is_paused {
+                    self.layout = KomorebiLayout::Paused;
+                }
 
-            if let Some(container) = monitor.workspaces()[focused_workspace_idx].monocle_container()
-            {
-                self.focused_container_information = (
-                    container
-                        .windows()
-                        .iter()
-                        .map(|w| w.title().unwrap_or_default())
-                        .collect::<Vec<_>>(),
-                    container
-                        .windows()
-                        .iter()
-                        .map(|w| windows_icons::get_icon_by_process_id(w.process_id()))
-                        .collect::<Vec<_>>(),
-                    container.focused_window_idx(),
-                );
-            } else if let Some(container) =
-                monitor.workspaces()[focused_workspace_idx].focused_container()
-            {
-                self.focused_container_information = (
-                    container
-                        .windows()
-                        .iter()
-                        .map(|w| w.title().unwrap_or_default())
-                        .collect::<Vec<_>>(),
-                    container
-                        .windows()
-                        .iter()
-                        .map(|w| windows_icons::get_icon_by_process_id(w.process_id()))
-                        .collect::<Vec<_>>(),
-                    container.focused_window_idx(),
-                );
-            } else {
-                self.focused_container_information.0.clear();
-                self.focused_container_information.1.clear();
-                self.focused_container_information.2 = 0;
+                if let Some(container) =
+                    monitor.workspaces()[focused_workspace_idx].monocle_container()
+                {
+                    self.focused_container_information = (
+                        container
+                            .windows()
+                            .iter()
+                            .map(|w| w.title().unwrap_or_default())
+                            .collect::<Vec<_>>(),
+                        container
+                            .windows()
+                            .iter()
+                            .map(|w| windows_icons::get_icon_by_process_id(w.process_id()))
+                            .collect::<Vec<_>>(),
+                        container.focused_window_idx(),
+                    );
+                } else if let Some(container) =
+                    monitor.workspaces()[focused_workspace_idx].focused_container()
+                {
+                    self.focused_container_information = (
+                        container
+                            .windows()
+                            .iter()
+                            .map(|w| w.title().unwrap_or_default())
+                            .collect::<Vec<_>>(),
+                        container
+                            .windows()
+                            .iter()
+                            .map(|w| windows_icons::get_icon_by_process_id(w.process_id()))
+                            .collect::<Vec<_>>(),
+                        container.focused_window_idx(),
+                    );
+                } else {
+                    self.focused_container_information.0.clear();
+                    self.focused_container_information.1.clear();
+                    self.focused_container_information.2 = 0;
+                }
+
+                let focused_container_idx =
+                    monitor.workspaces()[focused_workspace_idx].focused_container_idx();
+
+                let mut containers = vec![];
+                for (i, container) in monitor.workspaces()[focused_workspace_idx]
+                    .containers()
+                    .iter()
+                    .enumerate()
+                {
+                    containers.push(Container {
+                        titles: container
+                            .windows()
+                            .iter()
+                            .map(|w| w.title().unwrap_or_default())
+                            .collect::<Vec<_>>(),
+                        icons: container
+                            .windows()
+                            .iter()
+                            .map(|w| windows_icons::get_icon_by_process_id(w.process_id()))
+                            .collect::<Vec<_>>(),
+                        focused_window_idx: container.focused_window_idx(),
+                        is_focused_container: i == focused_container_idx,
+                    });
+                }
+
+                self.containers = containers;
             }
         }
     }

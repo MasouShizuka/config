@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ 3da977c530b86cfd12cb29650854842ed78cd8e8
+COMMIT_ 8220bad02a01f935e45b42bf6637b2ca9f665669
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
@@ -115,7 +115,7 @@ defaults = {
 	ziggy_pth = 'default',
 }
 options = table_copy(defaults)
-opt.read_options(options, nil, function(changed_options)
+function handle_options(changed_options)
 	if changed_options.time_precision then
 		timestamp_zero_rep_clear_cache()
 	end
@@ -125,7 +125,8 @@ opt.read_options(options, nil, function(changed_options)
 	Elements:trigger('options')
 	Elements:update_proximities()
 	request_render()
-end)
+end
+opt.read_options(options, nil, handle_options)
 -- Normalize values
 options.proximity_out = math.max(options.proximity_out, options.proximity_in + 1)
 if options.chapter_ranges:sub(1, 4) == '^op|' then options.chapter_ranges = defaults.chapter_ranges end

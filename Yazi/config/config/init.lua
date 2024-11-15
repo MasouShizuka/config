@@ -1,6 +1,6 @@
--- ╭─────────────────────────────────────────────────────────╮
--- │ Header                                                  │
--- ╰─────────────────────────────────────────────────────────╯
+-- ╭────────╮
+-- │ Header │
+-- ╰────────╯
 
 -- 修改 tabs 样式
 function Header:tabs()
@@ -34,9 +34,9 @@ end
 Header:children_remove(2, Header.RIGHT)
 Header:children_add(Header.tabs, 2000, Header.RIGHT)
 
--- ╭─────────────────────────────────────────────────────────╮
--- │ Status                                                  │
--- ╰─────────────────────────────────────────────────────────╯
+-- ╭────────╮
+-- │ Status │
+-- ╰────────╯
 
 -- Show symlink in status bar
 function Status:name()
@@ -80,9 +80,9 @@ Status:children_add(Status.name, 3000, Status.LEFT)
 
 Status:children_add(Status.modified, 500, Status.RIGHT)
 
--- ╭─────────────────────────────────────────────────────────╮
--- │ plugin                                                  │
--- ╰─────────────────────────────────────────────────────────╯
+-- ╭────────╮
+-- │ plugin │
+-- ╰────────╯
 
 -- ya pack -a ndtoan96/ouch
 -- ya pack -a yazi-rs/plugins:full-border

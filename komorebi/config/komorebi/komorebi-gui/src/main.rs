@@ -27,7 +27,6 @@ fn main() {
         viewport: ViewportBuilder::default()
             .with_always_on_top()
             .with_inner_size([320.0, 500.0]),
-        follow_system_theme: true,
         ..Default::default()
     };
 
@@ -218,7 +217,7 @@ extern "system" fn enum_window(
     lparam: windows::Win32::Foundation::LPARAM,
 ) -> windows::Win32::Foundation::BOOL {
     let windows = unsafe { &mut *(lparam.0 as *mut Vec<Window>) };
-    let window = Window::from(hwnd.0);
+    let window = Window::from(hwnd.0 as isize);
 
     if window.is_window()
         && !window.is_miminized()
@@ -234,7 +233,8 @@ extern "system" fn enum_window(
 
 fn json_view_ui(ui: &mut egui::Ui, code: &str) {
     let language = "json";
-    let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+    let theme =
+        egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx(), &ui.ctx().style());
     egui_extras::syntax_highlighting::code_view_ui(ui, &theme, code, language);
 }
 

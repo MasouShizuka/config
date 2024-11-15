@@ -91,7 +91,6 @@ return {
                     filter = {
                         event = "msg_show",
                         kind = "",
-                        find = "written",
                     },
                     opts = { skip = true },
                 },
@@ -445,6 +444,7 @@ return {
 
     {
         "tzachar/highlight-undo.nvim",
+        enabled = not environment.is_vscode,
         keys = {
             { "u",     desc = "Undo", mode = "n" },
             { "<c-r>", desc = "Redo", mode = "n" },

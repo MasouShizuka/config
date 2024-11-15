@@ -4,16 +4,20 @@
 Persistent
 OnExit((*) => komorebic_stop())
 
-localappdata := EnvGet("LOCALAPPDATA")
+; localappdata := EnvGet("LOCALAPPDATA")
 
 komorebic_stop() {
-    While (ProcessExist("yasb.exe")) {
-        ProcessClose("yasb.exe")
+    ; While (ProcessExist("yasb.exe")) {
+    ;     ProcessClose("yasb.exe")
+    ; }
+
+    While (ProcessExist("komorebi-bar.exe")) {
+        ProcessClose("komorebi-bar.exe")
     }
 
     RunWait("komorebic.exe stop", , "Hide")
 
-    DirDelete(localappdata . "/komorebi", true)
+    ; DirDelete(localappdata . "/komorebi", true)
 }
 
 
@@ -21,8 +25,8 @@ komorebic_stop() {
 ; │ Start │
 ; ╰───────╯
 
-DirCreate(localappdata . "/komorebi")
-RunWait("komorebic.exe start --config komorebi.json --await-configuration", , "Hide")
+; DirCreate(localappdata . "/komorebi")
+RunWait("komorebic.exe start --config komorebi.json --await-configuration --bar", , "Hide")
 
 
 ; ╭─────────╮
@@ -79,10 +83,17 @@ For key, value in workspace_key_value {
 
 RunWait("komorebic.exe complete-configuration", , "Hide")
 
-While (ProcessExist("yasb.exe")) {
-    ProcessClose("yasb.exe")
-}
-Run(Format("yasb.exe", A_ScriptDir), , "Hide")
+; While (ProcessExist("yasb.exe")) {
+;     ProcessClose("yasb.exe")
+; }
+; Run("yasb.exe", , "Hide")
+
+; While (ProcessExist("komorebi-bar.exe")) {
+;     ProcessClose("komorebi-bar.exe")
+; }
+; ComObject("Shell.Application")
+;     .Windows.FindWindowSW(0, 0, 0x08, 0, 0x01)  
+;     .Document.Application.ShellExecute("komorebi-bar.exe", "--config komorebi.bar.json", A_ScriptDir, "open", 0)
 
 
 ; ╭─────────╮
@@ -308,10 +319,18 @@ send_to_monitor(ThisHotkey) {
 }
 
 !+b:: {
-    While (ProcessExist("yasb.exe")) {
-        ProcessClose("yasb.exe")
+    ; While (ProcessExist("yasb.exe")) {
+    ;     ProcessClose("yasb.exe")
+    ; } Else {
+    ;     Run("yasb.exe", , "Hide")
+    ; }
+
+    While (ProcessExist("komorebi-bar.exe")) {
+        ProcessClose("komorebi-bar.exe")
     } Else {
-        Run(Format("yasb.exe", A_ScriptDir), , "Hide")
+        ComObject("Shell.Application")
+            .Windows.FindWindowSW(0, 0, 0x08, 0, 0x01)  
+            .Document.Application.ShellExecute("komorebi-bar.exe", "--config komorebi.bar.json", A_ScriptDir, "open", 0)
     }
 }
 

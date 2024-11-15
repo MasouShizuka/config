@@ -17,8 +17,8 @@ chrono = "0.4"
 crossbeam-channel = "0.5"
 crossbeam-utils = "0.8"
 color-eyre = "0.6"
-eframe = "0.28"
-egui_extras = "0.28"
+eframe = "0.29"
+egui_extras = "0.29"
 dirs = "5"
 dunce = "1"
 hotwatch = "0.5"
@@ -33,14 +33,15 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 paste = "1"
 sysinfo = "0.31"
 uds_windows = "1"
-win32-display-data = { git = "https://github.com/LGUG2Z/win32-display-data", rev = "32a45cebf132c3d651ee22c0c40033a6b7edc945" }
-windows-implement = { version = "0.53" }
-windows-interface = { version = "0.53" }
+win32-display-data = { git = "https://github.com/LGUG2Z/win32-display-data", rev = "dd65e3f22d0521b78fcddde11abc2a3e9dcc32a8" }
+windows-implement = { version = "0.58" }
+windows-interface = { version = "0.58" }
+windows-core = { version = "0.58" }
 shadow-rs = "0.35"
-which = "6"
+which = "7"
 
 [workspace.dependencies.windows]
-version = "0.54"
+version = "0.58"
 features = [
     "implement",
     "Win32_System_Com",
@@ -60,5 +61,6 @@ features = [
     "Win32_System_SystemServices",
     "Win32_System_WindowsProgramming",
     "Media",
-    "Media_Control"
+    "Media_Control",
+    "Win32_Globalization"
 ]

@@ -1,11 +1,9 @@
 [package]
 name = "komorebic"
-version = "0.1.29"
-authors = ["Jade Iqbal <jadeiqbal@fastmail.com>"]
+version = "0.1.31"
 description = "The command-line interface for Komorebi, a tiling window manager for Windows"
 categories = ["cli", "tiling-window-manager", "windows"]
 repository = "https://github.com/LGUG2Z/komorebi"
-license = "MIT"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -30,7 +28,7 @@ serde_json = { workspace = true }
 serde_yaml = "0.9"
 shadow-rs = { workspace = true }
 sysinfo = { workspace = true }
-thiserror = "1"
+thiserror = "2"
 uds_windows = { workspace = true }
 which = { workspace = true }
 win32-display-data = { workspace = true }
@@ -39,3 +37,6 @@ windows = { workspace = true }
 [build-dependencies]
 reqwest = { version = "0.12", features = ["blocking"] }
 shadow-rs = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(FALSE)'] }

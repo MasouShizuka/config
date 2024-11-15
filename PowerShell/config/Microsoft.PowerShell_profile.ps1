@@ -64,7 +64,7 @@ Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
 # │ Command Line Tool │
 # ╰───────────────────╯
 
-# fzf
+# ╭─ fzf ────────────────────────────────────────────────────╮
 
 $env:FZF_DEFAULT_OPTS="\\"
 $env:FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='bat --theme=TwoDark --color=always --style=numbers --line-range=:500 {}'"
@@ -75,13 +75,17 @@ $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
     --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
     --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef"
 
+# ╰──────────────────────────────────────────────────── fzf ─╯
 
-# sfsu
+
+# ╭─ sfsu ───────────────────────────────────────────────────╮
 
 Invoke-Expression (&sfsu hook)
 
+# ╰─────────────────────────────────────────────────── sfsu ─╯
 
-# starship
+
+# ╭─ starship ───────────────────────────────────────────────╮
 
 $env:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
@@ -100,8 +104,10 @@ if ($env:TERM_PROGRAM -eq "WezTerm") {
     }
 }
 
+# ╰─────────────────────────────────────────────── starship ─╯
 
-# yazi
+
+# ╭─ yazi ───────────────────────────────────────────────────╮
 
 function y {
     $tmp = [System.IO.Path]::GetTempFileName()
@@ -112,6 +118,8 @@ function y {
     }
     Remove-Item -Path $tmp
 }
+
+# ╰─────────────────────────────────────────────────── yazi ─╯
 
 
 

@@ -21,8 +21,8 @@ VALIDATION_SCHEMA = {
     'update_interval': {
         'type': 'integer',
         'default': DEFAULTS['update_interval'],
-        'min': 1,
-        'max': 3600
+        'min': 0,
+        'max': 60000
     },
     'callbacks': {
         'type': 'dict',

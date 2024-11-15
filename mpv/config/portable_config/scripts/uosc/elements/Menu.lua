@@ -1081,9 +1081,6 @@ function Menu:handle_shortcut(shortcut, info)
 
 	if info.event == 'up' then return end
 
-	-- ╭──────────╮
-	-- │ modified │
-	-- ╰──────────╯
 	if (key == 'enter' and selected_item) or (id == 'right' and is_submenu) or (id == 'l' and selected_item) then
 		self:activate_selected_item(shortcut)
 	elseif id == 'enter' and menu.search and menu.search_debounce == 'submit' then
@@ -1322,7 +1319,7 @@ function Menu:render()
 
 			-- Background
 			local highlight_opacity = 0 + (item.active and 0.8 or 0) + (is_selected and 0.15 or 0)
-			if not is_submenu and highlight_opacity > 0 then
+			if highlight_opacity > 0 then
 				ass:rect(ax + self.padding, item_ay, bx - self.padding, item_by, {
 					radius = state.radius,
 					color = fg,

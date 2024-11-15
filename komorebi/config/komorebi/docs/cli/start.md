@@ -6,9 +6,6 @@ Start komorebi.exe as a background process
 Usage: komorebic.exe start [OPTIONS]
 
 Options:
-  -f, --ffm
-          Allow the use of komorebi's custom focus-follows-mouse implementation
-
   -c, --config <CONFIG>
           Path to a static configuration JSON file
 
@@ -23,6 +20,9 @@ Options:
 
       --ahk
           Start autohotkey configuration file
+
+      --bar
+          Start komorebi-bar in a background process
 
   -h, --help
           Print help

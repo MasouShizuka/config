@@ -2,9 +2,12 @@ use crate::border_manager;
 use crate::com::SetCloak;
 use crate::focus_manager;
 use crate::stackbar_manager;
+use crate::windows_api;
 use crate::ANIMATIONS_IN_PROGRESS;
 use crate::ANIMATION_DURATION;
 use crate::ANIMATION_ENABLED;
+use crate::SLOW_APPLICATION_COMPENSATION_TIME;
+use crate::SLOW_APPLICATION_IDENTIFIERS;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fmt::Display;
@@ -39,9 +42,10 @@ use crate::styles::WindowStyle;
 use crate::transparency_manager;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
-use crate::FLOAT_IDENTIFIERS;
+use crate::FLOATING_APPLICATIONS;
 use crate::HIDDEN_HWNDS;
 use crate::HIDING_BEHAVIOUR;
+use crate::IGNORE_IDENTIFIERS;
 use crate::LAYERED_WHITELIST;
 use crate::MANAGE_IDENTIFIERS;
 use crate::NO_TITLEBAR;
@@ -71,8 +75,8 @@ impl From<isize> for Window {
 impl From<HWND> for Window {
     fn from(value: HWND) -> Self {
         Self {
-            hwnd: value.0,
-            animation: Animation::new(value.0),
+            hwnd: value.0 as isize,
+            animation: Animation::new(value.0 as isize),
         }
     }
 }
@@ -146,7 +150,7 @@ impl Serialize for Window {
         )?;
         state.serialize_field(
             "rect",
-            &WindowsApi::window_rect(self.hwnd()).unwrap_or_default(),
+            &WindowsApi::window_rect(self.hwnd).unwrap_or_default(),
         )?;
         state.end()
     }
@@ -154,7 +158,32 @@ impl Serialize for Window {
 
 impl Window {
     pub const fn hwnd(self) -> HWND {
-        HWND(self.hwnd)
+        HWND(windows_api::as_ptr!(self.hwnd))
+    }
+
+    pub fn move_to_area(&mut self, current_area: &Rect, target_area: &Rect) -> Result<()> {
+        let current_rect = WindowsApi::window_rect(self.hwnd)?;
+        let x_diff = target_area.left - current_area.left;
+        let y_diff = target_area.top - current_area.top;
+        let x_ratio = f32::abs((target_area.right as f32) / (current_area.right as f32));
+        let y_ratio = f32::abs((target_area.bottom as f32) / (current_area.bottom as f32));
+        let window_relative_x = current_rect.left - current_area.left;
+        let window_relative_y = current_rect.top - current_area.top;
+        let corrected_relative_x = (window_relative_x as f32 * x_ratio) as i32;
+        let corrected_relative_y = (window_relative_y as f32 * y_ratio) as i32;
+        let window_x = current_area.left + corrected_relative_x;
+        let window_y = current_area.top + corrected_relative_y;
+
+        let new_rect = Rect {
+            left: x_diff + window_x,
+            top: y_diff + window_y,
+            right: current_rect.right,
+            bottom: current_rect.bottom,
+        };
+        //TODO: We might need to take into account the differences in DPI for the new_rect, unless
+        //we can use the xy ratios above to the right/bottom (width/height of window) as well?
+
+        self.set_position(&new_rect, true)
     }
 
     pub fn center(&mut self, work_area: &Rect) -> Result<()> {
@@ -173,17 +202,18 @@ impl Window {
     }
 
     pub fn animate_position(&self, start_rect: &Rect, target_rect: &Rect, top: bool) -> Result<()> {
-        let hwnd = self.hwnd();
         let start_rect = *start_rect;
         let target_rect = *target_rect;
         let duration = Duration::from_millis(ANIMATION_DURATION.load(Ordering::SeqCst));
         let mut animation = self.animation;
 
         border_manager::BORDER_TEMPORARILY_DISABLED.store(true, Ordering::SeqCst);
-        border_manager::send_notification();
+        border_manager::send_notification(Some(self.hwnd));
 
         stackbar_manager::STACKBAR_TEMPORARILY_DISABLED.store(true, Ordering::SeqCst);
         stackbar_manager::send_notification();
+
+        let hwnd = self.hwnd;
 
         std::thread::spawn(move || {
             animation.animate(duration, |progress: f64| {
@@ -191,8 +221,8 @@ impl Window {
 
                 if progress == 1.0 {
                     WindowsApi::position_window(hwnd, &new_rect, top)?;
-                    if WindowsApi::foreground_window().unwrap_or_default() == hwnd.0 {
-                        focus_manager::send_notification(hwnd.0)
+                    if WindowsApi::foreground_window().unwrap_or_default() == hwnd {
+                        focus_manager::send_notification(hwnd)
                     }
 
                     if ANIMATIONS_IN_PROGRESS.load(Ordering::Acquire) == 0 {
@@ -200,7 +230,7 @@ impl Window {
                         stackbar_manager::STACKBAR_TEMPORARILY_DISABLED
                             .store(false, Ordering::SeqCst);
 
-                        border_manager::send_notification();
+                        border_manager::send_notification(Some(hwnd));
                         stackbar_manager::send_notification();
                         transparency_manager::send_notification();
                     }
@@ -219,7 +249,7 @@ impl Window {
     }
 
     pub fn set_position(&self, layout: &Rect, top: bool) -> Result<()> {
-        let window_rect = WindowsApi::window_rect(self.hwnd())?;
+        let window_rect = WindowsApi::window_rect(self.hwnd)?;
 
         if window_rect.eq(layout) {
             return Ok(());
@@ -228,20 +258,20 @@ impl Window {
         if ANIMATION_ENABLED.load(Ordering::SeqCst) {
             self.animate_position(&window_rect, layout, top)
         } else {
-            WindowsApi::position_window(self.hwnd(), layout, top)
+            WindowsApi::position_window(self.hwnd, layout, top)
         }
     }
 
     pub fn is_maximized(self) -> bool {
-        WindowsApi::is_zoomed(self.hwnd())
+        WindowsApi::is_zoomed(self.hwnd)
     }
 
     pub fn is_miminized(self) -> bool {
-        WindowsApi::is_iconic(self.hwnd())
+        WindowsApi::is_iconic(self.hwnd)
     }
 
     pub fn is_visible(self) -> bool {
-        WindowsApi::is_window_visible(self.hwnd())
+        WindowsApi::is_window_visible(self.hwnd)
     }
 
     pub fn hide(self) {
@@ -252,8 +282,8 @@ impl Window {
 
         let hiding_behaviour = HIDING_BEHAVIOUR.lock();
         match *hiding_behaviour {
-            HidingBehaviour::Hide => WindowsApi::hide_window(self.hwnd()),
-            HidingBehaviour::Minimize => WindowsApi::minimize_window(self.hwnd()),
+            HidingBehaviour::Hide => WindowsApi::hide_window(self.hwnd),
+            HidingBehaviour::Minimize => WindowsApi::minimize_window(self.hwnd),
             HidingBehaviour::Cloak => SetCloak(self.hwnd(), 1, 2),
         }
     }
@@ -270,14 +300,17 @@ impl Window {
         let hiding_behaviour = HIDING_BEHAVIOUR.lock();
         match *hiding_behaviour {
             HidingBehaviour::Hide | HidingBehaviour::Minimize => {
-                WindowsApi::restore_window(self.hwnd());
+                WindowsApi::restore_window(self.hwnd);
             }
             HidingBehaviour::Cloak => SetCloak(self.hwnd(), 1, 0),
         }
     }
 
     pub fn minimize(self) {
-        WindowsApi::minimize_window(self.hwnd());
+        let exe = self.exe().unwrap_or_default();
+        if !exe.contains("komorebi-bar") {
+            WindowsApi::minimize_window(self.hwnd);
+        }
     }
 
     pub fn close(self) -> Result<()> {
@@ -292,12 +325,12 @@ impl Window {
             animation: Animation::new(self.hwnd),
         }.exe()?;
         if kill_exes.contains(&exe) {
-            let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
+            let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd);
             let handle = WindowsApi::process_handle(process_id)?;
             unsafe { let _ = TerminateProcess(handle, 0); };
             WindowsApi::close_process(handle)
         } else {
-            WindowsApi::close_window(self.hwnd())
+            WindowsApi::close_window(self.hwnd)
         }
     }
 
@@ -310,7 +343,7 @@ impl Window {
             programmatically_hidden_hwnds.remove(idx);
         }
 
-        WindowsApi::maximize_window(self.hwnd());
+        WindowsApi::maximize_window(self.hwnd);
     }
 
     pub fn unmaximize(self) {
@@ -322,27 +355,27 @@ impl Window {
             programmatically_hidden_hwnds.remove(idx);
         }
 
-        WindowsApi::unmaximize_window(self.hwnd());
+        WindowsApi::unmaximize_window(self.hwnd);
     }
 
     pub fn focus(self, mouse_follows_focus: bool) -> Result<()> {
         // If the target window is already focused, do nothing.
         if let Ok(ihwnd) = WindowsApi::foreground_window() {
-            if HWND(ihwnd) == self.hwnd() {
+            if ihwnd == self.hwnd {
                 // Center cursor in Window
                 if mouse_follows_focus {
-                    WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(self.hwnd())?)?;
+                    WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(self.hwnd)?)?;
                 }
 
                 return Ok(());
             }
         }
 
-        WindowsApi::raise_and_focus_window(self.hwnd())?;
+        WindowsApi::raise_and_focus_window(self.hwnd)?;
 
         // Center cursor in Window
         if mouse_follows_focus {
-            WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(self.hwnd())?)?;
+            WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(self.hwnd)?)?;
         }
 
         Ok(())
@@ -353,7 +386,7 @@ impl Window {
         ex_style.insert(ExtendedWindowStyle::LAYERED);
         self.update_ex_style(&ex_style)?;
         WindowsApi::set_transparent(
-            self.hwnd(),
+            self.hwnd,
             transparency_manager::TRANSPARENCY_ALPHA.load_consume(),
         )
     }
@@ -372,31 +405,42 @@ impl Window {
         WindowsApi::set_window_accent(self.hwnd, None)
     }
 
-    #[allow(dead_code)]
+    #[cfg(target_pointer_width = "64")]
     pub fn update_style(self, style: &WindowStyle) -> Result<()> {
-        WindowsApi::update_style(self.hwnd(), isize::try_from(style.bits())?)
+        WindowsApi::update_style(self.hwnd, isize::try_from(style.bits())?)
     }
 
+    #[cfg(target_pointer_width = "32")]
+    pub fn update_style(self, style: &WindowStyle) -> Result<()> {
+        WindowsApi::update_style(self.hwnd, i32::try_from(style.bits())?)
+    }
+
+    #[cfg(target_pointer_width = "64")]
     pub fn update_ex_style(self, style: &ExtendedWindowStyle) -> Result<()> {
-        WindowsApi::update_ex_style(self.hwnd(), isize::try_from(style.bits())?)
+        WindowsApi::update_ex_style(self.hwnd, isize::try_from(style.bits())?)
+    }
+
+    #[cfg(target_pointer_width = "32")]
+    pub fn update_ex_style(self, style: &ExtendedWindowStyle) -> Result<()> {
+        WindowsApi::update_ex_style(self.hwnd, i32::try_from(style.bits())?)
     }
 
     pub fn style(self) -> Result<WindowStyle> {
-        let bits = u32::try_from(WindowsApi::gwl_style(self.hwnd())?)?;
+        let bits = u32::try_from(WindowsApi::gwl_style(self.hwnd)?)?;
         Ok(WindowStyle::from_bits_truncate(bits))
     }
 
     pub fn ex_style(self) -> Result<ExtendedWindowStyle> {
-        let bits = u32::try_from(WindowsApi::gwl_ex_style(self.hwnd())?)?;
+        let bits = u32::try_from(WindowsApi::gwl_ex_style(self.hwnd)?)?;
         Ok(ExtendedWindowStyle::from_bits_truncate(bits))
     }
 
     pub fn title(self) -> Result<String> {
-        WindowsApi::window_text_w(self.hwnd())
+        WindowsApi::window_text_w(self.hwnd)
     }
 
     pub fn path(self) -> Result<String> {
-        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
+        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd);
         let handle = WindowsApi::process_handle(process_id)?;
         let path = WindowsApi::exe_path(handle);
         WindowsApi::close_process(handle)?;
@@ -404,7 +448,7 @@ impl Window {
     }
 
     pub fn exe(self) -> Result<String> {
-        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
+        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd);
         let handle = WindowsApi::process_handle(process_id)?;
         let exe = WindowsApi::exe(handle);
         WindowsApi::close_process(handle)?;
@@ -412,20 +456,20 @@ impl Window {
     }
 
     pub fn process_id(self) -> u32 {
-        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd());
+        let (process_id, _) = WindowsApi::window_thread_process_id(self.hwnd);
         process_id
     }
 
     pub fn class(self) -> Result<String> {
-        WindowsApi::real_window_class_w(self.hwnd())
+        WindowsApi::real_window_class_w(self.hwnd)
     }
 
     pub fn is_cloaked(self) -> Result<bool> {
-        WindowsApi::is_window_cloaked(self.hwnd())
+        WindowsApi::is_window_cloaked(self.hwnd)
     }
 
     pub fn is_window(self) -> bool {
-        WindowsApi::is_window(self.hwnd())
+        WindowsApi::is_window(self.hwnd)
     }
 
     pub fn remove_title_bar(self) -> Result<()> {
@@ -454,7 +498,7 @@ impl Window {
 
         debug.is_window = true;
 
-        let rect = WindowsApi::window_rect(self.hwnd()).unwrap_or_default();
+        let rect = WindowsApi::window_rect(self.hwnd).unwrap_or_default();
 
         if rect.right < MINIMUM_WIDTH.load(Ordering::SeqCst) {
             return Ok(false);
@@ -537,9 +581,10 @@ pub struct RuleDebug {
     pub class: Option<String>,
     pub path: Option<String>,
     pub matches_permaignore_class: Option<String>,
-    pub matches_float_identifier: Option<MatchingRule>,
+    pub matches_ignore_identifier: Option<MatchingRule>,
     pub matches_managed_override: Option<MatchingRule>,
     pub matches_layered_whitelist: Option<MatchingRule>,
+    pub matches_floating_applications: Option<MatchingRule>,
     pub matches_wsl2_gui: Option<String>,
     pub matches_no_titlebar: Option<String>,
 }
@@ -566,16 +611,16 @@ fn window_is_eligible(
 
     let regex_identifiers = REGEX_IDENTIFIERS.lock();
 
-    let float_identifiers = FLOAT_IDENTIFIERS.lock();
-    let should_float = if let Some(rule) = should_act(
+    let ignore_identifiers = IGNORE_IDENTIFIERS.lock();
+    let should_ignore = if let Some(rule) = should_act(
         title,
         exe_name,
         class,
         path,
-        &float_identifiers,
+        &ignore_identifiers,
         &regex_identifiers,
     ) {
-        debug.matches_float_identifier = Some(rule);
+        debug.matches_ignore_identifier = Some(rule);
         true
     } else {
         false
@@ -596,7 +641,19 @@ fn window_is_eligible(
         false
     };
 
-    if should_float && !managed_override {
+    let floating_identifiers = FLOATING_APPLICATIONS.lock();
+    if let Some(rule) = should_act(
+        title,
+        exe_name,
+        class,
+        path,
+        &floating_identifiers,
+        &regex_identifiers,
+    ) {
+        debug.matches_floating_applications = Some(rule);
+    }
+
+    if should_ignore && !managed_override {
         return false;
     }
 
@@ -639,8 +696,23 @@ fn window_is_eligible(
         titlebars_removed.contains(exe_name)
     };
 
-    if exe_name.contains("firefox") {
-        std::thread::sleep(Duration::from_millis(10));
+    {
+        let slow_application_identifiers = SLOW_APPLICATION_IDENTIFIERS.lock();
+        let should_sleep = should_act(
+            title,
+            exe_name,
+            class,
+            path,
+            &slow_application_identifiers,
+            &regex_identifiers,
+        )
+        .is_some();
+
+        if should_sleep {
+            std::thread::sleep(Duration::from_millis(
+                SLOW_APPLICATION_COMPENSATION_TIME.load(Ordering::SeqCst),
+            ));
+        }
     }
 
     if (allow_wsl2_gui || allow_titlebar_removed || style.contains(WindowStyle::CAPTION) && ex_style.contains(ExtendedWindowStyle::WINDOWEDGE))
@@ -723,10 +795,7 @@ pub fn should_act_individual(
     let mut should_act = false;
 
     match identifier.matching_strategy {
-        None => {
-            panic!("there is no matching strategy identified for this rule");
-        }
-        Some(MatchingStrategy::Legacy) => match identifier.kind {
+        None | Some(MatchingStrategy::Legacy) => match identifier.kind {
             ApplicationIdentifier::Title => {
                 if title.starts_with(&identifier.id) || title.ends_with(&identifier.id) {
                     should_act = true;

@@ -6,7 +6,8 @@
   "border_colours": {
     "single": "#61afef",
     "stack": "#98c379",
-    "monocle": "#e06c75"
+    "monocle": "#e06c75",
+    "floating": "#56b6c2"
   },
   "default_workspace_padding": 4,
   "default_container_padding": 4,
@@ -95,5 +96,10 @@
   "animation": {
     "enabled": true,
     "duration": 100
-  }
+  },
+  "bar_configurations": [
+    "komorebi.bar.json",
+    "komorebi.bar2.json",
+    "komorebi.bar3.json"
+  ]
 }

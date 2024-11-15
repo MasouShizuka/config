@@ -723,28 +723,33 @@ return {
                 opts = function()
                     local lspconfig = require("lspconfig")
 
-                    local config = {}
-                    if utils.is_available("nvim-ufo") then
-                        config = {
-                            textDocument = {
-                                foldingRange = {
-                                    dynamicRegistration = false,
-                                    lineFoldingOnly = true,
-                                },
-                            },
-                        }
-                    end
+                    local capabilities = vim.lsp.protocol.make_client_capabilities()
 
-                    local has_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-                    local cmp_nvim_lsp_capabilities = has_cmp and cmp_nvim_lsp.default_capabilities() or {}
-
-                    local default_config = {
+                    if utils.is_available("cmp-nvim-lsp") then
                         capabilities = vim.tbl_deep_extend(
                             "force",
-                            config,
-                            vim.lsp.protocol.make_client_capabilities(),
-                            cmp_nvim_lsp_capabilities
-                        ),
+                            capabilities,
+                            require("cmp_nvim_lsp").default_capabilities()
+                        )
+                    end
+
+                    if utils.is_available("nvim-ufo") then
+                        capabilities = vim.tbl_deep_extend(
+                            "force",
+                            capabilities,
+                            {
+                                textDocument = {
+                                    foldingRange = {
+                                        dynamicRegistration = false,
+                                        lineFoldingOnly = true,
+                                    },
+                                },
+                            }
+                        )
+                    end
+
+                    local default_config = {
+                        capabilities = capabilities,
                     }
 
                     local handlers = {

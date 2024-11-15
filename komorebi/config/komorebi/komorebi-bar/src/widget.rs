@@ -1,9 +1,13 @@
 use crate::battery::Battery;
 use crate::battery::BatteryConfig;
+use crate::cpu::Cpu;
+use crate::cpu::CpuConfig;
 use crate::date::Date;
 use crate::date::DateConfig;
 use crate::komorebi::Komorebi;
 use crate::komorebi::KomorebiConfig;
+use crate::language::Language;
+use crate::language::LanguageConfig;
 use crate::media::Media;
 use crate::media::MediaConfig;
 use crate::memory::Memory;
@@ -27,8 +31,10 @@ pub trait BarWidget {
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 pub enum WidgetConfig {
     Battery(BatteryConfig),
+    Cpu(CpuConfig),
     Date(DateConfig),
     Komorebi(KomorebiConfig),
+    Language(LanguageConfig),
     Media(MediaConfig),
     Memory(MemoryConfig),
     Network(NetworkConfig),
@@ -40,8 +46,10 @@ impl WidgetConfig {
     pub fn as_boxed_bar_widget(&self) -> Box<dyn BarWidget> {
         match self {
             WidgetConfig::Battery(config) => Box::new(Battery::from(*config)),
+            WidgetConfig::Cpu(config) => Box::new(Cpu::from(*config)),
             WidgetConfig::Date(config) => Box::new(Date::from(config.clone())),
             WidgetConfig::Komorebi(config) => Box::new(Komorebi::from(config)),
+            WidgetConfig::Language(config) => Box::new(Language::from(*config)),
             WidgetConfig::Media(config) => Box::new(Media::from(*config)),
             WidgetConfig::Memory(config) => Box::new(Memory::from(*config)),
             WidgetConfig::Network(config) => Box::new(Network::from(*config)),

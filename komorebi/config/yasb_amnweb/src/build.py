@@ -2,7 +2,6 @@ from cx_Freeze import setup, Executable
 from settings import BUILD_VERSION
 import datetime
  
-base = "gui"
 build_options = {
     "packages": [
         'core.widgets.yasb.power_menu',
@@ -10,6 +9,7 @@ build_options = {
         'core.widgets.yasb.weather',
         'core.widgets.yasb.memory',
         'core.widgets.yasb.cpu',
+        'core.widgets.yasb.libre_monitor',
         'core.widgets.yasb.active_window',
         'core.widgets.yasb.applications',
         'core.widgets.yasb.battery',
@@ -17,19 +17,27 @@ build_options = {
         'core.widgets.yasb.custom',
         'core.widgets.yasb.github',
         'core.widgets.yasb.media',
+        'core.widgets.yasb.microphone',
+        'core.widgets.yasb.bluetooth',
         'core.widgets.yasb.wallpapers',
         'core.widgets.yasb.traffic',
         'core.widgets.yasb.wifi',
         'core.widgets.yasb.language',
         'core.widgets.yasb.disk',
+        'core.widgets.yasb.obs',
+        'core.widgets.yasb.whkd',
         'core.widgets.yasb.taskbar',
+        'core.widgets.yasb.update_check',
         'core.widgets.komorebi.active_layout',
         'core.widgets.komorebi.workspaces'
     ],
+
     "silent_level": 1,
-    "excludes": ['PySide6','pydoc_data','email','colorama','tkinter','PyQt5','PySide2'],
+    "silent": True,
+    "excludes": ['PySide6','pydoc_data','email','tkinter','PyQt5','PySide2'],
     "build_exe": "dist",
     "include_msvcr": True,
+    "includes": ["colorama"],
     "optimize": 1,
     "include_files": [
             ("assets/images/app_icon.png","lib/assets/images/app_icon.png"),
@@ -46,7 +54,7 @@ directory_table = [
 msi_data = {
     "Directory": directory_table,
     "ProgId": [
-        ("Prog.Id", None, None, "Yet Another Status Bar", "IconId", None),
+        ("Prog.Id", None, None, "A highly configurable Windows status bar", "IconId", None),
     ],
     "Icon": [
         ("IconId", "assets/images/app_icon.ico"),
@@ -57,33 +65,40 @@ bdist_msi_options = {
     "data": msi_data,
     "install_icon": "assets/images/app_icon.ico",
     "upgrade_code": "{3f620cf5-07b5-47fd-8e37-9ca8ad14b608}",
-    "add_to_path": False,
+    "add_to_path": True,
     "dist_dir": "dist/out",
     "initial_target_dir": r'[LocalAppDataFolder]\Yasb',
     "all_users": False,
     "summary_data": {
         "author": "AmN",
-        "comments": "Yet Another Status Bar",
-        "keywords": "windows; statusbar"
+        "comments": "A highly configurable Windows status bar",
+        "keywords": "windows; statusbar; ricing; customization; topbar; taskbar; yasb",
     }
 }
 
 executables = [
     Executable(
         "main.py",
-        base=base,
+        base="gui",
         icon="assets/images/app_icon.ico",
         shortcut_name="Yasb",
         shortcut_dir="MyProgramMenu",
         copyright=f"Copyright (C) {datetime.datetime.now().year} AmN",
         target_name="yasb.exe",
+    ),  
+    Executable(
+        "core/utils/cli.py",
+        base="Console",
+        copyright=f"Copyright (C) {datetime.datetime.now().year} AmN",
+        target_name="yasbc.exe",
     )
 ]
+
 setup(
     name="yasb",
     version=BUILD_VERSION,
     author="AmN",
-    description="Yet Another Status Bar",
+    description="Yasb Status Bar",
     executables=executables,
     options={
         "build_exe": build_options,

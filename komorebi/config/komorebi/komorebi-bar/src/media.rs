@@ -16,34 +16,77 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::sync::atomic::Ordering;
 use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager;
+use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus;
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
 pub struct MediaConfig {
     /// Enable the Media widget
     pub enable: bool,
+    /// Set the Media format
+    pub format: MediaFormat,
 }
 
 impl From<MediaConfig> for Media {
     fn from(value: MediaConfig) -> Self {
-        Self::new(value.enable)
+        Self::new(value)
+    }
+}
+
+// NOTE: 增加 Media 的格式
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub enum MediaFormat {
+    /// Artist - Title
+    ArtistFirst,
+    /// Title - Artist
+    TitleFirst,
+}
+
+impl MediaFormat {
+    pub fn toggle(&mut self) {
+        match self {
+            MediaFormat::ArtistFirst => *self = MediaFormat::TitleFirst,
+            MediaFormat::TitleFirst => *self = MediaFormat::ArtistFirst,
+        };
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct Media {
     pub enable: bool,
+    pub format: MediaFormat,
     pub session_manager: GlobalSystemMediaTransportControlsSessionManager,
 }
 
 impl Media {
-    pub fn new(enable: bool) -> Self {
+    pub fn new(value: MediaConfig) -> Self {
         Self {
-            enable,
+            enable: value.enable,
+            format: value.format,
             session_manager: GlobalSystemMediaTransportControlsSessionManager::RequestAsync()
                 .unwrap()
                 .get()
                 .unwrap(),
         }
+    }
+
+    // NOTE: 判断是否在播放
+    pub fn is_playing(&self) -> bool {
+        if let Ok(session) = self.session_manager.GetCurrentSession() {
+            if let Ok(op) = session.GetPlaybackInfo() {
+                if let Ok(st) = op.PlaybackStatus() {
+                    match st {
+                        GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing => {
+                            return true;
+                        }
+                        _ => {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        false
     }
 
     pub fn toggle(&self) {
@@ -67,7 +110,14 @@ impl Media {
                             return format!("{artist}");
                         }
 
-                        return format!("{artist} - {title}");
+                        match self.format {
+                            MediaFormat::ArtistFirst => {
+                                return format!("{artist} - {title}");
+                            }
+                            MediaFormat::TitleFirst => {
+                                return format!("{title} - {artist}");
+                            }
+                        }
                     }
                 }
             }
@@ -89,8 +139,14 @@ impl BarWidget for Media {
                     .cloned()
                     .unwrap_or_else(FontId::default);
 
+                let icon = if self.is_playing() {
+                    "\u{f04b}"
+                } else {
+                    "\u{f04c}"
+                };
+
                 let mut layout_job = LayoutJob::simple(
-                    egui_phosphor::regular::HEADPHONES.to_string(),
+                    icon.to_string(),
                     font_id.clone(),
                     ctx.style().visuals.selection.stroke.color,
                     100.0,
@@ -119,6 +175,7 @@ impl BarWidget for Media {
                     .clicked()
                 {
                     self.toggle();
+                    self.format.toggle();
                 }
 
                 ui.add_space(WIDGET_SPACING);

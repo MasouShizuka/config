@@ -194,10 +194,11 @@ function zvm_after_lazy_keybindings() {
 # │ Command Line Tool │
 # ╰───────────────────╯
 
-# fzf
+# ╭─ fzf ────────────────────────────────────────────────────╮
 
 export FZF_COMPLETION_TRIGGER="\\"
 export FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='bat --number --color always --theme TwoDark --line-range :500 {}'"
+
 # One Dark
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
     --color=dark
@@ -207,36 +208,46 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
 
+# ╰──────────────────────────────────────────────────── fzf ─╯
 
-# neovim
+
+# ╭─ neovim ─────────────────────────────────────────────────╮
 
 # wsl 使用 windows 的 neovim 配置
 if ((is_wsl)); then
     if [[ ! -d "$HOME/.config/nvim" ]]; then
-        ln -s "/mnt/c/Users/MasouShizuka/AppData/Local/nvim" "$HOME/.config/nvim"
+        localappdata=$(wslpath "$(cmd.exe /c "echo %LOCALAPPDATA%" 2>/dev/null | tr -d '\r')")
+        ln -s "$localappdata/nvim" "$HOME/.config/nvim"
     fi
 fi
 
+# ╰───────────────────────────────────────────────── neovim ─╯
 
-# sfsu
+
+# ╭─ sfsu ───────────────────────────────────────────────────╮
 
 if ((is_windows)); then
     source <(sfsu.exe hook --shell zsh)
 fi
 
+# ╰─────────────────────────────────────────────────── sfsu ─╯
 
-# starship
+
+# ╭─ starship ───────────────────────────────────────────────╮
 
 if ((is_wsl)); then
-    export STARSHIP_CONFIG="/mnt/c/Users/MasouShizuka/.config/starship/starship.toml"
+    userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
+    export STARSHIP_CONFIG="$userprofile/.config/starship/starship.toml"
 else
     export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 fi
 
 eval "$(starship init zsh)"
 
+# ╰─────────────────────────────────────────────── starship ─╯
 
-# yazi
+
+# ╭─ yazi ───────────────────────────────────────────────────╮
 
 function y() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
@@ -246,6 +257,8 @@ function y() {
     fi
     rm -f -- "$tmp"
 }
+
+# ╰─────────────────────────────────────────────────── yazi ─╯
 
 
 
@@ -258,21 +271,24 @@ if ((is_windows)); then
         eval "$("$HOME"/scoop/apps/mambaforge/current/Scripts/conda.exe 'shell.zsh' 'hook' | sed -e 's/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@"/"$CONDA_EXE" $_CE_M $_CE_CONDA "$@" | tr -d \x27\\r\x27/g')" 2>/dev/null
     fi
 elif ((is_linux)); then
-    __conda_setup=$("$HOME/mambaforge/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)
-    if [[ $? = 0 ]]; then
-        eval "$__conda_setup"
-    else
-        if [[ -f "$HOME/mambaforge/etc/profile.d/conda.sh" ]]; then
-            . "$HOME/mambaforge/etc/profile.d/conda.sh"
+    if [[ -f "$HOME/mambaforge/bin/conda" ]]; then
+        __conda_setup=$("$HOME/mambaforge/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)
+        if [[ $? = 0 ]]; then
+            eval "$__conda_setup"
         else
-            export PATH="$HOME/mambaforge/bin:$PATH"
+            if [[ -f "$HOME/mambaforge/etc/profile.d/conda.sh" ]]; then
+                . "$HOME/mambaforge/etc/profile.d/conda.sh"
+            else
+                export PATH="$HOME/mambaforge/bin:$PATH"
+            fi
         fi
-    fi
-    unset __conda_setup
+        unset __conda_setup
 
-    if ((is_wsl)); then
-        if [[ ! -f "$HOME/.condarc" ]]; then
-            ln -s "/mnt/c/Users/MasouShizuka/.condarc" "$HOME/.condarc"
+        if ((is_wsl)); then
+            if [[ ! -f "$HOME/.condarc" ]]; then
+                userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
+                ln -s "$userprofile/.condarc" "$HOME/.condarc"
+            fi
         fi
     fi
 fi

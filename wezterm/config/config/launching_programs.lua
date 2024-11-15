@@ -17,8 +17,8 @@ M.powershell = {
     },
 }
 
-M.arch = {
-    label = "Arch",
+M.wsl_arch = {
+    label = "WSL:Arch",
     args = {
         "wsl",
         "-d",
@@ -34,7 +34,7 @@ M.options = {
     launch_menu = {
         M.zsh,
         M.powershell,
-        M.arch,
+        M.wsl_arch,
     },
 }
 

@@ -23,24 +23,36 @@ WORKSPACE_STATUS_POPULATED: WorkspaceStatus = "POPULATED"
 WORKSPACE_STATUS_ACTIVE: WorkspaceStatus = "ACTIVE"
 
 class WorkspaceButton(QPushButton):
+
     def __init__(self, workspace_index: int, parent_widget: 'WorkspaceWidget', label: str = None, active_label: str = None, populated_label: str = None, animation: bool = False):
         super().__init__()
         self.komorebic = KomorebiClient()
         self.workspace_index = workspace_index
         self.parent_widget = parent_widget
         self.status = WORKSPACE_STATUS_EMPTY
-        self.setProperty("class", f"ws-btn button-{self.workspace_index + 1}")
+        self.setProperty("class", f"ws-btn")
         self.default_label = label if label else str(workspace_index + 1)
         self.active_label = active_label if active_label else self.default_label
         self.populated_label = populated_label if populated_label else self.default_label
         self.setText(self.default_label)
         self.clicked.connect(self.activate_workspace)
         self._animation = animation
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.hide()
-
+        
+    def update_visible_buttons(self):
+        visible_buttons = [btn for btn in self.parent_widget._workspace_buttons if btn.isVisible()]
+        for index, button in enumerate(visible_buttons):
+            current_class = button.property("class")
+            new_class = ' '.join([cls for cls in current_class.split() if not cls.startswith('button-')])
+            new_class = f"{new_class} button-{index + 1}"
+            button.setProperty("class", new_class)
+            button.setStyleSheet('')
+ 
+            
     def update_and_redraw(self, status: WorkspaceStatus):
         self.status = status
-        self.setProperty("class", f"ws-btn button-{self.workspace_index + 1} {status.lower()}")
+        self.setProperty("class", f"ws-btn {status.lower()}")
         if status == WORKSPACE_STATUS_ACTIVE:
             self.setText(self.active_label)
         elif status == WORKSPACE_STATUS_POPULATED:
@@ -48,6 +60,7 @@ class WorkspaceButton(QPushButton):
         else:
             self.setText(self.default_label)
         self.setStyleSheet('')
+
 
     def activate_workspace(self):
         try:
@@ -87,6 +100,7 @@ class WorkspaceButton(QPushButton):
         self._animation_timer = QTimer()
         self._animation_timer.timeout.connect(update_width)
         self._animation_timer.start(step_duration)
+        
         
 class WorkspaceWidget(BaseWidget):
     k_signal_connect = pyqtSignal(dict)
@@ -142,7 +156,8 @@ class WorkspaceWidget(BaseWidget):
             KomorebiEvent.SendContainerToWorkspaceNumber.value,
             KomorebiEvent.Unmanage.value,
             KomorebiEvent.WatchConfiguration.value,
-            KomorebiEvent.WorkspaceName.value
+            KomorebiEvent.WorkspaceName.value,
+            KomorebiEvent.Cloak.value
         ]
         # Disable default mouse event handling inherited from BaseWidget
         self.mousePressEvent = None
@@ -208,6 +223,8 @@ class WorkspaceWidget(BaseWidget):
                             self._try_remove_workspace_button(workspace_index)
                 self._add_or_update_buttons()
             elif event['type'] in self._workspace_focus_events or self._has_active_workspace_index_changed():
+                # send workspace_update event to active_window widgets
+                self._event_service.emit_event("workspace_update",event['type'])
                 try:
                     prev_workspace_button = self._workspace_buttons[self._prev_workspace_index]
                     self._update_button(prev_workspace_button)
@@ -217,7 +234,10 @@ class WorkspaceWidget(BaseWidget):
                     self._add_or_update_buttons()
             elif event['type'] in self._update_buttons_event_watchlist:
                 self._add_or_update_buttons()
-
+        # send workspace_update event to active_window widgets
+        if event['type'] in ['MoveWindow', 'Show', 'Hide', 'Destroy']:
+            self._event_service.emit_event("workspace_update",event['type'])
+ 
     def _clear_container_layout(self):
         for i in reversed(range(self._workspace_container_layout.count())):
             old_workspace_widget = self._workspace_container_layout.itemAt(i).widget()
@@ -265,6 +285,7 @@ class WorkspaceWidget(BaseWidget):
                 workspace_btn.update_and_redraw(workspace_status)
                 if self._animation:
                     workspace_btn.animate_buttons()
+            workspace_btn.update_visible_buttons()
 
     def _add_or_update_buttons(self) -> None:
         buttons_added = False
@@ -282,9 +303,6 @@ class WorkspaceWidget(BaseWidget):
             for workspace_btn in self._workspace_buttons:
                 self._workspace_container_layout.addWidget(workspace_btn)
                 self._update_button(workspace_btn)
-                # Set the cursor to be a pointer when hovering over the button
-                workspace_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-                
                 
     def _get_workspace_label(self, workspace_index):
         workspace = self._komorebic.get_workspace_by_index(self._komorebi_screen, workspace_index)
@@ -332,4 +350,3 @@ class WorkspaceWidget(BaseWidget):
     def _hide_offline_status(self):
         self._offline_text.hide()
         self._workspace_container.show()
- 

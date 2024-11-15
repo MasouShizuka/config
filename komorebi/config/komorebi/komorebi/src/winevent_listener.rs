@@ -39,11 +39,12 @@ pub fn start() {
 
             loop {
                 unsafe {
-                    if !GetMessageW(&mut msg, HWND(0), 0, 0).as_bool() {
+                    if !GetMessageW(&mut msg, HWND(std::ptr::null_mut()), 0, 0).as_bool() {
                         tracing::debug!("windows event processing thread shutdown");
                         break;
                     };
-                    TranslateMessage(&msg);
+                    // TODO: error handling
+                    let _ = TranslateMessage(&msg);
                     DispatchMessageW(&msg);
                 }
 

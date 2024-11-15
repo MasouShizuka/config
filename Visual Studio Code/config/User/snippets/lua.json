@@ -45,11 +45,10 @@
         "body": [
             "local M = {}",
             "",
-            "local config = {}",
+            "local default_config = {}",
             "",
             "M.setup = function(opts)",
-            "    opts = opts or {}",
-            "    config = vim.tbl_deep_extend(\"force\", config, opts)",
+            "    default_config = vim.tbl_deep_extend(\"force\", default_config, opts or {})",
             "",
             "    ${TM_SELECTED_TEXT}$0",
             "end",

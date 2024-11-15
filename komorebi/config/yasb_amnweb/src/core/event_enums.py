@@ -34,6 +34,7 @@ class KomorebiEvent(Event):
     WatchConfiguration = "WatchConfiguration"
     Manage = "Manage"
     Unmanage = "Unmanage"
+    Cloak = "Cloak"
     MoveContainerToMonitorNumber = "MoveContainerToMonitorNumber"
     MoveContainerToWorkspaceNumber = "MoveContainerToWorkspaceNumber"
     MoveWorkspaceToMonitorNumber = "MoveWorkspaceToMonitorNumber"
@@ -42,7 +43,6 @@ class KomorebiEvent(Event):
     SendContainerToWorkspaceNumber = "SendContainerToWorkspaceNumber"
     WorkspaceName = "WorkspaceName"
 
-    Cloak = "Cloak"
     Uncloak = "Uncloak"
 
     Close = "Close"

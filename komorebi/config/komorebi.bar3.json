@@ -1,0 +1,84 @@
+{
+  "height": 40,
+  "monitor": {
+    "index": 2,
+    "work_area_offset": {
+      "left": 0,
+      "top": 40,
+      "right": 0,
+      "bottom": 40
+    }
+  },
+  "font_family": "Iosevka NF,Sarasa Mono SC",
+  "font_size": 20,
+  "theme": {
+    "palette": "Catppuccin",
+    "name": "Mocha",
+    "accent": "Peach"
+  },
+  "left_widgets": [
+    {
+      "Komorebi": {
+        "workspaces": {
+          "enable": true,
+          "hide_empty_workspaces": false
+        },
+        "layout": {
+          "enable": true
+        },
+        "focused_window": {
+          "enable": true,
+          "show_icon": true
+        }
+      }
+    }
+  ],
+  "right_widgets": [
+    {
+      "Media": {
+        "enable": true,
+        "format": "TitleFirst"
+      }
+    },
+    {
+      "Language": {
+        "enable": true
+      }
+    },
+    {
+      "Network": {
+        "enable": false,
+        "show_total_data_transmitted": false,
+        "show_network_activity": true,
+        "data_refresh_interval": 1
+      }
+    },
+    {
+      "Cpu": {
+        "enable": true,
+        "data_refresh_interval": 1,
+        "label_prefix": "Icon"
+      }
+    },
+    {
+      "Memory": {
+        "enable": true,
+        "data_refresh_interval": 1,
+        "label_prefix": "Icon"
+      }
+    },
+    {
+      "Battery": {
+        "enable": true
+      }
+    },
+    {
+      "Time": {
+        "enable": true,
+        "format": {
+          "Custom": "%Y-%m-%d %H:%M:%S %a"
+        }
+      }
+    }
+  ]
+}

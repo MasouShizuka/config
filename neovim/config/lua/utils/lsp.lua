@@ -86,6 +86,10 @@ M.lsp = function(lspconfig, default_config)
         marksman = function()
             lspconfig.marksman.setup(vim.tbl_deep_extend("force", default_config, {
                 root_dir = function() return vim.fn.getcwd() end,
+                -- 已经使用 markdownlint-cli2 的 diagnostics，因此禁用 marksman 的 diagnostics
+                handlers = {
+                    ["textDocument/publishDiagnostics"] = function() end,
+                },
             }))
         end,
         pyright = function()
