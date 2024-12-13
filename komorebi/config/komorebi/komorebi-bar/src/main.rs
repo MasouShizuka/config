@@ -4,10 +4,13 @@ mod config;
 mod cpu;
 mod date;
 mod komorebi;
+mod komorebi_layout;
 mod language;
 mod media;
 mod memory;
 mod network;
+mod render;
+mod selected_frame;
 mod storage;
 mod time;
 mod ui;
@@ -22,15 +25,20 @@ use eframe::egui::ViewportBuilder;
 use font_loader::system_fonts;
 use hotwatch::EventKind;
 use hotwatch::Hotwatch;
+use image::RgbaImage;
 use komorebi_client::SocketMessage;
 use komorebi_client::SubscribeOptions;
 use schemars::gen::SchemaSettings;
+use std::collections::HashMap;
 use std::io::BufReader;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
+use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::sync::LazyLock;
+use std::sync::Mutex;
 use std::time::Duration;
 use tracing_subscriber::EnvFilter;
 use windows::Win32::Foundation::BOOL;
@@ -43,13 +51,15 @@ use windows::Win32::UI::HiDpi::DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
 use windows::Win32::UI::WindowsAndMessaging::EnumThreadWindows;
 use windows::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId;
 
-pub static WIDGET_SPACING: f32 = 10.0;
-
 pub static MAX_LABEL_WIDTH: AtomicI32 = AtomicI32::new(400);
 pub static MONITOR_LEFT: AtomicI32 = AtomicI32::new(0);
 pub static MONITOR_TOP: AtomicI32 = AtomicI32::new(0);
 pub static MONITOR_RIGHT: AtomicI32 = AtomicI32::new(0);
+pub static MONITOR_INDEX: AtomicUsize = AtomicUsize::new(0);
 pub static BAR_HEIGHT: AtomicI32 = AtomicI32::new(50);
+
+pub static ICON_CACHE: LazyLock<Mutex<HashMap<String, RgbaImage>>> =
+    LazyLock::new(|| Mutex::new(HashMap::new()));
 
 #[derive(Parser)]
 #[clap(author, about, version)]
@@ -236,6 +246,8 @@ fn main() -> color_eyre::Result<()> {
         Ordering::SeqCst,
     );
 
+    MONITOR_INDEX.store(config.monitor.index, Ordering::SeqCst);
+
     // NOTE: 读取 config 中的 height
     if let Some(height) = config.height {
         BAR_HEIGHT.store(height as i32, Ordering::SeqCst);
@@ -273,7 +285,7 @@ fn main() -> color_eyre::Result<()> {
 
     let viewport_builder = ViewportBuilder::default()
         .with_decorations(false)
-        // .with_transparent(config.transparent)
+        .with_transparent(true)
         .with_taskbar(false);
 
     let native_options = eframe::NativeOptions {

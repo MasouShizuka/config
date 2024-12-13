@@ -1,6 +1,6 @@
 use crate::config::LabelPrefix;
+use crate::render::RenderConfig;
 use crate::widget::BarWidget;
-use crate::WIDGET_SPACING;
 use eframe::egui::text::LayoutJob;
 use eframe::egui::Context;
 use eframe::egui::FontId;
@@ -9,7 +9,6 @@ use eframe::egui::Sense;
 use eframe::egui::TextFormat;
 use eframe::egui::TextStyle;
 use eframe::egui::Ui;
-use eframe::egui::WidgetText;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
@@ -77,7 +76,7 @@ impl Language {
 }
 
 impl BarWidget for Language {
-    fn render(&mut self, ctx: &Context, ui: &mut Ui) {
+    fn render(&mut self, ctx: &Context, ui: &mut Ui, config: &mut RenderConfig) {
         if self.enable {
             let mut output = self.output();
             if !output.is_empty() {
@@ -108,14 +107,14 @@ impl BarWidget for Language {
                     TextFormat::simple(font_id, ctx.style().visuals.text_color()),
                 );
 
-                ui.add(
-                    Label::new(WidgetText::LayoutJob(layout_job.clone()))
-                        .selectable(false)
-                        .sense(Sense::click()),
-                );
+                config.apply_on_widget(true, ui, |ui| {
+                    ui.add(
+                        Label::new(layout_job)
+                            .selectable(false)
+                            .sense(Sense::click()),
+                    );
+                });
             }
-
-            ui.add_space(WIDGET_SPACING);
         }
     }
 }

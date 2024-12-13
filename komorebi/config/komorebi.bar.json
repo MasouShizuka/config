@@ -9,7 +9,7 @@
       "bottom": 40
     }
   },
-  "font_family": "Iosevka NF,Sarasa Mono SC",
+  "font_family": "Sarasa Mono SC,Maple Mono NF CN",
   "font_size": 20,
   "theme": {
     "palette": "Catppuccin",
@@ -28,7 +28,7 @@
         },
         "focused_window": {
           "enable": true,
-          "show_icon": true
+          "display": "IconAndText"
         }
       }
     }
@@ -47,9 +47,10 @@
     },
     {
       "Network": {
-        "enable": false,
+        "enable": true,
         "show_total_data_transmitted": false,
         "show_network_activity": true,
+        "show_default_interface": false,
         "data_refresh_interval": 1
       }
     },

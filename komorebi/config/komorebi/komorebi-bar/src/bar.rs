@@ -5,6 +5,10 @@ use crate::config::PositionConfig;
 use crate::komorebi::Komorebi;
 use crate::komorebi::KomorebiNotificationState;
 use crate::process_hwnd;
+use crate::render::Color32Ext;
+use crate::render::Grouping;
+use crate::render::RenderConfig;
+use crate::render::RenderExt;
 use crate::widget::BarWidget;
 use crate::widget::WidgetConfig;
 use crate::BAR_HEIGHT;
@@ -14,6 +18,8 @@ use crate::MONITOR_RIGHT;
 use crate::MONITOR_TOP;
 use crossbeam_channel::Receiver;
 use eframe::egui::Align;
+use eframe::egui::Align2;
+use eframe::egui::Area;
 use eframe::egui::CentralPanel;
 use eframe::egui::Color32;
 use eframe::egui::Context;
@@ -22,10 +28,13 @@ use eframe::egui::FontDefinitions;
 use eframe::egui::FontFamily;
 use eframe::egui::FontId;
 use eframe::egui::Frame;
+use eframe::egui::Id;
 use eframe::egui::Layout;
 use eframe::egui::Margin;
+use eframe::egui::Rgba;
 use eframe::egui::Style;
 use eframe::egui::TextStyle;
+use eframe::egui::Visuals;
 use font_loader::system_fonts;
 use font_loader::system_fonts::FontPropertyBuilder;
 use komorebi_client::KomorebiTheme;
@@ -41,8 +50,10 @@ use std::sync::Arc;
 
 pub struct Komobar {
     pub config: Arc<KomobarConfig>,
+    pub render_config: Rc<RefCell<RenderConfig>>,
     pub komorebi_notification_state: Option<Rc<RefCell<KomorebiNotificationState>>>,
     pub left_widgets: Vec<Box<dyn BarWidget>>,
+    pub center_widgets: Vec<Box<dyn BarWidget>>,
     pub right_widgets: Vec<Box<dyn BarWidget>>,
     pub rx_gui: Receiver<komorebi_client::Notification>,
     pub rx_config: Receiver<KomobarConfig>,
@@ -171,6 +182,10 @@ impl Komobar {
                 y: BAR_HEIGHT.load(Ordering::SeqCst) as f32,
             });
 
+            if end.y == 0.0 {
+                tracing::warn!("position.end.y is set to 0.0 which will make your bar invisible on a config reload - this is usually set to 50.0 by default")
+            }
+
             let rect = komorebi_client::Rect {
                 left: start.x as i32,
                 top: start.y as i32,
@@ -237,6 +252,30 @@ impl Komobar {
             }
         }
 
+        // apply rounding to the widgets
+        if let Some(
+            Grouping::Bar(config) | Grouping::Alignment(config) | Grouping::Widget(config),
+        ) = &config.grouping
+        {
+            if let Some(rounding) = config.rounding {
+                ctx.style_mut(|style| {
+                    style.visuals.widgets.noninteractive.rounding = rounding.into();
+                    style.visuals.widgets.inactive.rounding = rounding.into();
+                    style.visuals.widgets.hovered.rounding = rounding.into();
+                    style.visuals.widgets.active.rounding = rounding.into();
+                    style.visuals.widgets.open.rounding = rounding.into();
+                });
+            }
+        }
+
+        let theme_color = *self.bg_color.borrow();
+
+        self.render_config
+            .replace(config.new_renderconfig(theme_color));
+
+        self.bg_color
+            .replace(theme_color.try_apply_alpha(config.transparency_alpha));
+
         if let Some(font_size) = &config.font_size {
             tracing::info!("attempting to set custom font size: {font_size}");
             Self::set_font_size(ctx, *font_size);
@@ -251,7 +290,17 @@ impl Komobar {
             if let WidgetConfig::Komorebi(config) = widget_config {
                 komorebi_widget = Some(Komorebi::from(config));
                 komorebi_widget_idx = Some(idx);
-                side = Some(Side::Left);
+                side = Some(Alignment::Left);
+            }
+        }
+
+        if let Some(center_widgets) = &config.center_widgets {
+            for (idx, widget_config) in center_widgets.iter().enumerate() {
+                if let WidgetConfig::Komorebi(config) = widget_config {
+                    komorebi_widget = Some(Komorebi::from(config));
+                    komorebi_widget_idx = Some(idx);
+                    side = Some(Alignment::Center);
+                }
             }
         }
 
@@ -259,19 +308,30 @@ impl Komobar {
             if let WidgetConfig::Komorebi(config) = widget_config {
                 komorebi_widget = Some(Komorebi::from(config));
                 komorebi_widget_idx = Some(idx);
-                side = Some(Side::Right);
+                side = Some(Alignment::Right);
             }
         }
 
         let mut left_widgets = config
             .left_widgets
             .iter()
+            .filter(|config| config.enabled())
             .map(|config| config.as_boxed_bar_widget())
             .collect::<Vec<Box<dyn BarWidget>>>();
+
+        let mut center_widgets = match &config.center_widgets {
+            Some(center_widgets) => center_widgets
+                .iter()
+                .filter(|config| config.enabled())
+                .map(|config| config.as_boxed_bar_widget())
+                .collect::<Vec<Box<dyn BarWidget>>>(),
+            None => vec![],
+        };
 
         let mut right_widgets = config
             .right_widgets
             .iter()
+            .filter(|config| config.enabled())
             .map(|config| config.as_boxed_bar_widget())
             .collect::<Vec<Box<dyn BarWidget>>>();
 
@@ -293,20 +353,23 @@ impl Komobar {
 
             let boxed: Box<dyn BarWidget> = Box::new(widget);
             match side {
-                Side::Left => left_widgets[idx] = boxed,
-                Side::Right => right_widgets[idx] = boxed,
+                Alignment::Left => left_widgets[idx] = boxed,
+                Alignment::Center => center_widgets[idx] = boxed,
+                Alignment::Right => right_widgets[idx] = boxed,
             }
         }
 
         right_widgets.reverse();
 
         self.left_widgets = left_widgets;
+        self.center_widgets = center_widgets;
         self.right_widgets = right_widgets;
 
         tracing::info!("widget configuration options applied");
 
         self.komorebi_notification_state = komorebi_notification_state;
     }
+
     pub fn new(
         cc: &eframe::CreationContext<'_>,
         rx_gui: Receiver<komorebi_client::Notification>,
@@ -315,8 +378,10 @@ impl Komobar {
     ) -> Self {
         let mut komobar = Self {
             config: config.clone(),
+            render_config: Rc::new(RefCell::new(RenderConfig::new())),
             komorebi_notification_state: None,
             left_widgets: vec![],
+            center_widgets: vec![],
             right_widgets: vec![],
             rx_gui,
             rx_config,
@@ -361,28 +426,29 @@ impl Komobar {
         egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
 
         // NOTE: 支持添加多个字体，以 "," 分隔
-        for mut font_name in name.split(",") {
-            font_name = font_name.trim();
+        // 逆序使得优先使用前面的字体
+        for font_name in name.split(",").collect::<Vec<_>>().iter().rev() {
+        let font_name = font_name.trim();
 
-            let property = FontPropertyBuilder::new().family(font_name).build();
+        let property = FontPropertyBuilder::new().family(font_name).build();
 
-            if let Some((font, _)) = system_fonts::get(&property) {
-                fonts
-                    .font_data
-                    .insert(font_name.to_owned(), FontData::from_owned(font));
+        if let Some((font, _)) = system_fonts::get(&property) {
+            fonts
+                .font_data
+                .insert(font_name.to_owned(), FontData::from_owned(font));
 
-                fonts
-                    .families
-                    .entry(FontFamily::Proportional)
-                    .or_default()
-                    .insert(0, font_name.to_owned());
+            fonts
+                .families
+                .entry(FontFamily::Proportional)
+                .or_default()
+                .insert(0, font_name.to_owned());
 
-                fonts
-                    .families
-                    .entry(FontFamily::Monospace)
-                    .or_default()
-                    .push(font_name.to_owned());
-            }
+            fonts
+                .families
+                .entry(FontFamily::Monospace)
+                .or_default()
+                .push(font_name.to_owned());
+        }
         }
 
         // Tell egui to use these fonts:
@@ -390,13 +456,10 @@ impl Komobar {
     }
 }
 impl eframe::App for Komobar {
-    // TODO: I think this is needed for transparency??
-    // fn clear_color(&self, _visuals: &Visuals) -> [f32; 4] {
-    // egui::Rgba::TRANSPARENT.to_array()
-    // let mut background = Color32::from_gray(18).to_normalized_gamma_f32();
-    // background[3] = 0.9;
-    // background
-    // }
+    // Needed for transparency
+    fn clear_color(&self, _visuals: &Visuals) -> [f32; 4] {
+        Rgba::TRANSPARENT.to_array()
+    }
 
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         if self.scale_factor != ctx.native_pixels_per_point().unwrap_or(1.0) {
@@ -438,17 +501,54 @@ impl eframe::App for Komobar {
             Frame::none().fill(*self.bg_color.borrow())
         };
 
-        CentralPanel::default().frame(frame).show(ctx, |ui| {
-            ui.horizontal_centered(|ui| {
-                ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
-                    for w in &mut self.left_widgets {
-                        w.render(ctx, ui);
-                    }
-                });
+        let mut render_config = self.render_config.borrow_mut();
 
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    for w in &mut self.right_widgets {
-                        w.render(ctx, ui);
+        CentralPanel::default().frame(frame).show(ctx, |ui| {
+            // Apply grouping logic for the bar as a whole
+            render_config.clone().apply_on_bar(ui, |ui| {
+                ui.horizontal_centered(|ui| {
+                    // Left-aligned widgets layout
+                    ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                        let mut render_conf = *render_config;
+                        render_conf.alignment = Some(Alignment::Left);
+
+                        render_config.apply_on_alignment(ui, |ui| {
+                            for w in &mut self.left_widgets {
+                                w.render(ctx, ui, &mut render_conf);
+                            }
+                        });
+                    });
+
+                    // Right-aligned widgets layout
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        let mut render_conf = *render_config;
+                        render_conf.alignment = Some(Alignment::Right);
+
+                        render_config.apply_on_alignment(ui, |ui| {
+                            for w in &mut self.right_widgets {
+                                w.render(ctx, ui, &mut render_conf);
+                            }
+                        });
+                    });
+
+                    if !self.center_widgets.is_empty() {
+                        // Floating center widgets
+                        Area::new(Id::new("center_panel"))
+                            .anchor(Align2::CENTER_CENTER, [0.0, 0.0]) // Align in the center of the window
+                            .show(ctx, |ui| {
+                                Frame::none().show(ui, |ui| {
+                                    ui.horizontal_centered(|ui| {
+                                        let mut render_conf = *render_config;
+                                        render_conf.alignment = Some(Alignment::Center);
+
+                                        render_config.apply_on_alignment(ui, |ui| {
+                                            for w in &mut self.center_widgets {
+                                                w.render(ctx, ui, &mut render_conf);
+                                            }
+                                        });
+                                    });
+                                });
+                            });
                     }
                 })
             })
@@ -457,7 +557,8 @@ impl eframe::App for Komobar {
 }
 
 #[derive(Copy, Clone)]
-enum Side {
+pub enum Alignment {
     Left,
+    Center,
     Right,
 }

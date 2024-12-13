@@ -58,7 +58,7 @@ return {
                                 vim.schedule(function()
                                     view.win:focus()
                                 end)
-                                vim.api.nvim_buf_detach(buf)
+                                return true
                             end,
                         })
                     end)
@@ -81,7 +81,7 @@ return {
                                 vim.schedule(function()
                                     view.win:focus()
                                 end)
-                                vim.api.nvim_buf_detach(buf)
+                                return true
                             end,
                         })
                     end)
@@ -104,7 +104,7 @@ return {
                                 vim.schedule(function()
                                     view.win:focus()
                                 end)
-                                vim.api.nvim_buf_detach(buf)
+                                return true
                             end,
                         })
                     end)
@@ -127,7 +127,7 @@ return {
                                 vim.schedule(function()
                                     view.win:focus()
                                 end)
-                                vim.api.nvim_buf_detach(buf)
+                                return true
                             end,
                         })
                     end)
@@ -150,7 +150,7 @@ return {
                                 vim.schedule(function()
                                     view.win:focus()
                                 end)
-                                vim.api.nvim_buf_detach(buf)
+                                return true
                             end,
                         })
                     end)

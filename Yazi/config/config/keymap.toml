@@ -1,38 +1,38 @@
 [manager]
 
 prepend_keymap = [
-    { on = "<C-w>",           run = "plugin --sync close-and-restore-tab --args=close_to_left",     desc = "Close the current tab and turn to left tab, or quit if it is last tab" },
-    { on = "<C-t>",           run = "plugin --sync close-and-restore-tab --args=restore",           desc = "Restore the closed tab" },
+    { on = "<C-w>",           run = "plugin close-and-restore-tab --args=close_to_left",            desc = "Close the current tab and turn to left tab, or quit if it is last tab" },
+    { on = "<C-t>",           run = "plugin close-and-restore-tab --args=restore",                  desc = "Restore the closed tab" },
 
     # Hopping
-    { on = "k",               run = "plugin --sync arrow --args=-1",                                desc = "Move cursor up" },
-    { on = "j",               run = "plugin --sync arrow --args=1",                                 desc = "Move cursor down" },
+    { on = "k",               run = "plugin arrow --args=-1",                                       desc = "Move cursor up" },
+    { on = "j",               run = "plugin arrow --args=1",                                        desc = "Move cursor down" },
 
     # Navigation
-    { on = "l",               run = "plugin --sync smart-enter",                                    desc = "Enter the child directory, or open the file" },
+    { on = "l",               run = "plugin smart-enter",                                           desc = "Enter the child directory, or open the file" },
 
     # Seeking
     { on = "<Up>",            run = "seek -5",                                                      desc = "Seek up 5 units in the preview" },
     { on = "<Down>",          run = "seek 5",                                                       desc = "Seek down 5 units in the preview" },
 
     # Selection
-    { on = "J",               run = [ "select --state=none", "arrow 1" ],                           desc = "Toggle the current selection state and down" },
-    { on = "K",               run = [ "select --state=none", "arrow -1" ],                          desc = "Toggle the current selection state and up" },
+    { on = "J",               run = [ "toggle", "arrow 1" ],                                        desc = "Toggle the current selection state and down" },
+    { on = "K",               run = [ "toggle", "arrow -1" ],                                       desc = "Toggle the current selection state and up" },
 
     # Operation
-    { on = "o",               run = "plugin --sync smart-open",                                     desc = "Open the directory in explorer, or open the file" },
-    { on = "O",               run = "plugin --sync smart-open --args=cwd",                          desc = "Open the current directory in explorer" },
+    { on = "o",               run = "plugin smart-open",                                            desc = "Open the directory in explorer, or open the file" },
+    { on = "O",               run = "plugin smart-open --args=cwd",                                 desc = "Open the current directory in explorer" },
     { on = "<Enter>",         run = "open --interactive",                                           desc = "Open selected files interactively" },
     { on = "c",               run = "yank",                                                         desc = "Copy selected files" },
     { on = "C",               run = "unyank",                                                       desc = "Cancel the yank status" },
     { on = "d",               run = "remove --force",                                               desc = "Trash selected files" },
     { on = "A",               run = "create --dir",                                                 desc = "Create a directory" },
-    { on = [ ";", ";" ],      run = "shell --interactive",                                          desc = "Run a shell command (block until finishes)" },
-    { on = [ ";", ":" ],      run = "shell --block --interactive",                                  desc = "Run a shell command" },
-    { on = [ ";", "l" ],      run = "shell lazygit --block --confirm",                              desc = "Open lazygit" },
+    { on = [ ";", ";" ],      run = "shell --interactive",                                          desc = "Run a shell command" },
+    { on = [ ";", ":" ],      run = "shell --block --interactive",                                  desc = "Run a shell command (block until finishes)" },
+    { on = [ ";", "l" ],      run = "shell lazygit --block",                                        desc = "Open lazygit" },
     { on = [ "T", "." ],      run = "hidden toggle",                                                desc = "Toggle the visibility of hidden files" },
-    { on = [ "s", "f" ],      run = 'search fd --args="--hidden --no-ignore"',                      desc = "Search files by name via fd" },
-    { on = [ "s", "r" ],      run = 'search rg --args="--hidden --no-ignore"',                      desc = "Search files by content via ripgrep" },
+    { on = [ "s", "f" ],      run = 'search --via=fd --args="--hidden --no-ignore"',                desc = "Search files by name via fd" },
+    { on = [ "s", "r" ],      run = 'search --via=rg --args="--hidden --no-ignore"',                desc = "Search files by content via ripgrep" },
     { on = [ "s", "n" ],      run = "escape --search",                                              desc = "Cancel the ongoing search" },
     { on = [ "s", "F" ],      run = "plugin fzf",                                                   desc = "Jump to a file/directory via fzf" },
     { on = [ "s", "R" ],      run = "plugin fzf-rg",                                                desc = "Reveal a file using fzf by content" },
@@ -84,11 +84,11 @@ prepend_keymap = [
     # Plugin
     { on = "b",               run = "plugin ouch --args=zip",                                       desc = "Compress with ouch" },
 
-    { on = "[",               run = "plugin --sync parent-arrow --args=-1",                         desc = "Move cursor up" },
-    { on = "]",               run = "plugin --sync parent-arrow --args=1",                          desc = "Move cursor down" },
+    { on = "[",               run = "plugin parent-arrow --args=-1",                                desc = "Move cursor up" },
+    { on = "]",               run = "plugin parent-arrow --args=1",                                 desc = "Move cursor down" },
 
-    { on = "e",               run = "plugin --sync smart-edit",                                     desc = "Edit in the directory, or edit the file" },
-    { on = "E",               run = "plugin --sync smart-edit --args=cwd",                          desc = "Edit in the current directory" },
+    { on = "e",               run = "plugin smart-edit",                                            desc = "Edit in the directory, or edit the file" },
+    { on = "E",               run = "plugin smart-edit --args=cwd",                                 desc = "Edit in the current directory" },
 
     { on = [ "z", "s" ],      run = "plugin projects --args=save",                                  desc = "Save current project" },
     { on = [ "z", "l" ],      run = "plugin projects --args=load",                                  desc = "Load project" },
@@ -103,6 +103,12 @@ prepend_keymap = [
 
 prepend_keymap = [
     { on = [ "l" ],           run = "inspect",                                                      desc = "Inspect the task" },
+]
+
+[spot]
+
+prepend_keymap = [
+    { on = "c",               run = "copy cell",                                                    desc = "Copy selected cell" },
 ]
 
 [pick]

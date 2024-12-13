@@ -26,12 +26,12 @@ local function start_hl()
 
     default_config.pre_hook()
 
-    local res = vim.fn.getreg("/")
-    if res:find([[%#]], 1, true) then
+    local reg = vim.fn.getreg("/")
+    if reg:find([[%#]], 1, true) then
         stop_hl()
         return
     end
-    ok, res = pcall(vim.fn.search, [[\%#\zs]] .. res, "cnW")
+    local ok, res = pcall(vim.fn.search, [[\%#\zs]] .. reg, "cnW")
     if ok and res == 0 then
         stop_hl()
         return

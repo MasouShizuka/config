@@ -3,6 +3,8 @@
 	示例：「给予」的正确读音是 ji yu，当用户输入 gei yu 时，在候选项的 comment 显示正确读音
 	示例：「按耐」的正确写法是「按捺」，当用户输入「按耐」时，在候选项的 comment 显示正确写法
 
+	关闭此 Lua 时，同时需要关闭 translator/spelling_hints，否则 comment 里都是拼音
+
 	为了让这个 Lua 同时适配全拼与双拼，使用 `spelling_hints` 生成的 comment（全拼拼音）作为通用的判断条件。
 	感谢大佬@[Shewer Lu](https://github.com/shewer)提供的思路。
 	
@@ -24,16 +26,16 @@ function M.init(env)
         -- 错音
         ["hun dun"] = { text = "馄饨", comment = "hún tun" },
         ["zhu jiao"] = { text = "主角", comment = "zhǔ jué" },
-        ["jiao se"] = { text = "角色", comment = "júe sè" },
+        ["jiao se"] = { text = "角色", comment = "jué sè" },
         ["chi pi sa"] = { text = "吃比萨", comment = "chī bǐ sà" },
         ["pi sa bing"] = { text = "比萨饼", comment = "bǐ sà bǐng" },
         ["shui fu"] = { text = "说服", comment = "shuō fú" },
-        ["dao hang"] = { text = "道行", comment = "dào héng" },
+        ["dao hang"] = { text = "道行", comment = "dào heng" },
         ["mo yang"] = { text = "模样", comment = "mú yàng" },
         ["you mo you yang"] = { text = "有模有样", comment = "yǒu mú yǒu yàng" },
         ["yi mo yi yang"] = { text = "一模一样", comment = "yī mú yī yàng" },
         ["zhuang mo zuo yang"] = { text = "装模作样", comment = "zhuāng mú zuò yàng" },
-        ["ren mo gou yang"] = { text = "人模狗样", comment = "rén mú góu yàng" },
+        ["ren mo gou yang"] = { text = "人模狗样", comment = "rén mú gǒu yàng" },
         ["mo ban"] = { text = "模板", comment = "mú bǎn" },
         ["a mi tuo fo"] = { text = "阿弥陀佛", comment = "ē mí tuó fó" },
         ["na mo a mi tuo fo"] = { text = "南无阿弥陀佛", comment = "nā mó ē mí tuó fó" },
@@ -44,7 +46,7 @@ function M.init(env)
         ["zhang bai zhi"] = { text = "张柏芝", comment = "zhāng bó zhī" },
         ["teng man"] = { text = "藤蔓", comment = "téng wàn" },
         ["nong tang"] = { text = "弄堂", comment = "lòng táng" },
-        ["xin kuan ti pang"] = { text = "心宽体胖", comment = "xīn kūan tǐ pán" },
+        ["xin kuan ti pang"] = { text = "心宽体胖", comment = "xīn kuān tǐ pán" },
         ["mai yuan"] = { text = "埋怨", comment = "mán yuàn" },
         ["xu yu wei she"] = { text = "虚与委蛇", comment = "xū yǔ wēi yí" },
         ["mu na"] = { text = "木讷", comment = "mù nè" },
@@ -56,7 +58,7 @@ function M.init(env)
         ["cao zhi"] = { text = "草薙", comment = "cǎo tì" },
         ["cao zhi jing"] = { text = "草薙京", comment = "cǎo tì jīng" },
         ["cao zhi jian"] = { text = "草薙剑", comment = "cǎo tì jiàn" },
-        ["jia ping ao"] = { text = "贾平凹", comment = "jià píng wā" },
+        ["jia ping ao"] = { text = "贾平凹", comment = "jiǎ píng wā" },
         ["xue fo lan"] = { text = "雪佛兰", comment = "xuě fú lán" },
         ["qiang jin"] = { text = "强劲", comment = "qiáng jìng" },
         ["tong ti"] = { text = "胴体", comment = "dòng tǐ" },
@@ -85,7 +87,7 @@ function M.init(env)
         ["ci ya"] = { text = "龇牙", comment = "zī yá" },
         ["ci zhe ya"] = { text = "龇着牙", comment = "zī zhe yá" },
         ["ci ya lie zui"] = { text = "龇牙咧嘴", comment = "zī yá liě zuǐ" },
-        ["tou pi xue"] = { text = "头皮屑", comment = "tóu pi xiè" },
+        ["tou pi xue"] = { text = "头皮屑", comment = "tóu pí xiè" },
         ["liu an shi"] = { text = "六安市", comment = "lù ān shì" },
         ["liu an xian"] = { text = "六安县", comment = "lù ān xiàn" },
         ["an hui sheng liu an shi"] = { text = "安徽省六安市", comment = "ān huī shěng lù ān shì" },
@@ -104,6 +106,9 @@ function M.init(env)
         ["yin gai"] = { text = "应该", comment = "应(yīng)该" },
         ["nian tie"] = { text = "粘贴", comment = "粘(zhān)贴" },
         ["gao ju li"] = { text = "高句丽", comment = "高句(gōu)丽" },
+        ["jiao dou shi"] = { text = "角斗士", comment = "角(jué)斗士" },
+        ["suo sha mi"] = { text = "缩砂密", comment = "缩(sù)砂密" },
+        ["po ji pao"] = { text = "迫击炮", comment = "迫(pǎi)击炮" },
         -- 错字
         ["pu jie"] = { text = "扑街", comment = "仆街" },
         ["pu gai"] = { text = "扑街", comment = "仆街" },

@@ -13,14 +13,13 @@ return {
         enabled = not environment.is_vscode,
         init = function()
             -- ccc 自动激活
-            local ccc_activate = vim.api.nvim_create_augroup("CccActivate", { clear = true })
             vim.api.nvim_create_autocmd("BufReadPost", {
                 callback = function()
                     require("ccc")
                     pcall(vim.api.nvim_del_augroup_by_name, "CccActivate")
                 end,
                 desc = "Activate ccc",
-                group = ccc_activate,
+                group = vim.api.nvim_create_augroup("CccActivate", { clear = true }),
                 pattern = {
                     "*.conf",
                     "*.css",

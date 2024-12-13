@@ -14,6 +14,7 @@ use crate::memory::Memory;
 use crate::memory::MemoryConfig;
 use crate::network::Network;
 use crate::network::NetworkConfig;
+use crate::render::RenderConfig;
 use crate::storage::Storage;
 use crate::storage::StorageConfig;
 use crate::time::Time;
@@ -25,7 +26,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 pub trait BarWidget {
-    fn render(&mut self, ctx: &Context, ui: &mut Ui);
+    fn render(&mut self, ctx: &Context, ui: &mut Ui, config: &mut RenderConfig);
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
@@ -55,6 +56,38 @@ impl WidgetConfig {
             WidgetConfig::Network(config) => Box::new(Network::from(*config)),
             WidgetConfig::Storage(config) => Box::new(Storage::from(*config)),
             WidgetConfig::Time(config) => Box::new(Time::from(config.clone())),
+        }
+    }
+
+    pub fn enabled(&self) -> bool {
+        match self {
+            WidgetConfig::Battery(config) => config.enable,
+            WidgetConfig::Cpu(config) => config.enable,
+            WidgetConfig::Date(config) => config.enable,
+            WidgetConfig::Komorebi(config) => {
+                config.workspaces.enable
+                    || (if let Some(layout) = &config.layout {
+                        layout.enable
+                    } else {
+                        false
+                    })
+                    || (if let Some(focused_window) = &config.focused_window {
+                        focused_window.enable
+                    } else {
+                        false
+                    })
+                    || (if let Some(configuration_switcher) = &config.configuration_switcher {
+                        configuration_switcher.enable
+                    } else {
+                        false
+                    })
+            }
+            WidgetConfig::Language(config) => config.enable,
+            WidgetConfig::Media(config) => config.enable,
+            WidgetConfig::Memory(config) => config.enable,
+            WidgetConfig::Network(config) => config.enable,
+            WidgetConfig::Storage(config) => config.enable,
+            WidgetConfig::Time(config) => config.enable,
         }
     }
 }

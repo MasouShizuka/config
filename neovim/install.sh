@@ -3,8 +3,8 @@ PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
 CONFIG_DIR=$DIR/config
 
-scoop install neovim --no-cache
-scoop install "$PARENT_DIR/Scoop/config/workspace/im-select.json" --no-cache
+scoop install neovim
+scoop install "$PARENT_DIR/Scoop/config/workspace/im-select.json"
 
 target="$LOCALAPPDATA/nvim"
 clean_target "$target"

@@ -1,10 +1,10 @@
 {
-    "version": "7.0-beta29",
+    "version": "7.0-beta31",
     "description": "An open source monospace font with round corner and ligatures for IDE and command line. (Simplified Chinese with Nerd Fonts patched)",
     "homepage": "https://github.com/subframe7536/Maple-font",
     "license": "OFL-1.1",
-    "url": "https://github.com/subframe7536/Maple-font/releases/download/v7.0-beta29/MapleMono-NF-CN.zip",
-    "hash": "85104523fcaa15db8539dcd60098bfc12011d796efa51d1fd5dc2cc418b8db16",
+    "url": "https://github.com/subframe7536/Maple-font/releases/download/v7.0-beta31/MapleMono-NF-CN.zip",
+    "hash": "6d5a19762f27f38347e28e55e357d9f9b380621992ce15da4f9787dfde0aeba1",
     "installer": {
         "script": [
             "$currentBuildNumber = [int] (Get-ItemProperty \"HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\").CurrentBuildNumber",
@@ -87,8 +87,8 @@
     },
     "checkver": {
         "url": "https://api.github.com/repos/subframe7536/maple-font/releases",
-        "jsonpath": "$[0]['assets'][?(@.name == 'MapleMono-NF-CN.zip')]['browser_download_url']",
-        "regex": "https://github.com/subframe7536/maple-font/releases/download/v([\\w.-]+)/MapleMono-NF-CN.zip"
+        "jsonpath": "$..browser_download_url",
+        "regex": "download/v([\\w.-]+)/MapleMono-NF-CN.zip"
     },
     "autoupdate": {
         "url": "https://github.com/subframe7536/Maple-font/releases/download/v$version/MapleMono-NF-CN.zip"

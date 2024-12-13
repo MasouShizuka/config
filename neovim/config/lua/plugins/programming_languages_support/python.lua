@@ -51,7 +51,7 @@ return {
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
                         require("venv-selector")
-                        utils.refresh_buf(args.buf, 1, false)
+                        utils.refresh_buf(args.buf, 1000, false)
                         vim.api.nvim_del_augroup_by_name("VenvActivate")
                     end
                 end,

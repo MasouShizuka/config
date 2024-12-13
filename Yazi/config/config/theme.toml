@@ -1,3 +1,4 @@
 [flavor]
 
-use = "onedarkpro"
+dark = "onedarkpro"
+light = "onedarkpro"

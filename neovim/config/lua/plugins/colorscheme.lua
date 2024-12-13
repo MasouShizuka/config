@@ -19,6 +19,7 @@ return {
                 WinBar = { bg = "none" },
                 WinBarNC = { bg = "none" },
             }
+
             if not environment.is_undercurl_available then
                 overrides = vim.tbl_deep_extend("force", overrides, {
                     GruvboxRedUnderline = { undercurl = false, underline = true },
@@ -30,16 +31,24 @@ return {
                     GruvboxOrangeUnderline = { undercurl = false, underline = true },
                 })
             end
+
             if utils.is_available("flash.nvim") then
                 overrides.FlashBackdrop = { link = "Comment" }
                 overrides.FlashLabel = { bg = colors.get_color("red", "gruvbox"), bold = true }
             end
+
+            if utils.is_available("gitsigns.nvim") then
+                overrides.GitSignsChange = { link = "GruvboxBlue" }
+            end
+
             if utils.is_available("mini.indentscope") then
                 overrides.MiniIndentscopeSymbol = { fg = colors.get_color("orange", "gruvbox") }
             end
+
             if utils.is_available("nvim-tree.lua") then
                 overrides.NvimTreeOpenedFile = { fg = colors.get_color("orange", "gruvbox") }
             end
+
             if utils.is_available("nvim-treesitter-context") then
                 overrides.TreesitterContextBottom = { underline = true }
                 overrides.TreesitterContextLineNumber = { fg = colors.get_color("purple", "gruvbox") }
@@ -82,11 +91,13 @@ return {
             ---@param highlights tokyonight.Highlights
             ---@param colors ColorScheme
             on_highlights = function(hl, c)
-                hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c[colors.get_colorscheme_color("tokyonight", "gray")] })
+                hl["@module"] = { fg = c[colors.get_colorscheme_color("tokyonight", "white")] }
+                hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
                 hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_colorscheme_color("tokyonight", "gray")] })
                 hl.StatusLine = vim.tbl_deep_extend("force", hl.StatusLine or {}, { bg = "none" })
                 hl.StatusLineNC = vim.tbl_deep_extend("force", hl.StatusLineNC or {}, { bg = "none" })
                 hl.TabLineFill = vim.tbl_deep_extend("force", hl.TabLineFill or {}, { bg = "none" })
+
                 if not environment.is_undercurl_available then
                     hl.DiagnosticUnderlineError = vim.tbl_deep_extend("force", hl.DiagnosticUnderlineError or {}, { undercurl = false, underline = true })
                     hl.DiagnosticUnderlineWarn = vim.tbl_deep_extend("force", hl.DiagnosticUnderlineWarn or {}, { undercurl = false, underline = true })
@@ -97,16 +108,19 @@ return {
                     hl.SpellLocal = vim.tbl_deep_extend("force", hl.SpellLocal or {}, { undercurl = false, underline = true })
                     hl.SpellRare = vim.tbl_deep_extend("force", hl.SpellRare or {}, { undercurl = false, underline = true })
                 end
+
                 if utils.is_available("nvim-tree.lua") then
                     hl.NvimTreeNormal = { link = "NvimTreeNormalFloat" }
                     hl.NvimTreeNormalNC = { link = "NvimTreeNormalFloat" }
                     hl.NvimTreeOpenedFile = { fg = c[colors.get_colorscheme_color("tokyonight", "purple")] }
                     hl.NvimTreeOpenedHL = { link = "NvimTreeOpenedFile" }
                 end
+
                 if utils.is_available("nvim-treesitter-context") then
                     hl.TreesitterContextBottom = vim.tbl_deep_extend("force", hl.TreesitterContextBottom or {}, { underline = true })
                     hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_colorscheme_color("tokyonight", "purple")] })
                 end
+
                 if utils.is_available("telescope.nvim") then
                     hl.TelescopeSelection = vim.tbl_deep_extend("force", hl.TelescopeSelection or {}, { bg = c[colors.get_colorscheme_color("tokyonight", "black")] })
                 end
@@ -132,21 +146,21 @@ return {
         event = {
             "User ColorschemePre",
         },
-        lazy = true,
         opts = function()
             local highlights = {
-                CursorLineNr = { fg = "${purple}" },
-                DiagnosticUnderlineError = { sp = "${red}", undercurl = true },
-                DiagnosticUnderlineWarn = { sp = "${yellow}", undercurl = true },
-                DiagnosticUnderlineInfo = { sp = "${blue}", undercurl = true },
-                DiagnosticUnderlineHint = { sp = "${cyan}", undercurl = true },
-                MatchParen = { bg = "${gray}" },
-                PmenuThumb = { bg = "${gray}" },
-                SpellBad = { sp = "${red}", undercurl = true },
-                SpellCap = { sp = "${yellow}", undercurl = true },
-                SpellLocal = { sp = "${blue}", undercurl = true },
-                SpellRare = { sp = "${green}", undercurl = true },
+                CursorLineNr = { fg = colors.get_color("purple", "onedark") },
+                DiagnosticUnderlineError = { sp = colors.get_color("red", "onedark"), undercurl = true },
+                DiagnosticUnderlineWarn = { sp = colors.get_color("yellow", "onedark"), undercurl = true },
+                DiagnosticUnderlineInfo = { sp = colors.get_color("blue", "onedark"), undercurl = true },
+                DiagnosticUnderlineHint = { sp = colors.get_color("cyan", "onedark"), undercurl = true },
+                MatchParen = { bg = colors.get_color("gray", "onedark") },
+                PmenuThumb = { bg = colors.get_color("gray", "onedark") },
+                SpellBad = { sp = colors.get_color("red", "onedark"), undercurl = true },
+                SpellCap = { sp = colors.get_color("yellow", "onedark"), undercurl = true },
+                SpellLocal = { sp = colors.get_color("blue", "onedark"), undercurl = true },
+                SpellRare = { sp = colors.get_color("green", "onedark"), undercurl = true },
             }
+
             if not environment.is_undercurl_available then
                 highlights = vim.tbl_deep_extend("force", highlights, {
                     DiagnosticUnderlineError = { undercurl = false, underline = true },
@@ -159,12 +173,14 @@ return {
                     SpellRare = { undercurl = false, underline = true },
                 })
             end
+
             if utils.is_available("nvim-tree.lua") then
                 highlights.NvimTreeOpenedHL = { link = "NvimTreeOpenedFile" }
             end
+
             if utils.is_available("nvim-treesitter-context") then
                 highlights.TreesitterContextBottom = { underline = true }
-                highlights.TreesitterContextLineNumber = { fg = "${purple}" }
+                highlights.TreesitterContextLineNumber = { fg = colors.get_color("purple", "onedark") }
             end
 
             return {

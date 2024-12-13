@@ -71,7 +71,7 @@
           "workspace_rules": [
             {
               "kind": "Exe",
-              "id": "Clash Verge.exe",
+              "id": "clash-verge.exe",
               "matching_strategy": "Equals"
             },
             {

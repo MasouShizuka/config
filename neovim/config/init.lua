@@ -1,4 +1,6 @@
+local buftype = require("utils.buftype")
 local environment = require("utils.environment")
+local filetype = require("utils.filetype")
 local keymap = require("utils.keymap")
 local path = require("utils.path")
 local utils = require("utils")
@@ -112,18 +114,7 @@ return require("lazy").setup({
                 { "N", desc = "Previous",        mode = { "n", "x" } },
             },
             name = "config.autocommands.hlsearch",
-            opts = {
-                pre_hook = function()
-                    if utils.is_available("mini.map") then
-                        require("mini.map").refresh()
-                    end
-                end,
-                post_hook = function()
-                    if utils.is_available("mini.map") then
-                        require("mini.map").refresh()
-                    end
-                end,
-            },
+            opts = {},
         },
 
         {
@@ -209,32 +200,6 @@ return require("lazy").setup({
                 { "<leader>gclr",  function() require("comment-box").line({ position = "right" }) end,                                                                    desc = "Right aligned line",                                      mode = { "n", "x" } },
                 { "<leader>gcd",   function() require("comment-box").dbox() end,                                                                                          desc = "Remove a box or titled line, keeping its content",        mode = { "n", "x" } },
                 { "<leader>gcy",   function() require("comment-box").yank() end,                                                                                          desc = "Yank the content of a box or titled line",                mode = { "n", "x" } },
-                -- { "<leader>gcbll", function() require("comment-box").box({ position = "left", justification = "left" }, { doc_width = 80, box_width = 60 }) end,             desc = "Left aligned box of fixed size with Left aligned text",   mode = { "n", "x" } },
-                -- { "<leader>gcblc", function() require("comment-box").box({ position = "left", justification = "center" }, { doc_width = 80, box_width = 60 }) end,           desc = "Left aligned box of fixed size with Centered text",       mode = { "n", "x" } },
-                -- { "<leader>gcblr", function() require("comment-box").box({ position = "left", justification = "right" }, { doc_width = 80, box_width = 60 }) end,            desc = "Left aligned box of fixed size with Right aligned text",  mode = { "n", "x" } },
-                -- { "<leader>gcbcl", function() require("comment-box").box({ position = "center", justification = "left" }, { doc_width = 80, box_width = 60 }) end,           desc = "Centered box of fixed size with Left aligned text",       mode = { "n", "x" } },
-                -- { "<leader>gcbcc", function() require("comment-box").box({ position = "center", justification = "center" }, { doc_width = 80, box_width = 60 }) end,         desc = "Centered box of fixed size with Centered text",           mode = { "n", "x" } },
-                -- { "<leader>gcbcr", function() require("comment-box").box({ position = "center", justification = "right" }, { doc_width = 80, box_width = 60 }) end,          desc = "Centered box of fixed size with Right aligned text",      mode = { "n", "x" } },
-                -- { "<leader>gcbrl", function() require("comment-box").box({ position = "right", justification = "left" }, { doc_width = 80, box_width = 60 }) end,            desc = "Right aligned box of fixed size with Left aligned text",  mode = { "n", "x" } },
-                -- { "<leader>gcbrc", function() require("comment-box").box({ position = "right", justification = "center" }, { doc_width = 80, box_width = 60 }) end,          desc = "Right aligned box of fixed size with Centered text",      mode = { "n", "x" } },
-                -- { "<leader>gcbrr", function() require("comment-box").box({ position = "right", justification = "right" }, { doc_width = 80, box_width = 60 }) end,           desc = "Right aligned box of fixed size with Right aligned text", mode = { "n", "x" } },
-                -- { "<leader>gcbla", function() require("comment-box").box({ position = "left", justification = "adapted" }, { doc_width = 10000, box_width = 10000 }) end,    desc = "Left aligned adapted box",                                mode = { "n", "x" } },
-                -- { "<leader>gcbca", function() require("comment-box").box({ position = "center", justification = "adapted" }, { doc_width = 80, box_width = 60 }) end,        desc = "Centered adapted box",                                    mode = { "n", "x" } },
-                -- { "<leader>gcbra", function() require("comment-box").box({ position = "right", justification = "adapted" }, { doc_width = 80, box_width = 60 }) end,         desc = "Right aligned adapted box",                               mode = { "n", "x" } },
-                -- { "<leader>gctll", function() require("comment-box").titled_line({ position = "left", justification = "left" }, { doc_width = 80, box_width = 60 }) end,     desc = "Left aligned titled line with Left aligned text",         mode = { "n", "x" } },
-                -- { "<leader>gctlc", function() require("comment-box").titled_line({ position = "left", justification = "center" }, { doc_width = 80, box_width = 60 }) end,   desc = "Left aligned titled line with Centered text",             mode = { "n", "x" } },
-                -- { "<leader>gctlr", function() require("comment-box").titled_line({ position = "left", justification = "right" }, { doc_width = 80, box_width = 60 }) end,    desc = "Left aligned titled line with Right aligned text",        mode = { "n", "x" } },
-                -- { "<leader>gctcl", function() require("comment-box").titled_line({ position = "center", justification = "left" }, { doc_width = 80, box_width = 60 }) end,   desc = "Centered titled line with Left aligned text",             mode = { "n", "x" } },
-                -- { "<leader>gctcc", function() require("comment-box").titled_line({ position = "center", justification = "center" }, { doc_width = 80, box_width = 60 }) end, desc = "Centered titled line with Centered text",                 mode = { "n", "x" } },
-                -- { "<leader>gctcr", function() require("comment-box").titled_line({ position = "center", justification = "right" }, { doc_width = 80, box_width = 60 }) end,  desc = "Centered titled line with Right aligned text",            mode = { "n", "x" } },
-                -- { "<leader>gctrl", function() require("comment-box").titled_line({ position = "right", justification = "left" }, { doc_width = 80, box_width = 60 }) end,    desc = "Right aligned titled line with Left aligned text",        mode = { "n", "x" } },
-                -- { "<leader>gctrc", function() require("comment-box").titled_line({ position = "right", justification = "center" }, { doc_width = 80, box_width = 60 }) end,  desc = "Right aligned titled line with Centered text",            mode = { "n", "x" } },
-                -- { "<leader>gctrr", function() require("comment-box").titled_line({ position = "right", justification = "right" }, { doc_width = 80, box_width = 60 }) end,   desc = "Right aligned titled line with Right aligned text",       mode = { "n", "x" } },
-                -- { "<leader>gcll",  function() require("comment-box").line({ position = "left" }, { doc_width = 80, box_width = 60 }) end,                                    desc = "Left aligned line",                                       mode = { "n", "x" } },
-                -- { "<leader>gclc",  function() require("comment-box").line({ position = "center" }, { doc_width = 80, box_width = 60 }) end,                                  desc = "Centered line",                                           mode = { "n", "x" } },
-                -- { "<leader>gclr",  function() require("comment-box").line({ position = "right" }, { doc_width = 80, box_width = 60 }) end,                                   desc = "Right aligned line",                                      mode = { "n", "x" } },
-                -- { "<leader>gcd",   function() require("comment-box").dbox() end,                                                                                             desc = "Remove a box or titled line, keeping its content",        mode = { "n", "x" } },
-                -- { "<leader>gcy",   function() require("comment-box").yank() end,                                                                                             desc = "Yank the content of a box or titled line",                mode = { "n", "x" } },
             },
             name = "config.user_commands.comment-box",
             opts = {
@@ -363,6 +328,39 @@ return require("lazy").setup({
             name = "config.user_commands.undoquit",
             opts = {},
         },
+
+        {
+            cmd = {
+                "WindowsMaximize",
+                "WindowsMaximizeVertical",
+                "WindowsMaximizeHorizont",
+                "WindowsEqualize",
+                "WindowsToggleAutowidth",
+            },
+            dir = path.config_path .. "/lua/config/user_commands/windows",
+            enabled = not environment.is_vscode,
+            event = {
+                "BufNewFile",
+                "BufReadPost",
+            },
+            keys = {
+                { "<c-s><c-m>", function() vim.api.nvim_command("WindowsMaximize") end,             desc = "Maximize current window",                 mode = "n" },
+                { "<c-s><c-c>", function() vim.api.nvim_command("WindowsMaximizeVertically") end,   desc = "Maximize height of the current window",   mode = "n" },
+                { "<c-s><c-r>", function() vim.api.nvim_command("WindowsMaximizeHorizontally") end, desc = "Maximize width of the current window",    mode = "n" },
+                { "<c-s><c-e>", function() vim.api.nvim_command("WindowsEqualize") end,             desc = "Equalize all windows heights and widths", mode = "n" },
+                { "<c-s><c-t>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
+            },
+            name = "config.user_commands.windows",
+            opts = {
+                ignore = {
+                    buftype = buftype.skip_buftype_list,
+                    filetype = filetype.skip_filetype_list,
+                },
+                animation = {
+                    enable = false,
+                },
+            },
+        },
     },
     defaults = {
         -- Set this to `true` to have all your plugins lazy-loaded by default.
@@ -386,11 +384,11 @@ return require("lazy").setup({
         enabled = not environment.is_vscode,
     },
     change_detection = {
-        -- get a notification when changes are found
-        notify = false,
+        notify = false, -- get a notification when changes are found
     },
     performance = {
         rtp = {
+            ---@type string[] list any plugins you want to disable here
             disabled_plugins = {
                 "gzip",
                 "matchit",

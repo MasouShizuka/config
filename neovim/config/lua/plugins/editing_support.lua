@@ -322,7 +322,7 @@ return {
                 -- '/usr/local/bin/im-select' for binary without extra arguments,
                 -- or { "AIMSwitcher.exe", "--imm" } for binary need extra arguments to work.
                 -- For Windows/WSL, default: "im-select.exe"
-                -- For macOS, default: "im-select"
+                -- For macOS, default: "macism"
                 -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
                 default_command         = default_command,
 

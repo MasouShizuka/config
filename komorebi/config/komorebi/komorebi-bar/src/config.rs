@@ -1,3 +1,4 @@
+use crate::render::Grouping;
 use crate::widget::WidgetConfig;
 use eframe::egui::Pos2;
 use eframe::egui::TextBuffer;
@@ -31,8 +32,16 @@ pub struct KomobarConfig {
     pub max_label_width: Option<f32>,
     /// Theme
     pub theme: Option<KomobarTheme>,
+    /// Alpha value for the color transparency [[0-255]] (default: 200)
+    pub transparency_alpha: Option<u8>,
+    /// Spacing between widgets (default: 10.0)
+    pub widget_spacing: Option<f32>,
+    /// Visual grouping for widgets
+    pub grouping: Option<Grouping>,
     /// Left side widgets (ordered left-to-right)
     pub left_widgets: Vec<WidgetConfig>,
+    /// Center widgets (ordered left-to-right)
+    pub center_widgets: Option<Vec<WidgetConfig>>,
     /// Right side widgets (ordered left-to-right)
     pub right_widgets: Vec<WidgetConfig>,
 }
@@ -179,5 +188,15 @@ pub enum LabelPrefix {
     /// Show text
     Text,
     /// Show an icon and text
+    IconAndText,
+}
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub enum DisplayFormat {
+    /// Show only icon
+    Icon,
+    /// Show only text
+    Text,
+    /// Show both icon and text
     IconAndText,
 }

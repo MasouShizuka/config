@@ -5,7 +5,11 @@ clean_target() {
 
     echo "删除已有的 $target"
     if [[ -d "$target" ]]; then
-        rm -rf "$target"
+        for f in "$target"/*; do
+            [[ -e "$f" ]] || break
+
+            rm -rf "$f"
+        done
     fi
 }
 

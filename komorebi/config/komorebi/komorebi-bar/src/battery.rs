@@ -1,6 +1,6 @@
 use crate::config::LabelPrefix;
+use crate::render::RenderConfig;
 use crate::widget::BarWidget;
-use crate::WIDGET_SPACING;
 use eframe::egui::text::LayoutJob;
 use eframe::egui::Context;
 use eframe::egui::FontId;
@@ -30,37 +30,18 @@ pub struct BatteryConfig {
 
 impl From<BatteryConfig> for Battery {
     fn from(value: BatteryConfig) -> Self {
-        let manager = Manager::new().unwrap();
-        let mut last_state = String::new();
-        let mut state = None;
-        let prefix = value.label_prefix.unwrap_or(LabelPrefix::Icon);
-
-        if let Ok(mut batteries) = manager.batteries() {
-            if let Some(Ok(first)) = batteries.nth(0) {
-                let percentage = first.state_of_charge().get::<percent>();
-                match first.state() {
-                    State::Charging => state = Some(BatteryState::Charging),
-                    State::Discharging => state = Some(BatteryState::Discharging),
-                    _ => {}
-                }
-
-                last_state = match prefix {
-                    LabelPrefix::Text | LabelPrefix::IconAndText => {
-                        format!("BAT: {percentage:.0}%")
-                    }
-                    LabelPrefix::None | LabelPrefix::Icon => format!("{percentage:.0}%"),
-                }
-            }
-        }
+        let data_refresh_interval = value.data_refresh_interval.unwrap_or(10);
 
         Self {
             enable: value.enable,
-            manager,
-            last_state,
-            data_refresh_interval: value.data_refresh_interval.unwrap_or(10),
-            label_prefix: prefix,
-            state: state.unwrap_or(BatteryState::Discharging),
-            last_updated: Instant::now(),
+            manager: Manager::new().unwrap(),
+            last_state: String::new(),
+            data_refresh_interval,
+            label_prefix: value.label_prefix.unwrap_or(LabelPrefix::Icon),
+            state: BatteryState::Discharging,
+            last_updated: Instant::now()
+                .checked_sub(Duration::from_secs(data_refresh_interval))
+                .unwrap(),
         }
     }
 }
@@ -115,7 +96,7 @@ impl Battery {
 }
 
 impl BarWidget for Battery {
-    fn render(&mut self, ctx: &Context, ui: &mut Ui) {
+    fn render(&mut self, ctx: &Context, ui: &mut Ui, config: &mut RenderConfig) {
         if self.enable {
             let output = self.output();
             if !output.is_empty() {
@@ -147,14 +128,14 @@ impl BarWidget for Battery {
                     TextFormat::simple(font_id, ctx.style().visuals.text_color()),
                 );
 
-                ui.add(
-                    Label::new(layout_job)
-                        .selectable(false)
-                        .sense(Sense::click()),
-                );
+                config.apply_on_widget(true, ui, |ui| {
+                    ui.add(
+                        Label::new(layout_job)
+                            .selectable(false)
+                            .sense(Sense::click()),
+                    );
+                });
             }
-
-            ui.add_space(WIDGET_SPACING);
         }
     }
 }

@@ -3,11 +3,70 @@ local environment = require("utils.environment")
 local utils = require("utils")
 
 return {
+    -- {
+    --     "dstein64/nvim-scrollview",
+    --     cmd = {
+    --         "ScrollViewDisable",
+    --         "ScrollViewEnable",
+    --         "ScrollViewToggle",
+    --         "ScrollViewRefresh",
+    --         "ScrollViewNext",
+    --         "ScrollViewPrev",
+    --         "ScrollViewFirst",
+    --         "ScrollViewLast",
+    --         "ScrollViewLegend",
+    --     },
+    --     config = function(_, opts)
+    --         require("scrollview").setup(opts)
+    --
+    --         if utils.is_available("gitsigns.nvim") then
+    --             vim.api.nvim_create_autocmd("User", {
+    --                 callback = function()
+    --                     require("scrollview.contrib.gitsigns").setup()
+    --                 end,
+    --                 desc = "description",
+    --                 group = vim.api.nvim_create_augroup("ScrollviewGitsigns", { clear = true }),
+    --                 pattern = "GitFile",
+    --             })
+    --         end
+    --     end,
+    --     enabled = not environment.is_vscode,
+    --     event = {
+    --         "BufNewFile",
+    --         "BufReadPost",
+    --     },
+    --     opts = {
+    --         byte_limit = -1,
+    --         current_only = true,
+    --         excluded_filetypes = filetype.skip_filetype_list,
+    --         line_limit = -1,
+    --         signs_on_startup = {
+    --             "changelist",
+    --             "conflicts",
+    --             -- "cursor",
+    --             "diagnostics",
+    --             "folds",
+    --             "latestchange",
+    --             "loclist",
+    --             "marks",
+    --             "quickfix",
+    --             "search",
+    --             "spell",
+    --             -- "textwidth",
+    --             -- "trail",
+    --         },
+    --         diagnostics_severities = {
+    --             vim.diagnostic.severity.ERROR,
+    --             vim.diagnostic.severity.WARN,
+    --         },
+    --     },
+    -- },
+
     {
         "echasnovski/mini.map",
         config = function(_, opts)
             local map = require("mini.map")
-            require("mini.map").setup(opts)
+            map.setup(opts)
 
             if vim.g.minimap_enabled == nil then
                 vim.g.minimap_enabled = true
@@ -168,21 +227,24 @@ return {
             local minimap_search = "MiniMapSearch"
             local minimap_spell = "MiniMapSpell"
             local function set_hl()
-                vim.api.nvim_set_hl(0, minimap_search, { fg = colors.get_color(colors.colors.green) })
+                vim.api.nvim_set_hl(0, minimap_search, { fg = colors.get_color(colors.colors.orange) })
                 vim.api.nvim_set_hl(0, minimap_spell, { fg = colors.get_color(colors.colors.purple) })
             end
 
             set_hl()
             vim.api.nvim_create_autocmd("ColorScheme", {
-                callback = function()
-                    set_hl()
-                end,
+                callback = set_hl,
                 desc = "Set hl for minimap",
                 group = vim.api.nvim_create_augroup("MiniMapHighlight", { clear = true }),
             })
 
             local integrations = {
                 map.gen_integration.builtin_search({ search = minimap_search }),
+                map.gen_integration.diff({
+                    add = "DiffAdd",
+                    change = "DiffChange",
+                    delete = "DiffDelete",
+                }),
                 map.gen_integration.diagnostic({
                     error = "DiagnosticError",
                     warn  = "DiagnosticWarn",
@@ -192,6 +254,44 @@ return {
             if utils.is_git() then
                 table.insert(integrations, 4, map.gen_integration.gitsigns())
             end
+
+            -- It's possible that <cmd>nohlsearch<cr> was executed from a mapping, and
+            -- wouldn't be handled by the CmdlineLeave callback above. Use a CursorMoved
+            -- event to check if search signs are shown when they shouldn't be, and
+            -- update accordingly. Also handle the case where 'n', 'N', '*', '#', 'g*',
+            -- or 'g#' are pressed (although these won't be properly handled when there
+            -- is only one search result and the cursor is already on it, since the
+            -- cursor wouldn't move; creating scrollview refresh mappings for those keys
+            -- could handle that scenario). NOTE: If there are scenarios where search
+            -- signs become out of sync (i.e., shown when they shouldn't be), this same
+            -- approach could be used with a timer.
+            vim.api.nvim_create_autocmd("CursorMoved", {
+                callback = function()
+                    -- Use defer_fn since vim.v.hlsearch may not have been properly set yet.
+                    vim.defer_fn(function()
+                        local refresh = false
+                        if vim.v.hlsearch ~= 0 then
+                            local searchcount_total = 0
+                            pcall(function()
+                                -- searchcount() can return {} (e.g., when launching Neovim
+                                -- with -i NONE).
+                                searchcount_total = vim.fn.searchcount().total or 0
+                            end)
+                            if searchcount_total > 0 then
+                                refresh = true
+                            end
+                        else
+                            refresh = true
+                        end
+
+                        if refresh then
+                            map.refresh({}, { lines = false, scrollbar = false })
+                        end
+                    end, 0)
+                end,
+                desc = "On 'search' update",
+                group = vim.api.nvim_create_augroup("MiniMapSearch", { clear = true }),
+            })
 
             return {
                 -- Highlight integrations (none by default)
@@ -244,6 +344,9 @@ return {
             -- All these keys will be mapped to their corresponding default scrolling animation
             mappings = {},
             hide_cursor = false, -- Hide cursor while scrolling
+            ignored_events = {   -- Events ignored while scrolling
+                "WinScrolled",
+            },
         },
     },
 }

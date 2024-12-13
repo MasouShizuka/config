@@ -116,24 +116,135 @@ function M.setup(opts)
         vim.keymap.set("n", "zr", function() vscode.action("editor.unfoldAll") end, { silent = true })
 
         -- 平滑滚动，防止 vscode 产生新的 jumplist
-        local scroll_interval = 10
-        vim.keymap.set({ "n", "x" }, "<c-d>", function()
-            vim.fn.timer_stopall()
-            local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
-            for i = 1, scroll do
-                vim.fn.timer_start(i * scroll_interval, function()
-                    vim.cmd.normal({ "j", bang = true })
-                end)
+        -- https://github.com/niuiic/scroll.nvim
+        local scroll_count = 0
+        ---@param target_line number
+        ---@param step fun(current_line: number, target_line: number) {next_line: number, delay: number, target_line: number | nil}
+        local scroll = function(target_line, step)
+            scroll_count = scroll_count + 1
+            local current_count = scroll_count
+            local line_count = vim.api.nvim_buf_line_count(0)
+            local start_line = vim.api.nvim_win_get_cursor(0)[1]
+            local column = vim.api.nvim_win_get_cursor(0)[2]
+            local end_line
+            local scroll_direction
+            local current_line = start_line
+
+            local make_config = function()
+                if target_line > line_count then
+                    end_line = line_count
+                elseif target_line < 1 then
+                    end_line = 1
+                else
+                    end_line = math.floor(target_line)
+                end
+                if start_line < end_line then
+                    scroll_direction = "down"
+                else
+                    scroll_direction = "up"
+                end
             end
+            make_config()
+
+            local scroll_step
+            scroll_step = function()
+                if scroll_count ~= current_count then
+                    return
+                end
+
+                if scroll_direction == "down" and current_line >= end_line then
+                    return
+                end
+
+                if scroll_direction == "up" and current_line <= end_line then
+                    return
+                end
+
+                local cur_step = step(current_line, target_line)
+                if cur_step.target_line ~= nil then
+                    target_line = cur_step.target_line
+                    make_config()
+                end
+                local next_line
+                if scroll_direction == "down" and cur_step.next_line > end_line then
+                    next_line = end_line
+                elseif scroll_direction == "up" and cur_step.next_line < end_line then
+                    next_line = end_line
+                else
+                    next_line = math.floor(cur_step.next_line)
+                end
+
+                if next_line == current_line then
+                    vim.notify("Next line is equal to current line, scroll exits, check your config", vim.log.levels.WARN, {
+                        title = "scroll.nvim",
+                    })
+                    return
+                end
+
+                local ok = pcall(vim.api.nvim_win_set_cursor, 0, { next_line, column })
+                if not ok then
+                    return
+                end
+                current_line = next_line
+                vim.defer_fn(scroll_step, cur_step.delay)
+            end
+
+            scroll_step()
+        end
+        vim.keymap.set({ "n", "x" }, "<c-d>", function()
+            local screen_h = vim.api.nvim_get_option_value("scroll", { scope = "local" }) * 2
+            local target_lnum = vim.api.nvim_win_get_cursor(0)[1] + screen_h / 2
+            local step = screen_h / 2 / 50
+            step = step >= 1 and step or 1
+
+            scroll(target_lnum, function(current_line, target_line)
+                local fold_end = vim.fn.foldclosedend(current_line)
+
+                -- if current_line is not in a fold
+                if fold_end < 0 then
+                    return {
+                        -- cursor position in next step
+                        next_line = current_line + step,
+                        -- delay 10ms for next step
+                        delay = 10,
+                    }
+                end
+
+                local fold_start = vim.fn.foldclosed(current_line)
+
+                return {
+                    next_line = fold_end + 1,
+                    delay = 10,
+                    -- when current_line is in a fold, you may want to regard it as one line, then you need to change the target_line
+                    target_line = target_line + fold_end - fold_start,
+                }
+            end)
         end, { silent = true })
         vim.keymap.set({ "n", "x" }, "<c-u>", function()
-            vim.fn.timer_stopall()
-            local scroll = vim.api.nvim_get_option_value("scroll", { scope = "local" })
-            for i = 1, scroll do
-                vim.fn.timer_start(i * scroll_interval, function()
-                    vim.cmd.normal({ "k", bang = true })
-                end)
+            local screen_h = vim.api.nvim_get_option_value("scroll", { scope = "local" }) * 2
+            local target_lnum = vim.api.nvim_win_get_cursor(0)[1] - screen_h / 2
+            local step = screen_h / 2 / 50
+            if step < 1 then
+                step = 1
             end
+
+            scroll(target_lnum, function(current_line, target_line)
+                local fold_end = vim.fn.foldclosedend(current_line)
+                if fold_end > 0 then
+                    local fold_start = vim.fn.foldclosed(current_line)
+
+                    return {
+                        next_line = fold_start - 1,
+                        delay = 10,
+                        target_line = target_line - fold_end + fold_start,
+                    }
+                end
+
+                return {
+                    next_line = current_line - step,
+                    delay = 10,
+                }
+            end)
         end, { silent = true })
 
         -- 调试
@@ -224,13 +335,13 @@ function M.setup(opts)
 
         -- 搜索并替换
         vim.keymap.set("n", "<c-f>", function()
-            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["config.autocommands.hlsearch"] then
+            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
                 require("lazy").load({ plugins = "config.autocommands.hlsearch" })
             end
             return ":1,$s///gcI<left><left><left><left><left>"
         end, { desc = "Search and replace in file", expr = true })
         vim.keymap.set("x", "<c-f>", function()
-            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["config.autocommands.hlsearch"] then
+            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
                 require("lazy").load({ plugins = "config.autocommands.hlsearch" })
             end
             return ":s///gcI<left><left><left><left><left>"
@@ -323,8 +434,8 @@ function M.setup(opts)
         end, { desc = "Previous diff", silent = true })
 
         -- 退出
-        vim.keymap.set({ "n", "x" }, "<c-w>", function() vim.cmd.quit({ bang = true }) end, { desc = "Quit", nowait = true, silent = true })
-        vim.keymap.set({ "n", "x" }, "<leader><c-w>", function() vim.cmd.quitall({ bang = true }) end, { desc = "Quit all", nowait = true, silent = true })
+        vim.keymap.set({ "n", "x" }, "<c-w>", function() vim.cmd.quit() end, { desc = "Quit", nowait = true, silent = true })
+        vim.keymap.set({ "n", "x" }, "<leader><c-w>", function() vim.cmd.quitall() end, { desc = "Quit all", nowait = true, silent = true })
 
         -- 运行
         vim.keymap.set("n", "<leader>r", function()
@@ -347,21 +458,6 @@ function M.setup(opts)
                     vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"']], curr_file, output, output, output))
                 elseif ft == "lua" then
                     vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
-                elseif ft == "java" then
-                    local curr_dir = vim.fn.fnamemodify(curr_file, ":h")
-                    local out_path = curr_dir:gsub("src/", "target/")
-                    if vim.fn.isdirectory(out_path) == 0 then
-                        vim.fn.mkdir(out_path, "p")
-                    end
-
-                    vim.api.nvim_command(string.format(
-                        [[TermExec cmd='javac --class-path "%s" -d "%s" -encoding utf-8 "%s" && java --class-path "%s" "%s"']],
-                        curr_dir:match(".*src"),
-                        "target",
-                        curr_file,
-                        "target",
-                        vim.fn.fnamemodify(curr_file:match(".*src/(.*)"), ":r"):gsub("/", ".")
-                    ))
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")
@@ -384,21 +480,6 @@ function M.setup(opts)
                     vim.api.nvim_command(string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output))
                 elseif ft == "lua" then
                     vim.api.nvim_command(string.format([[luafile "%s"]], curr_file))
-                elseif ft == "java" then
-                    local curr_dir = vim.fn.fnamemodify(curr_file, ":h")
-                    local out_path = curr_dir:gsub("src/", "target/")
-                    if vim.fn.isdirectory(out_path) == 0 then
-                        vim.fn.mkdir(out_path, "p")
-                    end
-
-                    vim.api.nvim_command(string.format(
-                        [[javac --class-path "%s" -d "%s" -encoding utf-8 "%s" && java --class-path "%s" "%s"]],
-                        curr_dir:match(".*src"),
-                        "target",
-                        curr_file,
-                        "target",
-                        vim.fn.fnamemodify(curr_file:match(".*src/(.*)"), ":r"):gsub("/", ".")
-                    ))
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")

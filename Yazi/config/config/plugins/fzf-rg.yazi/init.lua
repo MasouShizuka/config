@@ -17,7 +17,7 @@ local function fail(s, ...)
     ya.notify({ title = "Fzf", content = string.format(s, ...), timeout = 5, level = "error" })
 end
 
-local function entry(_, args)
+local function entry(_, job)
     local _permit = ya.hide()
     local cwd = tostring(state())
 

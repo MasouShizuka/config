@@ -6,6 +6,6 @@
 
 ## 配置文件
 
-| 文件          | 路径                                                                         | 说明     |
-| ------------- | ---------------------------------------------------------------------------- | -------- |
-| settings.json | `$LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/` | 配置文件 |
+| 文件          | 路径                                             | 说明     |
+| ------------- | ------------------------------------------------ | -------- |
+| settings.json | `$HOME/scoop/persist/windows-terminal/settings/` | 配置文件 |

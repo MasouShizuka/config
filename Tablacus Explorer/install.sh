@@ -3,7 +3,7 @@ PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
 CONFIG_DIR=$DIR/config
 
-scoop install "$PARENT_DIR/Scoop/config/workspace/tablacus-explorer.json" --no-cache
+scoop install "$PARENT_DIR/Scoop/config/workspace/tablacus-explorer.json"
 
 target="$HOME/scoop/persist/tablacus-explorer"
 clean_target "$target"

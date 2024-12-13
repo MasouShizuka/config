@@ -1,7 +1,7 @@
 local M = {}
 
 M.setup = function(opts)
-    -- mappings
+    -- Mappings
     vim.keymap.set("n", "<c-s-v>", function() vim.cmd.normal({ [["+p]], bang = true }) end, { silent = true }) -- Paste normal mode
     vim.keymap.set("v", "<c-s-v>", function() vim.cmd.normal({ [["+p]], bang = true }) end, { silent = true }) -- Paste visual mode
     vim.keymap.set("c", "<c-s-v>", "<c-r>+", {})                                                               -- Paste command mode

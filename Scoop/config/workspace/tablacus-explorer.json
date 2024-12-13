@@ -1,10 +1,10 @@
 {
-    "version": "24.10.11",
+    "version": "24.12.9",
     "description": "A tabbed file manager with Add-on support",
     "homepage": "https://github.com/tablacus/TablacusExplorer",
     "license": "MIT",
-    "url": "https://github.com/tablacus/TablacusExplorer/releases/download/24.10.11/te241011.zip",
-    "hash": "840efe5892458c8c3d55f11a8098a732f8c79ee550580814d31bcfbd58cc8910",
+    "url": "https://github.com/tablacus/TablacusExplorer/releases/download/24.12.9/te241209.zip",
+    "hash": "04f0e44b2949673eaf2900316c90338fdf2b045ae3085adcf68a5537cdcbc5c4",
     "architecture": {
         "64bit": {
             "shortcuts": [
@@ -29,10 +29,10 @@
     ],
     "checkver": {
         "url": "https://api.github.com/repos/tablacus/TablacusExplorer/releases",
-        "jsonpath": "$[0]['assets'][0]['browser_download_url']",
-        "regex": "https://github.com/tablacus/TablacusExplorer/releases/download/([\\d.]+)/(?<name>\\w+).zip"
+        "jsonpath": "$..browser_download_url",
+        "regex": "download/([\\d.]+)/te(?<date>\\d+).zip"
     },
     "autoupdate": {
-        "url": "https://github.com/tablacus/TablacusExplorer/releases/download/$version/$matchName.zip"
+        "url": "https://github.com/tablacus/TablacusExplorer/releases/download/$version/te$matchDate.zip"
     }
 }

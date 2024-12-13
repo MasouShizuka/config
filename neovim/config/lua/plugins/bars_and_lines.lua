@@ -517,9 +517,7 @@ return {
 
             local formatter = {
                 condition = function(self)
-                    local buf = self.buf or vim.api.nvim_get_current_buf()
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                    return utils.is_available("conform.nvim") and package.loaded["conform"] and vim.tbl_contains(format.format_filetype_list, ft)
+                    return utils.is_available("conform.nvim") and package.loaded["conform"]
                 end,
                 provider = function(self)
                     local names = {}

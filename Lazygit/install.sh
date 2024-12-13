@@ -3,7 +3,8 @@ PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
 CONFIG_DIR=$DIR/config
 
-scoop install lazygit --no-cache
+scoop install lazygit
+
 target="$LOCALAPPDATA/lazygit"
 clean_target "$target"
 install_to_target "$CONFIG_DIR" "$target"

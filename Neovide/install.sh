@@ -3,7 +3,7 @@ PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
 CONFIG_DIR=$DIR/config
 
-scoop install neovide --no-cache
+scoop install neovide
 
 target="$APPDATA/neovide"
 clean_target "$target"

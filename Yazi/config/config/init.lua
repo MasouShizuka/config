@@ -6,7 +6,7 @@
 function Header:tabs()
     local tabs = #cx.tabs
     if tabs == 1 then
-        return ui.Line({})
+        return ""
     end
 
     local spans = {}
@@ -40,37 +40,37 @@ Header:children_add(Header.tabs, 2000, Header.RIGHT)
 
 -- Show symlink in status bar
 function Status:name()
-    local h = self._tab.current.hovered
+    local h = self._current.hovered
     if not h then
-        return ui.Line("")
+        return ""
     end
 
     local linked = ""
     if h.link_to ~= nil then
         linked = " -> " .. tostring(h.link_to)
     end
-    return ui.Line(" " .. h.name .. linked)
+    return " " .. h.name .. linked
 end
 
 -- 修改时间
 function Status:modified()
-    local h = self._tab.current.hovered
+    local h = self._current.hovered
     if h == nil then
-        return ui.Line("")
+        return ""
     end
 
-    local time = h.cha.modified
+    local time = h.cha.mtime
     if time == nil then
-        return ui.Line("")
+        return ""
     end
 
-    local date = os.date("%Y-%m-%d %H:%M:%S", time // 1)
+    local date = os.date("%Y-%m-%d %H:%M:%S", math.floor(time or 0))
     if date == nil then
-        return ui.Line("")
+        return ""
     end
 
     return ui.Line({
-        ui.Span(date):fg(self:style().bg),
+        ui.Span(date):fg(self:style().main.bg),
         ui.Span(" "),
     })
 end
@@ -86,11 +86,14 @@ Status:children_add(Status.modified, 500, Status.RIGHT)
 
 -- ya pack -a ndtoan96/ouch
 -- ya pack -a yazi-rs/plugins:full-border
+-- ya pack -a yazi-rs/plugins:smart-enter
 
 require("full-border"):setup({
     -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
     type = ui.Border.ROUNDED,
 })
+
+require("git"):setup()
 
 require("projects"):setup({
     save = {

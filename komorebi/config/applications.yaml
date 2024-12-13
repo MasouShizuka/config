@@ -84,6 +84,14 @@
     id: MyKeymap.exe
     matching_strategy: Equals
 
+- name: PicView
+  identifier:
+    kind: Exe
+    id: PicView.exe
+    matching_strategy: Equals
+  options:
+  - force
+
 - name: QQ
   identifier:
     kind: Exe

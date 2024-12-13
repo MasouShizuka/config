@@ -4,7 +4,7 @@ A [Yazi](https://github.com/sxyazi/yazi) plugin that adds the functionality to s
 A project means all `tabs` and their status, including `cwd` and so on.
 
 > [!NOTE]
-> The latest main branch of Yazi is required at the moment.
+> The latest release of Yazi is required at the moment.
 
 https://github.com/MasouShizuka/projects.yazi/assets/44764707/79c3559a-7776-48cd-8317-dd1478314eed
 
@@ -90,11 +90,14 @@ The following are the default configurations:
 require("projects"):setup({
     save = {
         method = "yazi", -- yazi | lua
-        lua_save_path = "", -- windows: "%APPDATA%/yazi/state/projects.json", unix: "~/.config/yazi/state/projects.json"
+        lua_save_path = "", -- comment out to get the default value
+                            -- windows: "%APPDATA%/yazi/state/projects.json"
+                            -- unix: "~/.local/state/yazi/projects.json"
     },
     last = {
         update_after_save = true,
         update_after_load = true,
+        load_after_start = false,
     },
     merge = {
         quit_after_merge = false,
@@ -113,27 +116,31 @@ require("projects"):setup({
 > [!NOTE]
 > Yazi's api sometimes doesn't work on Windows, which is why the `lua` method is proposed
 
-`method` means the method of saving projects:
+`method`: the method of saving projects:
 - `yazi`: using `yazi` api to save to `.dds` file
-- `lua`: using Lua to save
+- `lua`: using `lua` api to save
 
-`lua_save_path` means the path of saved file with lua api, the defalut is
+`lua_save_path`: the path of saved file with lua api, the defalut is
 - `Windows`: `%APPDATA%/yazi/state/projects.json`
-- `Unix`: `~/.config/yazi/state/projects.json`
+- `Unix`: `~/.local/state/yazi/projects.json`
 
 ### `last`
 
 The last project is loaded by `load_last` command.
 
-When `update_after_save` enabled, the saved project will be saved to last project.
-When `update_after_load` enabled, the loaded project will be saved to last project.
+`update_after_save`: the saved project will be saved to last project.
+
+`update_after_load`: the loaded project will be saved to last project.
+
+`load_after_start`: the last project will be loaded after starting.
+- Only work with `lua` method, please refer to [#2](https://github.com/MasouShizuka/projects.yazi/issues/2)
 
 ### `merge`
 
-When `quit_after_merge` enabled, the merged project will be exited after merging.
+`quit_after_merge`: the merged project will be exited after merging.
 
 ### `notify`
 
-When enabled, notifications will be shown when the user saves/loads/deletes/merges a project and deletes all projects.
+When enabled, notifications are displayed when actions are performed.
 
 `title`, `timeout`, `level` are the same as [ya.notify](https://yazi-rs.github.io/docs/plugins/utils/#ya.notify).

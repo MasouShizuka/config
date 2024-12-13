@@ -14,7 +14,7 @@ find_position = { fg = "#c678dd", bg = "reset", bold = true, italic = true }
 # Marker
 marker_copied   = { fg = "#98c379", bg = "#98c379" }
 marker_cut      = { fg = "#e06c75", bg = "#e06c75" }
-marker_marked   = { fg = "#56b6c2",   bg = "#56b6c2" }
+marker_marked   = { fg = "#56b6c2", bg = "#56b6c2" }
 marker_selected = { fg = "#61afef", bg = "#61afef" }
 
 # Tab
@@ -37,17 +37,29 @@ syntect_theme = ""
 # : }}}
 
 
+# : Mode {{{
+
+[mode]
+
+normal_main = { fg = "#282c34", bg = "#61afef", bold = true }
+normal_alt  = { fg = "#61afef", bg = "#5c6370" }
+
+# Select mode
+select_main = { fg = "#282c34", bg = "#e06c75", bold = true }
+select_alt  = { fg = "#e06c75", bg = "#5c6370" }
+
+# Unset mode
+unset_main = { fg = "#282c34", bg = "#e06c75", bold = true }
+unset_alt  = { fg = "#e06c75", bg = "#5c6370" }
+
+# : }}}
+
+
 # : Status {{{
 
 [status]
 separator_open  = ""
 separator_close = ""
-separator_style = { fg = "#5c6370", bg = "#5c6370" }
-
-# Mode
-mode_normal = { fg = "#282c34", bg = "#61afef", bold = true }
-mode_select = { fg = "#282c34", bg = "#98c379", bold = true }
-mode_unset  = { fg = "#282c34", bg = "#e06c75", bold = true }
 
 # Progress
 progress_label  = { bold = true }
@@ -55,11 +67,12 @@ progress_normal = { fg = "#61afef", bg = "#5c6370" }
 progress_error  = { fg = "#e06c75", bg = "#5c6370" }
 
 # Permissions
-permissions_t = { fg = "#61afef" }
-permissions_r = { fg = "#e5c07b" }
-permissions_w = { fg = "#e06c75" }
-permissions_x = { fg = "#98c379" }
-permissions_s = { fg = "#abb2bf" }
+perm_sep = { fg = "#abb2bf" }
+perm_type = { fg = "#61afef" }
+perm_read = { fg = "#e5c07b" }
+perm_write = { fg = "#e06c75" }
+perm_exec = { fg = "#98c379" }
+
 
 # : }}}
 
@@ -178,13 +191,13 @@ rules = [
 
     # Archives
     { mime = "application/{,g}zip", fg = "#c678dd" },
-    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "#c678dd" },
+    { mime = "application/{tar,bzip*,7z-compressed,xz,rar}", fg = "#c678dd" },
 
     # Documents
-    { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#d19a66" },
+    { mime = "application/{pdf,doc,rtf}", fg = "#d19a66" },
 
     # Empty files
-    # { mime = "inode/x-empty", fg = "#e06c75" },
+    # { mime = "inode/empty", fg = "#e06c75" },
 
     # Special files
     { name = "*", is = "orphan", bg = "#e06c75" },

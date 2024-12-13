@@ -21,7 +21,6 @@ return {
             family = "Maple Mono NF CN",
             harfbuzz_features = { "+cv01", "+cv03", "+ss03" },
         },
-        -- "Iosevka Nerd Font",
         "Sarasa Mono SC",
     }),
     font_size = 17.0,

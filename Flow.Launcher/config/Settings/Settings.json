@@ -150,7 +150,12 @@
   "KeepMaxResults": false,
   "MaxResultsToShow": 10,
   "ActivateTimes": 0,
-  "CustomPluginHotkeys": [],
+  "CustomPluginHotkeys": [
+    {
+      "Hotkey": "Alt \u002B Shift \u002B P",
+      "ActionKeyword": "pyj:"
+    }
+  ],
   "CustomShortcuts": [],
   "DontPromptUpdateMsg": false,
   "EnableUpdateLog": false,

@@ -4,50 +4,6 @@ local keymap = require("utils.keymap")
 local utils = require("utils")
 
 return {
-    -- NOTE: 需要对 lua/windows/lib/frame.lua 的 Frame:autowidth 函数的 curwinLeaf 参数添加 nil 判断：
-    -- ╭───────────────────────────╮
-    -- │ if curwinLeaf == nil then │
-    -- │    return                 │
-    -- │ end                       │
-    -- ╰───────────────────────────╯
-    -- https://github.com/anuvyklack/windows.nvim/issues/31
-    {
-        "anuvyklack/windows.nvim",
-        cmd = {
-            "WindowsMaximize",
-            "WindowsMaximizeVertical",
-            "WindowsMaximizeHorizont",
-            "WindowsEqualize",
-            "WindowsToggleAutowidth",
-        },
-        dependencies = {
-            "anuvyklack/middleclass",
-        },
-        enabled = not environment.is_vscode,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
-        },
-        keys = {
-            { "<c-s><c-m>", function() vim.api.nvim_command("WindowsMaximize") end,             desc = "Maximize current window",                 mode = "n" },
-            { "<c-s><c-c>", function() vim.api.nvim_command("WindowsMaximizeVertically") end,   desc = "Maximize height of the current window",   mode = "n" },
-            { "<c-s><c-r>", function() vim.api.nvim_command("WindowsMaximizeHorizontally") end, desc = "Maximize width of the current window",    mode = "n" },
-            { "<c-s><c-e>", function() vim.api.nvim_command("WindowsEqualize") end,             desc = "Equalize all windows heights and widths", mode = "n" },
-            { "<c-s><c-t>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
-        },
-        opts = {
-            autowidth = {
-                enable = true,
-            },
-            ignore = {
-                filetype = filetype.skip_filetype_list,
-            },
-            animation = {
-                enable = false,
-            },
-        },
-    },
-
     {
         "folke/edgy.nvim",
         config = function(_, opts)

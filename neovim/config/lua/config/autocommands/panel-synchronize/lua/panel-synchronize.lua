@@ -6,6 +6,11 @@ local M = {}
 local auto_closed_panels = {}
 local opened_panels = {}
 
+-- 判断是否正在从 file explorer 打开新的 tab
+local function is_opening_tab()
+    return vim.g.is_opening_tab or false
+end
+
 M.setup = function(opts)
     -- 当关闭最后一个主编辑区域的 buf 时，自动关闭 panel
     vim.api.nvim_create_autocmd("QuitPre", {
@@ -65,13 +70,11 @@ M.setup = function(opts)
         group = vim.api.nvim_create_augroup("PanelAutoClose", { clear = true }),
     })
 
-
     -- 跨 tab 同步 panel 的打开状态
     local synchronize_panel_status_across_tabs = vim.api.nvim_create_augroup("SynchronizePanelStatusAcrossTabs", { clear = true })
     vim.api.nvim_create_autocmd("TabLeave", {
         callback = function()
-            local is_opening_tab = vim.g.is_opening_tab or false
-            if is_opening_tab then
+            if is_opening_tab() then
                 return
             end
 
@@ -111,32 +114,25 @@ M.setup = function(opts)
     })
     vim.api.nvim_create_autocmd("TabEnter", {
         callback = function()
-            local is_opening_tab = vim.g.is_opening_tab or false
-            if is_opening_tab then
+            if is_opening_tab() then
                 return
             end
 
-            local function reopen(panels)
-                local open_task = {}
-
-                for _, panel in ipairs(panels) do
-                    local open_func = panel.func.open
-                    if type(open_func) == "function" then
-                        open_task[#open_task + 1] = open_func
-                    end
-                end
-
-                utils.table_clear(panels)
-
-                return open_task
-            end
-
-            local open_task
+            local panels
             if #auto_closed_panels > 0 then
-                open_task = reopen(auto_closed_panels)
+                panels = auto_closed_panels
             else
-                open_task = reopen(opened_panels)
+                panels = opened_panels
             end
+
+            local open_task = {}
+            for _, panel in ipairs(panels) do
+                local open_func = panel.func.open
+                if type(open_func) == "function" then
+                    open_task[#open_task + 1] = open_func
+                end
+            end
+            utils.table_clear(panels)
 
             if #open_task > 0 then
                 vim.schedule(function()

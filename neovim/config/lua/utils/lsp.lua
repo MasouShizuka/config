@@ -40,13 +40,8 @@ M.lsp = function(lspconfig, default_config)
                 },
             }))
         end,
-        -- 由 nvim-jdtls 设置
-        jdtls = function() end,
         jsonls = function()
             lspconfig.jsonls.setup(vim.tbl_deep_extend("force", default_config, {}))
-        end,
-        lemminx = function()
-            lspconfig.lemminx.setup(vim.tbl_deep_extend("force", default_config, {}))
         end,
         lua_ls = function()
             local cwd = vim.fn.getcwd()
@@ -169,7 +164,6 @@ M.lsp_list = vim.tbl_keys(M.lsp())
 M.lsp_filetype_list = {
     "bib",
     "cpp",
-    "java",
     "json",
     "lua",
     "markdown",
@@ -177,7 +171,6 @@ M.lsp_filetype_list = {
     "rust",
     "sh",
     "tex",
-    "xml",
     "zsh",
 }
 

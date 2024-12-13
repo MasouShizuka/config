@@ -1,6 +1,8 @@
+--- @sync entry
+
 return {
-    entry = function(_, args)
-        if args[1] == "cwd" then
+    entry = function(_, job)
+        if job.args[1] == "cwd" then
             ya.manager_emit("shell", { "nvim", confirm = true, block = true })
         else
             local h = cx.active.current.hovered

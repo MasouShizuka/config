@@ -117,9 +117,7 @@ return {
 
             set_hl()
             vim.api.nvim_create_autocmd("ColorScheme", {
-                callback = function()
-                    set_hl()
-                end,
+                callback = set_hl,
                 desc = "Set hl for render-markdown",
                 group = vim.api.nvim_create_augroup("RenderMarkdownHighlight", { clear = true }),
             })
