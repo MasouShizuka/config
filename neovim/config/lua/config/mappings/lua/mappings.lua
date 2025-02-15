@@ -42,7 +42,11 @@ function M.setup(opts)
         end
 
         if count == 0 and not vim.fn.mode():find("V") then
-            vim.cmd.normal({ string.format("g%s", key), bang = true })
+            if environment.is_vscode then
+                vim.cmd.normal({ string.format("g%s", key) })
+            else
+                vim.cmd.normal({ string.format("g%s", key), bang = true })
+            end
         else
             vim.cmd.normal({ string.format("%s%s", prefix, key), bang = true })
         end
@@ -280,14 +284,11 @@ function M.setup(opts)
         vim.keymap.set("n", "<leader>p", function() vscode.action("extension.pasteImage") end, { silent = true })
     else
         -- 命令行
-        vim.keymap.set("c", "<down>", "<c-n>", { desc = "Down", silent = true })
-        vim.keymap.set("c", "<up>", "<c-p>", { desc = "Up", silent = true })
-        vim.keymap.set("c", "<c-j>", "<c-n>", { desc = "Down", silent = true })
-        vim.keymap.set("c", "<c-k>", "<c-p>", { desc = "Up", silent = true })
-
-        -- 新行保持缩进
-        if not utils.is_available("ultimate-autopair.nvim") then
-            vim.keymap.set("i", "<cr>", "<cr>x<bs>", { desc = "Enter", silent = true })
+        if not utils.is_available("nvim-cmp") and not utils.is_available("blink.cmp") then
+            vim.keymap.set("c", "<down>", "<c-n>", { desc = "Down", silent = true })
+            vim.keymap.set("c", "<up>", "<c-p>", { desc = "Up", silent = true })
+            vim.keymap.set("c", "<c-j>", "<c-n>", { desc = "Down", silent = true })
+            vim.keymap.set("c", "<c-k>", "<c-p>", { desc = "Up", silent = true })
         end
 
         -- 折行时小步上下移动
@@ -435,68 +436,73 @@ function M.setup(opts)
 
         -- 退出
         vim.keymap.set({ "n", "x" }, "<c-w>", function() vim.cmd.quit() end, { desc = "Quit", nowait = true, silent = true })
-        vim.keymap.set({ "n", "x" }, "<leader><c-w>", function() vim.cmd.quitall() end, { desc = "Quit all", nowait = true, silent = true })
+        vim.keymap.set({ "n", "x" }, "<leader><c-w>", function() vim.cmd.quitall({ bang = true }) end, { desc = "Quit all", nowait = true, silent = true })
 
         -- 运行
-        vim.keymap.set("n", "<leader>r", function()
-            local curr_file = vim.fn.expand("%:~:.")
-            local output = vim.fn.expand("%:.:r")
-            if environment.is_windows then
-                curr_file = curr_file:gsub("\\", "/")
-                output = output:gsub("\\", "/") .. ".exe"
-            end
+        if not utils.is_available("overseer.nvim") then
+            vim.keymap.set("n", "<leader>r", function()
+                local curr_file = vim.fn.expand("%:~:.")
+                local output = vim.fn.expand("%:.:r")
+                if environment.is_windows then
+                    curr_file = curr_file:gsub("\\", "/")
+                    output = output:gsub("\\", "/") .. ".exe"
+                end
 
-            local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
-            if utils.is_available("toggleterm.nvim") then
-                -- TermExec 执行时需要修改 shellslash = true，否则会输出 v:null
-                local shellslash = vim.api.nvim_get_option_value("shellslash", { scope = "local" })
-                vim.api.nvim_set_option_value("shellslash", true, { scope = "local" })
+                local shellslash
+                if utils.is_available("toggleterm.nvim") then
+                    -- TermExec 执行时需要修改 shellslash = true，否则会输出 v:null
+                    shellslash = vim.api.nvim_get_option_value("shellslash", { scope = "local" })
+                    vim.api.nvim_set_option_value("shellslash", true, { scope = "local" })
+                end
 
+                local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
                 if ft == "cpp" then
                     -- 若在使用 vector 等库时编译的程序无法运行，可能需要在编译时添加 -static-libstdc++
                     -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
-                    vim.api.nvim_command(string.format([[TermExec cmd='g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"']], curr_file, output, output, output))
+                    local command = string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output)
+                    if utils.is_available("toggleterm.nvim") then
+                        command = string.format([[TermExec cmd='%s']], command)
+                    end
+                    vim.api.nvim_command(command)
                 elseif ft == "lua" then
-                    vim.api.nvim_command(string.format([[TermExec cmd='lua "%s"']], curr_file))
+                    local command = string.format([[luafile "%s"]], curr_file)
+                    if utils.is_available("toggleterm.nvim") then
+                        command = string.format([[TermExec cmd='lua "%s"']], curr_file)
+                    end
+                    vim.api.nvim_command(command)
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
                         vim.api.nvim_command("MarkdownPreviewToggle")
                     end
                 elseif ft == "python" then
-                    vim.api.nvim_command(string.format([[TermExec cmd='python -u "%s"']], curr_file))
+                    local command = string.format([[python -u "%s"]], curr_file)
+                    if utils.is_available("toggleterm.nvim") then
+                        command = string.format([[TermExec cmd='%s']], command)
+                    end
+                    vim.api.nvim_command(command)
                 elseif ft == "rust" then
-                    vim.api.nvim_command([[TermExec cmd='cargo run']])
+                    local command = "cargo run"
+                    if utils.is_available("toggleterm.nvim") then
+                        command = string.format([[TermExec cmd='%s']], command)
+                    end
+                    vim.api.nvim_command(command)
                 elseif ft == "sh" then
-                    vim.api.nvim_command(string.format([[TermExec cmd='sh "%s"']], curr_file))
+                    local command = string.format([[sh "%s"]], curr_file)
+                    if utils.is_available("toggleterm.nvim") then
+                        command = string.format([[TermExec cmd='%s']], command)
+                    end
+                    vim.api.nvim_command(command)
                 elseif ft == "tex" then
                     if vim.tbl_contains(lsp.lsp_list, "texlab") then
                         vim.api.nvim_command("TexlabBuild")
                     end
                 end
 
-                vim.api.nvim_set_option_value("shellslash", shellslash, { scope = "local" })
-            else
-                if ft == "cpp" then
-                    vim.api.nvim_command(string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output))
-                elseif ft == "lua" then
-                    vim.api.nvim_command(string.format([[luafile "%s"]], curr_file))
-                elseif ft == "markdown" then
-                    if utils.is_available("markdown-preview.nvim") then
-                        vim.api.nvim_command("MarkdownPreviewToggle")
-                    end
-                elseif ft == "python" then
-                    vim.api.nvim_command(string.format([[python -u "%s"]], curr_file))
-                elseif ft == "rust" then
-                    vim.api.nvim_command("cargo run")
-                elseif ft == "sh" then
-                    vim.api.nvim_command(string.format([[sh "%s"]], curr_file))
-                elseif ft == "tex" then
-                    if vim.tbl_contains(lsp.lsp_list, "texlab") then
-                        vim.api.nvim_command("TexlabBuild")
-                    end
+                if utils.is_available("toggleterm.nvim") then
+                    vim.api.nvim_set_option_value("shellslash", shellslash, { scope = "local" })
                 end
-            end
-        end, { desc = "Run", silent = true })
+            end, { desc = "Run", silent = true })
+        end
     end
 end
 

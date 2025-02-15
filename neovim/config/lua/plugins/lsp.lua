@@ -13,9 +13,10 @@ return {
         dependencies = {
             "nvim-telescope/telescope.nvim",
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.lsp_enable,
         lazy = true,
         opts = {
+            -- options related to telescope.nvim
             telescope = {},
         },
     },
@@ -404,7 +405,7 @@ return {
                 group = vim.api.nvim_create_augroup("nvim-lint", { clear = true }),
             })
         end,
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.lint_enable,
         ft = lint.lint_filetype_list,
     },
 
@@ -418,8 +419,6 @@ return {
                 opts.border = opts.border or "rounded"
                 return orig_util_open_floating_preview(contents, syntax, opts, ...)
             end
-
-            require("lspconfig.ui.windows").default_options.border = "rounded"
 
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
@@ -731,6 +730,12 @@ return {
                             capabilities,
                             require("cmp_nvim_lsp").default_capabilities()
                         )
+                    elseif utils.is_available("blink.cmp") then
+                        capabilities = vim.tbl_deep_extend(
+                            "force",
+                            capabilities,
+                            require("blink.cmp").get_lsp_capabilities()
+                        )
                     end
 
                     if utils.is_available("nvim-ufo") then
@@ -772,16 +777,23 @@ return {
                 end,
             },
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.lsp_enable,
         ft = lsp.lsp_filetype_list,
         init = function()
-            -- Customizing how diagnostics are displayed
-            vim.diagnostic.config({
+            local virtual_text
+            if utils.is_available("tiny-inline-diagnostic.nvim") then
+                virtual_text = false
+            else
                 virtual_text = {
                     source = "if_many",
                     spacing = 4,
                     prefix = icons.dap.Breakpoint,
-                },
+                }
+            end
+
+            -- Customizing how diagnostics are displayed
+            vim.diagnostic.config({
+                virtual_text = virtual_text,
                 signs = {
                     text = {
                         [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
@@ -793,6 +805,101 @@ return {
                 update_in_insert = true,
                 severity_sort = true,
             })
+        end,
+    },
+
+    {
+        "rachartier/tiny-inline-diagnostic.nvim",
+        enabled = not environment.is_vscode and environment.lsp_enable,
+        event = {
+            "LspAttach",
+        },
+        opts = {
+            preset = "nonerdfont", -- Can be: "modern", "classic", "minimal", "powerline", ghost", "simple", "nonerdfont", "amongus"
+            options = {
+                -- Enable diagnostic message on all lines.
+                multilines = true,
+
+                -- Enable diagnostics on Insert mode. You should also se the `throttle` option to 0, as some artefacts may appear.
+                enable_on_insert = true,
+            },
+        },
+        priority = 1000, -- needs to be loaded in first
+    },
+
+    {
+        "Wansmer/symbol-usage.nvim",
+        enabled = not environment.is_vscode and environment.lsp_enable,
+        event = {
+            "LspAttach",
+        },
+        opts = function()
+            local function h(name) return vim.api.nvim_get_hl(0, { name = name }) end
+
+            -- hl-groups can have any name
+            utils.set_hl(0, "SymbolUsageRounding", { fg = h("CursorLine").bg })
+            utils.set_hl(0, "SymbolUsageContent", { bg = h("CursorLine").bg, fg = h("Comment").fg })
+            utils.set_hl(0, "SymbolUsageRef", { fg = h("Function").fg, bg = h("CursorLine").bg })
+            utils.set_hl(0, "SymbolUsageDef", { fg = h("Type").fg, bg = h("CursorLine").bg })
+            utils.set_hl(0, "SymbolUsageImpl", { fg = h("@keyword").fg, bg = h("CursorLine").bg })
+
+            local function text_format(symbol)
+                local res = {}
+
+                local round_start = { icons.surround.left_half_circle_thick, "SymbolUsageRounding" }
+                local round_end = { icons.surround.right_half_circle_thick, "SymbolUsageRounding" }
+
+                local function make_component(num, name, icon, kind)
+                    if num == 0 then
+                        num = 0
+                    elseif num > 1 then
+                        name = name .. "s"
+                    end
+
+                    if #res > 0 then
+                        table.insert(res, { " ", "NonText" })
+                    end
+
+                    table.insert(res, round_start)
+                    table.insert(res, { icon, kind })
+                    table.insert(res, { ("%s %s"):format(num, name), "SymbolUsageContent" })
+                    table.insert(res, round_end)
+                end
+
+                if symbol.definition and symbol.definition > 1 then
+                    make_component(symbol.definition, "def", icons.kinds.Interface, "SymbolUsageDef")
+                end
+
+                if symbol.references and symbol.references > 1 then
+                    make_component(symbol.references - 1, "ref", icons.kinds.Reference, "SymbolUsageRef")
+                end
+
+                if symbol.implementation and symbol.implementation > 0 then
+                    make_component(symbol.implementation, "impl", icons.kinds.Method, "SymbolUsageImpl")
+                end
+
+                -- Indicator that shows if there are any other symbols in the same line
+                if symbol.stacked_count and symbol.stacked_count > 0 then
+                    make_component(symbol.stacked_count, "other", icons.kinds.Object, "SymbolUsageImpl")
+                end
+
+                return res
+            end
+
+            return {
+                ---@type 'above'|'end_of_line'|'textwidth'|'signcolumn' `above` by default
+                vt_position = "end_of_line",
+                vt_priority = 100, ---@type integer Virtual text priority (see `nvim_buf_set_extmark`)
+                references = { enabled = true, include_declaration = true },
+                definition = { enabled = true },
+                implementation = { enabled = true },
+                ---The function can return a string to which the highlighting group from `opts.hl` is applied.
+                ---Alternatively, it can return a table of tuples of the form `{ { text, hl_group }, ... }`` - in this case the specified groups will be applied.
+                ---If `vt_position` is 'signcolumn', then only a 1-2 length string or a `{{ icon, hl_group }}` table is expected.
+                ---See `#format-text-examples`
+                ---@type function(symbol: Symbol): string|table Symbol{ definition = integer|nil, implementation = integer|nil, references = integer|nil, stacked_count = integer, stacked_symbols = table<SymbolId, Symbol> }
+                text_format = text_format,
+            }
         end,
     },
 
@@ -812,7 +919,6 @@ return {
         config = function(_, opts)
             require("mason").setup(opts)
 
-            -- 更新所有已经安装的 mason package
             local function mason_notify(msg, type)
                 vim.notify(msg, type, { title = "Mason" })
             end
@@ -823,6 +929,7 @@ return {
                 return
             end
 
+            -- 更新所有已经安装的 mason package
             -- mason_notify("Checking for package updates...")
             registry.update(vim.schedule_wrap(function(success, updated_registries)
                 if success then
@@ -887,7 +994,6 @@ return {
                     return {
                         -- a list of all tools you want to ensure are installed upon
                         -- start
-                        -- ensure_installed = format.format_list,
                         ensure_installed = utils.table_concat(format.format_list, lint.lint_list),
 
                         -- By default all integrations are enabled. If you turn on an integration
@@ -907,14 +1013,17 @@ return {
             },
 
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.mason_enable,
         keys = {
             { "<leader>lm", function() vim.api.nvim_command("Mason") end, desc = "Mason information", mode = "n" },
         },
         opts = {
+            ---@since 1.0.0
             -- The directory in which to install packages.
             install_root_dir = path.mason_install_root_path,
             ui = {
+                ---@since 1.0.0
+                -- The border to use for the UI window. Accepts same border values as |nvim_open_win()|.
                 border = "rounded",
             },
         },

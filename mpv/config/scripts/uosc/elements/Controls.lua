@@ -54,7 +54,8 @@ function Controls:init_options()
 		['loop-playlist']  = 'cycle:repeat:loop-playlist:no/inf!?' .. ulang._button16,
 		['loop-file']      = 'cycle:repeat_one:loop-file:no/inf!?' .. ulang._button17,
 		shuffle            = 'toggle:shuffle:shuffle?' .. ulang._button18,
-		fullscreen         = 'cycle:crop_free:fullscreen:no/yes=fullscreen_exit!?' .. ulang._button19,
+		autoload           = 'toggle:hdr_auto:autoload@uosc?' .. ulang._button19,
+		fullscreen         = 'cycle:crop_free:fullscreen:no/yes=fullscreen_exit!?' .. ulang._button20,
 
 		-- 自定义的捷径
 		['play_pause']     = 'cycle:not_started:pause:no=play_circle/yes=pause_circle?' .. ulang._button_ext01,

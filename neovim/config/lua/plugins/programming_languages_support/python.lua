@@ -43,7 +43,7 @@ return {
             "neovim/nvim-lspconfig",
             "nvim-telescope/telescope.nvim",
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.lsp_enable,
         init = function()
             -- 激活 venv-selector 并读取环境
             vim.api.nvim_create_autocmd("LspAttach", {

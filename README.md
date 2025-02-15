@@ -5,6 +5,11 @@
 ## 说明
 
 - `sh` 文件可通过安装 `msys2` 来运行
+    - 安装步骤
+        1. 下载并安装 `MSYS2`
+        2. 修改 `User` 目录为 `Windows` 下的 `User` 目录
+            1. 找到 `msys64/etc/nsswitch.conf`
+            2. 修改 `db_home: cygwin desc` 为 `db_home: windows`
     - 将 `msys64/ucrt64/bin` 和 `msys64/usr/bin` 添加到环境变量的系统变量的 `Path`，之后可用 `sh` 命令运行 `sh` 文件
 - `install.sh` 会调用每个文件夹中的 `install.sh` 来安装所有可安装的程序
     - 需要提前安装 `scoop`、`winget`、`msys2`、`git`、`unzip` 等程序

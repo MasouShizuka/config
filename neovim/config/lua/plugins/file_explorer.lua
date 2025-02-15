@@ -277,10 +277,6 @@ return {
                 update_focused_file = {
                     enable = true,
                 },
-                git = {
-                    enable = true,
-                    timeout = 5000,
-                },
                 diagnostics = {
                     enable = true,
                     icons = {

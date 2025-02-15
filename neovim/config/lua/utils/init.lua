@@ -192,6 +192,15 @@ function M.refresh_buf(buf, timeout, timer)
     M.defer_buf(buf, function() vim.cmd.edit() end, timeout, timer, "Refresh")
 end
 
+function M.set_hl(ns_id, name, val)
+    vim.api.nvim_set_hl(ns_id, name, val)
+    vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = function()
+            vim.api.nvim_set_hl(ns_id, name, val)
+        end,
+    })
+end
+
 function M.table_clear(a)
     for key, _ in pairs(a) do
         a[key] = nil

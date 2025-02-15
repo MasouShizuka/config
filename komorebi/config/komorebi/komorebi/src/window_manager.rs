@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
+use std::env::temp_dir;
 use std::io::ErrorKind;
+use std::net::Shutdown;
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::path::PathBuf;
@@ -20,7 +22,11 @@ use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
 use uds_windows::UnixListener;
+use uds_windows::UnixStream;
 
+use crate::animation::AnimationEngine;
+use crate::animation::ANIMATION_ENABLED_GLOBAL;
+use crate::animation::ANIMATION_ENABLED_PER_ANIMATION;
 use crate::core::config_generation::MatchingRule;
 use crate::core::custom_layout::CustomLayout;
 use crate::core::Arrangement;
@@ -50,6 +56,7 @@ use crate::current_virtual_desktop;
 use crate::load_configuration;
 use crate::monitor::Monitor;
 use crate::ring::Ring;
+use crate::should_act;
 use crate::should_act_individual;
 use crate::stackbar_manager::STACKBAR_FOCUSED_TEXT_COLOUR;
 use crate::stackbar_manager::STACKBAR_LABEL;
@@ -60,6 +67,8 @@ use crate::stackbar_manager::STACKBAR_TAB_WIDTH;
 use crate::stackbar_manager::STACKBAR_UNFOCUSED_TEXT_COLOUR;
 use crate::static_config::StaticConfig;
 use crate::transparency_manager;
+use crate::transparency_manager::TRANSPARENCY_ALPHA;
+use crate::transparency_manager::TRANSPARENCY_ENABLED;
 use crate::window::Window;
 use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
@@ -82,6 +91,8 @@ use crate::NO_TITLEBAR;
 use crate::OBJECT_NAME_CHANGE_ON_LAUNCH;
 use crate::REGEX_IDENTIFIERS;
 use crate::REMOVE_TITLEBARS;
+use crate::SUBSCRIPTION_SOCKETS;
+use crate::TRANSPARENCY_BLACKLIST;
 use crate::TRAY_AND_MULTI_WINDOW_IDENTIFIERS;
 use crate::WORKSPACE_MATCHING_RULES;
 
@@ -186,6 +197,9 @@ pub struct GlobalState {
     pub stackbar_tab_background_colour: Colour,
     pub stackbar_tab_width: i32,
     pub stackbar_height: i32,
+    pub transparency_enabled: bool,
+    pub transparency_alpha: u8,
+    pub transparency_blacklist: Vec<MatchingRule>,
     pub remove_titlebars: bool,
     #[serde(alias = "float_identifiers")]
     pub ignore_identifiers: Vec<MatchingRule>,
@@ -239,6 +253,9 @@ impl Default for GlobalState {
             )),
             stackbar_tab_width: STACKBAR_TAB_WIDTH.load(Ordering::SeqCst),
             stackbar_height: STACKBAR_TAB_HEIGHT.load(Ordering::SeqCst),
+            transparency_enabled: TRANSPARENCY_ENABLED.load(Ordering::SeqCst),
+            transparency_alpha: TRANSPARENCY_ALPHA.load(Ordering::SeqCst),
+            transparency_blacklist: TRANSPARENCY_BLACKLIST.lock().clone(),
             remove_titlebars: REMOVE_TITLEBARS.load(Ordering::SeqCst),
             ignore_identifiers: IGNORE_IDENTIFIERS.lock().clone(),
             manage_identifiers: MANAGE_IDENTIFIERS.lock().clone(),
@@ -351,6 +368,151 @@ impl WindowManager {
         tracing::info!("initialising");
         WindowsApi::load_monitor_information(&mut self.monitors)?;
         WindowsApi::load_workspace_information(&mut self.monitors)
+    }
+
+    #[tracing::instrument(skip(self, state))]
+    pub fn apply_state(&mut self, state: State) {
+        let mut can_apply = true;
+
+        let state_monitors_len = state.monitors.elements().len();
+        let current_monitors_len = self.monitors.elements().len();
+        if state_monitors_len != current_monitors_len {
+            tracing::warn!(
+                "cannot apply state from {}; state file has {state_monitors_len} monitors, but only {current_monitors_len} are currently connected",
+                temp_dir().join("komorebi.state.json").to_string_lossy()
+            );
+
+            return;
+        }
+
+        for monitor in state.monitors.elements() {
+            for workspace in monitor.workspaces() {
+                for container in workspace.containers() {
+                    for window in container.windows() {
+                        if window.exe().is_err() {
+                            can_apply = false;
+                            break;
+                        }
+                    }
+                }
+
+                if let Some(window) = workspace.maximized_window() {
+                    if window.exe().is_err() {
+                        can_apply = false;
+                        break;
+                    }
+                }
+
+                if let Some(container) = workspace.monocle_container() {
+                    for window in container.windows() {
+                        if window.exe().is_err() {
+                            can_apply = false;
+                            break;
+                        }
+                    }
+                }
+
+                for window in workspace.floating_windows() {
+                    if window.exe().is_err() {
+                        can_apply = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if can_apply {
+            tracing::info!(
+                "applying state from {}",
+                temp_dir().join("komorebi.state.json").to_string_lossy()
+            );
+
+            let offset = self.work_area_offset;
+            let mouse_follows_focus = self.mouse_follows_focus;
+            for (monitor_idx, monitor) in self.monitors_mut().iter_mut().enumerate() {
+                let mut focused_workspace = 0;
+                for (workspace_idx, workspace) in monitor.workspaces_mut().iter_mut().enumerate() {
+                    if let Some(state_monitor) = state.monitors.elements().get(monitor_idx) {
+                        if let Some(state_workspace) = state_monitor.workspaces().get(workspace_idx)
+                        {
+                            // to make sure padding changes get applied for users after a quick restart
+                            let container_padding = workspace.container_padding();
+                            let workspace_padding = workspace.workspace_padding();
+
+                            *workspace = state_workspace.clone();
+
+                            workspace.set_container_padding(container_padding);
+                            workspace.set_workspace_padding(workspace_padding);
+
+                            if state_monitor.focused_workspace_idx() == workspace_idx {
+                                focused_workspace = workspace_idx;
+                            }
+                        }
+                    }
+                }
+
+                if let Err(error) = monitor.focus_workspace(focused_workspace) {
+                    tracing::warn!(
+                        "cannot focus workspace '{focused_workspace}' on monitor '{monitor_idx}' from {}: {}",
+                        temp_dir().join("komorebi.state.json").to_string_lossy(),
+                        error,
+                    );
+                }
+
+                if let Err(error) = monitor.load_focused_workspace(mouse_follows_focus) {
+                    tracing::warn!(
+                        "cannot load focused workspace '{focused_workspace}' on monitor '{monitor_idx}' from {}: {}",
+                        temp_dir().join("komorebi.state.json").to_string_lossy(),
+                        error,
+                    );
+                }
+
+                if let Err(error) = monitor.update_focused_workspace(offset) {
+                    tracing::warn!(
+                        "cannot update workspace '{focused_workspace}' on monitor '{monitor_idx}' from {}: {}",
+                        temp_dir().join("komorebi.state.json").to_string_lossy(),
+                        error,
+                    );
+                }
+            }
+
+            let focused_monitor_idx = state.monitors.focused_idx();
+            let focused_workspace_idx = state
+                .monitors
+                .elements()
+                .get(focused_monitor_idx)
+                .map(|m| m.focused_workspace_idx())
+                .unwrap_or_default();
+
+            if let Err(error) = self.focus_monitor(focused_monitor_idx) {
+                tracing::warn!(
+                    "cannot focus monitor '{focused_monitor_idx}' from {}: {}",
+                    temp_dir().join("komorebi.state.json").to_string_lossy(),
+                    error,
+                );
+            }
+
+            if let Err(error) = self.focus_workspace(focused_workspace_idx) {
+                tracing::warn!(
+                    "cannot focus workspace '{focused_workspace_idx}' on monitor '{focused_monitor_idx}' from {}: {}",
+                    temp_dir().join("komorebi.state.json").to_string_lossy(),
+                    error,
+                );
+            }
+
+            if let Err(error) = self.update_focused_workspace(true, true) {
+                tracing::warn!(
+                    "cannot update focused workspace '{focused_workspace_idx}' on monitor '{focused_monitor_idx}' from {}: {}",
+                    temp_dir().join("komorebi.state.json").to_string_lossy(),
+                    error,
+                );
+            }
+        } else {
+            tracing::warn!(
+                "cannot apply state from {}; some windows referenced in the state file no longer exist",
+                temp_dir().join("komorebi.state.json").to_string_lossy()
+            );
+        }
     }
 
     #[tracing::instrument]
@@ -569,75 +731,80 @@ impl WindowManager {
             .ok_or_else(|| anyhow!("there is no monitor with that index"))?
             .focused_workspace_idx();
 
-        let workspace_matching_rules = WORKSPACE_MATCHING_RULES.lock();
-        let regex_identifiers = REGEX_IDENTIFIERS.lock();
-        // Go through all the monitors and workspaces
-        for (i, monitor) in self.monitors().iter().enumerate() {
-            for (j, workspace) in monitor.workspaces().iter().enumerate() {
-                // And all the visible windows (at the top of a container)
-                for window in workspace.visible_windows().into_iter().flatten() {
-                    let mut already_moved_window_handles = self.already_moved_window_handles.lock();
-                    let exe_name = window.exe()?;
-                    let title = window.title()?;
-                    let class = window.class()?;
-                    let path = window.path()?;
+        // scope mutex locks to avoid deadlock if should_update_focused_workspace evaluates to true
+        // at the end of this function
+        {
+            let workspace_matching_rules = WORKSPACE_MATCHING_RULES.lock();
+            let regex_identifiers = REGEX_IDENTIFIERS.lock();
+            // Go through all the monitors and workspaces
+            for (i, monitor) in self.monitors().iter().enumerate() {
+                for (j, workspace) in monitor.workspaces().iter().enumerate() {
+                    // And all the visible windows (at the top of a container)
+                    for window in workspace.visible_windows().into_iter().flatten() {
+                        let mut already_moved_window_handles =
+                            self.already_moved_window_handles.lock();
 
-                    for rule in &*workspace_matching_rules {
-                        let matched = match &rule.matching_rule {
-                            MatchingRule::Simple(r) => should_act_individual(
-                                &title,
-                                &exe_name,
-                                &class,
-                                &path,
-                                r,
-                                &regex_identifiers,
-                            ),
-                            MatchingRule::Composite(r) => {
-                                let mut composite_results = vec![];
-                                for identifier in r {
-                                    composite_results.push(should_act_individual(
+                        if let (Ok(exe_name), Ok(title), Ok(class), Ok(path)) =
+                            (window.exe(), window.title(), window.class(), window.path())
+                        {
+                            for rule in &*workspace_matching_rules {
+                                let matched = match &rule.matching_rule {
+                                    MatchingRule::Simple(r) => should_act_individual(
                                         &title,
                                         &exe_name,
                                         &class,
                                         &path,
-                                        identifier,
+                                        r,
                                         &regex_identifiers,
-                                    ));
+                                    ),
+                                    MatchingRule::Composite(r) => {
+                                        let mut composite_results = vec![];
+                                        for identifier in r {
+                                            composite_results.push(should_act_individual(
+                                                &title,
+                                                &exe_name,
+                                                &class,
+                                                &path,
+                                                identifier,
+                                                &regex_identifiers,
+                                            ));
+                                        }
+
+                                        composite_results.iter().all(|&x| x)
+                                    }
+                                };
+
+                                if matched {
+                                    let floating = workspace.floating_windows().contains(window);
+
+                                    if rule.initial_only {
+                                        if !already_moved_window_handles.contains(&window.hwnd) {
+                                            already_moved_window_handles.insert(window.hwnd);
+
+                                            self.add_window_handle_to_move_based_on_workspace_rule(
+                                                &window.title()?,
+                                                window.hwnd,
+                                                i,
+                                                j,
+                                                rule.monitor_index,
+                                                rule.workspace_index,
+                                                floating,
+                                                &mut to_move,
+                                            );
+                                        }
+                                    } else {
+                                        self.add_window_handle_to_move_based_on_workspace_rule(
+                                            &window.title()?,
+                                            window.hwnd,
+                                            i,
+                                            j,
+                                            rule.monitor_index,
+                                            rule.workspace_index,
+                                            floating,
+                                            &mut to_move,
+                                        );
+                                    }
                                 }
-
-                                composite_results.iter().all(|&x| x)
-                            }
-                        };
-
-                        if matched {
-                            let floating = workspace.floating_windows().contains(window);
-
-                            if rule.initial_only {
-                                if !already_moved_window_handles.contains(&window.hwnd) {
-                                    already_moved_window_handles.insert(window.hwnd);
-
-                                    self.add_window_handle_to_move_based_on_workspace_rule(
-                                        &window.title()?,
-                                        window.hwnd,
-                                        i,
-                                        j,
-                                        rule.monitor_index,
-                                        rule.workspace_index,
-                                        floating,
-                                        &mut to_move,
-                                    );
-                                }
-                            } else {
-                                self.add_window_handle_to_move_based_on_workspace_rule(
-                                    &window.title()?,
-                                    window.hwnd,
-                                    i,
-                                    j,
-                                    rule.monitor_index,
-                                    rule.workspace_index,
-                                    floating,
-                                    &mut to_move,
-                                );
                             }
                         }
                     }
@@ -1242,10 +1409,45 @@ impl WindowManager {
     }
 
     #[tracing::instrument(skip(self))]
-    pub fn restore_all_windows(&mut self) -> Result<()> {
+    pub fn stop(&mut self, ignore_restore: bool) -> Result<()> {
+        tracing::info!(
+            "received stop command, restoring all hidden windows and terminating process"
+        );
+
+        let state = &State::from(&*self);
+        std::fs::write(
+            temp_dir().join("komorebi.state.json"),
+            serde_json::to_string_pretty(&state)?,
+        )?;
+
+        ANIMATION_ENABLED_PER_ANIMATION.lock().clear();
+        ANIMATION_ENABLED_GLOBAL.store(false, Ordering::SeqCst);
+        self.restore_all_windows(ignore_restore)?;
+        AnimationEngine::wait_for_all_animations();
+
+        if WindowsApi::focus_follows_mouse()? {
+            WindowsApi::disable_focus_follows_mouse()?;
+        }
+
+        let sockets = SUBSCRIPTION_SOCKETS.lock();
+        for path in (*sockets).values() {
+            if let Ok(stream) = UnixStream::connect(path) {
+                stream.shutdown(Shutdown::Both)?;
+            }
+        }
+
+        let socket = DATA_DIR.join("komorebi.sock");
+        let _ = std::fs::remove_file(socket);
+
+        std::process::exit(0)
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn restore_all_windows(&mut self, ignore_restore: bool) -> Result<()> {
         tracing::info!("restoring all hidden windows");
 
         let no_titlebar = NO_TITLEBAR.lock();
+        let regex_identifiers = REGEX_IDENTIFIERS.lock();
         let known_transparent_hwnds = transparency_manager::known_hwnds();
         let border_implementation = border_manager::IMPLEMENTATION.load();
 
@@ -1261,7 +1463,17 @@ impl WindowManager {
 
                 for containers in workspace.containers_mut() {
                     for window in containers.windows_mut() {
-                        if no_titlebar.contains(&window.exe()?) {
+                        let should_remove_titlebar_for_window = should_act(
+                            &window.title().unwrap_or_default(),
+                            &window.exe().unwrap_or_default(),
+                            &window.class().unwrap_or_default(),
+                            &window.path().unwrap_or_default(),
+                            &no_titlebar,
+                            &regex_identifiers,
+                        )
+                        .is_some();
+
+                        if should_remove_titlebar_for_window {
                             window.add_title_bar()?;
                         }
 
@@ -1273,7 +1485,9 @@ impl WindowManager {
                             window.remove_accent()?;
                         }
 
-                        window.restore();
+                        if !ignore_restore {
+                            window.restore();
+                        }
                     }
                 }
             }
@@ -1683,21 +1897,10 @@ impl WindowManager {
                 if let Ok(focused_workspace) = self.focused_workspace_mut() {
                     if let Some(window) = focused_workspace.maximized_window() {
                         window.focus(mouse_follows_focus)?;
-                        // (alex-ds13): @LGUG2Z Why was this being done below on the monocle?
-                        // Should it really be done?
-                        //
-                        // WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(
-                        //     window.hwnd,
-                        // )?)?;
-
                         cross_monitor_monocle_or_max = true;
                     } else if let Some(monocle) = focused_workspace.monocle_container() {
                         if let Some(window) = monocle.focused_window() {
                             window.focus(mouse_follows_focus)?;
-                            WindowsApi::center_cursor_in_rect(&WindowsApi::window_rect(
-                                window.hwnd,
-                            )?)?;
-
                             cross_monitor_monocle_or_max = true;
                         }
                     } else {
@@ -2056,7 +2259,7 @@ impl WindowManager {
         let len = NonZeroUsize::new(container.windows().len())
             .ok_or_else(|| anyhow!("there must be at least one window in a container"))?;
 
-        if len.get() == 1 {
+        if len.get() == 1 && idx != 0 {
             bail!("there is only one window in this container");
         }
 
@@ -3089,6 +3292,10 @@ impl WindowManager {
         self.focused_workspace()?
             .focused_container()
             .ok_or_else(|| anyhow!("there is no container"))
+    }
+
+    pub fn focused_container_idx(&self) -> Result<usize> {
+        Ok(self.focused_workspace()?.focused_container_idx())
     }
 
     pub fn focused_container_mut(&mut self) -> Result<&mut Container> {

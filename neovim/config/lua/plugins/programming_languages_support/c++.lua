@@ -4,7 +4,7 @@ local utils = require("utils")
 
 return {
     -- NOTE: leetcode.nvim 使用 curl 来 post 数据，需要安装 curl
-    -- msys2 默认的 curl 对于 windows 存在一定的问题，比如在 powershell 中，-d 中的文件内容需要用单引号包裹，而在 zsh 中不需要
+    -- msys2 默认的 curl 对于 windows 存在一定的问题，比如在 powershell 中，-d 中的文件内容需要用单引号包裹
     -- 最好选择安装 mingw-w64-ucrt-x86_64-curl，并记得将环境变量中 msys64/ucrt64/bin 放在 msys64/usr/bin 之上
     {
         "kawre/leetcode.nvim",
@@ -29,6 +29,7 @@ return {
                     },
                 })
             end
+
             vim.keymap.set("n", "<leader>Lm", function() vim.api.nvim_command("Leet menu") end, { desc = "menu", silent = true })
             vim.keymap.set("n", "<leader>Lq", function() vim.api.nvim_command("Leet exit") end, { desc = "exit", silent = true })
             vim.keymap.set("n", "<leader>Lc", function() vim.api.nvim_command("Leet console") end, { desc = "console", silent = true })
@@ -60,8 +61,6 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-telescope/telescope.nvim",
             "nvim-tree/nvim-web-devicons",
-            "nvim-treesitter/nvim-treesitter",
-            "rcarriga/nvim-notify",
         },
         enabled = not environment.is_vscode,
         lazy = "leetcode" ~= vim.fn.argv()[1],
@@ -76,16 +75,20 @@ return {
             end
 
             return {
+                ---@type string
                 arg = "leetcode",
-                lang = "cpp",
-                cn = {
-                    enabled = true,
+
+                cn = { -- leetcode.cn
+                    enabled = true, ---@type boolean
                 },
+
+                ---@type lc.storage
                 storage = {
                     home = directory,
                     cache = directory,
                 },
-                logging = false,
+
+                ---@type table<lc.lang, lc.inject>
                 injector = {
                     ["cpp"] = {
                         before = {
@@ -105,13 +108,15 @@ return {
                         },
                     },
                 },
+
                 keys = {
-                    toggle = { "q", "<esc>" },
-                    confirm = { "<cr>" },
-                    reset_testcases = "r",
-                    use_testcase = "U",
-                    focus_testcases = "<c-k>",
-                    focus_result = "<c-j>",
+                    toggle = { "q", "<esc>" }, ---@type string|string[]
+                    -- confirm = { "<cr>" }, ---@type string|string[]
+
+                    -- reset_testcases = "r", ---@type string
+                    -- use_testcase = "U", ---@type string
+                    focus_testcases = "<c-k>", ---@type string
+                    focus_result = "<c-j>", ---@type string
                 },
             }
         end,

@@ -1,13 +1,4 @@
 {
-    "Lua.diagnostics.globals": [
-        "mp",
-        "vim"
-    ],
-    "Lua.format.defaultConfig": {
-        "max_line_length": "unset",
-        "quote_style": "double",
-        "trailing_table_separator": "smart"
-    },
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one",
         "editor.quickSuggestions": {
@@ -85,7 +76,7 @@
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
     "editor.tokenColorCustomizations": {
-        "[Tokyo Night]": { // or "[Tokyo Night Storm]"
+        "[Tokyo Night Storm]": {
             "textMateRules": [
                 {
                     "scope": [
@@ -106,7 +97,23 @@
             ]
         }
     },
+    "editor.wrappingStrategy": "advanced",
     "explorer.confirmDragAndDrop": false,
+    "explorer.fileNesting.patterns": {
+        "*.db": "${capture}.${extname}-*",
+        "*.db3": "${capture}.${extname}-*",
+        "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
+        "*.jsx": "${capture}.js",
+        "*.s3db": "${capture}.${extname}-*",
+        "*.sdb": "${capture}.${extname}-*",
+        "*.sqlite": "${capture}.${extname}-*",
+        "*.sqlite3": "${capture}.${extname}-*",
+        "*.ts": "${capture}.js",
+        "*.tsx": "${capture}.ts",
+        "Cargo.toml": "Cargo.lock",
+        "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb",
+        "tsconfig.json": "tsconfig.*.json"
+    },
     "extensions.experimental.affinity": {
         "asvetliakov.vscode-neovim": 1
     },
@@ -218,6 +225,15 @@
         }
     ],
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+    "Lua.diagnostics.globals": [
+        "mp",
+        "vim"
+    ],
+    "Lua.format.defaultConfig": {
+        "max_line_length": "unset",
+        "quote_style": "double",
+        "trailing_table_separator": "smart"
+    },
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.enableHtml": true,
     "markdown.occurrencesHighlight.enabled": true,
@@ -267,6 +283,7 @@
         "image/png",
         "text/plain"
     ],
+    "notebook.inlineValues": true,
     "notebook.lineNumbers": "on",
     "notebook.output.scrolling": true,
     "notebook.stickyScroll.enabled": true,
@@ -297,6 +314,7 @@
             "path": "pwsh.exe"
         }
     },
+    "terminal.integrated.stickyScroll.enabled": true,
     "terminal.integrated.tabs.location": "left",
     "todo-tree.general.tagGroups": {
         "FIX": [
@@ -353,46 +371,46 @@
         "[x]",
     ],
     "todo-tree.highlights.customHighlight": {
-        "FIX": {
-            "background": "#e06c75",
-            "foreground": "#282c34",
-            "icon": "bug"
-        },
-        "HACK": {
-            "background": "#d19a66",
-            "foreground": "#282c34",
-            "icon": "flame"
-        },
-        "NOTE": {
-            "background": "#61afef",
-            "foreground": "#282c34",
-            "icon": "note"
-        },
-        "PREF": {
-            "background": "#c678dd",
-            "foreground": "#282c34",
-            "icon": "clock"
-        },
-        "TEST": {
-            "background": "#56b6c2",
-            "foreground": "#282c34",
-            "icon": "beaker"
-        },
-        "TODO": {
-            "background": "#98c379",
-            "foreground": "#282c34",
-            "icon": "check"
-        },
-        "WARN": {
-            "background": "#e5c07b",
-            "foreground": "#282c34",
-            "icon": "alert"
-        },
         "[ ]": {
             "icon": "issue-draft"
         },
         "[x]": {
             "icon": "issue-closed"
+        },
+        "FIX": {
+            "background": "#ff757f",
+            "foreground": "#222436",
+            "icon": "bug"
+        },
+        "HACK": {
+            "background": "#ff966c",
+            "foreground": "#222436",
+            "icon": "flame"
+        },
+        "NOTE": {
+            "background": "#82aaff",
+            "foreground": "#222436",
+            "icon": "note"
+        },
+        "PREF": {
+            "background": "#fca7ea",
+            "foreground": "#222436",
+            "icon": "clock"
+        },
+        "TEST": {
+            "background": "#86e1fc",
+            "foreground": "#222436",
+            "icon": "beaker"
+        },
+        "TODO": {
+            "background": "#c3e88d",
+            "foreground": "#222436",
+            "icon": "check"
+        },
+        "WARN": {
+            "background": "#ffc777",
+            "foreground": "#222436",
+            "icon": "alert"
         }
     },
     "vscode-neovim.ctrlKeysForNormalMode": [
@@ -434,23 +452,23 @@
         "editor.selectionHighlightBackground": "#ffffff10",
         "editor.selectionHighlightBorder": "#dddddd",
         "editorCursor.foreground": "#528bff",
-        "minimap.background": "#282c3433",
+        "minimap.background": "#22243633",
         "minimapSlider.background": "#9fced11f",
         "notebook.cellEditorBackground": "#21252b",
-        "tab.activeBorder": "#d19a66",
-        "titleBar.inactiveBackground": "#282c34"
+        "tab.activeBorder": "#ff966c",
+        "titleBar.inactiveBackground": "#222436"
     },
-    "workbench.colorTheme": "Tokyo Night",
+    "workbench.colorTheme": "Tokyo Night Storm",
     "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
+        "{git,git-graph}:/**/*.{md,csv,svg}": "default",
+        "{git,gitlens,git-graph}:/**/*.{md,csv,svg}": "default",
+        "{hexdiff}:/**/*.*": "hexEditor.hexedit",
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
-        "*.md": "default",
-        "{git,git-graph}:/**/*.{md,csv,svg}": "default",
-        "{git,gitlens,git-graph}:/**/*.{md,csv,svg}": "default",
-        "{hexdiff}:/**/*.*": "hexEditor.hexedit"
+        "*.md": "default"
     },
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,

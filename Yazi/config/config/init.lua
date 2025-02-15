@@ -1,99 +1,42 @@
--- ╭────────╮
--- │ Header │
--- ╰────────╯
+local themes = {
+    ["onedarkpro"] = {
+        black = "#282c34",
+        blue = "#61afef",
+        cyan = "#56b6c2",
+        gray = "#5c6370",
+        green = "#98c379",
+        orange = "#d19a66",
+        purple = "#c678dd",
+        red = "#e06c75",
+        white = "#abb2bf",
+        yellow = "#e5c07b",
+    },
+    ["tokyonight-moon"] = {
+        black = "#222436",
+        blue = "#82aaff",
+        cyan = "#86e1fc",
+        gray = "#545c7e",
+        green = "#c3e88d",
+        orange = "#ff966c",
+        purple = "#fca7ea",
+        red = "#ff757f",
+        white = "#c8d3f5",
+        yellow = "#ffc777",
+    },
+}
 
--- 修改 tabs 样式
-function Header:tabs()
-    local tabs = #cx.tabs
-    if tabs == 1 then
-        return ""
-    end
+local theme = themes["tokyonight-moon"]
 
-    local spans = {}
-    for i = 1, tabs do
-        local text = i
-        if THEME.manager.tab_width > 2 then
-            text = ya.truncate(text .. " " .. cx.tabs[i]:name(), { max = THEME.manager.tab_width })
-            if i ~= 1 then
-                spans[#spans + 1] = ui.Span(" ")
-            end
-        end
-        if i == cx.tabs.idx then
-            spans[#spans + 1] = ui.Span(THEME.status.separator_open):fg(THEME.manager.tab_active.bg)
-            spans[#spans + 1] = ui.Span(text):style(THEME.manager.tab_active)
-            spans[#spans + 1] = ui.Span(THEME.status.separator_close):fg(THEME.manager.tab_active.bg)
-        else
-            spans[#spans + 1] = ui.Span(THEME.status.separator_open):fg(THEME.manager.tab_inactive.bg)
-            spans[#spans + 1] = ui.Span(text):style(THEME.manager.tab_inactive)
-            spans[#spans + 1] = ui.Span(THEME.status.separator_close):fg(THEME.manager.tab_inactive.bg)
-        end
-    end
-    return ui.Line(spans)
-end
 
-Header:children_remove(2, Header.RIGHT)
-Header:children_add(Header.tabs, 2000, Header.RIGHT)
 
--- ╭────────╮
--- │ Status │
--- ╰────────╯
-
--- Show symlink in status bar
-function Status:name()
-    local h = self._current.hovered
-    if not h then
-        return ""
-    end
-
-    local linked = ""
-    if h.link_to ~= nil then
-        linked = " -> " .. tostring(h.link_to)
-    end
-    return " " .. h.name .. linked
-end
-
--- 修改时间
-function Status:modified()
-    local h = self._current.hovered
-    if h == nil then
-        return ""
-    end
-
-    local time = h.cha.mtime
-    if time == nil then
-        return ""
-    end
-
-    local date = os.date("%Y-%m-%d %H:%M:%S", math.floor(time or 0))
-    if date == nil then
-        return ""
-    end
-
-    return ui.Line({
-        ui.Span(date):fg(self:style().main.bg),
-        ui.Span(" "),
-    })
-end
-
-Status:children_remove(3, Status.LEFT)
-Status:children_add(Status.name, 3000, Status.LEFT)
-
-Status:children_add(Status.modified, 500, Status.RIGHT)
-
--- ╭────────╮
--- │ plugin │
--- ╰────────╯
-
--- ya pack -a ndtoan96/ouch
--- ya pack -a yazi-rs/plugins:full-border
--- ya pack -a yazi-rs/plugins:smart-enter
-
-require("full-border"):setup({
-    -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
-    type = ui.Border.ROUNDED,
+require("session"):setup({
+    sync_yanked = true,
 })
 
-require("git"):setup()
+
+
+require("fzf-rg"):setup()
+
 
 require("projects"):setup({
     save = {
@@ -104,6 +47,127 @@ require("projects"):setup({
     },
 })
 
-require("session"):setup({
-    sync_yanked = true,
+
+
+-- ya pack -a ndtoan96/ouch
+-- ya pack -a yazi-rs/plugins:smart-enter
+
+
+
+-- ya pack -a imsi32/yatline
+require("yatline"):setup({
+    style_a = {
+        fg = theme.black,
+        bg_mode = {
+            normal = theme.blue,
+            select = theme.yellow,
+            un_set = theme.red,
+        },
+    },
+    style_b = { bg = theme.gray, fg = theme.white },
+    style_c = { bg = theme.black, fg = theme.white },
+
+    permissions_t_fg = theme.blue,
+    permissions_r_fg = theme.yellow,
+    permissions_w_fg = theme.red,
+    permissions_x_fg = theme.green,
+    permissions_s_fg = theme.white,
+
+    selected = { icon = "󰻭", fg = theme.yellow },
+    copied = { icon = "", fg = theme.green },
+    cut = { icon = "", fg = theme.red },
+
+    total = { icon = "󰮍", fg = theme.yellow },
+    succ = { icon = "", fg = theme.green },
+    fail = { icon = "", fg = theme.red },
+    found = { icon = "󰮕", fg = theme.blue },
+    processed = { icon = "󰐍", fg = theme.green },
+
+    show_background = false,
+
+    header_line = {
+        left = {
+            section_a = {
+                { type = "line", custom = false, name = "tabs", params = { "left" } },
+            },
+            section_b = {
+            },
+            section_c = {
+            },
+        },
+        right = {
+            section_a = {
+                { type = "string", custom = false, name = "tab_path" },
+            },
+            section_b = {
+            },
+            section_c = {
+            },
+        },
+    },
+
+    status_line = {
+        left = {
+            section_a = {
+                { type = "string", custom = false, name = "tab_mode" },
+            },
+            section_b = {
+                { type = "string", custom = false, name = "hovered_size" },
+            },
+            section_c = {
+                { type = "string",   custom = false, name = "hovered_name",  params = { { show_symlink = true } } },
+                { type = "coloreds", custom = false, name = "modified_time", params = { theme.white } },
+                { type = "coloreds", custom = false, name = "permissions" },
+            },
+        },
+        right = {
+            section_a = {
+                { type = "string", custom = false, name = "cursor_position" },
+            },
+            section_b = {
+                { type = "string", custom = false, name = "cursor_percentage" },
+            },
+            section_c = {
+                { type = "coloreds", custom = false, name = "count" },
+            },
+        },
+    },
 })
+
+if Yatline ~= nil then
+    function Yatline.coloreds.get:modified_time(color)
+        color = color or "white"
+
+        local modified_time = {}
+
+        local h = cx.active.current.hovered
+        if h == nil then
+            return modified_time
+        end
+
+        local mtime = h.cha.mtime
+        if mtime == nil then
+            return modified_time
+        end
+
+        local date = os.date(" %Y-%m-%d %H:%M:%S ", math.floor(mtime or 0))
+        if date == nil then
+            return modified_time
+        end
+
+        table.insert(modified_time, { date, color })
+
+        return modified_time
+    end
+end
+
+
+-- ya pack -a yazi-rs/plugins:full-border
+require("full-border"):setup({
+    -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
+    type = ui.Border.ROUNDED,
+})
+
+
+-- ya pack -a yazi-rs/plugins:git
+require("git"):setup()

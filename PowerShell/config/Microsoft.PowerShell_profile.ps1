@@ -1,5 +1,3 @@
-Import-Module PSReadLine
-
 # ╭───────╮
 # │ Alias │
 # ╰───────╯
@@ -11,6 +9,21 @@ Set-Alias lg lazygit
 Set-Alias vi nvim
 Set-Alias vim nvim
 
+
+
+# ╭──────────────────────╮
+# │ Environment Variable │
+# ╰──────────────────────╯
+
+$env:EDITOR="nvim"
+$env:GIT_EDITOR="nvim"
+
+
+
+# ╭──────────╮
+# │ Function │
+# ╰──────────╯
+
 function which($command) {
     Get-Command -Name $command -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
@@ -18,11 +31,19 @@ function which($command) {
 
 
 
-# ╭──────────────────────╮
-# │ Environment Variable │
-# ╰──────────────────────╯
+# ╭────────────╮
+# │ keybinding │
+# ╰────────────╯
 
-$env:TERM_PROGRAM="WindowsTerminal"
+Set-PSReadLineKeyHandler -Chord Ctrl+u -Function BackwardDeleteLine
+
+Set-PSReadLineKeyHandler -Chord Shift+LeftArrow -Function BackwardWord
+Set-PSReadLineKeyHandler -Chord Shift+RightArrow -Function ForwardWord
+
+Set-PSReadlineKeyHandler -Chord UpArrow -Function HistorySearchBackward
+Set-PSReadlineKeyHandler -Chord DownArrow -Function HistorySearchForward
+
+Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
 
 
 
@@ -51,13 +72,6 @@ Set-PSReadLineOption -AddToHistoryHandler {
     return "MemoryOnly"
 }
 
-Set-PSReadLineKeyHandler -Chord Ctrl+u -Function BackwardDeleteLine
-Set-PSReadLineKeyHandler -Chord Shift+LeftArrow -Function BackwardWord
-Set-PSReadLineKeyHandler -Chord Shift+RightArrow -Function ForwardWord
-Set-PSReadlineKeyHandler -Chord UpArrow -Function HistorySearchBackward
-Set-PSReadlineKeyHandler -Chord DownArrow -Function HistorySearchForward
-Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
-
 
 
 # ╭───────────────────╮
@@ -66,14 +80,42 @@ Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
 
 # ╭─ fzf ────────────────────────────────────────────────────╮
 
-$env:FZF_DEFAULT_OPTS="\\"
-$env:FZF_DEFAULT_OPTS="--bind=ctrl-i:accept --cycle --scroll-off=5 --height=80% --layout=reverse --border --info=inline --preview='bat --theme=TwoDark --color=always --style=numbers --line-range=:500 {}'"
+$env:FZF_COMPLETION_TRIGGER="\\"
+$env:FZF_DEFAULT_OPTS="
+    --height=80%
+    --layout=reverse
+    --border=rounded
+    --cycle
+    --scroll-off=5
+    --info=inline
+    --preview='bat --number --color always --theme ansi --line-range :500 {}'
+    --preview-border=rounded
+    --bind=ctrl-i:accept
+"
 
-# One Dark
+# # One Dark
+# $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
+#     --color=dark
+#     --color=fg:-1,bg:-1,hl:#c678dd,fg+:#abb2bf,bg+:#282c34,hl+:#c678dd
+#     --color=info:#98c379,prompt:#61afef,pointer:#e06c75,marker:#e5c07b,spinner:#61afef,header:#61afef"
+# Tokyo Night Moon
+# https://github.com/folke/tokyonight.nvim/blob/main/extras/fzf/tokyonight_moon.sh
 $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
-    --color=dark
-    --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
-    --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef"
+    --color=border:#589ed7
+    --color=fg:#c8d3f5
+    --color=gutter:#1e2030
+    --color=header:#ff966c
+    --color=hl+:#65bcff
+    --color=hl:#65bcff
+    --color=info:#545c7e
+    --color=marker:#ff007c
+    --color=pointer:#ff007c
+    --color=prompt:#65bcff
+    --color=query:#c8d3f5:regular
+    --color=scrollbar:#589ed7
+    --color=separator:#ff966c
+    --color=spinner:#ff007c
+"
 
 # ╰──────────────────────────────────────────────────── fzf ─╯
 
@@ -127,6 +169,9 @@ function y {
 # │ Conda │
 # ╰───────╯
 
-if (Test-Path "$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe") {
-    (& "$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression 2>$null
+$MAMBA_EXE="$HOME/scoop/apps/mambaforge/current/Library/bin/mamba.exe"
+if (Test-Path "$MAMBA_EXE") {
+    $Env:MAMBA_ROOT_PREFIX="$HOME/scoop/persist/mambaforge"
+    $Env:MAMBA_EXE="$MAMBA_EXE"
+    (& $Env:MAMBA_EXE 'shell' 'hook' -s 'powershell' -r $Env:MAMBA_ROOT_PREFIX) | Out-String | Invoke-Expression
 }

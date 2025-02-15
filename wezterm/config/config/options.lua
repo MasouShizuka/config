@@ -1,6 +1,7 @@
 local wezterm = require("wezterm")
 
-local custom = wezterm.color.get_builtin_schemes()["OneDark (base16)"]
+-- local custom = wezterm.color.get_builtin_schemes()["OneDark (base16)"]
+local custom = wezterm.color.get_builtin_schemes()["Tokyo Night Moon"]
 custom.background = wezterm.color.get_builtin_schemes()["Windows 10 (base16)"].background
 
 return {

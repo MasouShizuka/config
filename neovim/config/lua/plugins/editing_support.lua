@@ -1,6 +1,7 @@
 local buftype = require("utils.buftype")
 local colors = require("utils.colors")
 local environment = require("utils.environment")
+local filetype = require("utils.filetype")
 local icons = require("utils.icons")
 local treesitter = require("utils.treesitter")
 local utils = require("utils")
@@ -9,16 +10,14 @@ return {
     {
         "altermo/ultimate-autopair.nvim",
         config = function(_, opts)
-            require("ultimate-autopair").init({
-                require("ultimate-autopair").extend_default(opts),
-                { profile = require("ultimate-autopair.experimental.cmpair").init },
-            })
-
-            -- 新行保持缩进
-            vim.keymap.set("i", "<cr>", function()
-                local core = require("ultimate-autopair.core")
-                return core.run(vim.api.nvim_replace_termcodes("<cr>", true, true, true)) .. core.run(vim.api.nvim_replace_termcodes("x<bs>", true, true, true))
-            end, { desc = "Enter", expr = true, replace_keycodes = false })
+            if utils.is_available("nvim-cmp") then
+                require("ultimate-autopair").init({
+                    require("ultimate-autopair").extend_default(opts),
+                    { profile = require("ultimate-autopair.experimental.cmpair").init },
+                })
+            else
+                require("ultimate-autopair").setup(opts)
+            end
         end,
         enabled = not environment.is_vscode,
         event = {
@@ -40,6 +39,7 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
+        enabled = environment.treesitter_enable,
         keys = {
             { "<leader>gca", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
         },
@@ -154,31 +154,26 @@ return {
         opts = {
             -- Evaluate text and replace with output
             evaluate = {
-                -- prefix = "g=",
                 prefix = "se",
             },
 
             -- Exchange text regions
             exchange = {
-                -- prefix = "gx",
                 prefix = "sx",
             },
 
             -- Multiply (duplicate) text
             multiply = {
-                -- prefix = "gm",
                 prefix = "sm",
             },
 
             -- Replace text with register
             replace = {
-                -- prefix = "gr",
                 prefix = "ss",
             },
 
             -- Sort text
             sort = {
-                -- prefix = "gs",
                 prefix = "sS",
             },
         },
@@ -192,7 +187,6 @@ return {
             -- Module mappings. Use `''` (empty string) to disable one.
             -- Created for both Normal and Visual modes.
             mappings = {
-                -- toggle = "gS",
                 toggle = "gs",
             },
         },
@@ -211,7 +205,10 @@ return {
             "nvim-lua/plenary.nvim",
         },
         enabled = not environment.is_vscode,
-        ft = treesitter.treesitter_filetype_list,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
         keys = {
             { "<leader>xt", function() vim.api.nvim_command("TodoTrouble") end, desc = "List all project todos in trouble", mode = "n" },
         },
@@ -243,7 +240,8 @@ return {
                 -- * keyword: highlights of the keyword
                 -- * after: highlights after the keyword (todo text)
                 highlight = {
-                    keyword = "bg",
+                    keyword = "bg", -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
+                    comments_only = false, -- uses treesitter to match keywords in comments only
                 },
             }
         end,
@@ -263,14 +261,6 @@ return {
                 history_length = 0,
                 storage = "memory",
             },
-            highlight = {
-                on_put = true,
-                on_yank = true,
-                timer = 500,
-            },
-            preserve_cursor_position = {
-                enabled = true,
-            },
         },
     },
 
@@ -282,7 +272,7 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.treesitter_enable,
         ft = treesitter.treesitter_filetype_list,
         opts = {},
     },
@@ -316,7 +306,7 @@ return {
                 --               "1" for Fcitx
                 --               "xkb:us::eng" for ibus
                 -- You can use `im-select` or `fcitx5-remote -n` to get the IM's name
-                default_im_select       = default_im_select,
+                default_im_select  = default_im_select,
 
                 -- Can be binary's name, binary's full path, or a table, e.g. 'im-select',
                 -- '/usr/local/bin/im-select' for binary without extra arguments,
@@ -324,22 +314,10 @@ return {
                 -- For Windows/WSL, default: "im-select.exe"
                 -- For macOS, default: "macism"
                 -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
-                default_command         = default_command,
+                default_command    = default_command,
 
                 -- Restore the default input method state when the following events are triggered
-                set_default_events      = { "InsertLeave" },
-
-                -- Restore the previous used input method state when the following events
-                -- are triggered, if you don't want to restore previous used im in Insert mode,
-                -- e.g. deprecated `disable_auto_restore = 1`, just let it empty
-                -- as `set_previous_events = {}`
-                set_previous_events     = { "InsertEnter" },
-
-                -- Show notification about how to install executable binary when binary missed
-                keep_quiet_on_no_binary = false,
-
-                -- Async run `default_command` to switch IM or not
-                async_switch_im         = true,
+                set_default_events = { "InsertLeave" },
             }
         end,
     },
@@ -436,7 +414,6 @@ return {
             ---LHS of toggle mappings in NORMAL mode
             toggler = {
                 ---Block-comment toggle keymap
-                -- block = "gbc",
                 block = "gbb",
             },
             ---Function to call before (un)comment
@@ -596,11 +573,6 @@ return {
             { "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(enabled, prev_enabled) end) end,                 desc = "Toggle autoSave (buffer)", mode = "n" },
         },
         opts = {
-            trigger_events = {                                 -- See :h events
-                immediate_save = { "BufLeave", "FocusLost" },  -- vim events that trigger an immediate save
-                defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
-                cancel_deferred_save = { "InsertEnter" },      -- vim events that cancel a pending deferred save
-            },
             -- function that takes the buffer handle and determines whether to save the current buffer or not
             -- return true: if buffer is ok to be saved
             -- return false: if it's not ok to be saved
@@ -608,6 +580,11 @@ return {
             condition = function(buf)
                 local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
                 if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                    return false
+                end
+
+                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                if vim.tbl_contains(filetype.skip_filetype_list, ft) then
                     return false
                 end
 

@@ -176,7 +176,8 @@ ulang = {
 	_button16 = '列表循环',
 	_button17 = '单曲循环',
 	_button18 = '乱序播放',
-	_button19 = '切换全屏',
+	_button19 = '自动加载',
+	_button20 = '切换全屏',
 
 	_button_ext01 = '播放/暂停',
 	_button_ext02 = '播放/暂停',

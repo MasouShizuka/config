@@ -1,4 +1,3 @@
-local colors = require("utils.colors")
 local environment = require("utils.environment")
 local icons = require("utils.icons")
 

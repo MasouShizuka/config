@@ -1,0 +1,181 @@
+local buftype = require("utils.buftype")
+local colors = require("utils.colors")
+local environment = require("utils.environment")
+local filetype = require("utils.filetype")
+local icons = require("utils.icons")
+local lsp = require("utils.lsp")
+local utils = require("utils")
+
+return {
+    {
+        "rebelot/heirline.nvim",
+        dependencies = {
+            "nvim-tree/nvim-web-devicons",
+        },
+        enabled = not environment.is_vscode,
+        event = {
+            "UIEnter",
+        },
+        opts = function()
+            local bhu = require("plugins.bars_and_lines.heirline.utils")
+
+            local herrline_conditions = require("heirline.conditions")
+            local heirline_utils = require("heirline.utils")
+
+
+            bhu.load_colors()
+
+
+            local git_flexible = { flexible = 2 }
+            local git_branch = require("plugins.bars_and_lines.heirline.git").git_branch
+            local git_status = require("plugins.bars_and_lines.heirline.git").git_status
+            git_flexible = bhu.insert_with_child_condition(
+                git_flexible,
+                bhu.insert_with_child_condition({}, git_branch, git_status),
+                git_status
+            )
+
+
+            local lsp_flexible = { flexible = 1 }
+
+            local lsp_info = { condition = herrline_conditions.lsp_attached }
+            if utils.is_available("venv-selector.nvim") then
+                local python_venv = require("plugins.bars_and_lines.heirline.lsp").python_venv
+                lsp_info = heirline_utils.insert(lsp_info, bhu.padding_after(python_venv))
+            end
+            lsp_info = heirline_utils.insert(lsp_info, require("plugins.bars_and_lines.heirline.lsp").lsp_server)
+
+            local diagnostic = require("plugins.bars_and_lines.heirline.diagnostic").diagnostic
+
+            if utils.is_available("nvim-lint") then
+                lsp_flexible = bhu.insert_with_child_condition(
+                    lsp_flexible,
+                    bhu.insert_with_child_condition({}, lsp_info, bhu.padding_before(require("plugins.bars_and_lines.heirline.lint")), diagnostic)
+                )
+            end
+
+            lsp_flexible = bhu.insert_with_child_condition(
+                lsp_flexible,
+                bhu.insert_with_child_condition({}, lsp_info, diagnostic),
+                diagnostic
+            )
+
+
+            local align = require("plugins.bars_and_lines.heirline.utils").align
+            local mode = require("plugins.bars_and_lines.heirline.mode")
+            local file_size = require("plugins.bars_and_lines.heirline.file").file_size
+            local search_count = require("plugins.bars_and_lines.heirline.cmd").search_count
+            local macro = require("plugins.bars_and_lines.heirline.cmd").macro
+            local show_cmd = require("plugins.bars_and_lines.heirline.cmd").show_cmd
+            local lazy = require("plugins.bars_and_lines.heirline.lazy")
+            local ruler = require("plugins.bars_and_lines.heirline.nav").ruler
+            local scrollbar = require("plugins.bars_and_lines.heirline.nav").scrollbar
+
+
+            local default_statusline = {}
+            for _, value in ipairs({
+                { component = bhu.padding_after(mode, 2) },
+                { component = bhu.padding_after(git_flexible, 2) },
+                { component = bhu.padding_after(lsp_flexible, 2) },
+                { component = bhu.padding_after(require("plugins.bars_and_lines.heirline.conform"), 2),           package = "conform.nvim" },
+                { component = bhu.padding_after(require("plugins.bars_and_lines.heirline.dap"), 2),               package = "nvim-dap" },
+                { component = bhu.padding_after(require("plugins.bars_and_lines.heirline.overseer"), 1),          package = "overseer.nvim" },
+                { component = bhu.padding_after(file_size, 2) },
+                { component = bhu.padding_after(search_count, 2) },
+                { component = bhu.padding_after(macro, 2) },
+                { component = bhu.padding_after(show_cmd, 2) },
+                { component = align },
+                { component = bhu.padding_after(lazy, 2) },
+                { component = bhu.padding_after(require("plugins.bars_and_lines.heirline.file").file_indent, 2) },
+                { component = bhu.padding_after(require("plugins.bars_and_lines.heirline.file").file_encoding, 2) },
+                { component = bhu.padding_after(require("plugins.bars_and_lines.heirline.file").file_format, 2) },
+                { component = bhu.padding_after(ruler, 2) },
+                { component = bhu.padding_after(scrollbar, 2) },
+            }) do
+                if value.package == nil or utils.is_available(value.package) then
+                    default_statusline[#default_statusline + 1] = value.component
+                end
+            end
+
+
+            local winbar = {}
+            if utils.is_available("nvim-navic") then
+                winbar[#winbar + 1] = require("plugins.bars_and_lines.heirline.navic")
+            end
+            if #winbar == 0 then
+                winbar = nil
+            end
+
+            return {
+                statusline = {
+                    hl = { bg = colors.colors.black },
+                    fallthrough = false,
+
+                    {
+                        condition = function()
+                            return herrline_conditions.buffer_matches({ buftype = { "terminal" } })
+                        end,
+
+                        bhu.padding_after(mode, 2),
+                        align,
+                    },
+                    {
+                        condition = function()
+                            return herrline_conditions.buffer_matches({
+                                buftype = buftype.skip_buftype_list,
+                                filetype = filetype.skip_filetype_list,
+                            })
+                        end,
+
+                        bhu.padding_after(mode, 2),
+                        bhu.padding_after(file_size, 2),
+                        bhu.padding_after(search_count, 2),
+                        bhu.padding_after(show_cmd, 2),
+                        align,
+                        bhu.padding_after(lazy, 2),
+                        bhu.padding_after(ruler, 2),
+                        bhu.padding_after(scrollbar, 2),
+                    },
+                    default_statusline,
+                },
+                winbar = winbar,
+                tabline = {
+                    require("plugins.bars_and_lines.heirline.tabline").tabline_offset,
+                    require("plugins.bars_and_lines.heirline.tabline").tablist,
+                },
+                statuscolumn = {
+                    require("plugins.bars_and_lines.heirline.statuscolumn").fold,
+                    require("plugins.bars_and_lines.heirline.statuscolumn").signcolumn,
+                    align,
+                    require("plugins.bars_and_lines.heirline.statuscolumn").number,
+                },
+                opts = {
+                    disable_winbar_cb = function(args)
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                        return not vim.tbl_contains(lsp.lsp_filetype_list, ft)
+                    end,
+                },
+            }
+        end,
+    },
+
+    {
+        "SmiteshP/nvim-navic",
+        enabled = not environment.is_vscode and environment.lsp_enable,
+        init = function()
+            vim.api.nvim_create_autocmd("LspAttach", {
+                callback = function(args)
+                    local client = vim.lsp.get_client_by_id(args.data.client_id)
+                    if client.supports_method("textDocument/documentSymbol") then
+                        require("nvim-navic").attach(client, args.buf)
+                    end
+                end,
+            })
+        end,
+        lazy = true,
+        opts = {
+            icons = icons.kinds,
+            lazy_update_content = true,
+        },
+    },
+}

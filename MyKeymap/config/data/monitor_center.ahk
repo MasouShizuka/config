@@ -3,7 +3,7 @@ GetCurrentMonitorIndex() {
     MouseGetPos(&mx, &my)
     monitorsCount := SysGet(80)
 
-    Loop (monitorsCount) {
+    loop (monitorsCount) {
         MonitorGetWorkArea(A_Index, &Left, &Top, &Right, &Bottom)
         if (Left <= mx && mx <= Right && Top <= my && my <= Bottom) {
             Return A_Index

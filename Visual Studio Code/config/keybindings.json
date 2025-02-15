@@ -234,11 +234,6 @@
         "when": "notebookCellListFocused && notebookEditable && !inputFocus"
     },
 
-    {
-        "key": "v",
-        "command": "-notebook.cell.paste",
-        "when": "notebookEditorFocused && !inputFocus"
-    },
     // 粘贴
     {
         "key": "p",
@@ -249,7 +244,7 @@
     {
         "key": "escape",
         "command": "-notebook.cell.quitEdit",
-        "when": "inputFocus && notebookEditorFocused && !editorHasMultipleSelections && !editorHasSelection && !editorHoverVisible"
+        "when": "inputFocus && notebookEditorFocused && !editorHasMultipleSelections && !editorHasSelection && !editorHoverVisible && !inlineChatFocused"
     },
     // 退出编辑
     {

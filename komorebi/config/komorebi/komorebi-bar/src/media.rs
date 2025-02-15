@@ -4,11 +4,10 @@ use crate::ui::CustomUi;
 use crate::widget::BarWidget;
 use crate::MAX_LABEL_WIDTH;
 use eframe::egui::text::LayoutJob;
+use eframe::egui::Align;
 use eframe::egui::Context;
-use eframe::egui::FontId;
 use eframe::egui::Label;
 use eframe::egui::TextFormat;
-use eframe::egui::TextStyle;
 use eframe::egui::Ui;
 use eframe::egui::Vec2;
 use schemars::JsonSchema;
@@ -132,13 +131,6 @@ impl BarWidget for Media {
         if self.enable {
             let output = self.output();
             if !output.is_empty() {
-                let font_id = ctx
-                    .style()
-                    .text_styles
-                    .get(&TextStyle::Body)
-                    .cloned()
-                    .unwrap_or_else(FontId::default);
-
                 let icon = if self.is_playing() {
                     "\u{f04b}"
                 } else {
@@ -147,7 +139,7 @@ impl BarWidget for Media {
 
                 let mut layout_job = LayoutJob::simple(
                     icon.to_string(),
-                    font_id.clone(),
+                    config.icon_font_id.clone(),
                     ctx.style().visuals.selection.stroke.color,
                     100.0,
                 );
@@ -155,7 +147,12 @@ impl BarWidget for Media {
                 layout_job.append(
                     &output,
                     10.0,
-                    TextFormat::simple(font_id, ctx.style().visuals.text_color()),
+                    TextFormat {
+                        font_id: config.text_font_id.clone(),
+                        color: ctx.style().visuals.text_color(),
+                        valign: Align::Center,
+                        ..Default::default()
+                    },
                 );
 
                 config.apply_on_widget(false, ui, |ui| {

@@ -26,8 +26,6 @@ if environment.is_windows then
     M.scoop_path = M.home_path .. "/scoop"
     M.scoop_app_path = M.scoop_path .. "/apps"
     M.scoop_persist_path = M.scoop_path .. "/persist"
-
-    M.msys2_path = M.scoop_app_path .. "/msys2/current"
 end
 
 M.vscode_user_data_path = nil

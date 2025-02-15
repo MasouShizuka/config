@@ -84,15 +84,16 @@ end
 ---@param line string
 ---@param start boolean
 ---@param config table
+---@param indent number
 ---@return string
-local function remove_cs(comment_string, line, start, config)
+local function remove_cs(comment_string, line, start, config, indent)
     if comment_string == "" then
         return line
     end
 
     local comment_string_length = fn.strdisplaywidth(comment_string)
     if start then
-        if line:sub(1, comment_string_length) == comment_string then
+        if line:sub(indent + 1, indent + comment_string_length) == comment_string then
             line = line:gsub(vim.pesc(comment_string), "", 1) -- remove comment string
 
             local inner_indent = #line:gsub("^(%s*).-%s*$", "%1")
@@ -132,9 +133,9 @@ local function skip_cs(
     end
 
     -- Order is important: block comment strings are always longer
-    line = remove_cs(comment_string_b_start, line, true, config)
-    line = remove_cs(comment_string_l, line, true, config)
-    line = remove_cs(comment_string_b_end, line, false, config)
+    line = remove_cs(comment_string_b_start, line, true, config, indent)
+    line = remove_cs(comment_string_l, line, true, config, indent)
+    line = remove_cs(comment_string_b_end, line, false, config, indent)
 
     if not config.keep_indent then
         line = vim.trim(line)

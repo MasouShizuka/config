@@ -1,28 +1,21 @@
 {
   "height": 40,
-  "monitor": {
-    "index": 1,
-    "work_area_offset": {
-      "left": 0,
-      "top": 40,
-      "right": 0,
-      "bottom": 40
-    }
-  },
+  "monitor": 1,
   "font_family": "Sarasa Mono SC,Maple Mono NF CN",
-  "font_size": 20,
+  "font_size": 18,
   "theme": {
     "palette": "Catppuccin",
     "name": "Mocha",
     "accent": "Peach"
   },
+  "transparency_alpha": 0,
+  "grouping": {
+    "kind": "Widget",
+    "rounding": 12.0
+  },
   "left_widgets": [
     {
       "Komorebi": {
-        "workspaces": {
-          "enable": true,
-          "hide_empty_workspaces": false
-        },
         "layout": {
           "enable": true
         },
@@ -41,8 +34,9 @@
       }
     },
     {
-      "Language": {
-        "enable": true
+      "Keyboard": {
+        "enable": true,
+        "label_prefix": "Icon"
       }
     },
     {

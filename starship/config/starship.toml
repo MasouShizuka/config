@@ -1,23 +1,37 @@
 # Configure the format of the prompt
-format = '$os $all$fill$battery$time$line_break$character'
-
-# Right prompt which renders on the same line as the input
-right_format = ''
-
-# Timeout for starship to scan files (in milliseconds)
-scan_timeout = 30
-
-# Timeout for commands executed by starship (in milliseconds)
-command_timeout = 5000
+format = '$os$all$fill$battery$time$line_break$character'
 
 # Inserts blank line between shell prompts
 add_newline = false
 
 # Sets which color palette from palettes to use.
-# palette = ''
+palette = 'tokyonight'
 
-# Collection of color palettes that assign colors to user-defined names. Note that color palettes cannot reference their own color definitions
-# palettes = {}
+# Collection of color palettes that assign colors to user-defined names.
+# Note that color palettes cannot reference their own color definitions
+[palettes.onedarkpro]
+black = '#282c34'
+blue = '#61afef'
+cyan = '#56b6c2'
+gray = '#5c6370'
+green = '#98c379'
+orange = '#d19a66'
+purple = '#c678dd'
+red = '#e06c75'
+white = '#abb2bf'
+yellow = '#e5c07b'
+
+[palettes.tokyonight]
+black = '#222436'
+blue = '#82aaff'
+cyan = '#86e1fc'
+gray = '#545c7e'
+green = '#c3e88d'
+orange = '#ff966c'
+purple = '#fca7ea'
+red = '#ff757f'
+white = '#c8d3f5'
+yellow = '#ffc777'
 
 
 
@@ -30,49 +44,44 @@ empty_symbol = ' '
 
 [[battery.display]]
 threshold = 10
-style = 'bold #f44747'
+style = 'bold gray'
 discharging_symbol = ' '
 
 [[battery.display]]
 threshold = 30
-style = 'bold #e06c75'
+style = 'bold red'
 discharging_symbol = ' '
 
 [[battery.display]]
 threshold = 70
-style = 'bold #d19a66'
+style = 'bold orange'
 discharging_symbol = ' '
 
 [[battery.display]]
 threshold = 90
-style = 'bold #e5c07b'
+style = 'bold yellow'
 discharging_symbol = ' '
 
 [[battery.display]]
 threshold = 100
-style = 'bold #98c379'
+style = 'bold green'
 discharging_symbol = ' '
 
 
 
 [character]
-success_symbol = '[>>](bold #98c379)'
-error_symbol = '[xx](bold #e06c75)'
-vimcmd_symbol = '[<<](bold #98c379)'
-vimcmd_replace_one_symbol = '[<<](bold #c678dd)'
-vimcmd_replace_symbol = '[<<](bold #c678dd)'
-vimcmd_visual_symbol = '[<<](bold #e5c07b)'
-
-
-
-[conda]
-symbol = ' '
+success_symbol = '[>](bold green)'
+error_symbol = '[x](bold red)'
+vimcmd_symbol = '[<](bold green)'
+vimcmd_replace_one_symbol = '[<](bold purple)'
+vimcmd_replace_symbol = '[<](bold purple)'
+vimcmd_visual_symbol = '[<](bold yellow)'
 
 
 
 [directory]
 truncation_length = 0
-read_only = ' 󰌾'
+read_only = " 󰌾"
 use_os_path_sep = false
 
 
@@ -83,20 +92,198 @@ symbol = ' '
 
 
 [os]
-style = '#61afef'
+style = 'blue'
 disabled = false
-
-[os.symbols]
-Arch = " "
-Windows = " "
 
 
 
 [time]
-style = 'bold #c678dd'
+style = 'bold purple'
 disabled = false
 
 
 
 [username]
 disabled = true
+
+
+
+# ╭──────────────────────────╮
+# │ Nerd Font Symbols Preset │
+# ╰──────────────────────────╯
+
+[aws]
+symbol = "  "
+
+[buf]
+symbol = " "
+
+[c]
+symbol = " "
+
+[cmake]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[crystal]
+symbol = " "
+
+[dart]
+symbol = " "
+
+# [directory]
+# read_only = " 󰌾"
+
+[docker_context]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[fennel]
+symbol = " "
+
+[fossil_branch]
+symbol = " "
+
+[git_branch]
+symbol = " "
+
+[git_commit]
+tag_symbol = '  '
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[haxe]
+symbol = " "
+
+[hg_branch]
+symbol = " "
+
+[hostname]
+ssh_symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[kotlin]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[memory_usage]
+symbol = "󰍛 "
+
+[meson]
+symbol = "󰔷 "
+
+[nim]
+symbol = "󰆥 "
+
+[nix_shell]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[ocaml]
+symbol = " "
+
+[os.symbols]
+Alpaquita = " "
+Alpine = " "
+AlmaLinux = " "
+Amazon = " "
+Android = " "
+Arch = " "
+Artix = " "
+CachyOS = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = "󰛓 "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = "󰈸 "
+Kali = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+Nobara = " "
+OpenBSD = "󰈺 "
+openSUSE = " "
+OracleLinux = "󰌷 "
+Pop = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+RockyLinux = " "
+Redox = "󰀘 "
+Solus = "󰠳 "
+SUSE = " "
+Ubuntu = " "
+Unknown = " "
+Void = " "
+Windows = "󰍲 "
+
+[package]
+symbol = "󰏗 "
+
+[perl]
+symbol = " "
+
+[php]
+symbol = " "
+
+[pijul_channel]
+symbol = " "
+
+[python]
+symbol = " "
+
+[rlang]
+symbol = "󰟔 "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = "󱘗 "
+
+[scala]
+symbol = " "
+
+[swift]
+symbol = " "
+
+[zig]
+symbol = " "
+
+[gradle]
+symbol = " "

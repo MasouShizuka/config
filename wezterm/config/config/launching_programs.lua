@@ -1,11 +1,9 @@
 local M = {}
 
-M.zsh = {
-    label = "Zsh",
+M.bash = {
+    label = "Bash",
     args = {
         "ucrt64.cmd",
-        "-shell",
-        "zsh",
     },
 }
 
@@ -29,10 +27,10 @@ M.wsl_arch = {
 }
 
 M.options = {
-    default_prog = M.zsh.args,
+    default_prog = M.bash.args,
 
     launch_menu = {
-        M.zsh,
+        M.bash,
         M.powershell,
         M.wsl_arch,
     },

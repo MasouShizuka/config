@@ -5,7 +5,7 @@ local utils = require("utils")
 local M = {}
 
 local default_config = {
-    default_colorscheme = "onedark",
+    default_colorscheme = "tokyonight",
     colorscheme_file = path.data_path .. "/colorscheme.json",
 }
 

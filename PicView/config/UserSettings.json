@@ -1,1 +1,71 @@
-{"Version":1,"WindowProperties":{"Top":0,"Left":0,"Width":0,"Height":0,"AutoFit":false,"TopMost":false,"Maximized":false,"Fullscreen":false,"KeepCentered":false},"UIProperties":{"UserLanguage":"zh-CN","ShowInterface":false,"ShowAltInterfaceButtons":false,"ShowFileSavingDialog":true,"ShowBottomNavBar":true,"IsTaskbarProgressEnabled":true,"NavSpeed":0.3,"Looping":true,"BgColorChoice":0,"SlideShowTimer":5000,"OpenInSameWindow":false},"Theme":{"Dark":true,"Light":false,"ColorTheme":3},"Gallery":{"IsBottomGalleryShown":false,"ShowBottomGalleryInHiddenUI":false,"BottomGalleryItemSize":53,"ExpandedGalleryItemSize":150,"FullGalleryStretchMode":"Uniform","BottomGalleryStretchMode":"Uniform"},"ImageScaling":{"StretchImage":false,"IsScalingSetToNearestNeighbor":false},"Sorting":{"Name":true,"Size":false,"CreationTime":false,"LastAccessTime":false,"LastWriteTime":false,"Random":false,"Ascending":true,"SortPreference":0,"IncludeSubDirectories":false},"Zoom":{"ZoomSpeed":0.3,"AvoidZoomingOut":false,"CtrlZoom":true,"HorizontalReverseScroll":true,"ScrollEnabled":false},"StartUp":{"OpenLastFile":false,"OpenSpecificFile":false,"OpenSpecificString":"","LastFile":""}}
+{
+  "Version": 1.1,
+  "WindowProperties": {
+    "Top":0,
+    "Left":0,
+    "Width":0,
+    "Height":0,
+    "AutoFit": false,
+    "TopMost": false,
+    "Maximized": false,
+    "Fullscreen": false,
+    "KeepCentered": false
+  },
+  "UIProperties": {
+    "UserLanguage": "zh-CN",
+    "ShowInterface": false,
+    "ShowAltInterfaceButtons": false,
+    "ShowBottomNavBar": true,
+    "IsTaskbarProgressEnabled": true,
+    "NavSpeed": 0.3,
+    "Looping": true,
+    "BgColorChoice": 0,
+    "SlideShowTimer": 120,
+    "OpenInSameWindow": false,
+    "ShowConfirmationOnEsc": false
+  },
+  "Theme": {
+    "Dark": true,
+    "ColorTheme": 3,
+    "UseSystemTheme": false,
+    "GlassTheme": false
+  },
+  "Gallery": {
+    "IsBottomGalleryShown": false,
+    "ShowBottomGalleryInHiddenUI": false,
+    "BottomGalleryItemSize": 53,
+    "ExpandedGalleryItemSize": 150,
+    "FullGalleryStretchMode": "Uniform",
+    "BottomGalleryStretchMode": "Uniform"
+  },
+  "ImageScaling": {
+    "StretchImage": false,
+    "IsScalingSetToNearestNeighbor": false,
+    "ShowImageSideBySide": false
+  },
+  "Sorting": {
+    "Name": true,
+    "Size": false,
+    "CreationTime": false,
+    "LastAccessTime": false,
+    "LastWriteTime": false,
+    "Random": false,
+    "Ascending": true,
+    "SortPreference": 0,
+    "IncludeSubDirectories": false
+  },
+  "Zoom": {
+    "ZoomSpeed": 0.3,
+    "AvoidZoomingOut": false,
+    "CtrlZoom": true,
+    "HorizontalReverseScroll": true,
+    "ScrollEnabled": false,
+    "IsUsingTouchPad": false
+  },
+  "StartUp": {
+    "OpenLastFile": false,
+    "OpenSpecificFile": false,
+    "OpenSpecificString": "",
+    "LastFile": "D:\\Notes\\Student\\Master\\\u5B66\u9662\\\u4E2D\u5357\u5927\u5B66\u7814\u7A76\u751F\u793E\u4F1A\u5B9E\u8DF5\u5B66\u5206\u7BA1\u7406\u8003\u6838\u624B\u518C\\5.jpg"
+  }
+}

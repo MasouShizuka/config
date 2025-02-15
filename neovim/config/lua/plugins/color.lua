@@ -32,8 +32,7 @@ return {
             })
         end,
         opts = function()
-            local ccc = require("ccc")
-            local mapping = ccc.mapping
+            local mapping = require("ccc").mapping
 
             return {
                 highlighter = {

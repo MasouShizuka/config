@@ -1,13 +1,18 @@
 {
 	"name": "Vimium C",
-	"@time": "2023/10/19 11:23:24",
-	"time": 1697685804138,
+	"@time": "2025/1/17 20:27:51",
+	"time": 1737116871513,
 	"environment": {
-		"extension": "1.99.994",
+		"extension": "2.11.3",
 		"platform": "win",
-		"chromium": 118
+		"chromium": 132
 	},
-	"exclusionRules": [],
+	"exclusionRules": [
+		{
+			"passKeys": "",
+			"pattern": ":http://127.0.0.1:7070/"
+		}
+	],
 	"grabBackFocus": true,
 	"keyMappings": [
 		"#!no-check",

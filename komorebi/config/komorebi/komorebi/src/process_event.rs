@@ -93,8 +93,18 @@ impl WindowManager {
                             .map(|w| w.hwnd)
                             .collect::<Vec<_>>();
 
-                        if w.contains_managed_window(event_hwnd)
-                            && !visible_hwnds.contains(&event_hwnd)
+                        let contains_managed_window = w.contains_managed_window(event_hwnd);
+
+                        // this is for an old stackbar clicking fix
+                        if contains_managed_window && !visible_hwnds.contains(&event_hwnd) {
+                            transparency_override = true;
+                        }
+
+                        // but we always want to handle a minimize event when transparency overrides
+                        // are applied
+                        if !transparency_override
+                            && contains_managed_window
+                            && matches!(event, WindowManagerEvent::Minimize(_, _))
                         {
                             transparency_override = true;
                         }
@@ -247,7 +257,12 @@ impl WindowManager {
                 already_moved_window_handles.remove(&window.hwnd);
             }
             WindowManagerEvent::FocusChange(_, window) => {
-                self.update_focused_workspace(self.mouse_follows_focus, false)?;
+                // don't want to trigger the full workspace updates when there are no managed
+                // containers - this makes floating windows on empty workspaces go into very
+                // annoying focus change loops which prevents users from interacting with them
+                if !self.focused_workspace()?.containers().is_empty() {
+                    self.update_focused_workspace(self.mouse_follows_focus, false)?;
+                }
 
                 let workspace = self.focused_workspace_mut()?;
                 let floating_window_idx = workspace
@@ -363,10 +378,11 @@ impl WindowManager {
 
                         if !workspace_contains_window && !needs_reconciliation {
                             let floating_applications = FLOATING_APPLICATIONS.lock();
-                            let regex_identifiers = REGEX_IDENTIFIERS.lock();
                             let mut should_float = false;
 
                             if !floating_applications.is_empty() {
+                                let regex_identifiers = REGEX_IDENTIFIERS.lock();
+
                                 if let (Ok(title), Ok(exe_name), Ok(class), Ok(path)) =
                                     (window.title(), window.exe(), window.class(), window.path())
                                 {

@@ -18,8 +18,8 @@ return {
             return {
                 -- Module mappings. Use `''` (empty string) to disable one.
                 mappings = {
-                    start = "ga",
-                    start_with_preview = "gA",
+                    -- start = "ga",
+                    -- start_with_preview = "gA",
                 },
 
                 -- Modifiers changing alignment steps and/or options
@@ -46,6 +46,25 @@ return {
             { "[i", mode = { "n", "x", "o" } },
         },
         opts = function()
+            vim.api.nvim_create_autocmd("BufEnter", {
+                callback = function(args)
+                    local buf = args.buf
+
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                        vim.b[buf].miniindentscope_disable = true
+                        return
+                    end
+
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                        vim.b[buf].miniindentscope_disable = true
+                    end
+                end,
+                desc = "Disable mini.indentscope for some buftypes and filetypes",
+                group = vim.api.nvim_create_augroup("MiniIndentScopeDisable", { clear = true }),
+            })
+
             return {
                 draw = {
                     -- Delay (in ms) between event and start of drawing scope indicator
@@ -118,13 +137,18 @@ return {
     },
 
     {
-        "nmac427/guess-indent.nvim",
+        "NMAC427/guess-indent.nvim",
         enabled = not environment.is_vscode,
         event = {
             "BufNewFile",
             "BufReadPost",
         },
-        opts = {},
+        opts = {
+            -- A list of filetypes for which the auto command gets disabled
+            filetype_exclude = filetype.skip_filetype_list,
+            -- A list of buffer types for which the auto command gets disabled
+            buftype_exclude = buftype.skip_buftype_list,
+        },
     },
 
     {
@@ -149,7 +173,7 @@ return {
                 group = vim.api.nvim_create_augroup("ConformAutoFormat", { clear = true }),
             })
         end,
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.format_enable,
         keys = {
             { "<leader>f",   function() require("conform").format() end,                                                                            desc = "Buffer Diagnostics (Trouble)",   mode = "n" },
             { "<leader>ltf", function() utils.toggle_global_setting("autoformat_enabled", function(enabled, prev_enabled, global_enabled) end) end, desc = "Toggle autoformatting",          mode = "n" },

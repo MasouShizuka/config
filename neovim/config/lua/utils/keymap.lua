@@ -2,9 +2,8 @@ local environment = require("utils.environment")
 
 local M = {}
 
-local remapped_terminal_emulators = {
+local terminal_emulators = {
     "WezTerm",
-    "WindowsTerminal",
 }
 
 if environment.is_wsl then
@@ -20,7 +19,7 @@ if environment.is_wsl then
         ["<c-s-n>"] = "<f33>",
         ["<c-s-t>"] = "<f34>",
     }
-elseif not environment.is_neovide and vim.tbl_contains(remapped_terminal_emulators, vim.env.TERM_PROGRAM) then
+elseif (vim.tbl_contains(terminal_emulators, vim.env.TERM_PROGRAM) or vim.env.WT_SESSION) then
     M = {
         ["<c-1>"] = "<c-f1>",
         ["<c-2>"] = "<c-f2>",

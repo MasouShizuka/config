@@ -4,10 +4,10 @@
   "border_width": 6,
   "border": true,
   "border_colours": {
-    "single": "#61afef",
-    "stack": "#98c379",
-    "monocle": "#e06c75",
-    "floating": "#56b6c2"
+    "single": "#82aaff",
+    "stack": "#c3e88d",
+    "monocle": "#ff757f",
+    "floating": "#86e1fc"
   },
   "default_workspace_padding": 4,
   "default_container_padding": 4,

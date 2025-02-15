@@ -90,7 +90,7 @@ return {
                 opts = {},
             },
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.dap_enable,
         init = function()
             if utils.is_available("which-key.nvim") then
                 require("which-key").add({

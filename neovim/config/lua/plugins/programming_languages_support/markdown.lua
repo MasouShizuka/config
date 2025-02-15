@@ -2,6 +2,7 @@ local buftype = require("utils.buftype")
 local environment = require("utils.environment")
 local icons = require("utils.icons")
 local keymap = require("utils.keymap")
+local utils = require("utils")
 
 return {
     {
@@ -14,12 +15,16 @@ return {
         },
         opts = {
             default = {
+                -- file and directory options
+                ---@type string | fun(): string
                 dir_path = function() -- directory path to save images to, can be relative (cwd or current file) or absolute
                     return "_images_" .. vim.fn.expand("%:t:r")
                 end,
-                file_name = "%Y-%m-%d-%H-%M-%S", -- file name format (see lua.org/pil/22.1.html)
-                relative_to_current_file = true, -- make dir_path relative to current file rather than the cwd
-                prompt_for_file_name = false,    -- ask user for file name before saving, leave empty to use default
+                file_name = "%Y-%m-%d-%H-%M-%S", ---@type string | fun(): string
+                relative_to_current_file = true, ---@type boolean | fun(): boolean
+
+                -- prompt options
+                prompt_for_file_name = false, ---@type boolean | fun(): boolean
             },
         },
     },
@@ -93,34 +98,25 @@ return {
             "nvim-tree/nvim-web-devicons",
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.treesitter_enable,
         event = {
             "User MarkdownFile",
         },
         opts = function()
             -- https://github.com/OXY2DEV/markview.nvim
-            local function set_hl()
-                vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = "#453244", fg = "#f38ba8" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = "#46393e", fg = "#fab387" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = "#464245", fg = "#f9e2af" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = "#374243", fg = "#a6e3a1" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = "#2e3d51", fg = "#74c7ec" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = "#393b54", fg = "#b4befe" })
+            utils.set_hl(0, "RenderMarkdownH1Bg", { bg = "#453244", fg = "#f38ba8" })
+            utils.set_hl(0, "RenderMarkdownH2Bg", { bg = "#46393e", fg = "#fab387" })
+            utils.set_hl(0, "RenderMarkdownH3Bg", { bg = "#464245", fg = "#f9e2af" })
+            utils.set_hl(0, "RenderMarkdownH4Bg", { bg = "#374243", fg = "#a6e3a1" })
+            utils.set_hl(0, "RenderMarkdownH5Bg", { bg = "#2e3d51", fg = "#74c7ec" })
+            utils.set_hl(0, "RenderMarkdownH6Bg", { bg = "#393b54", fg = "#b4befe" })
 
-                vim.api.nvim_set_hl(0, "RenderMarkdownH1", { fg = "#f38ba8" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH2", { fg = "#fab387" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH3", { fg = "#f9e2af" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH4", { fg = "#a6e3a1" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH5", { fg = "#74c7ec" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH6", { fg = "#b4befe" })
-            end
-
-            set_hl()
-            vim.api.nvim_create_autocmd("ColorScheme", {
-                callback = set_hl,
-                desc = "Set hl for render-markdown",
-                group = vim.api.nvim_create_augroup("RenderMarkdownHighlight", { clear = true }),
-            })
+            utils.set_hl(0, "RenderMarkdownH1", { fg = "#f38ba8" })
+            utils.set_hl(0, "RenderMarkdownH2", { fg = "#fab387" })
+            utils.set_hl(0, "RenderMarkdownH3", { fg = "#f9e2af" })
+            utils.set_hl(0, "RenderMarkdownH4", { fg = "#a6e3a1" })
+            utils.set_hl(0, "RenderMarkdownH5", { fg = "#74c7ec" })
+            utils.set_hl(0, "RenderMarkdownH6", { fg = "#b4befe" })
 
             local overrides = {
                 buftype = {},
@@ -165,8 +161,9 @@ return {
                 -- More granular configuration mechanism, allows different aspects of buffers
                 -- to have their own behavior. Values default to the top level configuration
                 -- if no override is provided. Supports the following fields:
-                --   enabled, max_file_size, debounce, render_modes, anti_conceal, heading, code,
-                --   dash, bullet, checkbox, quote, pipe_table, callout, link, sign, indent, win_options
+                --   enabled, max_file_size, debounce, render_modes, anti_conceal, padding,
+                --   heading, paragraph, code, dash, bullet, checkbox, quote, pipe_table,
+                --   callout, link, sign, indent, html, win_options
                 overrides = overrides,
             }
         end,

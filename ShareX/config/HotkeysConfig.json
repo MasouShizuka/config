@@ -79,7 +79,7 @@
             "ShowInfo": true,
             "ShowMagnifier": true,
             "UseSquareMagnifier": true,
-            "MagnifierPixelCount": 15,
+            "MagnifierPixelCount": 35,
             "MagnifierPixelSize": 10,
             "ShowCrosshair": false,
             "UseLightResizeNodes": false,
@@ -166,9 +166,9 @@
               "CutOutEffectSize": 10,
               "CutOutBackgroundColor": "Transparent"
             },
-            "LastRegionTool": "RegionRectangle",
-            "LastAnnotationTool": "ToolSelect",
-            "LastEditorTool": "DrawingRectangle",
+            "LastRegionTool": null,
+            "LastAnnotationTool": null,
+            "LastEditorTool": null,
             "ImageEditorStartMode": "AutoSize",
             "ImageEditorWindowState": {
               "Location": "0, 0",
@@ -238,6 +238,7 @@
             "AutoScrollTop": false,
             "ScrollDelay": 300,
             "ScrollAmount": 2,
+            "AutoIgnoreBottomEdge": true,
             "AutoUpload": false,
             "ShowRegion": true
           },
@@ -631,9 +632,9 @@
               "CutOutEffectSize": 10,
               "CutOutBackgroundColor": "Transparent"
             },
-            "LastRegionTool": "RegionRectangle",
-            "LastAnnotationTool": "ToolSelect",
-            "LastEditorTool": "DrawingRectangle",
+            "LastRegionTool": null,
+            "LastAnnotationTool": null,
+            "LastEditorTool": null,
             "ImageEditorStartMode": "AutoSize",
             "ImageEditorWindowState": {
               "Location": "0, 0",
@@ -703,6 +704,7 @@
             "AutoScrollTop": false,
             "ScrollDelay": 300,
             "ScrollAmount": 2,
+            "AutoIgnoreBottomEdge": true,
             "AutoUpload": false,
             "ShowRegion": true
           },
@@ -920,9 +922,9 @@
               "CutOutEffectSize": 10,
               "CutOutBackgroundColor": "Transparent"
             },
-            "LastRegionTool": "RegionRectangle",
-            "LastAnnotationTool": "ToolSelect",
-            "LastEditorTool": "DrawingRectangle",
+            "LastRegionTool": null,
+            "LastAnnotationTool": null,
+            "LastEditorTool": null,
             "ImageEditorStartMode": "AutoSize",
             "ImageEditorWindowState": {
               "Location": "0, 0",
@@ -992,6 +994,7 @@
             "AutoScrollTop": false,
             "ScrollDelay": 300,
             "ScrollAmount": 2,
+            "AutoIgnoreBottomEdge": true,
             "AutoUpload": false,
             "ShowRegion": true
           },
@@ -1044,5 +1047,5 @@
       }
     }
   ],
-  "ApplicationVersion": "16.1.0"
+  "ApplicationVersion": "17.0.0"
 }

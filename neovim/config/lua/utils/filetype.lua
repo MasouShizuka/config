@@ -22,13 +22,19 @@ M.skip_filetype_list = {
     "dapui_console",
     "dashboard",
     "edgy",
+    "lazy",
+    "mason",
     "minimap",
     "noice",
     "notify",
     "nvim-docs-view",
     "NvimTree",
+    "OverseerForm",
+    "OverseerList",
+    "OverseerOutput",
     "toggleterm",
     "Trans",
+    "trans-view",
     "trouble",
 }
 -- skip when <c-2>
@@ -46,8 +52,13 @@ M.skip_filetype_list_to_main = {
     "notify",
     "nvim-docs-view",
     "NvimTree",
+    "OverseerForm",
+    "OverseerList",
+    "OverseerOutput",
+    "qf",
     "toggleterm",
     "Trans",
+    "trans-view",
     "trouble",
 }
 -- skip when <c-j>, <c-k>
@@ -64,8 +75,13 @@ M.skip_filetype_list_of_panel = {
     "noice",
     "nvim-docs-view",
     "NvimTree",
+    "OverseerForm",
+    "OverseerList",
+    "OverseerOutput",
+    "qf",
     "toggleterm",
     "Trans",
+    "trans-view",
     "trouble",
 }
 
@@ -110,7 +126,6 @@ M.skip_filetype = function(skip_filetype_list, step)
     end
 end
 
--- left panel
 M.left_panel_filetype_list = {
     ["dapui_scopes"] = {
         open = function() require("dapui").open() end,
@@ -137,7 +152,6 @@ M.left_panel_filetype_list = {
         close = function() require("nvim-tree.api").tree.close() end,
     },
 }
--- bottom panel
 M.bottom_panel_filetype_list = {
     ["dap-repl"] = {
         open = function() require("dapui").open() end,
@@ -155,6 +169,10 @@ M.bottom_panel_filetype_list = {
         open = function() vim.api.nvim_command("copen") end,
         close = function() vim.api.nvim_command("cclose") end,
     },
+    ["OverseerOutput"] = {
+        open = false,
+        close = false,
+    },
     ["toggleterm"] = {
         open = function() vim.api.nvim_command("ToggleTerm") end,
         close = function() vim.api.nvim_command("ToggleTerm") end,
@@ -164,7 +182,6 @@ M.bottom_panel_filetype_list = {
         close = function() require("trouble").close() end,
     },
 }
--- right panel
 M.right_panel_filetype_list = {
     ["edgy"] = {
         open = false,
@@ -178,6 +195,10 @@ M.right_panel_filetype_list = {
         open = function() vim.api.nvim_command("DocsViewToggle") end,
         close = function() vim.api.nvim_command("DocsViewToggle") end,
     },
+    ["OverseerList"] = {
+        open = function() vim.api.nvim_command("OverseerOpen") end,
+        close = function() vim.api.nvim_command("OverseerClose") end,
+    },
     ["Trans"] = {
         open = function() vim.api.nvim_command("Translate") end,
         close = function()
@@ -188,6 +209,10 @@ M.right_panel_filetype_list = {
             end
             utils.table_clear(require("Trans").cache)
         end,
+    },
+    ["trans-view"] = {
+        open = function() vim.api.nvim_command("TransToggle") end,
+        close = function() vim.api.nvim_command("TransToggle") end,
     },
     ["trouble"] = {
         open = function() require("trouble").open({ mode = "last" }) end,

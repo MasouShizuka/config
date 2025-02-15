@@ -54,7 +54,7 @@ return {
                 group = vim.api.nvim_create_augroup("RustKeymap", { clear = true }),
             })
         end,
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.lsp_enable,
         ft = {
             "rust",
         },

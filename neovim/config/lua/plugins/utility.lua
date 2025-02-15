@@ -20,6 +20,18 @@ return {
     },
 
     {
+        "chrisgrieser/nvim-early-retirement",
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
+        opts = {
+            -- If a buffer has been inactive for this many minutes, close it.
+            retirementAgeMins = 5,
+        },
+    },
+
+    {
         "delphinus/cellwidths.nvim",
         cmd = {
             "CellWidthsAdd",
@@ -107,7 +119,55 @@ return {
             "Translate",
             "TransPlay",
             "TranslateInput",
+            "TransToggle",
         },
+        config = function(_, opts)
+            local Trans = require("Trans")
+            Trans.setup(opts)
+
+            if utils.is_available("config.user_commands.extra-view") then
+                vim.api.nvim_create_user_command("TransToggle", function()
+                    if not package.loaded["extra-view"] then
+                        require("lazy").load({ plugins = "config.user_commands.extra-view" })
+                    end
+
+                    require("extra-view").extra_view_toggle(function(buf, win)
+                        if filetype.is_panel_filetype(vim.bo.filetype) then
+                            return
+                        end
+
+                        local trans_opts = {}
+                        trans_opts.mode = trans_opts.mode or vim.fn.mode()
+                        trans_opts.str = Trans.util.get_str(trans_opts.mode)
+                        local str = trans_opts.str
+                        if not str or str == "" then return end
+
+                        local data = Trans.data.new(trans_opts)
+                        Trans.backend.offline.query(data)
+                        if not data.result.offline then
+                            return
+                        end
+
+                        local result, name = data:get_available_result()
+                        if not result then
+                            return
+                        end
+
+                        data.frontend.buffer.bufnr = buf
+
+                        vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
+                        vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
+                        data.frontend:load(result, name, data.frontend.opts.order[name])
+                        vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+                    end, {
+                        filetype = "trans-view",
+                        init = function(buf, win)
+                            vim.api.nvim_set_option_value("wrap", true, { win = win })
+                        end,
+                    })
+                end, { desc = "Toggle trans-view" })
+            end
+        end,
         dependencies = {
             {
                 "kkharji/sqlite.lua",
@@ -152,7 +212,10 @@ return {
             "kevinhwang91/promise-async",
         },
         enabled = not environment.is_vscode,
-        ft = lsp.lsp_filetype_list,
+        event = {
+            "BufNewFile",
+            "BufReadPost",
+        },
         keys = {
             { "zR", function() require("ufo").openAllFolds() end,               desc = "Open all folds",          mode = "n" },
             { "zM", function() require("ufo").closeAllFolds() end,              desc = "Close all folds",         mode = "n" },
@@ -285,21 +348,23 @@ return {
             -- bigfile 自动激活
             vim.api.nvim_create_autocmd("BufReadPre", {
                 callback = function(args)
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    local buf = args.buf
+
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
                     if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                         return
                     end
 
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
                     if vim.tbl_contains(filetype.skip_filetype_list, ft) then
                         return
                     end
 
-                    if utils.is_bigfile(args.buf) then
+                    if utils.is_bigfile(buf) then
                         vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
 
-                        vim.b[args.buf].bigfile_detected = 1
-                        disable_features(bigfile_features, args.buf)
+                        vim.b[buf].bigfile_detected = 1
+                        disable_features(bigfile_features, buf)
 
                         pcall(vim.api.nvim_del_augroup_by_name, "BigFileActivate")
                     end
@@ -310,34 +375,36 @@ return {
 
             vim.api.nvim_create_autocmd("BufReadPost", {
                 callback = function(args)
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    local buf = args.buf
+
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
                     if vim.tbl_contains(buftype.skip_buftype_list, bt) then
                         return
                     end
 
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
                     if vim.tbl_contains(filetype.skip_filetype_list, ft) then
                         return
                     end
 
-                    if vim.b[args.buf].bigfile_detected and vim.b[args.buf].bigfile_detected == 1 then
+                    if vim.b[buf].bigfile_detected and vim.b[buf].bigfile_detected == 1 then
                         return
                     end
 
-                    if vim.b[args.buf].longfile_detected then
+                    if vim.b[buf].longfile_detected then
                         return
                     end
 
-                    if not utils.is_longfile(args.buf) then
-                        vim.b[args.buf].longfile_detected = 0
+                    if not utils.is_longfile(buf) then
+                        vim.b[buf].longfile_detected = 0
                         return
                     end
 
                     vim.notify("Long file detected!", vim.log.levels.WARN, { title = "bigfile" })
 
-                    vim.b[args.buf].bigfile_detected = 1
-                    vim.b[args.buf].longfile_detected = 1
-                    disable_features(longfile_features, args.buf)
+                    vim.b[buf].bigfile_detected = 1
+                    vim.b[buf].longfile_detected = 1
+                    disable_features(longfile_features, buf)
                 end,
                 desc = "Long file event",
                 group = vim.api.nvim_create_augroup("LongFile", { clear = true }),
@@ -409,24 +476,6 @@ return {
     },
 
     {
-        "rlychrisg/truncateline.nvim",
-        cmd = {
-            "TemporaryToggle",
-            "ToggleTruncate",
-        },
-        enabled = not environment.is_vscode,
-        event = {
-            "BufNewFile",
-            "BufReadPost",
-        },
-        keys = {
-            { "<leader>ctT", function() vim.api.nvim_command("TemporaryToggle") end, desc = "TruncateLine temporary toggle", mode = "n" },
-            { "<leader>ctt", function() vim.api.nvim_command("ToggleTruncate") end,  desc = "TruncateLine toggle",           mode = "n" },
-        },
-        opts = {},
-    },
-
-    {
         "stevearc/dressing.nvim",
         enabled = not environment.is_vscode,
         init = function()
@@ -451,6 +500,19 @@ return {
         },
         opts = {
             duration = 1000,
+            ignored_cb = function(buf)
+                local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                    return true
+                end
+
+                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                    return true
+                end
+
+                return false
+            end,
         },
     },
 }

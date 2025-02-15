@@ -91,9 +91,10 @@ return {
             ---@param highlights tokyonight.Highlights
             ---@param colors ColorScheme
             on_highlights = function(hl, c)
-                hl["@module"] = { fg = c[colors.get_colorscheme_color("tokyonight", "white")] }
+                hl["@module"] = { fg = c[colors.get_color_name("tokyonight", "yellow")] }
                 hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
-                hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_colorscheme_color("tokyonight", "gray")] })
+                hl.LspKindFile = { fg = c[colors.get_color_name("tokyonight", "orange")] }
+                hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_color_name("tokyonight", "gray")] })
                 hl.StatusLine = vim.tbl_deep_extend("force", hl.StatusLine or {}, { bg = "none" })
                 hl.StatusLineNC = vim.tbl_deep_extend("force", hl.StatusLineNC or {}, { bg = "none" })
                 hl.TabLineFill = vim.tbl_deep_extend("force", hl.TabLineFill or {}, { bg = "none" })
@@ -109,20 +110,28 @@ return {
                     hl.SpellRare = vim.tbl_deep_extend("force", hl.SpellRare or {}, { undercurl = false, underline = true })
                 end
 
+                if utils.is_available("blink.cmp") then
+                    hl.BlinkCmpKindVariable = { fg = c[colors.get_color_name("tokyonight", "red")] }
+                end
+
+                if utils.is_available("nvim-cmp") then
+                    hl.CmpItemKindVariable = { fg = c[colors.get_color_name("tokyonight", "red")] }
+                end
+
                 if utils.is_available("nvim-tree.lua") then
                     hl.NvimTreeNormal = { link = "NvimTreeNormalFloat" }
                     hl.NvimTreeNormalNC = { link = "NvimTreeNormalFloat" }
-                    hl.NvimTreeOpenedFile = { fg = c[colors.get_colorscheme_color("tokyonight", "purple")] }
+                    hl.NvimTreeOpenedFile = { fg = c[colors.get_color_name("tokyonight", "purple")] }
                     hl.NvimTreeOpenedHL = { link = "NvimTreeOpenedFile" }
                 end
 
                 if utils.is_available("nvim-treesitter-context") then
                     hl.TreesitterContextBottom = vim.tbl_deep_extend("force", hl.TreesitterContextBottom or {}, { underline = true })
-                    hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_colorscheme_color("tokyonight", "purple")] })
+                    hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_color_name("tokyonight", "purple")] })
                 end
 
                 if utils.is_available("telescope.nvim") then
-                    hl.TelescopeSelection = vim.tbl_deep_extend("force", hl.TelescopeSelection or {}, { bg = c[colors.get_colorscheme_color("tokyonight", "black")] })
+                    hl.TelescopeSelection = vim.tbl_deep_extend("force", hl.TelescopeSelection or {}, { bg = c[colors.get_color_name("tokyonight", "black")] })
                 end
             end,
         },

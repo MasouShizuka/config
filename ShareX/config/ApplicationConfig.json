@@ -24,6 +24,7 @@
     "GeneralSettings": {
       "PlaySoundAfterCapture": true,
       "PlaySoundAfterUpload": true,
+      "PlaySoundAfterAction": true,
       "ShowToastNotificationAfterTaskCompleted": true,
       "ToastWindowDuration": 3.0,
       "ToastWindowFadeDuration": 1.0,
@@ -33,14 +34,15 @@
       "ToastWindowRightClickAction": "CloseNotification",
       "ToastWindowMiddleClickAction": "AnnotateImage",
       "ToastWindowAutoHide": true,
+      "DisableNotificationsOnFullscreen": false,
       "UseCustomCaptureSound": false,
       "CustomCaptureSoundPath": "",
       "UseCustomTaskCompletedSound": false,
       "CustomTaskCompletedSoundPath": "",
+      "UseCustomActionCompletedSound": false,
+      "CustomActionCompletedSoundPath": "",
       "UseCustomErrorSound": false,
-      "CustomErrorSoundPath": "",
-      "DisableNotifications": false,
-      "DisableNotificationsOnFullscreen": false
+      "CustomErrorSoundPath": ""
     },
     "UseDefaultImageSettings": true,
     "ImageSettings": {
@@ -326,6 +328,7 @@
         "AutoScrollTop": false,
         "ScrollDelay": 300,
         "ScrollAmount": 2,
+        "AutoIgnoreBottomEdge": true,
         "AutoUpload": false,
         "ShowRegion": true
       },
@@ -786,7 +789,7 @@
   "ImagePreview": "Automatic",
   "ImagePreviewLocation": "Side",
   "AutoCleanupBackupFiles": false,
-  "AutoCleanupLogFiles": false,
+  "AutoCleanupLogFiles": true,
   "CleanupKeepFileCount": 10,
   "ProxySettings": {
     "ProxyMethod": "Manual",
@@ -805,7 +808,6 @@
     "ImageShack",
     "Flickr",
     "Photobucket",
-    "Picasa",
     "Twitter",
     "Chevereto",
     "Vgyme",
@@ -956,5 +958,5 @@
   "DropAlignment": "BottomRight",
   "DropOpacity": 100,
   "DropHoverOpacity": 255,
-  "ApplicationVersion": "16.1.0"
+  "ApplicationVersion": "17.0.0"
 }

@@ -1,5 +1,5 @@
 {
-    "version": "3.47.2",
+    "version": "3.49.0",
     "description": "A small, fast, self-contained, high-reliability and full-featured SQL database engine",
     "homepage": "https://www.sqlite.org/",
     "license": {
@@ -8,16 +8,15 @@
     "architecture": {
         "64bit": {
             "url": [
-                "https://www.sqlite.org/2024/sqlite-tools-win-x64-3470200.zip",
-                "https://www.sqlite.org/2024/sqlite-dll-win-x64-3470200.zip"
+                "https://www.sqlite.org/2025/sqlite-tools-win-x64-3490000.zip",
+                "https://www.sqlite.org/2025/sqlite-dll-win-x64-3490000.zip"
             ],
             "hash": [
-                "8c7fffbf4eec1f43e63153cca6deb018e4360d4d6b0d99bbdd2a541c53b7fa1c",
-                "2ab315502c66e5e3c31ed6b38b20487d98514ea0ee69fe51309f108af822a27d"
+                "31b4a6983e2e705b3c864c4eb4be9a207af280db6536de0626fae26c58925083",
+                "9ca18fdecd527c6a264cdd4d609ffd52329dfd758c87e2ab3798a5f8d88e4a80"
             ]
         }
     },
-    "env_add_path": ".",
     "checkver": {
         "url": "https://www.sqlite.org/download.html",
         "regex": "(?sm)\\d+-bit DLL \\(x\\d+\\) for SQLite version ([\\d.]+)\\..*?(?<year>\\d+)/sqlite-tools-win-x64-(?<clean>\\d+)"

@@ -4,18 +4,14 @@ local utils = require("utils")
 
 local M = {}
 
+-- wsl 下安装部分 lsp 后可能会存在路径错误
+-- 这是因为 mason 调用了 windows 中的 npm
+-- 需要安装 wsl 平台的 npm
+-- https://github.com/williamboman/mason.nvim/issues/1315
 M.lsp = function(lspconfig, default_config)
     return {
-        -- wsl 下安装后 mason.nvim/mason/bin/bash-language-server 中的路径错误
-        -- 需要将 "$basedir/../bash-language-server/out/cli.js" 改为 "$basedir/../packages/bash-language-server/node_modules/bash-language-server/out/cli.js"
-        -- https://github.com/williamboman/mason.nvim/issues/1315
         bashls = function()
-            lspconfig.bashls.setup(vim.tbl_deep_extend("force", default_config, {
-                filetypes = {
-                    "sh",
-                    "zsh",
-                },
-            }))
+            lspconfig.bashls.setup(vim.tbl_deep_extend("force", default_config, {}))
         end,
         clangd = function()
             local fallbackFlags = {}
@@ -115,31 +111,37 @@ M.lsp = function(lspconfig, default_config)
             end
         end,
         texlab = function()
-            -- NOTE: 需要安装 sioyek，且需要把 sioyek 的安装路径添加到环境变量的 path
             local executable = "sioyek"
-            local args = {
-                "--nofocus",
-                "--reuse-window",
-                "--forward-search-file",
-                "%f",
-                "--forward-search-line",
-                "%l",
-                "%p",
-            }
+            if environment.is_windows then
+                executable = path.scoop_app_path .. "/sioyek/current/sioyek"
+            end
 
             lspconfig.texlab.setup(vim.tbl_deep_extend("force", default_config, {
                 root_dir = function() return vim.fn.getcwd() end,
                 settings = {
                     texlab = {
                         build = {
+                            executable = "xelatex",
+                            args = {
+                                "-interaction=nonstopmode",
+                                "-synctex=1",
+                                "%f",
+                            },
                             forwardSearchAfter = true,
                         },
                         forwardSearch = {
                             executable = executable,
-                            args = args,
+                            args = {
+                                "--nofocus",
+                                "--reuse-window",
+                                "--forward-search-file",
+                                "%f",
+                                "--forward-search-line",
+                                "%l",
+                                "%p",
+                            },
                         },
                         inlayHints = {
-                            labelDefinitions = true,
                             labelReferences = false,
                         },
                     },
@@ -171,7 +173,6 @@ M.lsp_filetype_list = {
     "rust",
     "sh",
     "tex",
-    "zsh",
 }
 
 return M

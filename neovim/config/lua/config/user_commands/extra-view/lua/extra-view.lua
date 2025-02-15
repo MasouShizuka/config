@@ -5,10 +5,14 @@ local M = {}
 
 local default_config = {
     filetype = "extra-view",
+
     focus = false,
+
     height = 10,
     width = 60,
     position = "right",
+
+    init = nil,
 }
 
 local function extra_view_toggle(update, opts)
@@ -75,6 +79,10 @@ local function extra_view_toggle(update, opts)
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
     vim.api.nvim_set_option_value("filetype", config.filetype, { buf = buf })
     vim.api.nvim_set_option_value("swapfile", false, { buf = buf })
+
+    if config.init and type(config.init) == "function" then
+        config.init(buf, win)
+    end
 
     if not config.focus then
         vim.api.nvim_set_current_win(prev_win)

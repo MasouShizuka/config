@@ -1,5 +1,7 @@
+local buftype = require("utils.buftype")
 local colors = require("utils.colors")
 local environment = require("utils.environment")
+local filetype = require("utils.filetype")
 local utils = require("utils")
 
 return {
@@ -192,6 +194,25 @@ return {
         opts = function()
             local map = require("mini.map")
 
+            vim.api.nvim_create_autocmd("BufEnter", {
+                callback = function(args)
+                    local buf = args.buf
+
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                    if vim.tbl_contains(buftype.skip_buftype_list, bt) and bt ~= "help" then
+                        vim.b[buf].minimap_disable = true
+                        return
+                    end
+
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                        vim.b[buf].minimap_disable = true
+                    end
+                end,
+                desc = "Disable mini.map for some buftypes and filetypes",
+                group = vim.api.nvim_create_augroup("MiniMapDisable", { clear = true }),
+            })
+
             local function spell(hl_groups)
                 if hl_groups == nil then
                     hl_groups = { spell = "SpellBad" }
@@ -226,17 +247,9 @@ return {
 
             local minimap_search = "MiniMapSearch"
             local minimap_spell = "MiniMapSpell"
-            local function set_hl()
-                vim.api.nvim_set_hl(0, minimap_search, { fg = colors.get_color(colors.colors.orange) })
-                vim.api.nvim_set_hl(0, minimap_spell, { fg = colors.get_color(colors.colors.purple) })
-            end
 
-            set_hl()
-            vim.api.nvim_create_autocmd("ColorScheme", {
-                callback = set_hl,
-                desc = "Set hl for minimap",
-                group = vim.api.nvim_create_augroup("MiniMapHighlight", { clear = true }),
-            })
+            utils.set_hl(0, minimap_search, { fg = colors.get_color(colors.colors.orange) })
+            utils.set_hl(0, minimap_spell, { fg = colors.get_color(colors.colors.purple) })
 
             local integrations = {
                 map.gen_integration.builtin_search({ search = minimap_search }),
@@ -296,6 +309,14 @@ return {
             return {
                 -- Highlight integrations (none by default)
                 integrations = integrations,
+
+                -- Symbols used to display data
+                symbols = {
+                    -- Encode symbols. See `:h MiniMap.config` for specification and
+                    -- `:h MiniMap.gen_encode_symbols` for pre-built ones.
+                    -- Default: solid blocks with 3x2 resolution.
+                    encode = map.gen_encode_symbols.block("1x2"),
+                },
 
                 -- Window options
                 window = {

@@ -7,10 +7,6 @@ OnExit((*) => komorebic_stop())
 ; localappdata := EnvGet("LOCALAPPDATA")
 
 komorebic_stop() {
-    ; While (ProcessExist("yasb.exe")) {
-    ;     ProcessClose("yasb.exe")
-    ; }
-
     While (ProcessExist("komorebi-bar.exe")) {
         ProcessClose("komorebi-bar.exe")
     }
@@ -83,11 +79,6 @@ For key, value in workspace_key_value {
 
 RunWait("komorebic.exe complete-configuration", , "Hide")
 
-; While (ProcessExist("yasb.exe")) {
-;     ProcessClose("yasb.exe")
-; }
-; Run("yasb.exe", , "Hide")
-
 ; While (ProcessExist("komorebi-bar.exe")) {
 ;     ProcessClose("komorebi-bar.exe")
 ; }
@@ -96,16 +87,16 @@ RunWait("komorebic.exe complete-configuration", , "Hide")
 ;     .Document.Application.ShellExecute("komorebi-bar.exe", "--config komorebi.bar.json", A_ScriptDir, "open", 0)
 
 
-; ╭─────────╮
-; │ Keybind │
-; ╰─────────╯
+; ╭────────────╮
+; │ Keybinding │
+; ╰────────────╯
 
 !q:: {
     RunWait("komorebic.exe close", , "Hide")
 }
 
 !+q:: {
-    RunWait("komorebic.exe stop", , "Hide")
+    WinKill("A")
 }
 
 !left:: {
@@ -319,12 +310,6 @@ send_to_monitor(ThisHotkey) {
 }
 
 !+b:: {
-    ; While (ProcessExist("yasb.exe")) {
-    ;     ProcessClose("yasb.exe")
-    ; } Else {
-    ;     Run("yasb.exe", , "Hide")
-    ; }
-
     While (ProcessExist("komorebi-bar.exe")) {
         ProcessClose("komorebi-bar.exe")
     } Else {

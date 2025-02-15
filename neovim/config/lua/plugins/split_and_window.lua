@@ -158,8 +158,6 @@ return {
                 {
                     ft = "nvim-docs-view",
                     size = { width = 0.3 },
-                    pinned = true,
-                    open = filetype.right_panel_filetype_list["nvim-docs-view"].open,
                 },
             }
 
@@ -208,6 +206,17 @@ return {
                 }
             end
 
+            if utils.is_available("overseer.nvim") then
+                bottom[#bottom + 1] = {
+                    ft = "OverseerOutput",
+                    size = { height = 0.3 },
+                }
+                right[#right + 1] = {
+                    ft = "OverseerList",
+                    size = { width = 0.3 },
+                }
+            end
+
             if utils.is_available("toggleterm.nvim") then
                 bottom[#bottom + 1] = {
                     ft = "toggleterm",
@@ -223,10 +232,10 @@ return {
 
             if utils.is_available("Trans.nvim") then
                 right[#right + 1] = {
-                    ft = "Trans",
+                    ft = "trans-view",
                     size = { width = 0.3 },
                     pinned = true,
-                    open = filetype.right_panel_filetype_list["Trans"].open,
+                    open = filetype.right_panel_filetype_list["trans-view"].open,
                 }
             end
 

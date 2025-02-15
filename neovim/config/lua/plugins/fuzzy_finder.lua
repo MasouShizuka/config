@@ -3,6 +3,7 @@ local path = require("utils.path")
 local utils = require("utils")
 
 return {
+    -- NOTE: 需要安装 fd、ripgrep
     {
         "nvim-telescope/telescope.nvim",
         cmd = {
@@ -139,7 +140,7 @@ return {
                             ["<pageup>"] = actions.results_scrolling_up,
                             ["<pagedown>"] = actions.results_scrolling_down,
                             ["<cr>"] = actions.select_default,
-                            ["<c-x>"] = actions.select_horizontal,
+                            ["<c-s>"] = actions.select_horizontal,
                             ["<c-v>"] = actions.select_vertical,
                             ["<c-i>"] = function(prompt_bufnr) multiopen(prompt_bufnr, "tab") end,
                             ["<c-t>"] = function(prompt_bufnr) multiopen(prompt_bufnr, "tab") end,

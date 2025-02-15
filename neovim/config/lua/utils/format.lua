@@ -68,7 +68,6 @@ M.formatters_by_ft = {
     markdown = { "autocorrect", "markdownlint-cli2", "trim_newlines", "trim_whitespace" },
     python = { "black", "isort" },
     sh = { "shfmt" },
-    zsh = { "shfmt" },
     ["_"] = { "trim_newlines", "trim_whitespace" },
 }
 

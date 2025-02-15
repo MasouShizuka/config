@@ -1,6 +1,6 @@
 [manager]
 
-sort_by     = "natural"
+sort_by     = "extension"
 show_hidden = true
 
 [opener]
@@ -23,12 +23,18 @@ ouch = [
 [open]
 
 prepend_rules = [
+    # Text
+    { mime = "application/tex",                                                                             use = [ "edit", "reveal" ] },
     # Archive
-    { mime = "application/{,g}zip",                use = [ "ouch", "extract", "reveal" ] },
-    { mime = "application/{tar,bzip*,7z*,xz,rar}", use = [ "ouch", "extract", "reveal" ] },
-    { mime = "application/iso9660-image",          use = [ "extract", "reveal" ] },
+    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [ "ouch", "extract", "reveal" ] },
+    { mime = "application/iso9660-image",                                                                   use = [ "extract", "reveal" ] },
     # Exe
-    { mime = "application/msdownload",             use = [ "open", "extract", "reveal" ] },
+    { mime = "application/msdownload",                                                                      use = [ "open", "extract", "reveal" ] },
+]
+
+append_rules = [
+    # Fallback
+    { name = "*",                                                                                           use = [ "open", "edit", "reveal" ] },
 ]
 
 [plugin]
@@ -36,16 +42,14 @@ prepend_rules = [
 prepend_fetchers = [
     { id = "git",  name = "*",  run = "git" },
     { id = "git",  name = "*/", run = "git" },
-    { id = "mime", name = "*",  run = "mime-ext", if = "!(mime|dummy)", prio = "high" },
+    { id = "mime", name = "*",  run = "mime-ext", prio = "high" },
 ]
 
 prepend_previewers = [
     # Code
-    { mime = "text/*",                                run = "bat" },
-    { mime = "*/{xml,javascript,wine-extension-ini}", run = "bat" },
+    { mime = "application/{msdownload,tex}",                                                                run = "code" },
     # JSON
-    { mime = "application/{json,ndjson}",             run = "bat" },
+    { mime = "application/{json,ndjson}",                                                                   run = "code" },
     # Archive
-    { mime = "application/{,g}zip",                   run = "ouch" },
-    { mime = "application/{tar,bzip*,7z*,xz,rar}",    run = "ouch" },
+    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", run = "ouch" },
 ]

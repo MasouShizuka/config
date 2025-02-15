@@ -3,11 +3,10 @@ use crate::render::RenderConfig;
 use crate::selected_frame::SelectableFrame;
 use crate::widget::BarWidget;
 use eframe::egui::text::LayoutJob;
+use eframe::egui::Align;
 use eframe::egui::Context;
-use eframe::egui::FontId;
 use eframe::egui::Label;
 use eframe::egui::TextFormat;
-use eframe::egui::TextStyle;
 use eframe::egui::Ui;
 use num_derive::FromPrimitive;
 use schemars::JsonSchema;
@@ -97,9 +96,9 @@ impl Network {
             activity.clear();
             total_activity.clear();
 
-            // NOTE: 计算所有 interface 的总传输和
-            self.networks_network_activity.refresh_list();
+            self.networks_network_activity.refresh(true);
 
+            // NOTE: 计算所有 interface 的总传输和
             let mut received = 0;
             let mut transmitted = 0;
             let mut total_received = 0;
@@ -141,12 +140,17 @@ impl Network {
         (activity, total_activity)
     }
 
-    fn reading_to_label(&self, ctx: &Context, reading: NetworkReading) -> Label {
+    fn reading_to_label(
+        &self,
+        ctx: &Context,
+        reading: NetworkReading,
+        config: RenderConfig,
+    ) -> Label {
         let (text_down, text_up) = match self.label_prefix {
             LabelPrefix::None | LabelPrefix::Icon => match reading.format {
                 NetworkReadingFormat::Speed => (
                     format!(
-                        "{: >width$}/s | ",
+                        "{: >width$}/s ",
                         reading.received_text,
                         width = self.network_activity_fill_characters
                     ),
@@ -157,14 +161,14 @@ impl Network {
                     ),
                 ),
                 NetworkReadingFormat::Total => (
-                    format!("{} | ", reading.received_text),
+                    format!("{} ", reading.received_text),
                     reading.transmitted_text,
                 ),
             },
             LabelPrefix::Text | LabelPrefix::IconAndText => match reading.format {
                 NetworkReadingFormat::Speed => (
                     format!(
-                        "DOWN: {: >width$}/s | ",
+                        "DOWN: {: >width$}/s ",
                         reading.received_text,
                         width = self.network_activity_fill_characters
                     ),
@@ -175,22 +179,22 @@ impl Network {
                     ),
                 ),
                 NetworkReadingFormat::Total => (
-                    format!("\u{2211}DOWN: {}/s | ", reading.received_text),
+                    format!("\u{2211}DOWN: {}/s ", reading.received_text),
                     format!("\u{2211}UP: {}/s", reading.transmitted_text),
                 ),
             },
         };
 
-        let font_id = ctx
-            .style()
-            .text_styles
-            .get(&TextStyle::Body)
-            .cloned()
-            .unwrap_or_else(FontId::default);
-
-        let icon_format =
-            TextFormat::simple(font_id.clone(), ctx.style().visuals.selection.stroke.color);
-        let text_format = TextFormat::simple(font_id.clone(), ctx.style().visuals.text_color());
+        let icon_format = TextFormat::simple(
+            config.icon_font_id.clone(),
+            ctx.style().visuals.selection.stroke.color,
+        );
+        let text_format = TextFormat {
+            font_id: config.text_font_id.clone(),
+            color: ctx.style().visuals.text_color(),
+            valign: Align::Center,
+            ..Default::default()
+        };
 
         // icon
         let mut layout_job = LayoutJob::simple(
@@ -257,21 +261,24 @@ impl Network {
 impl BarWidget for Network {
     fn render(&mut self, ctx: &Context, ui: &mut Ui, config: &mut RenderConfig) {
         if self.enable {
+            // widget spacing: make sure to use the same config to call the apply_on_widget function
+            let mut render_config = config.clone();
+
             if self.show_total_activity || self.show_activity {
                 let (activity, total_activity) = self.network_activity();
 
                 if self.show_total_activity {
                     for reading in total_activity {
-                        config.apply_on_widget(true, ui, |ui| {
-                            ui.add(self.reading_to_label(ctx, reading));
+                        render_config.apply_on_widget(true, ui, |ui| {
+                            ui.add(self.reading_to_label(ctx, reading, config.clone()));
                         });
                     }
                 }
 
                 if self.show_activity {
                     for reading in activity {
-                        config.apply_on_widget(true, ui, |ui| {
-                            ui.add(self.reading_to_label(ctx, reading));
+                        render_config.apply_on_widget(true, ui, |ui| {
+                            ui.add(self.reading_to_label(ctx, reading, config.clone()));
                         });
                     }
                 }
@@ -281,13 +288,6 @@ impl BarWidget for Network {
                 self.default_interface();
 
                 if !self.default_interface.is_empty() {
-                    let font_id = ctx
-                        .style()
-                        .text_styles
-                        .get(&TextStyle::Body)
-                        .cloned()
-                        .unwrap_or_else(FontId::default);
-
                     let mut layout_job = LayoutJob::simple(
                         match self.label_prefix {
                             LabelPrefix::Icon | LabelPrefix::IconAndText => {
@@ -295,7 +295,7 @@ impl BarWidget for Network {
                             }
                             LabelPrefix::None | LabelPrefix::Text => String::new(),
                         },
-                        font_id.clone(),
+                        config.icon_font_id.clone(),
                         ctx.style().visuals.selection.stroke.color,
                         100.0,
                     );
@@ -307,10 +307,15 @@ impl BarWidget for Network {
                     layout_job.append(
                         &self.default_interface,
                         10.0,
-                        TextFormat::simple(font_id, ctx.style().visuals.text_color()),
+                        TextFormat {
+                            font_id: config.text_font_id.clone(),
+                            color: ctx.style().visuals.text_color(),
+                            valign: Align::Center,
+                            ..Default::default()
+                        },
                     );
 
-                    config.apply_on_widget(false, ui, |ui| {
+                    render_config.apply_on_widget(false, ui, |ui| {
                         if SelectableFrame::new(false)
                             .show(ui, |ui| ui.add(Label::new(layout_job).selectable(false)))
                             .clicked()
@@ -323,6 +328,9 @@ impl BarWidget for Network {
                     });
                 }
             }
+
+            // widget spacing: pass on the config that was use for calling the apply_on_widget function
+            *config = render_config.clone();
         }
     }
 }

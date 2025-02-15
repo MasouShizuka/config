@@ -62,19 +62,16 @@ return {
 
             -- Module mappings. Use `''` (empty string) to disable one.
             mappings = {
-                add = "sa",    -- Add surrounding in Normal and Visual modes
-                delete = "sd", -- Delete surrounding
-                -- find = "sf",           -- Find surrounding (to the right)
-                -- find_left = "sF",      -- Find surrounding (to the left)
-                find = "sF",
-                find_left = "sf",
-                highlight = "sh",      -- Highlight surrounding
-                replace = "sr",        -- Replace surrounding
-                update_n_lines = "sn", -- Update `n_lines`
+                -- add = "sa",            -- Add surrounding in Normal and Visual modes
+                -- delete = "sd",         -- Delete surrounding
+                find = "sF",      -- Find surrounding (to the right)
+                find_left = "sf", -- Find surrounding (to the left)
+                -- highlight = "sh",      -- Highlight surrounding
+                -- replace = "sr",        -- Replace surrounding
+                -- update_n_lines = "sn", -- Update `n_lines`
 
-                -- suffix_last = "l",     -- Suffix to search with "prev" method
-                suffix_last = "p", -- Suffix to search with "prev" method
-                suffix_next = "n", -- Suffix to search with "next" method
+                -- suffix_last = "p",     -- Suffix to search with "prev" method
+                -- suffix_next = "n",     -- Suffix to search with "next" method
             },
 
             -- Number of lines within which surrounding is searched
@@ -115,6 +112,7 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter-textobjects",
         },
+        enabled = environment.treesitter_enable,
         ft = treesitter.treesitter_filetype_list,
         init = function(plugin)
             -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
@@ -215,7 +213,7 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not environment.is_vscode,
+        enabled = not environment.is_vscode and environment.treesitter_enable,
         ft = treesitter.treesitter_filetype_list,
         opts = {
             multiline_threshold = 1, -- Maximum number of lines to show for a single context

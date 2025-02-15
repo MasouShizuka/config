@@ -69,7 +69,7 @@ M.colorscheme = {
     },
 }
 
-M.get_colorscheme_color = function(colorscheme, color_name)
+M.get_color_name = function(colorscheme, color_name)
     local t = M.colorscheme[colorscheme]
     if t then
         local colorscheme_color_name = t.map[color_name]
@@ -96,7 +96,7 @@ M.get_color = function(color, colorscheme)
     if spec then
         local func = spec.func
         if func then
-            local color_value = func(M.get_colorscheme_color(colorscheme, color))
+            local color_value = func(M.get_color_name(colorscheme, color))
             if color_value then
                 return color_value
             end
