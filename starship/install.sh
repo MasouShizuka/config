@@ -1,9 +1,11 @@
 DIR=$(dirname "$(readlink -f "$0")")
 PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
-CONFIG_DIR=$DIR/config
+CONFIG_DIR="$DIR/config"
 
-scoop install starship
+if ((is_windows)); then
+    scoop install starship
+fi
 
 target="$HOME/.config/starship"
 clean_target "$target"

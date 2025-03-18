@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::env::temp_dir;
+use std::fs::OpenOptions;
 use std::io::ErrorKind;
 use std::net::Shutdown;
 use std::num::NonZeroUsize;
@@ -18,7 +19,6 @@ use hotwatch::notify::ErrorKind as NotifyErrorKind;
 use hotwatch::EventKind;
 use hotwatch::Hotwatch;
 use parking_lot::Mutex;
-use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
 use uds_windows::UnixListener;
@@ -48,6 +48,8 @@ use crate::core::WindowContainerBehaviour;
 use crate::core::WindowManagementBehaviour;
 
 use crate::border_manager;
+use crate::border_manager::BORDER_OFFSET;
+use crate::border_manager::BORDER_WIDTH;
 use crate::border_manager::STYLE;
 use crate::config_generation::WorkspaceMatchingRule;
 use crate::container::Container;
@@ -74,6 +76,7 @@ use crate::window_manager_event::WindowManagerEvent;
 use crate::windows_api::WindowsApi;
 use crate::winevent_listener;
 use crate::workspace::Workspace;
+use crate::workspace::WorkspaceLayer;
 use crate::BorderColours;
 use crate::Colour;
 use crate::CrossBoundaryBehaviour;
@@ -99,6 +102,7 @@ use crate::WORKSPACE_MATCHING_RULES;
 #[derive(Debug)]
 pub struct WindowManager {
     pub monitors: Ring<Monitor>,
+    pub monitor_usr_idx_map: HashMap<usize, usize>,
     pub incoming_events: Receiver<WindowManagerEvent>,
     pub command_listener: UnixListener,
     pub is_paused: bool,
@@ -116,12 +120,16 @@ pub struct WindowManager {
     pub pending_move_op: Arc<Option<(usize, usize, isize)>>,
     pub already_moved_window_handles: Arc<Mutex<HashSet<isize>>>,
     pub uncloack_to_ignore: usize,
+    /// Maps each known window hwnd to the (monitor, workspace) index pair managing it
+    pub known_hwnds: HashMap<isize, (usize, usize)>,
 }
 
 #[allow(clippy::struct_excessive_bools)]
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct State {
     pub monitors: Ring<Monitor>,
+    pub monitor_usr_idx_map: HashMap<usize, usize>,
     pub is_paused: bool,
     pub resize_delta: i32,
     pub new_window_behaviour: WindowContainerBehaviour,
@@ -183,7 +191,8 @@ impl State {
 }
 
 #[allow(clippy::struct_excessive_bools)]
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct GlobalState {
     pub border_enabled: bool,
     pub border_colours: BorderColours,
@@ -263,7 +272,7 @@ impl Default for GlobalState {
             tray_and_multi_window_identifiers: TRAY_AND_MULTI_WINDOW_IDENTIFIERS.lock().clone(),
             name_change_on_launch_identifiers: OBJECT_NAME_CHANGE_ON_LAUNCH.lock().clone(),
             monitor_index_preferences: MONITOR_INDEX_PREFERENCES.lock().clone(),
-            display_index_preferences: DISPLAY_INDEX_PREFERENCES.lock().clone(),
+            display_index_preferences: DISPLAY_INDEX_PREFERENCES.read().clone(),
             workspace_rules: WORKSPACE_MATCHING_RULES.lock().clone(),
             window_hiding_behaviour: *HIDING_BEHAVIOUR.lock(),
             configuration_dir: HOME_DIR.clone(),
@@ -281,8 +290,72 @@ impl AsRef<Self> for WindowManager {
 
 impl From<&WindowManager> for State {
     fn from(wm: &WindowManager) -> Self {
+        // This is used to remove any information that doesn't need to be passed on to subscribers
+        // or to be shown with the `komorebic state` command. Currently it is only removing the
+        // `workspace_config` field from every workspace, but more stripping can be added later if
+        // needed.
+        let mut stripped_monitors = Ring::default();
+        *stripped_monitors.elements_mut() = wm
+            .monitors()
+            .iter()
+            .map(|monitor| Monitor {
+                id: monitor.id,
+                name: monitor.name.clone(),
+                device: monitor.device.clone(),
+                device_id: monitor.device_id.clone(),
+                serial_number_id: monitor.serial_number_id.clone(),
+                size: monitor.size,
+                work_area_size: monitor.work_area_size,
+                work_area_offset: monitor.work_area_offset,
+                window_based_work_area_offset: monitor.window_based_work_area_offset,
+                window_based_work_area_offset_limit: monitor.window_based_work_area_offset_limit,
+                workspaces: {
+                    let mut ws = Ring::default();
+                    *ws.elements_mut() = monitor
+                        .workspaces()
+                        .iter()
+                        .map(|workspace| Workspace {
+                            name: workspace.name.clone(),
+                            containers: workspace.containers.clone(),
+                            monocle_container: workspace.monocle_container.clone(),
+                            monocle_container_restore_idx: workspace.monocle_container_restore_idx,
+                            maximized_window: workspace.maximized_window,
+                            maximized_window_restore_idx: workspace.maximized_window_restore_idx,
+                            floating_windows: workspace.floating_windows.clone(),
+                            layout: workspace.layout.clone(),
+                            layout_rules: workspace.layout_rules.clone(),
+                            layout_flip: workspace.layout_flip,
+                            workspace_padding: workspace.workspace_padding,
+                            container_padding: workspace.container_padding,
+                            latest_layout: workspace.latest_layout.clone(),
+                            resize_dimensions: workspace.resize_dimensions.clone(),
+                            tile: workspace.tile,
+                            apply_window_based_work_area_offset: workspace
+                                .apply_window_based_work_area_offset,
+                            window_container_behaviour: workspace.window_container_behaviour,
+                            window_container_behaviour_rules: workspace
+                                .window_container_behaviour_rules
+                                .clone(),
+                            float_override: workspace.float_override,
+                            layer: workspace.layer,
+                            globals: workspace.globals,
+                            workspace_config: None,
+                        })
+                        .collect::<VecDeque<_>>();
+                    ws.focus(monitor.workspaces.focused_idx());
+                    ws
+                },
+                last_focused_workspace: monitor.last_focused_workspace,
+                workspace_names: monitor.workspace_names.clone(),
+                container_padding: monitor.container_padding,
+                workspace_padding: monitor.workspace_padding,
+            })
+            .collect::<VecDeque<_>>();
+        stripped_monitors.focus(wm.monitors.focused_idx());
+
         Self {
-            monitors: wm.monitors.clone(),
+            monitors: stripped_monitors,
+            monitor_usr_idx_map: wm.monitor_usr_idx_map.clone(),
             is_paused: wm.is_paused,
             work_area_offset: wm.work_area_offset,
             resize_delta: wm.resize_delta,
@@ -325,8 +398,11 @@ impl EnforceWorkspaceRuleOp {
 
 impl WindowManager {
     #[tracing::instrument]
-    pub fn new(incoming: Receiver<WindowManagerEvent>) -> Result<Self> {
-        let socket = DATA_DIR.join("komorebi.sock");
+    pub fn new(
+        incoming: Receiver<WindowManagerEvent>,
+        custom_socket_path: Option<PathBuf>,
+    ) -> Result<Self> {
+        let socket = custom_socket_path.unwrap_or_else(|| DATA_DIR.join("komorebi.sock"));
 
         match std::fs::remove_file(&socket) {
             Ok(()) => {}
@@ -343,6 +419,7 @@ impl WindowManager {
 
         Ok(Self {
             monitors: Ring::default(),
+            monitor_usr_idx_map: HashMap::new(),
             incoming_events: incoming,
             command_listener: listener,
             is_paused: false,
@@ -360,13 +437,14 @@ impl WindowManager {
             pending_move_op: Arc::new(None),
             already_moved_window_handles: Arc::new(Mutex::new(HashSet::new())),
             uncloack_to_ignore: 0,
+            known_hwnds: HashMap::new(),
         })
     }
 
     #[tracing::instrument(skip(self))]
     pub fn init(&mut self) -> Result<()> {
         tracing::info!("initialising");
-        WindowsApi::load_monitor_information(&mut self.monitors)?;
+        WindowsApi::load_monitor_information(self)?;
         WindowsApi::load_workspace_information(&mut self.monitors)
     }
 
@@ -556,11 +634,16 @@ impl WindowManager {
                         self.window_management_behaviour.current_behaviour
                     };
 
-                let float_override = if let Some(float_override) = workspace.float_override() {
+                let mut float_override = if let Some(float_override) = workspace.float_override() {
                     *float_override
                 } else {
                     self.window_management_behaviour.float_override
                 };
+
+                // If the workspace layer is `Floating`, then consider it as if it had float
+                // override so that new windows spawn as floating
+                float_override =
+                    float_override || matches!(workspace.layer, WorkspaceLayer::Floating);
 
                 return WindowManagementBehaviour {
                     current_behaviour,
@@ -908,17 +991,14 @@ impl WindowManager {
         let offset = self.work_area_offset;
 
         for monitor in self.monitors_mut() {
-            let work_area = *monitor.work_area_size();
-            let window_based_work_area_offset = (
-                monitor.window_based_work_area_offset_limit(),
-                monitor.window_based_work_area_offset(),
-            );
-
             let offset = if monitor.work_area_offset().is_some() {
                 monitor.work_area_offset()
             } else {
                 offset
             };
+
+            let focused_workspace_idx = monitor.focused_workspace_idx();
+            monitor.update_workspace_globals(focused_workspace_idx, offset);
 
             let workspace = monitor
                 .focused_workspace_mut()
@@ -931,7 +1011,7 @@ impl WindowManager {
                 }
             }
 
-            workspace.update(&work_area, offset, window_based_work_area_offset)?;
+            workspace.update()?;
         }
 
         Ok(())
@@ -1303,15 +1383,6 @@ impl WindowManager {
                     }
                 }
             }
-
-            // This is to correctly restore and focus when switching to a workspace which
-            // contains a managed maximized window
-            if let Some(window) = self.focused_workspace()?.maximized_window() {
-                window.restore();
-                if trigger_focus {
-                    window.focus(self.mouse_follows_focus)?;
-                }
-            }
         }
 
         Ok(())
@@ -1325,86 +1396,174 @@ impl WindowManager {
         delta: i32,
         update: bool,
     ) -> Result<()> {
-        let work_area = self.focused_monitor_work_area()?;
+        let mouse_follows_focus = self.mouse_follows_focus;
+        let mut focused_monitor_work_area = self.focused_monitor_work_area()?;
         let workspace = self.focused_workspace_mut()?;
 
-        match workspace.layout() {
-            Layout::Default(layout) => {
-                tracing::info!("resizing window");
-                let len = NonZeroUsize::new(workspace.containers().len())
-                    .ok_or_else(|| anyhow!("there must be at least one container"))?;
-                let focused_idx = workspace.focused_container_idx();
-                let focused_idx_resize = workspace
-                    .resize_dimensions()
-                    .get(focused_idx)
-                    .ok_or_else(|| anyhow!("there is no resize adjustment for this container"))?;
+        match workspace.layer() {
+            WorkspaceLayer::Floating => {
+                let workspace = self.focused_workspace()?;
+                let focused_hwnd = WindowsApi::foreground_window()?;
 
-                if direction
-                    .destination(
-                        workspace.layout().as_boxed_direction().as_ref(),
-                        workspace.layout_flip(),
-                        focused_idx,
-                        len,
-                    )
-                    .is_some()
-                {
-                    let unaltered = layout.calculate(
-                        &work_area,
-                        len,
-                        workspace.container_padding(),
-                        workspace.layout_flip(),
-                        &[],
-                    );
+                let border_offset = BORDER_OFFSET.load(Ordering::SeqCst);
+                let border_width = BORDER_WIDTH.load(Ordering::SeqCst);
+                focused_monitor_work_area.left += border_offset;
+                focused_monitor_work_area.left += border_width;
+                focused_monitor_work_area.top += border_offset;
+                focused_monitor_work_area.top += border_width;
+                focused_monitor_work_area.right -= border_offset * 2;
+                focused_monitor_work_area.right -= border_width * 2;
+                focused_monitor_work_area.bottom -= border_offset * 2;
+                focused_monitor_work_area.bottom -= border_width * 2;
 
-                    let mut direction = direction;
-
-                    // We only ever want to operate on the unflipped Rect positions when resizing, then we
-                    // can flip them however they need to be flipped once the resizing has been done
-                    if let Some(flip) = workspace.layout_flip() {
-                        match flip {
-                            Axis::Horizontal => {
-                                if matches!(direction, OperationDirection::Left)
-                                    || matches!(direction, OperationDirection::Right)
-                                {
-                                    direction = direction.opposite();
+                for window in workspace.floating_windows().iter() {
+                    if window.hwnd == focused_hwnd {
+                        let mut rect = WindowsApi::window_rect(window.hwnd)?;
+                        match (direction, sizing) {
+                            (OperationDirection::Left, Sizing::Increase) => {
+                                if rect.left - delta < focused_monitor_work_area.left {
+                                    rect.left = focused_monitor_work_area.left;
+                                } else {
+                                    rect.left -= delta;
                                 }
                             }
-                            Axis::Vertical => {
-                                if matches!(direction, OperationDirection::Up)
-                                    || matches!(direction, OperationDirection::Down)
+                            (OperationDirection::Left, Sizing::Decrease) => {
+                                rect.left += delta;
+                            }
+                            (OperationDirection::Right, Sizing::Increase) => {
+                                if rect.left + rect.right + delta * 2
+                                    > focused_monitor_work_area.left
+                                        + focused_monitor_work_area.right
                                 {
-                                    direction = direction.opposite();
+                                    rect.right = focused_monitor_work_area.left
+                                        + focused_monitor_work_area.right
+                                        - rect.left;
+                                } else {
+                                    rect.right += delta * 2;
                                 }
                             }
-                            Axis::HorizontalAndVertical => direction = direction.opposite(),
+                            (OperationDirection::Right, Sizing::Decrease) => {
+                                rect.right -= delta * 2;
+                            }
+                            (OperationDirection::Up, Sizing::Increase) => {
+                                if rect.top - delta < focused_monitor_work_area.top {
+                                    rect.top = focused_monitor_work_area.top;
+                                } else {
+                                    rect.top -= delta;
+                                }
+                            }
+                            (OperationDirection::Up, Sizing::Decrease) => {
+                                rect.top += delta;
+                            }
+                            (OperationDirection::Down, Sizing::Increase) => {
+                                if rect.top + rect.bottom + delta * 2
+                                    > focused_monitor_work_area.top
+                                        + focused_monitor_work_area.bottom
+                                {
+                                    rect.bottom = focused_monitor_work_area.top
+                                        + focused_monitor_work_area.bottom
+                                        - rect.top;
+                                } else {
+                                    rect.bottom += delta * 2;
+                                }
+                            }
+                            (OperationDirection::Down, Sizing::Decrease) => {
+                                rect.bottom -= delta * 2;
+                            }
                         }
+
+                        WindowsApi::position_window(window.hwnd, &rect, false)?;
+                        if mouse_follows_focus {
+                            WindowsApi::center_cursor_in_rect(&rect)?;
+                        }
+
+                        break;
                     }
-
-                    let resize = layout.resize(
-                        unaltered
-                            .get(focused_idx)
-                            .ok_or_else(|| anyhow!("there is no last layout"))?,
-                        focused_idx_resize,
-                        direction,
-                        sizing,
-                        delta,
-                    );
-
-                    workspace.resize_dimensions_mut()[focused_idx] = resize;
-
-                    return if update {
-                        self.update_focused_workspace(false, false)
-                    } else {
-                        Ok(())
-                    };
                 }
-
-                tracing::warn!("cannot resize container in this direction");
             }
-            Layout::Custom(_) => {
-                tracing::warn!("containers cannot be resized when using custom layouts");
+            WorkspaceLayer::Tiling => {
+                match workspace.layout() {
+                    Layout::Default(layout) => {
+                        tracing::info!("resizing window");
+                        let len = NonZeroUsize::new(workspace.containers().len())
+                            .ok_or_else(|| anyhow!("there must be at least one container"))?;
+                        let focused_idx = workspace.focused_container_idx();
+                        let focused_idx_resize = workspace
+                            .resize_dimensions()
+                            .get(focused_idx)
+                            .ok_or_else(|| {
+                                anyhow!("there is no resize adjustment for this container")
+                            })?;
+
+                        if direction
+                            .destination(
+                                workspace.layout().as_boxed_direction().as_ref(),
+                                workspace.layout_flip(),
+                                focused_idx,
+                                len,
+                            )
+                            .is_some()
+                        {
+                            let unaltered = layout.calculate(
+                                &focused_monitor_work_area,
+                                len,
+                                workspace.container_padding(),
+                                workspace.layout_flip(),
+                                &[],
+                            );
+
+                            let mut direction = direction;
+
+                            // We only ever want to operate on the unflipped Rect positions when resizing, then we
+                            // can flip them however they need to be flipped once the resizing has been done
+                            if let Some(flip) = workspace.layout_flip() {
+                                match flip {
+                                    Axis::Horizontal => {
+                                        if matches!(direction, OperationDirection::Left)
+                                            || matches!(direction, OperationDirection::Right)
+                                        {
+                                            direction = direction.opposite();
+                                        }
+                                    }
+                                    Axis::Vertical => {
+                                        if matches!(direction, OperationDirection::Up)
+                                            || matches!(direction, OperationDirection::Down)
+                                        {
+                                            direction = direction.opposite();
+                                        }
+                                    }
+                                    Axis::HorizontalAndVertical => direction = direction.opposite(),
+                                }
+                            }
+
+                            let resize = layout.resize(
+                                unaltered
+                                    .get(focused_idx)
+                                    .ok_or_else(|| anyhow!("there is no last layout"))?,
+                                focused_idx_resize,
+                                direction,
+                                sizing,
+                                delta,
+                            );
+
+                            workspace.resize_dimensions_mut()[focused_idx] = resize;
+
+                            return if update {
+                                self.update_focused_workspace(false, false)
+                            } else {
+                                Ok(())
+                            };
+                        }
+
+                        tracing::warn!("cannot resize container in this direction");
+                    }
+                    Layout::Custom(_) => {
+                        tracing::warn!("containers cannot be resized when using custom layouts");
+                    }
+                }
             }
         }
+
         Ok(())
     }
 
@@ -1551,6 +1710,7 @@ impl WindowManager {
             return Ok(());
         }
         let mouse_follows_focus = self.mouse_follows_focus;
+        let offset = self.work_area_offset;
         let first_focused_workspace = {
             let first_monitor = self
                 .monitors()
@@ -1595,11 +1755,13 @@ impl WindowManager {
 
         // Set the focused workspaces for the first and second monitors
         if let Some(first_monitor) = self.monitors_mut().get_mut(first_idx) {
+            first_monitor.update_workspaces_globals(offset);
             first_monitor.focus_workspace(second_focused_workspace)?;
             first_monitor.load_focused_workspace(mouse_follows_focus)?;
         }
 
         if let Some(second_monitor) = self.monitors_mut().get_mut(second_idx) {
+            second_monitor.update_workspaces_globals(offset);
             second_monitor.focus_workspace(first_focused_workspace)?;
             second_monitor.load_focused_workspace(mouse_follows_focus)?;
         }
@@ -1657,11 +1819,6 @@ impl WindowManager {
             bail!("cannot move native maximized window to another monitor or workspace");
         }
 
-        // NOTE: 禁止将 monocle 窗口移动到其他 monitor 或 workspace
-        if workspace.monocle_container().is_some() {
-            bail!("cannot move monocle window to another monitor or workspace");
-        }
-
         // NOTE: 若当前 workspace 仅剩 1 个 container，则 focus 目标 monitor
         let is_empty = workspace.containers().len() == 1;
         let follow = follow || is_empty;
@@ -1703,6 +1860,7 @@ impl WindowManager {
 
         if let Some(window) = floating_window {
             target_workspace.floating_windows_mut().push(window);
+            target_workspace.set_layer(WorkspaceLayer::Floating);
             Window::from(window.hwnd)
                 .move_to_area(&current_area, target_monitor.work_area_size())?;
         } else if let Some(container) = container {
@@ -1711,6 +1869,8 @@ impl WindowManager {
                 .iter()
                 .map(|w| w.hwnd)
                 .collect::<Vec<_>>();
+
+            target_workspace.set_layer(WorkspaceLayer::Tiling);
 
             if let Some(direction) = move_direction {
                 target_monitor.add_container_with_direction(container, workspace_idx, direction)?;
@@ -1776,13 +1936,22 @@ impl WindowManager {
     pub fn remove_focused_workspace(&mut self) -> Option<Workspace> {
         let focused_monitor: &mut Monitor = self.focused_monitor_mut()?;
         let focused_workspace_idx = focused_monitor.focused_workspace_idx();
-        focused_monitor.remove_workspace_by_idx(focused_workspace_idx)
+        let workspace = focused_monitor.remove_workspace_by_idx(focused_workspace_idx);
+        if let Err(error) = focused_monitor.focus_workspace(focused_workspace_idx.saturating_sub(1))
+        {
+            tracing::error!(
+                "Error focusing previous workspace while removing the focused workspace: {}",
+                error
+            );
+        }
+        workspace
     }
 
     #[tracing::instrument(skip(self))]
     pub fn move_workspace_to_monitor(&mut self, idx: usize) -> Result<()> {
         tracing::info!("moving workspace");
         let mouse_follows_focus = self.mouse_follows_focus;
+        let offset = self.work_area_offset;
         let workspace = self
             .remove_focused_workspace()
             .ok_or_else(|| anyhow!("there is no workspace"))?;
@@ -1794,12 +1963,63 @@ impl WindowManager {
                 .ok_or_else(|| anyhow!("there is no monitor"))?;
 
             target_monitor.workspaces_mut().push_back(workspace);
+            target_monitor.update_workspaces_globals(offset);
             target_monitor.focus_workspace(target_monitor.workspaces().len().saturating_sub(1))?;
             target_monitor.load_focused_workspace(mouse_follows_focus)?;
         }
 
         self.focus_monitor(idx)?;
         self.update_focused_workspace(mouse_follows_focus, true)
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn focus_floating_window_in_direction(
+        &mut self,
+        direction: OperationDirection,
+    ) -> Result<()> {
+        let mouse_follows_focus = self.mouse_follows_focus;
+        let focused_workspace = self.focused_workspace()?;
+
+        let mut target_idx = None;
+        let len = focused_workspace.floating_windows().len();
+
+        if len > 1 {
+            let focused_hwnd = WindowsApi::foreground_window()?;
+            for (idx, window) in focused_workspace.floating_windows().iter().enumerate() {
+                if window.hwnd == focused_hwnd {
+                    match direction {
+                        OperationDirection::Left => {}
+                        OperationDirection::Right => {}
+                        OperationDirection::Up => {
+                            if idx == len - 1 {
+                                target_idx = Some(0)
+                            } else {
+                                target_idx = Some(idx + 1)
+                            }
+                        }
+                        OperationDirection::Down => {
+                            if idx == 0 {
+                                target_idx = Some(len - 1)
+                            } else {
+                                target_idx = Some(idx - 1)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if target_idx.is_none() {
+                target_idx = Some(0);
+            }
+        }
+
+        if let Some(idx) = target_idx {
+            if let Some(window) = focused_workspace.floating_windows().get(idx) {
+                window.focus(mouse_follows_focus)?;
+            }
+        }
+
+        Ok(())
     }
 
     #[tracing::instrument(skip(self))]
@@ -1941,6 +2161,83 @@ impl WindowManager {
         if !cross_monitor_monocle_or_max {
             if let Ok(focused_window) = self.focused_window_mut() {
                 focused_window.focus(self.mouse_follows_focus)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn move_floating_window_in_direction(
+        &mut self,
+        direction: OperationDirection,
+    ) -> Result<()> {
+        let mouse_follows_focus = self.mouse_follows_focus;
+
+        let mut focused_monitor_work_area = self.focused_monitor_work_area()?;
+        let border_offset = BORDER_OFFSET.load(Ordering::SeqCst);
+        let border_width = BORDER_WIDTH.load(Ordering::SeqCst);
+        focused_monitor_work_area.left += border_offset;
+        focused_monitor_work_area.left += border_width;
+        focused_monitor_work_area.top += border_offset;
+        focused_monitor_work_area.top += border_width;
+        focused_monitor_work_area.right -= border_offset * 2;
+        focused_monitor_work_area.right -= border_width * 2;
+        focused_monitor_work_area.bottom -= border_offset * 2;
+        focused_monitor_work_area.bottom -= border_width * 2;
+
+        let focused_workspace = self.focused_workspace()?;
+        let delta = self.resize_delta;
+
+        let focused_hwnd = WindowsApi::foreground_window()?;
+        for window in focused_workspace.floating_windows().iter() {
+            if window.hwnd == focused_hwnd {
+                let mut rect = WindowsApi::window_rect(window.hwnd)?;
+                match direction {
+                    OperationDirection::Left => {
+                        if rect.left - delta < focused_monitor_work_area.left {
+                            rect.left = focused_monitor_work_area.left;
+                        } else {
+                            rect.left -= delta;
+                        }
+                    }
+                    OperationDirection::Right => {
+                        if rect.left + delta + rect.right
+                            > focused_monitor_work_area.left + focused_monitor_work_area.right
+                        {
+                            rect.left = focused_monitor_work_area.left
+                                + focused_monitor_work_area.right
+                                - rect.right;
+                        } else {
+                            rect.left += delta;
+                        }
+                    }
+                    OperationDirection::Up => {
+                        if rect.top - delta < focused_monitor_work_area.top {
+                            rect.top = focused_monitor_work_area.top;
+                        } else {
+                            rect.top -= delta;
+                        }
+                    }
+                    OperationDirection::Down => {
+                        if rect.top + delta + rect.bottom
+                            > focused_monitor_work_area.top + focused_monitor_work_area.bottom
+                        {
+                            rect.top = focused_monitor_work_area.top
+                                + focused_monitor_work_area.bottom
+                                - rect.bottom;
+                        } else {
+                            rect.top += delta;
+                        }
+                    }
+                }
+
+                WindowsApi::position_window(window.hwnd, &rect, false)?;
+                if mouse_follows_focus {
+                    WindowsApi::center_cursor_in_rect(&rect)?;
+                }
+
+                break;
             }
         }
 
@@ -2124,6 +2421,54 @@ impl WindowManager {
     }
 
     #[tracing::instrument(skip(self))]
+    pub fn focus_floating_window_in_cycle_direction(
+        &mut self,
+        direction: CycleDirection,
+    ) -> Result<()> {
+        let mouse_follows_focus = self.mouse_follows_focus;
+        let focused_workspace = self.focused_workspace()?;
+
+        let mut target_idx = None;
+        let len = focused_workspace.floating_windows().len();
+
+        if len > 1 {
+            let focused_hwnd = WindowsApi::foreground_window()?;
+            for (idx, window) in focused_workspace.floating_windows().iter().enumerate() {
+                if window.hwnd == focused_hwnd {
+                    match direction {
+                        CycleDirection::Previous => {
+                            if idx == 0 {
+                                target_idx = Some(len - 1)
+                            } else {
+                                target_idx = Some(idx - 1)
+                            }
+                        }
+                        CycleDirection::Next => {
+                            if idx == len - 1 {
+                                target_idx = Some(0)
+                            } else {
+                                target_idx = Some(idx - 1)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if target_idx.is_none() {
+                target_idx = Some(0);
+            }
+        }
+
+        if let Some(idx) = target_idx {
+            if let Some(window) = focused_workspace.floating_windows().get(idx) {
+                window.focus(mouse_follows_focus)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
     pub fn focus_container_in_cycle_direction(&mut self, direction: CycleDirection) -> Result<()> {
         self.handle_unmanaged_window_behaviour()?;
 
@@ -2207,6 +2552,10 @@ impl WindowManager {
         container.focus_window(next_idx);
         container.load_focused_window();
 
+        if let Some(window) = container.focused_window() {
+            window.focus(self.mouse_follows_focus)?;
+        }
+
         self.update_focused_workspace(self.mouse_follows_focus, true)
     }
 
@@ -2240,9 +2589,12 @@ impl WindowManager {
         container.focus_window(next_idx);
         container.load_focused_window();
 
+        if let Some(window) = container.focused_window() {
+            window.focus(self.mouse_follows_focus)?;
+        }
+
         self.update_focused_workspace(self.mouse_follows_focus, true)
     }
-
     #[tracing::instrument(skip(self))]
     pub fn focus_container_window(&mut self, idx: usize) -> Result<()> {
         self.handle_unmanaged_window_behaviour()?;
@@ -2269,6 +2621,10 @@ impl WindowManager {
 
         container.focus_window(idx);
         container.load_focused_window();
+
+        if let Some(window) = container.focused_window() {
+            window.focus(self.mouse_follows_focus)?;
+        }
 
         self.update_focused_workspace(self.mouse_follows_focus, true)
     }
@@ -2359,12 +2715,16 @@ impl WindowManager {
                 anyhow!("this is not a valid direction from the current position")
             })?;
 
+            let mut changed_focus = false;
+
             let adjusted_new_index = if new_idx > current_container_idx
                 && !matches!(
                     workspace.layout(),
                     Layout::Default(DefaultLayout::Grid)
                         | Layout::Default(DefaultLayout::UltrawideVerticalStack)
                 ) {
+                workspace.focus_container(new_idx);
+                changed_focus = true;
                 new_idx.saturating_sub(1)
             } else {
                 new_idx
@@ -2381,9 +2741,19 @@ impl WindowManager {
             if let Some(current) = workspace.focused_container() {
                 if current.windows().len() > 1 && !target_container_is_stack {
                     workspace.focus_container(adjusted_new_index);
+                    changed_focus = true;
                     workspace.move_window_to_container(current_container_idx)?;
                 } else {
                     workspace.move_window_to_container(adjusted_new_index)?;
+                }
+            }
+
+            if changed_focus {
+                if let Some(container) = workspace.focused_container_mut() {
+                    container.load_focused_window();
+                    if let Some(window) = container.focused_window() {
+                        window.focus(self.mouse_follows_focus)?;
+                    }
                 }
             }
 
@@ -2470,8 +2840,10 @@ impl WindowManager {
         }
 
         if is_floating_window {
+            workspace.set_layer(WorkspaceLayer::Tiling);
             self.unfloat_window()?;
         } else {
+            workspace.set_layer(WorkspaceLayer::Floating);
             self.float_window()?;
         }
 
@@ -2528,17 +2900,12 @@ impl WindowManager {
         let workspace = self.focused_workspace_mut()?;
         workspace.new_monocle_container()?;
 
-        // NOTE: 由于修改了 new_monocle_container 使其添加 monocle 窗口时不要移除其 container，因此需要检测 monocle
-        let monocle_id = if let Some(monocle) = workspace.monocle_container() {
-            monocle.id()
-        } else {
-            ""
-        };
-        for container in workspace.containers() {
-            if container.id() == monocle_id {
-                continue;
-            }
+        for container in workspace.containers_mut() {
             container.hide(None);
+        }
+
+        for window in workspace.floating_windows_mut() {
+            window.hide();
         }
 
         Ok(())
@@ -2552,6 +2919,10 @@ impl WindowManager {
 
         for container in workspace.containers_mut() {
             container.restore();
+        }
+
+        for window in workspace.floating_windows_mut() {
+            window.restore();
         }
 
         workspace.reintegrate_monocle_container()
@@ -2770,7 +3141,6 @@ impl WindowManager {
     ) -> Result<()> {
         tracing::info!("setting workspace layout");
 
-        let offset = self.work_area_offset;
         let focused_monitor_idx = self.focused_monitor_idx();
 
         let monitor = self
@@ -2778,18 +3148,7 @@ impl WindowManager {
             .get_mut(monitor_idx)
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
-        let work_area = *monitor.work_area_size();
-        let window_based_work_area_offset = (
-            monitor.window_based_work_area_offset_limit(),
-            monitor.window_based_work_area_offset(),
-        );
-
         let focused_workspace_idx = monitor.focused_workspace_idx();
-        let offset = if monitor.work_area_offset().is_some() {
-            monitor.work_area_offset()
-        } else {
-            offset
-        };
 
         let workspace = monitor
             .workspaces_mut()
@@ -2803,7 +3162,7 @@ impl WindowManager {
 
         // If this is the focused workspace on a non-focused screen, let's update it
         if focused_monitor_idx != monitor_idx && focused_workspace_idx == workspace_idx {
-            workspace.update(&work_area, offset, window_based_work_area_offset)?;
+            workspace.update()?;
             Ok(())
         } else {
             Ok(self.update_focused_workspace(false, false)?)
@@ -2823,7 +3182,6 @@ impl WindowManager {
     {
         tracing::info!("setting workspace layout");
 
-        let offset = self.work_area_offset;
         let focused_monitor_idx = self.focused_monitor_idx();
 
         let monitor = self
@@ -2831,18 +3189,7 @@ impl WindowManager {
             .get_mut(monitor_idx)
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
-        let work_area = *monitor.work_area_size();
-        let window_based_work_area_offset = (
-            monitor.window_based_work_area_offset_limit(),
-            monitor.window_based_work_area_offset(),
-        );
-
         let focused_workspace_idx = monitor.focused_workspace_idx();
-        let offset = if monitor.work_area_offset().is_some() {
-            monitor.work_area_offset()
-        } else {
-            offset
-        };
 
         let workspace = monitor
             .workspaces_mut()
@@ -2858,7 +3205,7 @@ impl WindowManager {
 
         // If this is the focused workspace on a non-focused screen, let's update it
         if focused_monitor_idx != monitor_idx && focused_workspace_idx == workspace_idx {
-            workspace.update(&work_area, offset, window_based_work_area_offset)?;
+            workspace.update()?;
             Ok(())
         } else {
             Ok(self.update_focused_workspace(false, false)?)
@@ -2873,7 +3220,6 @@ impl WindowManager {
     ) -> Result<()> {
         tracing::info!("setting workspace layout");
 
-        let offset = self.work_area_offset;
         let focused_monitor_idx = self.focused_monitor_idx();
 
         let monitor = self
@@ -2881,18 +3227,7 @@ impl WindowManager {
             .get_mut(monitor_idx)
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
-        let work_area = *monitor.work_area_size();
-        let window_based_work_area_offset = (
-            monitor.window_based_work_area_offset_limit(),
-            monitor.window_based_work_area_offset(),
-        );
-
         let focused_workspace_idx = monitor.focused_workspace_idx();
-        let offset = if monitor.work_area_offset().is_some() {
-            monitor.work_area_offset()
-        } else {
-            offset
-        };
 
         let workspace = monitor
             .workspaces_mut()
@@ -2904,7 +3239,7 @@ impl WindowManager {
 
         // If this is the focused workspace on a non-focused screen, let's update it
         if focused_monitor_idx != monitor_idx && focused_workspace_idx == workspace_idx {
-            workspace.update(&work_area, offset, window_based_work_area_offset)?;
+            workspace.update()?;
             Ok(())
         } else {
             Ok(self.update_focused_workspace(false, false)?)
@@ -2920,7 +3255,6 @@ impl WindowManager {
     ) -> Result<()> {
         tracing::info!("setting workspace layout");
 
-        let offset = self.work_area_offset;
         let focused_monitor_idx = self.focused_monitor_idx();
 
         let monitor = self
@@ -2928,18 +3262,7 @@ impl WindowManager {
             .get_mut(monitor_idx)
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
-        let work_area = *monitor.work_area_size();
-        let window_based_work_area_offset = (
-            monitor.window_based_work_area_offset_limit(),
-            monitor.window_based_work_area_offset(),
-        );
-
         let focused_workspace_idx = monitor.focused_workspace_idx();
-        let offset = if monitor.work_area_offset().is_some() {
-            monitor.work_area_offset()
-        } else {
-            offset
-        };
 
         let workspace = monitor
             .workspaces_mut()
@@ -2950,7 +3273,7 @@ impl WindowManager {
 
         // If this is the focused workspace on a non-focused screen, let's update it
         if focused_monitor_idx != monitor_idx && focused_workspace_idx == workspace_idx {
-            workspace.update(&work_area, offset, window_based_work_area_offset)?;
+            workspace.update()?;
             Ok(())
         } else {
             Ok(self.update_focused_workspace(false, false)?)
@@ -2969,7 +3292,6 @@ impl WindowManager {
     {
         tracing::info!("setting workspace layout");
         let layout = CustomLayout::from_path(path)?;
-        let offset = self.work_area_offset;
         let focused_monitor_idx = self.focused_monitor_idx();
 
         let monitor = self
@@ -2977,18 +3299,7 @@ impl WindowManager {
             .get_mut(monitor_idx)
             .ok_or_else(|| anyhow!("there is no monitor"))?;
 
-        let work_area = *monitor.work_area_size();
-        let window_based_work_area_offset = (
-            monitor.window_based_work_area_offset_limit(),
-            monitor.window_based_work_area_offset(),
-        );
-
         let focused_workspace_idx = monitor.focused_workspace_idx();
-        let offset = if monitor.work_area_offset().is_some() {
-            monitor.work_area_offset()
-        } else {
-            offset
-        };
 
         let workspace = monitor
             .workspaces_mut()
@@ -3000,7 +3311,7 @@ impl WindowManager {
 
         // If this is the focused workspace on a non-focused screen, let's update it
         if focused_monitor_idx != monitor_idx && focused_workspace_idx == workspace_idx {
-            workspace.update(&work_area, offset, window_based_work_area_offset)?;
+            workspace.update()?;
             Ok(())
         } else {
             Ok(self.update_focused_workspace(false, false)?)
@@ -3314,5 +3625,1119 @@ impl WindowManager {
         self.focused_container_mut()?
             .focused_window_mut()
             .ok_or_else(|| anyhow!("there is no window"))
+    }
+
+    /// Updates the list of `known_hwnds` and their monitor/workspace index pair
+    ///
+    /// [`known_hwnds`]: `Self.known_hwnds`
+    pub fn update_known_hwnds(&mut self) {
+        tracing::trace!("updating list of known hwnds");
+        let mut known_hwnds = HashMap::new();
+        for (m_idx, monitor) in self.monitors().iter().enumerate() {
+            for (w_idx, workspace) in monitor.workspaces().iter().enumerate() {
+                for container in workspace.containers() {
+                    for window in container.windows() {
+                        known_hwnds.insert(window.hwnd, (m_idx, w_idx));
+                    }
+                }
+
+                for window in workspace.floating_windows() {
+                    known_hwnds.insert(window.hwnd, (m_idx, w_idx));
+                }
+
+                if let Some(window) = workspace.maximized_window() {
+                    known_hwnds.insert(window.hwnd, (m_idx, w_idx));
+                }
+
+                if let Some(container) = workspace.monocle_container() {
+                    for window in container.windows() {
+                        known_hwnds.insert(window.hwnd, (m_idx, w_idx));
+                    }
+                }
+            }
+        }
+
+        if self.known_hwnds != known_hwnds {
+            // Update reaper cache
+            {
+                let mut reaper_cache = crate::reaper::HWNDS_CACHE.lock();
+                *reaper_cache = known_hwnds.clone();
+            }
+
+            // Save to file
+            let hwnd_json = DATA_DIR.join("komorebi.hwnd.json");
+            match OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .create(true)
+                .open(hwnd_json)
+            {
+                Ok(file) => {
+                    if let Err(error) =
+                        serde_json::to_writer_pretty(&file, &known_hwnds.keys().collect::<Vec<_>>())
+                    {
+                        tracing::error!("Failed to save list of known_hwnds on file: {}", error);
+                    }
+                }
+                Err(error) => {
+                    tracing::error!("Failed to save list of known_hwnds on file: {}", error);
+                }
+            }
+
+            // Store new hwnds
+            self.known_hwnds = known_hwnds;
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::monitor;
+    use crossbeam_channel::bounded;
+    use crossbeam_channel::Sender;
+    use std::path::PathBuf;
+    use uuid::Uuid;
+
+    struct TestContext {
+        socket_path: Option<PathBuf>,
+    }
+
+    impl Drop for TestContext {
+        fn drop(&mut self) {
+            if let Some(socket_path) = &self.socket_path {
+                // Clean up the socket file
+                std::fs::remove_file(socket_path).unwrap();
+            }
+        }
+    }
+
+    fn setup_window_manager() -> (WindowManager, TestContext) {
+        let (_sender, receiver): (Sender<WindowManagerEvent>, Receiver<WindowManagerEvent>) =
+            bounded(1);
+
+        // Temporary socket path for testing
+        let socket_name = format!("komorebi-test-{}.sock", Uuid::new_v4());
+        let socket_path = PathBuf::from(socket_name);
+
+        // Create a new WindowManager instance
+        let wm = WindowManager::new(receiver, Some(socket_path.clone()));
+
+        // Window Manager should be created successfully
+        assert!(wm.is_ok());
+
+        (
+            wm.unwrap(),
+            TestContext {
+                socket_path: Some(socket_path),
+            },
+        )
+    }
+
+    #[test]
+    fn test_create_window_manager() {
+        let (_wm, _test_context) = setup_window_manager();
+    }
+
+    #[test]
+    fn test_focus_workspace() {
+        let (mut wm, _test_context) = setup_window_manager();
+
+        let m = monitor::new(
+            0,
+            Rect::default(),
+            Rect::default(),
+            "TestMonitor".to_string(),
+            "TestDevice".to_string(),
+            "TestDeviceID".to_string(),
+            Some("TestMonitorID".to_string()),
+        );
+
+        // a new monitor should have a single workspace
+        assert_eq!(m.workspaces().len(), 1);
+
+        // the next index on the monitor should be the not-yet-created second workspace
+        let new_workspace_index = m.new_workspace_idx();
+        assert_eq!(new_workspace_index, 1);
+
+        // add the monitor to the window manager
+        wm.monitors_mut().push_back(m);
+
+        {
+            // focusing a workspace which doesn't yet exist should create it
+            let monitor = wm.focused_monitor_mut().unwrap();
+            monitor.focus_workspace(new_workspace_index).unwrap();
+            assert_eq!(monitor.workspaces().len(), 2);
+        }
+        assert_eq!(wm.focused_workspace_idx().unwrap(), 1);
+
+        {
+            // focusing a workspace many indices ahead should create all workspaces
+            // required along the way
+            let monitor = wm.focused_monitor_mut().unwrap();
+            monitor.focus_workspace(new_workspace_index + 2).unwrap();
+            assert_eq!(monitor.workspaces().len(), 4);
+        }
+        assert_eq!(wm.focused_workspace_idx().unwrap(), 3);
+
+        // we should be able to successfully focus an existing workspace too
+        wm.focus_workspace(0).unwrap();
+        assert_eq!(wm.focused_workspace_idx().unwrap(), 0);
+    }
+
+    #[test]
+    fn test_remove_focused_workspace() {
+        let (mut wm, _context) = setup_window_manager();
+
+        let m = monitor::new(
+            0,
+            Rect::default(),
+            Rect::default(),
+            "TestMonitor".to_string(),
+            "TestDevice".to_string(),
+            "TestDeviceID".to_string(),
+            Some("TestMonitorID".to_string()),
+        );
+
+        // a new monitor should have a single workspace
+        assert_eq!(m.workspaces().len(), 1);
+
+        // the next index on the monitor should be the not-yet-created second workspace
+        let new_workspace_index = m.new_workspace_idx();
+        assert_eq!(new_workspace_index, 1);
+
+        // add the monitor to the window manager
+        wm.monitors_mut().push_back(m);
+
+        {
+            // focus a workspace which doesn't yet exist should create it
+            let monitor = wm.focused_monitor_mut().unwrap();
+            monitor.focus_workspace(new_workspace_index + 1).unwrap();
+
+            // Monitor focused workspace should be 2
+            assert_eq!(monitor.focused_workspace_idx(), 2);
+
+            // Should have 3 Workspaces
+            assert_eq!(monitor.workspaces().len(), 3);
+        }
+
+        // Remove the focused workspace
+        wm.remove_focused_workspace().unwrap();
+
+        {
+            let monitor = wm.focused_monitor_mut().unwrap();
+            monitor.focus_workspace(new_workspace_index).unwrap();
+
+            // Should be focused on workspace 1
+            assert_eq!(monitor.focused_workspace_idx(), 1);
+
+            // Should have 2 Workspaces
+            assert_eq!(monitor.workspaces().len(), 2);
+        }
+    }
+
+    #[test]
+    fn test_set_workspace_name() {
+        let (mut wm, _test_context) = setup_window_manager();
+
+        let m = monitor::new(
+            0,
+            Rect::default(),
+            Rect::default(),
+            "TestMonitor".to_string(),
+            "TestDevice".to_string(),
+            "TestDeviceID".to_string(),
+            Some("TestMonitorID".to_string()),
+        );
+
+        // a new monitor should have a single workspace
+        assert_eq!(m.workspaces().len(), 1);
+
+        // create a new workspace
+        let new_workspace_index = m.new_workspace_idx();
+        assert_eq!(new_workspace_index, 1);
+
+        // add the monitor to the window manager
+        wm.monitors_mut().push_back(m);
+
+        {
+            // focusing a workspace which doesn't yet exist should create it
+            let monitor = wm.focused_monitor_mut().unwrap();
+            monitor.focus_workspace(new_workspace_index).unwrap();
+            assert_eq!(monitor.workspaces().len(), 2);
+        }
+        assert_eq!(wm.focused_workspace_idx().unwrap(), 1);
+
+        // set the name of the first workspace
+        wm.set_workspace_name(0, 0, "workspace1".to_string())
+            .unwrap();
+
+        // monitor_workspace_index_by_name should return the index of the workspace with the name "workspace1"
+        let workspace_index = wm.monitor_workspace_index_by_name("workspace1").unwrap();
+
+        // workspace index 0 should now have the name "workspace1"
+        assert_eq!(workspace_index.1, 0);
+    }
+
+    #[test]
+    fn test_switch_focus_monitors() {
+        let (mut wm, _test_context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // monitor should have a single workspace
+            assert_eq!(m.workspaces().len(), 1);
+
+            // add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+        assert_eq!(wm.monitors().len(), 1);
+
+        {
+            // Create a second monitor
+            let m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor2".to_string(),
+                "TestDevice2".to_string(),
+                "TestDeviceID2".to_string(),
+                Some("TestMonitorID2".to_string()),
+            );
+
+            // monitor should have a single workspace
+            assert_eq!(m.workspaces().len(), 1);
+
+            // add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+        assert_eq!(wm.monitors().len(), 2);
+
+        {
+            // Create a third monitor
+            let m = monitor::new(
+                2,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor3".to_string(),
+                "TestDevice3".to_string(),
+                "TestDeviceID3".to_string(),
+                Some("TestMonitorID3".to_string()),
+            );
+
+            // monitor should have a single workspace
+            assert_eq!(m.workspaces().len(), 1);
+
+            // add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+        assert_eq!(wm.monitors().len(), 3);
+
+        {
+            // Set the first monitor as focused and check if it is focused
+            wm.focus_monitor(0).unwrap();
+            let current_monitor_idx = wm.monitors.focused_idx();
+            assert_eq!(current_monitor_idx, 0);
+        }
+
+        {
+            // Set the second monitor as focused and check if it is focused
+            wm.focus_monitor(1).unwrap();
+            let current_monitor_idx = wm.monitors.focused_idx();
+            assert_eq!(current_monitor_idx, 1);
+        }
+
+        {
+            // Set the third monitor as focused and check if it is focused
+            wm.focus_monitor(2).unwrap();
+            let current_monitor_idx = wm.monitors.focused_idx();
+            assert_eq!(current_monitor_idx, 2);
+        }
+
+        // Switch back to the first monitor
+        wm.focus_monitor(0).unwrap();
+        let current_monitor_idx = wm.monitors.focused_idx();
+        assert_eq!(current_monitor_idx, 0);
+    }
+
+    #[test]
+    fn test_focused_monitor_size() {
+        let (mut wm, _test_context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // monitor should have a single workspace
+            assert_eq!(m.workspaces().len(), 1);
+
+            // add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+        assert_eq!(wm.monitors().len(), 1);
+
+        {
+            // Set the first monitor as focused and check if it is focused
+            wm.focus_monitor(0).unwrap();
+            let current_monitor_size = wm.focused_monitor_size().unwrap();
+            assert_eq!(current_monitor_size, Rect::default());
+        }
+    }
+
+    #[test]
+    fn test_focus_container_in_cycle_direction() {
+        let (mut wm, _test_context) = setup_window_manager();
+
+        // Create a monitor
+        let mut m = monitor::new(
+            0,
+            Rect::default(),
+            Rect::default(),
+            "TestMonitor".to_string(),
+            "TestDevice".to_string(),
+            "TestDeviceID".to_string(),
+            Some("TestMonitorID".to_string()),
+        );
+
+        let workspace = m.focused_workspace_mut().unwrap();
+        workspace.set_layer(WorkspaceLayer::Tiling);
+
+        for i in 0..4 {
+            let mut container = Container::default();
+            container.windows_mut().push_back(Window::from(i));
+            workspace.add_container_to_back(container);
+        }
+        assert_eq!(workspace.containers().len(), 4);
+
+        workspace.focus_container(0);
+
+        // add the monitor to the window manager
+        wm.monitors_mut().push_back(m);
+
+        // container focus should be on the second container
+        wm.focus_container_in_cycle_direction(CycleDirection::Next)
+            .ok();
+        assert_eq!(wm.focused_container_idx().unwrap(), 1);
+
+        // container focus should be on the third container
+        wm.focus_container_in_cycle_direction(CycleDirection::Next)
+            .ok();
+        assert_eq!(wm.focused_container_idx().unwrap(), 2);
+
+        // container focus should be on the second container
+        wm.focus_container_in_cycle_direction(CycleDirection::Previous)
+            .ok();
+        assert_eq!(wm.focused_container_idx().unwrap(), 1);
+
+        // container focus should be on the first container
+        wm.focus_container_in_cycle_direction(CycleDirection::Previous)
+            .ok();
+        assert_eq!(wm.focused_container_idx().unwrap(), 0);
+    }
+
+    #[test]
+    fn test_transfer_window() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let workspace = m.focused_workspace_mut().unwrap();
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(0));
+            workspace.add_container_to_back(container);
+
+            // Should contain 1 container
+            assert_eq!(workspace.containers().len(), 1);
+
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // Create a second monitor
+            let mut m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor2".to_string(),
+                "TestDevice2".to_string(),
+                "TestDeviceID2".to_string(),
+                Some("TestMonitorID2".to_string()),
+            );
+
+            // Create a container
+            let workspace = m.focused_workspace_mut().unwrap();
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(1));
+            workspace.add_container_to_back(container);
+
+            // Should contain 1 container
+            assert_eq!(workspace.containers().len(), 1);
+
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should contain 2 monitors
+        assert_eq!(wm.monitors().len(), 2);
+
+        {
+            // Monitor 0, Workspace 0, Window 0
+            let origin = (0, 0, 0);
+
+            // Monitor 1, Workspace 0, Window 0
+            let target = (1, 0, 0);
+
+            // Transfer the window from monitor 0 to monitor 1
+            wm.transfer_window(origin, target).unwrap();
+
+            // Monitor 1 should contain 0 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 0);
+
+            // Monitor 2 should contain 2 containers
+            wm.focus_monitor(1).unwrap();
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 2);
+        }
+
+        {
+            // Monitor 1, Workspace 0, Window 0
+            let origin = (1, 0, 0);
+
+            // Monitor 0, Workspace 0, Window 0
+            let target = (0, 0, 0);
+
+            // Transfer the window from monitor 1 back to monitor 0
+            wm.transfer_window(origin, target).unwrap();
+
+            // Monitor 2 should contain 1 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 1);
+
+            // Monitor 1 should contain 1 containers
+            wm.focus_monitor(0).unwrap();
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 1);
+        }
+    }
+
+    #[test]
+    fn test_transfer_container() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let workspace = m.focused_workspace_mut().unwrap();
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(0));
+            workspace.add_container_to_back(container);
+
+            // Should contain 1 container
+            assert_eq!(workspace.containers().len(), 1);
+
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // Create a second monitor
+            let mut m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor2".to_string(),
+                "TestDevice2".to_string(),
+                "TestDeviceID2".to_string(),
+                Some("TestMonitorID2".to_string()),
+            );
+
+            // Create a container
+            let workspace = m.focused_workspace_mut().unwrap();
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(1));
+            workspace.add_container_to_back(container);
+
+            // Should contain 1 container
+            assert_eq!(workspace.containers().len(), 1);
+
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should contain 2 monitors
+        assert_eq!(wm.monitors().len(), 2);
+
+        {
+            // Monitor 0, Workspace 0, Window 0
+            let origin = (0, 0, 0);
+
+            // Monitor 1, Workspace 0, Window 0
+            let target = (1, 0, 0);
+
+            // Transfer the window from monitor 0 to monitor 1
+            wm.transfer_container(origin, target).unwrap();
+
+            // Monitor 1 should contain 0 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 0);
+
+            // Monitor 2 should contain 2 containers
+            wm.focus_monitor(1).unwrap();
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 2);
+        }
+
+        {
+            // Monitor 1, Workspace 0, Window 0
+            let origin = (1, 0, 0);
+
+            // Monitor 0, Workspace 0, Window 0
+            let target = (0, 0, 0);
+
+            // Transfer the window from monitor 1 back to monitor 0
+            wm.transfer_container(origin, target).unwrap();
+
+            // Monitor 2 should contain 1 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 1);
+
+            // Monitor 1 should contain 1 containers
+            wm.focus_monitor(0).unwrap();
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 1);
+        }
+    }
+
+    #[test]
+    fn test_remove_window_from_container() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor1".to_string(),
+                "TestDevice1".to_string(),
+                "TestDeviceID1".to_string(),
+                Some("TestMonitorID1".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add three windows to the container
+            for i in 0..3 {
+                container.windows_mut().push_back(Window::from(i));
+            }
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 3);
+
+            // Focus last window
+            container.focus_window(2);
+
+            // Should be focused on the 2nd window
+            assert_eq!(container.focused_window_idx(), 2);
+
+            // Add the container to a workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Remove the focused window from the container
+        wm.remove_window_from_container().ok();
+
+        {
+            // Should have 2 containers in the workspace
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert_eq!(workspace.containers().len(), 2);
+
+            // Should contain 1 window in the new container
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.windows().len(), 1);
+        }
+
+        {
+            // Switch to the old container
+            let workspace = wm.focused_workspace_mut().unwrap();
+            workspace.focus_container(0);
+
+            // Should contain 2 windows in the old container
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.windows().len(), 2);
+        }
+    }
+
+    #[test]
+    fn cycle_container_window_in_direction() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            let workspace = m.focused_workspace_mut().unwrap();
+
+            {
+                let mut container = Container::default();
+
+                for i in 0..3 {
+                    container.windows_mut().push_back(Window::from(i));
+                }
+
+                // Should have 3 windows in the container
+                assert_eq!(container.windows().len(), 3);
+
+                // Add container to workspace
+                workspace.add_container_to_back(container);
+            }
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Cycle to the next window
+        wm.cycle_container_window_in_direction(CycleDirection::Next)
+            .ok();
+
+        {
+            // Should be on Window 1
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            println!("Window: {:?}", container.focused_window());
+            assert_eq!(container.focused_window_idx(), 1);
+        }
+
+        // Cycle to the next window
+        wm.cycle_container_window_in_direction(CycleDirection::Next)
+            .ok();
+
+        {
+            // Should be on Window 2
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            println!("Window: {:?}", container.focused_window());
+            assert_eq!(container.focused_window_idx(), 2);
+        }
+
+        // Cycle to the previous window
+        wm.cycle_container_window_in_direction(CycleDirection::Previous)
+            .ok();
+
+        {
+            // Should be on Window 1
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            println!("Window: {:?}", container.focused_window());
+            assert_eq!(container.focused_window_idx(), 1);
+        }
+    }
+
+    #[test]
+    fn test_cycle_container_window_index_in_direction() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            let workspace = m.focused_workspace_mut().unwrap();
+
+            {
+                let mut container = Container::default();
+
+                for i in 0..3 {
+                    container.windows_mut().push_back(Window::from(i));
+                }
+
+                // Should have 3 windows in the container
+                assert_eq!(container.windows().len(), 3);
+
+                // Add container to workspace
+                workspace.add_container_to_back(container);
+            }
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Cycle to the next window
+        wm.cycle_container_window_index_in_direction(CycleDirection::Next)
+            .ok();
+
+        {
+            // Should be on Window 1
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.focused_window_idx(), 1);
+        }
+
+        // Cycle to the next window
+        wm.cycle_container_window_index_in_direction(CycleDirection::Next)
+            .ok();
+
+        {
+            // Should be on Window 2
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.focused_window_idx(), 2);
+        }
+
+        // Cycle to the Previous window
+        wm.cycle_container_window_index_in_direction(CycleDirection::Previous)
+            .ok();
+
+        {
+            // Should be on Window 1
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.focused_window_idx(), 1);
+        }
+    }
+
+    #[test]
+    fn test_swap_containers() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add three windows to the container
+            for i in 0..3 {
+                container.windows_mut().push_back(Window::from(i));
+            }
+
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 3);
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // Create a second monitor
+            let mut m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor2".to_string(),
+                "TestDevice2".to_string(),
+                "TestDeviceID2".to_string(),
+                Some("TestMonitorID2".to_string()),
+            );
+
+            // Create a container
+            let workspace = m.focused_workspace_mut().unwrap();
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(1));
+            workspace.add_container_to_back(container);
+
+            // Should contain 1 container
+            assert_eq!(workspace.containers().len(), 1);
+
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should contain 2 monitors
+        assert_eq!(wm.monitors().len(), 2);
+
+        // Monitor 0, Workspace 0, Window 0
+        let origin = (0, 0, 0);
+
+        // Monitor 1, Workspace 0, Window 0
+        let target = (1, 0, 0);
+
+        wm.swap_containers(origin, target).unwrap();
+
+        {
+            // Monitor 0 Workspace 0 container 0 should contain 1 container
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.windows().len(), 1);
+        }
+
+        wm.focus_monitor(1).unwrap();
+
+        {
+            // Monitor 1 Workspace 0 container 0 should contain 3 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.windows().len(), 3);
+        }
+    }
+
+    #[test]
+    fn test_swap_monitor_workspaces() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add three windows to the container
+            for i in 0..3 {
+                container.windows_mut().push_back(Window::from(i));
+            }
+
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 3);
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // Create a second monitor
+            let mut m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor2".to_string(),
+                "TestDevice2".to_string(),
+                "TestDeviceID2".to_string(),
+                Some("TestMonitorID2".to_string()),
+            );
+
+            // Create a container
+            let workspace = m.focused_workspace_mut().unwrap();
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(1));
+            workspace.add_container_to_back(container);
+
+            // Should contain 1 container
+            assert_eq!(workspace.containers().len(), 1);
+
+            // Add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Swap the workspaces between Monitor 0 and Monitor 1
+        wm.swap_monitor_workspaces(0, 1).ok();
+
+        {
+            // The focused workspace container in Monitor 0 should contain 3 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.windows().len(), 1);
+        }
+
+        // Switch to Monitor 1
+        wm.focus_monitor(1).unwrap();
+        assert_eq!(wm.focused_monitor_idx(), 1);
+
+        {
+            // The focused workspace container in Monitor 1 should contain 3 containers
+            let workspace = wm.focused_workspace_mut().unwrap();
+            let container = workspace.focused_container_mut().unwrap();
+            assert_eq!(container.windows().len(), 3);
+        }
+    }
+
+    #[test]
+    fn test_move_workspace_to_monitor() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Add another workspace
+            let new_workspace_index = m.new_workspace_idx();
+            m.focus_workspace(new_workspace_index).unwrap();
+
+            // Should have 2 workspaces
+            assert_eq!(m.workspaces().len(), 2);
+
+            // Add monitor to workspace
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            let m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor2".to_string(),
+                "TestDevice2".to_string(),
+                "TestDeviceID2".to_string(),
+                Some("TestMonitorID2".to_string()),
+            );
+
+            // Should contain 1 workspace
+            assert_eq!(m.workspaces().len(), 1);
+
+            // Add monitor to workspace
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should contain 2 monitors
+        assert_eq!(wm.monitors().len(), 2);
+
+        // Move a workspace from Monitor 0 to Monitor 1
+        wm.move_workspace_to_monitor(1).ok();
+
+        {
+            // Should be focused on Monitor 1
+            assert_eq!(wm.focused_monitor_idx(), 1);
+
+            // Should contain 2 workspaces
+            let monitor = wm.focused_monitor_mut().unwrap();
+            assert_eq!(monitor.workspaces().len(), 2);
+        }
+
+        {
+            // Switch to Monitor 0
+            wm.focus_monitor(0).unwrap();
+
+            // Should contain 1 workspace
+            let monitor = wm.focused_monitor_mut().unwrap();
+            assert_eq!(monitor.workspaces().len(), 1);
+        }
+    }
+
+    #[test]
+    fn test_toggle_tiling() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Set Workspace Layer to Tiling
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.set_layer(WorkspaceLayer::Tiling);
+
+            // Tiling state should be true
+            assert!(*workspace.tile());
+
+            // Add monitor to workspace
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // Tiling state should be false
+            wm.toggle_tiling().unwrap();
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert!(!*workspace.tile());
+        }
+
+        {
+            // Tiling state should be true
+            wm.toggle_tiling().unwrap();
+            let workspace = wm.focused_workspace_mut().unwrap();
+            assert!(*workspace.tile());
+        }
     }
 }

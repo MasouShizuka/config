@@ -1,17 +1,17 @@
 {
-    "version": "7.40",
+    "version": "7.42",
     "description": "DUI 配置 for foobar2000",
     "homepage": "https://github.com/dream7180/foobox-cn",
     "license": "GPL-3.0",
     "depends": "extras/foobar2000",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/dream7180/foobox-cn/releases/download/7.40/foobox_x64.cn.v7.40-1.exe#/dl.7z_",
-            "hash": "e0b4cc9ffec776b2b6d5920806281a67f3bf4203298f23b60884106b7d2eebff"
+            "url": "https://github.com/dream7180/foobox-cn/releases/download/7.42/foobox_x64.cn.v7.42-1.exe#/dl.7z_",
+            "hash": "942340d66fa49768f8850e61ad70e6e3ab436876a71bb44185fa1bdb67f6f3d5"
         },
         "32bit": {
-            "url": "https://github.com/dream7180/foobox-cn/releases/download/7.40/foobox_x86.cn.v7.40-1.exe#/dl.7z_",
-            "hash": "61cc1a88f2c672e8cbe8c41127bfdc33098eeccd14bc07ede614d91df0908159"
+            "url": "https://github.com/dream7180/foobox-cn/releases/download/7.42/foobox_x86.cn.v7.42-1.exe#/dl.7z_",
+            "hash": "763c3de6a632ad67271f1922b84d5431a93b7531161219ef8379109a905c1bcf"
         }
     },
     "installer": {

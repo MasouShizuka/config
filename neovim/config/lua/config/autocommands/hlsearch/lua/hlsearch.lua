@@ -4,6 +4,7 @@
 local M = {}
 
 local default_config = {
+    delay = 0,
     pre_hook = function() end,
     post_hook = function() end,
 }
@@ -31,28 +32,30 @@ local function start_hl()
         stop_hl()
         return
     end
-    local ok, res = pcall(vim.fn.search, [[\%#\zs]] .. reg, "cnW")
-    if ok and res == 0 then
-        stop_hl()
-        return
-    end
+
+    require("utils").defer_fn(function()
+        local ok, res = pcall(vim.fn.search, [[\%#\zs]] .. reg, "cnW")
+        if ok and res == 0 then
+            stop_hl()
+            return
+        end
+    end, {
+        timeout = default_config.delay,
+        use_timer = true,
+    })
 end
 
 local group = vim.api.nvim_create_augroup("Hlsearch", { clear = true })
 
 local function hs_event()
     vim.api.nvim_create_autocmd("CursorMoved", {
-        callback = function()
-            start_hl()
-        end,
+        callback = start_hl,
         desc = "Auto hlsearch",
         group = group,
     })
 
     vim.api.nvim_create_autocmd("InsertEnter", {
-        callback = function()
-            stop_hl()
-        end,
+        callback = stop_hl,
         desc = "Auto remove hlsearch",
         group = group,
     })

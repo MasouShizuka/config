@@ -1,8 +1,4 @@
-local buftype = require("utils.buftype")
-local colors = require("utils.colors")
 local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local utils = require("utils")
 
 return {
     -- {
@@ -70,13 +66,12 @@ return {
             local map = require("mini.map")
             map.setup(opts)
 
-            if vim.g.minimap_enabled == nil then
-                vim.g.minimap_enabled = true
+            if vim.g.minimap == nil then
+                vim.g.minimap = true
             end
 
             local function open_map()
-                local buf = vim.api.nvim_get_current_buf()
-                if vim.b[buf].minimap_enabled == nil and vim.g.minimap_enabled or vim.b[buf].minimap_enabled then
+                if require("utils").get_setting_condition("minimap") then
                     vim.schedule(function() map.open() end)
                 else
                     vim.schedule(function() map.close() end)
@@ -94,23 +89,74 @@ return {
         end,
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         init = function()
+            local utils = require("utils")
+
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "<leader>m", group = "minimap", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>m", group = "minimap", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for mini.minimap",
+                    pattern = "IceLoad",
                 })
             end
+
+            utils.create_once_autocmd("User", {
+                callback = function()
+                    utils.set_setting_toggle("minimap", {
+                        default = true,
+                        g = {
+                            keymap = { keys = "<leader>mt", mode = "n" },
+                            opts = {
+                                callback = function(enabled, prev_enabled, global_enabled)
+                                    if prev_enabled == enabled then
+                                        return
+                                    end
+
+                                    local map = require("mini.map")
+                                    if enabled then
+                                        vim.schedule(function() map.open() end)
+                                    else
+                                        vim.schedule(function() map.close() end)
+                                    end
+                                end,
+                            },
+                        },
+                        b = {
+                            keymap = { keys = "<leader>mT", mode = "n" },
+                            opts = {
+                                callback = function(enabled, prev_enabled, global_enabled)
+                                    if prev_enabled == enabled then
+                                        return
+                                    end
+
+                                    local map = require("mini.map")
+                                    if enabled then
+                                        vim.schedule(function() map.open() end)
+                                    else
+                                        vim.schedule(function() map.close() end)
+                                    end
+                                end,
+                            },
+                        },
+                    })
+                end,
+                desc = "Toggle mini.minimap",
+                pattern = "IceLoad",
+            })
         end,
         keys = {
             {
                 "<leader>mm",
                 function()
                     local buf = vim.api.nvim_get_current_buf()
-                    vim.g.minimap_enabled = true
-                    if vim.b[buf].minimap_enabled ~= false then
+                    vim.g.minimap = true
+                    if vim.b[buf].minimap ~= false then
                         require("mini.map").open()
                     end
                 end,
@@ -121,7 +167,7 @@ return {
                 "<leader>mM",
                 function()
                     local buf = vim.api.nvim_get_current_buf()
-                    vim.b[buf].minimap_enabled = true
+                    vim.b[buf].minimap = true
                     require("mini.map").open()
                 end,
                 desc = "Open map window (buffer)",
@@ -132,8 +178,8 @@ return {
                 "<leader>mq",
                 function()
                     local buf = vim.api.nvim_get_current_buf()
-                    vim.g.minimap_enabled = false
-                    if vim.b[buf].minimap_enabled ~= true then
+                    vim.g.minimap = false
+                    if vim.b[buf].minimap ~= true then
                         require("mini.map").close()
                     end
                 end,
@@ -144,54 +190,19 @@ return {
                 "<leader>mQ",
                 function()
                     local buf = vim.api.nvim_get_current_buf()
-                    vim.b[buf].minimap_enabled = false
+                    vim.b[buf].minimap = false
                     require("mini.map").close()
                 end,
                 desc = "Close map window (buffer)",
-                mode = "n",
-            },
-            {
-                "<leader>mt",
-                function()
-                    local map = require("mini.map")
-                    utils.toggle_global_setting("minimap_enabled", function(enabled, prev_enabled, global_enabled)
-                        if prev_enabled == enabled then
-                            return
-                        end
-
-                        if enabled then
-                            vim.schedule(function() map.open() end)
-                        else
-                            vim.schedule(function() map.close() end)
-                        end
-                    end)
-                end,
-                desc = "Toggle map window",
-                mode = "n",
-            },
-            {
-                "<leader>mT",
-                function()
-                    local map = require("mini.map")
-                    utils.toggle_buffer_setting("minimap_enabled", function(enabled, prev_enabled)
-                        if prev_enabled == enabled then
-                            return
-                        end
-
-                        if enabled then
-                            vim.schedule(function() map.open() end)
-                        else
-                            vim.schedule(function() map.close() end)
-                        end
-                    end)
-                end,
-                desc = "Toggle map window (buffer)",
                 mode = "n",
             },
             { "<leader>mf", function() require("mini.map").toggle_focus() end, desc = "Toggle focus to/from map window", mode = "n" },
             { "<leader>ms", function() require("mini.map").toggle_side() end,  desc = "Toggle side of map window",       mode = "n" },
         },
         opts = function()
+            local colors = require("utils.colors")
+            local utils = require("utils")
+
             local map = require("mini.map")
 
             vim.api.nvim_create_autocmd("BufEnter", {
@@ -199,13 +210,13 @@ return {
                     local buf = args.buf
 
                     local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                    if vim.tbl_contains(buftype.skip_buftype_list, bt) and bt ~= "help" then
+                    if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
                         vim.b[buf].minimap_disable = true
                         return
                     end
 
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                    if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
                         vim.b[buf].minimap_disable = true
                     end
                 end,
@@ -335,39 +346,5 @@ return {
 
             }
         end,
-    },
-
-    {
-        "karb94/neoscroll.nvim",
-        enabled = not environment.is_vscode,
-        keys = {
-            {
-                "<c-u>",
-                function()
-                    require("neoscroll").ctrl_u({ duration = 100 })
-                end,
-                desc = "Scroll half page up",
-                mode = { "n", "x" },
-            },
-            {
-                "<c-d>",
-                function()
-                    require("neoscroll").ctrl_d({ duration = 100 })
-                end,
-                desc = "Scroll half page down",
-                mode = { "n", "x" },
-            },
-            { "zj", function() require("neoscroll").zt({ half_win_duration = 100 }) end, desc = "Top this line",    mode = { "n", "x" } },
-            { "zz", function() require("neoscroll").zz({ half_win_duration = 100 }) end, desc = "Center this line", mode = { "n", "x" } },
-            { "zk", function() require("neoscroll").zb({ half_win_duration = 100 }) end, desc = "Bottom this line", mode = { "n", "x" } },
-        },
-        opts = {
-            -- All these keys will be mapped to their corresponding default scrolling animation
-            mappings = {},
-            hide_cursor = false, -- Hide cursor while scrolling
-            ignored_events = {   -- Events ignored while scrolling
-                "WinScrolled",
-            },
-        },
     },
 }

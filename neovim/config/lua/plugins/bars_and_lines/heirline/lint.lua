@@ -1,15 +1,14 @@
 local colors = require("utils.colors")
-local icons = require("utils.icons")
-local lint = require("utils.lint")
 
 return {
     condition = function(self)
         local buf = self.buf or vim.api.nvim_get_current_buf()
         self.ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-        return package.loaded["lint"] and vim.tbl_contains(lint.lint_filetype_list, self.ft)
+        return package.loaded["lint"] and vim.tbl_contains(require("utils.lint").lint_filetype_list, self.ft)
     end,
     provider = function(self)
         local nvim_lint = require("lint")
+        local icons = require("utils.icons")
 
         local icon
         if #nvim_lint.get_running() == 0 then

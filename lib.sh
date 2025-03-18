@@ -1,16 +1,37 @@
-PORTABLE_DIR=/d/Tools
+is_windows=0
+is_mac=0
+is_linux=0
+is_wsl=0
+uname=$(uname -a | tr '[:upper:]' '[:lower:]')
+case "$uname" in
+mingw*)
+    is_windows=1
+    ;;
+*msys)
+    is_windows=1
+    ;;
+darwin*)
+    is_mac=1
+    ;;
+*wsl*)
+    is_linux=1
+    is_wsl=1
+    ;;
+linux*)
+    is_linux=1
+    ;;
+esac
 
 clean_target() {
     target=$1
 
-    echo "删除已有的 $target"
     if [[ -d "$target" ]]; then
-        for f in "$target"/*; do
-            [[ -e "$f" ]] || break
-
-            rm -rf "$f"
-        done
+        backup="$target"_bak_"$(date "+%Y-%m-%d-%H-%M-%S")"
+        echo "备份已有的 $target" 到 "$backup"
+        mv "$target" "$backup"
     fi
+
+    mkdir -p "$target"
 }
 
 install_to_target() {
@@ -20,6 +41,8 @@ install_to_target() {
     if [[ ! -d "$target" ]]; then
         mkdir -p "$target"
     fi
+
+    shopt -s dotglob
 
     echo "复制配置到 $target"
     exclusion_list=("README.md" "install.sh" "update.sh")

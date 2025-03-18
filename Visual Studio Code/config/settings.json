@@ -1,25 +1,18 @@
 {
     "[markdown]": {
-        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
         "editor.quickSuggestions": {
-            "comments": false,
-            "other": true,
-            "strings": true
-        },
-        "editor.wordWrap": "on"
+            "other": "on",
+            "strings": "on"
+        }
     },
     "[plaintext]": {
-        "editor.unicodeHighlight.ambiguousCharacters": false,
-        "editor.unicodeHighlight.invisibleCharacters": false,
         "editor.wordWrap": "on"
     },
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
         },
-        "editor.defaultFormatter": "ms-python.black-formatter",
-        "editor.formatOnSave": true,
-        "editor.formatOnType": true
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
     "auto-run-command.rules": [
         {
@@ -35,10 +28,6 @@
     "backgroundCover.blur": 5,
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
-    "black-formatter.args": [
-        "--line-length",
-        "120"
-    ],
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && gcc -static-libgcc $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
         "cpp": "cd $dirWithoutTrailingSlash && g++ -static-libstdc++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
@@ -124,19 +113,8 @@
     "files.autoSave": "afterDelay",
     "git.blame.editorDecoration.enabled": true,
     "git.blame.statusBarItem.enabled": true,
+    "hediet.vscode-drawio.appearance": "light",
     "hediet.vscode-drawio.codeLinkActivated": true,
-    "hediet.vscode-drawio.theme": "Kennedy",
-    "isort.args": [
-        "--multi-line",
-        "3",
-        "--trailing-comma",
-        "--profile",
-        "black"
-    ],
-    "isort.check": true,
-    "isort.severity": {
-        "E": "Information"
-    },
     "json.format.keepLines": true,
     "jupyter.askForKernelRestart": false,
     "latex-workshop.latex.autoBuild.run": "never",
@@ -235,7 +213,9 @@
         "trailing_table_separator": "smart"
     },
     "markdown.extension.list.indentationSize": "inherit",
-    "markdown.marp.enableHtml": true,
+    "markdown.marp.browser": "chrome",
+    "markdown.marp.browserPath": "C:\\Users\\MasouShizuka\\scoop\\apps\\brave\\current\\brave.exe",
+    "markdown.marp.html": "all",
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
     "markdown.preview.fontSize": 15,
@@ -284,7 +264,6 @@
         "text/plain"
     ],
     "notebook.inlineValues": true,
-    "notebook.lineNumbers": "on",
     "notebook.output.scrolling": true,
     "notebook.stickyScroll.enabled": true,
     "oneDarkPro.italic": false,
@@ -292,6 +271,7 @@
     "python.analysis.inlayHints.pytestParameters": true,
     "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
     "python.languageServer": "Pylance",
+    "python.terminal.shellIntegration.enabled": true,
     "search.defaultViewMode": "tree",
     "search.followSymlinks": false,
     "search.showLineNumbers": true,

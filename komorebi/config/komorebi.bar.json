@@ -1,7 +1,7 @@
 {
   "height": 40,
   "monitor": 0,
-  "font_family": "Sarasa Mono SC,Maple Mono NF CN",
+  "font_family": "Sarasa Mono SC",
   "font_size": 18,
   "theme": {
     "palette": "Catppuccin",
@@ -76,7 +76,8 @@
         "enable": true,
         "format": {
           "Custom": "%Y-%m-%d %H:%M:%S %a"
-        }
+        },
+        "changing_icon": true
       }
     }
   ]

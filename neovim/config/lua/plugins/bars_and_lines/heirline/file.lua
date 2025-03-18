@@ -1,6 +1,5 @@
 local colors = require("utils.colors")
 local icons = require("utils.icons")
-local utils = require("utils")
 
 local M = {}
 
@@ -8,7 +7,12 @@ M.file_encoding = {
     provider = function(self)
         local fileencoding = vim.api.nvim_get_option_value("fileencoding", { scope = "local" })
         local encoding = vim.api.nvim_get_option_value("encoding", { scope = "local" })
-        local file_encoding = fileencoding ~= "" and fileencoding or encoding
+        local file_encoding
+        if fileencoding ~= "" then
+            file_encoding = fileencoding
+        else
+            file_encoding = encoding
+        end
         return icons.misc.code_braces .. file_encoding:upper()
     end,
     update = { "BufEnter", "OptionSet" },
@@ -71,25 +75,29 @@ M.file_modified = {
 M.file_name = {
     init = function(self)
         self.max_length = 30
+        self.omit_str = "..."
     end,
     provider = function(self)
         local buf = self.buf or vim.api.nvim_get_current_buf()
-        local filename = self.filename or vim.api.nvim_buf_get_name(buf)
 
+        local filename = self.filename or vim.api.nvim_buf_get_name(buf)
         if filename == "" then
             return "[No Name]"
         end
 
         filename = vim.fn.fnamemodify(filename, ":t")
 
+        -- escape illegal character
+        filename = filename:gsub("%%", "%%%%")
+
         if vim.api.nvim_get_option_value("buftype", { buf = buf }) == "terminal" then
             filename, _ = vim.api.nvim_buf_get_name(buf):gsub(".*:", "")
-        else
-            local char_list = utils.get_char_from_string(filename)
-            local char_count = #char_list
-            if char_count > self.max_length then
-                filename = "..." .. table.concat(char_list, "", char_count - self.max_length + 1)
-            end
+        end
+
+        local char_list = require("utils").get_char_from_string(filename)
+        local char_count = #char_list
+        if char_count > self.max_length then
+            filename = self.omit_str .. table.concat(char_list, "", char_count - self.max_length + 1)
         end
 
         return filename

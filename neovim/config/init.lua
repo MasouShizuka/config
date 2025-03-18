@@ -28,6 +28,32 @@ if not environment.is_vscode then
     vim.keymap.set("n", "<leader>z", function() require("lazy").home() end, { desc = "Lazy", silent = true })
 end
 
+-- https://shaobin-jiang.github.io/blog/posts/neovim-startup/
+vim.api.nvim_create_autocmd("User", {
+    callback = function()
+        local function _trigger()
+            vim.api.nvim_exec_autocmds("User", { pattern = "IceLoad" })
+        end
+
+        if vim.bo.filetype == "snacks_dashboard" then
+            vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+                callback = function()
+                    _trigger()
+                    vim.api.nvim_del_augroup_by_name("IceLoadBuf")
+                end,
+                group = vim.api.nvim_create_augroup("IceLoadBuf", { clear = true }),
+            })
+        else
+            _trigger()
+        end
+
+        vim.api.nvim_del_augroup_by_name("IceLoad")
+    end,
+    desc = "Trigger event after VeryLazy or BufRead",
+    group = vim.api.nvim_create_augroup("IceLoad", { clear = true }),
+    pattern = "VeryLazy",
+})
+
 -- Setup lazy.nvim
 return require("lazy").setup({
     spec = {
@@ -64,17 +90,20 @@ return require("lazy").setup({
         rtp = {
             ---@type string[] list any plugins you want to disable here
             disabled_plugins = {
+                "editorconfig",
                 "gzip",
+                "man",
                 "matchit",
                 "matchparen",
                 "netrwPlugin",
+                "osc52",
+                "rplugin",
+                "shada",
+                "spellfile",
                 "tarPlugin",
                 "tohtml",
                 "tutor",
                 "zipPlugin",
-                "man",
-                "osc52", -- Wezterm doesn't support osc52 yet
-                "spellfile",
             },
         },
     },

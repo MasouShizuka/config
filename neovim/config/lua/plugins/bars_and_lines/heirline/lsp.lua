@@ -1,5 +1,4 @@
 local colors = require("utils.colors")
-local icons = require("utils.icons")
 
 local M = {}
 
@@ -9,7 +8,7 @@ M.lsp_server = {
         for _, server in pairs(vim.lsp.get_clients({ bufnr = 0 })) do
             names[#names + 1] = server.name
         end
-        return icons.misc.gear .. table.concat(names, ",")
+        return require("utils.icons").misc.gear .. table.concat(names, ",")
     end,
     hl = { fg = colors.colors.green },
     update = { "BufEnter", "LspAttach", "LspDetach" },
@@ -25,7 +24,7 @@ M.python_venv = {
         if active_venv ~= nil and active_venv:find("envs") then
             venv_name = vim.fn.fnamemodify(active_venv, ":h:t")
         end
-        return icons.languages.python .. venv_name
+        return require("utils.icons").languages.python .. venv_name
     end,
     hl = { fg = colors.colors.green },
     on_click = {

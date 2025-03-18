@@ -1,6 +1,4 @@
-local colors = require("utils.colors")
 local environment = require("utils.environment")
-local utils = require("utils")
 
 return {
     {
@@ -10,6 +8,9 @@ return {
             "User ColorschemePre",
         },
         opts = function()
+            local colors = require("utils.colors")
+            local utils = require("utils")
+
             local overrides = {
                 CursorLineNr = { bg = "none" },
                 LspReferenceRead = { bg = colors.get_color("gray", "gruvbox") },
@@ -43,10 +44,6 @@ return {
 
             if utils.is_available("mini.indentscope") then
                 overrides.MiniIndentscopeSymbol = { fg = colors.get_color("orange", "gruvbox") }
-            end
-
-            if utils.is_available("nvim-tree.lua") then
-                overrides.NvimTreeOpenedFile = { fg = colors.get_color("orange", "gruvbox") }
             end
 
             if utils.is_available("nvim-treesitter-context") then
@@ -91,6 +88,9 @@ return {
             ---@param highlights tokyonight.Highlights
             ---@param colors ColorScheme
             on_highlights = function(hl, c)
+                local colors = require("utils.colors")
+                local utils = require("utils")
+
                 hl["@module"] = { fg = c[colors.get_color_name("tokyonight", "yellow")] }
                 hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
                 hl.LspKindFile = { fg = c[colors.get_color_name("tokyonight", "orange")] }
@@ -116,13 +116,6 @@ return {
 
                 if utils.is_available("nvim-cmp") then
                     hl.CmpItemKindVariable = { fg = c[colors.get_color_name("tokyonight", "red")] }
-                end
-
-                if utils.is_available("nvim-tree.lua") then
-                    hl.NvimTreeNormal = { link = "NvimTreeNormalFloat" }
-                    hl.NvimTreeNormalNC = { link = "NvimTreeNormalFloat" }
-                    hl.NvimTreeOpenedFile = { fg = c[colors.get_color_name("tokyonight", "purple")] }
-                    hl.NvimTreeOpenedHL = { link = "NvimTreeOpenedFile" }
                 end
 
                 if utils.is_available("nvim-treesitter-context") then
@@ -156,6 +149,9 @@ return {
             "User ColorschemePre",
         },
         opts = function()
+            local colors = require("utils.colors")
+            local utils = require("utils")
+
             local highlights = {
                 CursorLineNr = { fg = colors.get_color("purple", "onedark") },
                 DiagnosticUnderlineError = { sp = colors.get_color("red", "onedark"), undercurl = true },
@@ -181,10 +177,6 @@ return {
                     SpellLocal = { undercurl = false, underline = true },
                     SpellRare = { undercurl = false, underline = true },
                 })
-            end
-
-            if utils.is_available("nvim-tree.lua") then
-                highlights.NvimTreeOpenedHL = { link = "NvimTreeOpenedFile" }
             end
 
             if utils.is_available("nvim-treesitter-context") then

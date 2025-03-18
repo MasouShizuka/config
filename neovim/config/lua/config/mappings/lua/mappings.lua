@@ -1,12 +1,12 @@
-local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local keymap = require("utils.keymap")
-local lsp = require("utils.lsp")
-local utils = require("utils")
-
 local M = {}
 
 function M.setup(opts)
+    local environment = require("utils.environment")
+    local filetype = require("utils.filetype")
+    local keymap = require("utils.keymap")
+    local lsp = require("utils.lsp")
+    local utils = require("utils")
+
     -- 清除原有 keymap
     if utils.is_available("which-key.nvim") then
         local wk = require("which-key")
@@ -50,6 +50,22 @@ function M.setup(opts)
         else
             vim.cmd.normal({ string.format("%s%s", prefix, key), bang = true })
         end
+
+        local buf = vim.api.nvim_get_current_buf()
+        local cursor_center_enabled
+        if vim.b[buf].cursor_center == nil then
+            cursor_center_enabled = vim.g.cursor_center
+        else
+            cursor_center_enabled = vim.b[buf].cursor_center
+        end
+
+        if cursor_center_enabled then
+            if environment.is_vscode then
+                vim.cmd.normal("zz")
+            else
+                vim.cmd.normal({ "zz", bang = true })
+            end
+        end
     end
     vim.keymap.set({ "n", "x" }, "j", function() move("j") end, { desc = "Down", silent = true })
     vim.keymap.set({ "n", "x" }, "k", function() move("k") end, { desc = "Up", silent = true })
@@ -65,10 +81,8 @@ function M.setup(opts)
     vim.keymap.set("n", "gp", "`[v`]", { desc = "Select last pasted text", silent = true })
 
     -- 调整光标所在行到屏幕的位置
-    if not utils.is_available("neoscroll.nvim") then
-        vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
-        vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
-    end
+    vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
+    vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
 
     if environment.is_vscode then
         local vscode = require("vscode-neovim")
@@ -199,7 +213,9 @@ function M.setup(opts)
             local screen_h = vim.api.nvim_get_option_value("scroll", { scope = "local" }) * 2
             local target_lnum = vim.api.nvim_win_get_cursor(0)[1] + screen_h / 2
             local step = screen_h / 2 / 50
-            step = step >= 1 and step or 1
+            if step < 1 then
+                step = 1
+            end
 
             scroll(target_lnum, function(current_line, target_line)
                 local fold_end = vim.fn.foldclosedend(current_line)
@@ -300,53 +316,32 @@ function M.setup(opts)
 
         if not utils.is_available("edgy.nvim") then
             -- 聚焦 left panel
-            vim.keymap.set("n", keymap["<c-1>"], function()
-                if not filetype.toggle_panel("left") then
-                    if utils.is_available("nvim-tree.lua") then
-                        require("nvim-tree.api").tree.open()
-                    end
-                end
-            end, { desc = "Focus left panel", silent = true })
-
+            vim.keymap.set("n", keymap["<c-1>"], function() filetype.toggle_panel("left") end, { desc = "Focus left panel", silent = true })
             -- 聚焦主编辑区域
             vim.keymap.set("n", keymap["<c-2>"], function() filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1) end, { desc = "Focus editor", silent = true })
-
             -- 聚焦 bottom panel
             vim.keymap.set("n", keymap["<c-3>"], function()
                 local count = vim.v.count
-                if count > 0 and utils.is_available("toggleterm.nvim") then
-                    vim.api.nvim_command(tostring(count) .. "ToggleTerm")
-                    return
-                end
-
-                if not filetype.toggle_panel("bottom") then
-                    if utils.is_available("toggleterm.nvim") then
-                        vim.api.nvim_command("ToggleTerm")
+                if count > 0 then
+                    if utils.is_available("snacks.nvim") then
+                        filetype.bottom_panel_filetype_list["snacks_terminal"].open()
+                        return
                     end
                 end
-            end, { desc = "Focus bottom panel", silent = true })
 
+                filetype.toggle_panel("bottom")
+            end, { desc = "Focus bottom panel", silent = true })
             -- 聚焦 right panel
-            vim.keymap.set("n", keymap["<c-4>"], function()
-                if not filetype.toggle_panel("right") then
-                    vim.api.nvim_command("DocsViewToggle")
-                end
-            end, { desc = "Focus right panel", silent = true })
+            vim.keymap.set("n", keymap["<c-4>"], function() filetype.toggle_panel("right") end, { desc = "Focus right panel", silent = true })
         end
 
-        -- 搜索并替换
-        vim.keymap.set("n", "<c-f>", function()
-            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
-                require("lazy").load({ plugins = "config.autocommands.hlsearch" })
-            end
-            return ":1,$s///gcI<left><left><left><left><left>"
-        end, { desc = "Search and replace in file", expr = true })
-        vim.keymap.set("x", "<c-f>", function()
-            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
-                require("lazy").load({ plugins = "config.autocommands.hlsearch" })
-            end
-            return ":s///gcI<left><left><left><left><left>"
-        end, { desc = "Search and replace in file", expr = true })
+        -- 跳转居中
+        if not utils.is_available("snacks.nvim") then
+            vim.keymap.set("n", "<c-d>", "<c-d>zz", { desc = "Scroll half page down", silent = true })
+            vim.keymap.set("n", "<c-u>", "<c-u>zz", { desc = "Scroll half page up", silent = true })
+            vim.keymap.set("n", "<c-i>", "<c-i>zz", { desc = "Jump to next location", silent = true })
+            vim.keymap.set("n", "<c-o>", "<c-o>zz", { desc = "Jump to previous location", silent = true })
+        end
 
         -- 窗口
         vim.keymap.set("n", "<c-e>", function() vim.cmd.wincmd("r") end, { desc = "Exchange window", silent = true })
@@ -395,6 +390,20 @@ function M.setup(opts)
         vim.keymap.set("n", "<c-up>", function() vim.cmd.wincmd("+") end, { desc = "Increase window height", silent = true })
         vim.keymap.set("n", "<c-down>", function() vim.cmd.wincmd("-") end, { desc = "Decrease window height", silent = true })
 
+        -- 搜索并替换
+        vim.keymap.set("n", "<c-f>", function()
+            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
+                require("lazy").load({ plugins = "config.autocommands.hlsearch" })
+            end
+            return ":1,$s///gcI<left><left><left><left><left>"
+        end, { desc = "Search and replace in file", expr = true })
+        vim.keymap.set("x", "<c-f>", function()
+            if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
+                require("lazy").load({ plugins = "config.autocommands.hlsearch" })
+            end
+            return ":s///gcI<left><left><left><left><left>"
+        end, { desc = "Search and replace in file", expr = true })
+
         -- tab
         vim.keymap.set("n", "<c-h>", function() vim.cmd.tabprevious() end, { desc = "Cycle previous tab", silent = true })
         vim.keymap.set("n", "<c-l>", function() vim.cmd.tabnext() end, { desc = "Cycle next tab", silent = true })
@@ -408,7 +417,7 @@ function M.setup(opts)
                 vim.cmd.tabmove("+")
             end
         end, { desc = "Move tab right", silent = true })
-        vim.keymap.set("n", "<c-s>t", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
+        vim.keymap.set("n", "<c-t>", function() vim.api.nvim_command("tab sbuffer") end, { desc = "Copy tab", silent = true })
         vim.keymap.set("n", "<c-s>" .. keymap["<c-,>"], function()
             local buf = vim.api.nvim_get_current_buf()
             vim.cmd.tabprevious()
@@ -419,10 +428,6 @@ function M.setup(opts)
             vim.cmd.tabnext()
             vim.api.nvim_command("vertical sbuffer " .. buf)
         end, { desc = "Split buffer to next tab", silent = true })
-
-        -- 跳转居中
-        vim.keymap.set("n", "<c-i>", "<c-i>zz", { desc = "Jump to next location", silent = true })
-        vim.keymap.set("n", "<c-o>", "<c-o>zz", { desc = "Jump to previous location", silent = true })
 
         -- diff
         vim.keymap.set("n", "<c-n>", function()
@@ -435,24 +440,27 @@ function M.setup(opts)
         end, { desc = "Previous diff", silent = true })
 
         -- 退出
-        vim.keymap.set({ "n", "x" }, "<c-w>", function() vim.cmd.quit() end, { desc = "Quit", nowait = true, silent = true })
+        vim.keymap.set({ "n", "x" }, "<c-w>", function()
+            if utils.is_available("config.autocommands.panel-synchronize") then
+                if not package.loaded["panel-synchronize"] then
+                    require("lazy").load({ plugins = "config.autocommands.panel-synchronize" })
+                end
+                require("panel-synchronize").close()
+            else
+                vim.cmd.quit()
+            end
+        end, { desc = "Quit", nowait = true, silent = true })
         vim.keymap.set({ "n", "x" }, "<leader><c-w>", function() vim.cmd.quitall({ bang = true }) end, { desc = "Quit all", nowait = true, silent = true })
 
         -- 运行
         if not utils.is_available("overseer.nvim") then
             vim.keymap.set("n", "<leader>r", function()
-                local curr_file = vim.fn.expand("%:~:.")
-                local output = vim.fn.expand("%:.:r")
+                local curr_file = vim.fn.expand("%:p:.")
+                local curr_file_no_ext = vim.fn.fnamemodify(curr_file, ":r")
+                local output = curr_file_no_ext
                 if environment.is_windows then
                     curr_file = curr_file:gsub("\\", "/")
                     output = output:gsub("\\", "/") .. ".exe"
-                end
-
-                local shellslash
-                if utils.is_available("toggleterm.nvim") then
-                    -- TermExec 执行时需要修改 shellslash = true，否则会输出 v:null
-                    shellslash = vim.api.nvim_get_option_value("shellslash", { scope = "local" })
-                    vim.api.nvim_set_option_value("shellslash", true, { scope = "local" })
                 end
 
                 local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
@@ -460,15 +468,9 @@ function M.setup(opts)
                     -- 若在使用 vector 等库时编译的程序无法运行，可能需要在编译时添加 -static-libstdc++
                     -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
                     local command = string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output)
-                    if utils.is_available("toggleterm.nvim") then
-                        command = string.format([[TermExec cmd='%s']], command)
-                    end
                     vim.api.nvim_command(command)
                 elseif ft == "lua" then
                     local command = string.format([[luafile "%s"]], curr_file)
-                    if utils.is_available("toggleterm.nvim") then
-                        command = string.format([[TermExec cmd='lua "%s"']], curr_file)
-                    end
                     vim.api.nvim_command(command)
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
@@ -476,30 +478,17 @@ function M.setup(opts)
                     end
                 elseif ft == "python" then
                     local command = string.format([[python -u "%s"]], curr_file)
-                    if utils.is_available("toggleterm.nvim") then
-                        command = string.format([[TermExec cmd='%s']], command)
-                    end
                     vim.api.nvim_command(command)
                 elseif ft == "rust" then
                     local command = "cargo run"
-                    if utils.is_available("toggleterm.nvim") then
-                        command = string.format([[TermExec cmd='%s']], command)
-                    end
                     vim.api.nvim_command(command)
                 elseif ft == "sh" then
                     local command = string.format([[sh "%s"]], curr_file)
-                    if utils.is_available("toggleterm.nvim") then
-                        command = string.format([[TermExec cmd='%s']], command)
-                    end
                     vim.api.nvim_command(command)
                 elseif ft == "tex" then
                     if vim.tbl_contains(lsp.lsp_list, "texlab") then
                         vim.api.nvim_command("TexlabBuild")
                     end
-                end
-
-                if utils.is_available("toggleterm.nvim") then
-                    vim.api.nvim_set_option_value("shellslash", shellslash, { scope = "local" })
                 end
             end, { desc = "Run", silent = true })
         end

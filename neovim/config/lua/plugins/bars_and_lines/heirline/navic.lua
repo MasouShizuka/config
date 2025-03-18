@@ -1,7 +1,3 @@
-local colors = require("utils.colors")
-local environment = require("utils.environment")
-local icons = require("utils.icons")
-
 return {
     condition = function(self)
         return package.loaded["nvim-navic"]
@@ -49,13 +45,14 @@ return {
         end,
     },
     init = function(self)
-        local separator = " " .. icons.fold.FoldClosed .. " "
+        local colors = require("utils.colors")
 
+        local separator = " " .. require("utils.icons").fold.FoldClosed .. " "
         local children = { { provider = " " } }
 
         local filename = self.filename or vim.api.nvim_buf_get_name(0)
-        filename = vim.fn.fnamemodify(filename, ":.")
-        if environment.is_windows then
+        filename = vim.fn.fnamemodify(filename, ":p:.")
+        if require("utils.environment").is_windows then
             filename = filename:gsub("\\", "/")
         end
         for token in filename:gmatch("([^/]+)/?") do

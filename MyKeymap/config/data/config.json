@@ -7,6 +7,7 @@
       "hotkey": "*capslock",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {
         "*;": [
           {
@@ -144,6 +145,7 @@
       "hotkey": "*space",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {
         "*/": [
           {
@@ -170,7 +172,7 @@
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{Blind}{Media_Next}"
+            "keysToSend": "{Blind}{Media_Play_Pause}"
           }
         ],
         "*d": [
@@ -268,7 +270,7 @@
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{Blind}{Backspace}"
+            "keysToSend": "{Blind}`"
           }
         ],
         "*r": [
@@ -299,21 +301,21 @@
             "keysToSend": "{Blind}_"
           }
         ],
+        "*v": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 6,
+            "keysToSend": "{Blind}{Media_Next}"
+          }
+        ],
         "*w": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
-            "keysToSend": "{Blind}`"
+            "keysToSend": "{Blind}{Backspace}"
           }
         ],
         "*x": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 6,
-            "keysToSend": "{Blind}{Media_Play_Pause}"
-          }
-        ],
-        "*z": [
           {
             "windowGroupID": 0,
             "actionTypeID": 6,
@@ -336,6 +338,7 @@
       "hotkey": "*;",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {
         "*,": [
           {
@@ -535,6 +538,7 @@
       "hotkey": "customHotkeys",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {
         "!'": [
           {
@@ -577,6 +581,7 @@
       "hotkey": "capslockAbbr",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {
         "bb": [
           {
@@ -774,6 +779,7 @@
       "hotkey": "semicolonAbbr",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {
         ",": [
           {
@@ -872,11 +878,12 @@
       "hotkey": "settings",
       "parentID": 0,
       "delay": 0,
+      "disableAt": "",
       "hotkeys": {}
     }
   ],
   "options": {
-    "mykeymapVersion": "2.0-beta32",
+    "mykeymapVersion": "2.0-beta33",
     "windowGroups": [
       {
         "id": -1,

@@ -1,13 +1,12 @@
 local bhu = require("plugins.bars_and_lines.heirline.utils")
 local colors = require("utils.colors")
-local icons = require("utils.icons")
-
-local herrline_conditions = require("heirline.conditions")
 
 local M = {}
 
 local function get_git_status(status, show_count)
     status = status:lower()
+
+    local icons = require("utils.icons")
 
     local icon, hl
     if status == "added" then
@@ -43,15 +42,15 @@ end
 
 M.git_branch = {
     condition = function(self)
-        if not herrline_conditions.is_git_repo then
+        if not require("heirline.conditions").is_git_repo then
             return false
         end
 
         self.status_dict = vim.b.gitsigns_status_dict
-        return self.status_dict and true or false
+        return self.status_dict
     end,
     provider = function(self)
-        return icons.git.branch .. self.status_dict.head
+        return require("utils.icons").git.branch .. self.status_dict.head
     end,
     hl = { fg = colors.colors.orange },
 }

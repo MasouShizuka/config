@@ -1,5 +1,4 @@
 local environment = require("utils.environment")
-local utils = require("utils")
 
 return {
     {
@@ -21,9 +20,16 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
+            local utils = require("utils")
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "<leader>o", group = "overseer", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>o", group = "overseer", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for overseer",
+                    pattern = "IceLoad",
                 })
             end
         end,
@@ -43,7 +49,7 @@ return {
         },
         opts = {
             -- Template modules to load
-            templates = { "builtin", "user.run" },
+            templates = { "builtin", "user.run", "user.latex" },
             -- Configure the task list
             task_list = {
                 -- Default direction. Can be "left", "right", or "bottom"
@@ -61,7 +67,7 @@ return {
                     ["v"] = "OpenVsplit",
                     ["<c-s>"] = false,
                     ["V"] = "OpenSplit",
-                    ["<c-f>"] = false,
+                    -- ["<c-f>"] = "OpenFloat",
                     ["f"] = "OpenFloat",
                     -- ["<c-q>"] = "OpenQuickFix",
                     -- ["p"] = "TogglePreview",
@@ -76,9 +82,9 @@ return {
                     -- ["{"] = "PrevTask",
                     -- ["}"] = "NextTask",
                     ["<c-k>"] = false,
-                    ["<c-d>"] = "ScrollOutputDown",
+                    ["<c-f>"] = "ScrollOutputDown",
                     ["<c-j>"] = false,
-                    ["<c-u>"] = "ScrollOutputUp",
+                    ["<c-b>"] = "ScrollOutputUp",
                     -- ["q"] = "Close",
                 },
             },

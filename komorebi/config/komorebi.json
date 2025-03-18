@@ -15,15 +15,15 @@
     {
       "workspaces": [
         {
-          "name": " ",
+          "name": "\uE47E",
           "layout": "BSP"
         },
         {
-          "name": " ",
+          "name": "\uE976",
           "layout": "BSP"
         },
         {
-          "name": " ",
+          "name": "\uE218",
           "layout": "BSP",
           "workspace_rules": [
             {
@@ -39,7 +39,7 @@
           ]
         },
         {
-          "name": " ",
+          "name": "\uE342",
           "layout": "BSP",
           "workspace_rules": [
             {
@@ -55,7 +55,7 @@
           ]
         },
         {
-          "name": " ",
+          "name": "\uE20C",
           "layout": "BSP",
           "workspace_rules": [
             {
@@ -66,7 +66,7 @@
           ]
         },
         {
-          "name": " ",
+          "name": "\uE28E",
           "layout": "BSP",
           "workspace_rules": [
             {
@@ -82,17 +82,13 @@
           ]
         },
         {
-          "name": " ",
+          "name": "\uE2A2",
           "layout": "BSP"
         }
       ]
     }
   ],
   "window_hiding_behaviour": "Cloak",
-  "display_index_preferences": {
-    "0": "DELF137-5&22795f3&0&UID4613",
-    "1": "DELD03B-5&22795f3&0&UID4612"
-  },
   "animation": {
     "enabled": true,
     "duration": 100

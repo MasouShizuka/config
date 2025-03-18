@@ -1,10 +1,10 @@
 {
-  "Version": 1.1,
+  "Version": 1.3,
   "WindowProperties": {
-    "Top":0,
-    "Left":0,
-    "Width":0,
-    "Height":0,
+    "Top": 0,
+    "Left": 0,
+    "Width": 0,
+    "Height": 0,
     "AutoFit": false,
     "TopMost": false,
     "Maximized": false,
@@ -66,6 +66,6 @@
     "OpenLastFile": false,
     "OpenSpecificFile": false,
     "OpenSpecificString": "",
-    "LastFile": "D:\\Notes\\Student\\Master\\\u5B66\u9662\\\u4E2D\u5357\u5927\u5B66\u7814\u7A76\u751F\u793E\u4F1A\u5B9E\u8DF5\u5B66\u5206\u7BA1\u7406\u8003\u6838\u624B\u518C\\5.jpg"
+    "LastFile": ""
   }
 }

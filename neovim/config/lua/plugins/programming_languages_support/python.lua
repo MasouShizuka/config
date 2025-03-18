@@ -1,6 +1,5 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     -- NOTE: 需要安装 fd
@@ -33,30 +32,33 @@ return {
                     if environment.is_windows then
                         adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
                     end
-                    require("dap-python").setup(adapter_python_path)
+                    require("dap-python").setup(adapter_python_path, { include_configs = false })
                 end,
                 dependencies = {
                     "mfussenegger/nvim-dap",
                 },
+                keys = {
+                    { "<leader>dlm", function() require("dap-python").test_method() end, desc = "Debug Method", ft = "python", mode = "n" },
+                    { "<leader>dlc", function() require("dap-python").test_class() end,  desc = "Debug Class",  ft = "python", mode = "n" },
+                },
             },
 
             "neovim/nvim-lspconfig",
-            "nvim-telescope/telescope.nvim",
         },
         enabled = not environment.is_vscode and environment.lsp_enable,
         init = function()
             -- 激活 venv-selector 并读取环境
-            vim.api.nvim_create_autocmd("LspAttach", {
+            local id
+            id = vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
-                        require("venv-selector")
-                        utils.refresh_buf(args.buf, 1000, false)
-                        vim.api.nvim_del_augroup_by_name("VenvActivate")
+                        require("lazy").load({ plugins = "venv-selector.nvim" })
+                        require("utils").refresh_buf(args.buf, { timeout = 3000, use_timer = false })
+                        vim.api.nvim_del_autocmd(id)
                     end
                 end,
                 desc = "Auto select virtualenv",
-                group = vim.api.nvim_create_augroup("VenvActivate", { clear = true }),
             })
         end,
         opts = function()

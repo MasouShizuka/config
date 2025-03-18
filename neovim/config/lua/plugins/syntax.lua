@@ -1,6 +1,4 @@
 local environment = require("utils.environment")
-local treesitter = require("utils.treesitter")
-local utils = require("utils")
 
 return {
     {
@@ -15,9 +13,16 @@ return {
             { "sn", desc = "Update n_lines",                             mode = { "n", "x" } },
         },
         init = function()
+            local utils = require("utils")
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "s", group = "mini.surround", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "s", group = "mini.surround", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for mini.surround",
+                    pattern = "IceLoad",
                 })
             end
         end,
@@ -64,8 +69,10 @@ return {
             mappings = {
                 -- add = "sa",            -- Add surrounding in Normal and Visual modes
                 -- delete = "sd",         -- Delete surrounding
-                find = "sF",      -- Find surrounding (to the right)
-                find_left = "sf", -- Find surrounding (to the left)
+                -- find = "sf",           -- Find surrounding (to the right)
+                -- find_left = "sF",      -- Find surrounding (to the left)
+                find = "sF",           -- Find surrounding (to the right)
+                find_left = "sf",      -- Find surrounding (to the left)
                 -- highlight = "sh",      -- Highlight surrounding
                 -- replace = "sr",        -- Replace surrounding
                 -- update_n_lines = "sn", -- Update `n_lines`
@@ -113,7 +120,9 @@ return {
             "nvim-treesitter/nvim-treesitter-textobjects",
         },
         enabled = environment.treesitter_enable,
-        ft = treesitter.treesitter_filetype_list,
+        event = {
+            "User TreesitterFile",
+        },
         init = function(plugin)
             -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
             -- This is needed because a bunch of plugins no longer `require("nvim-treesitter")`, which
@@ -124,15 +133,20 @@ return {
             require("nvim-treesitter.query_predicates")
         end,
         opts = function()
+            local utils = require("utils")
+
             local opts = {
-                -- A list of parser names, or "all" (the five listed parsers should always be installed)
-                ensure_installed = treesitter.treesitter,
+                -- A list of parser names, or "all"
+                ensure_installed = require("utils.treesitter").treesitter,
+
+                -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
                 highlight = {
                     enable = not environment.is_vscode,
                     disable = function(lang, buf)
-                        return not vim.tbl_contains(treesitter.treesitter_filetype_list, lang) and utils.is_bigfile(buf) or utils.is_longfile(buf)
+                        return utils.is_bigfile(buf) or utils.is_longfile(buf)
                     end,
                 },
+
                 indent = {
                     enable = true,
                 },
@@ -214,7 +228,9 @@ return {
             "nvim-treesitter/nvim-treesitter",
         },
         enabled = not environment.is_vscode and environment.treesitter_enable,
-        ft = treesitter.treesitter_filetype_list,
+        event = {
+            "User TreesitterFile",
+        },
         opts = {
             multiline_threshold = 1, -- Maximum number of lines to show for a single context
         },

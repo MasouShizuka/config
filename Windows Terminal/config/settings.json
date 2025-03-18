@@ -7,7 +7,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[1;5R"
+                "input": " k3"
             },
             "id": "User.sendInput.6C85BA19"
         },
@@ -19,7 +19,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[21;5~"
+                "input": " kt"
             },
             "id": "User.sendInput.5C2FE848"
         },
@@ -50,7 +50,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[1;5P"
+                "input": " k1"
             },
             "id": "User.sendInput.D97C9F86"
         },
@@ -58,7 +58,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[18;5~"
+                "input": " k."
             },
             "id": "User.sendInput.422ABE55"
         },
@@ -73,7 +73,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[1;5S"
+                "input": " k4"
             },
             "id": "User.sendInput.B040523C"
         },
@@ -89,7 +89,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[1;5Q"
+                "input": " k2"
             },
             "id": "User.sendInput.2BFD5600"
         },
@@ -101,14 +101,6 @@
             "id": "User.globalSummon.51A3D78C"
         },
         {
-            "command": 
-            {
-                "action": "sendInput",
-                "input": "\u001b[15;5~"
-            },
-            "id": "User.sendInput.F6854EB3"
-        },
-        {
             "command": "duplicateTab",
             "id": "User.duplicateTab"
         },
@@ -116,7 +108,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[17;5~"
+                "input": " k,"
             },
             "id": "User.sendInput.38C90572"
         },
@@ -136,7 +128,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[19;5~"
+                "input": " k;"
             },
             "id": "User.sendInput.AA2AB5E1"
         },
@@ -151,7 +143,7 @@
             "command": 
             {
                 "action": "sendInput",
-                "input": "\u001b[20;5~"
+                "input": " kn"
             },
             "id": "User.sendInput.2AFEE807"
         },
@@ -376,10 +368,6 @@
         {
             "id": "User.sendInput.F6854EB3",
             "keys": "ctrl+space"
-        },
-        {
-            "id": "User.sendInput.D97C9F86",
-            "keys": "ctrl+1"
         },
         {
             "id": "User.sendInput.422ABE55",
@@ -720,6 +708,10 @@
         {
             "id": "User.scrollToBottom",
             "keys": "ctrl+end"
+        },
+        {
+            "id": "User.sendInput.D97C9F86",
+            "keys": "ctrl+1"
         }
     ],
     "language": "zh-Hans-CN",
@@ -788,12 +780,6 @@
                 "hidden": false,
                 "name": "Azure Cloud Shell",
                 "source": "Windows.Terminal.Azure"
-            },
-            {
-                "guid": "{16208362-94fc-5b1f-a491-5b2624d5ab56}",
-                "hidden": true,
-                "name": "Visual Studio Debug Console",
-                "source": "VSDebugConsole"
             }
         ]
     },

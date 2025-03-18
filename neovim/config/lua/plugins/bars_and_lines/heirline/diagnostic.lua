@@ -1,11 +1,12 @@
 local bhu = require("plugins.bars_and_lines.heirline.utils")
-local colors = require("utils.colors")
-local icons = require("utils.icons")
 
 local M = {}
 
 M.get_diagnostic_severity = function(severity, show_count)
     severity = severity:upper()
+
+    local colors = require("utils.colors")
+    local icons = require("utils.icons")
 
     local icon, hl
     if severity == "ERROR" then

@@ -1,0 +1,32 @@
+[[plugin.deps]]
+use = "yazi-rs/plugins:full-border"
+rev = "79193b3"
+hash = "6882ed11f8efed32c9de32c9d9222b57"
+
+[[plugin.deps]]
+use = "ndtoan96/ouch"
+rev = "ce6fb75"
+hash = "5d6294925132300a4744c5d2030fa21b"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:mime-ext"
+rev = "79193b3"
+hash = "403ee6c7cb1298bd56289d48ac752d4f"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-enter"
+rev = "79193b3"
+hash = "2d3c17251b47e9e59535247ad8013814"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:git"
+rev = "79193b3"
+hash = "9ae0a91da29b29721679c64bb23a378"
+
+[[plugin.deps]]
+use = "imsi32/yatline"
+rev = "6b0fc1e"
+hash = "6e0f07994039f84a2c57c573bb6ceb79"
+
+[flavor]
+deps = []

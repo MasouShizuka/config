@@ -1,9 +1,5 @@
-local buftype = require("utils.buftype")
 local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local keymap = require("utils.keymap")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     {
@@ -56,8 +52,7 @@ return {
         dir = path.config_path .. "/lua/config/autocommands/file-event",
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPre",
+            "User IceLoad",
         },
         name = "config.autocommands.file-event",
         opts = {},
@@ -84,7 +79,9 @@ return {
             { "N", desc = "Previous",        mode = { "n", "x" } },
         },
         name = "config.autocommands.hlsearch",
-        opts = {},
+        opts = {
+            delay = 250,
+        },
     },
 
     {
@@ -131,15 +128,22 @@ return {
         },
         dir = path.config_path .. "/lua/config/user_commands/comment-box",
         init = function()
+            local utils = require("utils")
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    {
-                        mode = { "n", "x" },
-                        { "<leader>gc",  group = "comment box" },
-                        { "<leader>gcb", group = "boxes" },
-                        { "<leader>gct", group = "titled lines" },
-                        { "<leader>gcl", group = "lines" },
-                    },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            {
+                                mode = { "n", "x" },
+                                { "<leader>gc",  group = "comment box" },
+                                { "<leader>gcb", group = "boxes" },
+                                { "<leader>gct", group = "titled lines" },
+                                { "<leader>gcl", group = "lines" },
+                            },
+                        })
+                    end,
+                    desc = "Register which-key for comment-box",
+                    pattern = "IceLoad",
                 })
             end
         end,
@@ -186,9 +190,16 @@ return {
         dir = path.config_path .. "/lua/config/user_commands/diff",
         enabled = not environment.is_vscode,
         init = function()
+            local utils = require("utils")
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "<leader>cd", group = "diff", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>cd", group = "diff", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for diff",
+                    pattern = "IceLoad",
                 })
             end
         end,
@@ -202,83 +213,99 @@ return {
     },
 
     {
-        cmd = {
-            "DocsViewToggle",
-        },
-        config = function(_, opts)
-            local extra_view = require("extra-view")
-            extra_view.setup(opts)
-
-            vim.api.nvim_create_user_command("DocsViewToggle", function()
-                extra_view.extra_view_toggle(function(buf, win)
-                    if filetype.is_panel_filetype(vim.bo.filetype) then
-                        return
-                    end
-
-                    local gotHover = false
-                    for _, client in ipairs(vim.lsp.get_clients()) do
-                        if client.supports_method("textDocument/hover") then
-                            gotHover = true
-                            break
-                        end
-                    end
-                    if not gotHover then
-                        return
-                    end
-
-                    vim.lsp.buf_request(0, "textDocument/hover", vim.lsp.util.make_position_params(), function(err, result, ctx, config)
-                        if win and vim.api.nvim_win_is_valid(win) and result and result.contents then
-                            local md_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
-                            if vim.tbl_isempty(md_lines) then
-                                return
-                            end
-
-                            vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
-                            vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
-                            vim.lsp.util.stylize_markdown(buf, md_lines)
-                            vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
-                        end
-                    end)
-                end, {
-                    filetype = "nvim-docs-view",
-                })
-            end, { desc = "Toggle nvim-docs-view" })
-        end,
-        dir = path.config_path .. "/lua/config/user_commands/extra-view",
-        enabled = not environment.is_vscode,
-        name = "config.user_commands.extra-view",
-        opts = {},
-    },
-
-    {
         dir = path.config_path .. "/lua/config/user_commands/toggle",
         init = function()
+            local utils = require("utils")
+
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "<leader>ct", group = "toggle", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>ct", group = "toggle", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for toggle",
+                    pattern = "IceLoad",
                 })
             end
-        end,
-        keys = function()
-            local keys = {}
-            if environment.is_vscode then
-                vim.list_extend(keys, {
-                    { "<leader>ctc", function() require("toggle").vscode.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
-                    { "<leader>ctC", function() require("toggle").vscode.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
-                    { "<leader>ctf", function() require("toggle").vscode.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
-                    { "<leader>ctw", function() require("toggle").vscode.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
-                })
-            else
-                vim.list_extend(keys, {
-                    { "<leader>ctc", function() require("toggle").nvim.toggle_cursor_center() end,     desc = "Toggle cursor center",          mode = "n" },
-                    { "<leader>ctC", function() require("toggle").nvim.toggle_cursor_center(true) end, desc = "Toggle cursor center (buffer)", mode = "n" },
-                    { "<leader>ctf", function() require("toggle").nvim.toggle_fileformat() end,        desc = "Toggle fileformat",             mode = "n" },
-                    { "<leader>cts", function() require("toggle").nvim.toggle_spell() end,             desc = "Toggle spell",                  mode = "n" },
-                    { "<leader>ctS", function() require("toggle").nvim.toggle_syntax() end,            desc = "Toggle syntax",                 mode = "n" },
-                    { "<leader>ctw", function() require("toggle").nvim.toggle_wrap() end,              desc = "Toggle wrap",                   mode = "n" },
-                })
-            end
-            return keys
+
+            utils.create_once_autocmd("User", {
+                callback = function()
+                    utils.set_setting_toggle("cursor_center", {
+                        default = false,
+                        g = {
+                            keymap = { keys = "<leader>ctc", mode = "n" },
+                        },
+                        b = {
+                            keymap = { keys = "<leader>ctC", mode = "n" },
+                        },
+                    })
+
+                    if environment.is_vscode then
+                        vim.keymap.set("n", "<leader>ctf", function()
+                            if not package.loaded["toggle"] then
+                                require("lazy").load({ plugins = "config.user_commands.toggle" })
+                            end
+                            require("toggle").vscode.toggle_fileformat()
+                        end, { desc = "Toggle fileformat", silent = true })
+                        vim.keymap.set("n", "<leader>ctw", function()
+                            if not package.loaded["toggle"] then
+                                require("lazy").load({ plugins = "config.user_commands.toggle" })
+                            end
+                            require("toggle").vscode.toggle_wrap()
+                        end, { desc = "Toggle wrap", silent = true })
+                    else
+                        if utils.is_available("snacks.nvim") then
+                            local snacks = require("snacks")
+
+                            snacks.toggle.new({
+                                id = "fileformat",
+                                name = "fileformat",
+                                get = function()
+                                    local on = "unix"
+                                    if environment.is_windows then
+                                        on = "dos"
+                                    end
+                                    return vim.api.nvim_get_option_value("fileformat", { scope = "local" }) == on
+                                end,
+                                set = function()
+                                    if not package.loaded["toggle"] then
+                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
+                                    end
+                                    require("toggle").nvim.toggle_fileformat({ notify = false })
+                                end,
+                            }):map("<leader>ctf")
+                            snacks.toggle.new({
+                                id = "syntax",
+                                name = "syntax",
+                                get = function()
+                                    local syntax = vim.api.nvim_get_option_value("syntax", { scope = "local" })
+                                    if syntax == "" then
+                                        syntax = "on"
+                                    end
+                                    return syntax == "on"
+                                end,
+                                set = function()
+                                    if not package.loaded["toggle"] then
+                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
+                                    end
+                                    require("toggle").nvim.toggle_syntax({ notify = false })
+                                end,
+                            }):map("<leader>ctt")
+
+                            snacks.toggle.option("spell"):map("<leader>cts")
+                            snacks.toggle.option("wrap"):map("<leader>ctw")
+                        else
+                            vim.keymap.set("n", "<leader>ctf", function() require("toggle").nvim.toggle_fileformat() end, { desc = "Toggle fileformat", silent = true })
+                            vim.keymap.set("n", "<leader>cts", function() require("toggle").nvim.toggle_spell() end, { desc = "Toggle spell", silent = true })
+                            vim.keymap.set("n", "<leader>ctt", function() require("toggle").nvim.toggle_syntax() end, { desc = "Toggle syntax", silent = true })
+                            vim.keymap.set("n", "<leader>ctw", function() require("toggle").nvim.toggle_wrap() end, { desc = "Toggle wrap", silent = true })
+                        end
+                    end
+                end,
+                desc = "Toggle toggle",
+                pattern = "IceLoad",
+            })
         end,
         name = "config.user_commands.toggle",
         opts = {},
@@ -294,10 +321,14 @@ return {
         event = {
             "QuitPre",
         },
-        keys = {
-            { keymap["<c-s-t>"],               function() require("undoquit").restore_window() end, desc = "Undo quit",     mode = "n" },
-            { "<leader>" .. keymap["<c-s-t>"], function() require("undoquit").restore_tab() end,    desc = "Undo quit tab", mode = "n" },
-        },
+        keys = function()
+            local keymap = require("utils.keymap")
+
+            return {
+                { keymap["<c-s-t>"],               function() require("undoquit").restore_window() end, desc = "Undo quit",     mode = "n" },
+                { "<leader>" .. keymap["<c-s-t>"], function() require("undoquit").restore_tab() end,    desc = "Undo quit tab", mode = "n" },
+            }
+        end,
         name = "config.user_commands.undoquit",
         opts = {},
     },
@@ -313,8 +344,7 @@ return {
         dir = path.config_path .. "/lua/config/user_commands/windows",
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         keys = {
             { "<c-s><c-m>", function() vim.api.nvim_command("WindowsMaximize") end,             desc = "Maximize current window",                 mode = "n" },
@@ -324,14 +354,16 @@ return {
             { "<c-s><c-t>", function() vim.api.nvim_command("WindowsToggleAutowidth") end,      desc = "Toggle auto-width feature",               mode = "n" },
         },
         name = "config.user_commands.windows",
-        opts = {
-            ignore = {
-                buftype = buftype.skip_buftype_list,
-                filetype = filetype.skip_filetype_list,
-            },
-            animation = {
-                enable = false,
-            },
-        },
+        opts = function()
+            return {
+                ignore = {
+                    buftype = require("utils.buftype").skip_buftype_list,
+                    filetype = require("utils.filetype").skip_filetype_list,
+                },
+                animation = {
+                    enable = false,
+                },
+            }
+        end,
     },
 }

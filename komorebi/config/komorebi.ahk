@@ -7,11 +7,11 @@ OnExit((*) => komorebic_stop())
 ; localappdata := EnvGet("LOCALAPPDATA")
 
 komorebic_stop() {
+    RunWait("komorebic.exe stop", , "Hide")
+
     While (ProcessExist("komorebi-bar.exe")) {
         ProcessClose("komorebi-bar.exe")
     }
-
-    RunWait("komorebic.exe stop", , "Hide")
 
     ; DirDelete(localappdata . "/komorebi", true)
 }
@@ -37,14 +37,14 @@ global monitor_key_value := Map(
     "u", 2
 )
 
-global focus_monitor_prefix := "!"
-For key, value in monitor_key_value {
-    Hotkey(focus_monitor_prefix . key, focus_monitor)
-}
-
 global send_to_monitor_prefix := "!+"
 For key, value in monitor_key_value {
     Hotkey(send_to_monitor_prefix . key, send_to_monitor)
+}
+
+global focus_monitor_prefix := "!"
+For key, value in monitor_key_value {
+    Hotkey(focus_monitor_prefix . key, focus_monitor)
 }
 
 
@@ -62,14 +62,14 @@ global workspace_key_value := Map(
     "7", 6
 )
 
-global focus_monitor_workspace_prefix := "!"
-For key, value in workspace_key_value {
-    Hotkey(focus_monitor_workspace_prefix . key, focus_monitor_workspace)
-}
-
 global send_to_monitor_workspace_prefix := "!+"
 For key, value in workspace_key_value {
     Hotkey(send_to_monitor_workspace_prefix . key, send_to_monitor_workspace)
+}
+
+global focus_monitor_workspace_prefix := "!"
+For key, value in workspace_key_value {
+    Hotkey(focus_monitor_workspace_prefix . key, focus_monitor_workspace)
 }
 
 
@@ -79,25 +79,10 @@ For key, value in workspace_key_value {
 
 RunWait("komorebic.exe complete-configuration", , "Hide")
 
-; While (ProcessExist("komorebi-bar.exe")) {
-;     ProcessClose("komorebi-bar.exe")
-; }
-; ComObject("Shell.Application")
-;     .Windows.FindWindowSW(0, 0, 0x08, 0, 0x01)  
-;     .Document.Application.ShellExecute("komorebi-bar.exe", "--config komorebi.bar.json", A_ScriptDir, "open", 0)
-
 
 ; ╭────────────╮
 ; │ Keybinding │
 ; ╰────────────╯
-
-!q:: {
-    RunWait("komorebic.exe close", , "Hide")
-}
-
-!+q:: {
-    WinKill("A")
-}
 
 !left:: {
     RunWait("komorebic.exe focus left", , "Hide")
@@ -129,6 +114,18 @@ RunWait("komorebic.exe complete-configuration", , "Hide")
 
 !+down:: {
     RunWait("komorebic.exe move down", , "Hide")
+}
+
+!d:: {
+    RunWait("komorebic.exe minimize", , "Hide")
+}
+
+!q:: {
+    RunWait("komorebic.exe close", , "Hide")
+}
+
+!+q:: {
+    WinKill("A")
 }
 
 !j:: {
@@ -163,10 +160,10 @@ RunWait("komorebic.exe complete-configuration", , "Hide")
     RunWait("komorebic.exe resize-axis vertical increase", , "Hide")
 }
 
-focus_monitor_workspace(ThisHotkey) {
-    key := SubStr(ThisHotkey, StrLen(focus_monitor_workspace_prefix) + 1)
-    num := workspace_key_value[key]
-    RunWait(Format("komorebic.exe focus-monitor-workspace {} {}", main_monitor, num), , "Hide")
+send_to_monitor(ThisHotkey) {
+    key := SubStr(ThisHotkey, StrLen(send_to_monitor_prefix) + 1)
+    value := monitor_key_value[key]
+    RunWait(Format("komorebic.exe send-to-monitor {}", value), , "Hide")
 }
 
 send_to_monitor_workspace(ThisHotkey) {
@@ -181,10 +178,10 @@ focus_monitor(ThisHotkey) {
     RunWait(Format("komorebic.exe focus-monitor {}", value), , "Hide")
 }
 
-send_to_monitor(ThisHotkey) {
-    key := SubStr(ThisHotkey, StrLen(send_to_monitor_prefix) + 1)
-    value := monitor_key_value[key]
-    RunWait(Format("komorebic.exe send-to-monitor {}", value), , "Hide")
+focus_monitor_workspace(ThisHotkey) {
+    key := SubStr(ThisHotkey, StrLen(focus_monitor_workspace_prefix) + 1)
+    num := workspace_key_value[key]
+    RunWait(Format("komorebic.exe focus-monitor-workspace {} {}", main_monitor, num), , "Hide")
 }
 
 ; +-------+-----+
@@ -255,32 +252,6 @@ send_to_monitor(ThisHotkey) {
     RunWait("komorebic.exe change-layout grid", , "Hide")
 }
 
-!+Capslock::
-!+Esc:: {
-    RunWait("komorebic.exe toggle-pause", , "Hide")
-}
-
-!Capslock::
-!Esc:: {
-    RunWait("komorebic.exe toggle-tiling", , "Hide")
-}
-
-!+f:: {
-    RunWait("komorebic.exe toggle-float", , "Hide")
-}
-
-!m:: {
-    RunWait("komorebic.exe toggle-monocle", , "Hide")
-}
-
-!f:: {
-    RunWait("komorebic.exe toggle-maximize", , "Hide")
-}
-
-!d:: {
-    RunWait("komorebic.exe minimize", , "Hide")
-}
-
 !x:: {
     RunWait("komorebic.exe flip-layout horizontal", , "Hide")
 }
@@ -301,22 +272,38 @@ send_to_monitor(ThisHotkey) {
     RunWait("komorebic.exe retile", , "Hide")
 }
 
+!+w:: {
+    RunWait("komorebic.exe toggle-workspace-layer", , "Hide")
+}
+
+!+Capslock::
+!+Esc:: {
+    RunWait("komorebic.exe toggle-pause", , "Hide")
+}
+
+!Capslock::
+!Esc:: {
+    RunWait("komorebic.exe toggle-tiling", , "Hide")
+}
+
+!w:: {
+    RunWait("komorebic.exe toggle-float", , "Hide")
+}
+
+!m:: {
+    RunWait("komorebic.exe toggle-monocle", , "Hide")
+}
+
+!f:: {
+    RunWait("komorebic.exe toggle-maximize", , "Hide")
+}
+
 !t:: {
     RunWait("komorebic.exe manage", , "Hide")
 }
 
 !+t:: {
     RunWait("komorebic.exe unmanage", , "Hide")
-}
-
-!+b:: {
-    While (ProcessExist("komorebi-bar.exe")) {
-        ProcessClose("komorebi-bar.exe")
-    } Else {
-        ComObject("Shell.Application")
-            .Windows.FindWindowSW(0, 0, 0x08, 0, 0x01)  
-            .Document.Application.ShellExecute("komorebi-bar.exe", "--config komorebi.bar.json", A_ScriptDir, "open", 0)
-    }
 }
 
 !Enter:: {

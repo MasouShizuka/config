@@ -1,14 +1,16 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ 7ad2ee495e74bf01990e2f709c1b5853fa02482d
+COMMIT_ 0b6580222ef5a2941025548d18c0ecfe88bb6ad5
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
 ]]
 
-local uosc_version = '5.7.0'
+local uosc_version = '5.8.0'
 
 mp.commandv('script-message', 'uosc-version', uosc_version)
+
+mp.set_property('osc', 'no')
 
 assdraw = require('mp.assdraw')
 opt = require('mp.options')
@@ -107,7 +109,7 @@ defaults = {
 	chapter_range_patterns = 'openings:オープニング;endings:エンディング',
 	languages = 'slang,en',                   -- https://opensubtitles.stoplight.io/docs/opensubtitles-api/1de776d20e873-languages
 	disable_elements = '',
-
+	subtitles_directory = '~~/_cache/usubs',
 	idlescreen = true,
 	idlemsg = 'default',
 	idle_call_menu = 0,
@@ -348,7 +350,7 @@ function create_default_menu_items()
 		{title = ulang._cm_tools, items = {
 			{title = ulang._cm_keybinding, value = 'script-binding uosc/keybinds'},
 			{title = ulang._cm_stats_toggle, value = 'script-binding display-stats-toggle'},
-			{title = ulang._cm_console_on, value = 'script-binding console/enable'},
+			{title = ulang._cm_console_on, value = 'script-binding commands/open'},
 			{title = ulang._cm_border_toggle, value = 'cycle border'},
 			{title = ulang._cm_ontop_toggle, value = 'cycle ontop'},
 			{title = ulang._cm_audio_device, value = 'script-binding uosc/audio-device'},
@@ -389,6 +391,7 @@ state = {
 	time_human = nil, -- current playback time in human format
 	destination_time_human = nil, -- depends on options.destination_time
 	pause = mp.get_property_native('pause'),
+	ime_active = mp.get_property_native("input-ime"),
 	chapters = {},
 	---@type {index: number; title: string}|nil
 	current_chapter = nil,
@@ -986,11 +989,12 @@ bind_command('playlist', create_self_updating_menu_opener({
 	footnote = ulang._playlist_submenu_footnote,
 	serializer = function(playlist)
 		local items = {}
+		local force_filename = mp.get_property_native('osd-playlist-entry') == 'filename'
 		for index, item in ipairs(playlist) do
-			local is_url = is_protocol(item.filename)
-			local item_title = type(item.title) == 'string' and #item.title > 0 and item.title or false
+			local title = type(item.title) == 'string' and #item.title > 0 and item.title or false
 			items[index] = {
-				title = item_title or (is_url and item.filename or serialize_path(item.filename).basename),
+				title = (not force_filename and title) and title
+					or (is_protocol(item.filename) and item.filename or serialize_path(item.filename).basename),
 				hint = tostring(index),
 				active = item.current,
 				value = index,
@@ -1154,7 +1158,13 @@ bind_command('paste-to-playlist', function()
 		end
 	end
 end)
-bind_command('copy-to-clipboard', function() set_clipboard(state.path) end)
+bind_command('copy-to-clipboard', function()
+	if state.path then
+		set_clipboard(state.path)
+	else
+		mp.commandv('show-text', ulang._clipboard_osd2, 3000)
+	end
+end)
 bind_command('open-config-directory', function()
 	local config_path = mp.command_native({'expand-path', '~~/mpv.conf'})
 	local config = serialize_path(normalize_path(config_path))
@@ -1246,6 +1256,16 @@ mp.register_script_message('select-menu-item', function(type, item_index, menu_i
 end)
 mp.register_script_message('close-menu', function(type)
 	if Menu:is_open(type) then Menu:close() end
+end)
+mp.register_script_message('menu-action', function(name, ...)
+	local menu = Menu:is_open()
+	if menu then
+		local method = ({
+			['search-cancel'] = 'search_cancel',
+			['search-query-update'] = 'search_query_update',
+		})[name]
+		if method then menu[method](menu, ...) end
+	end
 end)
 mp.register_script_message('thumbfast-info', function(json)
 	local data = utils.parse_json(json)

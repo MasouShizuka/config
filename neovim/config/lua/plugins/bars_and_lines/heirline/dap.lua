@@ -1,5 +1,4 @@
 local colors = require("utils.colors")
-local icons = require("utils.icons")
 
 return {
     condition = function(self)
@@ -11,7 +10,7 @@ return {
         return self.dap.session() ~= nil
     end,
     provider = function(self)
-        return icons.misc.bug .. self.dap.status()
+        return require("utils.icons").misc.bug .. self.dap.status()
     end,
     hl = { fg = colors.colors.blue },
 }

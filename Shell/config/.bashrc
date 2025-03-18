@@ -32,22 +32,30 @@ linux*)
     ;;
 esac
 
+if ((is_wsl)); then
+    appdata=$(wslpath "$(cmd.exe /c "echo %APPDATA%" 2>/dev/null | tr -d '\r')")
+    localappdata=$(wslpath "$(cmd.exe /c "echo %LOCALAPPDATA%" 2>/dev/null | tr -d '\r')")
+    userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
+fi
+
 
 
 # ╭───────╮
 # │ Alias │
 # ╰───────╯
 
-alias ls="ls --color=auto"
-alias ll="ls -al -h --time-style=long-iso"
-
-alias grep="grep --color=auto"
-
-alias q=exit
-
 alias ..="cd .."         # Go up one directory
 alias ...="cd ../.."     # Go up two directories
 alias ....="cd ../../.." # Go up three directories
+
+alias dus="du --max-depth=1 --human-readable | sort --human-numeric-sort --reverse"
+
+alias q=exit
+
+alias grep="grep --color=auto"
+
+alias ls="ls --color=auto"
+alias ll="ls --all --human-readable -l --time-style=long-iso"
 
 
 
@@ -55,9 +63,13 @@ alias ....="cd ../../.." # Go up three directories
 # │ Environment Variable │
 # ╰──────────────────────╯
 
+[[ -d "$HOME/.local/bin" ]] && export PATH="$PATH:$HOME/.local/bin"
+
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
 if [[ -x "$(command -v nvim)" ]]; then
     export EDITOR=nvim
-    export GIT_EDITOR=nvim
+    export GIT_EDITOR=$EDITOR
 fi
 
 export LANG=en_US.UTF-8
@@ -92,7 +104,7 @@ function quiet() {
 
 
 # ╭────────────╮
-# │ keybinding │
+# │ Keybinding │
 # ╰────────────╯
 
 # enter a few characters and press UpArrow/DownArrow
@@ -104,15 +116,18 @@ bind '"\e[B":history-search-forward'
 bind '"\e[1;2D":backward-word'
 bind '"\e[1;2C":forward-word'
 
+# tab 相关
+bind "set completion-ignore-case on"
+bind "set mark-symlinked-directories on"
+bind "set show-all-if-unmodified on"
+
 
 
 # ╭─────────╮
 # │ Setting │
 # ╰─────────╯
 
-if [[ -z "$HISTFILE" ]]; then
-    HISTFILE="$HOME/.bash_history"
-fi
+[[ -z "$HISTFILE" ]] && HISTFILE="$HOME/.bash_history"
 HISTSIZE=50000
 
 LAST_COMMAND=""
@@ -167,6 +182,14 @@ PROMPT_COMMAND="precmd"
 # │ Command Line Tool │
 # ╰───────────────────╯
 
+# ╭─ bottom ─────────────────────────────────────────────────╮
+
+if [[ -x "$(command -v btm)" ]]; then
+    alias b=btm
+fi
+
+# ╰───────────────────────────────────────────────── bottom ─╯
+
 # ╭─ fzf ────────────────────────────────────────────────────╮
 
 if [[ -x "$(command -v fzf)" ]]; then
@@ -180,14 +203,9 @@ if [[ -x "$(command -v fzf)" ]]; then
         --info=inline
         --preview='bat --number --color always --theme ansi --line-range :500 {}'
         --preview-border=rounded
-        --bind=ctrl-i:accept
+        --bind=ctrl-i:accept,ctrl-d:page-down,ctrl-u:page-up,ctrl-f:preview-down,ctrl-b:preview-up
     "
 
-    # # One Dark
-    # export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
-    #     --color=dark
-    #     --color=fg:-1,bg:-1,hl:#c678dd,fg+:#abb2bf,bg+:#282c34,hl+:#c678dd
-    #     --color=info:#98c379,prompt:#61afef,pointer:#e06c75,marker:#e5c07b,spinner:#61afef,header:#61afef"
     # Tokyo Night Moon
     # https://github.com/folke/tokyonight.nvim/blob/main/extras/fzf/tokyonight_moon.sh
     export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS
@@ -216,9 +234,7 @@ fi
 
 # ╭─ lazygit ────────────────────────────────────────────────╮
 
-if [[ -x "$(command -v lazygit)" ]]; then
-    alias lg=lazygit
-fi
+[[ -x "$(command -v lazygit)" ]] && alias lg=lazygit
 
 # ╰──────────────────────────────────────────────── lazygit ─╯
 
@@ -226,12 +242,10 @@ fi
 # ╭─ neovim ─────────────────────────────────────────────────╮
 
 if [[ -x "$(command -v nvim)" ]]; then
-    alias vi=nvim
-    alias vim=nvim
+    alias v=nvim
 
     if ((is_wsl)); then
         if [[ ! -d "$HOME/.config/nvim" ]]; then
-            localappdata=$(wslpath "$(cmd.exe /c "echo %LOCALAPPDATA%" 2>/dev/null | tr -d '\r')")
             ln -s "$localappdata/nvim" "$HOME/.config/nvim"
         fi
     fi
@@ -242,9 +256,7 @@ fi
 
 # ╭─ sfsu ───────────────────────────────────────────────────╮
 
-if [[ -x "$(command -v sfsu)" ]]; then
-    source <(sfsu.exe hook --shell bash)
-fi
+[[ -x "$(command -v sfsu)" ]] && source <(sfsu.exe hook --shell bash)
 
 # ╰─────────────────────────────────────────────────── sfsu ─╯
 
@@ -253,7 +265,6 @@ fi
 
 if [[ -x "$(command -v starship)" ]]; then
     if ((is_wsl)); then
-        userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
         export STARSHIP_CONFIG="$userprofile/.config/starship/starship.toml"
     else
         export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
@@ -270,7 +281,6 @@ fi
 if [[ -x "$(command -v yazi)" ]]; then
     if ((is_wsl)); then
         if [[ ! -d "$HOME/.config/yazi" ]]; then
-            appdata=$(wslpath "$(cmd.exe /c "echo %APPDATA%" 2>/dev/null | tr -d '\r')")
             ln -s "$appdata/yazi/config" "$HOME/.config/yazi"
         fi
     fi
@@ -288,6 +298,22 @@ fi
 # ╰─────────────────────────────────────────────────── yazi ─╯
 
 
+# ╭─ zellij ─────────────────────────────────────────────────╮
+
+if [[ -x "$(command -v zellij)" ]]; then
+    alias z=zellij
+    alias Z="zellij attach -c default"
+
+    if ((is_wsl)); then
+        if [[ ! -d "$HOME/.config/zellij" ]]; then
+            ln -s "$userprofile/.config/zellij" "$HOME/.config/zellij"
+        fi
+    fi
+fi
+
+# ╰───────────────────────────────────────────────── zellij ─╯
+
+
 
 # ╭───────╮
 # │ Conda │
@@ -295,11 +321,10 @@ fi
 
 if [[ -x "$(command -v mamba)" ]]; then
     if ((is_windows)); then
-        export MAMBA_EXE="$HOME/scoop/apps/mambaforge/current/Library/bin/mamba.exe"
+        MAMBA_EXE="$HOME/scoop/apps/mambaforge/current/Library/bin/mamba.exe"
         if [[ -f "$MAMBA_EXE" ]]; then
             export MAMBA_EXE="$MAMBA_EXE"
-            export MAMBA_ROOT_PREFIX="$HOME/scoop/persist/mambaforge"
-            eval "$("$MAMBA_EXE" shell hook --shell bash --root-prefix "$MAMBA_ROOT_PREFIX")"
+            eval "$("$MAMBA_EXE" shell hook --shell bash)"
         fi
     elif ((is_linux)); then
         if [[ -f "$HOME/mambaforge/bin/conda" ]]; then
@@ -317,7 +342,6 @@ if [[ -x "$(command -v mamba)" ]]; then
 
             if ((is_wsl)); then
                 if [[ ! -f "$HOME/.condarc" ]]; then
-                    userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
                     ln -s "$userprofile/.condarc" "$HOME/.condarc"
                 fi
             fi

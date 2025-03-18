@@ -1,64 +1,127 @@
-local buftype = require("utils.buftype")
-local filetype = require("utils.filetype")
-local lsp = require("utils.lsp")
-local utils = require("utils")
-
 local M = {}
 
-M.setup = function(opts)
-    -- 检测 git 仓库
-    vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
-        callback = function()
-            if utils.is_git() then
-                utils.event("GitFile", true)
-                vim.api.nvim_del_augroup_by_name("GitFile")
+local function create_event(opts)
+    local condition = opts.condition or function(args) return true end
+    local desc = opts.desc or ""
+    local event_name = opts.event_name
+    local func = opts.func or function(args) end
+    local once = opts.once or false
+
+    local args = { buf = vim.api.nvim_get_current_buf() }
+    if condition(args) then
+        if event_name then
+            vim.api.nvim_exec_autocmds("User", { pattern = event_name })
+        end
+        func(args)
+
+        if once then
+            return
+        end
+    end
+
+    local id
+    id = vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+        callback = function(args)
+            if condition(args) then
+                if event_name then
+                    vim.api.nvim_exec_autocmds("User", { pattern = event_name })
+                end
+                func(args)
+
+                if once then
+                    vim.api.nvim_del_autocmd(id)
+                end
             end
         end,
+        desc = desc,
+    })
+end
+
+M.setup = function(opts)
+    local refresh_buf = function(args)
+        require("utils").refresh_buf(args.buf, { timeout = 2000, use_timer = true })
+    end
+
+    -- 检测 git 仓库
+    create_event({
+        condition = function(args)
+            return require("utils").is_git()
+        end,
         desc = "Git file event",
-        group = vim.api.nvim_create_augroup("GitFile", { clear = true }),
+        event_name = "GitFile",
+        once = true,
+    })
+
+    -- 检测 lsp 文件
+    create_event({
+        condition = function(args)
+            return vim.tbl_contains(require("utils.lsp").lsp_filetype_list, vim.bo[args.buf].filetype)
+        end,
+        desc = "Lsp file event",
+        event_name = "LspFile",
+        func = refresh_buf,
+        once = true,
+    })
+
+    -- 检测 lint 文件
+    create_event({
+        condition = function(args)
+            return vim.tbl_contains(require("utils.lint").lint_filetype_list, vim.bo[args.buf].filetype)
+        end,
+        desc = "Lint file event",
+        event_name = "LintFile",
+        func = refresh_buf,
+        once = true,
+    })
+
+    -- 检测 treesitter 文件
+    create_event({
+        condition = function(args)
+            return vim.tbl_contains(require("utils.treesitter").treesitter_filetype_list, vim.bo[args.buf].filetype)
+        end,
+        desc = "Treesitter file event",
+        event_name = "TreesitterFile",
+        func = refresh_buf,
+        once = true,
     })
 
     -- 检测内嵌以外的 markdown
-    vim.api.nvim_create_autocmd("Filetype", {
-        callback = function(args)
+    create_event({
+        condition = function(args)
             local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
-            -- 防止在 lsp hover 等内嵌 markdown 中激活 markdown plugins
-            if not vim.tbl_contains(buftype.skip_buftype_list, bt) then
-                utils.event("MarkdownFile", true)
-                utils.refresh_buf(args.buf, 1, true)
-                vim.api.nvim_del_augroup_by_name("MarkdownFile")
-            end
+            return vim.bo[args.buf].filetype == "markdown" and not vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt)
         end,
         desc = "Markdown file event",
-        group = vim.api.nvim_create_augroup("MarkdownFile", { clear = true }),
-        pattern = "markdown",
+        event_name = "MarkdownFile",
+        func = refresh_buf,
+        once = true,
     })
 
     -- lsp 文件切换部分设置
-    vim.api.nvim_create_autocmd("FileType", {
-        callback = function(args)
+    create_event({
+        condition = function(args)
             local session_file = vim.b[args.buf].session_file or false
-            if not session_file then
-                vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
-            end
+            return not session_file and vim.tbl_contains(require("utils.lsp").lsp_filetype_list, vim.bo[args.buf].filetype)
         end,
         desc = "Change settings for lsp file",
-        group = vim.api.nvim_create_augroup("LspSetting", { clear = true }),
-        pattern = lsp.lsp_filetype_list,
+        func = function(args)
+            vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
+        end,
     })
 
     -- 文本文件切换部分设置
-    vim.api.nvim_create_autocmd("FileType", {
-        callback = function(args)
+    create_event({
+        condition = function(args)
+            local filetype = require("utils.filetype")
+            local filetype_list = require("utils").table_concat(filetype.tex_filetype_list, filetype.text_filetype_list)
             local session_file = vim.b[args.buf].session_file or false
-            if not session_file then
-                vim.api.nvim_set_option_value("spell", true, { scope = "local" })
-                vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
-            end
+            return not session_file and vim.tbl_contains(filetype_list, vim.bo[args.buf].filetype)
         end,
         desc = "Change settings for text file",
-        group = vim.api.nvim_create_augroup("TextSetting", { clear = true }),
-        pattern = utils.table_concat(filetype.tex_filetype_list, filetype.text_filetype_list),
+        func = function(args)
+            vim.api.nvim_set_option_value("spell", true, { scope = "local" })
+            vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
+        end,
     })
 end
 

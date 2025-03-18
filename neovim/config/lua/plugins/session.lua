@@ -1,6 +1,5 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     {
@@ -11,17 +10,27 @@ return {
         config = function(_, opts)
             require("session_manager").setup(opts)
 
-            -- 标记 session 读取的 buf
+            -- 标记 session 读取的 buf，并刷新以便触发 file event
             vim.api.nvim_create_autocmd("User", {
                 callback = function()
                     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                         if vim.api.nvim_buf_is_valid(buf) then
                             vim.b[buf].session_file = true
+                            require("utils").refresh_buf(buf, { timeout = 1, use_timer = true })
                         end
                     end
                 end,
                 group = vim.api.nvim_create_augroup("SessionManagerFile", { clear = true }),
                 pattern = "SessionLoadPost",
+            })
+
+            local notify_augroup = vim.api.nvim_create_augroup("SessionManagerNotify", { clear = true })
+            vim.api.nvim_create_autocmd("User", {
+                callback = function()
+                    vim.notify("Session saved!", vim.log.levels.INFO, { title = "neovim-session-manager" })
+                end,
+                group = notify_augroup,
+                pattern = "SessionSavePost",
             })
         end,
         dependencies = {
@@ -29,40 +38,36 @@ return {
         },
         enabled = not environment.is_vscode,
         init = function()
+            local utils = require("utils")
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "<leader>s", group = "neovim-session-manager", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>s", group = "neovim-session-manager", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for session-manager",
+                    pattern = "IceLoad",
                 })
             end
 
             -- 判断是否启动 neovim-session-manager
             if vim.fn.argc() == 0 then
-                require("session_manager")
+                require("lazy").load({ plugins = "neovim-session-manager" })
             end
         end,
         keys = {
-            { "<leader>sl", function() vim.api.nvim_command("SessionManager load_session") end,      desc = "Load session",      mode = "n" },
-            { "<leader>sp", function() vim.api.nvim_command("SessionManager load_last_session") end, desc = "Load last session", mode = "n" },
-            {
-                "<leader>ss",
-                function()
-                    vim.api.nvim_command("SessionManager save_current_session")
-                    vim.notify("Session saved!", vim.log.levels.INFO, { title = "neovim-session-manager" })
-                end,
-                desc = "Save current sessoin",
-                mode = "n",
-            },
-            { "<leader>sd", function() vim.api.nvim_command("SessionManager delete_session") end, desc = "Delete session", mode = "n" },
+            { "<leader>sl", function() vim.api.nvim_command("SessionManager load_session") end,         desc = "Load session",         mode = "n" },
+            { "<leader>sp", function() vim.api.nvim_command("SessionManager load_last_session") end,    desc = "Load last session",    mode = "n" },
+            { "<leader>ss", function() vim.api.nvim_command("SessionManager save_current_session") end, desc = "Save current sessoin", mode = "n" },
+            { "<leader>sd", function() vim.api.nvim_command("SessionManager delete_session") end,       desc = "Delete session",       mode = "n" },
         },
         opts = function()
             local Path = require("plenary.path")
 
-            local sessions_dir = path.data_path .. "/lazy/neovim-session-manager/sessions"
+            local sessions_dir = path.data_path .. "/sessions"
             if environment.is_wsl then
-                sessions_dir = path.wsl_data_path .. "/lazy/neovim-session-manager/sessions_wsl"
-            end
-            if vim.fn.isdirectory(sessions_dir) == 0 then
-                vim.fn.mkdir(sessions_dir)
+                sessions_dir = path.windows_data_path .. "/sessions_wsl"
             end
 
             -- 选择 gsub 中不会转义的字符，否则需要添加 % 来防止转义
@@ -74,6 +79,7 @@ return {
                 -- Function that replaces symbols into separators and colons to transform filename into a session directory.
                 session_filename_to_dir = function(filename)
                     local dir = filename:sub(#tostring(sessions_dir) + 2)
+
                     dir = dir:gsub(colon_replacer, ":")
                     dir = dir:gsub(path_replacer, Path.path.sep)
                     return Path:new(dir)

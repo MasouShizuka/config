@@ -576,7 +576,7 @@
     "WatchFolderEnabled": false,
     "WatchFolderList": []
   },
-  "FirstTimeRunDate": "2024-01-11T12:20:32.6375641Z",
+  "FirstTimeRunDate": null,
   "FileUploadDefaultDirectory": "",
   "NameParserAutoIncrementNumber": 0,
   "QuickTaskPresets": [

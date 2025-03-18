@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
+use std::sync::atomic::Ordering;
 
 use color_eyre::eyre::anyhow;
 use color_eyre::eyre::bail;
@@ -8,7 +9,6 @@ use getset::CopyGetters;
 use getset::Getters;
 use getset::MutGetters;
 use getset::Setters;
-use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -17,50 +17,49 @@ use crate::core::Rect;
 use crate::container::Container;
 use crate::ring::Ring;
 use crate::workspace::Workspace;
+use crate::workspace::WorkspaceLayer;
 use crate::DefaultLayout;
 use crate::Layout;
 use crate::OperationDirection;
 use crate::WindowsApi;
+use crate::DEFAULT_CONTAINER_PADDING;
+use crate::DEFAULT_WORKSPACE_PADDING;
 
 #[derive(
-    Debug,
-    Clone,
-    Serialize,
-    Deserialize,
-    Getters,
-    CopyGetters,
-    MutGetters,
-    Setters,
-    JsonSchema,
-    PartialEq,
+    Debug, Clone, Serialize, Deserialize, Getters, CopyGetters, MutGetters, Setters, PartialEq,
 )]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Monitor {
     #[getset(get_copy = "pub", set = "pub")]
-    id: isize,
+    pub id: isize,
     #[getset(get = "pub", set = "pub")]
-    name: String,
+    pub name: String,
     #[getset(get = "pub", set = "pub")]
-    device: String,
+    pub device: String,
     #[getset(get = "pub", set = "pub")]
-    device_id: String,
+    pub device_id: String,
     #[getset(get = "pub", set = "pub")]
-    serial_number_id: Option<String>,
+    pub serial_number_id: Option<String>,
     #[getset(get = "pub", set = "pub")]
-    size: Rect,
+    pub size: Rect,
     #[getset(get = "pub", set = "pub")]
-    work_area_size: Rect,
+    pub work_area_size: Rect,
     #[getset(get_copy = "pub", set = "pub")]
-    work_area_offset: Option<Rect>,
+    pub work_area_offset: Option<Rect>,
     #[getset(get_copy = "pub", set = "pub")]
-    window_based_work_area_offset: Option<Rect>,
+    pub window_based_work_area_offset: Option<Rect>,
     #[getset(get_copy = "pub", set = "pub")]
-    window_based_work_area_offset_limit: isize,
-    workspaces: Ring<Workspace>,
+    pub window_based_work_area_offset_limit: isize,
+    pub workspaces: Ring<Workspace>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
-    last_focused_workspace: Option<usize>,
+    pub last_focused_workspace: Option<usize>,
     #[getset(get_mut = "pub")]
-    workspace_names: HashMap<usize, String>,
+    pub workspace_names: HashMap<usize, String>,
+    #[getset(get_copy = "pub", set = "pub")]
+    pub container_padding: Option<i32>,
+    #[getset(get_copy = "pub", set = "pub")]
+    pub workspace_padding: Option<i32>,
 }
 
 impl_ring_elements!(Monitor, Workspace);
@@ -114,6 +113,8 @@ pub fn new(
         workspaces,
         last_focused_workspace: None,
         workspace_names: HashMap::default(),
+        container_padding: None,
+        workspace_padding: None,
     }
 }
 
@@ -153,6 +154,8 @@ impl Monitor {
             workspaces: Default::default(),
             last_focused_workspace: None,
             workspace_names: Default::default(),
+            container_padding: None,
+            workspace_padding: None,
         }
     }
 
@@ -173,6 +176,52 @@ impl Monitor {
         }
 
         Ok(())
+    }
+
+    /// Updates the `globals` field of all workspaces
+    pub fn update_workspaces_globals(&mut self, offset: Option<Rect>) {
+        let container_padding = self
+            .container_padding()
+            .or(Some(DEFAULT_CONTAINER_PADDING.load(Ordering::SeqCst)));
+        let workspace_padding = self
+            .workspace_padding()
+            .or(Some(DEFAULT_WORKSPACE_PADDING.load(Ordering::SeqCst)));
+        let work_area = *self.work_area_size();
+        let offset = self.work_area_offset.or(offset);
+        let window_based_work_area_offset = self.window_based_work_area_offset();
+        let limit = self.window_based_work_area_offset_limit();
+
+        for workspace in self.workspaces_mut() {
+            workspace.globals_mut().container_padding = container_padding;
+            workspace.globals_mut().workspace_padding = workspace_padding;
+            workspace.globals_mut().work_area = work_area;
+            workspace.globals_mut().work_area_offset = offset;
+            workspace.globals_mut().window_based_work_area_offset = window_based_work_area_offset;
+            workspace.globals_mut().window_based_work_area_offset_limit = limit;
+        }
+    }
+
+    /// Updates the `globals` field of workspace with index `workspace_idx`
+    pub fn update_workspace_globals(&mut self, workspace_idx: usize, offset: Option<Rect>) {
+        let container_padding = self
+            .container_padding()
+            .or(Some(DEFAULT_CONTAINER_PADDING.load(Ordering::SeqCst)));
+        let workspace_padding = self
+            .workspace_padding()
+            .or(Some(DEFAULT_WORKSPACE_PADDING.load(Ordering::SeqCst)));
+        let work_area = *self.work_area_size();
+        let offset = self.work_area_offset.or(offset);
+        let window_based_work_area_offset = self.window_based_work_area_offset();
+        let limit = self.window_based_work_area_offset_limit();
+
+        if let Some(workspace) = self.workspaces_mut().get_mut(workspace_idx) {
+            workspace.globals_mut().container_padding = container_padding;
+            workspace.globals_mut().workspace_padding = workspace_padding;
+            workspace.globals_mut().work_area = work_area;
+            workspace.globals_mut().work_area_offset = offset;
+            workspace.globals_mut().window_based_work_area_offset = window_based_work_area_offset;
+            workspace.globals_mut().window_based_work_area_offset_limit = limit;
+        }
     }
 
     pub fn add_container(
@@ -314,11 +363,6 @@ impl Monitor {
             bail!("cannot move native maximized window to another monitor or workspace");
         }
 
-        // NOTE: 禁止将 monocle 窗口移动到其他 monitor 或 workspace
-        if workspace.monocle_container().is_some() {
-            bail!("cannot move monocle window to another monitor or workspace");
-        }
-
         // NOTE: 若当前 workspace 仅剩 1 个 container，则 focus 目标 workspace
         let is_empty = workspace.containers().len() == 1;
         let follow = follow || is_empty;
@@ -343,6 +387,7 @@ impl Monitor {
             };
 
             target_workspace.floating_windows_mut().push(window);
+            target_workspace.set_layer(WorkspaceLayer::Floating);
         } else {
             let container = workspace
                 .remove_focused_container()
@@ -358,6 +403,8 @@ impl Monitor {
                 }
                 Some(workspace) => workspace,
             };
+
+            target_workspace.set_layer(WorkspaceLayer::Tiling);
 
             if let Some(direction) = direction {
                 self.add_container_with_direction(
@@ -410,21 +457,17 @@ impl Monitor {
     }
 
     pub fn update_focused_workspace(&mut self, offset: Option<Rect>) -> Result<()> {
-        let work_area = *self.work_area_size();
-        let window_based_work_area_offset = (
-            self.window_based_work_area_offset_limit(),
-            self.window_based_work_area_offset(),
-        );
-
         let offset = if self.work_area_offset().is_some() {
             self.work_area_offset()
         } else {
             offset
         };
 
+        let focused_workspace_idx = self.focused_workspace_idx();
+        self.update_workspace_globals(focused_workspace_idx, offset);
         self.focused_workspace_mut()
             .ok_or_else(|| anyhow!("there is no workspace"))?
-            .update(&work_area, offset, window_based_work_area_offset)?;
+            .update()?;
 
         Ok(())
     }

@@ -1,8 +1,6 @@
 local bhu = require("plugins.bars_and_lines.heirline.utils")
 local icons = require("utils.icons")
 
-local heirline_utils = require("heirline.utils")
-
 local function OverseerTasksForStatus(status)
     return {
         condition = function(self)
@@ -13,7 +11,7 @@ local function OverseerTasksForStatus(status)
         end,
         hl = function(self)
             return {
-                fg = heirline_utils.get_highlight(string.format("Overseer%s", status)).fg,
+                fg = require("heirline.utils").get_highlight(string.format("Overseer%s", status)).fg,
             }
         end,
     }

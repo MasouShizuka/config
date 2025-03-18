@@ -1,7 +1,6 @@
 local M = {}
 
 M.skip_buftype_list = {
-    "help",
     "nofile",
     "popup",
     "prompt",

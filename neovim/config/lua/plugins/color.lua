@@ -11,26 +11,9 @@ return {
             "CccHighlighterToggle",
         },
         enabled = not environment.is_vscode,
-        init = function()
-            -- ccc 自动激活
-            vim.api.nvim_create_autocmd("BufReadPost", {
-                callback = function()
-                    require("ccc")
-                    pcall(vim.api.nvim_del_augroup_by_name, "CccActivate")
-                end,
-                desc = "Activate ccc",
-                group = vim.api.nvim_create_augroup("CccActivate", { clear = true }),
-                pattern = {
-                    "*.conf",
-                    "*.css",
-                    "*.ini",
-                    "*.json",
-                    "*.toml",
-                    "*.xaml",
-                    "*.yaml",
-                },
-            })
-        end,
+        event = {
+            "User IceLoad",
+        },
         opts = function()
             local mapping = require("ccc").mapping
 

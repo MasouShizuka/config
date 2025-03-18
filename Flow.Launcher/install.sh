@@ -1,7 +1,12 @@
 DIR=$(dirname "$(readlink -f "$0")")
 PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
-CONFIG_DIR=$DIR/config
+CONFIG_DIR="$DIR/config"
+
+if ((!is_windows)); then
+    echo "不是 Windows 平台"
+    exit 1
+fi
 
 scoop install flow-launcher
 

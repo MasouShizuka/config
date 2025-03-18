@@ -1,8 +1,4 @@
-local buftype = require("utils.buftype")
 local environment = require("utils.environment")
-local icons = require("utils.icons")
-local keymap = require("utils.keymap")
-local utils = require("utils")
 
 return {
     {
@@ -52,7 +48,7 @@ return {
 
             vim.api.nvim_create_autocmd("FileType", {
                 callback = function(args)
-                    vim.keymap.set({ "n", "x" }, keymap["<c-space>"], function() vim.api.nvim_command("MkdnToggleToDo") end, { buffer = args.buf, desc = "Toggle todo" })
+                    vim.keymap.set({ "n", "x" }, "<c-tab>", function() vim.api.nvim_command("MkdnToggleToDo") end, { buffer = args.buf, desc = "Toggle todo" })
                     vim.keymap.set("i", "<cr>", function() vim.api.nvim_command("MkdnNewListItem") end, { buffer = args.buf, desc = "New list item" })
                     vim.keymap.set({ "n", "i" }, "<tab>", function() vim.api.nvim_command("MkdnTableNextCell") end, { buffer = args.buf, desc = "Table next cell" })
                     vim.keymap.set({ "n", "i" }, "<s-tab>", function() vim.api.nvim_command("MkdnTablePrevCell") end, { buffer = args.buf, desc = "Table previous cell" })
@@ -103,6 +99,9 @@ return {
             "User MarkdownFile",
         },
         opts = function()
+            local icons = require("utils.icons")
+            local utils = require("utils")
+
             -- https://github.com/OXY2DEV/markview.nvim
             utils.set_hl(0, "RenderMarkdownH1Bg", { bg = "#453244", fg = "#f38ba8" })
             utils.set_hl(0, "RenderMarkdownH2Bg", { bg = "#46393e", fg = "#fab387" })
@@ -121,7 +120,7 @@ return {
             local overrides = {
                 buftype = {},
             }
-            for _, bt in ipairs(buftype.skip_buftype_list) do
+            for _, bt in ipairs(require("utils.buftype").skip_buftype_list) do
                 overrides.buftype[bt] = {}
                 overrides.buftype[bt].enabled = false
             end

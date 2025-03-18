@@ -1,12 +1,11 @@
 local environment = require("utils.environment")
-local lsp = require("utils.lsp")
-local utils = require("utils")
 
 return {
     name = "run",
     builder = function()
-        local curr_file = vim.fn.expand("%:~:.")
-        local output = vim.fn.expand("%:.:r")
+        local curr_file = vim.fn.expand("%:p:.")
+        local curr_file_no_ext = vim.fn.fnamemodify(curr_file, ":r")
+        local output = curr_file_no_ext
         if environment.is_windows then
             curr_file = curr_file:gsub("\\", "/")
             output = output:gsub("\\", "/") .. ".exe"
@@ -67,7 +66,7 @@ return {
                 { "on_complete_notify",  statuses = { "FAILURE" } },
                 "default",
             }
-            if utils.is_available("markdown-preview.nvim") then
+            if require("utils").is_available("markdown-preview.nvim") then
                 vim.api.nvim_command("MarkdownPreviewToggle")
             end
         elseif ft == "python" then
@@ -101,7 +100,7 @@ return {
                 { "on_complete_notify",  statuses = { "FAILURE" } },
                 "default",
             }
-            if vim.tbl_contains(lsp.lsp_list, "texlab") then
+            if vim.tbl_contains(require("utils.lsp").lsp_list, "texlab") then
                 vim.api.nvim_command("TexlabBuild")
             end
         end

@@ -1,6 +1,5 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     {
@@ -9,14 +8,18 @@ return {
             "ScissorsAddNewSnippet",
             "ScissorsEditSnippet",
         },
-        dependencies = {
-            "nvim-telescope/telescope.nvim",
-        },
         enabled = not environment.is_vscode,
         init = function()
+            local utils = require("utils")
             if utils.is_available("which-key.nvim") then
-                require("which-key").add({
-                    { "<leader>S", group = "scissors", mode = "n" },
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>S", group = "scissors", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for scissors",
+                    pattern = "IceLoad",
                 })
             end
         end,

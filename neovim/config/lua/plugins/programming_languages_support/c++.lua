@@ -1,6 +1,5 @@
 local environment = require("utils.environment")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     -- NOTE: leetcode.nvim 使用 curl 来 post 数据，需要安装 curl
@@ -17,7 +16,7 @@ return {
         config = function(_, opts)
             require("leetcode").setup(opts)
 
-            if utils.is_available("which-key.nvim") then
+            if require("utils").is_available("which-key.nvim") then
                 require("which-key").add({
                     {
                         mode = "n",
@@ -59,7 +58,6 @@ return {
         dependencies = {
             "MunifTanjim/nui.nvim",
             "nvim-lua/plenary.nvim",
-            "nvim-telescope/telescope.nvim",
             "nvim-tree/nvim-web-devicons",
         },
         enabled = not environment.is_vscode,

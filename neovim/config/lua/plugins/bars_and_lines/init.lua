@@ -1,10 +1,4 @@
-local buftype = require("utils.buftype")
-local colors = require("utils.colors")
 local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local icons = require("utils.icons")
-local lsp = require("utils.lsp")
-local utils = require("utils")
 
 return {
     {
@@ -18,6 +12,7 @@ return {
         },
         opts = function()
             local bhu = require("plugins.bars_and_lines.heirline.utils")
+            local utils = require("utils")
 
             local herrline_conditions = require("heirline.conditions")
             local heirline_utils = require("heirline.utils")
@@ -61,7 +56,7 @@ return {
             )
 
 
-            local align = require("plugins.bars_and_lines.heirline.utils").align
+            local align = bhu.align
             local mode = require("plugins.bars_and_lines.heirline.mode")
             local file_size = require("plugins.bars_and_lines.heirline.file").file_size
             local search_count = require("plugins.bars_and_lines.heirline.cmd").search_count
@@ -108,7 +103,7 @@ return {
 
             return {
                 statusline = {
-                    hl = { bg = colors.colors.black },
+                    hl = { bg = require("utils.colors").colors.black },
                     fallthrough = false,
 
                     {
@@ -122,8 +117,8 @@ return {
                     {
                         condition = function()
                             return herrline_conditions.buffer_matches({
-                                buftype = buftype.skip_buftype_list,
-                                filetype = filetype.skip_filetype_list,
+                                buftype = require("utils.buftype").skip_buftype_list,
+                                filetype = require("utils.filetype").skip_filetype_list,
                             })
                         end,
 
@@ -144,15 +139,15 @@ return {
                     require("plugins.bars_and_lines.heirline.tabline").tablist,
                 },
                 statuscolumn = {
-                    require("plugins.bars_and_lines.heirline.statuscolumn").fold,
+                    require("plugins.bars_and_lines.heirline.statuscolumn").foldcolumn,
                     require("plugins.bars_and_lines.heirline.statuscolumn").signcolumn,
                     align,
-                    require("plugins.bars_and_lines.heirline.statuscolumn").number,
+                    require("plugins.bars_and_lines.heirline.statuscolumn").numbercolumn,
                 },
                 opts = {
                     disable_winbar_cb = function(args)
                         local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-                        return not vim.tbl_contains(lsp.lsp_filetype_list, ft)
+                        return not vim.tbl_contains(require("utils.lsp").lsp_filetype_list, ft)
                     end,
                 },
             }
@@ -173,9 +168,11 @@ return {
             })
         end,
         lazy = true,
-        opts = {
-            icons = icons.kinds,
-            lazy_update_content = true,
-        },
+        opts = function()
+            return {
+                icons = require("utils.icons").kinds,
+                lazy_update_content = true,
+            }
+        end,
     },
 }

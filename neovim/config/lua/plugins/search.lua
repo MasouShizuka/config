@@ -1,5 +1,4 @@
 local environment = require("utils.environment")
-local utils = require("utils")
 
 return {
     -- NOTE: 需要安装 ripgrep
@@ -9,10 +8,13 @@ return {
             "GrugFar",
         },
         config = function(_, opts)
-            require("grug-far").setup(opts)
+            local grug_far = require("grug-far")
+            grug_far.setup(opts)
 
             vim.api.nvim_create_autocmd("FileType", {
                 callback = function(args)
+                    local utils = require("utils")
+
                     if utils.is_available("which-key.nvim") then
                         require("which-key").add({
                             { "<leader>t", buffer = args.buf, group = "Grug Far: toggle", mode = "n" },
@@ -34,11 +36,15 @@ return {
                         vim.notify("toggled current file only " .. utils.bool2str(filter_line ~= ""), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle current file only", silent = true })
                     vim.keymap.set("n", "<leader>tf", function()
-                        local state = unpack(require("grug-far").toggle_flags({ "--fixed-strings" }))
+                        local state = unpack(grug_far.toggle_flags({ "--fixed-strings" }))
                         vim.notify("toggled --fixed-strings " .. utils.bool2str(state), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle --fixed-strings", silent = true })
+                    vim.keymap.set("n", "<leader>tm", function()
+                        local state = unpack(grug_far.toggle_flags({ "--multiline" }))
+                        vim.notify("toggled --multiline " .. utils.bool2str(state), vim.log.levels.INFO, { title = "Grug Far" })
+                    end, { buffer = args.buf, desc = "Grug Far: toggle --multiline", silent = true })
                     vim.keymap.set("n", "<leader>te", function()
-                        local state = unpack(require("grug-far").toggle_flags({ "--replace=" }))
+                        local state = unpack(grug_far.toggle_flags({ "--replace=" }))
                         vim.notify("toggled empty string " .. utils.bool2str(state), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle empty string", silent = true })
                 end,
@@ -51,8 +57,8 @@ return {
             {
                 "<leader><c-f>",
                 function()
-                    vim.g.grug_far_prev_file = vim.fn.expand("%:."):gsub("\\", "/")
-                    require("grug-far").grug_far()
+                    vim.g.grug_far_prev_file = vim.fn.expand("%:p:."):gsub("\\", "/")
+                    require("grug-far").open()
                 end,
                 desc = "Grug Far: open a grug-far buffer",
                 mode = "n",
@@ -60,7 +66,7 @@ return {
             {
                 "<leader><c-f>",
                 function()
-                    vim.g.grug_far_prev_file = vim.fn.expand("%:."):gsub("\\", "/")
+                    vim.g.grug_far_prev_file = vim.fn.expand("%:p:."):gsub("\\", "/")
                     require("grug-far").with_visual_selection()
                 end,
                 desc = "Grug Far: pre-fill current visual selection",
@@ -68,32 +74,51 @@ return {
             },
         },
         opts = {
+            -- search and replace engines configuration
+            engines = {
+                -- see https://github.com/BurntSushi/ripgrep
+                ripgrep = {
+                    -- extra args that you always want to pass
+                    -- like for example if you always want context lines around matches
+                    extraArgs = "--hidden --no-ignore",
+                },
+            },
+
             -- whether to start in insert mode,
             -- set to false for normal mode
             startInInsertMode = false,
 
             -- shortcuts for the actions you see at the top of the buffer
             -- set to '' or false to unset. Mappings with no normal mode value will be removed from the help header
-            -- you can specify either a string which is then used as the mapping for both normmal and insert mode
-            -- or you can specify a table of the form { [mode] = <lhs> } (ex: { i = '<C-enter>', n = '<localleader>gr'})
+            -- you can specify either a string which is then used as the mapping for both normal and insert mode
+            -- or you can specify a table of the form { [mode] = <lhs> } (e.g. { i = '<C-enter>', n = '<localleader>gr'})
             -- it is recommended to use <localleader> though as that is more vim-ish
             -- see https://learnvimscriptthehardway.stevelosh.com/chapters/11.html#local-leader
             keymaps = {
-                replace = { n = "<leader>r" },
-                qflist = { n = "<leader>q" },
-                syncLocations = { n = "R" },
+                -- replace = { n = "<localleader>r" },
+                replace = { n = "R" },
+                -- qflist = { n = "<localleader>q" },
+                -- syncLocations = { n = "<localleader>s" },
+                -- syncLine = { n = "<localleader>l" },
                 syncLine = { n = "r" },
+                -- close = { n = "<localleader>c" },
                 close = { n = "<c-w>" },
+                -- historyOpen = { n = "<localleader>t" },
                 historyOpen = { n = "<leader>h" },
-                historyAdd = { n = "<leader>a" },
-                refresh = { n = "<leader>f" },
-                openLocation = { n = "<leader>o" },
-                gotoLocation = { n = "<enter>" },
-                pickHistoryEntry = { n = "<enter>" },
-                abort = { n = "<leader>b" },
-                help = { n = "g?" },
-                toggleShowCommand = { n = "<leader>p" },
-                swapEngine = { n = "<leader>e" },
+                -- historyAdd = { n = "<localleader>a" },
+                -- refresh = { n = "<localleader>f" },
+                -- openNextLocation = { n = "<down>" },
+                -- openPrevLocation = { n = "<up>" },
+                -- gotoLocation = { n = "<enter>" },
+                -- pickHistoryEntry = { n = "<enter>" },
+                -- abort = { n = "<localleader>b" },
+                -- help = { n = "g?" },
+                -- toggleShowCommand = { n = "<localleader>p" },
+                -- swapEngine = { n = "<localleader>e" },
+                -- previewLocation = { n = "<localleader>i" },
+                -- swapReplacementInterpreter = { n = "<localleader>x" },
+                -- applyNext = { n = "<localleader>j" },
+                -- applyPrev = { n = "<localleader>k" },
             },
 
             -- search history settings

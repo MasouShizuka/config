@@ -1,7 +1,4 @@
 local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local keymap = require("utils.keymap")
-local utils = require("utils")
 
 return {
     {
@@ -9,6 +6,10 @@ return {
         config = function(_, opts)
             local edgy = require("edgy")
             edgy.setup(opts)
+
+            local filetype = require("utils.filetype")
+            local keymap = require("utils.keymap")
+            local utils = require("utils")
 
             local function focus_nth_win(pos, n)
                 for p, edgebar in pairs(require("edgy.config").layout) do
@@ -32,7 +33,7 @@ return {
             local function toggle(pos)
                 local panel_filetype_list = filetype.panel_filetype_lists[pos]
 
-                local is_focused, _ = filetype.get_focused_panel_filetype(panel_filetype_list)
+                local is_focused, _ = filetype.get_focused_panel_filetype_info(panel_filetype_list)
                 if is_focused then
                     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                         if not vim.api.nvim_win_is_valid(win) then
@@ -41,12 +42,12 @@ return {
 
                         local buf = vim.api.nvim_win_get_buf(win)
                         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                        local is_panel_filetype, func = filetype.get_panel_filetype_func(ft, panel_filetype_list)
+                        local is_panel_filetype, info = filetype.get_panel_filetype_info(ft, panel_filetype_list)
                         if is_panel_filetype then
-                            local close_func = func.close
-                            if type(close_func) == "function" then
-                                close_func()
-                            else
+                            local close = info.close
+                            if type(close) == "function" then
+                                close()
+                            elseif close then
                                 vim.api.nvim_win_close(win, true)
                             end
                         end
@@ -63,7 +64,7 @@ return {
                     prev_win = vim.api.nvim_get_current_win()
                 end
 
-                local opened = filetype.get_opened_panel_filetype(panel_filetype_list)
+                local opened = filetype.get_opened_panel_filetype_wins(panel_filetype_list)
                 if #opened > 0 then
                     if not focus_nth_win(pos, 1) then
                         vim.api.nvim_set_current_win(opened[1])
@@ -91,8 +92,10 @@ return {
             vim.keymap.set("n", keymap["<c-3>"], function()
                 local count = vim.v.count
                 if count > 0 then
-                    vim.api.nvim_command(tostring(count) .. "ToggleTerm")
-                    return
+                    if utils.is_available("snacks.nvim") then
+                        require("snacks").terminal()
+                        return
+                    end
                 end
 
                 toggle("bottom")
@@ -102,40 +105,36 @@ return {
         enabled = not environment.is_vscode,
         init = function()
             -- edgy 自动激活
-            local edgy_activate = vim.api.nvim_create_augroup("EdgyActivate", { clear = true })
-            vim.api.nvim_create_autocmd("BufNew", {
+            local id
+            id = vim.api.nvim_create_autocmd("BufNew", {
                 callback = function(args)
                     vim.schedule(function()
                         if vim.api.nvim_buf_is_valid(args.buf) then
                             local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-                            if filetype.is_panel_filetype(ft) then
-                                require("edgy")
-                                pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
+                            if require("utils.filetype").is_panel_filetype(ft) then
+                                require("lazy").load({ plugins = "edgy.nvim" })
+                                pcall(vim.api.nvim_del_autocmd, id)
                             end
                         end
                     end)
                 end,
                 desc = "Activate edgy",
-                group = edgy_activate,
             })
-            if utils.is_available("toggleterm.nvim") and filetype.is_panel_filetype("toggleterm") then
-                vim.api.nvim_create_autocmd("TermOpen", {
-                    callback = function()
-                        require("edgy")
-                        pcall(vim.api.nvim_del_augroup_by_name, "EdgyActivate")
-                    end,
-                    desc = "Activate edgy",
-                    group = edgy_activate,
-                })
-            end
         end,
-        keys = {
-            { keymap["<c-1>"], desc = "Focus left panel",   mode = "n" },
-            { keymap["<c-2>"], desc = "Focus main editor",  mode = "n" },
-            { keymap["<c-3>"], desc = "Focus bottom panel", mode = "n" },
-            { keymap["<c-4>"], desc = "Focus right panel",  mode = "n" },
-        },
+        keys = function()
+            local keymap = require("utils.keymap")
+
+            return {
+                { keymap["<c-1>"], desc = "Focus left panel",   mode = "n" },
+                { keymap["<c-2>"], desc = "Focus main editor",  mode = "n" },
+                { keymap["<c-3>"], desc = "Focus bottom panel", mode = "n" },
+                { keymap["<c-4>"], desc = "Focus right panel",  mode = "n" },
+            }
+        end,
         opts = function()
+            local filetype = require("utils.filetype")
+            local utils = require("utils")
+
             local left = {}
 
             local bottom = {
@@ -154,10 +153,6 @@ return {
                         return vim.api.nvim_get_option_value("buftype", { buf = buf }) == "help"
                     end,
                     size = { width = 0.5 },
-                },
-                {
-                    ft = "nvim-docs-view",
-                    size = { width = 0.3 },
                 },
             }
 
@@ -197,15 +192,6 @@ return {
                 }
             end
 
-            if utils.is_available("nvim-tree.lua") then
-                left[#left + 1] = {
-                    ft = "NvimTree",
-                    size = { width = 0.2, height = 0.7 },
-                    pinned = true,
-                    open = filetype.left_panel_filetype_list["NvimTree"].open,
-                }
-            end
-
             if utils.is_available("overseer.nvim") then
                 bottom[#bottom + 1] = {
                     ft = "OverseerOutput",
@@ -217,16 +203,29 @@ return {
                 }
             end
 
-            if utils.is_available("toggleterm.nvim") then
+            if utils.is_available("snacks.nvim") then
+                left[#left + 1] = {
+                    ft = "snacks_explorer_list",
+                    size = { width = 0.2 },
+                }
+                left[#left + 1] = {
+                    ft = "snacks_explorer_input",
+                    size = { width = 0.2, height = 0.1 },
+                    pinned = true,
+                    open = filetype.left_panel_filetype_list["snacks_explorer_input"].open,
+                }
                 bottom[#bottom + 1] = {
-                    ft = "toggleterm",
-                    -- exclude floating windows
-                    filter = function(buf, win)
-                        return vim.api.nvim_win_get_config(win).relative == ""
+                    ft = "snacks_terminal",
+                    filter = function(_buf, win)
+                        return vim.w[win].snacks_win
+                            and vim.w[win].snacks_win.position == "bottom"
+                            and vim.w[win].snacks_win.relative == "editor"
+                            and not vim.w[win].trouble_preview
                     end,
+                    -- title = "%{b:snacks_terminal.id}: %{b:term_title}",
                     size = { height = 0.3 },
                     pinned = true,
-                    open = filetype.bottom_panel_filetype_list["toggleterm"].open,
+                    open = filetype.bottom_panel_filetype_list["snacks_terminal"].open,
                 }
             end
 
@@ -276,10 +275,10 @@ return {
                 -- Set to false to disable a builtin.
                 ---@type table<string, fun(win:Edgy.Window)|false>
                 keys = {
-                    -- close window
-                    ["q"] = function(win)
-                        win:close()
-                    end,
+                    -- -- close window
+                    -- ["q"] = function(win)
+                    --     win:close()
+                    -- end,
                     -- hide window
                     ["<c-q>"] = function(win)
                         local idx = win.idx
@@ -312,18 +311,18 @@ return {
 
                         win:hide()
                     end,
-                    -- close sidebar
-                    ["Q"] = function(win)
-                        win.view.edgebar:close()
-                    end,
-                    -- next open window
-                    ["]w"] = function(win)
-                        win:next({ visible = true, focus = true })
-                    end,
-                    -- previous open window
-                    ["[w"] = function(win)
-                        win:prev({ visible = true, focus = true })
-                    end,
+                    -- -- close sidebar
+                    -- ["Q"] = function(win)
+                    --     win.view.edgebar:close()
+                    -- end,
+                    -- -- next open window
+                    -- ["]w"] = function(win)
+                    --     win:next({ visible = true, focus = true })
+                    -- end,
+                    -- -- previous open window
+                    -- ["[w"] = function(win)
+                    --     win:prev({ visible = true, focus = true })
+                    -- end,
                     -- next loaded window
                     ["]W"] = false,
                     ["<c-j>"] = function(win)
@@ -354,8 +353,10 @@ return {
                     ["<c-down>"] = function(win)
                         win:resize("height", -2)
                     end,
-                    -- reset all custom sizing
-                    ["<c-w>="] = false,
+                    -- -- reset all custom sizing
+                    -- ["<c-w>="] = function(win)
+                    --     win.view.edgebar:equalize()
+                    -- end,
                 },
             }
         end,

@@ -48,8 +48,8 @@
   "FirstLaunch": false,
   "SettingWindowWidth": 1200,
   "SettingWindowHeight": 800,
-  "SettingWindowTop": 336,
-  "SettingWindowLeft": 680,
+  "SettingWindowTop": 0,
+  "SettingWindowLeft": 0,
   "SettingWindowState": 0,
   "CustomExplorerIndex": 6,
   "CustomExplorerList": [
@@ -90,14 +90,14 @@
     },
     {
       "Name": "WezTerm",
-      "Path": "powershell",
+      "Path": "pwsh",
       "FileArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
       "DirectoryArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
       "Editable": true
     },
     {
       "Name": "Yazi",
-      "Path": "powershell",
+      "Path": "pwsh",
       "FileArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027,\u0022yazi\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
       "DirectoryArgument": "-Command Start-Process \u0022wezterm\u0022 -ArgumentList \u0022start\u0022,\u0022--cwd\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027,\u0022yazi\u0022,\u0027\u0022\u0022\u0022%d\u0022\u0022\u0022\u0027 -WindowStyle Hidden",
       "Editable": true

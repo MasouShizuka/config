@@ -4,10 +4,7 @@
 
 Set-Alias ll ls
 
-Set-Alias lg lazygit
 
-Set-Alias vi nvim
-Set-Alias vim nvim
 
 
 
@@ -16,7 +13,7 @@ Set-Alias vim nvim
 # ╰──────────────────────╯
 
 $env:EDITOR="nvim"
-$env:GIT_EDITOR="nvim"
+$env:GIT_EDITOR=$env:EDITOR
 
 
 
@@ -78,6 +75,15 @@ Set-PSReadLineOption -AddToHistoryHandler {
 # │ Command Line Tool │
 # ╰───────────────────╯
 
+# ╭─ bottom ─────────────────────────────────────────────────╮
+
+if (Get-Command "btm" -ErrorAction SilentlyContinue) {
+    Set-Alias b btm
+}
+
+# ╰───────────────────────────────────────────────── bottom ─╯
+
+
 # ╭─ fzf ────────────────────────────────────────────────────╮
 
 $env:FZF_COMPLETION_TRIGGER="\\"
@@ -90,14 +96,9 @@ $env:FZF_DEFAULT_OPTS="
     --info=inline
     --preview='bat --number --color always --theme ansi --line-range :500 {}'
     --preview-border=rounded
-    --bind=ctrl-i:accept
+    --bind=ctrl-i:accept,ctrl-d:page-down,ctrl-u:page-up,ctrl-f:preview-down,ctrl-b:preview-up
 "
 
-# # One Dark
-# $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
-#     --color=dark
-#     --color=fg:-1,bg:-1,hl:#c678dd,fg+:#abb2bf,bg+:#282c34,hl+:#c678dd
-#     --color=info:#98c379,prompt:#61afef,pointer:#e06c75,marker:#e5c07b,spinner:#61afef,header:#61afef"
 # Tokyo Night Moon
 # https://github.com/folke/tokyonight.nvim/blob/main/extras/fzf/tokyonight_moon.sh
 $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
@@ -120,29 +121,51 @@ $env:FZF_DEFAULT_OPTS="$env:FZF_DEFAULT_OPTS
 # ╰──────────────────────────────────────────────────── fzf ─╯
 
 
+# ╭─ lazygit ────────────────────────────────────────────────╮
+
+if (Get-Command "lazygit" -ErrorAction SilentlyContinue) {
+    Set-Alias lg lazygit
+}
+
+# ╰──────────────────────────────────────────────── lazygit ─╯
+
+
+# ╭─ neovim ─────────────────────────────────────────────────╮
+
+if (Get-Command "nvim" -ErrorAction SilentlyContinue) {
+    Set-Alias v nvim
+}
+
+# ╰───────────────────────────────────────────────── neovim ─╯
+
+
 # ╭─ sfsu ───────────────────────────────────────────────────╮
 
-Invoke-Expression (&sfsu hook)
+if (Get-Command "sfsu" -ErrorAction SilentlyContinue) {
+    Invoke-Expression (&sfsu hook)
+}
 
 # ╰─────────────────────────────────────────────────── sfsu ─╯
 
 
 # ╭─ starship ───────────────────────────────────────────────╮
 
-$env:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
-Invoke-Expression (&starship init powershell)
+if (Get-Command "starship" -ErrorAction SilentlyContinue) {
+    $env:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+    Invoke-Expression (&starship init powershell)
 
-# OSC 7 on Windows with powershell (with starship)
-if ($env:TERM_PROGRAM -eq "WezTerm") {
-    $prompt=""
-    function Invoke-Starship-PreCommand {
-        $current_location=$executionContext.SessionState.Path.CurrentLocation
-        if ($current_location.Provider.Name -eq "FileSystem") {
-            $ansi_escape=[char]27
-            $provider_path=$current_location.ProviderPath -replace "\\", "/"
-            $prompt="$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
+    # OSC 7 on Windows with powershell (with starship)
+    if ($env:TERM_PROGRAM -eq "WezTerm") {
+        $prompt=""
+        function Invoke-Starship-PreCommand {
+            $current_location=$executionContext.SessionState.Path.CurrentLocation
+            if ($current_location.Provider.Name -eq "FileSystem") {
+                $ansi_escape=[char]27
+                $provider_path=$current_location.ProviderPath -replace "\\", "/"
+                $prompt="$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
+            }
+            $host.ui.Write($prompt)
         }
-        $host.ui.Write($prompt)
     }
 }
 
@@ -151,14 +174,16 @@ if ($env:TERM_PROGRAM -eq "WezTerm") {
 
 # ╭─ yazi ───────────────────────────────────────────────────╮
 
-function y {
-    $tmp = [System.IO.Path]::GetTempFileName()
-    yazi $args --cwd-file="$tmp"
-    $cwd = Get-Content -Path $tmp
-    if (-not [String]::IsNullOrEmpty($cwd) -and $cwd -ne $PWD.Path) {
-        Set-Location -LiteralPath $cwd
+if (Get-Command "yazi" -ErrorAction SilentlyContinue) {
+    function y {
+        $tmp = [System.IO.Path]::GetTempFileName()
+        yazi $args --cwd-file="$tmp"
+        $cwd = Get-Content -Path $tmp
+        if (-not [String]::IsNullOrEmpty($cwd) -and $cwd -ne $PWD.Path) {
+            Set-Location -LiteralPath $cwd
+        }
+        Remove-Item -Path $tmp
     }
-    Remove-Item -Path $tmp
 }
 
 # ╰─────────────────────────────────────────────────── yazi ─╯
@@ -171,7 +196,6 @@ function y {
 
 $MAMBA_EXE="$HOME/scoop/apps/mambaforge/current/Library/bin/mamba.exe"
 if (Test-Path "$MAMBA_EXE") {
-    $Env:MAMBA_ROOT_PREFIX="$HOME/scoop/persist/mambaforge"
     $Env:MAMBA_EXE="$MAMBA_EXE"
-    (& $Env:MAMBA_EXE 'shell' 'hook' -s 'powershell' -r $Env:MAMBA_ROOT_PREFIX) | Out-String | Invoke-Expression
+    (& $Env:MAMBA_EXE 'shell' 'hook' -s 'powershell') | Out-String | Invoke-Expression
 }

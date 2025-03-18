@@ -1,24 +1,21 @@
-local colors = require("utils.colors")
 local path = require("utils.path")
-local utils = require("utils")
 
 local M = {}
 
 local default_config = {
     default_colorscheme = "tokyonight",
-    colorscheme_file = path.data_path .. "/colorscheme.json",
+    colorscheme_file = path.data_path .. "/colorscheme",
 }
 
 local function load_colorscheme()
-    local data = utils.json_load(default_config.colorscheme_file)
-    local colorscheme = data.colorscheme
+    local colorscheme = require("utils").file_read(default_config.colorscheme_file)
     if colorscheme == nil then
         colorscheme = default_config.default_colorscheme
     end
 
-    for installed_colorscheme, value in pairs(colors.colorscheme) do
+    for installed_colorscheme, value in pairs(require("utils.colors").colorscheme_list) do
         if colorscheme:match(installed_colorscheme) then
-            require(value.package_name)
+            require("lazy").load({ plugins = value.package_name })
             vim.cmd.colorscheme(colorscheme)
             break
         end
@@ -32,10 +29,7 @@ M.setup = function(opts)
 
     vim.api.nvim_create_autocmd("VimLeave", {
         callback = function()
-            local data = {
-                colorscheme = vim.g.colors_name or "default",
-            }
-            utils.json_save(default_config.colorscheme_file, data)
+            require("utils").file_write(default_config.colorscheme_file, vim.g.colors_name or "default")
         end,
         desc = "Save colorscheme to local file",
         group = vim.api.nvim_create_augroup("ColorschemeAutoSave", { clear = true }),

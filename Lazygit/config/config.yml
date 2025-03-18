@@ -47,8 +47,8 @@ keybinding:
     select: '<enter>'
     goInto: 'l'
     openRecentRepos: '<c-o>'
-    scrollUpMain: '<up>' # main panel scroll up
-    scrollDownMain: '<down>' # main panel scroll down
+    scrollUpMain: '<c-b>' # main panel scroll up
+    scrollDownMain: '<c-f>' # main panel scroll down
     scrollUpMain-alt1: '<disabled>' # main panel scroll up
     scrollDownMain-alt1: '<disabled>' # main panel scroll down
     scrollUpMain-alt2: '<disabled>' # main panel scroll up
@@ -61,6 +61,8 @@ keybinding:
     rangeSelectUp: 'K'
     rangeSelectDown: 'J'
   files:
+    findBaseCommitForFixup: 'F'
+    openStatusFilter: 't'
     copyFileInfoToClipboard: 'Y'
   commits:
     viewResetOptions: '<backspace>'

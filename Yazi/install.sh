@@ -1,16 +1,18 @@
 DIR=$(dirname "$(readlink -f "$0")")
 PARENT_DIR=$(dirname "$DIR")
 source "$PARENT_DIR/lib.sh"
-CONFIG_DIR=$DIR/config
+CONFIG_DIR="$DIR/config"
 
-scoop install yazi
+if ((is_windows)); then
+    scoop install yazi
 
-scoop install bat
-scoop install fd
-scoop install fzf
-scoop install ouch
-scoop install ripgrep
+    scoop install bat
+    scoop install fd
+    scoop install fzf
+    scoop install ouch
+    scoop install ripgrep
 
-target="$APPDATA/yazi"
-clean_target "$target"
-install_to_target "$CONFIG_DIR" "$target"
+    target="$APPDATA/yazi/config"
+    clean_target "$target"
+    install_to_target "$CONFIG_DIR" "$target"
+fi

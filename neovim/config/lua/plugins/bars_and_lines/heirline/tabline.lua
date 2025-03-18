@@ -1,6 +1,5 @@
 local bhu = require("plugins.bars_and_lines.heirline.utils")
 local colors = require("utils.colors")
-local filetype = require("utils.filetype")
 local icons = require("utils.icons")
 
 local heirline_utils = require("heirline.utils")
@@ -13,6 +12,7 @@ M.tabline_offset = {
         self.win = vim.api.nvim_tabpage_list_wins(0)[1]
         self.buf = vim.api.nvim_win_get_buf(self.win)
         local ft = vim.api.nvim_get_option_value("filetype", { buf = self.buf })
+        local filetype = require("utils.filetype")
         return filetype.is_panel_filetype(ft, filetype.left_panel_filetype_list)
     end,
     provider = function(self)

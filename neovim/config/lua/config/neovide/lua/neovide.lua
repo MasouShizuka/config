@@ -15,8 +15,9 @@ M.setup = function(opts)
     vim.keymap.set("n", "<c-0>", function() vim.g.neovide_scale_factor = 1.0 end)
 
     -- Display
-    vim.opt.linespace = -2
-    vim.g.neovide_transparency = 0.8
+    vim.g.neovide_window_blurred = true
+    vim.g.neovide_opacity = 0.6
+    vim.g.neovide_normal_opacity = 0.6
     vim.g.neovide_underline_stroke_scale = 2.0
 
     -- Cursor Particles

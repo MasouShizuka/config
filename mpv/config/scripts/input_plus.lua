@@ -19,11 +19,6 @@
 
  <KEY>   script-binding input_plus/info_toggle         # 启用/禁用仿Pot的OSD常驻显示简要信息
 
- <KEY>   script-binding input_plus/load_cbd            # 加载剪贴板地址
- <KEY>   script-binding input_plus/load_cbd_add        # ...（追加到列表）
- <KEY>   script-binding input_plus/load_cbd_alt        # 加载主缓冲区地址（仅Linux可用）
- <KEY>   script-binding input_plus/load_cbd_alt_add    # ...（追加到列表）
-
  <KEY>   script-binding input_plus/mark_aid_A          # 标记当前音轨为A
  <KEY>   script-binding input_plus/mark_aid_B          # 标记当前音轨为B
  <KEY>   script-binding input_plus/mark_aid_merge      # 合并AB音轨
@@ -60,8 +55,8 @@
  <KEY>   script-binding input_plus/speed_recover       # 仿Pot的速度重置与恢复
  <KEY>   script-binding input_plus/speed_sync_toggle   # 启用/禁用自适应速度偏移（补偿显示刷新率）
 
- <KEY>   script-binding input_plus/stats_1_2           # 单键浏览统计数据第1至2页
- <KEY>   script-binding input_plus/stats_0_4           # 单键浏览统计数据第0至4页
+ <KEY>   script-binding input_plus/stats_1_2           # 循环浏览统计数据第1至2页
+ <KEY>   script-binding input_plus/stats_0_5           # 循环浏览统计数据第0至5页
 
  <KEY>   script-binding input_plus/trackA_back         # 上一个音频轨道（自动跳过无轨道）
  <KEY>   script-binding input_plus/trackA_next         # 下...
@@ -122,8 +117,6 @@ local cmds_sqnum = {}
 local osm = mp.create_osd_overlay("ass-events")
 local osm_showing = false
 local style_generic = "{\\rDefault\\fnConsolas\\fs20\\blur1\\bord2\\1c&HFFFFFF\\3c&H000000}"
-
-local text_pasted = nil
 
 local marked_aid_A = nil
 local marked_aid_B = nil
@@ -400,62 +393,6 @@ function info_toggle()
 			osm:update()
 		end
 	end)
-end
-
-
-function copy_clipboard(clip)
-	if plat == "windows" then
-		local res = utils.subprocess({
-			args = { 'powershell', '-NoProfile', '-Command', [[& {
-				Trap {
-					Write-Error -ErrorRecord $_
-					Exit 1
-				}
-				$clip = ""
-				if (Get-Command "Get-Clipboard" -errorAction SilentlyContinue) {
-					$clip = Get-Clipboard -Raw -Format Text -TextFormatType UnicodeText
-				} else {
-					Add-Type -AssemblyName PresentationCore
-					$clip = [Windows.Clipboard]::GetText()
-				}
-				$clip = $clip -Replace "`r",""
-				$u8clip = [System.Text.Encoding]::UTF8.GetBytes($clip)
-				[Console]::OpenStandardOutput().Write($u8clip, 0, $u8clip.Length)
-			}]] },
-			playback_only = false,
-		})
-		if not res.error then
-			return res.stdout
-		end
-	elseif plat == "macos" then
-		local res = utils.subprocess({args = { 'pbpaste' }, playback_only = false,})
-		if not res.error then
-			return res.stdout
-		end
-	elseif plat == "x11" then
-		local res = utils.subprocess({args = { 'xclip', '-selection', clip and 'clipboard' or 'primary', '-out' }, playback_only = false,})
-		if not res.error then
-			return res.stdout
-		end
-	elseif plat == "wayland" then
-		local res = utils.subprocess({args = { 'wl-paste', clip and '-n' or  '-np' }, playback_only = false,})
-		if not res.error then
-			return res.stdout
-		end
-	end
-	return ""
-end
-function load_clipboard(action, clip)
-	if not clip and (plat == "windows" or plat == "macos") then
-		return
-	end
-	local text = copy_clipboard(clip):gsub("^%s*", ""):gsub("%s*$", "")
-	if text == text_pasted and action == "replace" then
-		mp.osd_message("剪贴板内容无变动", 1)
-		return
-	end
-	mp.commandv("loadfile", text, action)
-	text_pasted = text
 end
 
 
@@ -935,11 +872,6 @@ mp.add_key_binding(nil, "import_append_sid", import_append_sid)
 
 mp.add_key_binding(nil, "info_toggle", info_toggle)
 
-mp.add_key_binding(nil, "load_cbd", function() load_clipboard("replace", true) end)
-mp.add_key_binding(nil, "load_cbd_alt", function() load_clipboard("replace") end)
-mp.add_key_binding(nil, "load_cbd_add", function() load_clipboard("append-play", true) end)
-mp.add_key_binding(nil, "load_cbd_alt_add", function() load_clipboard("append-play") end)
-
 mp.add_key_binding(nil, "mark_aid_A", mark_aid_A)
 mp.add_key_binding(nil, "mark_aid_B", mark_aid_B)
 mp.add_key_binding(nil, "mark_aid_merge", mark_aid_merge)
@@ -977,7 +909,7 @@ mp.add_key_binding(nil, "speed_recover", speed_recover)
 mp.add_key_binding(nil, "speed_sync_toggle", speed_sync_toggle)
 
 mp.add_key_binding(nil, "stats_1_2", function() stats_cycle(1, 2) end)
-mp.add_key_binding(nil, "stats_0_4", function() stats_cycle(0, 4) end)
+mp.add_key_binding(nil, "stats_0_5", function() stats_cycle(0, 5) end)
 
 mp.add_key_binding(nil, "trackA_back", function() track_seek("aid", -1) end)
 mp.add_key_binding(nil, "trackA_next", function() track_seek("aid", 1) end)

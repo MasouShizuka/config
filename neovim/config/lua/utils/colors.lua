@@ -1,5 +1,6 @@
 local M = {}
 
+--- Define variables for color names
 M.colors = {
     black      = "black",
     blue       = "blue",
@@ -17,6 +18,7 @@ M.colors = {
     git_delete = "git_delete",
 }
 
+--- Define highlight for color names
 M.color_highlight_map = {
     [M.colors.black]      = "EndOfBuffer",
     [M.colors.blue]       = "DiagnosticInfo",
@@ -34,7 +36,13 @@ M.color_highlight_map = {
     [M.colors.git_delete] = { "diffRemoved", "DiffDelete" },
 }
 
-M.colorscheme = {
+---@class colorscheme_info
+---@field func? fun(name:string):string
+---@field map? table<string, string>
+---@field package_name string
+
+---@type table<string, colorscheme_info>
+M.colorscheme_list = {
     gruvbox = {
         func = function(name) return require("gruvbox").palette[name] end,
         map = {
@@ -49,7 +57,7 @@ M.colorscheme = {
             white  = "light0",
             yellow = "bright_yellow",
         },
-        package_name = "gruvbox",
+        package_name = "gruvbox.nvim",
     },
     tokyonight = {
         func = function(name) return require("tokyonight.colors").setup()[name] end,
@@ -58,21 +66,26 @@ M.colorscheme = {
             gray  = "dark3",
             white = "fg",
         },
-        package_name = "tokyonight",
+        package_name = "tokyonight.nvim",
     },
     onedark = {
         func = function(name) return require("onedarkpro.helpers").get_preloaded_colors()[name] end,
         map = {
             black = "bg",
         },
-        package_name = "onedarkpro",
+        package_name = "onedarkpro.nvim",
     },
 }
 
+--- Get the colorscheme's name of the color
+---@param colorscheme string
+---@param color_name string
+---@return string
 M.get_color_name = function(colorscheme, color_name)
-    local t = M.colorscheme[colorscheme]
+    local t = M.colorscheme_list[colorscheme]
     if t then
-        local colorscheme_color_name = t.map[color_name]
+        local map = t.map or {}
+        local colorscheme_color_name = map[color_name]
         if colorscheme_color_name then
             return colorscheme_color_name
         end
@@ -81,11 +94,15 @@ M.get_color_name = function(colorscheme, color_name)
     return M.colors[color_name]
 end
 
+--- Get the colorscheme's value of the color
+---@param color string
+---@param colorscheme? string
+---@return string
 M.get_color = function(color, colorscheme)
     colorscheme = colorscheme or vim.g.colors_name or "default"
 
     local spec
-    for c, s in pairs(M.colorscheme) do
+    for c, s in pairs(M.colorscheme_list) do
         if colorscheme:match(c) then
             colorscheme = c
             spec = s

@@ -1,10 +1,10 @@
-local environment = require("utils.environment")
-local icons = require("utils.icons")
-local utils = require("utils")
-
 local M = {}
 
 function M.setup(opts)
+    local environment = require("utils.environment")
+    local icons = require("utils.icons")
+    local utils = require("utils")
+
     -- Char
     vim.opt.list = true                                                                                     -- show <Tab> and <EOL>
     vim.opt.listchars:append({
@@ -15,6 +15,19 @@ function M.setup(opts)
 
     -- Clipboard
     vim.opt.clipboard = "unnamedplus"                                                                       -- use the clipboard as the unnamed register
+    if environment.is_wsl then
+        vim.g.clipboard = {
+            name = "WslClipboard",
+            copy = {
+                ["+"] = "clip.exe",
+                ["*"] = "clip.exe",
+            },
+            paste = {
+                ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+                ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+            },
+        }
+    end
 
     -- Column
     vim.opt.fillchars:append({
@@ -43,6 +56,7 @@ function M.setup(opts)
     -- File
     vim.opt.writebackup = false                                                                             -- make a backup before overwriting a file
     vim.opt.shada = ""                                                                                      -- use .shada file upon startup and exiting
+    vim.opt.shadafile = "NONE"                                                                              -- disable .shada file
     vim.opt.swapfile = false                                                                                -- whether to use a swapfile for a buffer
 
     -- Fold

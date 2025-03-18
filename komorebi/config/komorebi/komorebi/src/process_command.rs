@@ -1,3 +1,8 @@
+use color_eyre::eyre::anyhow;
+use color_eyre::Result;
+use miow::pipe::connect;
+use net2::TcpStreamExt;
+use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -11,20 +16,11 @@ use std::str::FromStr;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
-
-use color_eyre::eyre::anyhow;
-use color_eyre::Result;
-use miow::pipe::connect;
-use net2::TcpStreamExt;
-use parking_lot::Mutex;
-use schemars::gen::SchemaSettings;
-use schemars::schema_for;
 use uds_windows::UnixStream;
 
 use crate::animation::ANIMATION_DURATION_PER_ANIMATION;
 use crate::animation::ANIMATION_ENABLED_PER_ANIMATION;
 use crate::animation::ANIMATION_STYLE_PER_ANIMATION;
-use crate::core::config_generation::ApplicationConfiguration;
 use crate::core::config_generation::IdWithIdentifier;
 use crate::core::config_generation::MatchingRule;
 use crate::core::config_generation::MatchingStrategy;
@@ -66,6 +62,7 @@ use crate::window_manager;
 use crate::window_manager::WindowManager;
 use crate::windows_api::WindowsApi;
 use crate::winevent_listener;
+use crate::workspace::WorkspaceLayer;
 use crate::workspace::WorkspaceWindowLocation;
 use crate::GlobalState;
 use crate::Notification;
@@ -208,7 +205,9 @@ impl WindowManager {
         let initial_state = State::from(self.as_ref());
 
         match message {
-            SocketMessage::CycleFocusWorkspace(_) | SocketMessage::FocusWorkspaceNumber(_) => {
+            SocketMessage::CycleFocusEmptyWorkspace(_)
+            | SocketMessage::CycleFocusWorkspace(_)
+            | SocketMessage::FocusWorkspaceNumber(_) => {
                 if let Some(monitor) = self.focused_monitor_mut() {
                     let idx = monitor.focused_workspace_idx();
                     monitor.set_last_focused_workspace(Option::from(idx));
@@ -251,9 +250,11 @@ impl WindowManager {
                 if let Some((monitor_idx, workspace_idx)) = monitor_workspace_indices {
                     if monitor_idx != focused_monitor_idx {
                         self.focus_monitor(monitor_idx)?;
-                    }
-
-                    if workspace_idx != focused_workspace_idx {
+                        let focused_ws_idx = self.focused_workspace_idx()?;
+                        if focused_ws_idx != workspace_idx {
+                            self.focus_workspace(workspace_idx)?;
+                        }
+                    } else if workspace_idx != focused_workspace_idx {
                         self.focus_workspace(workspace_idx)?;
                     }
                 }
@@ -291,13 +292,37 @@ impl WindowManager {
                 }
             }
             SocketMessage::FocusWindow(direction) => {
-                self.focus_container_in_direction(direction)?;
+                let focused_workspace = self.focused_workspace()?;
+                match focused_workspace.layer() {
+                    WorkspaceLayer::Tiling => {
+                        self.focus_container_in_direction(direction)?;
+                    }
+                    WorkspaceLayer::Floating => {
+                        self.focus_floating_window_in_direction(direction)?;
+                    }
+                }
             }
             SocketMessage::MoveWindow(direction) => {
-                self.move_container_in_direction(direction)?;
+                let focused_workspace = self.focused_workspace()?;
+                match focused_workspace.layer() {
+                    WorkspaceLayer::Tiling => {
+                        self.move_container_in_direction(direction)?;
+                    }
+                    WorkspaceLayer::Floating => {
+                        self.move_floating_window_in_direction(direction)?;
+                    }
+                }
             }
             SocketMessage::CycleFocusWindow(direction) => {
-                self.focus_container_in_cycle_direction(direction)?;
+                let focused_workspace = self.focused_workspace()?;
+                match focused_workspace.layer() {
+                    WorkspaceLayer::Tiling => {
+                        self.focus_container_in_cycle_direction(direction)?;
+                    }
+                    WorkspaceLayer::Floating => {
+                        self.focus_floating_window_in_cycle_direction(direction)?;
+                    }
+                }
             }
             SocketMessage::CycleMoveWindow(direction) => {
                 self.move_container_in_cycle_direction(direction)?;
@@ -308,11 +333,9 @@ impl WindowManager {
             SocketMessage::UnstackAll => self.unstack_all()?,
             SocketMessage::CycleStack(direction) => {
                 self.cycle_container_window_in_direction(direction)?;
-                self.focused_window()?.focus(self.mouse_follows_focus)?;
             }
             SocketMessage::CycleStackIndex(direction) => {
                 self.cycle_container_window_index_in_direction(direction)?;
-                self.focused_window()?.focus(self.mouse_follows_focus)?;
             }
             SocketMessage::FocusStackWindow(idx) => {
                 // In case you are using this command on a bar on a monitor
@@ -323,7 +346,6 @@ impl WindowManager {
                     self.focus_monitor(monitor_idx)?;
                 }
                 self.focus_container_window(idx)?;
-                self.focused_window()?.focus(self.mouse_follows_focus)?;
             }
             SocketMessage::ForceFocus => {
                 let focused_window = self.focused_window()?;
@@ -884,6 +906,55 @@ impl WindowManager {
 
                 self.focus_workspace(workspace_idx)?;
             }
+            SocketMessage::CycleFocusEmptyWorkspace(direction) => {
+                // This is to ensure that even on an empty workspace on a secondary monitor, the
+                // secondary monitor where the cursor is focused will be used as the target for
+                // the workspace switch op
+                if let Some(monitor_idx) = self.monitor_idx_from_current_pos() {
+                    if monitor_idx != self.focused_monitor_idx() {
+                        if let Some(monitor) = self.monitors().get(monitor_idx) {
+                            if let Some(workspace) = monitor.focused_workspace() {
+                                if workspace.is_empty() {
+                                    self.focus_monitor(monitor_idx)?;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let focused_monitor = self
+                    .focused_monitor()
+                    .ok_or_else(|| anyhow!("there is no monitor"))?;
+
+                let focused_workspace_idx = focused_monitor.focused_workspace_idx();
+                let workspaces = focused_monitor.workspaces().len();
+
+                let mut empty_workspaces = vec![];
+
+                for (idx, w) in focused_monitor.workspaces().iter().enumerate() {
+                    if w.is_empty() {
+                        empty_workspaces.push(idx);
+                    }
+                }
+
+                if !empty_workspaces.is_empty() {
+                    let mut workspace_idx = direction.next_idx(
+                        focused_workspace_idx,
+                        NonZeroUsize::new(workspaces)
+                            .ok_or_else(|| anyhow!("there must be at least one workspace"))?,
+                    );
+
+                    while !empty_workspaces.contains(&workspace_idx) {
+                        workspace_idx = direction.next_idx(
+                            workspace_idx,
+                            NonZeroUsize::new(workspaces)
+                                .ok_or_else(|| anyhow!("there must be at least one workspace"))?,
+                        );
+                    }
+
+                    self.focus_workspace(workspace_idx)?;
+                }
+            }
             SocketMessage::CloseWorkspace => {
                 // This is to ensure that even on an empty workspace on a secondary monitor, the
                 // secondary monitor where the cursor is focused will be used as the target for
@@ -1025,6 +1096,50 @@ impl WindowManager {
                     self.focus_workspace(workspace_idx)?;
                 }
             }
+            SocketMessage::ToggleWorkspaceLayer => {
+                let mouse_follows_focus = self.mouse_follows_focus;
+                let workspace = self.focused_workspace_mut()?;
+
+                let mut to_focus = None;
+                match workspace.layer() {
+                    WorkspaceLayer::Tiling => {
+                        workspace.set_layer(WorkspaceLayer::Floating);
+
+                        for (i, window) in workspace.floating_windows().iter().enumerate() {
+                            if i == 0 {
+                                to_focus = Some(*window);
+                            }
+                            window.raise()?;
+                        }
+
+                        for container in workspace.containers() {
+                            if let Some(window) = container.focused_window() {
+                                window.lower()?;
+                            }
+                        }
+                    }
+                    WorkspaceLayer::Floating => {
+                        workspace.set_layer(WorkspaceLayer::Tiling);
+
+                        let focused_container_idx = workspace.focused_container_idx();
+                        for (i, container) in workspace.containers_mut().iter_mut().enumerate() {
+                            if let Some(window) = container.focused_window() {
+                                if i == focused_container_idx {
+                                    to_focus = Some(*window);
+                                }
+                                window.raise()?;
+                            }
+                        }
+
+                        for window in workspace.floating_windows() {
+                            window.lower()?;
+                        }
+                    }
+                };
+                if let Some(window) = to_focus {
+                    window.focus(mouse_follows_focus)?;
+                }
+            }
             SocketMessage::Stop => {
                 self.stop(false)?;
             }
@@ -1044,7 +1159,7 @@ impl WindowManager {
                 );
             }
             SocketMessage::DisplayIndexPreference(index_preference, ref display) => {
-                let mut display_index_preferences = DISPLAY_INDEX_PREFERENCES.lock();
+                let mut display_index_preferences = DISPLAY_INDEX_PREFERENCES.write();
                 display_index_preferences.insert(index_preference, display.clone());
             }
             SocketMessage::EnsureWorkspaces(monitor_idx, workspace_count) => {
@@ -1463,6 +1578,14 @@ impl WindowManager {
                     self.retile_all(false)?;
                 }
             }
+            SocketMessage::ToggleWindowBasedWorkAreaOffset => {
+                let workspace = self.focused_workspace_mut()?;
+                workspace.set_apply_window_based_work_area_offset(
+                    !workspace.apply_window_based_work_area_offset(),
+                );
+
+                self.retile_all(true)?;
+            }
             SocketMessage::QuickSave => {
                 let workspace = self.focused_workspace()?;
                 let resize = workspace.resize_dimensions();
@@ -1756,35 +1879,49 @@ impl WindowManager {
                 *STACKBAR_FONT_FAMILY.lock() = font_family.clone();
             }
             SocketMessage::ApplicationSpecificConfigurationSchema => {
-                let asc = schema_for!(Vec<ApplicationConfiguration>);
-                let schema = serde_json::to_string_pretty(&asc)?;
+                #[cfg(feature = "schemars")]
+                {
+                    let asc = schemars::schema_for!(
+                        Vec<crate::core::config_generation::ApplicationConfiguration>
+                    );
+                    let schema = serde_json::to_string_pretty(&asc)?;
 
-                reply.write_all(schema.as_bytes())?;
+                    reply.write_all(schema.as_bytes())?;
+                }
             }
             SocketMessage::NotificationSchema => {
-                let notification = schema_for!(Notification);
-                let schema = serde_json::to_string_pretty(&notification)?;
+                #[cfg(feature = "schemars")]
+                {
+                    let notification = schemars::schema_for!(Notification);
+                    let schema = serde_json::to_string_pretty(&notification)?;
 
-                reply.write_all(schema.as_bytes())?;
+                    reply.write_all(schema.as_bytes())?;
+                }
             }
             SocketMessage::SocketSchema => {
-                let socket_message = schema_for!(SocketMessage);
-                let schema = serde_json::to_string_pretty(&socket_message)?;
+                #[cfg(feature = "schemars")]
+                {
+                    let socket_message = schemars::schema_for!(SocketMessage);
+                    let schema = serde_json::to_string_pretty(&socket_message)?;
 
-                reply.write_all(schema.as_bytes())?;
+                    reply.write_all(schema.as_bytes())?;
+                }
             }
             SocketMessage::StaticConfigSchema => {
-                let settings = SchemaSettings::default().with(|s| {
-                    s.option_nullable = false;
-                    s.option_add_null_type = false;
-                    s.inline_subschemas = true;
-                });
+                #[cfg(feature = "schemars")]
+                {
+                    let settings = schemars::gen::SchemaSettings::default().with(|s| {
+                        s.option_nullable = false;
+                        s.option_add_null_type = false;
+                        s.inline_subschemas = true;
+                    });
 
-                let gen = settings.into_generator();
-                let socket_message = gen.into_root_schema_for::<StaticConfig>();
-                let schema = serde_json::to_string_pretty(&socket_message)?;
+                    let gen = settings.into_generator();
+                    let socket_message = gen.into_root_schema_for::<StaticConfig>();
+                    let schema = serde_json::to_string_pretty(&socket_message)?;
 
-                reply.write_all(schema.as_bytes())?;
+                    reply.write_all(schema.as_bytes())?;
+                }
             }
             SocketMessage::GenerateStaticConfig => {
                 let config = serde_json::to_string_pretty(&StaticConfig::from(&*self))?;
@@ -1831,6 +1968,9 @@ impl WindowManager {
             SocketMessage::AltFocusHack(_)
             | SocketMessage::IdentifyBorderOverflowApplication(_, _) => {}
         };
+
+        // Update list of known_hwnds and their monitor/workspace index pair
+        self.update_known_hwnds();
 
         notify_subscribers(
             Notification {
@@ -1932,4 +2072,74 @@ pub fn read_commands_tcp(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::monitor;
+    use crate::window_manager::WindowManager;
+    use crate::Rect;
+    use crate::SocketMessage;
+    use crate::WindowManagerEvent;
+    use crossbeam_channel::bounded;
+    use crossbeam_channel::Receiver;
+    use crossbeam_channel::Sender;
+    use std::io::BufRead;
+    use std::io::BufReader;
+    use std::io::Write;
+    use std::path::PathBuf;
+    use std::str::FromStr;
+    use std::time::Duration;
+    use uds_windows::UnixStream;
+    use uuid::Uuid;
+
+    fn send_socket_message(socket: &PathBuf, message: SocketMessage) {
+        let mut stream = UnixStream::connect(socket).unwrap();
+        stream
+            .set_write_timeout(Some(Duration::from_secs(1)))
+            .unwrap();
+        stream
+            .write_all(serde_json::to_string(&message).unwrap().as_bytes())
+            .unwrap();
+    }
+
+    #[test]
+    fn test_receive_socket_message() {
+        let (_sender, receiver): (Sender<WindowManagerEvent>, Receiver<WindowManagerEvent>) =
+            bounded(1);
+        let socket_name = format!("komorebi-test-{}.sock", Uuid::new_v4());
+        let socket_path = PathBuf::from(&socket_name);
+        let mut wm = WindowManager::new(receiver, Some(socket_path.clone())).unwrap();
+        let m = monitor::new(
+            0,
+            Rect::default(),
+            Rect::default(),
+            "TestMonitor".to_string(),
+            "TestDevice".to_string(),
+            "TestDeviceID".to_string(),
+            Some("TestMonitorID".to_string()),
+        );
+
+        wm.monitors_mut().push_back(m);
+
+        // send a message
+        send_socket_message(&socket_path, SocketMessage::FocusWorkspaceNumber(5));
+
+        let (stream, _) = wm.command_listener.accept().unwrap();
+        let reader = BufReader::new(stream.try_clone().unwrap());
+        let next = reader.lines().next();
+
+        // read and deserialize the message
+        let message_string = next.unwrap().unwrap();
+        let message = SocketMessage::from_str(&message_string).unwrap();
+        assert!(matches!(message, SocketMessage::FocusWorkspaceNumber(5)));
+
+        // process the message
+        wm.process_command(message, stream).unwrap();
+
+        // check the updated window manager state
+        assert_eq!(wm.focused_workspace_idx().unwrap(), 5);
+
+        std::fs::remove_file(socket_path).unwrap();
+    }
 }

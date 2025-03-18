@@ -1,8 +1,0 @@
-patch:
-  engine/filters:
-    - lua_filter@autocap_filter # 英文自动大写
-    - lua_filter@en_spacer      # 英文词条上屏自动空格
-    - uniquifier
-  # 修改为小鹤双拼的拼写派生规则，因为不在同一个文件了，前面要加上文件名
-  speller/algebra:
-    __include: melt_eng.schema.yaml:/algebra_flypy

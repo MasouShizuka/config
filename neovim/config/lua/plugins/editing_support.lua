@@ -1,36 +1,6 @@
-local buftype = require("utils.buftype")
-local colors = require("utils.colors")
 local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local icons = require("utils.icons")
-local treesitter = require("utils.treesitter")
-local utils = require("utils")
 
 return {
-    {
-        "altermo/ultimate-autopair.nvim",
-        config = function(_, opts)
-            if utils.is_available("nvim-cmp") then
-                require("ultimate-autopair").init({
-                    require("ultimate-autopair").extend_default(opts),
-                    { profile = require("ultimate-autopair.experimental.cmpair").init },
-                })
-            else
-                require("ultimate-autopair").setup(opts)
-            end
-        end,
-        enabled = not environment.is_vscode,
-        event = {
-            "CmdlineEnter",
-            "InsertEnter",
-        },
-        opts = {
-            space = {
-                enable = false,
-            },
-        },
-    },
-
     {
         "danymat/neogen",
         cmd = {
@@ -47,7 +17,11 @@ return {
             local opts = {}
 
             if not environment.is_vscode then
-                opts["snippet_engine"] = "luasnip"
+                if require("utils").is_available("LuaSnip") then
+                    opts["snippet_engine"] = "luasnip"
+                else
+                    opts["snippet_engine"] = "nvim"
+                end
             end
 
             return opts
@@ -57,55 +31,57 @@ return {
     {
         "echasnovski/mini.ai",
         keys = {
-            { "a(",  mode = { "x", "o" } },
             { "i(",  mode = { "x", "o" } },
-            { "a[",  mode = { "x", "o" } },
+            { "a(",  mode = { "x", "o" } },
             { "i[",  mode = { "x", "o" } },
-            { "a{",  mode = { "x", "o" } },
+            { "a[",  mode = { "x", "o" } },
             { "i{",  mode = { "x", "o" } },
-            { "a<",  mode = { "x", "o" } },
+            { "a{",  mode = { "x", "o" } },
             { "i<",  mode = { "x", "o" } },
-            { "a)",  mode = { "x", "o" } },
+            { "a<",  mode = { "x", "o" } },
             { "i)",  mode = { "x", "o" } },
-            { "a]",  mode = { "x", "o" } },
+            { "a)",  mode = { "x", "o" } },
             { "i]",  mode = { "x", "o" } },
-            { "a}",  mode = { "x", "o" } },
+            { "a]",  mode = { "x", "o" } },
             { "i}",  mode = { "x", "o" } },
-            { "a>",  mode = { "x", "o" } },
+            { "a}",  mode = { "x", "o" } },
             { "i>",  mode = { "x", "o" } },
-            { "ab",  mode = { "x", "o" } },
+            { "a>",  mode = { "x", "o" } },
             { "ib",  mode = { "x", "o" } },
-            { "a\"", mode = { "x", "o" } },
+            { "ab",  mode = { "x", "o" } },
             { "i\"", mode = { "x", "o" } },
-            { "a'",  mode = { "x", "o" } },
+            { "a\"", mode = { "x", "o" } },
             { "i'",  mode = { "x", "o" } },
-            { "a`",  mode = { "x", "o" } },
+            { "a'",  mode = { "x", "o" } },
             { "i`",  mode = { "x", "o" } },
-            { "aq",  mode = { "x", "o" } },
+            { "a`",  mode = { "x", "o" } },
             { "iq",  mode = { "x", "o" } },
-            { "a?",  mode = { "x", "o" } },
+            { "aq",  mode = { "x", "o" } },
             { "i?",  mode = { "x", "o" } },
-            { "at",  mode = { "x", "o" } },
+            { "a?",  mode = { "x", "o" } },
             { "it",  mode = { "x", "o" } },
+            { "at",  mode = { "x", "o" } },
             -- 由 nvim-treesitter-textobjects 设置
-            -- { "af",  mode = { "x", "o" } },
             -- { "if",  mode = { "x", "o" } },
-            -- { "aa",  mode = { "x", "o" } },
+            -- { "af",  mode = { "x", "o" } },
             -- { "ia",  mode = { "x", "o" } },
-            { "a_",  mode = { "x", "o" } },
+            -- { "aa",  mode = { "x", "o" } },
             { "i_",  mode = { "x", "o" } },
-            { "a ",  mode = { "x", "o" } },
+            { "a_",  mode = { "x", "o" } },
             { "i ",  mode = { "x", "o" } },
-            { "a,",  mode = { "x", "o" } },
+            { "a ",  mode = { "x", "o" } },
             { "i,",  mode = { "x", "o" } },
-            { "a.",  mode = { "x", "o" } },
+            { "a,",  mode = { "x", "o" } },
             { "i.",  mode = { "x", "o" } },
-            { "ae",  mode = { "x", "o" } },
+            { "a.",  mode = { "x", "o" } },
+            { "id",  mode = { "x", "o" } },
+            { "ad",  mode = { "x", "o" } },
             { "ie",  mode = { "x", "o" } },
-            { "ar",  mode = { "x", "o" } },
+            { "ae",  mode = { "x", "o" } },
             { "ir",  mode = { "x", "o" } },
-            { "av",  mode = { "x", "o" } },
+            { "ar",  mode = { "x", "o" } },
             { "iv",  mode = { "x", "o" } },
+            { "av",  mode = { "x", "o" } },
         },
         opts = {
             -- Table with textobject id as fields, textobject specification as values.
@@ -113,14 +89,28 @@ return {
             custom_textobjects = {
                 [","] = { "%b<>", "^.%s*().-()%s*.$" },
                 ["."] = { "%b<>", "^.().*().$" },
+                -- https://github.com/echasnovski/mini.extra
+                d = function(ai_type)
+                    local cur_diag = vim.diagnostic.get(0)
+
+                    local regions = {}
+                    for _, diag in ipairs(cur_diag) do
+                        local from = { line = diag.lnum + 1, col = diag.col + 1 }
+                        local to = { line = diag.end_lnum + 1, col = diag.end_col }
+                        if to.line == nil or to.col == nil then to = { line = diag.lnum + 1, col = diag.col + 1 } end
+                        table.insert(regions, { from = from, to = to })
+                    end
+                    return regions
+                end,
+                -- https://github.com/echasnovski/mini.extra
                 e = function(ai_type)
-                    local n_lines = vim.fn.line("$")
-                    local start_line, end_line = 1, n_lines
+                    local start_line, end_line = 1, vim.fn.line("$")
                     if ai_type == "i" then
                         -- Skip first and last blank lines for `i` textobject
-                        local first_nonblank, last_nonblank = vim.fn.nextnonblank(1), vim.fn.prevnonblank(n_lines)
-                        start_line = first_nonblank == 0 and 1 or first_nonblank
-                        end_line = last_nonblank == 0 and n_lines or last_nonblank
+                        local first_nonblank, last_nonblank = vim.fn.nextnonblank(start_line), vim.fn.prevnonblank(end_line)
+                        -- Do nothing for buffer with all blanks
+                        if first_nonblank == 0 or last_nonblank == 0 then return { from = { line = start_line, col = 1 } } end
+                        start_line, end_line = first_nonblank, last_nonblank
                     end
 
                     local to_col = math.max(vim.fn.getline(end_line):len(), 1)
@@ -154,28 +144,44 @@ return {
         opts = {
             -- Evaluate text and replace with output
             evaluate = {
+                -- prefix = "g=",
                 prefix = "se",
             },
 
             -- Exchange text regions
             exchange = {
+                -- prefix = "gx",
                 prefix = "sx",
             },
 
             -- Multiply (duplicate) text
             multiply = {
+                -- prefix = "gm",
                 prefix = "sm",
             },
 
             -- Replace text with register
             replace = {
+                -- prefix = "gr",
                 prefix = "ss",
             },
 
             -- Sort text
             sort = {
+                -- prefix = "gs",
                 prefix = "sS",
             },
+        },
+    },
+    {
+        "echasnovski/mini.pairs",
+        event = {
+            "CmdlineEnter",
+            "InsertEnter",
+        },
+        opts = {
+            -- In which modes mappings from this `config` should be created
+            modes = { command = true },
         },
     },
     {
@@ -187,6 +193,7 @@ return {
             -- Module mappings. Use `''` (empty string) to disable one.
             -- Created for both Normal and Visual modes.
             mappings = {
+                -- toggle = "gS",
                 toggle = "gs",
             },
         },
@@ -206,13 +213,15 @@ return {
         },
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         keys = {
-            { "<leader>xt", function() vim.api.nvim_command("TodoTrouble") end, desc = "List all project todos in trouble", mode = "n" },
+            { "<leader>xt", function() vim.api.nvim_command("Trouble todo") end, desc = "List all project todos in trouble", mode = "n" },
         },
         opts = function()
+            local colors = require("utils.colors")
+            local icons = require("utils.icons")
+
             local keywords = {
                 FIX = { icon = icons.misc.bug, color = colors.get_color(colors.colors.red), alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
                 TODO = { icon = icons.misc.check, color = colors.get_color(colors.colors.green) },
@@ -240,7 +249,7 @@ return {
                 -- * keyword: highlights of the keyword
                 -- * after: highlights after the keyword (todo text)
                 highlight = {
-                    keyword = "bg", -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
+                    keyword = "bg",        -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
                     comments_only = false, -- uses treesitter to match keywords in comments only
                 },
             }
@@ -250,11 +259,9 @@ return {
     {
         "gbprod/yanky.nvim",
         keys = {
-            { "y", "<plug>(YankyYank)",      desc = "Yank",            mode = { "n", "x" } },
-            { "p", "<plug>(YankyPutAfter)",  desc = "Yank put after",  mode = { "n", "x" } },
-            { "P", "<plug>(YankyPutBefore)", desc = "Yank put before", mode = { "n", "x" } },
-            -- { "gp", "<plug>(YankyGPutAfter)",  desc = "YankG put after",  mode = { "n", "x" } },
-            -- { "gP", "<plug>(YankyGPutBefore)", desc = "YankG put before", mode = { "n", "x" } },
+            { "y", "<plug>(YankyYank)",      desc = "Yank",                          mode = { "n", "x" } },
+            { "p", "<plug>(YankyPutAfter)",  desc = "Put yanked text after cursor",  mode = { "n", "x" } },
+            { "P", "<plug>(YankyPutBefore)", desc = "Put yanked text before cursor", mode = { "n", "x" } },
         },
         opts = {
             ring = {
@@ -273,7 +280,9 @@ return {
             "nvim-treesitter/nvim-treesitter",
         },
         enabled = not environment.is_vscode and environment.treesitter_enable,
-        ft = treesitter.treesitter_filetype_list,
+        event = {
+            "User TreesitterFile",
+        },
         opts = {},
     },
 
@@ -317,6 +326,7 @@ return {
                 default_command    = default_command,
 
                 -- Restore the default input method state when the following events are triggered
+                -- set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
                 set_default_events = { "InsertLeave" },
             }
         end,
@@ -414,6 +424,7 @@ return {
             ---LHS of toggle mappings in NORMAL mode
             toggler = {
                 ---Block-comment toggle keymap
+                -- block = "gbc",
                 block = "gbb",
             },
             ---Function to call before (un)comment
@@ -471,6 +482,12 @@ return {
         },
         config = function(_, opts)
             require("auto-save").setup(opts)
+
+            if vim.g.autosave == nil then
+                vim.g.autosave = true
+            end
+
+            local utils = require("utils")
 
             local trailspace_interval = 3
             local prev_trailspace_time = os.time()
@@ -543,35 +560,59 @@ return {
         end,
         enabled = not environment.is_vscode,
         init = function()
-            if vim.g.autosave_enabled == nil then
-                vim.g.autosave_enabled = true
-            end
+            local utils = require("utils")
 
             -- auto-save 自动激活
-            vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertLeave", "TextChanged" }, {
+            local id
+            id = vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertLeave", "TextChanged" }, {
                 callback = function(args)
                     if package.loaded["auto-save"] then
-                        pcall(vim.api.nvim_del_augroup_by_name, "AutoSaveActivate")
+                        pcall(vim.api.nvim_del_autocmd, id)
                         return
                     end
 
                     local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
                     local is_modifiable = vim.api.nvim_get_option_value("modifiable", { buf = args.buf })
                     local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
-                    if not vim.tbl_contains(buftype.skip_buftype_list, bt) and is_modifiable and is_modified then
+                    if not vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) and is_modifiable and is_modified then
                         pcall(vim.cmd.write)
-                        require("auto-save")
-                        vim.api.nvim_del_augroup_by_name("AutoSaveActivate")
+                        require("lazy").load({ plugins = "auto-save.nvim" })
+                        vim.api.nvim_del_autocmd(id)
                     end
                 end,
                 desc = "AutoSave event",
-                group = vim.api.nvim_create_augroup("AutoSaveActivate", { clear = true }),
+            })
+
+            utils.create_once_autocmd("User", {
+                callback = function()
+                    utils.set_setting_toggle("autosave", {
+                        default = true,
+                        g = {
+                            keymap = { keys = "<leader>cta", mode = "n" },
+                            opts = {
+                                callback = function(enabled, prev_enabled, global_enabled)
+                                    if not package.loaded["auto-save"] then
+                                        require("lazy").load({ plugins = "auto-save.nvim" })
+                                    end
+                                end,
+                            },
+                        },
+                        b = {
+                            keymap = { keys = "<leader>ctA", mode = "n" },
+                            opts = {
+                                callback = function(enabled, prev_enabled, global_enabled)
+                                    if not package.loaded["auto-save"] then
+                                        require("lazy").load({ plugins = "auto-save.nvim" })
+                                    end
+                                end,
+                            },
+                        },
+                    })
+                end,
+                desc = "Toggle autosave",
+                pattern = "IceLoad",
             })
         end,
-        keys = {
-            { "<leader>cta", function() utils.toggle_global_setting("autosave_enabled", function(enabled, prev_enabled, global_enabled) end) end, desc = "Toggle autoSave",          mode = "n" },
-            { "<leader>ctA", function() utils.toggle_buffer_setting("autosave_enabled", function(enabled, prev_enabled) end) end,                 desc = "Toggle autoSave (buffer)", mode = "n" },
-        },
         opts = {
             -- function that takes the buffer handle and determines whether to save the current buffer or not
             -- return true: if buffer is ok to be saved
@@ -579,16 +620,20 @@ return {
             -- if set to `nil` then no specific condition is applied
             condition = function(buf)
                 local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
                     return false
                 end
 
                 local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
                     return false
                 end
 
-                return vim.b[buf].autosave_enabled == nil and vim.g.autosave_enabled or vim.b[buf].autosave_enabled
+                if vim.b[buf].autosave == nil then
+                    return vim.g.autosave
+                else
+                    return vim.b[buf].autosave
+                end
             end,
             debounce_delay = 1, -- delay after which a pending save is executed
         },
@@ -602,8 +647,7 @@ return {
         },
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         init = function()
             -- `matchparen.vim` needs to be disabled manually in case of lazy loading

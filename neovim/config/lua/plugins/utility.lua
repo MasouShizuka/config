@@ -1,29 +1,25 @@
-local buftype = require("utils.buftype")
 local environment = require("utils.environment")
-local filetype = require("utils.filetype")
-local lsp = require("utils.lsp")
 local path = require("utils.path")
-local utils = require("utils")
 
 return {
     {
         "Aasim-A/scrollEOF.nvim",
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
-        opts = {
-            -- List of filetypes to disable scrollEOF for.
-            disabled_filetypes = filetype.skip_filetype_list,
-        },
+        opts = function()
+            return {
+                -- List of filetypes to disable scrollEOF for.
+                disabled_filetypes = require("utils.filetype").skip_filetype_list,
+            }
+        end,
     },
 
     {
         "chrisgrieser/nvim-early-retirement",
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         opts = {
             -- If a buffer has been inactive for this many minutes, close it.
@@ -41,8 +37,7 @@ return {
         },
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         opts = {
             name = "default",
@@ -65,7 +60,6 @@ return {
         },
         dependencies = {
             "MunifTanjim/nui.nvim",
-            "rcarriga/nvim-notify",
         },
         opts = {
             messages = {
@@ -109,6 +103,641 @@ return {
             },
         },
     },
+    -- NOTE: 需要安装 ripgrep
+    {
+        "folke/snacks.nvim",
+        enabled = not environment.is_vscode,
+        init = function()
+            local utils = require("utils")
+            utils.create_once_autocmd("User", {
+                callback = function()
+                    local snacks = require("snacks")
+
+
+                    -- Setup some globals for debugging (lazy-loaded)
+                    _G.dd = function(...)
+                        snacks.debug.inspect(...)
+                    end
+                    _G.bt = function()
+                        snacks.debug.backtrace()
+                    end
+                    vim.print = _G.dd -- Override print to use snacks for `:=` command
+
+
+                    require("which-key").add({
+                        {
+                            mode = "n",
+                            { "<leader>t",  group = "picker" },
+                            { "<leader>tg", group = "picker git" },
+                            { "<leader>lg", group = "picker lsp goto" },
+                        },
+                    })
+
+
+                    require("which-key").add({
+                        { "<leader>T", group = "command line tool", mode = "n" },
+                    })
+
+                    local cli_opts = {
+                        win = {
+                            on_buf = function(self)
+                                -- 禁用 cellwidth 设置
+                                if utils.is_available("cellwidths.nvim") and package.loaded["cellwidths"] then
+                                    vim.api.nvim_command("CellWidthsLoad empty")
+                                end
+                            end,
+                            on_close = function()
+                                -- 恢复 cellwidth 设置
+                                if utils.is_available("cellwidths.nvim") and package.loaded["cellwidths"] then
+                                    vim.api.nvim_command("CellWidthsLoad default")
+                                end
+                            end,
+                        },
+                    }
+                    vim.keymap.set("n", "<leader>Tl", function() require("snacks").lazygit(cli_opts) end, { desc = "Open lazygit", silent = true })
+                    vim.keymap.set("n", "<leader>Ty", function() require("snacks").terminal("yazi", cli_opts) end, { desc = "Open yazi", silent = true })
+
+
+                    snacks.toggle.diagnostics():map("<leader>ctd")
+                    snacks.toggle.indent():map("<leader>cti")
+                    snacks.toggle.scroll():map("<leader>ctS")
+                    snacks.toggle.words():map("<leader>ctW")
+                end,
+                desc = "Snacks init",
+                pattern = "IceLoad",
+            })
+        end,
+        keys = {
+            { "ii",         mode = { "x", "o" } },
+            { "ai",         mode = { "x", "o" } },
+            { "[i",         mode = { "n", "x", "o" } },
+            { "]i",         mode = { "n", "x", "o" } },
+
+            { "<leader>ta", function() require("snacks").picker.autocmds() end, desc = "Autocmds", mode = "n" },
+            { "<leader>tb", function() require("snacks").picker.buffers() end,  desc = "Buffers",  mode = "n" },
+            {
+                "<leader>tc",
+                function()
+                    vim.api.nvim_exec_autocmds("User", { pattern = "ColorschemePre" })
+                    require("snacks").picker.colorschemes()
+                end,
+                desc = "Neovim colorschemes with live preview",
+                mode = "n",
+            },
+            { "<leader>t:",  function() require("snacks").picker.command_history() end,       desc = "Neovim command history",                      mode = "n" },
+            { "<leader>tC",  function() require("snacks").picker.commands() end,              desc = "Neovim commands",                             mode = "n" },
+            { "<leader>tD",  function() require("snacks").picker.diagnostics() end,           desc = "Diagnostics",                                 mode = "n" },
+            { "<leader>td",  function() require("snacks").picker.diagnostics_buffer() end,    desc = "Buffer Diagnostics",                          mode = "n" },
+            { "<leader>tgb", function() require("snacks").picker.git_branches() end,          desc = "Git Branches",                                mode = "n" },
+            { "<leader>tgd", function() require("snacks").picker.git_diff() end,              desc = "Git Diff (Hunks)",                            mode = "n" },
+            { "<leader>tgg", function() require("snacks").picker.git_files() end,             desc = "Find git files",                              mode = "n" },
+            { "<leader>tg/", function() require("snacks").picker.git_grep() end,              desc = "Grep in git files",                           mode = "n" },
+            { "<leader>tgo", function() require("snacks").picker.git_log() end,               desc = "Git log" },
+            { "<leader>tgf", function() require("snacks").picker.git_log_file() end,          desc = "Git log file",                                mode = "n" },
+            { "<leader>tgl", function() require("snacks").picker.git_log_line() end,          desc = "Git log line",                                mode = "n" },
+            { "<leader>tgS", function() require("snacks").picker.git_stash() end,             desc = "Git Stash",                                   mode = "n" },
+            { "<leader>tgs", function() require("snacks").picker.git_status() end,            desc = "Git Status",                                  mode = "n" },
+            { "<leader>/",   function() require("snacks").picker.grep() end,                  desc = "Grep",                                        mode = "n" },
+            { "<leader>tB",  function() require("snacks").picker.grep_buffers() end,          desc = "Grep Open Buffers",                           mode = "n" },
+            { "<leader>tw",  function() require("snacks").picker.grep_word() end,             desc = "Visual selection or word",                    mode = { "n", "x" } },
+            { "<leader>th",  function() require("snacks").picker.help() end,                  desc = "Neovim help tags",                            mode = "n" },
+            { "<leader>tH",  function() require("snacks").picker.highlights() end,            desc = "Highlights",                                  mode = "n" },
+            { "<leader>ti",  function() require("snacks").picker.icons() end,                 desc = "Icons",                                       mode = "n" },
+            { "<leader>tj",  function() require("snacks").picker.jumps() end,                 desc = "Jumps",                                       mode = "n" },
+            { "<leader>tk",  function() require("snacks").picker.keymaps() end,               desc = "Keymaps",                                     mode = "n" },
+            { "<leader>tz",  function() require("snacks").picker.lazy() end,                  desc = "Search for a lazy.nvim plugin spec",          mode = "n" },
+            { "<leader>tl",  function() require("snacks").picker.lines() end,                 desc = "Search lines in the current buffer",          mode = "n" },
+            { "<leader>tL",  function() require("snacks").picker.loclist() end,               desc = "Loclist",                                     mode = "n" },
+            { "<leader>lgD", function() require("snacks").picker.lsp_declarations() end,      desc = "LSP declarations",                            mode = "n" },
+            { "<leader>lgd", function() require("snacks").picker.lsp_definitions() end,       desc = "LSP definitions",                             mode = "n" },
+            { "<leader>lgi", function() require("snacks").picker.lsp_implementations() end,   desc = "LSP implementations",                         mode = "n" },
+            { "<leader>lgr", function() require("snacks").picker.lsp_references() end,        desc = "LSP references",                              mode = "n" },
+            { "<leader>ls",  function() require("snacks").picker.lsp_symbols() end,           desc = "LSP document symbols",                        mode = "n" },
+            { "<leader>lgy", function() require("snacks").picker.lsp_type_definitions() end,  desc = "LSP type definitions",                        mode = "n" },
+            { "<leader>lS",  function() require("snacks").picker.lsp_workspace_symbols() end, desc = "LSP workspace symbols",                       mode = "n" },
+            { "<leader>tm",  function() require("snacks").picker.man() end,                   desc = "Man Pages",                                   mode = "n" },
+            { "<leader>t'",  function() require("snacks").picker.marks() end,                 desc = "Marks",                                       mode = "n" },
+            { "<leader>tn",  function() require("snacks").picker.notifications() end,         desc = "Notification History",                        mode = "n" },
+            { "<leader>tp",  function() require("snacks").picker.pickers() end,               desc = "List all available sources",                  mode = "n" },
+            { "<leader>tq",  function() require("snacks").picker.qflist() end,                desc = "Quickfix list",                               mode = "n" },
+            { "<leader>tr",  function() require("snacks").picker.recent() end,                desc = "Find recent files",                           mode = "n" },
+            { '<leader>t"',  function() require("snacks").picker.registers() end,             desc = "Neovim registers",                            mode = "n" },
+            { "<leader>tR",  function() require("snacks").picker.resume() end,                desc = "Special picker that resumes the last picker", mode = "n" },
+            { "<leader>t/",  function() require("snacks").picker.search_history() end,        desc = "Neovim search history",                       mode = "n" },
+            { "<c-p>",       function() require("snacks").picker.smart() end,                 desc = "Smart Find Files",                            mode = "n" },
+            { "<leader>ts",  function() require("snacks").picker.spelling() end,              desc = "Spelling",                                    mode = "n" },
+            { "<leader>tt",  function() require("snacks").picker.treesitter() end,            desc = "Treesitter",                                  mode = "n" },
+            { "<leader>tu",  function() require("snacks").picker.undo() end,                  desc = "Undo History",                                mode = "n" },
+
+            { "<s-f2>",      function() require("snacks").rename.rename_file() end,           desc = "Rename File",                                 mode = "n" },
+
+            { "<leader>.",   function() require("snacks").scratch() end,                      desc = "Toggle Scratch Buffer",                       mode = "n" },
+            { "<leader>>",   function() require("snacks").scratch.select() end,               desc = "Select Scratch Buffer",                       mode = "n" },
+        },
+        lazy = false,
+        opts = function()
+            local icons = require("utils.icons")
+            local utils = require("utils")
+
+            local snacks = require("snacks")
+
+            -- https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-1225975038
+            local function multiopen(picker, method, keep)
+                local edit_file_cmd_map = {
+                    vertical = "vsplit",
+                    horizontal = "split",
+                    tab = "tabnew",
+                    default = "edit",
+                }
+                local edit_buf_cmd_map = {
+                    vertical = "vert sbuffer",
+                    horizontal = "sbuffer",
+                    tab = "tab sbuffer",
+                    default = "buffer",
+                }
+
+                if not keep then
+                    picker:close()
+                end
+
+                local items = snacks.picker.get()[1]:selected({ fallback = true })
+                for _, item in ipairs(items) do
+                    local filename = snacks.picker.util.path(item)
+                    local row = item.pos and item.pos[1] or 1
+                    local col = item.pos and item.pos[2] + 1 or 1
+
+                    local entry_bufnr = item.buf
+
+                    if entry_bufnr then
+                        if not vim.api.nvim_get_option_value("buflisted", { buf = entry_bufnr }) then
+                            vim.api.nvim_set_option_value("buflisted", true, { buf = entry_bufnr })
+                        end
+                        local command = edit_buf_cmd_map[method]
+                        pcall(vim.cmd, string.format("%s %s", command, vim.api.nvim_buf_get_name(entry_bufnr)))
+                    else
+                        local command = edit_file_cmd_map[method]
+                        if vim.api.nvim_buf_get_name(0) ~= filename or command ~= "edit" then
+                            filename = require("plenary.path"):new(vim.fn.fnameescape(filename)):normalize(vim.loop.cwd())
+                            pcall(vim.cmd, string.format("%s %s", command, filename))
+                        end
+                    end
+
+                    if row and col then
+                        pcall(vim.api.nvim_win_set_cursor, 0, { row, col })
+                    end
+                end
+            end
+
+            local explorer_layout
+            if utils.is_available("edgy.nvim") then
+                explorer_layout = {
+                    width = 1,
+                    col = 0,
+                    box = "vertical",
+                    {
+                        win = "input",
+                        bo = {
+                            filetype = "snacks_explorer_input",
+                        },
+                    },
+                    {
+                        win = "list",
+                        bo = {
+                            filetype = "snacks_explorer_list",
+                        },
+                    },
+                }
+            else
+                explorer_layout = {
+                    backdrop = false,
+                    width = 40,
+                    min_width = 40,
+                    height = 0,
+                    position = "left",
+                    border = "none",
+                    box = "vertical",
+                    {
+                        win = "input",
+                        height = 1,
+                        bo = {
+                            filetype = "snacks_explorer_input",
+                        },
+                    },
+                    {
+                        win = "list",
+                        bo = {
+                            filetype = "snacks_explorer_list",
+                        },
+                    },
+                }
+            end
+
+            return {
+                bigfile = {
+                    enabled = true,
+                    -- Enable or disable features when big file detected
+                    ---@param ctx {buf: number, ft:string}
+                    setup = function(ctx)
+                        if vim.fn.exists(":NoMatchParen") ~= 0 then
+                            vim.cmd([[NoMatchParen]])
+                        end
+                        snacks.util.wo(0, {
+                            foldmethod = "manual",
+                            statuscolumn = "",
+                            conceallevel = 0,
+
+                            wrap = false,
+
+                            -- https://github.com/LunarVim/bigfile.nvim
+                            list = false,
+                            swapfile = false,
+                            undolevels = -1,
+                            undoreload = 0,
+                        })
+                        vim.schedule(function()
+                            if vim.api.nvim_buf_is_valid(ctx.buf) then
+                                vim.bo[ctx.buf].syntax = ctx.ft
+                            end
+                        end)
+                    end,
+                },
+                dashboard = {
+                    enabled = true,
+                    -- These settings are used by some built-in sections
+                    preset = {
+                        -- Used by the `keys` section to show keymaps.
+                        -- Set your custom keymaps here.
+                        -- When using a function, the `items` argument are the default keymaps.
+                        ---@type snacks.dashboard.Item[]
+                        keys = {
+                            {
+                                icon = icons.misc.new_file,
+                                key = "n",
+                                desc = "New File",
+                                action = function()
+                                    vim.cmd.enew()
+                                    vim.cmd.startinsert()
+                                end,
+                            },
+                            {
+                                icon = icons.misc.search,
+                                key = "f",
+                                desc = "Find File",
+                                action = function() require("snacks").dashboard.pick("files") end,
+                            },
+                            {
+                                icon = icons.misc.search,
+                                key = "/",
+                                desc = "Find Text",
+                                action = function() require("snacks").dashboard.pick("live_grep") end,
+                            },
+                            {
+                                icon = icons.misc.gear,
+                                key = "c",
+                                desc = "Config",
+                                action = function()
+                                    vim.api.nvim_set_current_dir(vim.fn.fnamemodify(vim.env.MYVIMRC, ":h"))
+                                    vim.api.nvim_command("SessionManager load_current_dir_session")
+                                end,
+                            },
+                            {
+                                icon = icons.misc.list_unordered,
+                                key = "s",
+                                desc = "Load Session",
+                                action = function() vim.api.nvim_command("SessionManager load_session") end,
+                            },
+                            {
+                                icon = icons.misc.refresh,
+                                key = "S",
+                                desc = "Load Last Session",
+                                action = function() vim.api.nvim_command("SessionManager load_last_session") end,
+                            },
+                            {
+                                icon = icons.misc.extensions,
+                                key = "l",
+                                desc = "Lazy",
+                                action = function() require("lazy").home() end,
+                                enabled = package.loaded.lazy ~= nil,
+                            },
+                            {
+                                icon = icons.misc.close,
+                                key = "q",
+                                desc = "Quit",
+                                action = function() vim.cmd.quitall() end,
+                            },
+                        },
+                    },
+                },
+                debug = { enabled = true },
+                explorer = { enabled = true },
+                indent = {
+                    enabled = true,
+                    indent = {
+                        char = icons.misc.left_one_quarter_block,
+                        only_current = true, -- only show indent guides in the current window
+                    },
+                    animate = {
+                        enabled = false,
+                    },
+                    scope = {
+                        char = icons.misc.left_one_quarter_block,
+                        underline = true,    -- underline the start of the scope
+                        only_current = true, -- only show scope in the current window
+                    },
+                    -- filter for buffers to enable indent guides
+                    filter = function(buf)
+                        local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                        if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
+                            return false
+                        end
+
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                        if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
+                            return false
+                        end
+
+                        return vim.g.snacks_indent ~= false and vim.b[buf].snacks_indent ~= false and
+                            vim.bo[buf].buftype == ""
+                    end,
+                },
+                input = { enabled = true },
+                lazygit = { enabled = true },
+                notifier = {
+                    enabled = true,
+                    ---@type snacks.notifier.style
+                    style = "fancy",
+                },
+                picker = {
+                    enabled = true,
+                    hidden = true,
+                    ignored = true,
+                    sources = {
+                        explorer = {
+                            prompt = " " .. require("utils.icons").fold.FoldClosed,
+                            layout = {
+                                cycle = false,
+                                layout = explorer_layout,
+                            },
+                            win = {
+                                list = {
+                                    keys = {
+                                        -- ["<BS>"] = "explorer_up",
+                                        ["H"] = "explorer_up",
+                                        -- ["l"] = "confirm",
+                                        -- ["h"] = "explorer_close", -- close directory
+                                        -- ["a"] = "explorer_add",
+                                        -- ["d"] = "explorer_del",
+                                        -- ["r"] = "explorer_rename",
+                                        -- ["c"] = "explorer_copy",
+                                        -- ["m"] = "explorer_move",
+                                        ["x"] = "explorer_move",
+                                        -- ["o"] = "explorer_open", -- open with system application
+                                        -- ["P"] = "toggle_preview",
+                                        -- ["y"] = { "explorer_yank", mode = { "n", "x" } },
+                                        ["c"] = { "explorer_yank", mode = { "n", "x" } },
+                                        -- ["p"] = "explorer_paste",
+                                        -- ["u"] = "explorer_update",
+                                        -- ["<c-c>"] = "tcd",
+                                        -- ["<leader>/"] = "picker_grep",
+                                        -- ["<c-t>"] = "terminal",
+                                        -- ["."] = "explorer_focus",
+                                        ["L"] = "explorer_focus",
+                                        -- ["I"] = "toggle_ignored",
+                                        ["Ti"] = "toggle_ignored",
+                                        -- ["H"] = "toggle_hidden",
+                                        ["Th"] = "toggle_hidden",
+                                        -- ["Z"] = "explorer_close_all",
+                                        -- ["]g"] = "explorer_git_next",
+                                        -- ["[g"] = "explorer_git_prev",
+                                        -- ["]d"] = "explorer_diagnostic_next",
+                                        -- ["[d"] = "explorer_diagnostic_prev",
+                                        -- ["]w"] = "explorer_warn_next",
+                                        -- ["[w"] = "explorer_warn_prev",
+                                        -- ["]e"] = "explorer_error_next",
+                                        -- ["[e"] = "explorer_error_prev",
+
+                                        ["D"] = function(picker)
+                                            local items = snacks.picker.get()[1]:selected({ fallback = true })
+                                            if #items ~= 2 then
+                                                vim.notify("Diff requires specifying 2 files", vim.log.levels.WARN, { title = "Explorer" })
+                                                return
+                                            end
+
+                                            picker:close()
+
+                                            vim.cmd(string.format("%s %s", "tabedit", require("snacks").picker.util.path(items[1])))
+                                            vim.cmd.vnew()
+                                            vim.cmd.edit(require("snacks").picker.util.path(items[2]))
+
+                                            utils.diffthis()
+                                        end,
+                                        ["t"] = function(picker) multiopen(picker, "tab", false) end,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    win = {
+                        -- input window
+                        input = {
+                            keys = {
+                                -- to close the picker on ESC instead of going to normal mode,
+                                -- add the following keymap to your config
+                                -- ["<Esc>"] = { "close", mode = { "n", "i" } },
+                                -- ["/"] = "toggle_focus",
+                                -- ["<C-Down>"] = { "history_forward", mode = { "i", "n" } },
+                                -- ["<C-Up>"] = { "history_back", mode = { "i", "n" } },
+                                ["<c-p>"] = { "history_forward", mode = { "i", "n" } },
+                                ["<c-n>"] = { "history_back", mode = { "i", "n" } },
+                                -- ["<C-c>"] = { "cancel", mode = "i" },
+                                -- ["<C-w>"] = { "<c-s-w>", mode = { "i" }, expr = true, desc = "delete word" },
+                                -- ["<CR>"] = { "confirm", mode = { "n", "i" } },
+                                -- ["<Down>"] = { "list_down", mode = { "i", "n" } },
+                                -- ["<Esc>"] = "cancel",
+                                -- ["<S-CR>"] = { { "pick_win", "jump" }, mode = { "n", "i" } },
+                                -- ["<S-Tab>"] = { "select_and_prev", mode = { "i", "n" } },
+                                -- ["<Tab>"] = { "select_and_next", mode = { "i", "n" } },
+                                ["<s-up>"] = { "select_and_prev", mode = { "i", "n" } },
+                                ["<s-down>"] = { "select_and_next", mode = { "i", "n" } },
+                                -- ["<Up>"] = { "list_up", mode = { "i", "n" } },
+                                -- ["<a-d>"] = { "inspect", mode = { "n", "i" } },
+                                -- ["<a-f>"] = { "toggle_follow", mode = { "i", "n" } },
+                                -- ["<a-h>"] = { "toggle_hidden", mode = { "i", "n" } },
+                                -- ["<a-i>"] = { "toggle_ignored", mode = { "i", "n" } },
+                                -- ["<a-m>"] = { "toggle_maximize", mode = { "i", "n" } },
+                                -- ["<a-p>"] = { "toggle_preview", mode = { "i", "n" } },
+                                -- ["<a-w>"] = { "cycle_win", mode = { "i", "n" } },
+                                ["<Tab>"] = { "cycle_win", mode = { "i", "n" } },
+                                -- ["<c-a>"] = { "select_all", mode = { "n", "i" } },
+                                -- ["<c-b>"] = { "preview_scroll_up", mode = { "i", "n" } },
+                                -- ["<c-d>"] = { "list_scroll_down", mode = { "i", "n" } },
+                                -- ["<c-f>"] = { "preview_scroll_down", mode = { "i", "n" } },
+                                -- ["<c-g>"] = { "toggle_live", mode = { "i", "n" } },
+                                -- ["<c-j>"] = { "list_down", mode = { "i", "n" } },
+                                -- ["<c-k>"] = { "list_up", mode = { "i", "n" } },
+                                -- ["<c-n>"] = { "list_down", mode = { "i", "n" } },
+                                -- ["<c-p>"] = { "list_up", mode = { "i", "n" } },
+                                -- ["<c-q>"] = { "qflist", mode = { "i", "n" } },
+                                -- ["<c-s>"] = { "edit_split", mode = { "i", "n" } },
+                                -- ["<c-t>"] = { "tab", mode = { "n", "i" } },
+                                ["<c-t>"] = { function(picker) multiopen(picker, "tab") end, mode = { "n", "i" } },
+                                ["<c-i>"] = { function(picker) multiopen(picker, "tab") end, mode = { "n", "i" } },
+                                -- ["<c-u>"] = { "list_scroll_up", mode = { "i", "n" } },
+                                -- ["<c-v>"] = { "edit_vsplit", mode = { "i", "n" } },
+                                -- ["<c-r>#"] = { "insert_alt", mode = "i" },
+                                -- ["<c-r>%"] = { "insert_filename", mode = "i" },
+                                -- ["<c-r><c-a>"] = { "insert_cWORD", mode = "i" },
+                                -- ["<c-r><c-f>"] = { "insert_file", mode = "i" },
+                                -- ["<c-r><c-l>"] = { "insert_line", mode = "i" },
+                                -- ["<c-r><c-p>"] = { "insert_file_full", mode = "i" },
+                                -- ["<c-r><c-w>"] = { "insert_cword", mode = "i" },
+                                -- ["<c-w>H"] = "layout_left",
+                                -- ["<c-w>J"] = "layout_bottom",
+                                -- ["<c-w>K"] = "layout_top",
+                                -- ["<c-w>L"] = "layout_right",
+                                -- ["?"] = "toggle_help_input",
+                                -- ["G"] = "list_bottom",
+                                -- ["gg"] = "list_top",
+                                -- ["j"] = "list_down",
+                                -- ["k"] = "list_up",
+                                -- ["q"] = "close",
+
+                                ["<c-h>"] = { "preview_scroll_left", mode = { "i", "n" } },
+                                ["<c-l>"] = { "preview_scroll_right", mode = { "i", "n" } },
+                            },
+                        },
+                        -- result list window
+                        list = {
+                            keys = {
+                                -- ["/"] = "toggle_focus",
+                                -- ["<2-LeftMouse>"] = "confirm",
+                                -- ["<CR>"] = "confirm",
+                                ["l"] = "confirm",
+                                -- ["<Down>"] = "list_down",
+                                -- ["<Esc>"] = "cancel",
+                                -- ["<S-CR>"] = { { "pick_win", "jump" } },
+                                -- ["<S-Tab>"] = { "select_and_prev", mode = { "n", "x" } },
+                                -- ["<Tab>"] = { "select_and_next", mode = { "n", "x" } },
+                                ["K"] = { "select_and_prev", mode = { "n", "x" } },
+                                ["J"] = { "select_and_next", mode = { "n", "x" } },
+                                -- ["<Up>"] = "list_up",
+                                -- ["<a-d>"] = "inspect",
+                                -- ["<a-f>"] = "toggle_follow",
+                                -- ["<a-h>"] = "toggle_hidden",
+                                -- ["<a-i>"] = "toggle_ignored",
+                                -- ["<a-m>"] = "toggle_maximize",
+                                -- ["<a-p>"] = "toggle_preview",
+                                ["Tf"] = "toggle_follow",
+                                ["Th"] = "toggle_hidden",
+                                ["Ti"] = "toggle_ignored",
+                                ["Tm"] = "toggle_maximize",
+                                ["Tp"] = "toggle_preview",
+                                -- ["<a-w>"] = "cycle_win",
+                                ["<Tab>"] = "cycle_win",
+                                -- ["<c-a>"] = "select_all",
+                                -- ["<c-b>"] = "preview_scroll_up",
+                                -- ["<c-d>"] = "list_scroll_down",
+                                -- ["<c-f>"] = "preview_scroll_down",
+                                -- ["<c-j>"] = "list_down",
+                                -- ["<c-k>"] = "list_up",
+                                -- ["<c-n>"] = "list_down",
+                                -- ["<c-p>"] = "list_up",
+                                -- ["<c-q>"] = "qflist",
+                                -- ["<c-s>"] = "edit_split",
+                                ["V"] = "edit_split",
+                                -- ["<c-t>"] = "tab",
+                                ["t"] = function(picker) multiopen(picker, "tab") end,
+                                -- ["<c-u>"] = "list_scroll_up",
+                                -- ["<c-v>"] = "edit_vsplit",
+                                ["v"] = "edit_vsplit",
+                                -- ["<c-w>H"] = "layout_left",
+                                -- ["<c-w>J"] = "layout_bottom",
+                                -- ["<c-w>K"] = "layout_top",
+                                -- ["<c-w>L"] = "layout_right",
+                                -- ["?"] = "toggle_help_list",
+                                -- ["G"] = "list_bottom",
+                                -- ["gg"] = "list_top",
+                                -- ["i"] = "focus_input",
+                                -- ["j"] = "list_down",
+                                -- ["k"] = "list_up",
+                                -- ["q"] = "close",
+                                -- ["zb"] = "list_scroll_bottom",
+                                -- ["zt"] = "list_scroll_top",
+                                -- ["zz"] = "list_scroll_center",
+                            },
+                        },
+                        -- preview window
+                        preview = {
+                            keys = {
+                                -- ["<Esc>"] = "cancel",
+                                -- ["q"] = "close",
+                                -- ["i"] = "focus_input",
+                                -- ["<a-w>"] = "cycle_win",
+                                ["<Tab>"] = "cycle_win",
+                            },
+                        },
+                    },
+                    ---@class snacks.picker.db.Config
+                    db = {
+                        -- path to the sqlite3 library
+                        -- If not set, it will try to load the library by name.
+                        -- On Windows it will download the library from the internet.
+                        sqlite3_path = path.sqlite_path, ---@type string?
+                    },
+                },
+                rename = { enabled = true },
+                scope = {
+                    enabled = true,
+                    -- what buffers to attach to
+                    filter = function(buf)
+                        local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                        if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
+                            return false
+                        end
+
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                        if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
+                            return false
+                        end
+
+                        return vim.b[buf].snacks_scope ~= false and vim.g.snacks_scope ~= false
+                    end,
+                },
+                scratch = {
+                    enabled = true,
+                    win = {
+                        wo = {
+                            winbar = "",
+                        },
+                    },
+                    template = "",
+                },
+                scroll = {
+                    enabled = true,
+                    -- what buffers to animate
+                    filter = function(buf)
+                        local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                        if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
+                            return false
+                        end
+
+                        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                        if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
+                            return false
+                        end
+
+                        return vim.g.snacks_scroll ~= false and vim.b[buf].snacks_scroll ~= false
+                    end,
+
+                },
+                terminal = { enabled = true },
+                toggle = { enabled = true },
+                win = { enabled = true },
+                words = { enabled = true },
+            }
+        end,
+        priority = 1000,
+    },
 
     {
         "JuanZoran/Trans.nvim",
@@ -125,16 +754,33 @@ return {
             local Trans = require("Trans")
             Trans.setup(opts)
 
-            if utils.is_available("config.user_commands.extra-view") then
+            if require("utils").is_available("snacks.nvim") then
+                local trans_win
                 vim.api.nvim_create_user_command("TransToggle", function()
-                    if not package.loaded["extra-view"] then
-                        require("lazy").load({ plugins = "config.user_commands.extra-view" })
+                    if trans_win ~= nil then
+                        trans_win:destroy()
+                        trans_win = nil
+                        return
                     end
 
-                    require("extra-view").extra_view_toggle(function(buf, win)
-                        if filetype.is_panel_filetype(vim.bo.filetype) then
+                    trans_win = require("snacks").win({
+                        width = 0.3,
+                        position = "right",
+                        enter = false,
+                        wo = {
+                            wrap = true,
+                        },
+                        bo = {
+                            ft = "trans-view",
+                        },
+                    })
+
+                    trans_win:on({ "CursorHold", "CursorHoldI" }, function()
+                        if require("utils.filetype").is_panel_filetype(vim.bo.filetype) then
                             return
                         end
+
+                        local buf = trans_win.buf
 
                         local trans_opts = {}
                         trans_opts.mode = trans_opts.mode or vim.fn.mode()
@@ -159,12 +805,7 @@ return {
                         vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
                         data.frontend:load(result, name, data.frontend.opts.order[name])
                         vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
-                    end, {
-                        filetype = "trans-view",
-                        init = function(buf, win)
-                            vim.api.nvim_set_option_value("wrap", true, { win = win })
-                        end,
-                    })
+                    end)
                 end, { desc = "Toggle trans-view" })
             end
         end,
@@ -172,7 +813,10 @@ return {
             {
                 "kkharji/sqlite.lua",
                 config = function(_, opts)
-                    vim.g.sqlite_clib_path = path.scoop_app_path .. "/sqlite-with-dll/current/sqlite3.dll"
+                    vim.g.sqlite_clib_path = "sqlite3.dll"
+                    if environment.is_windows then
+                        vim.g.sqlite_clib_path = path.sqlite_path
+                    end
                 end,
             },
         },
@@ -213,8 +857,7 @@ return {
         },
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         keys = {
             { "zR", function() require("ufo").openAllFolds() end,               desc = "Open all folds",          mode = "n" },
@@ -273,222 +916,12 @@ return {
     },
 
     {
-        "LunarVim/bigfile.nvim",
-        enabled = not environment.is_vscode,
-        init = function()
-            local bigfile_features = {
-                "syntax",
-                "matchparen",
-                -- "vimopts",
-                {
-                    name = "vimopts",
-                    disable = function()
-                        vim.opt_local.swapfile = false
-                        vim.opt_local.foldmethod = "manual"
-                        -- vim.opt_local.undolevels = -1
-                        vim.opt_local.undoreload = 0
-                        vim.opt_local.list = false
-                    end,
-                },
-                "filetype",
-            }
-            if utils.is_available("indent-blankline.nvim") then
-                bigfile_features[#bigfile_features + 1] = "indent_blankline"
-            end
-            if utils.is_available("vim-illuminate") then
-                bigfile_features[#bigfile_features + 1] = "illuminate"
-            end
-            if utils.is_available("nvim-lspconfig") then
-                bigfile_features[#bigfile_features + 1] = "lsp"
-            end
-            if utils.is_available("nvim-treesitter") then
-                bigfile_features[#bigfile_features + 1] = "treesitter"
-            end
-
-            vim.g.bigfile_features = bigfile_features
-
-            local longfile_features = {
-                {
-                    name = "wrap",
-                    opts = {
-                        defer = false,
-                    },
-                    disable = function()
-                        vim.api.nvim_set_option_value("wrap", false, { scope = "local" })
-                    end,
-                },
-            }
-            vim.list_extend(longfile_features, bigfile_features)
-
-            local function disable_features(features, buf)
-                buf = buf or vim.api.nvim_get_current_buf()
-
-                local matched_features = vim.tbl_map(function(feature)
-                    return require("bigfile.features").get_feature(feature)
-                end, features)
-
-                local matched_deferred_features = {}
-                for _, feature in ipairs(matched_features) do
-                    feature.disable(buf)
-                    if feature.opts.defer then
-                        matched_deferred_features[#matched_deferred_features + 1] = feature
-                    end
-                end
-
-                vim.api.nvim_create_autocmd("BufReadPost", {
-                    buffer = buf,
-                    callback = function()
-                        for _, feature in ipairs(matched_deferred_features) do
-                            feature.disable(buf)
-                        end
-                    end,
-                })
-            end
-
-            -- bigfile 自动激活
-            vim.api.nvim_create_autocmd("BufReadPre", {
-                callback = function(args)
-                    local buf = args.buf
-
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
-                        return
-                    end
-
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
-                        return
-                    end
-
-                    if utils.is_bigfile(buf) then
-                        vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
-
-                        vim.b[buf].bigfile_detected = 1
-                        disable_features(bigfile_features, buf)
-
-                        pcall(vim.api.nvim_del_augroup_by_name, "BigFileActivate")
-                    end
-                end,
-                desc = "Big file event",
-                group = vim.api.nvim_create_augroup("BigFileActivate", { clear = true }),
-            })
-
-            vim.api.nvim_create_autocmd("BufReadPost", {
-                callback = function(args)
-                    local buf = args.buf
-
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
-                        return
-                    end
-
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
-                        return
-                    end
-
-                    if vim.b[buf].bigfile_detected and vim.b[buf].bigfile_detected == 1 then
-                        return
-                    end
-
-                    if vim.b[buf].longfile_detected then
-                        return
-                    end
-
-                    if not utils.is_longfile(buf) then
-                        vim.b[buf].longfile_detected = 0
-                        return
-                    end
-
-                    vim.notify("Long file detected!", vim.log.levels.WARN, { title = "bigfile" })
-
-                    vim.b[buf].bigfile_detected = 1
-                    vim.b[buf].longfile_detected = 1
-                    disable_features(longfile_features, buf)
-                end,
-                desc = "Long file event",
-                group = vim.api.nvim_create_augroup("LongFile", { clear = true }),
-            })
-        end,
-        lazy = true,
-        opts = function()
-            return {
-                -- 禁用 filesize 检查，只通过 pattern 判断
-                filesize = math.huge,                   -- size of the file in MiB, the plugin round file sizes to the closest MiB
-                pattern = function(bufnr, filesize_mib) -- autocmd pattern or function see <### Overriding the detection of big files>
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
-                    if vim.tbl_contains(buftype.skip_buftype_list, bt) then
-                        return false
-                    end
-
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-                    if vim.tbl_contains(filetype.skip_filetype_list, ft) then
-                        return false
-                    end
-
-                    if utils.is_bigfile(bufnr) then
-                        vim.notify("Big file detected!", vim.log.levels.WARN, { title = "bigfile" })
-                        return true
-                    end
-
-                    return false
-                end,
-                features = vim.g.bigfile_features, -- features to disable
-            }
-        end,
-    },
-
-    {
         "mbbill/fencview",
         cmd = {
             "FencAutoDetect",
             "FencView",
         },
         enabled = not environment.is_vscode,
-    },
-
-    {
-        "rcarriga/nvim-notify",
-        init = function()
-            vim.notify = function(message, ...)
-                require("notify")(message, ...)
-            end
-        end,
-        config = function(_, opts)
-            require("notify").setup(opts)
-
-            if utils.is_available("noice.nvim") and not package.loaded["noice"] then
-                require("noice")
-            end
-        end,
-        enabled = not environment.is_vscode,
-        lazy = true,
-        opts = {
-            timeout = 3000,
-            max_width = function()
-                return math.floor(vim.o.columns * 0.75)
-            end,
-            max_height = function()
-                return math.floor((vim.o.lines - vim.o.cmdheight) * 0.75)
-            end,
-            background_colour = "#000000",
-        },
-    },
-
-    {
-        "stevearc/dressing.nvim",
-        enabled = not environment.is_vscode,
-        init = function()
-            vim.ui.select = function(...)
-                require("dressing.select")(...)
-            end
-
-            vim.ui.input = function(...)
-                require("dressing.input")(...)
-            end
-        end,
-        lazy = true,
-        opts = {},
     },
 
     {
@@ -502,12 +935,12 @@ return {
             duration = 1000,
             ignored_cb = function(buf)
                 local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                if vim.tbl_contains(buftype.skip_buftype_list, bt) then
+                if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
                     return true
                 end
 
                 local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                if vim.tbl_contains(filetype.skip_filetype_list, ft) then
+                if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
                     return true
                 end
 

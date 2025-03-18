@@ -2,8 +2,6 @@ local bhu = require("plugins.bars_and_lines.heirline.utils")
 local colors = require("utils.colors")
 local icons = require("utils.icons")
 
-local herrline_conditions = require("heirline.conditions")
-
 return {
     static = {
         mode_names = {
@@ -59,7 +57,7 @@ return {
             t = colors.colors.blue,
         },
         mode_color = function(self)
-            local mode = herrline_conditions.is_active() and vim.fn.mode() or "n"
+            local mode = require("heirline.conditions").is_active() and vim.fn.mode() or "n"
             return self.mode_colors_map[mode]
         end,
     },

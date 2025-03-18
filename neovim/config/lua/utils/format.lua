@@ -2,73 +2,125 @@ local path = require("utils.path")
 
 local M = {}
 
-M.format = {
-    -- NOTE: autocorrect 目前不在 mason 仓库中，只能通过 scoop 安装
-    -- 当 mason 仓库收录时，解除注释
-    -- autocorrect = false,
-    black = {
-        append_args = {
-            "--line-length", "120",
-        },
-    },
-    ["clang-format"] = {
-        append_args = function(self, ctx)
-            local style = {
-                "BasedOnStyle: LLVM",
-                "BreakAfterJavaFieldAnnotations: True",
-                "AlignArrayOfStructures: Right",
-                "AlignTrailingComments: {Kind: Always}",
-                "ColumnLimit: 0",
-                "IndentWidth: 4",
-                "PointerAlignment: Left",
-            }
-            local style_str = "{"
-            for index, value in ipairs(style) do
-                style_str = style_str .. value
-                if index ~= #style then
-                    style_str = style_str .. ", "
-                end
-            end
-            style_str = style_str .. "}"
+---@class format_info
+---@field config? table
+---@field download? boolean|fun():boolean
+---@field enable? boolean|fun():boolean
+---@field filetype? string|string[]
 
-            return {
-                "--style", style_str,
-            }
-        end,
-    },
-    isort = {
-        -- isort: error: argument --le/--line-ending: expected one argument
-        -- https://github.com/stevearc/conform.nvim/issues/423
-        args = {
-            "--stdout",
-            "--filename",
-            "$FILENAME",
-            "-",
-            "--multi-line", "3",
-            "--trailing-comma",
-            "--profile", "black",
+---@type table<string, format_info>
+local format_list = {
+    -- NOTE: autocorrect 目前不在 mason 仓库中，只能手动安装
+    -- 当 mason 仓库收录后解除注释
+    -- autocorrect = {
+    --     download = true,
+    --     enable = true,
+    --     filetype = { "markdown" },
+    -- },
+    ["clang-format"] = {
+        config = {
+            append_args = function(self, ctx)
+                local style = {
+                    "BasedOnStyle: LLVM",
+                    "BreakAfterJavaFieldAnnotations: True",
+                    "AlignArrayOfStructures: Right",
+                    "AlignTrailingComments: {Kind: Always}",
+                    "ColumnLimit: 0",
+                    "IndentWidth: 4",
+                    "PointerAlignment: Left",
+                }
+                local style_str = "{"
+                for index, value in ipairs(style) do
+                    style_str = style_str .. value
+                    if index ~= #style then
+                        style_str = style_str .. ", "
+                    end
+                end
+                style_str = style_str .. "}"
+
+                return {
+                    "--style", style_str,
+                }
+            end,
         },
+        download = true,
+        enable = function() return vim.fn.executable("python") == 1 end,
+        filetype = { "c", "cpp" },
+    },
+    ruff_format = {
+        download = false,
+        enable = function() return vim.fn.executable("python") == 1 end,
+        filetype = { "python" },
+    },
+    ruff_organize_imports = {
+        download = false,
+        enable = function() return vim.fn.executable("python") == 1 end,
+        filetype = { "python" },
     },
     ["markdownlint-cli2"] = {
-        append_args = {
-            "--config", path.package_config_path .. "/.markdownlint.yaml",
+        config = {
+            append_args = {
+                "--config", path.package_config_path .. "/.markdownlint.yaml",
+            },
         },
+        download = true,
+        enable = true,
+        filetype = { "markdown" },
     },
     shfmt = {
-        append_args = {
-            "--indent", "4",
+        config = {
+            append_args = {
+                "--indent", "4",
+            },
         },
+        download = true,
+        enable = true,
+        filetype = { "sh" },
     },
 }
 
-M.format_list = vim.tbl_keys(M.format)
-
+M.format_config = {}
+M.format_list = {}
 M.formatters_by_ft = {
-    cpp = { "clang-format" },
-    markdown = { "autocorrect", "markdownlint-cli2", "trim_newlines", "trim_whitespace" },
-    python = { "black", "isort" },
-    sh = { "shfmt" },
+    markdown = { "autocorrect", "trim_newlines", "trim_whitespace" },
     ["_"] = { "trim_newlines", "trim_whitespace" },
 }
+M.format_filetype_list = {}
+for format, info in pairs(format_list) do
+    local enable = info.enable
+    if enable == nil then
+        enable = true
+    end
+    if type(enable) == "function" then
+        enable = enable()
+    end
+    if enable then
+        M.format_config[format] = info.config or {}
+
+        local download = info.download
+        if download == nil then
+            download = true
+        end
+        if type(download) == "function" then
+            download = download()
+        end
+        if download then
+            M.format_list[#M.format_list + 1] = format
+        end
+
+        local filetype = info.filetype or {}
+        if type(filetype) == "string" then
+            filetype = { filetype }
+        end
+        for _, ft in ipairs(filetype) do
+            if M.formatters_by_ft[ft] == nil then
+                M.formatters_by_ft[ft] = {}
+            end
+            M.formatters_by_ft[ft][#M.formatters_by_ft[ft] + 1] = format
+
+            M.format_filetype_list[#M.format_filetype_list + 1] = ft
+        end
+    end
+end
 
 return M

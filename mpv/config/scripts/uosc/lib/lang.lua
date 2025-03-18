@@ -99,6 +99,7 @@ ulang = {
 	_input_empty = 'input-bindings 为空',
 	_error = '出错 详见控制台',
 	_clipboard_osd = '复制到剪贴板',
+	_clipboard_osd2 = '无可复制',
 
 	_sid_submenu_title = '字幕轨列表',
 	_sid_submenu_label1 = '开/关 次字幕',
