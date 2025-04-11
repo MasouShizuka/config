@@ -22,7 +22,9 @@
     "BgColorChoice": 0,
     "SlideShowTimer": 120,
     "OpenInSameWindow": false,
-    "ShowConfirmationOnEsc": false
+    "ShowConfirmationOnEsc": false,
+    "ShowRecycleConfirmation": false,
+    "ShowPermanentDeletionConfirmation": true
   },
   "Theme": {
     "Dark": true,

@@ -93,7 +93,7 @@ return require("lazy").setup({
                 "editorconfig",
                 "gzip",
                 "man",
-                "matchit",
+                -- "matchit",
                 "matchparen",
                 "netrwPlugin",
                 "osc52",

@@ -52,7 +52,7 @@ return {
             end
 
             -- 判断是否启动 neovim-session-manager
-            if vim.fn.argc() == 0 then
+            if vim.fn.argc(-1) == 0 then
                 require("lazy").load({ plugins = "neovim-session-manager" })
             end
         end,

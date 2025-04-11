@@ -7,6 +7,14 @@
             "command": 
             {
                 "action": "sendInput",
+                "input": " kt"
+            },
+            "id": "User.sendInput.5C2FE848"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
                 "input": " k3"
             },
             "id": "User.sendInput.6C85BA19"
@@ -14,14 +22,6 @@
         {
             "command": "togglePaneZoom",
             "id": "User.togglePaneZoom"
-        },
-        {
-            "command": 
-            {
-                "action": "sendInput",
-                "input": " kt"
-            },
-            "id": "User.sendInput.5C2FE848"
         },
         {
             "command": 
@@ -80,18 +80,18 @@
         {
             "command": 
             {
-                "action": "moveFocus",
-                "direction": "nextInOrder"
-            },
-            "id": "User.moveFocus.D7681B66"
-        },
-        {
-            "command": 
-            {
                 "action": "sendInput",
                 "input": " k2"
             },
             "id": "User.sendInput.2BFD5600"
+        },
+        {
+            "command": 
+            {
+                "action": "moveFocus",
+                "direction": "nextInOrder"
+            },
+            "id": "User.moveFocus.D7681B66"
         },
         {
             "command": 
@@ -113,8 +113,12 @@
             "id": "User.sendInput.38C90572"
         },
         {
-            "command": "openNewTabDropdown",
-            "id": "User.openNewTabDropdown"
+            "command": 
+            {
+                "action": "sendInput",
+                "input": " k;"
+            },
+            "id": "User.sendInput.AA2AB5E1"
         },
         {
             "command": 
@@ -125,12 +129,16 @@
             "id": "User.moveTab.793E2350"
         },
         {
+            "command": "openNewTabDropdown",
+            "id": "User.openNewTabDropdown"
+        },
+        {
             "command": 
             {
                 "action": "sendInput",
-                "input": " k;"
+                "input": " kn"
             },
-            "id": "User.sendInput.AA2AB5E1"
+            "id": "User.sendInput.2AFEE807"
         },
         {
             "command": 
@@ -142,26 +150,14 @@
         {
             "command": 
             {
-                "action": "sendInput",
-                "input": " kn"
-            },
-            "id": "User.sendInput.2AFEE807"
-        },
-        {
-            "command": "toggleSplitOrientation",
-            "id": "User.toggleSplitOrientation"
-        },
-        {
-            "command": 
-            {
                 "action": "resizePane",
                 "direction": "right"
             },
             "id": "User.resizePane.87C324ED"
         },
         {
-            "command": "scrollDownPage",
-            "id": "User.scrollDownPage"
+            "command": "toggleSplitOrientation",
+            "id": "User.toggleSplitOrientation"
         },
         {
             "command": 
@@ -173,15 +169,15 @@
             "id": "User.splitPane.652D529A"
         },
         {
+            "command": "scrollDownPage",
+            "id": "User.scrollDownPage"
+        },
+        {
             "command": 
             {
                 "action": "commandPalette"
             },
             "id": "User.commandPalette.D3F0B923"
-        },
-        {
-            "command": "scrollToTop",
-            "id": "User.scrollToTop"
         },
         {
             "command": 
@@ -191,6 +187,10 @@
                 "splitMode": "duplicate"
             },
             "id": "User.splitPane.A6751878"
+        },
+        {
+            "command": "scrollToTop",
+            "id": "User.scrollToTop"
         },
         {
             "command": 
@@ -248,10 +248,6 @@
             "id": "User.closePane"
         },
         {
-            "command": "scrollToBottom",
-            "id": "User.scrollToBottom"
-        },
-        {
             "command": 
             {
                 "action": "splitPane",
@@ -259,6 +255,10 @@
                 "splitMode": "duplicate"
             },
             "id": "User.splitPane.FEF0D40B"
+        },
+        {
+            "command": "scrollToBottom",
+            "id": "User.scrollToBottom"
         },
         {
             "command": "scrollUpPage",
@@ -309,22 +309,26 @@
         {
             "command": 
             {
-                "action": "splitPane"
+                "action": "nextTab"
             },
-            "id": "User.splitPane.91AB55B1"
+            "id": "User.nextTab.0"
         },
         {
             "command": 
             {
-                "action": "nextTab"
+                "action": "splitPane"
             },
-            "id": "User.nextTab.0"
+            "id": "User.splitPane.91AB55B1"
         }
     ],
     "copyFormatting": "none",
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
     "keybindings": 
     [
+        {
+            "id": "User.sendInput.B040523C",
+            "keys": "ctrl+4"
+        },
         {
             "id": null,
             "keys": "ctrl+alt+d"
@@ -338,16 +342,12 @@
             "keys": "ctrl+3"
         },
         {
-            "id": "User.sendInput.B040523C",
-            "keys": "ctrl+4"
+            "id": null,
+            "keys": "ctrl+alt+k"
         },
         {
             "id": "User.sendInput.5C2FE848",
             "keys": "ctrl+shift+t"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+alt+k"
         },
         {
             "id": null,
@@ -362,12 +362,12 @@
             "keys": "ctrl+shift+h"
         },
         {
-            "id": null,
-            "keys": "ctrl+n"
-        },
-        {
             "id": "User.sendInput.F6854EB3",
             "keys": "ctrl+space"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+n"
         },
         {
             "id": "User.sendInput.422ABE55",
@@ -382,40 +382,44 @@
             "keys": "ctrl+alt+6"
         },
         {
-            "id": "User.sendInput.38C90572",
-            "keys": "ctrl+comma"
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
         },
         {
             "id": null,
             "keys": "ctrl+v"
         },
         {
-            "id": "User.find",
-            "keys": "ctrl+shift+f"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+left"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+j"
+            "id": "User.sendInput.38C90572",
+            "keys": "ctrl+comma"
         },
         {
             "id": "User.sendInput.AA2AB5E1",
             "keys": "ctrl+;"
         },
         {
+            "id": null,
+            "keys": "ctrl+j"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+left"
+        },
+        {
             "id": "User.sendInput.2AFEE807",
             "keys": "ctrl+shift+n"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+o"
         },
         {
             "id": "User.resizePane.87C324ED",
             "keys": "ctrl+shift+right"
         },
         {
-            "id": null,
-            "keys": "ctrl+o"
+            "id": "User.scrollDown.0",
+            "keys": "ctrl+shift+d"
         },
         {
             "id": null,
@@ -424,10 +428,6 @@
         {
             "id": "User.moveFocus.787314EB",
             "keys": "ctrl+shift+k"
-        },
-        {
-            "id": "User.scrollDown.0",
-            "keys": "ctrl+shift+d"
         },
         {
             "id": "User.resizePane.2A0DA8E0",
@@ -439,11 +439,11 @@
         },
         {
             "id": null,
-            "keys": "ctrl+numpad0"
+            "keys": "ctrl+shift+pgup"
         },
         {
             "id": null,
-            "keys": "f11"
+            "keys": "ctrl+shift+pgdn"
         },
         {
             "id": "User.moveTab.793E2350",
@@ -451,23 +451,23 @@
         },
         {
             "id": null,
-            "keys": "ctrl+shift+pgdn"
+            "keys": "ctrl+numpad0"
         },
         {
             "id": null,
-            "keys": "ctrl+shift+pgup"
+            "keys": "f11"
         },
         {
             "id": "User.swapPane.75247157",
             "keys": "ctrl+shift+e"
         },
         {
-            "id": null,
-            "keys": "enter"
-        },
-        {
             "id": "User.scrollToTop",
             "keys": "ctrl+home"
+        },
+        {
+            "id": null,
+            "keys": "enter"
         },
         {
             "id": "User.closePane",
@@ -479,11 +479,11 @@
         },
         {
             "id": null,
-            "keys": "alt+shift+down"
+            "keys": "ctrl+tab"
         },
         {
             "id": null,
-            "keys": "ctrl+tab"
+            "keys": "alt+shift+down"
         },
         {
             "id": null,
@@ -491,11 +491,11 @@
         },
         {
             "id": null,
-            "keys": "alt+shift+up"
+            "keys": "ctrl+h"
         },
         {
             "id": null,
-            "keys": "ctrl+h"
+            "keys": "alt+shift+up"
         },
         {
             "id": null,
@@ -503,7 +503,7 @@
         },
         {
             "id": null,
-            "keys": "alt+shift+left"
+            "keys": "ctrl+up"
         },
         {
             "id": null,
@@ -511,15 +511,11 @@
         },
         {
             "id": null,
-            "keys": "ctrl+up"
+            "keys": "alt+shift+left"
         },
         {
             "id": null,
             "keys": "alt+f4"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+alt+h"
         },
         {
             "id": null,
@@ -531,7 +527,7 @@
         },
         {
             "id": null,
-            "keys": "ctrl+k"
+            "keys": "ctrl+alt+h"
         },
         {
             "id": null,
@@ -539,15 +535,19 @@
         },
         {
             "id": null,
+            "keys": "ctrl+k"
+        },
+        {
+            "id": null,
             "keys": "alt+up"
         },
         {
             "id": null,
-            "keys": "ctrl+f"
+            "keys": "alt+right"
         },
         {
             "id": null,
-            "keys": "alt+right"
+            "keys": "ctrl+f"
         },
         {
             "id": null,
@@ -559,19 +559,19 @@
         },
         {
             "id": null,
-            "keys": "ctrl+alt+left"
-        },
-        {
-            "id": null,
             "keys": "ctrl+w"
         },
         {
             "id": null,
-            "keys": "alt+shift+plus"
+            "keys": "ctrl+alt+left"
         },
         {
             "id": null,
             "keys": "alt+space"
+        },
+        {
+            "id": null,
+            "keys": "alt+shift+plus"
         },
         {
             "id": null,
@@ -760,10 +760,10 @@
                 "startingDirectory": "%USERPROFILE%"
             },
             {
-                "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
+                "guid": "{6203138c-1815-5830-a2b0-86381bcf79b3}",
                 "hidden": false,
-                "name": "Arch",
-                "source": "Windows.Terminal.Wsl"
+                "name": "archlinux",
+                "source": "Microsoft.WSL"
             },
             {
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
@@ -814,14 +814,14 @@
             "blue": "#82AAFF",
             "brightBlack": "#444A73",
             "brightBlue": "#82AAFF",
-            "brightCyan": "#86E1FC",
+            "brightCyan": "#4FD6BE",
             "brightGreen": "#C3E88D",
             "brightPurple": "#FCA7EA",
             "brightRed": "#FF757F",
             "brightWhite": "#C8D3F5",
             "brightYellow": "#FFC777",
             "cursorColor": "#C8D3F5",
-            "cyan": "#86E1FC",
+            "cyan": "#4FD6BE",
             "foreground": "#C8D3F5",
             "green": "#C3E88D",
             "name": "Tokyo Night Moon",

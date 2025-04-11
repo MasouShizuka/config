@@ -12,7 +12,7 @@
 | komorebi.json      |      | komorebi 配置文件             |
 | komorebi.bar*.json |      | komorebi-bar 配置文件         |
 | komorebi.ahk       |      | komorebi 快捷键配置文件       |
-| applications.yaml  |      | komorebi 窗口配置文件         |
+| applications.json  |      | komorebi 窗口配置文件         |
 
 ## 注意
 

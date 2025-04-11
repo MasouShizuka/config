@@ -91,21 +91,6 @@ task_switch() {
 }
 
 
-; Taskbar
-
-is_taskbar_hide := false
-
-hide_taskbar() {
-    If (is_taskbar_hide) {
-        WinSetTransparent(255, "ahk_class Shell_TrayWnd")
-        WinSetTransparent("Off", "ahk_class Shell_TrayWnd")
-    } Else {
-        WinSetTransparent(0, "ahk_class Shell_TrayWnd")
-    }
-    is_taskbar_hide := !is_taskbar_hide
-}
-
-
 ; Window
 
 center_window() {
@@ -120,7 +105,7 @@ center_window() {
     MonitorCount := SysGet(80)
     Loop (MonitorCount) {
         MonitorGetWorkArea(A_Index, &Left, &Top, &Right, &Bottom)
-        If (CX >= Left && CX <= Right && CY >= Top && CY <= Bottom) {
+        If (CX >= Left and CX <= Right and CY >= Top and CY <= Bottom) {
             MW := (Right - Left)
             MH := (Bottom - Top)
 
@@ -354,23 +339,25 @@ veryslow_resize_window(key) {
     resize_window(1)
 }
 
+*Esc Up::
 *CapsLock Up:: {
-    If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
+    If ((A_PriorKey == "Escape" or A_PriorKey == "CapsLock") and A_TimeSinceThisHotkey < 500) {
         Send("{Blind}{Esc}")
     }
 }
 
 #HotIf FASTMODE
+*Esc Up::
 *CapsLock Up:: {
     global FASTMODE := false
     global SLOWMODE := true
 }
 #HotIf
 
-#HotIf GetKeyState("Capslock", "P") and GetKeyState("Alt", "P")
+#HotIf (GetKeyState("Esc", "P") or GetKeyState("Capslock", "P")) and GetKeyState("Alt", "P")
 #HotIf
 
-HotIf 'GetKeyState("Capslock", "P") and GetKeyState("Alt", "P")'
+HotIf '(GetKeyState("Esc", "P") or GetKeyState("Capslock", "P")) and GetKeyState("Alt", "P")'
 For key, value in mouse_direction {
     Hotkey("*" . value, veryslow_move_mouse)
 }
@@ -379,7 +366,7 @@ For key, value in window_direction {
 }
 HotIf
 
-#HotIf GetKeyState("Capslock", "P")
+#HotIf GetKeyState("Esc", "P") or GetKeyState("Capslock", "P")
 *N:: click_down("L")
 *N Up:: click_up("L")
 *M:: click_down("R")
@@ -390,7 +377,7 @@ HotIf
 */:: MakeWindowDraggable()
 #HotIf
 
-HotIf 'GetKeyState("Capslock", "P")'
+HotIf 'GetKeyState("Esc", "P") or GetKeyState("Capslock", "P")'
 For key, value in mouse_direction {
     Hotkey("*" . value, fast_move_mouse)
 }
@@ -408,10 +395,10 @@ HotIf
 *.:: click_down("M")
 *. Up:: click_up_without_hide_mouse_move_prompt("M")
 */:: MakeWindowDraggable()
-*Esc:: exit_mouse_mode_with_left_click_up()
 *Space:: exit_mouse_mode()
+*Esc Up::
 *CapsLock Up:: {
-    If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
+    If ((A_PriorKey == "Escape" or A_PriorKey == "CapsLock") and A_TimeSinceThisHotkey < 500) {
         exit_mouse_mode_with_left_click_up()
     }
 }
@@ -438,10 +425,10 @@ HotIf
 *.:: click_down("M")
 *. Up:: click_up_without_hide_mouse_move_prompt("M")
 */:: MakeWindowDraggable()
-*Esc:: exit_mouse_mode_with_left_click_up()
 *Space:: exit_mouse_mode()
+*Esc Up::
 *CapsLock Up:: {
-    If (A_PriorKey == "CapsLock" && A_TimeSinceThisHotkey < 500) {
+    If ((A_PriorKey == "Escape" or A_PriorKey == "CapsLock") and A_TimeSinceThisHotkey < 500) {
         exit_mouse_mode_with_left_click_up()
     }
 }

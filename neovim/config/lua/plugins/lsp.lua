@@ -191,6 +191,8 @@ return {
                 -- -- k = "prev",
                 -- ["{"] = "prev",
                 -- ["[["] = "prev",
+                -- dd = "delete",
+                -- d = { action = "delete", mode = "v" },
                 -- i = "inspect",
                 -- p = "preview",
                 -- P = "toggle_preview",
@@ -211,8 +213,7 @@ return {
                 -- zi = "fold_toggle_enable",
                 -- gb = { -- example of a custom action that toggles the active view filter
                 --     action = function(view)
-                --         view.state.filter_buffer = not view.state.filter_buffer
-                --         view:filter(view.state.filter_buffer and { buf = 0 } or nil)
+                --         view:filter({ buf = 0 }, { toggle = true })
                 --     end,
                 --     desc = "Toggle Current Buffer Filter",
                 -- },
@@ -337,6 +338,7 @@ return {
 
             nvim_lint.linters_by_ft = lint.linters_by_ft
 
+            -- lazyvim.plugins.linting
             vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
                 callback = function(args)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
@@ -763,6 +765,7 @@ return {
 
                     if client.supports_method("textDocument/signatureHelp") then
                         vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
+                        vim.keymap.set("i", "<c-k>", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
                     end
 
                     if not utils.is_available("snacks.nvim") then
@@ -812,8 +815,6 @@ return {
                     local lsp = require("utils.lsp")
                     local utils = require("utils")
 
-                    local lspconfig = require("lspconfig")
-
                     local capabilities = vim.lsp.protocol.make_client_capabilities()
 
                     if utils.is_available("cmp-nvim-lsp") then
@@ -858,7 +859,7 @@ return {
                         -- end,
                     }
                     for lsp_server, setup in pairs(lsp.lsp_config) do
-                        handlers[lsp_server] = setup(lspconfig, default_config)
+                        handlers[lsp_server] = setup(require("lspconfig"), default_config)
                     end
 
                     return {

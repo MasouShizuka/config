@@ -1,13 +1,15 @@
 {
   "cross_monitor_move_behaviour": "Insert",
-  "app_specific_configuration_path": "applications.yaml",
+  "app_specific_configuration_path": "applications.json",
   "border_width": 6,
   "border": true,
   "border_colours": {
     "single": "#82aaff",
     "stack": "#c3e88d",
     "monocle": "#ff757f",
-    "floating": "#86e1fc"
+    "floating": "#4fd6be",
+    "unfocused": "#545c7e",
+    "unfocused_locked": "#ff007c"
   },
   "default_workspace_padding": 4,
   "default_container_padding": 4,
@@ -55,9 +57,14 @@
           ]
         },
         {
-          "name": "\uE20C",
+          "name": "\uE2F2",
           "layout": "BSP",
           "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "reminder.exe",
+              "matching_strategy": "Equals"
+            },
             {
               "kind": "Exe",
               "id": "Thunder.exe",
@@ -72,11 +79,6 @@
             {
               "kind": "Exe",
               "id": "clash-verge.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "nekoray.exe",
               "matching_strategy": "Equals"
             }
           ]

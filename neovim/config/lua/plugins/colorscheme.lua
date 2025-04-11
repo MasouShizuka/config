@@ -42,10 +42,6 @@ return {
                 overrides.GitSignsChange = { link = "GruvboxBlue" }
             end
 
-            if utils.is_available("mini.indentscope") then
-                overrides.MiniIndentscopeSymbol = { fg = colors.get_color("orange", "gruvbox") }
-            end
-
             if utils.is_available("nvim-treesitter-context") then
                 overrides.TreesitterContextBottom = { underline = true }
                 overrides.TreesitterContextLineNumber = { fg = colors.get_color("purple", "gruvbox") }
@@ -53,13 +49,6 @@ return {
 
             return {
                 undercurl = environment.is_undercurl_available,
-                italic = {
-                    strings = false,
-                    emphasis = false,
-                    comments = false,
-                    operators = false,
-                    folds = false,
-                },
                 overrides = overrides,
                 transparent_mode = true,
             }
@@ -75,10 +64,6 @@ return {
         opts = {
             transparent = true, -- Enable this to disable setting the background color
             styles = {
-                -- Style to be applied to different syntax groups
-                -- Value is any valid attr-list value for `:help nvim_set_hl`
-                comments = { italic = false },
-                keywords = { italic = false },
                 -- Background styles. Can be "dark", "transparent" or "normal"
                 sidebars = "transparent", -- style for sidebars, see below
                 floats = "transparent",   -- style for floating windows
@@ -93,6 +78,9 @@ return {
 
                 hl["@module"] = { fg = c[colors.get_color_name("tokyonight", "yellow")] }
                 hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
+                hl.DiffAdd = { link = "diffAdded" }
+                hl.DiffChange = { link = "diffChanged" }
+                hl.DiffDelete = { link = "diffRemoved" }
                 hl.LspKindFile = { fg = c[colors.get_color_name("tokyonight", "orange")] }
                 hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_color_name("tokyonight", "gray")] })
                 hl.StatusLine = vim.tbl_deep_extend("force", hl.StatusLine or {}, { bg = "none" })
@@ -121,10 +109,6 @@ return {
                 if utils.is_available("nvim-treesitter-context") then
                     hl.TreesitterContextBottom = vim.tbl_deep_extend("force", hl.TreesitterContextBottom or {}, { underline = true })
                     hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_color_name("tokyonight", "purple")] })
-                end
-
-                if utils.is_available("telescope.nvim") then
-                    hl.TelescopeSelection = vim.tbl_deep_extend("force", hl.TelescopeSelection or {}, { bg = c[colors.get_color_name("tokyonight", "black")] })
                 end
             end,
         },
@@ -185,10 +169,25 @@ return {
             end
 
             return {
-                highlights = highlights,
+                highlights = highlights, -- Override default highlight groups or create your own
+                styles = {               -- For example, to apply bold and italic, use "bold,italic"
+                    types = "NONE",
+                    methods = "NONE",
+                    numbers = "NONE",
+                    strings = "NONE",
+                    comments = "italic",
+                    keywords = "bold,italic",
+                    constants = "NONE",
+                    functions = "italic",
+                    operators = "NONE",
+                    variables = "NONE",
+                    parameters = "NONE",
+                    conditionals = "italic",
+                    virtual_text = "NONE",
+                },
                 options = {
-                    cursorline = true,
-                    transparency = true,
+                    cursorline = true,   -- Use cursorline highlighting?
+                    transparency = true, -- Use a transparent background?
                 },
             }
         end,

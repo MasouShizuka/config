@@ -77,12 +77,18 @@ function M.setup(opts)
     -- mark
     vim.keymap.set("n", "M", "m", { desc = "Mark", silent = true })
 
+    -- 跳转居中
+    vim.keymap.set({ "n", "x" }, "n", "nzz", { desc = "Jump to next location", remap = true, silent = true })
+    vim.keymap.set({ "n", "x" }, "N", "Nzz", { desc = "Jump to next location", remap = true, silent = true })
+
     -- 选中上次粘贴的文本
     vim.keymap.set("n", "gp", "`[v`]", { desc = "Select last pasted text", silent = true })
 
     -- 调整光标所在行到屏幕的位置
-    vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
-    vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
+    if not utils.is_available("neoscroll.nvim") then
+        vim.keymap.set({ "n", "x" }, "zj", "zt", { desc = "Top this line", remap = true, silent = true })
+        vim.keymap.set({ "n", "x" }, "zk", "zb", { desc = "Bottom this line", remap = true, silent = true })
+    end
 
     if environment.is_vscode then
         local vscode = require("vscode-neovim")
@@ -313,6 +319,7 @@ function M.setup(opts)
 
         -- 终端
         vim.keymap.set("t", "<esc>", [[<c-\><c-n>]], { desc = "Enter normal mode", silent = true })
+        vim.keymap.set("t", "<c-s-v>", '<C-\\><C-N>"+pi', { desc = "Paste", silent = true })
 
         if not utils.is_available("edgy.nvim") then
             -- 聚焦 left panel
@@ -336,12 +343,12 @@ function M.setup(opts)
         end
 
         -- 跳转居中
-        if not utils.is_available("snacks.nvim") then
+        if not utils.is_available("neoscroll.nvim") then
             vim.keymap.set("n", "<c-d>", "<c-d>zz", { desc = "Scroll half page down", silent = true })
             vim.keymap.set("n", "<c-u>", "<c-u>zz", { desc = "Scroll half page up", silent = true })
-            vim.keymap.set("n", "<c-i>", "<c-i>zz", { desc = "Jump to next location", silent = true })
-            vim.keymap.set("n", "<c-o>", "<c-o>zz", { desc = "Jump to previous location", silent = true })
         end
+        vim.keymap.set("n", "<c-i>", "<c-i>zz", { desc = "Jump to next location", silent = true })
+        vim.keymap.set("n", "<c-o>", "<c-o>zz", { desc = "Jump to previous location", silent = true })
 
         -- 窗口
         vim.keymap.set("n", "<c-e>", function() vim.cmd.wincmd("r") end, { desc = "Exchange window", silent = true })

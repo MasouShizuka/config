@@ -20,7 +20,7 @@ M.wsl_arch = {
     args = {
         "wsl",
         "-d",
-        "Arch",
+        "archlinux",
         "--cd",
         "~",
     },

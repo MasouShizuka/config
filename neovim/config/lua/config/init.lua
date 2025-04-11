@@ -29,7 +29,9 @@ return {
     {
         dir = path.config_path .. "/lua/config/autocommands/colorscheme-persist",
         enabled = not environment.is_vscode,
-        lazy = false,
+        event = {
+            "UIEnter"
+        },
         name = "config.autocommands.colorscheme-persist",
         opts = {},
         priority = 1000,
@@ -75,13 +77,9 @@ return {
             { "?", desc = "Search backward", mode = { "n", "x" } },
             { "*", desc = "Next",            mode = { "n", "x" } },
             { "#", desc = "Previous",        mode = { "n", "x" } },
-            { "n", desc = "Next",            mode = { "n", "x" } },
-            { "N", desc = "Previous",        mode = { "n", "x" } },
         },
         name = "config.autocommands.hlsearch",
-        opts = {
-            delay = 250,
-        },
+        opts = {},
     },
 
     {
@@ -280,7 +278,7 @@ return {
                                 name = "syntax",
                                 get = function()
                                     local syntax = vim.api.nvim_get_option_value("syntax", { scope = "local" })
-                                    if syntax == "" then
+                                    if syntax ~= "on" and syntax ~= "off" then
                                         syntax = "on"
                                     end
                                     return syntax == "on"

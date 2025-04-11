@@ -13,6 +13,9 @@ preview_hovered = { fg = "#222436", bg = "#82aaff" }
 find_keyword  = { fg = "#1e2030", bg = "#ff966c", bold = true }
 find_position = { fg = "#0db9d7", bg = "#203346", bold = true }
 
+# Symlink
+symlink_target = { italic = true }
+
 # Marker
 marker_copied   = { fg = "#4fd6be", bg = "#4fd6be" }
 marker_cut      = { fg = "#ff757f", bg = "#ff757f" }
@@ -70,11 +73,11 @@ progress_normal = { fg = "#222436" }
 progress_error  = { fg = "#ff757f" }
 
 # Permissions
+perm_sep   = { fg = "#444a73" }
 perm_type  = { fg = "#82aaff" }
 perm_read  = { fg = "#ffc777" }
 perm_write = { fg = "#ff757f" }
 perm_exec  = { fg = "#c3e88d" }
-perm_sep   = { fg = "#444a73" }
 
 
 # : }}}
@@ -85,7 +88,7 @@ perm_sep   = { fg = "#444a73" }
 [which]
 cols            = 3
 mask            = { bg = "#1e2030" }
-cand            = { fg = "#86e1fc" }
+cand            = { fg = "#4fd6be" }
 rest            = { fg = "#82aaff" }
 desc            = { fg = "#c099ff" }
 separator       = " ➜ "

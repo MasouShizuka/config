@@ -74,10 +74,13 @@ return {
                 enabled = false,
             },
             lsp = {
-                -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
                 override = {
+                    -- override the default lsp markdown formatter with Noice
                     ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                    -- override the lsp markdown formatter with Noice
                     ["vim.lsp.util.stylize_markdown"] = true,
+                    -- override cmp documentation with Noice (needs the other options to work)
+                    ["cmp.entry.get_documentation"] = true,
                 },
             },
             -- you can enable a preset for easier configuration
@@ -96,9 +99,13 @@ return {
                 {
                     filter = {
                         event = "msg_show",
-                        kind = "",
+                        any = {
+                            { find = "%d+L, %d+B" },
+                            { find = "; after #%d+" },
+                            { find = "; before #%d+" },
+                        },
                     },
-                    opts = { skip = true },
+                    view = "mini",
                 },
             },
         },
@@ -124,14 +131,16 @@ return {
                     vim.print = _G.dd -- Override print to use snacks for `:=` command
 
 
-                    require("which-key").add({
-                        {
-                            mode = "n",
-                            { "<leader>t",  group = "picker" },
-                            { "<leader>tg", group = "picker git" },
-                            { "<leader>lg", group = "picker lsp goto" },
-                        },
-                    })
+                    if utils.is_available("which-key.nvim") then
+                        require("which-key").add({
+                            {
+                                mode = "n",
+                                { "<leader>t",  group = "picker" },
+                                { "<leader>tg", group = "picker git" },
+                                { "<leader>lg", group = "picker lsp goto" },
+                            },
+                        })
+                    end
 
 
                     require("which-key").add({
@@ -159,13 +168,41 @@ return {
 
 
                     snacks.toggle.diagnostics():map("<leader>ctd")
-                    snacks.toggle.indent():map("<leader>cti")
-                    snacks.toggle.scroll():map("<leader>ctS")
+                    -- snacks.toggle.indent():map("<leader>cti")
+                    -- snacks.toggle.scroll():map("<leader>ctS")
                     snacks.toggle.words():map("<leader>ctW")
                 end,
                 desc = "Snacks init",
                 pattern = "IceLoad",
             })
+
+            -- 当直接打开一个大文件时，需要手动执行
+            if vim.fn.argc(-1) > 0 then
+                utils.create_once_autocmd("BufReadPre", {
+                    callback = function(ev)
+                        if not utils.is_bigfile(ev.buf) and not utils.is_longfile(ev.buf) then
+                            return
+                        end
+
+                        local opts = require("snacks").config.get("bigfile", { notify = true })
+
+                        if opts.notify then
+                            local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(ev.buf), ":p:~:.")
+                            Snacks.notify.warn({
+                                ("Big file detected `%s`."):format(path),
+                                "Some Neovim features have been **disabled**.",
+                            }, { title = "Big File" })
+                        end
+                        vim.api.nvim_buf_call(ev.buf, function()
+                            opts.setup({
+                                buf = ev.buf,
+                                ft = vim.filetype.match({ buf = ev.buf }) or "",
+                            })
+                        end)
+                    end,
+                    desc = "Disable bigfile features when running nvim with file argument",
+                })
+            end
         end,
         keys = {
             { "ii",         mode = { "x", "o" } },
@@ -185,7 +222,7 @@ return {
                 mode = "n",
             },
             { "<leader>t:",  function() require("snacks").picker.command_history() end,       desc = "Neovim command history",                      mode = "n" },
-            { "<leader>tC",  function() require("snacks").picker.commands() end,              desc = "Neovim commands",                             mode = "n" },
+            { "<c-s-p>",     function() require("snacks").picker.commands() end,              desc = "Neovim commands",                             mode = "n" },
             { "<leader>tD",  function() require("snacks").picker.diagnostics() end,           desc = "Diagnostics",                                 mode = "n" },
             { "<leader>td",  function() require("snacks").picker.diagnostics_buffer() end,    desc = "Buffer Diagnostics",                          mode = "n" },
             { "<leader>tgb", function() require("snacks").picker.git_branches() end,          desc = "Git Branches",                                mode = "n" },
@@ -333,6 +370,7 @@ return {
             end
 
             return {
+                -- NOTE: 存在直接打开大文件无法检测的情况
                 bigfile = {
                     enabled = true,
                     -- Enable or disable features when big file detected
@@ -345,19 +383,28 @@ return {
                             foldmethod = "manual",
                             statuscolumn = "",
                             conceallevel = 0,
-
-                            wrap = false,
-
-                            -- https://github.com/LunarVim/bigfile.nvim
-                            list = false,
-                            swapfile = false,
-                            undolevels = -1,
-                            undoreload = 0,
                         })
                         vim.schedule(function()
                             if vim.api.nvim_buf_is_valid(ctx.buf) then
                                 vim.bo[ctx.buf].syntax = ctx.ft
                             end
+                        end)
+
+                        vim.api.nvim_set_option_value("wrap", false, { scope = "local" })
+
+                        -- https://github.com/LunarVim/bigfile.nvim
+                        vim.api.nvim_set_option_value("swapfile", false, { scope = "local" })
+                        vim.api.nvim_set_option_value("undolevels", 0, { scope = "local" })
+                        vim.api.nvim_set_option_value("undoreload", 0, { scope = "local" })
+                        vim.api.nvim_set_option_value("list", false, { scope = "local" })
+
+                        vim.schedule(function()
+                            local ts_avail, parsers = pcall(require, "nvim-treesitter.parsers")
+                            local is_treesitter_available = ts_avail and parsers.has_parser()
+                            if is_treesitter_available then
+                                vim.treesitter.stop(ctx.buf)
+                            end
+                            vim.api.nvim_set_option_value("syntax", "off", { scope = "local" })
                         end)
                     end,
                 },
@@ -430,36 +477,39 @@ return {
                 },
                 debug = { enabled = true },
                 explorer = { enabled = true },
-                indent = {
-                    enabled = true,
-                    indent = {
-                        char = icons.misc.left_one_quarter_block,
-                        only_current = true, -- only show indent guides in the current window
-                    },
-                    animate = {
-                        enabled = false,
-                    },
-                    scope = {
-                        char = icons.misc.left_one_quarter_block,
-                        underline = true,    -- underline the start of the scope
-                        only_current = true, -- only show scope in the current window
-                    },
-                    -- filter for buffers to enable indent guides
-                    filter = function(buf)
-                        local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                        if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
-                            return false
-                        end
-
-                        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                        if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
-                            return false
-                        end
-
-                        return vim.g.snacks_indent ~= false and vim.b[buf].snacks_indent ~= false and
-                            vim.bo[buf].buftype == ""
-                    end,
-                },
+                -- NOTE: 存在以下问题
+                -- 1. 大文件内存在性能问题
+                -- 2. 相同 buf 的 indent 互相干扰，需要设置 only_current
+                -- indent = {
+                --     enabled = true,
+                --     indent = {
+                --         char = icons.misc.left_one_quarter_block,
+                --         only_current = true, -- only show indent guides in the current window
+                --     },
+                --     animate = {
+                --         enabled = false,
+                --     },
+                --     scope = {
+                --         char = icons.misc.left_one_quarter_block,
+                --         underline = true,    -- underline the start of the scope
+                --         only_current = true, -- only show scope in the current window
+                --     },
+                --     -- filter for buffers to enable indent guides
+                --     filter = function(buf)
+                --         local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                --         if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
+                --             return false
+                --         end
+                --
+                --         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                --         if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
+                --             return false
+                --         end
+                --
+                --         return vim.g.snacks_indent ~= false and vim.b[buf].snacks_indent ~= false and
+                --             vim.bo[buf].buftype == ""
+                --     end,
+                -- },
                 input = { enabled = true },
                 lazygit = { enabled = true },
                 notifier = {
@@ -474,6 +524,7 @@ return {
                     sources = {
                         explorer = {
                             prompt = " " .. require("utils.icons").fold.FoldClosed,
+                            watch = false,
                             layout = {
                                 cycle = false,
                                 layout = explorer_layout,
@@ -516,7 +567,7 @@ return {
                                         -- ["]e"] = "explorer_error_next",
                                         -- ["[e"] = "explorer_error_prev",
 
-                                        ["D"] = function(picker)
+                                        ["s"] = function(picker)
                                             local items = snacks.picker.get()[1]:selected({ fallback = true })
                                             if #items ~= 2 then
                                                 vim.notify("Diff requires specifying 2 files", vim.log.levels.WARN, { title = "Explorer" })
@@ -712,24 +763,28 @@ return {
                     },
                     template = "",
                 },
-                scroll = {
-                    enabled = true,
-                    -- what buffers to animate
-                    filter = function(buf)
-                        local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                        if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
-                            return false
-                        end
-
-                        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                        if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
-                            return false
-                        end
-
-                        return vim.g.snacks_scroll ~= false and vim.b[buf].snacks_scroll ~= false
-                    end,
-
-                },
+                -- NOTE: 存在以下问题
+                -- 1. 有时第一次滑动无法平滑滚动
+                -- 2. 按住滚动时不连贯
+                -- 3. 无法禁用部分操作的平滑滚动
+                -- scroll = {
+                --     enabled = true,
+                --     -- what buffers to animate
+                --     filter = function(buf)
+                --         local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
+                --         if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
+                --             return false
+                --         end
+                --
+                --         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                --         if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
+                --             return false
+                --         end
+                --
+                --         return vim.g.snacks_scroll ~= false and vim.b[buf].snacks_scroll ~= false
+                --     end,
+                --
+                -- },
                 terminal = { enabled = true },
                 toggle = { enabled = true },
                 win = { enabled = true },
@@ -852,6 +907,15 @@ return {
 
     {
         "kevinhwang91/nvim-ufo",
+        cmd = {
+            "UfoEnable",
+            "UfoDisable",
+            "UfoInspect",
+            "UfoAttach",
+            "UfoDetach",
+            "UfoEnableFold",
+            "UfoDisableFold",
+        },
         dependencies = {
             "kevinhwang91/promise-async",
         },
@@ -899,17 +963,19 @@ return {
                     winblend = 0,
                 },
                 mappings = {
-                    scrollB = "",
-                    scrollF = "",
+                    -- scrollB = "",
+                    -- scrollF = "",
+                    -- scrollU = "",
+                    -- scrollD = "",
                     scrollU = "<c-u>",
                     scrollD = "<c-d>",
-                    scrollE = "<c-e>",
-                    scrollY = "<c-y>",
-                    jumpTop = "",
-                    jumpBot = "",
-                    close = "q",
-                    switch = "<tab>",
-                    trace = "<cr>",
+                    -- scrollE = "<C-E>",
+                    -- scrollY = "<C-Y>",
+                    -- jumpTop = "",
+                    -- jumpBot = "",
+                    -- close = "q",
+                    -- switch = "<Tab>",
+                    -- trace = "<CR>",
                 },
             },
         },
@@ -925,27 +991,89 @@ return {
     },
 
     {
-        "tzachar/highlight-undo.nvim",
+        "y3owk1n/undo-glow.nvim",
         enabled = not environment.is_vscode,
+        init = function()
+            local utils = require("utils")
+            utils.create_once_autocmd("User", {
+                callback = function()
+                    if not utils.is_available("yanky.nvim") then
+                        vim.api.nvim_create_autocmd("TextYankPost", {
+                            callback = function()
+                                require("undo-glow").yank()
+                            end,
+                            desc = "Highlight when yanking (copying) text",
+                        })
+                    end
+
+                    -- This only handles neovim instance and do not highlight when switching panes in tmux
+                    vim.api.nvim_create_autocmd("CursorMoved", {
+                        callback = function()
+                            require("undo-glow").cursor_moved({
+                                animation = {
+                                    animation_type = "slide",
+                                },
+                            })
+                        end,
+                        desc = "Highlight when cursor moved significantly",
+                    })
+
+                    -- This will handle highlights when focus gained, including switching panes in tmux
+                    local first_focus_gained = true
+                    vim.api.nvim_create_autocmd("FocusGained", {
+                        callback = function()
+                            if first_focus_gained then
+                                first_focus_gained = false
+                                return
+                            end
+
+                            ---@type UndoGlow.CommandOpts
+                            local opts = {
+                                animation = {
+                                    animation_type = "slide",
+                                },
+                            }
+
+                            opts = require("undo-glow.utils").merge_command_opts("UgCursor", opts)
+                            local current_row = vim.api.nvim_win_get_cursor(0)[1]
+                            local cur_line = vim.api.nvim_get_current_line()
+                            require("undo-glow").highlight_region(vim.tbl_extend("force", opts, {
+                                s_row = current_row - 1,
+                                s_col = 0,
+                                e_row = current_row - 1,
+                                e_col = #cur_line,
+                                force_edge = opts.force_edge == nil and true or opts.force_edge,
+                            }))
+                        end,
+                        desc = "Highlight when focus gained",
+                    })
+
+                    vim.api.nvim_create_autocmd("CmdLineLeave", {
+                        callback = function()
+                            require("undo-glow").search_cmd({
+                                animation = {
+                                    animation_type = "fade",
+                                },
+                            })
+                        end,
+                        desc = "Highlight when search cmdline leave",
+                        pattern = { "/", "?" },
+                    })
+                end,
+                desc = "undo-glow init",
+                pattern = "IceLoad",
+            })
+        end,
         keys = {
-            { "u",     desc = "Undo", mode = "n" },
-            { "<c-r>", desc = "Redo", mode = "n" },
+            { "u",     function() require("undo-glow").undo() end, desc = "Undo with highlight", mode = "n" },
+            { "<c-r>", function() require("undo-glow").redo() end, desc = "Redo with highlight", mode = "n" },
         },
         opts = {
-            duration = 1000,
-            ignored_cb = function(buf)
-                local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
-                    return true
-                end
-
-                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
-                    return true
-                end
-
-                return false
-            end,
+            animation = {
+                enabled = true,       -- whether to turn on or off for animation
+                duration = 1000,      -- in ms
+                window_scoped = true, -- this uses an experimental extmark options (it might not work depends on your version of neovim)
+            },
         },
     },
 }

@@ -1,5 +1,3 @@
--- https://gitee.com/DreamMaoMao/fg.yazi
-
 local _load_config = ya.sync(function(state, opts)
     opts = opts or {}
 
@@ -41,25 +39,11 @@ local _get_config = ya.sync(function(state, name)
     return state[name]
 end)
 
-local function splitAndGetFirst(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
-    local sepStart, sepEnd = string.find(inputstr, sep)
-    if sepStart then
-        return string.sub(inputstr, 1, sepStart - 1)
-    end
-    return inputstr
-end
-
 local state = ya.sync(function() return tostring(cx.active.current.cwd) end)
 
 local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s, ...), timeout = 5, level = "error" } end
 
 local function entry(_, job)
-    local _permit = ya.hide()
-    local cwd = state()
-
     local args = _get_config("args")
     local bat_args = args.bat
     local fzf_args = args.fzf
@@ -90,6 +74,9 @@ local function entry(_, job)
         cmd_args[#cmd_args + 1] = value
     end
 
+    local _permit = ya.hide()
+    local cwd = state()
+
     local child, err =
         Command("fzf"):args(cmd_args):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
@@ -105,11 +92,12 @@ local function entry(_, job)
     end
 
     local target = output.stdout:gsub("\n$", "")
-
-    local file_url = splitAndGetFirst(target, ":")
-
-    if file_url ~= "" then
-        ya.mgr_emit(file_url:match("[/\\]$") and "cd" or "reveal", { file_url })
+    local start, _ = target:find(":")
+    if start then
+        target = string.sub(target, 1, start - 1)
+    end
+    if target ~= "" then
+        ya.mgr_emit(target:match("[/\\]$") and "cd" or "reveal", { target })
     end
 end
 

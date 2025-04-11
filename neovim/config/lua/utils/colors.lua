@@ -27,9 +27,9 @@ M.color_highlight_map = {
     [M.colors.green]      = "String",
     [M.colors.orange]     = "Constant",
     [M.colors.purple]     = "Statement",
-    [M.colors.red]        = "DiagnosticError",
+    [M.colors.red]        = { "DiagnosticError", "ErrorMsg" },
     [M.colors.white]      = "Conceal",
-    [M.colors.yellow]     = "DiagnosticWarn",
+    [M.colors.yellow]     = { "DiagnosticWarn", "WarningMsg" },
 
     [M.colors.git_add]    = { "diffAdded", "DiffAdd" },
     [M.colors.git_change] = { "diffChanged", "DiffChange" },
@@ -63,6 +63,7 @@ M.colorscheme_list = {
         func = function(name) return require("tokyonight.colors").setup()[name] end,
         map = {
             black = "bg",
+            cyan  = "teal",
             gray  = "dark3",
             white = "fg",
         },

@@ -298,6 +298,10 @@ focus_monitor_workspace(ThisHotkey) {
     RunWait("komorebic.exe toggle-maximize", , "Hide")
 }
 
+!z:: {
+    RunWait("komorebic.exe toggle-lock", , "Hide")
+}
+
 !t:: {
     RunWait("komorebic.exe manage", , "Hide")
 }

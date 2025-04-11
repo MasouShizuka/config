@@ -17,6 +17,8 @@ local function load_colorscheme()
         if colorscheme:match(installed_colorscheme) then
             require("lazy").load({ plugins = value.package_name })
             vim.cmd.colorscheme(colorscheme)
+            -- 确保触发 heirline 等 UI 颜色的更新
+            vim.api.nvim_exec_autocmds("ColorScheme", {})
             break
         end
     end

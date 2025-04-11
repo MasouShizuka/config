@@ -106,13 +106,6 @@
             "actionValueID": 12
           }
         ],
-        "*v": [
-          {
-            "windowGroupID": 0,
-            "actionTypeID": 8,
-            "ahkCode": "hide_taskbar()"
-          }
-        ],
         "*w": [
           {
             "windowGroupID": 0,
@@ -527,6 +520,137 @@
             "windowGroupID": 0,
             "actionTypeID": 6,
             "keysToSend": "{Blind};"
+          }
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "name": "Esc",
+      "enable": true,
+      "hotkey": "*Escape",
+      "parentID": 0,
+      "delay": 0,
+      "disableAt": "",
+      "hotkeys": {
+        "*;": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:6",
+            "actionValueID": 6
+          }
+        ],
+        "*a": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"data/hide_mouse_when_idle.ahk\")"
+          }
+        ],
+        "*b": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"data/ChangeBrightness.ahk\")"
+          }
+        ],
+        "*c": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "center_window()"
+          }
+        ],
+        "*d": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:10",
+            "actionValueID": 8
+          }
+        ],
+        "*e": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "task_switch()"
+          }
+        ],
+        "*f": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:11",
+            "actionValueID": 9
+          }
+        ],
+        "*g": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi.ahk\")"
+          }
+        ],
+        "*h": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:5",
+            "actionValueID": 5
+          }
+        ],
+        "*q": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:1",
+            "actionValueID": 1
+          }
+        ],
+        "*r": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "switch_IME()"
+          }
+        ],
+        "*s": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "close_or_run_script(\"data/SoundControl.ahk\")"
+          }
+        ],
+        "*t": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:14",
+            "actionValueID": 12
+          }
+        ],
+        "*w": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:2",
+            "actionValueID": 2
+          }
+        ],
+        "*x": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 3,
+            "comment": "label:7",
+            "actionValueID": 7
+          }
+        ],
+        "*z": [
+          {
+            "windowGroupID": 0,
+            "actionTypeID": 8,
+            "ahkCode": "turn_off_monitor()"
           }
         ]
       }

@@ -16,13 +16,13 @@ return {
             local snippet_source
             if is_luasnip_available then
                 snippet_plugin = "cmp_luasnip"
-                snippet_source = { name = "luasnip", priority = 1000 }
+                snippet_source = { name = "luasnip", priority = 100 }
             else
                 snippet_plugin = "nvim-snippets"
-                snippet_source = { name = "snippets", priority = 1000 }
+                snippet_source = { name = "snippets", priority = 100 }
             end
 
-            local lsp_source = { name = "nvim_lsp", priority = 1000 }
+            local lsp_source = { name = "nvim_lsp", priority = 100 }
 
 
             local sources = {}
@@ -38,7 +38,7 @@ return {
             end
 
             cmp.setup({
-                mapping = cmp.mapping.preset.insert({
+                mapping = {
                     ["<down>"] = cmp.mapping({
                         i = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
                         c = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
@@ -65,9 +65,18 @@ return {
                         else
                             cmp.complete()
                         end
-                    end),
+                    end, { "i", "c" }),
                     ["<cr>"] = cmp.mapping.confirm({ select = false }),
-                    ["<tab>"] = cmp.mapping.confirm({ select = true }),
+                    ["<tab>"] = cmp.mapping({
+                        i = cmp.mapping.confirm({ select = true }),
+                        c = function()
+                            if cmp.visible() then
+                                cmp.select_next_item()
+                            else
+                                cmp.complete()
+                            end
+                        end,
+                    }),
 
                     ["<s-right>"] = cmp.mapping(function(fallback)
                         if is_luasnip_available then
@@ -113,7 +122,7 @@ return {
                             fallback()
                         end
                     end, { "i", "s" }),
-                }),
+                },
                 snippet = {
                     expand = function(args)
                         if is_luasnip_available then
@@ -160,7 +169,6 @@ return {
             end
 
             cmp.setup.cmdline({ "/", "?" }, {
-                mapping = cmp.mapping.preset.cmdline(),
                 completion = {
                     completeopt = "menu,menuone,noinsert,noselect",
                 },
@@ -180,7 +188,6 @@ return {
             end
 
             cmp.setup.cmdline(":", {
-                mapping = cmp.mapping.preset.cmdline(),
                 completion = {
                     completeopt = "menu,menuone,noinsert,noselect",
                 },
@@ -256,7 +263,7 @@ return {
             })
 
 
-            -- LazyVim lazyvim.util.cmp.auto_brackets
+            -- lazyvim.util.cmp.auto_brackets
             cmp.event:on("confirm_done", function(event)
                 if vim.tbl_contains({ "lua", "python" }, vim.bo.filetype) then
                     local entry = event.entry
@@ -314,10 +321,23 @@ return {
                     {
                         "L3MON4D3/LuaSnip",
                         config = function(_, opts)
-                            require("luasnip").setup(opts)
+                            local luasnip = require("luasnip")
+                            luasnip.setup(opts)
+
                             require("luasnip.loaders.from_vscode").lazy_load()
-                            require("luasnip.loaders.from_vscode").lazy_load({
-                                paths = { path.vscode_snippet_path },
+                            require("luasnip.loaders.from_vscode").lazy_load({ paths = { path.vscode_snippet_path } })
+
+                            vim.api.nvim_create_autocmd("User", {
+                                callback = function()
+                                    if luasnip.choice_active() then
+                                        vim.schedule(function()
+                                            require("luasnip.extras.select_choice")()
+                                        end)
+                                    end
+                                end,
+                                desc = "Auto select choice when entering choice",
+                                group = vim.api.nvim_create_augroup("LuaSnipAutoSelectChoice", { clear = true }),
+                                pattern = "LuasnipChoiceNodeEnter",
                             })
                         end,
                         dependencies = {
@@ -340,22 +360,37 @@ return {
     -- {
     --     "saghen/blink.cmp",
     --     dependencies = {
-    --         {
-    --             "L3MON4D3/LuaSnip",
-    --             config = function(_, opts)
-    --                 require("luasnip").setup(opts)
-    --                 require("luasnip.loaders.from_vscode").lazy_load()
-    --                 require("luasnip.loaders.from_vscode").lazy_load({ paths = { path.vscode_snippet_path } })
-    --             end,
-    --             dependencies = {
-    --                 "rafamadriz/friendly-snippets",
-    --             },
-    --             opts = {
-    --                 enable_autosnippets = true,
-    --             },
-    --         },
+    --         -- {
+    --         --     "L3MON4D3/LuaSnip",
+    --         --     config = function(_, opts)
+    --         --         local luasnip = require("luasnip")
+    --         --         luasnip.setup(opts)
+    --         --
+    --         --         require("luasnip.loaders.from_vscode").lazy_load()
+    --         --         require("luasnip.loaders.from_vscode").lazy_load({ paths = { path.vscode_snippet_path } })
+    --         --
+    --         --         vim.api.nvim_create_autocmd("User", {
+    --         --             callback = function()
+    --         --                 if luasnip.choice_active() then
+    --         --                     vim.schedule(function()
+    --         --                         require("luasnip.extras.select_choice")()
+    --         --                     end)
+    --         --                 end
+    --         --             end,
+    --         --             desc = "Auto select choice when entering choice",
+    --         --             group = vim.api.nvim_create_augroup("LuaSnipAutoSelectChoice", { clear = true }),
+    --         --             pattern = "LuasnipChoiceNodeEnter",
+    --         --         })
+    --         --     end,
+    --         --     dependencies = {
+    --         --         "rafamadriz/friendly-snippets",
+    --         --     },
+    --         --     opts = {
+    --         --         enable_autosnippets = true,
+    --         --     },
+    --         -- },
     --
-    --         -- "rafamadriz/friendly-snippets",
+    --         "rafamadriz/friendly-snippets",
     --
     --         {
     --             "saghen/blink.compat",
@@ -373,7 +408,6 @@ return {
     --         "InsertEnter",
     --     },
     --     opts = function()
-    --         local icons = require("utils.icons")
     --         local utils = require("utils")
     --
     --         utils.set_hl(0, "BlinkCmpGhostText", { link = "LspCodeLens" })
@@ -444,23 +478,6 @@ return {
     --         end
     --
     --         return {
-    --             -- Enables keymaps, completions and signature help when true
-    --             enabled = function()
-    --                 local buf = vim.api.nvim_get_current_buf()
-    --
-    --                 local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-    --                 if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
-    --                     return false
-    --                 end
-    --
-    --                 local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-    --                 if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
-    --                     return false
-    --                 end
-    --
-    --                 return true
-    --             end,
-    --
     --             keymap = {
     --                 -- set to 'none' to disable the 'default' preset
     --                 preset = "none",
@@ -531,8 +548,6 @@ return {
     --                 documentation = {
     --                     -- Controls whether the documentation window will automatically show when selecting a completion item
     --                     auto_show = true,
-    --                     -- Delay before showing the documentation window
-    --                     auto_show_delay_ms = 200,
     --                     window = {
     --                         border = "rounded",
     --                         winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
@@ -616,7 +631,7 @@ return {
     --                 -- Useful for when your theme doesn't support blink.cmp
     --                 -- Will be removed in a future release
     --                 use_nvim_cmp_as_default = true,
-    --                 kind_icons = icons,
+    --                 kind_icons = require("utils.icons").kinds,
     --             },
     --
     --             cmdline = {
@@ -665,7 +680,7 @@ return {
     --         }
     --     end,
     --     -- use a release tag to download pre-built binaries
-    --     -- version = "*",
+    --     version = "*",
     --     opts_extend = { "sources.default" },
     -- },
 }

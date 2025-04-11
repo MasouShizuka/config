@@ -31,17 +31,17 @@ return {
             snippetDir = path.vscode_snippet_path,
             editSnippetPopup = {
                 keymaps = {
-                    -- if not mentioned otherwise, the keymaps apply to normal mode
                     -- cancel = "q",
-                    -- saveChanges = "<cr>", -- alternatively, can also use `:w`
-                    -- goBackToSearch = "<bs>",
-                    -- deleteSnippet = "<c-bs>",
-                    -- duplicateSnippet = "<c-d>",
-                    -- openInFile = "<c-o>",
-                    -- insertNextPlaceholder = "<c-p>", -- insert & normal mode
+                    -- saveChanges = "<CR>", -- alternatively, can also use `:w`
+                    -- goBackToSearch = "<BS>",
+                    -- deleteSnippet = "<C-BS>",
+                    -- duplicateSnippet = "<C-d>",
+                    -- openInFile = "<C-o>",
+                    -- insertNextPlaceholder = "<C-p>", -- insert & normal mode
                     -- showHelp = "?",
                 },
             },
+
             -- `none` writes as a minified json file using `vim.encode.json`.
             -- `yq`/`jq` ensure formatted & sorted json files, which is relevant when
             -- you version control your snippets. To use a custom formatter, set to a

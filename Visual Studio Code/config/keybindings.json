@@ -743,6 +743,19 @@
         "when": "panelFocus || view.jupyterViewVariables.visible"
     },
 
+    // 面板问题页面聚焦时，则聚焦 filter
+    {
+        "key": "/",
+        "command": "problems.action.focusFilter",
+        "when": "focusedView == 'workbench.panel.markers.view'"
+    },
+    // 面板问题页面聚焦 filter 时，则聚焦回问题
+    {
+        "key": "ctrl+j",
+        "command": "problems.action.focusProblemsFromFilter",
+        "when": "problemsFilterFocus"
+    },
+
     // 面板终端页面且聚焦时，则切换终端
     {
         "key": "ctrl+j",

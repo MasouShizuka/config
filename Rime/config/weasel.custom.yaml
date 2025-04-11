@@ -2,6 +2,8 @@ patch:
   app_options:
     code.exe:
       ascii_mode: true
+    devecostudio64.exe:
+      ascii_mode: true
     neovide.exe:
       ascii_mode: true
     wezterm-gui.exe:

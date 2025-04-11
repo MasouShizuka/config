@@ -118,6 +118,7 @@ return {
             utils.set_hl(0, "RenderMarkdownH6", { fg = "#b4befe" })
 
             local overrides = {
+                -- Override for different buftype values, @see :h 'buftype'.
                 buftype = {},
             }
             for _, bt in ipairs(require("utils.buftype").skip_buftype_list) do
@@ -127,13 +128,14 @@ return {
 
             return {
                 latex = {
-                    -- Whether LaTeX should be rendered, mainly used for health check
+                    -- Turn on / off latex rendering.
                     enabled = false,
                 },
                 heading = {
-                    -- Replaces '#+' of 'atx_h._marker'
-                    -- The number of '#' in the heading determines the 'level'
-                    -- The 'level' is used to index into the array using a cycle
+                    -- Replaces '#+' of 'atx_h._marker'.
+                    -- Output is evaluated depending on the type.
+                    -- | function | `value(context)`              |
+                    -- | string[] | `cycle(value, context.level)` |
                     icons = {
                         icons.misc.format_header_1,
                         icons.misc.format_header_2,
@@ -144,25 +146,31 @@ return {
                     },
                 },
                 code = {
-                    -- Width of the code block background:
-                    --  block: width of the code block
-                    --  full:  full width of the window
+                    -- Width of the code block background.
+                    -- | block | width of the code block  |
+                    -- | full  | full width of the window |
                     width = "block",
                 },
                 pipe_table = {
-                    -- Pre configured settings largely for setting table border easier
-                    --  heavy:  use thicker border characters
-                    --  double: use double line border characters
-                    --  round:  use round border corners
-                    --  none:   does nothing
+                    -- Pre configured settings largely for setting table border easier.
+                    -- | heavy  | use thicker border characters     |
+                    -- | double | use double line border characters |
+                    -- | round  | use round border corners          |
+                    -- | none   | does nothing                      |
                     preset = "round",
                 },
-                -- More granular configuration mechanism, allows different aspects of buffers
-                -- to have their own behavior. Values default to the top level configuration
-                -- if no override is provided. Supports the following fields:
-                --   enabled, max_file_size, debounce, render_modes, anti_conceal, padding,
-                --   heading, paragraph, code, dash, bullet, checkbox, quote, pipe_table,
-                --   callout, link, sign, indent, html, win_options
+                html = {
+                    comment = {
+                        -- Turn on / off HTML comment concealing.
+                        conceal = false,
+                    },
+                },
+                -- More granular configuration mechanism, allows different aspects of buffers to have their own
+                -- behavior. Values default to the top level configuration if no override is provided. Supports
+                -- the following fields:
+                --   enabled, max_file_size, debounce, render_modes, anti_conceal, padding, heading, paragraph,
+                --   code, dash, bullet, checkbox, quote, pipe_table, callout, link, sign, indent, latex, html,
+                --   win_options
                 overrides = overrides,
             }
         end,

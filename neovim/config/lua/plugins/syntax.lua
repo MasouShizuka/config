@@ -71,8 +71,8 @@ return {
                 -- delete = "sd",         -- Delete surrounding
                 -- find = "sf",           -- Find surrounding (to the right)
                 -- find_left = "sF",      -- Find surrounding (to the left)
-                find = "sF",           -- Find surrounding (to the right)
-                find_left = "sf",      -- Find surrounding (to the left)
+                find = "sF",      -- Find surrounding (to the right)
+                find_left = "sf", -- Find surrounding (to the left)
                 -- highlight = "sh",      -- Highlight surrounding
                 -- replace = "sr",        -- Replace surrounding
                 -- update_n_lines = "sn", -- Update `n_lines`
@@ -115,6 +115,28 @@ return {
         },
         config = function(_, opts)
             require("nvim-treesitter.configs").setup(opts)
+
+            -- lazyvim.plugins.treesitter
+            -- When in diff mode, we want to use the default
+            -- vim text objects c & C instead of the treesitter ones.
+            local move = require("nvim-treesitter.textobjects.move") ---@type table<string,fun(...)>
+            local configs = require("nvim-treesitter.configs")
+            for name, fn in pairs(move) do
+                if name:find("goto") == 1 then
+                    move[name] = function(q, ...)
+                        if vim.wo.diff then
+                            local config = configs.get_module("textobjects.move")[name] ---@type table<string,string>
+                            for key, query in pairs(config or {}) do
+                                if q == query and key:find("[%]%[][cC]") then
+                                    vim.cmd("normal! " .. key)
+                                    return
+                                end
+                            end
+                        end
+                        return fn(q, ...)
+                    end
+                end
+            end
         end,
         dependencies = {
             "nvim-treesitter/nvim-treesitter-textobjects",
@@ -124,10 +146,11 @@ return {
             "User TreesitterFile",
         },
         init = function(plugin)
+            -- lazyvim.plugins.treesitter
             -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
             -- This is needed because a bunch of plugins no longer `require("nvim-treesitter")`, which
-            -- no longer trigger the **nvim-treeitter** module to be loaded in time.
-            -- Luckily, the only thins that those plugins need are the custom queries, which we make available
+            -- no longer trigger the **nvim-treesitter** module to be loaded in time.
+            -- Luckily, the only things that those plugins need are the custom queries, which we make available
             -- during startup.
             require("lazy.core.loader").add_to_rtp(plugin)
             require("nvim-treesitter.query_predicates")
@@ -155,33 +178,33 @@ return {
             if utils.is_available("nvim-treesitter-textobjects") then
                 local textobjects = {}
 
-                textobjects["select"] = {
-                    enable = true,
-                    -- Automatically jump forward to textobj, similar to targets.vim
-                    lookahead = true,
-                    keymaps = {
-                        -- You can use the capture groups defined in textobjects.scm
-                        ["ak"] = { query = "@block.outer", desc = "Around block" },
-                        ["ik"] = { query = "@block.inner", desc = "Inside block" },
-                        ["ac"] = { query = "@class.outer", desc = "Around class" },
-                        ["ic"] = { query = "@class.inner", desc = "Inside class" },
-                        ["af"] = { query = "@function.outer", desc = "Around function " },
-                        ["if"] = { query = "@function.inner", desc = "Inside function " },
-                        ["aa"] = { query = "@parameter.outer", desc = "Around argument" },
-                        ["ia"] = { query = "@parameter.inner", desc = "Inside argument" },
-                    },
-                }
+                if not utils.is_available("mini.ai") then
+                    textobjects["select"] = {
+                        enable = true,
+
+                        -- Automatically jump forward to textobj, similar to targets.vim
+                        lookahead = true,
+
+                        keymaps = {
+                            -- You can use the capture groups defined in textobjects.scm
+                            ["ao"] = { query = "@block.outer", desc = "Around block" },
+                            ["io"] = { query = "@block.inner", desc = "Inside block" },
+                            ["ac"] = { query = "@class.outer", desc = "Around class" },
+                            ["ic"] = { query = "@class.inner", desc = "Inside class" },
+                            ["af"] = { query = "@function.outer", desc = "Around function " },
+                            ["if"] = { query = "@function.inner", desc = "Inside function " },
+                            ["aa"] = { query = "@parameter.outer", desc = "Around argument" },
+                            ["ia"] = { query = "@parameter.inner", desc = "Inside argument" },
+                        },
+                    }
+                end
 
                 textobjects["swap"] = {
                     enable = true,
                     swap_next = {
-                        ["sXk"] = { query = "@block.outer", desc = "Swap next block" },
-                        ["sXf"] = { query = "@function.outer", desc = "Swap next function" },
                         ["sXa"] = { query = "@parameter.inner", desc = "Swap next argument" },
                     },
                     swap_previous = {
-                        ["sXK"] = { query = "@block.outer", desc = "Swap previous block" },
-                        ["sXF"] = { query = "@function.outer", desc = "Swap previous function" },
                         ["sXA"] = { query = "@parameter.inner", desc = "Swap previous argument" },
                     },
                 }
@@ -190,22 +213,26 @@ return {
                     enable = true,
                     set_jumps = true, -- whether to set jumps in the jumplist
                     goto_next_start = {
-                        ["]k"] = { query = "@block.outer", desc = "Next block start" },
+                        ["]o"] = { query = "@block.outer", desc = "Next block start" },
+                        ["]c"] = { query = "@class.outer", desc = "Next class start" },
                         ["]f"] = { query = "@function.outer", desc = "Next function start" },
                         ["]a"] = { query = "@parameter.inner", desc = "Next argument start" },
                     },
                     goto_next_end = {
-                        ["]K"] = { query = "@block.outer", desc = "Next block end" },
+                        ["]O"] = { query = "@block.outer", desc = "Next block end" },
+                        ["]C"] = { query = "@class.outer", desc = "Next class end" },
                         ["]F"] = { query = "@function.outer", desc = "Next function end" },
                         ["]A"] = { query = "@parameter.inner", desc = "Next argument end" },
                     },
                     goto_previous_start = {
-                        ["[k"] = { query = "@block.outer", desc = "Previous block start" },
+                        ["[o"] = { query = "@block.outer", desc = "Previous block start" },
+                        ["[c"] = { query = "@class.outer", desc = "Previous class start" },
                         ["[f"] = { query = "@function.outer", desc = "Previous function start" },
                         ["[a"] = { query = "@parameter.inner", desc = "Previous argument start" },
                     },
                     goto_previous_end = {
-                        ["[K"] = { query = "@block.outer", desc = "Previous block end" },
+                        ["[O"] = { query = "@block.outer", desc = "Previous block end" },
+                        ["[C"] = { query = "@class.outer", desc = "Previous class end" },
                         ["[F"] = { query = "@function.outer", desc = "Previous function end" },
                         ["[A"] = { query = "@parameter.inner", desc = "Previous argument end" },
                     },

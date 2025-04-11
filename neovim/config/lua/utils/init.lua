@@ -326,12 +326,20 @@ end
 --- Set a highlight with "ColorScheme" event autocmd
 ---@param ns_id integer
 ---@param name string
----@param val vim.api.keyset.highlight
+---@param val vim.api.keyset.highlight|fun(): vim.api.keyset.highlight
 function M.set_hl(ns_id, name, val)
-    vim.api.nvim_set_hl(ns_id, name, val)
+    local function set_hl()
+        if type(val) == "function" then
+            vim.api.nvim_set_hl(ns_id, name, val())
+        else
+            vim.api.nvim_set_hl(ns_id, name, val)
+        end
+    end
+
+    set_hl()
     vim.api.nvim_create_autocmd("ColorScheme", {
         callback = function()
-            vim.api.nvim_set_hl(ns_id, name, val)
+            set_hl()
         end,
     })
 end
@@ -379,7 +387,7 @@ function M.set_setting_toggle(setting, opts)
                 id = setting .. "_buffer",
                 name = setting .. " (buffer)",
                 get = function()
-                    local buf = b.buf or vim.api.nvim_get_current_buf()
+                    local buf = local_keymap.buf or vim.api.nvim_get_current_buf()
                     if vim.b[buf][setting] == nil then
                         return vim.g[setting]
                     end

@@ -123,6 +123,35 @@ M.setup = function(opts)
             vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
         end,
     })
+
+    -- https://github.com/stevearc/dotfiles/blob/6bc8a8c96af72ab5b0437865542db3ad5d57ba0f/.config/nvim/init.lua#L286-L297
+    local checktime = vim.api.nvim_create_augroup("Checktime", { clear = true })
+    vim.api.nvim_create_autocmd("FocusGained", {
+        callback = function(args)
+            if vim.fn.getcmdwintype() == "" then
+                vim.api.nvim_command("checktime " .. args.buf)
+            end
+        end,
+        desc = "Reload files from disk when we focus vim",
+        group = checktime,
+    })
+    vim.api.nvim_create_autocmd("BufEnter", {
+        callback = function(args)
+            local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+            if bt ~= "" then
+                return
+            end
+
+            local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
+            if is_modified then
+                return
+            end
+
+            vim.api.nvim_command("checktime " .. args.buf)
+        end,
+        desc = "Every time we enter an unmodified buffer, check if it changed on disk",
+        group = checktime,
+    })
 end
 
 return M

@@ -36,7 +36,7 @@
         "shellscript": "cd $dirWithoutTrailingSlash && sh $fileName"
     },
     "code-runner.runInTerminal": true,
-    "debug.console.fontSize": 15,
+    "debug.console.fontSize": 16,
     "debug.showBreakpointsInOverviewRuler": true,
     "diffEditor.diffAlgorithm": "advanced",
     "diffEditor.ignoreTrimWhitespace": false,
@@ -49,7 +49,7 @@
     "editor.find.seedSearchStringFromSelection": "selection",
     "editor.fontFamily": "Maple Mono NF CN, Sarasa Mono SC",
     "editor.fontLigatures": "'cv01', 'cv03', 'ss03'",
-    "editor.fontSize": 15,
+    "editor.fontSize": 16,
     "editor.guides.bracketPairs": true,
     "editor.lineNumbers": "relative",
     "editor.linkedEditing": true,
@@ -64,28 +64,6 @@
     "editor.stickyScroll.enabled": true,
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
-    "editor.tokenColorCustomizations": {
-        "[Tokyo Night Storm]": {
-            "textMateRules": [
-                {
-                    "scope": [
-                        "comment",
-                        "meta.var.expr storage.type",
-                        "keyword.control.flow",
-                        "keyword.control.return",
-                        "meta.directive.vue punctuation.separator.key-value.html",
-                        "meta.directive.vue entity.other.attribute-name.html",
-                        "tag.decorator.js entity.name.tag.js",
-                        "tag.decorator.js punctuation.definition.tag.js",
-                        "storage.modifier"
-                    ],
-                    "settings": {
-                        "fontStyle": ""
-                    }
-                }
-            ]
-        }
-    },
     "editor.wrappingStrategy": "advanced",
     "explorer.confirmDragAndDrop": false,
     "explorer.fileNesting.patterns": {
@@ -205,7 +183,8 @@
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
     "Lua.diagnostics.globals": [
         "mp",
-        "vim"
+        "vim",
+        "ya"
     ],
     "Lua.format.defaultConfig": {
         "max_line_length": "unset",
@@ -215,10 +194,9 @@
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.browser": "chrome",
     "markdown.marp.browserPath": "C:\\Users\\MasouShizuka\\scoop\\apps\\brave\\current\\brave.exe",
-    "markdown.marp.html": "all",
     "markdown.occurrencesHighlight.enabled": true,
     "markdown.preview.breaks": true,
-    "markdown.preview.fontSize": 15,
+    "markdown.preview.fontSize": 16,
     "markdown.preview.scrollEditorWithPreview": false,
     "markdown.updateLinksOnFileMove.enabled": "always",
     "markdownConverter.ChromiumExecutablePath": "brave.exe",
@@ -263,7 +241,7 @@
         "image/png",
         "text/plain"
     ],
-    "notebook.inlineValues": true,
+    "notebook.inlineValues": "on",
     "notebook.output.scrolling": true,
     "notebook.stickyScroll.enabled": true,
     "oneDarkPro.italic": false,
@@ -283,8 +261,8 @@
     "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.defaultProfile.windows": "Pwsh",
-    "terminal.integrated.fontLigatures": true,
-    "terminal.integrated.fontSize": 15,
+    "terminal.integrated.fontLigatures.enabled": true,
+    "terminal.integrated.fontSize": 16,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.profiles.windows": {
         "Pwsh": {
@@ -378,7 +356,7 @@
             "icon": "clock"
         },
         "TEST": {
-            "background": "#86e1fc",
+            "background": "#4fd6be",
             "foreground": "#222436",
             "icon": "beaker"
         },

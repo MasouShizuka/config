@@ -61,15 +61,15 @@ return {
             { "a?",  mode = { "x", "o" } },
             { "it",  mode = { "x", "o" } },
             { "at",  mode = { "x", "o" } },
-            -- 由 nvim-treesitter-textobjects 设置
-            -- { "if",  mode = { "x", "o" } },
-            -- { "af",  mode = { "x", "o" } },
-            -- { "ia",  mode = { "x", "o" } },
-            -- { "aa",  mode = { "x", "o" } },
+            { "if",  mode = { "x", "o" } },
+            { "af",  mode = { "x", "o" } },
+            { "ia",  mode = { "x", "o" } },
+            { "aa",  mode = { "x", "o" } },
             { "i_",  mode = { "x", "o" } },
             { "a_",  mode = { "x", "o" } },
             { "i ",  mode = { "x", "o" } },
             { "a ",  mode = { "x", "o" } },
+
             { "i,",  mode = { "x", "o" } },
             { "a,",  mode = { "x", "o" } },
             { "i.",  mode = { "x", "o" } },
@@ -78,58 +78,75 @@ return {
             { "ad",  mode = { "x", "o" } },
             { "ie",  mode = { "x", "o" } },
             { "ae",  mode = { "x", "o" } },
+            { "io",  mode = { "x", "o" } },
+            { "ao",  mode = { "x", "o" } },
             { "ir",  mode = { "x", "o" } },
             { "ar",  mode = { "x", "o" } },
+            { "iu",  mode = { "x", "o" } },
+            { "au",  mode = { "x", "o" } },
+            { "iU",  mode = { "x", "o" } },
+            { "aU",  mode = { "x", "o" } },
             { "iv",  mode = { "x", "o" } },
             { "av",  mode = { "x", "o" } },
         },
-        opts = {
-            -- Table with textobject id as fields, textobject specification as values.
-            -- Also use this to disable builtin textobjects. See |MiniAi.config|.
-            custom_textobjects = {
-                [","] = { "%b<>", "^.%s*().-()%s*.$" },
-                ["."] = { "%b<>", "^.().*().$" },
-                -- https://github.com/echasnovski/mini.extra
-                d = function(ai_type)
-                    local cur_diag = vim.diagnostic.get(0)
+        opts = function()
+            local ai = require("mini.ai")
+            return {
+                -- Table with textobject id as fields, textobject specification as values.
+                -- Also use this to disable builtin textobjects. See |MiniAi.config|.
+                custom_textobjects = {
+                    [","] = { "%b<>", "^.%s*().-()%s*.$" },
+                    ["."] = { "%b<>", "^.().*().$" },
+                    c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }), -- class
+                    -- https://github.com/echasnovski/mini.extra
+                    d = function(ai_type)
+                        local cur_diag = vim.diagnostic.get(0)
 
-                    local regions = {}
-                    for _, diag in ipairs(cur_diag) do
-                        local from = { line = diag.lnum + 1, col = diag.col + 1 }
-                        local to = { line = diag.end_lnum + 1, col = diag.end_col }
-                        if to.line == nil or to.col == nil then to = { line = diag.lnum + 1, col = diag.col + 1 } end
-                        table.insert(regions, { from = from, to = to })
-                    end
-                    return regions
-                end,
-                -- https://github.com/echasnovski/mini.extra
-                e = function(ai_type)
-                    local start_line, end_line = 1, vim.fn.line("$")
-                    if ai_type == "i" then
-                        -- Skip first and last blank lines for `i` textobject
-                        local first_nonblank, last_nonblank = vim.fn.nextnonblank(start_line), vim.fn.prevnonblank(end_line)
-                        -- Do nothing for buffer with all blanks
-                        if first_nonblank == 0 or last_nonblank == 0 then return { from = { line = start_line, col = 1 } } end
-                        start_line, end_line = first_nonblank, last_nonblank
-                    end
+                        local regions = {}
+                        for _, diag in ipairs(cur_diag) do
+                            local from = { line = diag.lnum + 1, col = diag.col + 1 }
+                            local to = { line = diag.end_lnum + 1, col = diag.end_col }
+                            if to.line == nil or to.col == nil then to = { line = diag.lnum + 1, col = diag.col + 1 } end
+                            table.insert(regions, { from = from, to = to })
+                        end
+                        return regions
+                    end,
+                    -- https://github.com/echasnovski/mini.extra
+                    e = function(ai_type)
+                        local start_line, end_line = 1, vim.fn.line("$")
+                        if ai_type == "i" then
+                            -- Skip first and last blank lines for `i` textobject
+                            local first_nonblank, last_nonblank = vim.fn.nextnonblank(start_line), vim.fn.prevnonblank(end_line)
+                            -- Do nothing for buffer with all blanks
+                            if first_nonblank == 0 or last_nonblank == 0 then return { from = { line = start_line, col = 1 } } end
+                            start_line, end_line = first_nonblank, last_nonblank
+                        end
 
-                    local to_col = math.max(vim.fn.getline(end_line):len(), 1)
-                    return { from = { line = start_line, col = 1 }, to = { line = end_line, col = to_col } }
-                end,
-                r = { { "%b[]" }, "^.().*().$" },
-                v = {
-                    {
-                        "%f[%w]()%w+()[-_]",
-                        "[-_]()%w+()%f[%W]",
-                        "%f[-_%u]()%u[%d%l]+()%f[^-_%d%l]",
-                        "%f[-_%w]()[%d%l]+()%f[^-_%d%l]",
+                        local to_col = math.max(vim.fn.getline(end_line):len(), 1)
+                        return { from = { line = start_line, col = 1 }, to = { line = end_line, col = to_col } }
+                    end,
+                    f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }), -- function
+                    o = ai.gen_spec.treesitter({                                                  -- code block
+                        a = { "@block.outer", "@conditional.outer", "@loop.outer" },
+                        i = { "@block.inner", "@conditional.inner", "@loop.inner" },
+                    }),
+                    r = { { "%b[]" }, "^.().*().$" },
+                    u = ai.gen_spec.function_call(),                           -- u for "Usage"
+                    U = ai.gen_spec.function_call({ name_pattern = "[%w_]" }), -- without dot in function name
+                    v = {
+                        {
+                            "%f[%w]()%w+()[-_]",
+                            "[-_]()%w+()%f[%W]",
+                            "%f[-_%u]()%u[%d%l]+()%f[^-_%d%l]",
+                            "%f[-_%w]()[%d%l]+()%f[^-_%d%l]",
+                        },
                     },
                 },
-            },
 
-            -- Number of lines within which textobject is searched
-            n_lines = math.huge,
-        },
+                -- Number of lines within which textobject is searched
+                n_lines = math.huge,
+            }
+        end,
     },
     {
         "echasnovski/mini.operators",
@@ -175,6 +192,57 @@ return {
     },
     {
         "echasnovski/mini.pairs",
+        config = function(_, opts)
+            local pairs = require("mini.pairs")
+            pairs.setup(opts)
+
+            opts = {
+                -- skip autopair when next character is one of these
+                -- skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+                -- skip autopair when the cursor is inside these treesitter nodes
+                -- skip_ts = { "string" },
+                -- skip autopair when next character is closing pair
+                -- and there are more closing pairs than opening pairs
+                skip_unbalanced = true,
+                -- better deal with markdown code blocks
+                markdown = true,
+            }
+
+            -- lazyvim.util.mini.pairs
+            local open = pairs.open
+            pairs.open = function(pair, neigh_pattern)
+                if vim.fn.getcmdline() ~= "" then
+                    return open(pair, neigh_pattern)
+                end
+                local o, c = pair:sub(1, 1), pair:sub(2, 2)
+                local line = vim.api.nvim_get_current_line()
+                local cursor = vim.api.nvim_win_get_cursor(0)
+                local next = line:sub(cursor[2] + 1, cursor[2] + 1)
+                local before = line:sub(1, cursor[2])
+                if opts.markdown and o == "`" and vim.bo.filetype == "markdown" and before:match("^%s*``") then
+                    return "`\n```" .. vim.api.nvim_replace_termcodes("<up>", true, true, true)
+                end
+                if opts.skip_next and next ~= "" and next:match(opts.skip_next) then
+                    return o
+                end
+                if opts.skip_ts and #opts.skip_ts > 0 then
+                    local ok, captures = pcall(vim.treesitter.get_captures_at_pos, 0, cursor[1] - 1, math.max(cursor[2] - 1, 0))
+                    for _, capture in ipairs(ok and captures or {}) do
+                        if vim.tbl_contains(opts.skip_ts, capture.capture) then
+                            return o
+                        end
+                    end
+                end
+                if opts.skip_unbalanced and next == c and c ~= o then
+                    local _, count_open = line:gsub(vim.pesc(pair:sub(1, 1)), "")
+                    local _, count_close = line:gsub(vim.pesc(pair:sub(2, 2)), "")
+                    if count_close > count_open then
+                        return o
+                    end
+                end
+                return open(pair, neigh_pattern)
+            end
+        end,
         event = {
             "CmdlineEnter",
             "InsertEnter",
@@ -219,31 +287,43 @@ return {
             { "<leader>xt", function() vim.api.nvim_command("Trouble todo") end, desc = "List all project todos in trouble", mode = "n" },
         },
         opts = function()
-            local colors = require("utils.colors")
-            local icons = require("utils.icons")
+            local function get_keyword()
+                local colors = require("utils.colors")
+                local icons = require("utils.icons")
 
-            local keywords = {
-                FIX = { icon = icons.misc.bug, color = colors.get_color(colors.colors.red), alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                TODO = { icon = icons.misc.check, color = colors.get_color(colors.colors.green) },
-                HACK = { icon = icons.misc.flame, color = colors.get_color(colors.colors.orange) },
-                WARN = { icon = icons.diagnostics.Warn, color = colors.get_color(colors.colors.yellow), alt = { "WARNING", "XXX" } },
-                PERF = { icon = icons.misc.clock, color = colors.get_color(colors.colors.purple), alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                NOTE = { icon = icons.diagnostics.Info, color = colors.get_color(colors.colors.blue), alt = { "INFO" } },
-                TEST = { icon = icons.misc.beaker, color = colors.get_color(colors.colors.cyan), alt = { "TESTING", "PASSED", "FAILED" } },
-            }
-            -- 忽略大小写
-            for key, value in pairs(keywords) do
-                value = vim.deepcopy(value)
-                local alt = value.alt
-                if alt then
-                    value.alt = vim.tbl_map(string.lower, alt)
+                local keywords = {
+                    FIX = { icon = icons.misc.bug, color = colors.get_color(colors.colors.red), alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+                    TODO = { icon = icons.misc.check, color = colors.get_color(colors.colors.green) },
+                    HACK = { icon = icons.misc.flame, color = colors.get_color(colors.colors.orange) },
+                    WARN = { icon = icons.diagnostics.Warn, color = colors.get_color(colors.colors.yellow), alt = { "WARNING", "XXX" } },
+                    PERF = { icon = icons.misc.clock, color = colors.get_color(colors.colors.purple), alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+                    NOTE = { icon = icons.diagnostics.Info, color = colors.get_color(colors.colors.blue), alt = { "INFO" } },
+                    TEST = { icon = icons.misc.beaker, color = colors.get_color(colors.colors.cyan), alt = { "TESTING", "PASSED", "FAILED" } },
+                }
+                -- 忽略大小写
+                for key, value in pairs(keywords) do
+                    value = vim.deepcopy(value)
+                    local alt = value.alt
+                    if alt then
+                        value.alt = vim.tbl_map(string.lower, alt)
+                    end
+                    keywords[key:lower()] = value
                 end
-                keywords[key:lower()] = value
+
+                return keywords
             end
+
+            vim.api.nvim_create_autocmd("ColorScheme", {
+                callback = function()
+                    require("todo-comments").setup({ keywords = get_keyword() })
+                end,
+                desc = "Reload keywords color of todo-comments when changing colorscheme",
+                group = vim.api.nvim_create_augroup("TodoCommentsReloadColor", { clear = true }),
+            })
 
             return {
                 -- keywords recognized as todo comments
-                keywords = keywords,
+                keywords = get_keyword(),
                 -- highlighting of the line containing the todo comment
                 -- * before: highlights before the keyword (typically comment characters)
                 -- * keyword: highlights of the keyword
@@ -289,7 +369,7 @@ return {
     -- NOTE: 需要安装 im-select
     {
         "keaising/im-select.nvim",
-        enabled = environment.is_windows,
+        enabled = environment.is_windows or environment.is_wsl,
         event = {
             "InsertEnter",
         },
@@ -343,9 +423,22 @@ return {
                         cyclic = true,
                     }),
 
-                    augend.constant.alias.Alpha,
-                    augend.constant.alias.alpha,
-                    augend.constant.alias.bool,
+                    augend.constant.alias.en_weekday_full,
+                    augend.constant.new({
+                        elements = { "周一", "周二", "周三", "周四", "周五", "周六", "周日" },
+                        word = false,
+                        cyclic = true,
+                    }),
+                    augend.constant.new({
+                        elements = { "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天" },
+                        word = false,
+                        cyclic = true,
+                    }),
+                    augend.constant.new({
+                        elements = { "true", "false" },
+                        word = true,
+                        cyclic = true,
+                    }),
                     augend.constant.new({
                         elements = { "True", "False" },
                         word = true,
@@ -353,8 +446,8 @@ return {
                     }),
                     augend.constant.new({
                         elements = { "and", "or" },
-                        word = true,
-                        cyclic = true,
+                        word = true,   -- if false, "sand" is incremented into "sor", "doctor" into "doctand", etc.
+                        cyclic = true, -- "or" is incremented into "and".
                     }),
                     augend.constant.new({
                         elements = { "&&", "||" },
@@ -362,16 +455,17 @@ return {
                         cyclic = true,
                     }),
 
-                    augend.date.alias["%Y/%m/%d"],
-                    augend.date.alias["%-m/%-d"],
-                    augend.date.alias["%Y-%m-%d"],
-                    augend.date.alias["%Y年%-m月%-d日"],
                     augend.date.new({
                         pattern = "%Y/%-m/%-d",
                         default_kind = "day",
+                        -- if true, it does not match dates which does not exist, such as 2022/05/32
                         only_valid = true,
+                        -- if true, it only matches dates with word boundary
                         word = false,
                     }),
+                    augend.date.alias["%-m/%-d"],
+                    augend.date.alias["%Y-%m-%d"],
+                    augend.date.alias["%Y年%-m月%-d日"],
                     augend.date.alias["%H:%M:%S"],
                     augend.date.alias["%H:%M"],
 
@@ -385,11 +479,13 @@ return {
                     }),
 
                     augend.integer.alias.binary,
-                    augend.integer.alias.decimal_int,
+                    augend.integer.alias.decimal,
                     augend.integer.alias.hex,
                     augend.integer.alias.octal,
 
                     augend.misc.alias["markdown_header"],
+
+                    augend.paren.alias.quote,
 
                     augend.semver.alias.semver,
                 },

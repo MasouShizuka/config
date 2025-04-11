@@ -103,7 +103,10 @@ return {
 
             return {
                 statusline = {
-                    hl = { bg = require("utils.colors").colors.black },
+                    hl = {
+                        bg = require("utils.colors").colors.black,
+                        fg = require("utils.colors").colors.white,
+                    },
                     fallthrough = false,
 
                     {

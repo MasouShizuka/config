@@ -3,10 +3,7 @@
 # ╰─────────────────────╯
 
 # If not running interactively, don't do anything
-case $- in
-    *i*) ;;
-    *) return ;;
-esac
+[[ $- != *i* ]] && return
 
 is_windows=0
 is_mac=0
@@ -38,8 +35,6 @@ if ((is_wsl)); then
     userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
 fi
 
-
-
 # ╭───────╮
 # │ Alias │
 # ╰───────╯
@@ -56,8 +51,6 @@ alias grep="grep --color=auto"
 
 alias ls="ls --color=auto"
 alias ll="ls --all --human-readable -l --time-style=long-iso"
-
-
 
 # ╭──────────────────────╮
 # │ Environment Variable │
@@ -80,8 +73,6 @@ if ((is_windows)); then
     export MSYS2_PATH_TYPE=inherit
 fi
 
-
-
 # ╭──────────╮
 # │ Function │
 # ╰──────────╯
@@ -98,10 +89,8 @@ function myip() {
 }
 
 function quiet() {
-    nohup "$@" &> /dev/null < /dev/null &
+    nohup "$@" &>/dev/null </dev/null &
 }
-
-
 
 # ╭────────────╮
 # │ Keybinding │
@@ -120,8 +109,7 @@ bind '"\e[1;2C":forward-word'
 bind "set completion-ignore-case on"
 bind "set mark-symlinked-directories on"
 bind "set show-all-if-unmodified on"
-
-
+shopt -s no_empty_cmd_completion
 
 # ╭─────────╮
 # │ Setting │
@@ -162,6 +150,9 @@ function preexec() {
 }
 trap "preexec" DEBUG
 
+# Don't record history to $HISTFILE when the window is closed
+trap "unset HISTFILE; exit" SIGHUP
+
 # This will run after the execution of the previous full command line.  We don't
 # want it PostCommand to execute when first starting a bash session (i.e., at
 # the first prompt).
@@ -175,8 +166,6 @@ function precmd() {
     fi
 }
 PROMPT_COMMAND="precmd"
-
-
 
 # ╭───────────────────╮
 # │ Command Line Tool │
@@ -231,13 +220,11 @@ fi
 
 # ╰──────────────────────────────────────────────────── fzf ─╯
 
-
 # ╭─ lazygit ────────────────────────────────────────────────╮
 
 [[ -x "$(command -v lazygit)" ]] && alias lg=lazygit
 
 # ╰──────────────────────────────────────────────── lazygit ─╯
-
 
 # ╭─ neovim ─────────────────────────────────────────────────╮
 
@@ -246,6 +233,9 @@ if [[ -x "$(command -v nvim)" ]]; then
 
     if ((is_wsl)); then
         if [[ ! -d "$HOME/.config/nvim" ]]; then
+            if [[ ! -d "$HOME/.config" ]]; then
+                mkdir -p "$HOME/.config"
+            fi
             ln -s "$localappdata/nvim" "$HOME/.config/nvim"
         fi
     fi
@@ -253,13 +243,11 @@ fi
 
 # ╰───────────────────────────────────────────────── neovim ─╯
 
-
 # ╭─ sfsu ───────────────────────────────────────────────────╮
 
 [[ -x "$(command -v sfsu)" ]] && source <(sfsu.exe hook --shell bash)
 
 # ╰─────────────────────────────────────────────────── sfsu ─╯
-
 
 # ╭─ starship ───────────────────────────────────────────────╮
 
@@ -275,12 +263,14 @@ fi
 
 # ╰─────────────────────────────────────────────── starship ─╯
 
-
 # ╭─ yazi ───────────────────────────────────────────────────╮
 
 if [[ -x "$(command -v yazi)" ]]; then
     if ((is_wsl)); then
         if [[ ! -d "$HOME/.config/yazi" ]]; then
+            if [[ ! -d "$HOME/.config" ]]; then
+                mkdir -p "$HOME/.config"
+            fi
             ln -s "$appdata/yazi/config" "$HOME/.config/yazi"
         fi
     fi
@@ -297,7 +287,6 @@ fi
 
 # ╰─────────────────────────────────────────────────── yazi ─╯
 
-
 # ╭─ zellij ─────────────────────────────────────────────────╮
 
 if [[ -x "$(command -v zellij)" ]]; then
@@ -306,14 +295,15 @@ if [[ -x "$(command -v zellij)" ]]; then
 
     if ((is_wsl)); then
         if [[ ! -d "$HOME/.config/zellij" ]]; then
+            if [[ ! -d "$HOME/.config" ]]; then
+                mkdir -p "$HOME/.config"
+            fi
             ln -s "$userprofile/.config/zellij" "$HOME/.config/zellij"
         fi
     fi
 fi
 
 # ╰───────────────────────────────────────────────── zellij ─╯
-
-
 
 # ╭───────╮
 # │ Conda │

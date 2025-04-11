@@ -75,6 +75,7 @@ local lsp_list = {
                                 globals = {
                                     "mp",
                                     "vim",
+                                    "ya",
                                 },
                             },
                             format = {

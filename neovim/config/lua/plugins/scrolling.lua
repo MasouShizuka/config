@@ -17,12 +17,12 @@ return {
     --     config = function(_, opts)
     --         require("scrollview").setup(opts)
     --
-    --         if utils.is_available("gitsigns.nvim") then
+    --         if require("utils").is_available("gitsigns.nvim") then
     --             vim.api.nvim_create_autocmd("User", {
     --                 callback = function()
     --                     require("scrollview.contrib.gitsigns").setup()
     --                 end,
-    --                 desc = "description",
+    --                 desc = "Register gitsigns for scrollview",
     --                 group = vim.api.nvim_create_augroup("ScrollviewGitsigns", { clear = true }),
     --                 pattern = "GitFile",
     --             })
@@ -30,34 +30,35 @@ return {
     --     end,
     --     enabled = not environment.is_vscode,
     --     event = {
-    --         "BufNewFile",
-    --         "BufReadPost",
+    --         "User IceLoad",
     --     },
-    --     opts = {
-    --         byte_limit = -1,
-    --         current_only = true,
-    --         excluded_filetypes = filetype.skip_filetype_list,
-    --         line_limit = -1,
-    --         signs_on_startup = {
-    --             "changelist",
-    --             "conflicts",
-    --             -- "cursor",
-    --             "diagnostics",
-    --             "folds",
-    --             "latestchange",
-    --             "loclist",
-    --             "marks",
-    --             "quickfix",
-    --             "search",
-    --             "spell",
-    --             -- "textwidth",
-    --             -- "trail",
-    --         },
-    --         diagnostics_severities = {
-    --             vim.diagnostic.severity.ERROR,
-    --             vim.diagnostic.severity.WARN,
-    --         },
-    --     },
+    --     opts = function()
+    --         return {
+    --             byte_limit = -1,
+    --             current_only = true,
+    --             excluded_filetypes = require("utils.filetype").skip_filetype_list,
+    --             line_limit = -1,
+    --             signs_on_startup = {
+    --                 "changelist",
+    --                 "conflicts",
+    --                 -- "cursor",
+    --                 "diagnostics",
+    --                 "folds",
+    --                 "latestchange",
+    --                 "loclist",
+    --                 "marks",
+    --                 "quickfix",
+    --                 "search",
+    --                 "spell",
+    --                 -- "textwidth",
+    --                 -- "trail",
+    --             },
+    --             diagnostics_severities = {
+    --                 vim.diagnostic.severity.ERROR,
+    --                 vim.diagnostic.severity.WARN,
+    --             },
+    --         }
+    --     end,
     -- },
 
     {
@@ -93,6 +94,29 @@ return {
         },
         init = function()
             local utils = require("utils")
+
+            -- 不以 lazy 的方式加载，防止打开大文件时卡顿
+            vim.api.nvim_create_autocmd("BufEnter", {
+                callback = function(args)
+                    if utils.is_bigfile(args.buf) or utils.is_longfile(args.buf) then
+                        vim.b[args.buf].minimap_disable = true
+                        return
+                    end
+
+                    local bt = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+                    if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
+                        vim.b[args.buf].minimap_disable = true
+                        return
+                    end
+
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
+                        vim.b[args.buf].minimap_disable = true
+                    end
+                end,
+                desc = "Disable mini.map for some buftypes and filetypes",
+                group = vim.api.nvim_create_augroup("MiniMapDisable", { clear = true }),
+            })
 
             if utils.is_available("which-key.nvim") then
                 utils.create_once_autocmd("User", {
@@ -205,25 +229,6 @@ return {
 
             local map = require("mini.map")
 
-            vim.api.nvim_create_autocmd("BufEnter", {
-                callback = function(args)
-                    local buf = args.buf
-
-                    local bt = vim.api.nvim_get_option_value("buftype", { buf = buf })
-                    if vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) then
-                        vim.b[buf].minimap_disable = true
-                        return
-                    end
-
-                    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                    if vim.tbl_contains(require("utils.filetype").skip_filetype_list, ft) then
-                        vim.b[buf].minimap_disable = true
-                    end
-                end,
-                desc = "Disable mini.map for some buftypes and filetypes",
-                group = vim.api.nvim_create_augroup("MiniMapDisable", { clear = true }),
-            })
-
             local function spell(hl_groups)
                 if hl_groups == nil then
                     hl_groups = { spell = "SpellBad" }
@@ -259,8 +264,8 @@ return {
             local minimap_search = "MiniMapSearch"
             local minimap_spell = "MiniMapSpell"
 
-            utils.set_hl(0, minimap_search, { fg = colors.get_color(colors.colors.orange) })
-            utils.set_hl(0, minimap_spell, { fg = colors.get_color(colors.colors.purple) })
+            utils.set_hl(0, minimap_search, function() return { fg = colors.get_color(colors.colors.orange) } end)
+            utils.set_hl(0, minimap_spell, function() return { fg = colors.get_color(colors.colors.purple) } end)
 
             local integrations = {
                 map.gen_integration.builtin_search({ search = minimap_search }),
@@ -346,5 +351,25 @@ return {
 
             }
         end,
+    },
+
+    {
+        "karb94/neoscroll.nvim",
+        enabled = not environment.is_vscode,
+        keys = {
+            { "<c-u>", function() require("neoscroll").ctrl_u({ duration = 100 }) end,      desc = "Scroll half page up",   mode = { "n", "x" } },
+            { "<c-d>", function() require("neoscroll").ctrl_d({ duration = 100 }) end,      desc = "Scroll half page down", mode = { "n", "x" } },
+            { "zj",    function() require("neoscroll").zt({ half_win_duration = 100 }) end, desc = "Top this line",         mode = { "n", "x" } },
+            { "zz",    function() require("neoscroll").zz({ half_win_duration = 100 }) end, desc = "Center this line",      mode = { "n", "x" } },
+            { "zk",    function() require("neoscroll").zb({ half_win_duration = 100 }) end, desc = "Bottom this line",      mode = { "n", "x" } },
+        },
+        opts = {
+            -- All these keys will be mapped to their corresponding default scrolling animation
+            mappings = {},
+            hide_cursor = false, -- Hide cursor while scrolling
+            ignored_events = {   -- Events ignored while scrolling
+                "WinScrolled",
+            },
+        },
     },
 }

@@ -49,7 +49,13 @@ return {
         },
         opts = {
             -- Template modules to load
-            templates = { "builtin", "user.run", "user.latex" },
+            templates = {
+                "shell",
+                "vscode",
+                "user.cargo",
+                "user.latex",
+                "user.run",
+            },
             -- Configure the task list
             task_list = {
                 -- Default direction. Can be "left", "right", or "bottom"
@@ -59,7 +65,7 @@ return {
                 bindings = {
                     -- ["?"] = "ShowHelp",
                     -- ["g?"] = "ShowHelp",
-                    -- ["<cr>"] = "RunAction",
+                    -- ["<CR>"] = "RunAction",
                     ["<c-e>"] = false,
                     ["e"] = "Edit",
                     -- ["o"] = "Open",
@@ -67,9 +73,9 @@ return {
                     ["v"] = "OpenVsplit",
                     ["<c-s>"] = false,
                     ["V"] = "OpenSplit",
-                    -- ["<c-f>"] = "OpenFloat",
+                    -- ["<C-f>"] = "OpenFloat",
                     ["f"] = "OpenFloat",
-                    -- ["<c-q>"] = "OpenQuickFix",
+                    -- ["<C-q>"] = "OpenQuickFix",
                     -- ["p"] = "TogglePreview",
                     ["<c-l>"] = false,
                     ["J"] = "IncreaseDetail",
@@ -86,6 +92,44 @@ return {
                     ["<c-j>"] = false,
                     ["<c-b>"] = "ScrollOutputUp",
                     -- ["q"] = "Close",
+                },
+            },
+            task_launcher = {
+                -- Set keymap to false to remove default behavior
+                -- You can add custom keymaps here as well (anything vim.keymap.set accepts)
+                bindings = {
+                    i = {
+                        -- ["<C-s>"] = "Submit",
+                        -- ["<C-c>"] = "Cancel",
+                    },
+                    n = {
+                        -- ["<CR>"] = "Submit",
+                        -- ["<C-s>"] = "Submit",
+                        -- ["q"] = "Cancel",
+                        -- ["?"] = "ShowHelp",
+                    },
+                },
+            },
+            task_editor = {
+                -- Set keymap to false to remove default behavior
+                -- You can add custom keymaps here as well (anything vim.keymap.set accepts)
+                bindings = {
+                    i = {
+                        -- ["<CR>"] = "NextOrSubmit",
+                        -- ["<C-s>"] = "Submit",
+                        -- ["<Tab>"] = "Next",
+                        -- ["<S-Tab>"] = "Prev",
+                        -- ["<C-c>"] = "Cancel",
+                    },
+                    n = {
+                        -- ["<CR>"] = "NextOrSubmit",
+                        ["<CR>"] = "Submit",
+                        -- ["<C-s>"] = "Submit",
+                        -- ["<Tab>"] = "Next",
+                        -- ["<S-Tab>"] = "Prev",
+                        -- ["q"] = "Cancel",
+                        -- ["?"] = "ShowHelp",
+                    },
                 },
             },
             -- Aliases for bundles of components. Redefine the builtins, or create your own.

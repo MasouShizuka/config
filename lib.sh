@@ -45,14 +45,16 @@ install_to_target() {
     shopt -s dotglob
 
     echo "复制配置到 $target"
-    exclusion_list=("README.md" "install.sh" "update.sh")
     for f in "$source"/*; do
         [[ -e "$f" ]] || break
 
         name=${f##*/}
-        if [[ ! ${exclusion_list[*]} =~ $name ]]; then
-            cp -rf "$f" "$target"
+        if [[ -e "$target/$name" ]]; then
+            backup="$target/$name"_bak_"$(date "+%Y-%m-%d-%H-%M-%S")"
+            echo "备份已有的 $target/$name" 到 "$backup"
+            mv "$target/$name" "$backup"
         fi
+        cp -r "$f" "$target"
     done
 }
 

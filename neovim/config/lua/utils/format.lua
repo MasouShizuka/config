@@ -82,8 +82,7 @@ local format_list = {
 M.format_config = {}
 M.format_list = {}
 M.formatters_by_ft = {
-    markdown = { "autocorrect", "trim_newlines", "trim_whitespace" },
-    ["_"] = { "trim_newlines", "trim_whitespace" },
+    markdown = { "autocorrect" },
 }
 M.format_filetype_list = {}
 for format, info in pairs(format_list) do

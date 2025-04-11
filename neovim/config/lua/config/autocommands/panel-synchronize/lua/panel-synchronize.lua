@@ -17,7 +17,7 @@ M.close = function()
         end
 
         local buf = vim.api.nvim_win_get_buf(win)
-        ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
         local is_panel_filetype, info = filetype.get_panel_filetype_info(ft)
         if is_panel_filetype then
             panels[#panels + 1] = {

@@ -12,3 +12,6 @@ family = "Sarasa Mono SC"
 
 [font.features]
 "Maple Mono NF CN" = [ "+cv01", "+cv03", "+ss03" ]
+
+[box-drawing]
+mode = "font-glyph"
