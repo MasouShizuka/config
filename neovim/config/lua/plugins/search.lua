@@ -6,6 +6,7 @@ return {
         "MagicDuck/grug-far.nvim",
         cmd = {
             "GrugFar",
+            "GrugFarWithin",
         },
         config = function(_, opts)
             local grug_far = require("grug-far")
@@ -24,10 +25,10 @@ return {
                     vim.keymap.set("n", "<leader>tc", function()
                         local grug_far_prev_file = vim.g.grug_far_prev_file or ""
 
-                        local FILTER_LINE_NO = 5
+                        local FILTER_LINE_NO = 6
                         local filter_line = vim.fn.getline(FILTER_LINE_NO)
                         if #filter_line == 0 then
-                            filter_line = "/" .. grug_far_prev_file
+                            filter_line = grug_far_prev_file
                         else
                             filter_line = ""
                         end
@@ -36,15 +37,15 @@ return {
                         vim.notify("toggled current file only " .. utils.bool2str(filter_line ~= ""), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle current file only", silent = true })
                     vim.keymap.set("n", "<leader>tf", function()
-                        local state = unpack(grug_far.toggle_flags({ "--fixed-strings" }))
+                        local state = unpack(require("grug-far").get_instance(0):toggle_flags({ "--fixed-strings" }))
                         vim.notify("toggled --fixed-strings " .. utils.bool2str(state), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle --fixed-strings", silent = true })
                     vim.keymap.set("n", "<leader>tm", function()
-                        local state = unpack(grug_far.toggle_flags({ "--multiline" }))
+                        local state = unpack(require("grug-far").get_instance(0):toggle_flags({ "--multiline" }))
                         vim.notify("toggled --multiline " .. utils.bool2str(state), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle --multiline", silent = true })
                     vim.keymap.set("n", "<leader>te", function()
-                        local state = unpack(grug_far.toggle_flags({ "--replace=" }))
+                        local state = unpack(require("grug-far").get_instance(0):toggle_flags({ "--replace=" }))
                         vim.notify("toggled empty string " .. utils.bool2str(state), vim.log.levels.INFO, { title = "Grug Far" })
                     end, { buffer = args.buf, desc = "Grug Far: toggle empty string", silent = true })
                 end,

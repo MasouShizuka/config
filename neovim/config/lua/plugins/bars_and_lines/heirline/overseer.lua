@@ -29,7 +29,7 @@ return {
     static = {
         symbols = {
             ["CANCELED"] = icons.dap.BreakpointRejected,
-            ["FAILURE"] = icons.diagnostics.Error,
+            ["FAILURE"] = icons.misc.close,
             ["SUCCESS"] = icons.misc.progress_check,
             ["RUNNING"] = icons.misc.refresh,
         },

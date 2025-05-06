@@ -676,7 +676,7 @@ impl BarWidget for Komorebi {
     }
 }
 
-fn img_to_texture(ctx: &Context, rgba_image: &RgbaImage) -> TextureHandle {
+pub(super) fn img_to_texture(ctx: &Context, rgba_image: &RgbaImage) -> TextureHandle {
     let size = [rgba_image.width() as usize, rgba_image.height() as usize];
     let pixels = rgba_image.as_flat_samples();
     let color_image = ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
@@ -727,6 +727,7 @@ impl KomorebiNotificationState {
         let show_all_icons = render_config.borrow().show_all_icons;
 
         match notification.event {
+            NotificationEvent::VirtualDesktop(_) => {}
             NotificationEvent::WindowManager(_) => {}
             NotificationEvent::Monitor(_) => {}
             NotificationEvent::Socket(message) => match message {

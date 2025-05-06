@@ -80,7 +80,6 @@ use crate::workspace::WorkspaceLayer;
 use crate::BorderColours;
 use crate::Colour;
 use crate::CrossBoundaryBehaviour;
-use crate::FloatingLayerBehaviour;
 use crate::Rgb;
 use crate::CUSTOM_FFM;
 use crate::DATA_DIR;
@@ -439,7 +438,7 @@ impl WindowManager {
             work_area_offset: None,
             window_management_behaviour: WindowManagementBehaviour::default(),
             cross_monitor_move_behaviour: MoveBehaviour::Swap,
-            cross_boundary_behaviour: CrossBoundaryBehaviour::Workspace,
+            cross_boundary_behaviour: CrossBoundaryBehaviour::Monitor,
             unmanaged_window_operation_behaviour: OperationBehaviour::Op,
             resize_delta: 50,
             focus_follows_mouse: None,
@@ -646,7 +645,7 @@ impl WindowManager {
                         self.window_management_behaviour.current_behaviour
                     };
 
-                let mut float_override = if let Some(float_override) = workspace.float_override() {
+                let float_override = if let Some(float_override) = workspace.float_override() {
                     *float_override
                 } else {
                     self.window_management_behaviour.float_override
@@ -656,18 +655,30 @@ impl WindowManager {
                     if let Some(behaviour) = workspace.floating_layer_behaviour() {
                         behaviour
                     } else {
-                        monitor.floating_layer_behaviour().unwrap_or_default()
+                        monitor
+                            .floating_layer_behaviour()
+                            .unwrap_or(self.window_management_behaviour.floating_layer_behaviour)
                     };
 
-                // If the workspace layer is `Floating` and the floating layer behaviour is `Float`,
-                // then consider it as if it had float override so that new windows spawn as floating
-                float_override = float_override
-                    || (matches!(workspace.layer, WorkspaceLayer::Floating)
-                        && matches!(floating_layer_behaviour, FloatingLayerBehaviour::Float));
+                // If the workspace layer is `Floating` and the floating layer behaviour should
+                // float then change floating_layer_override to true so that new windows spawn
+                // as floating
+                let floating_layer_override = matches!(workspace.layer, WorkspaceLayer::Floating)
+                    && floating_layer_behaviour.should_float();
 
                 return WindowManagementBehaviour {
                     current_behaviour,
                     float_override,
+                    floating_layer_override,
+                    floating_layer_behaviour,
+                    toggle_float_placement: self.window_management_behaviour.toggle_float_placement,
+                    floating_layer_placement: self
+                        .window_management_behaviour
+                        .floating_layer_placement,
+                    float_override_placement: self
+                        .window_management_behaviour
+                        .float_override_placement,
+                    float_rule_placement: self.window_management_behaviour.float_rule_placement,
                 };
             }
         }
@@ -675,6 +686,12 @@ impl WindowManager {
         WindowManagementBehaviour {
             current_behaviour: WindowContainerBehaviour::Create,
             float_override: self.window_management_behaviour.float_override,
+            floating_layer_override: self.window_management_behaviour.floating_layer_override,
+            floating_layer_behaviour: self.window_management_behaviour.floating_layer_behaviour,
+            toggle_float_placement: self.window_management_behaviour.toggle_float_placement,
+            floating_layer_placement: self.window_management_behaviour.floating_layer_placement,
+            float_override_placement: self.window_management_behaviour.float_override_placement,
+            float_rule_placement: self.window_management_behaviour.float_rule_placement,
         }
     }
 
@@ -1500,7 +1517,7 @@ impl WindowManager {
                             }
                         }
 
-                        WindowsApi::position_window(window.hwnd, &rect, false)?;
+                        WindowsApi::position_window(window.hwnd, &rect, false, true)?;
                         if mouse_follows_focus {
                             WindowsApi::center_cursor_in_rect(&rect)?;
                         }
@@ -2508,7 +2525,7 @@ impl WindowManager {
                     }
                 }
 
-                WindowsApi::position_window(window.hwnd, &rect, false)?;
+                WindowsApi::position_window(window.hwnd, &rect, false, true)?;
                 if mouse_follows_focus {
                     WindowsApi::center_cursor_in_rect(&rect)?;
                 }
@@ -3146,6 +3163,8 @@ impl WindowManager {
 
         let work_area = self.focused_monitor_work_area()?;
 
+        let toggle_float_placement = self.window_management_behaviour.toggle_float_placement;
+
         let workspace = self.focused_workspace_mut()?;
         workspace.new_floating_window()?;
 
@@ -3154,7 +3173,9 @@ impl WindowManager {
             .back_mut()
             .ok_or_else(|| anyhow!("there is no floating window"))?;
 
-        window.center(&work_area)?;
+        if toggle_float_placement.should_center() {
+            window.center(&work_area, toggle_float_placement.should_resize())?;
+        }
         window.focus(self.mouse_follows_focus)?;
 
         Ok(())
@@ -5156,5 +5177,405 @@ mod tests {
             // Should be focused on window 2
             assert_eq!(container.focused_window(), Some(&Window { hwnd: 2 }));
         }
+    }
+
+    #[test]
+    fn test_maximize_and_unmaximize_window() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add three windows to the container
+            for i in 0..3 {
+                container.windows_mut().push_back(Window::from(i));
+            }
+
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 3);
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // No windows should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, None);
+        }
+
+        // Maximize the focused window
+        wm.maximize_window().ok();
+
+        {
+            // Window 0 should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, Some(Window::from(0)));
+        }
+
+        wm.unmaximize_window().ok();
+
+        {
+            // No windows should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, None);
+        }
+
+        // Focus container at index 1
+        wm.focused_workspace_mut().unwrap().focus_container(1);
+
+        {
+            // Focus the window at index 1
+            let container = wm.focused_container_mut().unwrap();
+            container.focus_window(1);
+        }
+
+        // Maximize the focused window
+        wm.maximize_window().ok();
+
+        {
+            // Window 2 should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, Some(Window::from(2)));
+        }
+
+        wm.unmaximize_window().ok();
+
+        {
+            // No windows should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, None);
+        }
+    }
+
+    #[test]
+    fn test_toggle_maximize() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add three windows to the container
+            for i in 0..3 {
+                container.windows_mut().push_back(Window::from(i));
+            }
+
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 3);
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Toggle maximize on
+        wm.toggle_maximize().ok();
+
+        {
+            // Window 0 should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, Some(Window::from(0)));
+        }
+
+        // Toggle maximize off
+        wm.toggle_maximize().ok();
+
+        {
+            // No windows should be maximized
+            let workspace = wm.focused_workspace().unwrap();
+            let maximized_window = workspace.maximized_window();
+            assert_eq!(*maximized_window, None);
+        }
+    }
+
+    #[test]
+    fn test_monocle_on_and_monocle_off() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(1));
+
+            // Should have 1 window in the container
+            assert_eq!(container.windows().len(), 1);
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Move container to monocle container
+        wm.monocle_on().ok();
+
+        {
+            // Container should be a monocle container
+            let monocle_container = wm
+                .focused_workspace()
+                .unwrap()
+                .monocle_container()
+                .as_ref()
+                .unwrap();
+            assert_eq!(monocle_container.windows().len(), 1);
+            assert_eq!(monocle_container.windows()[0].hwnd, 1);
+        }
+
+        {
+            // Should not have any containers
+            let container = wm.focused_workspace().unwrap();
+            assert_eq!(container.containers().len(), 0);
+        }
+
+        // Move monocle container to regular container
+        wm.monocle_off().ok();
+
+        {
+            // Should have 1 container in the workspace
+            let container = wm.focused_workspace().unwrap();
+            assert_eq!(container.containers().len(), 1);
+            assert_eq!(container.containers()[0].windows()[0].hwnd, 1);
+        }
+
+        {
+            // No windows should be in the monocle container
+            let monocle_container = wm.focused_workspace().unwrap().monocle_container();
+            assert_eq!(*monocle_container, None);
+        }
+    }
+
+    #[test]
+    fn test_toggle_monocle() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let mut container = Container::default();
+
+            // Add a window to the container
+            container.windows_mut().push_back(Window::from(1));
+
+            // Should have 1 window in the container
+            assert_eq!(container.windows().len(), 1);
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Toggle monocle on
+        wm.toggle_monocle().ok();
+
+        {
+            // Container should be a monocle container
+            let monocle_container = wm
+                .focused_workspace()
+                .unwrap()
+                .monocle_container()
+                .as_ref()
+                .unwrap();
+            assert_eq!(monocle_container.windows().len(), 1);
+            assert_eq!(monocle_container.windows()[0].hwnd, 1);
+        }
+
+        {
+            // Should not have any containers
+            let container = wm.focused_workspace().unwrap();
+            assert_eq!(container.containers().len(), 0);
+        }
+
+        // Toggle monocle off
+        wm.toggle_monocle().ok();
+
+        {
+            // Should have 1 container in the workspace
+            let container = wm.focused_workspace().unwrap();
+            assert_eq!(container.containers().len(), 1);
+            assert_eq!(container.containers()[0].windows()[0].hwnd, 1);
+        }
+
+        {
+            // No windows should be in the monocle container
+            let monocle_container = wm.focused_workspace().unwrap().monocle_container();
+            assert_eq!(*monocle_container, None);
+        }
+    }
+
+    #[test]
+    fn test_ensure_named_workspace_for_monitor() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        {
+            // Create a monitor
+            let m = monitor::new(
+                1,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor1".to_string(),
+                "TestDevice1".to_string(),
+                "TestDeviceID1".to_string(),
+                Some("TestMonitorID1".to_string()),
+            );
+
+            // Add the monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Workspace names list
+        let mut workspace_names = vec!["Workspace".to_string(), "Workspace1".to_string()];
+
+        // Ensure workspaces for monitor 1
+        wm.ensure_named_workspaces_for_monitor(1, &workspace_names)
+            .ok();
+
+        {
+            // Monitor 1 should have 2 workspaces with names "Workspace" and "Workspace1"
+            let monitor = wm.monitors().get(1).unwrap();
+            let workspaces = monitor.workspaces();
+            assert_eq!(workspaces.len(), workspace_names.len());
+            for (i, workspace) in workspaces.iter().enumerate() {
+                assert_eq!(workspace.name(), &Some(workspace_names[i].clone()));
+            }
+        }
+
+        // Add more workspaces to list
+        workspace_names.push("Workspace2".to_string());
+        workspace_names.push("Workspace3".to_string());
+
+        // Ensure workspaces for monitor 0
+        wm.ensure_named_workspaces_for_monitor(0, &workspace_names)
+            .ok();
+
+        {
+            // Monitor 0 should have 4 workspaces with names "Workspace", "Workspace1",
+            // "Workspace2" and "Workspace3"
+            let monitor = wm.monitors().front().unwrap();
+            let workspaces = monitor.workspaces();
+            assert_eq!(workspaces.len(), workspace_names.len());
+            for (i, workspace) in workspaces.iter().enumerate() {
+                assert_eq!(workspace.name(), &Some(workspace_names[i].clone()));
+            }
+        }
+    }
+
+    #[test]
+    fn test_add_window_handle_to_move_based_on_workspace_rule() {
+        let (wm, _context) = setup_window_manager();
+
+        // Mock Data representing a window and its workspace/movement details
+        let window_title = String::from("TestWindow");
+        let hwnd = 12345;
+        let origin_monitor_idx = 0;
+        let origin_workspace_idx = 0;
+        let target_monitor_idx = 2;
+        let target_workspace_idx = 3;
+        let floating = false;
+
+        // Empty vector to hold workspace rule enforcement operations
+        let mut to_move: Vec<EnforceWorkspaceRuleOp> = Vec::new();
+
+        // Call the function to add a window movement operation based on workspace rules
+        wm.add_window_handle_to_move_based_on_workspace_rule(
+            &window_title,
+            hwnd,
+            origin_monitor_idx,
+            origin_workspace_idx,
+            target_monitor_idx,
+            target_workspace_idx,
+            floating,
+            &mut to_move,
+        );
+
+        // Verify that the vector contains the expected operation with the correct values
+        assert_eq!(to_move.len(), 1);
+        let op = &to_move[0];
+        assert_eq!(op.hwnd, hwnd); // 12345
+        assert_eq!(op.origin_monitor_idx, origin_monitor_idx); // 0
+        assert_eq!(op.origin_workspace_idx, origin_workspace_idx); // 0
+        assert_eq!(op.target_monitor_idx, target_monitor_idx); // 2
+        assert_eq!(op.target_workspace_idx, target_workspace_idx); // 3
+        assert_eq!(op.floating, floating); // false
     }
 }

@@ -197,13 +197,34 @@ local lsp_list = {
                 }))
 
                 vim.api.nvim_create_user_command("TexlabCleanAuxiliary", function()
-                    vim.lsp.buf.execute_command({ command = "texlab.cleanAuxiliary", arguments = { { uri = vim.uri_from_bufnr(0) } } })
+                    local client = vim.lsp.get_clients({ bufnr = 0, name = "texlab" })
+                    if #client > 0 then
+                        client[1]:exec_cmd({
+                            title = "cleanAuxiliary",
+                            command = "texlab.cleanAuxiliary",
+                            arguments = { { uri = vim.uri_from_bufnr(0) } },
+                        })
+                    end
                 end, { desc = "Clean Auxiliary" })
                 vim.api.nvim_create_user_command("TexlabCleanArtifacts", function()
-                    vim.lsp.buf.execute_command({ command = "texlab.cleanArtifacts", arguments = { { uri = vim.uri_from_bufnr(0) } } })
+                    local client = vim.lsp.get_clients({ bufnr = 0, name = "texlab" })
+                    if #client > 0 then
+                        client[1]:exec_cmd({
+                            title = "cleanArtifacts",
+                            command = "texlab.cleanArtifacts",
+                            arguments = { { uri = vim.uri_from_bufnr(0) } },
+                        })
+                    end
                 end, { desc = "Clean Artifacts" })
                 vim.api.nvim_create_user_command("TexlabCancelBuild", function()
-                    vim.lsp.buf.execute_command({ command = "texlab.cancelBuild", arguments = {} })
+                    local client = vim.lsp.get_clients({ bufnr = 0, name = "texlab" })
+                    if #client > 0 then
+                        client[1]:exec_cmd({
+                            title = "cancelBuild",
+                            command = "texlab.cancelBuild",
+                            arguments = {},
+                        })
+                    end
                 end, { desc = "Cancel Build" })
             end
         end,

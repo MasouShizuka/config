@@ -428,7 +428,7 @@ return {
                             local servers_on_buffer = vim.lsp.get_clients({ bufnr = buf })
                             for _, client in ipairs(servers_on_buffer) do
                                 if client.attached_buffers[buf] then
-                                    client.stop()
+                                    client:stop()
                                 end
                             end
                         end)
@@ -479,7 +479,7 @@ return {
                         },
                     })
 
-                    if client.supports_method("textDocument/codeAction") then
+                    if client:supports_method("textDocument/codeAction") then
                         if utils.is_available("actions-preview.nvim") then
                             vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() require("actions-preview").code_actions() end, { buffer = buf, desc = "LSP code action", silent = true })
                         else
@@ -487,7 +487,7 @@ return {
                         end
                     end
 
-                    if client.supports_method("textDocument/codeLens") then
+                    if client:supports_method("textDocument/codeLens") then
                         vim.keymap.set("n", "<leader>lc", function() vim.lsp.codelens.refresh({ bufnr = buf }) end, { buffer = buf, desc = "LSP CodeLens refresh", silent = true })
                         vim.keymap.set("n", "<leader>lC", function() vim.lsp.codelens.run() end, { buffer = buf, desc = "LSP CodeLens run", silent = true })
 
@@ -531,25 +531,25 @@ return {
                     end
 
                     if not utils.is_available("trouble.nvim") then
-                        if client.supports_method("textDocument/definition") then
+                        if client:supports_method("textDocument/definition") then
                             vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
                         end
-                        if client.supports_method("textDocument/declaration") then
+                        if client:supports_method("textDocument/declaration") then
                             vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
                         end
-                        if client.supports_method("textDocument/implementation") then
+                        if client:supports_method("textDocument/implementation") then
                             vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, { buffer = buf, desc = "Implementation of current symbol", silent = true })
                         end
-                        if client.supports_method("textDocument/typeDefinition") then
+                        if client:supports_method("textDocument/typeDefinition") then
                             vim.keymap.set("n", "gy", function() vim.lsp.buf.type_definition() end, { buffer = buf, desc = "Definition of current type", silent = true })
                         end
-                        if client.supports_method("textDocument/references") then
+                        if client:supports_method("textDocument/references") then
                             vim.keymap.set("n", "gr", function() vim.lsp.buf.references() end, { buffer = buf, desc = "References of current symbol", silent = true })
                         end
                     end
 
                     if not utils.is_available("snacks.nvim") then
-                        if client.supports_method("textDocument/documentHighlight") then
+                        if client:supports_method("textDocument/documentHighlight") then
                             utils.set_setting_toggle("document_highlight", {
                                 default = true,
                                 init = function()
@@ -604,8 +604,8 @@ return {
                     if
                         not utils.is_available("conform.nvim")
                         and (
-                            client.supports_method("textDocument/formatting")
-                            or client.supports_method("textDocument/rangeFormatting")
+                            client:supports_method("textDocument/formatting")
+                            or client:supports_method("textDocument/rangeFormatting")
                         )
                     then
                         local buf_format = function(opts)
@@ -667,11 +667,11 @@ return {
                         })
                     end
 
-                    if client.supports_method("textDocument/hover") then
+                    if client:supports_method("textDocument/hover") then
                         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { buffer = buf, desc = "Hover symbol details", silent = true })
                     end
 
-                    if client.supports_method("textDocument/inlayHint") then
+                    if client:supports_method("textDocument/inlayHint") then
                         utils.set_setting_toggle("inlay_hints", {
                             default = true,
                             init = function()
@@ -714,11 +714,11 @@ return {
                         })
                     end
 
-                    if client.supports_method("textDocument/rename") then
+                    if client:supports_method("textDocument/rename") then
                         vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = buf, desc = "Rename current symbol", silent = true })
                     end
 
-                    if client.supports_method("textDocument/semanticTokens/full") and vim.lsp.semantic_tokens then
+                    if client:supports_method("textDocument/semanticTokens/full") and vim.lsp.semantic_tokens then
                         local function toggle_semantic_tokens()
                             local enabled = utils.get_setting_condition("inlay_hints", { buf = buf })
                             for _, client in ipairs(vim.lsp.get_clients({ bufnr = buf })) do
@@ -763,13 +763,13 @@ return {
                         })
                     end
 
-                    if client.supports_method("textDocument/signatureHelp") then
+                    if client:supports_method("textDocument/signatureHelp") then
                         vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
                         vim.keymap.set("i", "<c-k>", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
                     end
 
                     if not utils.is_available("snacks.nvim") then
-                        if client.supports_method("workspace/symbol") then
+                        if client:supports_method("workspace/symbol") then
                             vim.keymap.set("n", "<leader>ls", function() vim.lsp.buf.document_symbol() end, { buffer = buf, desc = "Search symbols", silent = true })
                             vim.keymap.set("n", "<leader>lS", function() vim.lsp.buf.workspace_symbol() end, { buffer = buf, desc = "Search workspace symbols", silent = true })
                         end
@@ -779,8 +779,8 @@ return {
 
                     vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
                     if not utils.is_available("trouble.nvim") then
-                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.goto_prev() end, { buffer = buf, desc = "Previous diagnostic", silent = true })
-                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.goto_next() end, { buffer = buf, desc = "Next diagnostic", silent = true })
+                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.jump({ count = -1, float = true }) end, { buffer = buf, desc = "Previous diagnostic", silent = true })
+                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.jump({ count = 1, float = true }) end, { buffer = buf, desc = "Next diagnostic", silent = true })
                     end
                 end,
                 desc = "Lsp config",
@@ -945,7 +945,7 @@ return {
 
             local registry_avail, registry = pcall(require, "mason-registry")
             if not registry_avail then
-                vim.api.nvim_err_writeln("Unable to access mason registry")
+                vim.api.nvim_echo({ { "Unable to access mason registry" } }, true, { err = true })
                 return
             end
 

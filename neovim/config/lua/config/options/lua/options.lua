@@ -98,7 +98,6 @@ function M.setup(opts)
 
     -- Tab
     vim.opt.expandtab = true                                                                                -- use spaces when <Tab> is inserted
-    vim.opt.shiftround = true                                                                               -- round indent to multiple of shiftwidth
     vim.opt.shiftwidth = 0                                                                                  -- number of spaces to use for (auto)indent step
     vim.opt.softtabstop = 4                                                                                 -- number of spaces that <Tab> uses while editing
     vim.opt.tabstop = 4                                                                                     -- number of spaces that <Tab> in file uses

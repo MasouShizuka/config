@@ -71,7 +71,7 @@ return {
                         i = cmp.mapping.confirm({ select = true }),
                         c = function()
                             if cmp.visible() then
-                                cmp.select_next_item()
+                                cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                             else
                                 cmp.complete()
                             end

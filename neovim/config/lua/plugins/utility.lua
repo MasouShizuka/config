@@ -178,27 +178,41 @@ return {
 
             -- 当直接打开一个大文件时，需要手动执行
             if vim.fn.argc(-1) > 0 then
+                local function load_bigfile(args)
+                    local opts = require("snacks").config.get("bigfile", { notify = true })
+
+                    if opts.notify then
+                        local file_path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(args.buf), ":p:~:.")
+                        Snacks.notify.warn({
+                            ("Big file detected `%s`."):format(file_path),
+                            "Some Neovim features have been **disabled**.",
+                        }, { title = "Big File" })
+                    end
+                    vim.api.nvim_buf_call(args.buf, function()
+                        opts.setup({
+                            buf = args.buf,
+                            ft = vim.filetype.match({ buf = args.buf }) or "",
+                        })
+                    end)
+                end
+
                 utils.create_once_autocmd("BufReadPre", {
                     callback = function(ev)
-                        if not utils.is_bigfile(ev.buf) and not utils.is_longfile(ev.buf) then
+                        if not utils.is_bigfile(ev.buf) then
                             return
                         end
 
-                        local opts = require("snacks").config.get("bigfile", { notify = true })
-
-                        if opts.notify then
-                            local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(ev.buf), ":p:~:.")
-                            Snacks.notify.warn({
-                                ("Big file detected `%s`."):format(path),
-                                "Some Neovim features have been **disabled**.",
-                            }, { title = "Big File" })
+                        load_bigfile(ev)
+                    end,
+                    desc = "Disable bigfile features when running nvim with file argument",
+                })
+                utils.create_once_autocmd("BufReadPost", {
+                    callback = function(ev)
+                        if not utils.is_longfile(ev.buf) then
+                            return
                         end
-                        vim.api.nvim_buf_call(ev.buf, function()
-                            opts.setup({
-                                buf = ev.buf,
-                                ft = vim.filetype.match({ buf = ev.buf }) or "",
-                            })
-                        end)
+
+                        load_bigfile(ev)
                     end,
                     desc = "Disable bigfile features when running nvim with file argument",
                 })
@@ -267,9 +281,6 @@ return {
             { "<leader>tu",  function() require("snacks").picker.undo() end,                  desc = "Undo History",                                mode = "n" },
 
             { "<s-f2>",      function() require("snacks").rename.rename_file() end,           desc = "Rename File",                                 mode = "n" },
-
-            { "<leader>.",   function() require("snacks").scratch() end,                      desc = "Toggle Scratch Buffer",                       mode = "n" },
-            { "<leader>>",   function() require("snacks").scratch.select() end,               desc = "Select Scratch Buffer",                       mode = "n" },
         },
         lazy = false,
         opts = function()
@@ -754,15 +765,6 @@ return {
                         return vim.b[buf].snacks_scope ~= false and vim.g.snacks_scope ~= false
                     end,
                 },
-                scratch = {
-                    enabled = true,
-                    win = {
-                        wo = {
-                            winbar = "",
-                        },
-                    },
-                    template = "",
-                },
                 -- NOTE: 存在以下问题
                 -- 1. 有时第一次滑动无法平滑滚动
                 -- 2. 按住滚动时不连贯
@@ -1019,14 +1021,8 @@ return {
                     })
 
                     -- This will handle highlights when focus gained, including switching panes in tmux
-                    local first_focus_gained = true
                     vim.api.nvim_create_autocmd("FocusGained", {
                         callback = function()
-                            if first_focus_gained then
-                                first_focus_gained = false
-                                return
-                            end
-
                             ---@type UndoGlow.CommandOpts
                             local opts = {
                                 animation = {

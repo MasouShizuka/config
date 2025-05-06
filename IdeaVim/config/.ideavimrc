@@ -218,6 +218,12 @@ imap <c-s-v> <Action>($Paste)
 
 " ──────────────────── Pluings in neovim ─────────────────────
 
+" ╭────────────────╮
+" │ auto-save.nvim │
+" ╰────────────────╯
+
+" Settings -> Appearance & Behavior -> System Settings -> Autosave -> 1 sec
+
 " ╭───────────────╮
 " │ gitsigns.nvim │
 " ╰───────────────╯
@@ -234,6 +240,12 @@ nmap <leader>gl <Action>(Vcs.Show.Log)
 " ╰───────────╯
 
 nmap <leader>z <Action>(WelcomeScreen.Plugins)
+
+" ╭────────╮
+" │ neogen │
+" ╰────────╯
+
+nnoremap <leader>gca O/**
 
 " ╭──────────╮
 " │ nvim-dap │
@@ -268,6 +280,7 @@ nmap <leader>dp <Action>(ChooseDebugConfiguration)
 nmap <c-;> <Action>(ShowIntentionActions)
 
 nmap K <Action>(QuickJavaDoc)
+nmap gh <Action>(com.huawei.ohos.infocenter.action.ShowDevelopDocumentAction)
 
 nmap <f2> <Action>(RenameElement)
 nmap <s-f2> <Action>(RenameFile)
@@ -276,6 +289,8 @@ nmap gK <Action>(ParameterInfo)
 imap <c-k> <Action>(ParameterInfo)
 
 nmap gl <Action>(ShowErrorDescription)
+
+nmap <leader>lo <Action>(OptimizeImports)
 
 " ╭────────────────────╮
 " │ snacks.nvim picker │
@@ -329,7 +344,8 @@ nmap [d <Action>(GotoPreviousError)
 nmap ]w <Action>(GotoNextError)
 nmap [w <Action>(GotoPreviousError)
 
-nmap <leader>xl <Action>(ActivateLogToolWindow)
+nmap <leader>xl <Action>(ActivateCodeLinterToolWindow)
+nmap <leader>xo <Action>(ActivateLogToolWindow)
 nmap <leader>xn <Action>(ActivateNotificationsToolWindow)
 nmap <leader>xx <Action>(ActivateProblemsViewToolWindow)
 nmap <leader>xs <Action>(ActivateStructureToolWindow)
@@ -385,15 +401,6 @@ Plug 'machakann/vim-highlightedyank'
 let g:highlightedyank_highlight_duration = "500"
 let g:highlightedyank_highlight_color = "rgba(160, 160, 160, 155)"
 let g:highlightedyank_highlight_foreground_color = "rgba(0, 0, 0, 255)"
-
-" ╭──────────────────╮
-" │ IdeaVimExtension │
-" ╰──────────────────╯
-
-" NOTE: 安装插件 IdeaVimExtension
-" https://github.com/hadix-lin/ideavim_extension
-" https://plugins.jetbrains.com/plugin/9615-ideavimextension
-set keep-english-in-normal-and-restore-in-insert
 
 " ╭───────────────╮
 " │ indent-object │

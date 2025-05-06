@@ -65,7 +65,7 @@
           {
             "windowGroupID": 0,
             "actionTypeID": 8,
-            "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi.ahk\")"
+            "ahkCode": "close_or_run_script(EnvGet(\"USERPROFILE\") . \"/.config/komorebi/komorebi.ahk\")"
           }
         ],
         "*h": [
@@ -589,7 +589,7 @@
           {
             "windowGroupID": 0,
             "actionTypeID": 8,
-            "ahkCode": "close_or_run_script(\"D:/Tools/komorebi/komorebi.ahk\")"
+            "ahkCode": "close_or_run_script(EnvGet(\"USERPROFILE\") . \"/.config/komorebi/komorebi.ahk\")"
           }
         ],
         "*h": [

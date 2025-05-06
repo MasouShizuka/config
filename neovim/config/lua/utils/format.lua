@@ -44,7 +44,7 @@ local format_list = {
             end,
         },
         download = true,
-        enable = function() return vim.fn.executable("python") == 1 end,
+        enable = function() return vim.fn.executable("gcc") == 1 end,
         filetype = { "c", "cpp" },
     },
     ruff_format = {

@@ -76,7 +76,8 @@ return {
                 local colors = require("utils.colors")
                 local utils = require("utils")
 
-                hl["@module"] = { fg = c[colors.get_color_name("tokyonight", "yellow")] }
+                hl.DiagnosticError = vim.tbl_deep_extend("force", hl.DiagnosticError or {}, { fg = c[colors.get_color_name("tokyonight", "red")] })
+                hl.DiagnosticInfo = vim.tbl_deep_extend("force", hl.DiagnosticInfo or {}, { fg = c[colors.get_color_name("tokyonight", "blue")] })
                 hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
                 hl.DiffAdd = { link = "diffAdded" }
                 hl.DiffChange = { link = "diffChanged" }

@@ -22,7 +22,7 @@
 # # MD005/list-indent : Inconsistent indentation for list items at the same level : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md005.md
 # MD005: true
 #
-# # MD007/ul-indent : Unordered list indentation : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md007.md
+# MD007/ul-indent : Unordered list indentation : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md007.md
 MD007:
   # Spaces for indent
   indent: 4
@@ -57,7 +57,7 @@ MD007:
 #   # Consecutive blank lines
 #   maximum: 1
 #
-# # MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md013.md
+# MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md013.md
 MD013:
   # Number of characters
   line_length: 10000
@@ -101,7 +101,7 @@ MD013:
 # # MD023/heading-start-left : Headings must start at the beginning of the line : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md023.md
 # MD023: true
 #
-# # MD024/no-duplicate-heading : Multiple headings with the same content : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md024.md
+# MD024/no-duplicate-heading : Multiple headings with the same content : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md024.md
 MD024:
 #   # Only check sibling headings
 #   allow_different_nesting: false
@@ -123,7 +123,7 @@ MD024:
 # # MD027/no-multiple-space-blockquote : Multiple spaces after blockquote symbol : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md027.md
 # MD027: true
 #
-# # MD028/no-blanks-blockquote : Blank line inside blockquote : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md028.md
+# MD028/no-blanks-blockquote : Blank line inside blockquote : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md028.md
 MD028: false
 #
 # # MD029/ol-prefix : Ordered list item prefix : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md029.md
@@ -142,20 +142,20 @@ MD028: false
 #   # Spaces for multi-line ordered list items
 #   ol_multi: 1
 #
-# # MD031/blanks-around-fences : Fenced code blocks should be surrounded by blank lines : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md031.md
+# MD031/blanks-around-fences : Fenced code blocks should be surrounded by blank lines : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md031.md
 MD031:
   # Include list items
   list_items: false
 #
-# # MD032/blanks-around-lists : Lists should be surrounded by blank lines : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md032.md
+# MD032/blanks-around-lists : Lists should be surrounded by blank lines : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md032.md
 MD032: false
 #
-# # MD033/no-inline-html : Inline HTML : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md033.md
-# MD033:
-#   # Allowed elements
-#   allowed_elements: []
+# MD033/no-inline-html : Inline HTML : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md033.md
+MD033:
+  # Allowed elements
+  allowed_elements: ["br"]
 #
-# # MD034/no-bare-urls : Bare URL used : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md034.md
+# MD034/no-bare-urls : Bare URL used : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md034.md
 MD034: false
 #
 # # MD035/hr-style : Horizontal rule style : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md035.md

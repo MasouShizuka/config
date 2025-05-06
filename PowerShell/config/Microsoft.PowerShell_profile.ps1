@@ -6,8 +6,6 @@ Set-Alias ll ls
 
 
 
-
-
 # ╭──────────────────────╮
 # │ Environment Variable │
 # ╰──────────────────────╯

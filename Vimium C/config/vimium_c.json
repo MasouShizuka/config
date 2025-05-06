@@ -1,11 +1,11 @@
 {
 	"name": "Vimium C",
-	"@time": "2025/3/6 15:53:42",
-	"time": 1741247622103,
+	"@time": "2025/4/26 08:43:47",
+	"time": 1745628227432,
 	"environment": {
-		"extension": "2.11.3",
+		"extension": "2.12.2",
 		"platform": "win",
-		"chromium": 134
+		"chromium": 135
 	},
 	"exclusionRules": [
 		{
@@ -14,6 +14,7 @@
 		}
 	],
 	"grabBackFocus": true,
+	"keyLayout": 2,
 	"keyMappings": [
 		"#!no-check",
 		"unmap <c-e>",
@@ -34,9 +35,9 @@
 		"unmap ^",
 		"",
 		"map F LinkHints.activate",
-		"map f LinkHints.activateOpenInNewTab newtab=\"force\"",
+		"map f LinkHints.activateOpenInNewTab newtab=\"inactive\" activeOnCtrl",
 		"unmap <a-f>",
-		"map ;f LinkHints.activateWithQueue newtab=\"force\"",
+		"map ;f LinkHints.activateWithQueue newtab=\"inactive\" activeOnCtrl",
 		"",
 		"unmap zH",
 		"map H scrollToLeft",
@@ -120,8 +121,6 @@
 		"# run <v-f1> LinkHints.click#dblclick+f2+reset",
 		""
 	],
-	"nextPatterns": "下一封,下页,下一页,下一頁,下一章,后一页,下一张,next,more,Older,>,›,→,»,≫,>>",
-	"previousPatterns": "上一封,上页,上一页,上一頁,上一章,前一页,上一张,prev,previous,back,Newer,<,‹,←,«,≪,<<",
 	"smoothScroll": false,
-	"vimSync": true
+	"vimSync": false
 }

@@ -366,52 +366,6 @@ return {
         opts = {},
     },
 
-    -- NOTE: 需要安装 im-select
-    {
-        "keaising/im-select.nvim",
-        enabled = environment.is_windows or environment.is_wsl,
-        event = {
-            "InsertEnter",
-        },
-        opts = function()
-            local default_im_select = "com.apple.keylayout.ABC"
-            local default_command = "im-select"
-            if environment.is_windows or environment.is_wsl then
-                default_im_select = "1033"
-                default_command = "im-select.exe"
-            elseif environment.is_mac then
-                default_im_select = "com.apple.keylayout.ABC"
-            elseif environment.is_linux then
-                default_im_select = "keyboard-us"
-                default_command = "fcitx5-remote"
-            end
-
-            return {
-                -- IM will be set to `default_im_select` in `normal` mode
-                -- For Windows/WSL, default: "1033", aka: English US Keyboard
-                -- For macOS, default: "com.apple.keylayout.ABC", aka: US
-                -- For Linux, default:
-                --               "keyboard-us" for Fcitx5
-                --               "1" for Fcitx
-                --               "xkb:us::eng" for ibus
-                -- You can use `im-select` or `fcitx5-remote -n` to get the IM's name
-                default_im_select  = default_im_select,
-
-                -- Can be binary's name, binary's full path, or a table, e.g. 'im-select',
-                -- '/usr/local/bin/im-select' for binary without extra arguments,
-                -- or { "AIMSwitcher.exe", "--imm" } for binary need extra arguments to work.
-                -- For Windows/WSL, default: "im-select.exe"
-                -- For macOS, default: "macism"
-                -- For Linux, default: "fcitx5-remote" or "fcitx-remote" or "ibus"
-                default_command    = default_command,
-
-                -- Restore the default input method state when the following events are triggered
-                -- set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
-                set_default_events = { "InsertLeave" },
-            }
-        end,
-    },
-
     {
         "monaqa/dial.nvim",
         config = function()
@@ -484,8 +438,6 @@ return {
                     augend.integer.alias.octal,
 
                     augend.misc.alias["markdown_header"],
-
-                    augend.paren.alias.quote,
 
                     augend.semver.alias.semver,
                 },

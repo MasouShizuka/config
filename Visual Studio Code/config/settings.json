@@ -420,9 +420,8 @@
     "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
-        "{git,git-graph}:/**/*.{md,csv,svg}": "default",
-        "{git,gitlens,git-graph}:/**/*.{md,csv,svg}": "default",
         "{hexdiff}:/**/*.*": "hexEditor.hexedit",
+        "{git,git-graph}:/**/*.{md,csv,svg}": "default",
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",

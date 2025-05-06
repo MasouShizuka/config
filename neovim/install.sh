@@ -5,7 +5,7 @@ CONFIG_DIR="$DIR/config"
 
 if ((is_windows)); then
     scoop install neovim
-    scoop install "$PARENT_DIR/Scoop/config/workspace/im-select.json"
+    scoop install nodejs
     target="$LOCALAPPDATA/nvim"
     clean_target "$target"
     install_to_target "$CONFIG_DIR" "$target"
