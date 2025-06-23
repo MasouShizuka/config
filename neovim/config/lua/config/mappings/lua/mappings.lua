@@ -16,7 +16,10 @@ function M.setup(opts)
         vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
         vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
     end
-    vim.keymap.set({ "n", "x" }, "<c-c>", "<nop>", { silent = true })
+    pcall(vim.keymap.del, "n", "grn")
+    pcall(vim.keymap.del, { "n", "x" }, "gra")
+    pcall(vim.keymap.del, "n", "grr")
+    pcall(vim.keymap.del, "n", "gri")
 
     -- 不复制到 clipboard
     vim.keymap.set({ "n", "x" }, "C", '"_c', { silent = true })
@@ -474,7 +477,7 @@ function M.setup(opts)
                 if ft == "cpp" then
                     -- 若在使用 vector 等库时编译的程序无法运行，可能需要在编译时添加 -static-libstdc++
                     -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
-                    local command = string.format([[g++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output)
+                    local command = string.format([[clang++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output)
                     vim.api.nvim_command(command)
                 elseif ft == "lua" then
                     local command = string.format([[luafile "%s"]], curr_file)

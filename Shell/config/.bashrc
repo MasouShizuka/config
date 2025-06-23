@@ -58,11 +58,10 @@ alias ll="ls --all --human-readable -l --time-style=long-iso"
 
 [[ -d "$HOME/.local/bin" ]] && export PATH="$PATH:$HOME/.local/bin"
 
-[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
 if [[ -x "$(command -v nvim)" ]]; then
     export EDITOR=nvim
-    export GIT_EDITOR=$EDITOR
 fi
 
 export LANG=en_US.UTF-8
@@ -96,14 +95,37 @@ function quiet() {
 # │ Keybinding │
 # ╰────────────╯
 
-# enter a few characters and press UpArrow/DownArrow
-# to search backwards/forwards through the history
-bind '"\e[A":history-search-backward'
-bind '"\e[B":history-search-forward'
+set -o vi
+bind "set show-mode-in-prompt on"
+bind "set vi-cmd-mode-string \1\e[2 q\2"
+bind "set vi-ins-mode-string \1\e[6 q\2"
 
-# 移动到上/下一个单词
-bind '"\e[1;2D":backward-word'
-bind '"\e[1;2C":forward-word'
+bind "set bind-tty-special-chars off"
+
+# H:Move to the start of the current line.
+bind -m vi-command "H:beginning-of-line"
+# L:Move to the end of the line.
+bind -m vi-command "L:end-of-line"
+
+# s-left: Move forward to the end of the next word. Words are delimited by non-quoted shell metacharacters.
+bind '"\e[1;2D":shell-backward-word'
+# s-right: Move back to the start of the current or previous word. Words are delimited by non-quoted shell metacharacters.
+bind '"\e[1;2C":shell-forward-word'
+
+# c-l: Clear the screen, then redraw the current line, leaving the current line at the top of the screen.
+bind '"\C-l":clear-screen'
+bind -m vi-command "Control-l:clear-screen"
+
+# up/k: Search backward through the history for the string of characters between the start of the current line and the point.
+bind '"\e[A":history-search-backward'
+bind -m vi-command "k:history-search-backward"
+# down/j: Search forward through the history for the string of characters between the start of the current line and the point.
+bind '"\e[B":history-search-forward'
+bind -m vi-command "j:history-search-forward"
+
+# c-w: Kill the word behind point. Word boundaries are the same as shell-backward-word.
+bind '"\C-w":shell-backward-kill-word'
+bind -m vi-command "Control-w:shell-backward-kill-word"
 
 # tab 相关
 bind "set completion-ignore-case on"
@@ -115,38 +137,42 @@ shopt -s no_empty_cmd_completion
 # │ Setting │
 # ╰─────────╯
 
+blue="\[\e[38;2;130;170;255m\]"
+cyan="\[\e[38;2;79;214;190m\]"
+green="\[\e[38;2;195;232;141m\]"
+purple="\[\e[38;2;252;167;234m\]"
+
+bold="\[\e[1m\]"
+reset="\[\e[0m\]"
+
+if ((is_windows)); then
+    PS1="${blue}󰍲 "
+elif ((is_mac)); then
+    PS1="${blue} "
+else
+    PS1="${blue} "
+fi
+PS1="$PS1$bold$cyan\w ${reset}at $bold$purple\t$green\n $reset"
+
 [[ -z "$HISTFILE" ]] && HISTFILE="$HOME/.bash_history"
 HISTSIZE=50000
 
 LAST_COMMAND=""
 # This will run before any command is executed.
 function preexec() {
-    if [ -z "$AT_PROMPT" ]; then
+    if [[ -z "$AT_PROMPT" ]]; then
         return
-    fi
-    unset AT_PROMPT
-
-    if [[ -z ${BASH_COMMAND//[[:space:]]/} ]]; then
-        return
+    else
+        unset AT_PROMPT
     fi
 
-    LASTHIST=$(history 1 | sed 's/^\s*[0-9]*\s*//')
-
-    if [[ "$LASTHIST" == "$LAST_COMMAND" ]]; then
+    if [[ "$BASH_COMMAND" == "$PROMPT_COMMAND" ]]; then
+        LAST_COMMAND=""
         return
+    else
+        LASTHIST=$(history 1 | sed 's/^\s*[0-9]*\s*//')
+        LAST_COMMAND=$LASTHIST
     fi
-    LAST_COMMAND=$LASTHIST
-
-    LASTHIST_SLASH=${LASTHIST//\\//}
-
-    LASTHIST_TRIM=${LASTHIST_SLASH%%$'\n'}
-    LASTHIST_TRIM=${LASTHIST_TRIM#"${LASTHIST_TRIM%%[![:space:]]*}"}
-    LASTHIST_TRIM=${LASTHIST_TRIM%"${LASTHIST_TRIM##*[![:space:]]}"}
-
-    LASTHIST_SED=$(<<<"$LASTHIST_TRIM" sed -e 's`[][\\/.*^$]`\\&`g')
-    sed -i "{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
-
-    echo "$LASTHIST_TRIM" >>"$HISTFILE"
 }
 trap "preexec" DEBUG
 
@@ -158,11 +184,28 @@ trap "unset HISTFILE; exit" SIGHUP
 # the first prompt).
 FIRST_PROMPT=1
 function precmd() {
-    AT_PROMPT=1
+    if (($? == 0)); then
+        is_succeeded=1
+    else
+        is_succeeded=0
+    fi
 
-    if [ -n "$FIRST_PROMPT" ]; then
+    AT_PROMPT=1
+    if [[ -n "$FIRST_PROMPT" ]]; then
         unset FIRST_PROMPT
         return
+    fi
+
+    if ((is_succeeded)); then
+        LASTHIST=${LAST_COMMAND%%$'\n'}
+        LASTHIST=${LASTHIST#"${LASTHIST%%[![:space:]]*}"}
+        LASTHIST=${LASTHIST%"${LASTHIST##*[![:space:]]}"}
+        if [[ -n "$LASTHIST" ]]; then
+            LASTHIST=${LASTHIST//\\//}
+            LASTHIST_SED=$(<<<"$LASTHIST" sed -e 's`[][\\/.*^$]`\\&`g')
+            sed -i "{/^${LASTHIST_SED}$/d;}" "$HISTFILE"
+            echo "$LASTHIST" >>"$HISTFILE"
+        fi
     fi
 }
 PROMPT_COMMAND="precmd"
@@ -173,11 +216,26 @@ PROMPT_COMMAND="precmd"
 
 # ╭─ bottom ─────────────────────────────────────────────────╮
 
-if [[ -x "$(command -v btm)" ]]; then
-    alias b=btm
-fi
+[[ -x "$(command -v btm)" ]] && alias b=btm
 
 # ╰───────────────────────────────────────────────── bottom ─╯
+
+# ╭─ conda ──────────────────────────────────────────────────╮
+
+if [[ -x "$(command -v mamba)" ]]; then
+    if ((is_windows)); then
+        CONDA_EXE="$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe"
+        if [[ -f "$CONDA_EXE" ]]; then
+            eval "$("$CONDA_EXE" "shell.bash" "hook")"
+        fi
+        MAMBA_SH="$HOME/scoop/apps/mambaforge/current/etc/profile.d/mamba.sh"
+        if [[ -f "$MAMBA_SH" ]]; then
+            . "$MAMBA_SH"
+        fi
+    fi
+fi
+
+# ╰────────────────────────────────────────────────── conda ─╯
 
 # ╭─ fzf ────────────────────────────────────────────────────╮
 
@@ -249,20 +307,6 @@ fi
 
 # ╰─────────────────────────────────────────────────── sfsu ─╯
 
-# ╭─ starship ───────────────────────────────────────────────╮
-
-if [[ -x "$(command -v starship)" ]]; then
-    if ((is_wsl)); then
-        export STARSHIP_CONFIG="$userprofile/.config/starship/starship.toml"
-    else
-        export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
-    fi
-
-    eval "$(starship init bash)"
-fi
-
-# ╰─────────────────────────────────────────────── starship ─╯
-
 # ╭─ yazi ───────────────────────────────────────────────────╮
 
 if [[ -x "$(command -v yazi)" ]]; then
@@ -304,37 +348,3 @@ if [[ -x "$(command -v zellij)" ]]; then
 fi
 
 # ╰───────────────────────────────────────────────── zellij ─╯
-
-# ╭───────╮
-# │ Conda │
-# ╰───────╯
-
-if [[ -x "$(command -v mamba)" ]]; then
-    if ((is_windows)); then
-        MAMBA_EXE="$HOME/scoop/apps/mambaforge/current/Library/bin/mamba.exe"
-        if [[ -f "$MAMBA_EXE" ]]; then
-            export MAMBA_EXE="$MAMBA_EXE"
-            eval "$("$MAMBA_EXE" shell hook --shell bash)"
-        fi
-    elif ((is_linux)); then
-        if [[ -f "$HOME/mambaforge/bin/conda" ]]; then
-            __conda_setup=$("$HOME/mambaforge/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)
-            if [[ $? = 0 ]]; then
-                eval "$__conda_setup"
-            else
-                if [[ -f "$HOME/mambaforge/etc/profile.d/conda.sh" ]]; then
-                    . "$HOME/mambaforge/etc/profile.d/conda.sh"
-                else
-                    export PATH="$HOME/mambaforge/bin:$PATH"
-                fi
-            fi
-            unset __conda_setup
-
-            if ((is_wsl)); then
-                if [[ ! -f "$HOME/.condarc" ]]; then
-                    ln -s "$userprofile/.condarc" "$HOME/.condarc"
-                fi
-            fi
-        fi
-    fi
-fi

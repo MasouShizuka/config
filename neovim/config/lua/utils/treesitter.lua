@@ -11,7 +11,7 @@ local treesitter_info = {
         filetype = { "sh" },
     },
     cpp = {
-        enable = function() return vim.fn.executable("g++") == 1 end,
+        enable = function() return vim.fn.executable("g++") == 1 or vim.fn.executable("clang++") == 1 end,
         filetype = { "cpp" },
     },
     diff = {

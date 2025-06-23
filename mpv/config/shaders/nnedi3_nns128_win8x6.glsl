@@ -17,8 +17,9 @@
 //!BIND HOOKED
 //!HEIGHT 2 HOOKED.h *
 //!OFFSET 0.000000 -0.500000
-//!WHEN HOOKED.h OUTPUT.h / 0.833333 <
+//!WHEN OUTPUT.w LUMA.w 1.200 * >
 //!COMPUTE 32 16 32 8
+
 #pragma optionNV(inline none)
 float nnedi3(vec4 samples[12]) {
 float sum = 0.0, sumsq = 0.0;
@@ -229,13 +230,15 @@ ret0[0] = inp[local_pos + 41];
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(1, 2), ret0);
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(1, 2) + ivec2(0, 1), ret);
 }  // hook
+
 //!DESC [nnedi3_nns128_win8x6] (double_x, nns128, win8x6)
 //!HOOK LUMA
 //!BIND HOOKED
 //!WIDTH 2 HOOKED.w *
 //!OFFSET -0.500000 0.000000
-//!WHEN HOOKED.w OUTPUT.w / 0.833333 <
+//!WHEN OUTPUT.w LUMA.w 1.200 * >
 //!COMPUTE 64 8 32 8
+
 #pragma optionNV(inline none)
 float nnedi3(vec4 samples[12]) {
 float sum = 0.0, sumsq = 0.0;
@@ -446,3 +449,4 @@ ret0[0] = inp[local_pos + 33];
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(2, 1), ret0);
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(2, 1) + ivec2(1, 0), ret);
 }  // hook
+

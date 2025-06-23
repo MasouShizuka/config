@@ -48,7 +48,7 @@ return {
 
             vim.api.nvim_create_autocmd("FileType", {
                 callback = function(args)
-                    vim.keymap.set({ "n", "x" }, "<c-tab>", function() vim.api.nvim_command("MkdnToggleToDo") end, { buffer = args.buf, desc = "Toggle todo" })
+                    vim.keymap.set({ "n", "x" }, "<enter>", function() vim.api.nvim_command("MkdnToggleToDo") end, { buffer = args.buf, desc = "Toggle todo" })
                     vim.keymap.set("i", "<cr>", function() vim.api.nvim_command("MkdnNewListItem") end, { buffer = args.buf, desc = "New list item" })
                     vim.keymap.set({ "n", "i" }, "<tab>", function() vim.api.nvim_command("MkdnTableNextCell") end, { buffer = args.buf, desc = "Table next cell" })
                     vim.keymap.set({ "n", "i" }, "<s-tab>", function() vim.api.nvim_command("MkdnTablePrevCell") end, { buffer = args.buf, desc = "Table previous cell" })
@@ -73,6 +73,7 @@ return {
                 conceal = false,
                 cursor = false,
                 folds = false,
+                foldtext = false,
                 links = false,
                 lists = true,
                 maps = false,

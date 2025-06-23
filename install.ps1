@@ -11,6 +11,10 @@ scoop bucket add extras
 scoop bucket add nerd-fonts
 scoop bucket add versions
 
+# install aria2
+scoop install aria2
+scoop config aria2-warning-enabled false
+
 # install fonts
 scoop install Maple-Mono-NF-CN
 scoop install SarasaGothic-SC

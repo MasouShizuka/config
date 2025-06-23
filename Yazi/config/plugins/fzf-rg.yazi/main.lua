@@ -78,7 +78,7 @@ local function entry(_, job)
     local cwd = state()
 
     local child, err =
-        Command("fzf"):args(cmd_args):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
+        Command("fzf"):arg(cmd_args):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
     if not child then
         return fail("Spawn `rfzf` failed with error code %s. Do you have it installed?", err)
@@ -97,7 +97,7 @@ local function entry(_, job)
         target = string.sub(target, 1, start - 1)
     end
     if target ~= "" then
-        ya.mgr_emit(target:match("[/\\]$") and "cd" or "reveal", { target })
+        ya.emit(target:match("[/\\]$") and "cd" or "reveal", { target })
     end
 end
 

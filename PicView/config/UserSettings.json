@@ -24,7 +24,8 @@
     "OpenInSameWindow": false,
     "ShowConfirmationOnEsc": false,
     "ShowRecycleConfirmation": false,
-    "ShowPermanentDeletionConfirmation": true
+    "ShowPermanentDeletionConfirmation": true,
+    "IsConstrainBackgroundColorEnabled": true
   },
   "Theme": {
     "Dark": true,

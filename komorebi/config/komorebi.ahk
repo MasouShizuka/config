@@ -252,6 +252,10 @@ focus_monitor_workspace(ThisHotkey) {
     RunWait("komorebic.exe change-layout grid", , "Hide")
 }
 
+!+g:: {
+    RunWait("komorebic.exe change-layout scrolling", , "Hide")
+}
+
 !x:: {
     RunWait("komorebic.exe flip-layout horizontal", , "Hide")
 }

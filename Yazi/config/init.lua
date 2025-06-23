@@ -28,15 +28,12 @@ local themes = {
 local theme = themes["tokyonight-moon"]
 
 
-
 require("session"):setup({
     sync_yanked = true,
 })
 
 
-
 require("fzf-rg"):setup()
-
 
 require("projects"):setup({
     save = {
@@ -48,13 +45,7 @@ require("projects"):setup({
 })
 
 
-
--- ya pack -a ndtoan96/ouch
--- ya pack -a yazi-rs/plugins:smart-enter
-
-
-
--- ya pack -a imsi32/yatline
+-- ya pkg add imsi32/yatline
 require("yatline"):setup({
     style_a = {
         fg = theme.black,
@@ -161,13 +152,18 @@ if Yatline ~= nil then
     end
 end
 
+-- ya pkg add ndtoan96/ouch
 
--- ya pack -a yazi-rs/plugins:full-border
+-- ya pkg add yazi-rs/plugins:full-border
 require("full-border"):setup({
     -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
     type = ui.Border.ROUNDED,
 })
 
-
--- ya pack -a yazi-rs/plugins:git
+-- ya pkg add yazi-rs/plugins:git
 require("git"):setup()
+
+-- ya pkg add yazi-rs/plugins:smart-enter
+require("smart-enter"):setup({
+    open_multi = true,
+})

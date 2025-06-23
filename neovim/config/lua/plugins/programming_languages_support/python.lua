@@ -32,7 +32,7 @@ return {
                     if environment.is_windows then
                         adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
                     end
-                    require("dap-python").setup(adapter_python_path, { include_configs = false })
+                    require("dap-python").setup(adapter_python_path)
                 end,
                 dependencies = {
                     "mfussenegger/nvim-dap",

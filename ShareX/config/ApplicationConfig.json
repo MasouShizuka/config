@@ -645,7 +645,6 @@
   "AutoCheckUpdate": false,
   "UpdateChannel": "Release",
   "CheckPreReleaseUpdates": false,
-  "UseCustomTheme": true,
   "Themes": [
     {
       "Name": "Dark",
@@ -958,5 +957,5 @@
   "DropAlignment": "BottomRight",
   "DropOpacity": 100,
   "DropHoverOpacity": 255,
-  "ApplicationVersion": "17.0.0"
+  "ApplicationVersion": "17.1.0"
 }

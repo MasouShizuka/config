@@ -21,7 +21,8 @@
 // Mod of AMD_FSR.glsl
 
 //!PARAM ALPHA
-//!TYPE int
+//!TYPE DEFINE
+//!DESC int
 //!MINIMUM 0
 //!MAXIMUM 1
 1

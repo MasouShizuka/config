@@ -1,5 +1,13 @@
 local M = {}
 
+---@class create_event_opts
+---@field condition? fun(args:vim.api.keyset.create_autocmd.callback_args):boolean
+---@field desc? string
+---@field event_name? string
+---@field func? fun(args:vim.api.keyset.create_autocmd.callback_args)
+---@field once? boolean
+
+---@param opts create_event_opts
 local function create_event(opts)
     local condition = opts.condition or function(args) return true end
     local desc = opts.desc or ""
@@ -122,6 +130,35 @@ M.setup = function(opts)
             vim.api.nvim_set_option_value("spell", true, { scope = "local" })
             vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
         end,
+    })
+
+    -- 打开 help 时移动到右边
+    -- https://github.com/anuvyklack/help-vsplit.nvim
+    vim.api.nvim_create_autocmd({ "BufEnter", "WinNew" }, {
+        callback = function(args)
+            local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+            if ft ~= "help" then
+                return
+            end
+
+            local origin_win = vim.fn.win_getid(vim.fn.winnr("#"))
+
+            local help_buf = vim.api.nvim_get_current_buf()
+
+            local bufhidden = vim.api.nvim_get_option_value("bufhidden", { buf = args.buf })
+            vim.api.nvim_set_option_value("bufhidden", "hide", { buf = args.buf })
+
+            local old_help_win = vim.api.nvim_get_current_win()
+            vim.api.nvim_set_current_win(origin_win)
+
+            vim.api.nvim_win_close(old_help_win, false)
+
+            vim.api.nvim_command("vsplit")
+            vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win(), help_buf)
+            vim.api.nvim_set_option_value("bufhidden", bufhidden, { buf = args.buf })
+        end,
+        desc = "Open help in a vertical split",
+        group = vim.api.nvim_create_augroup("HelpVerticalSplit", { clear = true }),
     })
 
     -- https://github.com/stevearc/dotfiles/blob/6bc8a8c96af72ab5b0437865542db3ad5d57ba0f/.config/nvim/init.lua#L286-L297

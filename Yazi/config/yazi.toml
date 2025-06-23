@@ -1,4 +1,4 @@
-[manager]
+[mgr]
 
 sort_by     = "extension"
 show_hidden = true
@@ -6,13 +6,13 @@ show_hidden = true
 [opener]
 
 edit = [
-    { run = 'nvim %*',      block = true,  desc = "nvim",                   for = "windows" },
-    { run = 'neovide %*',   orphan = true, desc = "neovide",                for = "windows" },
-    { run = 'code %*',      orphan = true, desc = "code",                   for = "windows" },
-    { run = 'code -w %*',   block = true,  desc = "code (block)",           for = "windows" },
-    { run = 'nvim "$@"',    block = true,  desc = "nvim",                   for = "unix" },
-    { run = 'code "$@"',    orphan = true, desc = "code",                   for = "unix" },
-    { run = 'code -w "$@"', block = true,  desc = "code (block)",           for = "unix" },
+    { run = 'nvim -p %*',                                           block = true,  desc = "nvim",           for = "windows" },
+    { run = 'wezterm start --cwd "%0" -- nvim -p %* -c "cd %:p:h"', orphan = true, desc = "nvim (wezterm)", for = "windows" },
+    { run = 'code %*',                                              orphan = true, desc = "code",           for = "windows" },
+    { run = 'code -w %*',                                           block = true,  desc = "code (block)",   for = "windows" },
+    { run = 'nvim -p "$@"',                                         block = true,  desc = "nvim",           for = "unix" },
+    { run = 'code "$@"',                                            orphan = true, desc = "code",           for = "unix" },
+    { run = 'code -w "$@"',                                         block = true,  desc = "code (block)",   for = "unix" },
 ]
 
 ouch = [

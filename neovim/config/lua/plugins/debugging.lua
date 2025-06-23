@@ -28,8 +28,6 @@ return {
                     "williamboman/mason.nvim",
                 },
                 opts = function()
-                    local dap = require("utils.dap")
-
                     local handlers = {
                         -- function(config)
                         --     -- all sources with no handler get passed here
@@ -38,24 +36,11 @@ return {
                         --     mason_nvim_dap.default_setup(config)
                         -- end,
                     }
-                    for dap_server, setup in pairs(dap.dap_config) do
+                    for dap_server, setup in pairs(require("utils.dap").dap_config) do
                         handlers[dap_server] = setup(require("mason-nvim-dap"))
                     end
 
                     return {
-                        -- A list of adapters to install if they're not already installed.
-                        -- This setting has no relation with the `automatic_installation` setting.
-                        ensure_installed = dap.dap_list,
-
-                        -- Whether adapters that are set up (via dap) should be automatically installed if they're not already installed.
-                        -- This setting has no relation with the `ensure_installed` setting.
-                        -- Can either be:
-                        --   - false: Daps are not automatically installed.
-                        --   - true: All adapters set up via dap are automatically installed.
-                        --   - { exclude: string[] }: All adapters set up via mason-nvim-dap, except the ones provided in the list, are automatically installed.
-                        --       Example: automatic_installation = { exclude = { "python", "delve" } }
-                        automatic_installation = true,
-
                         handlers = handlers,
                     }
                 end,
@@ -118,6 +103,7 @@ return {
                     if ft == "python" and utils.is_available("nvim-dap-python") and utils.is_available("venv-selector.nvim") then
                         vim.fn.setenv("CONDA_PREFIX", nil)
                     end
+
                     require("dap").continue()
                 end,
                 desc = "Continue",

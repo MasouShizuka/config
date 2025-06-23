@@ -120,6 +120,17 @@ return {
                 callback = function()
                     local snacks = require("snacks")
 
+                    if utils.is_available("which-key.nvim") then
+                        require("which-key").add({
+                            {
+                                mode = "n",
+                                { "<leader>t",  group = "picker" },
+                                { "<leader>tg", group = "picker git" },
+                                { "<leader>lg", group = "picker lsp goto" },
+                                { "<leader>T",  group = "command line tool", mode = "n" },
+                            },
+                        })
+                    end
 
                     -- Setup some globals for debugging (lazy-loaded)
                     _G.dd = function(...)
@@ -129,23 +140,6 @@ return {
                         snacks.debug.backtrace()
                     end
                     vim.print = _G.dd -- Override print to use snacks for `:=` command
-
-
-                    if utils.is_available("which-key.nvim") then
-                        require("which-key").add({
-                            {
-                                mode = "n",
-                                { "<leader>t",  group = "picker" },
-                                { "<leader>tg", group = "picker git" },
-                                { "<leader>lg", group = "picker lsp goto" },
-                            },
-                        })
-                    end
-
-
-                    require("which-key").add({
-                        { "<leader>T", group = "command line tool", mode = "n" },
-                    })
 
                     local cli_opts = {
                         win = {
@@ -163,9 +157,8 @@ return {
                             end,
                         },
                     }
-                    vim.keymap.set("n", "<leader>Tl", function() require("snacks").lazygit(cli_opts) end, { desc = "Open lazygit", silent = true })
-                    vim.keymap.set("n", "<leader>Ty", function() require("snacks").terminal("yazi", cli_opts) end, { desc = "Open yazi", silent = true })
-
+                    vim.keymap.set("n", "<leader>Tl", function() snacks.lazygit(cli_opts) end, { desc = "Open lazygit", silent = true })
+                    vim.keymap.set("n", "<leader>Ty", function() snacks.terminal("yazi", cli_opts) end, { desc = "Open yazi", silent = true })
 
                     snacks.toggle.diagnostics():map("<leader>ctd")
                     -- snacks.toggle.indent():map("<leader>cti")
@@ -179,12 +172,13 @@ return {
             -- 当直接打开一个大文件时，需要手动执行
             if vim.fn.argc(-1) > 0 then
                 local function load_bigfile(args)
-                    local opts = require("snacks").config.get("bigfile", { notify = true })
+                    local snacks = require("snacks")
 
+                    local opts = snacks.config.get("bigfile", { notify = true })
                     if opts.notify then
-                        local file_path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(args.buf), ":p:~:.")
-                        Snacks.notify.warn({
-                            ("Big file detected `%s`."):format(file_path),
+                        local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(args.buf), ":p:~:.")
+                        snacks.notify.warn({
+                            ("Big file detected `%s`."):format(path),
                             "Some Neovim features have been **disabled**.",
                         }, { title = "Big File" })
                     end
@@ -289,8 +283,21 @@ return {
 
             local snacks = require("snacks")
 
+            local function get_picker()
+                return snacks.picker.get()[1]
+            end
+
+            local function list_down_or_cycle_win(win)
+                local picker = get_picker()
+                if vim.fn.mode():find("n") then
+                    require("snacks.picker.actions").cycle_win(picker)
+                else
+                    require("snacks.picker.actions").list_down(picker)
+                end
+            end
+
             -- https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-1225975038
-            local function multiopen(picker, method, keep)
+            local function multiopen(win, method, keep)
                 local edit_file_cmd_map = {
                     vertical = "vsplit",
                     horizontal = "split",
@@ -305,10 +312,12 @@ return {
                 }
 
                 if not keep then
-                    picker:close()
+                    win:close()
                 end
 
-                local items = snacks.picker.get()[1]:selected({ fallback = true })
+                local picker = get_picker()
+
+                local items = picker:selected({ fallback = true })
                 for _, item in ipairs(items) do
                     local filename = snacks.picker.util.path(item)
                     local row = item.pos and item.pos[1] or 1
@@ -441,34 +450,37 @@ return {
                                 icon = icons.misc.search,
                                 key = "f",
                                 desc = "Find File",
-                                action = function() require("snacks").dashboard.pick("files") end,
+                                action = function() snacks.dashboard.pick("files") end,
                             },
                             {
                                 icon = icons.misc.search,
                                 key = "/",
                                 desc = "Find Text",
-                                action = function() require("snacks").dashboard.pick("live_grep") end,
+                                action = function() snacks.dashboard.pick("live_grep") end,
                             },
                             {
                                 icon = icons.misc.gear,
                                 key = "c",
                                 desc = "Config",
                                 action = function()
-                                    vim.api.nvim_set_current_dir(vim.fn.fnamemodify(vim.env.MYVIMRC, ":h"))
+                                    vim.api.nvim_set_current_dir(path.config_path)
                                     vim.api.nvim_command("SessionManager load_current_dir_session")
                                 end,
+                                enabled = utils.is_available("neovim-session-manager"),
                             },
                             {
                                 icon = icons.misc.list_unordered,
                                 key = "s",
                                 desc = "Load Session",
                                 action = function() vim.api.nvim_command("SessionManager load_session") end,
+                                enabled = utils.is_available("neovim-session-manager"),
                             },
                             {
                                 icon = icons.misc.refresh,
                                 key = "S",
                                 desc = "Load Last Session",
                                 action = function() vim.api.nvim_command("SessionManager load_last_session") end,
+                                enabled = utils.is_available("neovim-session-manager"),
                             },
                             {
                                 icon = icons.misc.extensions,
@@ -534,7 +546,7 @@ return {
                     ignored = true,
                     sources = {
                         explorer = {
-                            prompt = " " .. require("utils.icons").fold.FoldClosed,
+                            prompt = " " .. icons.fold.FoldClosed,
                             watch = false,
                             layout = {
                                 cycle = false,
@@ -544,7 +556,13 @@ return {
                                 list = {
                                     keys = {
                                         -- ["<BS>"] = "explorer_up",
-                                        ["H"] = "explorer_up",
+                                        ["H"] = {
+                                            function(win)
+                                                local picker = get_picker()
+                                                require("snacks.explorer.actions").actions.explorer_up(picker)
+                                                vim.api.nvim_command("cd " .. vim.fs.dirname(picker:cwd()))
+                                            end,
+                                        },
                                         -- ["l"] = "confirm",
                                         -- ["h"] = "explorer_close", -- close directory
                                         -- ["a"] = "explorer_add",
@@ -563,7 +581,13 @@ return {
                                         -- ["<leader>/"] = "picker_grep",
                                         -- ["<c-t>"] = "terminal",
                                         -- ["."] = "explorer_focus",
-                                        ["L"] = "explorer_focus",
+                                        ["L"] = {
+                                            function(win)
+                                                local picker = get_picker()
+                                                require("snacks.explorer.actions").actions.explorer_focus(picker)
+                                                vim.api.nvim_command("cd " .. picker:dir())
+                                            end,
+                                        },
                                         -- ["I"] = "toggle_ignored",
                                         ["Ti"] = "toggle_ignored",
                                         -- ["H"] = "toggle_hidden",
@@ -578,22 +602,22 @@ return {
                                         -- ["]e"] = "explorer_error_next",
                                         -- ["[e"] = "explorer_error_prev",
 
-                                        ["s"] = function(picker)
+                                        ["s"] = function(win)
                                             local items = snacks.picker.get()[1]:selected({ fallback = true })
                                             if #items ~= 2 then
                                                 vim.notify("Diff requires specifying 2 files", vim.log.levels.WARN, { title = "Explorer" })
                                                 return
                                             end
 
-                                            picker:close()
+                                            win:close()
 
-                                            vim.cmd(string.format("%s %s", "tabedit", require("snacks").picker.util.path(items[1])))
+                                            vim.cmd(string.format("%s %s", "tabedit", snacks.picker.util.path(items[1])))
                                             vim.cmd.vnew()
-                                            vim.cmd.edit(require("snacks").picker.util.path(items[2]))
+                                            vim.cmd.edit(snacks.picker.util.path(items[2]))
 
                                             utils.diffthis()
                                         end,
-                                        ["t"] = function(picker) multiopen(picker, "tab", false) end,
+                                        ["t"] = function(win) multiopen(win, "tab", false) end,
                                     },
                                 },
                             },
@@ -606,6 +630,7 @@ return {
                                 -- to close the picker on ESC instead of going to normal mode,
                                 -- add the following keymap to your config
                                 -- ["<Esc>"] = { "close", mode = { "n", "i" } },
+                                ["<c-q>"] = { "close", mode = { "n", "i" } },
                                 -- ["/"] = "toggle_focus",
                                 -- ["<C-Down>"] = { "history_forward", mode = { "i", "n" } },
                                 -- ["<C-Up>"] = { "history_back", mode = { "i", "n" } },
@@ -619,6 +644,7 @@ return {
                                 -- ["<S-CR>"] = { { "pick_win", "jump" }, mode = { "n", "i" } },
                                 -- ["<S-Tab>"] = { "select_and_prev", mode = { "i", "n" } },
                                 -- ["<Tab>"] = { "select_and_next", mode = { "i", "n" } },
+                                ["<tab>"] = false,
                                 ["<s-up>"] = { "select_and_prev", mode = { "i", "n" } },
                                 ["<s-down>"] = { "select_and_next", mode = { "i", "n" } },
                                 -- ["<Up>"] = { "list_up", mode = { "i", "n" } },
@@ -629,21 +655,21 @@ return {
                                 -- ["<a-m>"] = { "toggle_maximize", mode = { "i", "n" } },
                                 -- ["<a-p>"] = { "toggle_preview", mode = { "i", "n" } },
                                 -- ["<a-w>"] = { "cycle_win", mode = { "i", "n" } },
-                                ["<Tab>"] = { "cycle_win", mode = { "i", "n" } },
                                 -- ["<c-a>"] = { "select_all", mode = { "n", "i" } },
                                 -- ["<c-b>"] = { "preview_scroll_up", mode = { "i", "n" } },
                                 -- ["<c-d>"] = { "list_scroll_down", mode = { "i", "n" } },
                                 -- ["<c-f>"] = { "preview_scroll_down", mode = { "i", "n" } },
                                 -- ["<c-g>"] = { "toggle_live", mode = { "i", "n" } },
                                 -- ["<c-j>"] = { "list_down", mode = { "i", "n" } },
+                                ["<c-j>"] = { list_down_or_cycle_win, mode = { "i", "n" } },
                                 -- ["<c-k>"] = { "list_up", mode = { "i", "n" } },
                                 -- ["<c-n>"] = { "list_down", mode = { "i", "n" } },
                                 -- ["<c-p>"] = { "list_up", mode = { "i", "n" } },
                                 -- ["<c-q>"] = { "qflist", mode = { "i", "n" } },
                                 -- ["<c-s>"] = { "edit_split", mode = { "i", "n" } },
                                 -- ["<c-t>"] = { "tab", mode = { "n", "i" } },
-                                ["<c-t>"] = { function(picker) multiopen(picker, "tab") end, mode = { "n", "i" } },
-                                ["<c-i>"] = { function(picker) multiopen(picker, "tab") end, mode = { "n", "i" } },
+                                ["<c-t>"] = { function(win) multiopen(win, "tab") end, mode = { "n", "i" } },
+                                ["<c-i>"] = { function(win) multiopen(win, "tab") end, mode = { "n", "i" } },
                                 -- ["<c-u>"] = { "list_scroll_up", mode = { "i", "n" } },
                                 -- ["<c-v>"] = { "edit_vsplit", mode = { "i", "n" } },
                                 -- ["<c-r>#"] = { "insert_alt", mode = "i" },
@@ -701,6 +727,7 @@ return {
                                 -- ["<c-d>"] = "list_scroll_down",
                                 -- ["<c-f>"] = "preview_scroll_down",
                                 -- ["<c-j>"] = "list_down",
+                                ["<c-j>"] = { list_down_or_cycle_win, mode = { "i", "n" } },
                                 -- ["<c-k>"] = "list_up",
                                 -- ["<c-n>"] = "list_down",
                                 -- ["<c-p>"] = "list_up",
@@ -708,7 +735,7 @@ return {
                                 -- ["<c-s>"] = "edit_split",
                                 ["V"] = "edit_split",
                                 -- ["<c-t>"] = "tab",
-                                ["t"] = function(picker) multiopen(picker, "tab") end,
+                                ["t"] = function(win) multiopen(win, "tab") end,
                                 -- ["<c-u>"] = "list_scroll_up",
                                 -- ["<c-v>"] = "edit_vsplit",
                                 ["v"] = "edit_vsplit",
@@ -735,7 +762,6 @@ return {
                                 -- ["q"] = "close",
                                 -- ["i"] = "focus_input",
                                 -- ["<a-w>"] = "cycle_win",
-                                ["<Tab>"] = "cycle_win",
                             },
                         },
                     },
@@ -905,91 +931,6 @@ return {
                 },
             },
         },
-    },
-
-    {
-        "kevinhwang91/nvim-ufo",
-        cmd = {
-            "UfoEnable",
-            "UfoDisable",
-            "UfoInspect",
-            "UfoAttach",
-            "UfoDetach",
-            "UfoEnableFold",
-            "UfoDisableFold",
-        },
-        dependencies = {
-            "kevinhwang91/promise-async",
-        },
-        enabled = not environment.is_vscode,
-        event = {
-            "User IceLoad",
-        },
-        keys = {
-            { "zR", function() require("ufo").openAllFolds() end,               desc = "Open all folds",          mode = "n" },
-            { "zM", function() require("ufo").closeAllFolds() end,              desc = "Close all folds",         mode = "n" },
-            { "zr", function() require("ufo").openFoldsExceptKinds() end,       desc = "Open folds except kinds", mode = "n" },
-            { "zm", function() require("ufo").closeFoldsWith() end,             desc = "Close folds with",        mode = "n" },
-            { "zK", function() require("ufo").peekFoldedLinesUnderCursor() end, desc = "Peek fold",               mode = "n" },
-        },
-        opts = {
-            fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate)
-                local newVirtText = {}
-                local suffix = (" 󰁂 %d "):format(endLnum - lnum)
-                local sufWidth = vim.fn.strdisplaywidth(suffix)
-                local targetWidth = width - sufWidth
-                local curWidth = 0
-                for _, chunk in ipairs(virtText) do
-                    local chunkText = chunk[1]
-                    local chunkWidth = vim.fn.strdisplaywidth(chunkText)
-                    if targetWidth > curWidth + chunkWidth then
-                        newVirtText[#newVirtText + 1] = chunk
-                    else
-                        chunkText = truncate(chunkText, targetWidth - curWidth)
-                        local hlGroup = chunk[2]
-                        newVirtText[#newVirtText + 1] = { chunkText, hlGroup }
-                        chunkWidth = vim.fn.strdisplaywidth(chunkText)
-                        -- str width returned from truncate() may less than 2nd argument, need padding
-                        if curWidth + chunkWidth < targetWidth then
-                            suffix = suffix .. (" "):rep(targetWidth - curWidth - chunkWidth)
-                        end
-                        break
-                    end
-                    curWidth = curWidth + chunkWidth
-                end
-                newVirtText[#newVirtText + 1] = { suffix, "MoreMsg" }
-                return newVirtText
-            end,
-            preview = {
-                win_config = {
-                    winblend = 0,
-                },
-                mappings = {
-                    -- scrollB = "",
-                    -- scrollF = "",
-                    -- scrollU = "",
-                    -- scrollD = "",
-                    scrollU = "<c-u>",
-                    scrollD = "<c-d>",
-                    -- scrollE = "<C-E>",
-                    -- scrollY = "<C-Y>",
-                    -- jumpTop = "",
-                    -- jumpBot = "",
-                    -- close = "q",
-                    -- switch = "<Tab>",
-                    -- trace = "<CR>",
-                },
-            },
-        },
-    },
-
-    {
-        "mbbill/fencview",
-        cmd = {
-            "FencAutoDetect",
-            "FencView",
-        },
-        enabled = not environment.is_vscode,
     },
 
     {

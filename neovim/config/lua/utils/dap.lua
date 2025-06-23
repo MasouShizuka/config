@@ -1,12 +1,14 @@
+local environment = require("utils.environment")
 local path = require("utils.path")
 local utils = require("utils")
 
 local M = {}
 
 ---@class dap_info
----@field config? fun(mason_nvim_dap: any): fun(config: any)
+---@field config? fun(mason_nvim_dap: any):fun(config: any)
 ---@field download? boolean|fun():boolean
 ---@field enable? boolean|fun():boolean
+---@field mason? string|{ version?:string, auto_update?:boolean, condition?:fun():boolean }
 
 ---@type table<string, dap_info>
 local dap_list = {
@@ -14,22 +16,20 @@ local dap_list = {
         config = function(mason_nvim_dap)
             return function(config)
                 local command = path.mason_install_root_path .. "/packages/codelldb/extension/adapter/codelldb"
+                local cwd = vim.fn.getcwd()
                 local detached = true
                 if require("utils.environment").is_windows then
                     command = command .. ".exe"
+                    cwd = cwd:gsub("\\", "/")
                     detached = false
                 end
 
                 config.adapters = {
-                    type = "server",
-                    port = "${port}",
-                    executable = {
-                        -- CHANGE THIS to your path!
-                        command = command,
-                        args = { "--port", "${port}" },
-                        -- On windows you may have to uncomment this:
-                        detached = detached,
-                    },
+                    type = "executable",
+                    command = command, -- or if not in $PATH: "/absolute/path/to/codelldb"
+
+                    -- On windows you may have to uncomment this:
+                    detached = detached,
                 }
 
                 config.configurations = {
@@ -38,7 +38,7 @@ local dap_list = {
                         type = "codelldb",
                         request = "launch",
                         program = function()
-                            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+                            return vim.fn.input("Path to executable: ", cwd .. "/", "file")
                         end,
                         cwd = "${workspaceFolder}",
                         stopOnEntry = false,
@@ -48,8 +48,8 @@ local dap_list = {
                 mason_nvim_dap.default_setup(config)
             end
         end,
-        download = true,
-        enable = function() return vim.fn.executable("gcc") == 1 end,
+        download = environment.is_gcc_exist or environment.is_clang_exist,
+        enable = environment.is_gcc_exist or environment.is_clang_exist,
     },
     python = {
         config = function(mason_nvim_dap)
@@ -59,6 +59,7 @@ local dap_list = {
                     if require("utils.environment").is_windows then
                         adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
                     end
+
                     if config.request == "attach" then
                         ---@diagnostic disable-next-line: undefined-field
                         local port = (config.connect or config).port
@@ -82,74 +83,62 @@ local dap_list = {
                             },
                         }
                     end
-                end
 
-                local python_path
-                if not utils.is_available("nvim-dap-python") then
-                    python_path = path.python_path
-                    local python_envs_path = path.get_python_envs_path()
-                    if python_envs_path then
-                        python_path = python_envs_path
-                    end
-                end
+                    config.configurations = {
+                        {
+                            -- The first three options are required by nvim-dap
+                            type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
+                            request = "launch",
+                            name = "Launch file",
 
-                -- nvim-dap-python
-                config.configurations = {
-                    {
-                        type = "python",
-                        request = "launch",
-                        name = "file",
-                        program = "${file}",
-                        pythonPath = python_path,
-                    },
-                    {
-                        type = "python",
-                        request = "launch",
-                        name = "file:args",
-                        program = "${file}",
-                        args = function()
-                            local args_string = vim.fn.input("Arguments: ")
-                            local utils = require("dap.utils")
-                            if utils.splitstr and vim.fn.has("nvim-0.10") == 1 then
-                                return utils.splitstr(args_string)
-                            end
-                            return vim.split(args_string, " +")
-                        end,
-                        pythonPath = python_path,
-                    },
-                    {
-                        type = "python",
-                        request = "attach",
-                        name = "attach",
-                        connect = function()
-                            local host = vim.fn.input("Host [127.0.0.1]: ")
-                            host = host ~= "" and host or "127.0.0.1"
-                            local port = tonumber(vim.fn.input("Port [5678]: ")) or 5678
-                            return { host = host, port = port }
-                        end,
-                    },
-                    {
-                        type = "python",
-                        request = "launch",
-                        name = "file:doctest",
-                        module = "doctest",
-                        args = { "${file}" },
-                        noDebug = true,
-                        pythonPath = python_path,
-                    },
-                }
+                            -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
+
+                            program = "${file}", -- This configuration will launch the current file if used.
+                            pythonPath = function()
+                                -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+                                -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+                                -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+                                local cwd = vim.fn.getcwd()
+                                if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+                                    return cwd .. "/venv/bin/python"
+                                elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+                                    return cwd .. "/.venv/bin/python"
+                                else
+                                    local python_path = path.python_path
+                                    local python_envs_path = path.get_python_envs_path()
+                                    if python_envs_path then
+                                        python_path = python_envs_path
+                                    end
+                                    return python_path
+                                end
+                            end,
+                        },
+                    }
+                end
 
                 mason_nvim_dap.default_setup(config)
             end
         end,
-        download = true,
-        enable = function() return vim.fn.executable("python") == 1 end,
+        download = environment.is_python_exist,
+        enable = environment.is_python_exist,
+        mason = "debugpy",
     },
 }
 
+M.dap_list_for_mason = {}
 M.dap_config = {}
-M.dap_list = {}
 for dap, info in pairs(dap_list) do
+    local download = info.download
+    if download == nil then
+        download = true
+    end
+    if type(download) == "function" then
+        download = download()
+    end
+    if download then
+        M.dap_list_for_mason[#M.dap_list_for_mason + 1] = info.mason or dap
+    end
+
     local enable = info.enable
     if enable == nil then
         enable = true
@@ -162,17 +151,6 @@ for dap, info in pairs(dap_list) do
             return function(config)
                 mason_nvim_dap[dap].default_setup(vim.tbl_deep_extend("force", default_config, {}))
             end
-        end
-
-        local download = info.download
-        if download == nil then
-            download = true
-        end
-        if type(download) == "function" then
-            download = download()
-        end
-        if download then
-            M.dap_list[#M.dap_list + 1] = dap
         end
     end
 end

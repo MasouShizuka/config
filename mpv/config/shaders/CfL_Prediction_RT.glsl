@@ -28,6 +28,23 @@
 //!TYPE float
 0.0
 
+//!PARAM SMTH
+//!TYPE int
+//!MINIMUM 0
+//!MAXIMUM 1
+1
+
+//!PARAM distance_coeff
+//!TYPE float
+//!MINIMUM 0.0
+2.0
+
+//!PARAM intensity_coeff
+//!TYPE float
+//!MINIMUM 0.0
+128.0
+
+
 //!HOOK CHROMA
 //!BIND LUMA
 //!BIND CHROMA
@@ -314,20 +331,11 @@ vec4 hook() {
     return output_pix;
 }
 
-//!PARAM distance_coeff
-//!TYPE float
-//!MINIMUM 0.0
-2.0
-
-//!PARAM intensity_coeff
-//!TYPE float
-//!MINIMUM 0.0
-128.0
-
 //!HOOK CHROMA
 //!BIND CHROMA
 //!BIND LUMA
 //!DESC [CfL_Prediction_RT] (Smoothing Chroma)
+//!WHEN SMTH 0 >
 
 float comp_w(vec2 spatial_distance, float intensity_distance) {
     return max(100.0 * exp(-distance_coeff * pow(length(spatial_distance), 2.0) - intensity_coeff * pow(intensity_distance, 2.0)), 1e-32);
@@ -352,3 +360,4 @@ vec4 hook() {
     output_pix.xy = clamp(ct / wt, 0.0, 1.0);
     return output_pix;
 }
+

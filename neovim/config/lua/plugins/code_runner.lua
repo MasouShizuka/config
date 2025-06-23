@@ -25,7 +25,8 @@ return {
                 utils.create_once_autocmd("User", {
                     callback = function()
                         require("which-key").add({
-                            { "<leader>o", group = "overseer", mode = "n" },
+                            { "<leader>o",  group = "overseer",        mode = "n" },
+                            { "<leader>oB", group = "overseer bundle", mode = "n" },
                         })
                     end,
                     desc = "Register which-key for overseer",

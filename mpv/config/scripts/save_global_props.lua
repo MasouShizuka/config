@@ -12,24 +12,57 @@ COMMIT_ 20220811 03cfc0e39682a73d9d24a6e01a3c02716a019d1d
 
 ]]
 
-local mp = require("mp")
-local options = require("mp.options")
-local utils = require("mp.utils")
+local mp = require "mp"
+mp.options = require "mp.options"
+mp.utils = require "mp.utils"
 
 local opt = {
-	save_mode = 1,                     -- <0|1|2>
+	load = true,
+
+	save_mode = 1,                     -- <1|2>
 	props     = "volume,mute",
 	dup_block = false,
 	cache_dir = "~~/"
 }
-options.read_options(opt)
+mp.options.read_options(opt)
 
-if opt.save_mode == 0 then
-	mp.msg.info("已手动禁用 全局属性保存恢复")
+if opt.load == false then
+	mp.msg.info("脚本已被初始化禁用")
 	return
 end
+-- 原因：首个添加 --watch-later-options 选项的版本
+local min_major = 0
+local min_minor = 34
+local min_patch = 0
+local mpv_ver_curr = mp.get_property_native("mpv-version", "unknown")
+local function incompat_check(full_str, tar_major, tar_minor, tar_patch)
+	if full_str == "unknown" then
+		return true
+	end
 
---opt.props = "volume,mute,speed"
+	local clean_ver_str = full_str:gsub("^[^%d]*", "")
+	local major, minor, patch = clean_ver_str:match("^(%d+)%.(%d+)%.(%d+)")
+	major = tonumber(major)
+	minor = tonumber(minor)
+	patch = tonumber(patch or 0)
+	if major < tar_major then
+		return true
+	elseif major == tar_major then
+		if minor < tar_minor then
+			return true
+		elseif minor == tar_minor then
+			if patch < tar_patch then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+if incompat_check(mpv_ver_curr, min_major, min_minor, min_patch) then
+	mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止缩略图功能。")
+	return
+end
 
 local function split(inputstr, sep)
 	local result = {}
@@ -66,7 +99,7 @@ local data_file_path = (mp.command_native({"expand-path", opt.cache_dir .. "save
 
 local function read_data_file()
 	local json_file = io.open(data_file_path, "a+")
-	local result = utils.parse_json(json_file:read("*all"))
+	local result = mp.utils.parse_json(json_file:read("*all"))
 	if result == nil then
 		result = {}
 	end
@@ -85,7 +118,7 @@ local function save_data_file()
 	if file == nil then
 		return
 	end
-	local content, ret = utils.format_json(saved_data)
+	local content, ret = mp.utils.format_json(saved_data)
 	if ret ~= error and content ~= nil then
 		file:write(content)
 	end

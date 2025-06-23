@@ -91,7 +91,7 @@ return {
         },
     },
 
-    -- NOTE: 需要安装 C 编译器，例如 msys2 中的 mingw-w64-ucrt-x86_64-gcc
+    -- NOTE: 需要安装 C 编译器，例如 msys2 中的 mingw-w64-ucrt-x86_64-gcc 或 mingw-w64-ucrt-x86_64-clang
     -- msys2 中自带的 gcc 编译的 parser 会使得 neovim 闪退
     {
         "nvim-treesitter/nvim-treesitter",

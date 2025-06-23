@@ -79,21 +79,6 @@ fi
 
 # ╰───────────────────────────────────────────────── neovim ─╯
 
-# ╭─ starship ───────────────────────────────────────────────╮
-
-if [[ ! -x "$(command -v starship)" ]]; then
-    curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir "$INSTALL_DIR"
-fi
-
-src="$DIR/starship/config"
-des="$HOME/.config/starship"
-if [[ -d "$src" ]]; then
-    clean_target "$des"
-    install_to_target "$src" "$des"
-fi
-
-# ╰─────────────────────────────────────────────── starship ─╯
-
 # ╭─ yazi ───────────────────────────────────────────────────╮
 
 if [[ ! -x "$(command -v yazi)" ]]; then

@@ -4,8 +4,6 @@ patch:
       ascii_mode: true
     devecostudio64.exe:
       ascii_mode: true
-    neovide.exe:
-      ascii_mode: true
     wezterm-gui.exe:
       ascii_mode: true
     windowsterminal.exe:

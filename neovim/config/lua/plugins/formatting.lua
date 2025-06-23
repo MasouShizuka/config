@@ -97,6 +97,9 @@ return {
         cmd = {
             "ConformInfo",
         },
+        dependencies = {
+            "williamboman/mason.nvim",
+        },
         enabled = not environment.is_vscode and environment.format_enable,
         init = function()
             local utils = require("utils")
@@ -209,9 +212,7 @@ return {
         opts = function()
             local formatters = {}
             for formatter, config in pairs(require("utils.format").format_config) do
-                if config then
-                    formatters[formatter] = config
-                end
+                formatters[formatter] = config
             end
 
             return {

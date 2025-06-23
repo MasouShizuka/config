@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/player/lua/stats.lua
-COMMIT_ f676a9ff201d18c3741e223e626874dc986f9819
+COMMIT_ bff0d59cbeea205f4a27f205b8e972b3238f3c36
 文档_ stats.conf
 
 mpv.conf的前置条件 --load-stats-overlay=no
@@ -42,15 +42,10 @@ local mp = require 'mp'
 local utils = require 'mp.utils'
 local input = require 'mp.input'
 
-mp.observe_property("load-stats-overlay", "bool", function(_, value)
-    if value == true then
-        mp.set_property("load-stats-overlay", "no")
-        mp.msg.info("请以 --load-stats-overlay=no 启动mpv以避免部分脚本联动的功能无效")
-    end
-end)
-
 -- Options
 local o = {
+    load = true,
+
     -- Default key bindings
     key_page_1 = "1",
     key_page_2 = "2",
@@ -77,9 +72,10 @@ local o = {
     debug = false,
 
     -- Graph options and style
-    plot_perfdata = true,
-    plot_vsync_ratio = true,
-    plot_vsync_jitter = true,
+    plot_perfdata = false,
+    plot_vsync_ratio = false,
+    plot_vsync_jitter = false,
+    plot_cache = true,
     plot_tonemapping_lut = false,
     skip_frames = 5,
     global_max = true,
@@ -131,6 +127,51 @@ local o = {
 local update_scale
 require "mp.options".read_options(o, nil, function ()
     update_scale()
+end)
+
+if o.load == false then
+    mp.msg.info("脚本已被初始化禁用")
+    return
+end
+-- 原因：与上游同步
+local min_major = 0
+local min_minor = 40
+local min_patch = 0
+local mpv_ver_curr = mp.get_property_native("mpv-version", "unknown")
+local function incompat_check(full_str, tar_major, tar_minor, tar_patch)
+    if full_str == "unknown" then
+        return true
+    end
+
+    local clean_ver_str = full_str:gsub("^[^%d]*", "")
+    local major, minor, patch = clean_ver_str:match("^(%d+)%.(%d+)%.(%d+)")
+    major = tonumber(major)
+    minor = tonumber(minor)
+    patch = tonumber(patch or 0)
+    if major < tar_major then
+        return true
+    elseif major == tar_major then
+        if minor < tar_minor then
+            return true
+        elseif minor == tar_minor then
+            if patch < tar_patch then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+if incompat_check(mpv_ver_curr, min_major, min_minor, min_patch) then
+    mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止缩略图功能。")
+    return
+end
+
+mp.observe_property("load-stats-overlay", "bool", function(_, value)
+    if value == true then
+        mp.set_property("load-stats-overlay", "no")
+        mp.msg.warn("请以 --load-stats-overlay=no 启动mpv，以避免部分脚本联动的功能无效。")
+    end
 end)
 
 local format = string.format
@@ -1390,7 +1431,7 @@ local function cache_stats()
     end
 
     local r_graph = nil
-    if not display_timer.oneshot and o.use_ass then
+    if not display_timer.oneshot and o.use_ass and o.plot_cache then
         r_graph = generate_graph(cache_ahead_buf, cache_ahead_buf.pos,
                                  cache_ahead_buf.len, cache_ahead_buf.max,
                                  nil, 0.8, 1)
@@ -1415,7 +1456,7 @@ local function cache_stats()
 
     local speed = info["raw-input-rate"] or 0
     local speed_graph = nil
-    if not display_timer.oneshot and o.use_ass then
+    if not display_timer.oneshot and o.use_ass and o.plot_cache then
         speed_graph = generate_graph(cache_speed_buf, cache_speed_buf.pos,
                                      cache_speed_buf.len, cache_speed_buf.max,
                                      nil, 0.8, 1)

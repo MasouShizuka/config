@@ -22,5 +22,6 @@
   "HideUninstallers": false,
   "EnableRegistrySource": true,
   "EnablePathSource": false,
-  "EnableUWP": true
+  "EnableUWP": true,
+  "HideDuplicatedWindowsApp": false
 }

@@ -10,14 +10,6 @@ return {
     },
 
     {
-        dir = path.config_path .. "/lua/config/neovide",
-        enabled = environment.is_neovide,
-        lazy = false,
-        name = "config.neovide",
-        opts = {},
-    },
-
-    {
         dir = path.config_path .. "/lua/config/mappings",
         event = {
             "VeryLazy",
@@ -30,7 +22,7 @@ return {
         dir = path.config_path .. "/lua/config/autocommands/colorscheme-persist",
         enabled = not environment.is_vscode,
         event = {
-            "UIEnter"
+            "UIEnter",
         },
         name = "config.autocommands.colorscheme-persist",
         opts = {},
@@ -207,6 +199,35 @@ return {
             { "<leader>cdp", function() require("diff").diff_with_previous_tab() end, desc = "Diff with previous tab", mode = "n" },
         },
         name = "config.user_commands.diff",
+        opts = {},
+    },
+
+    {
+        cmd = {
+            "FencAutoDetect",
+            "FencView",
+        },
+        init = function()
+            local utils = require("utils")
+            if utils.is_available("which-key.nvim") then
+                utils.create_once_autocmd("User", {
+                    callback = function()
+                        require("which-key").add({
+                            { "<leader>cf", group = "fencview", mode = "n" },
+                        })
+                    end,
+                    desc = "Register which-key for fencview",
+                    pattern = "IceLoad",
+                })
+            end
+        end,
+        keys = {
+            { "<leader>cff", function() require("fencview").autodetect() end,  desc = "Auto detect encoding", mode = "n" },
+            { "<leader>cfv", function() require("fencview").toggle_view() end, desc = "Toggle encoding",      mode = "n" },
+        },
+        dir = path.config_path .. "/lua/config/user_commands/fencview",
+        enabled = not environment.is_vscode,
+        name = "config.user_commands.fencview",
         opts = {},
     },
 

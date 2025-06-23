@@ -1,0 +1,88 @@
+{
+  "Commands": [
+    {
+      "Key": "Shutdown",
+      "Keyword": "Shutdown"
+    },
+    {
+      "Key": "Restart",
+      "Keyword": "Restart"
+    },
+    {
+      "Key": "Restart With Advanced Boot Options",
+      "Keyword": "Restart With Advanced Boot Options"
+    },
+    {
+      "Key": "Log Off/Sign Out",
+      "Keyword": "Log Off/Sign Out"
+    },
+    {
+      "Key": "Lock",
+      "Keyword": "Lock"
+    },
+    {
+      "Key": "Sleep",
+      "Keyword": "Sleep"
+    },
+    {
+      "Key": "Hibernate",
+      "Keyword": "Hibernate"
+    },
+    {
+      "Key": "Index Option",
+      "Keyword": "Index Option"
+    },
+    {
+      "Key": "Empty Recycle Bin",
+      "Keyword": "Empty Recycle Bin"
+    },
+    {
+      "Key": "Open Recycle Bin",
+      "Keyword": "Open Recycle Bin"
+    },
+    {
+      "Key": "Exit",
+      "Keyword": "Exit"
+    },
+    {
+      "Key": "Save Settings",
+      "Keyword": "Save Settings"
+    },
+    {
+      "Key": "Restart Flow Launcher",
+      "Keyword": "Restart Flow Launcher"
+    },
+    {
+      "Key": "Settings",
+      "Keyword": "Settings"
+    },
+    {
+      "Key": "Reload Plugin Data",
+      "Keyword": "Reload Plugin Data"
+    },
+    {
+      "Key": "Check For Update",
+      "Keyword": "Check For Update"
+    },
+    {
+      "Key": "Open Log Location",
+      "Keyword": "Open Log Location"
+    },
+    {
+      "Key": "Flow Launcher Tips",
+      "Keyword": "Flow Launcher Tips"
+    },
+    {
+      "Key": "Flow Launcher UserData Folder",
+      "Keyword": "Flow Launcher UserData Folder"
+    },
+    {
+      "Key": "Toggle Game Mode",
+      "Keyword": "Toggle Game Mode"
+    },
+    {
+      "Key": "Set Flow Launcher Theme",
+      "Keyword": "Set Flow Launcher Theme"
+    }
+  ]
+}

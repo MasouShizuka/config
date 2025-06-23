@@ -46,6 +46,4 @@
     userprofile=$(wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')")
     rm $HOME/.bashrc
     ln -s "$userprofile/.bashrc" "$HOME/.bashrc"
-    rm $HOME/.bash_profile
-    ln -s "$userprofile/.bash_profile" "$HOME/.bash_profile"
     ```

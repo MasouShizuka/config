@@ -19,6 +19,7 @@ M.skip_filetype_list = {
     "dapui_watches",
     "dapui_console",
     "edgy",
+    "fencview",
     "lazy",
     "mason",
     "minimap",
@@ -45,7 +46,7 @@ M.skip_filetype_list_to_main = {
     "dapui_watches",
     "dapui_console",
     "edgy",
-    "help",
+    "fencview",
     "minimap",
     "noice",
     "OverseerForm",
@@ -70,7 +71,7 @@ M.skip_filetype_list_of_panel = {
     "dapui_watches",
     "dapui_console",
     "edgy",
-    "help",
+    "fencview",
     "minimap",
     "noice",
     "OverseerForm",
@@ -202,8 +203,9 @@ M.right_panel_filetype_list = {
     ["edgy"] = {
         close = true,
     },
-    ["help"] = {
-        close = true,
+    ["fencview"] = {
+        close = function() vim.api.nvim_command("FencView") end,
+        open = function() vim.api.nvim_command("FencView") end,
     },
     ["OverseerList"] = {
         close = function() vim.api.nvim_command("OverseerClose") end,

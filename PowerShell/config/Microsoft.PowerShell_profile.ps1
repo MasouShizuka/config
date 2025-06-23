@@ -146,30 +146,6 @@ if (Get-Command "sfsu" -ErrorAction SilentlyContinue) {
 # ╰─────────────────────────────────────────────────── sfsu ─╯
 
 
-# ╭─ starship ───────────────────────────────────────────────╮
-
-if (Get-Command "starship" -ErrorAction SilentlyContinue) {
-    $env:STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
-    Invoke-Expression (&starship init powershell)
-
-    # OSC 7 on Windows with powershell (with starship)
-    if ($env:TERM_PROGRAM -eq "WezTerm") {
-        $prompt=""
-        function Invoke-Starship-PreCommand {
-            $current_location=$executionContext.SessionState.Path.CurrentLocation
-            if ($current_location.Provider.Name -eq "FileSystem") {
-                $ansi_escape=[char]27
-                $provider_path=$current_location.ProviderPath -replace "\\", "/"
-                $prompt="$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
-            }
-            $host.ui.Write($prompt)
-        }
-    }
-}
-
-# ╰─────────────────────────────────────────────── starship ─╯
-
-
 # ╭─ yazi ───────────────────────────────────────────────────╮
 
 if (Get-Command "yazi" -ErrorAction SilentlyContinue) {
@@ -192,8 +168,7 @@ if (Get-Command "yazi" -ErrorAction SilentlyContinue) {
 # │ Conda │
 # ╰───────╯
 
-$MAMBA_EXE="$HOME/scoop/apps/mambaforge/current/Library/bin/mamba.exe"
-if (Test-Path "$MAMBA_EXE") {
-    $Env:MAMBA_EXE="$MAMBA_EXE"
-    (& $Env:MAMBA_EXE 'shell' 'hook' -s 'powershell') | Out-String | Invoke-Expression
+$CONDA_EXE="$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe"
+If (Test-Path "$CONDA_EXE") {
+    (& "$CONDA_EXE" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression
 }

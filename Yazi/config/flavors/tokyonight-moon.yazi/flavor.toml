@@ -2,7 +2,7 @@
 
 # : Manager {{{
 
-[manager]
+[mgr]
 cwd = { fg = "#828bb8", italic = true }
 
 # Hovered
@@ -22,11 +22,6 @@ marker_cut      = { fg = "#ff757f", bg = "#ff757f" }
 marker_marked   = { fg = "#c099ff", bg = "#c099ff" }
 marker_selected = { fg = "#82aaff", bg = "#82aaff" }
 
-# Tab
-tab_active   = { fg = "#c8d3f5", bg = "#2f334d" }
-tab_inactive = { fg = "#3b4261", bg = "#222436" }
-tab_width    = 1
-
 # Count
 count_copied   = { fg = "#c8d3f5", bg = "#41a6b5" }
 count_cut      = { fg = "#c8d3f5", bg = "#c53b53" }
@@ -38,6 +33,19 @@ border_style  = { fg = "#589ed7" }
 
 # Highlighting
 syntect_theme = ""
+
+# : }}}
+
+
+# : Tabs {{{
+
+[tabs]
+active   = { fg = "#c8d3f5", bg = "#2f334d" }
+inactive = { fg = "#3b4261", bg = "#222436" }
+
+# Separator
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
 
 # : }}}
 

@@ -1,11 +1,9 @@
 ﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F,Ctrl+P" Type="Tools">Search</All><All Key="Ctrl+Shift+P" Type="Addon switcher">preview</All><All Key="$2034" Type="Add-ons">Switch hidden items</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Inner Filter Bar</List><List Key="A" Type="Background">.txt</List><List Key="Shift+A" Type="Background">NewFolder</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">copy</List><List Key="X" Type="Context">cut</List><List Key="P" Type="Background">paste</List><List Key="D" Type="Context">delete</List><List Key="S" Type="Context">undelete</List><List Key="E" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
 const path = (FV.FocusedItem || FV.FolderItem).Path;
 if (api.PathIsDirectory(path)) {
-    // cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
-    cmd = "neovide -- --cmd " + "\"cd " + path + "\"";
+    cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
 } else {
-    // cmd = "wezterm start --cwd \"" + current_dir + "\" -- nvim " + "\"" + path + "\"";
-    cmd = "neovide " + "\"" + path + "\"";
+    cmd = "wezterm start --cwd \"" + current_dir + "\" -- nvim " + "\"" + path + "\"";
 }
 api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">Open with &amp;Code</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
     FV.SelectItem(0, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);

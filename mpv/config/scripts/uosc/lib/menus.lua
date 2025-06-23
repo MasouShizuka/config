@@ -392,7 +392,7 @@ function open_file_navigation_menu(directory_path, handle_activate, opts)
 			local items, selected_index = {}, 1
 
 			if process.status == 0 then
-				for drive in process.stdout:gmatch("(%a:)\\") do
+				for drive in process.stdout:gmatch('(%a:)\\') do
 					if drive then
 						local drive_path = normalize_path(drive)
 						items[#items + 1] = {
@@ -664,7 +664,8 @@ do
 						-- If command is already in menu, just append the key to it
 						if key ~= '#' and command ~= '' and target_menu.items_by_command[command] then
 							local hint = target_menu.items_by_command[command].hint
-							target_menu.items_by_command[command].hint = hint and hint .. ', ' .. key or key
+							local key_human = keybind_to_human(key)
+							target_menu.items_by_command[command].hint = hint and hint .. ', ' .. key_human or key_human
 						else
 							-- Separator
 							if title_part:sub(1, 3) == '---' then
@@ -673,7 +674,7 @@ do
 							elseif command ~= 'ignore' then
 								local item = {
 									title = title_part,
-									hint = not is_dummy and key or nil,
+									hint = not is_dummy and keybind_to_human(key) or nil,
 									value = command,
 								}
 								if command == '' then
@@ -712,7 +713,7 @@ function get_keybinds_items()
 		local id = bind.key .. '<>' .. bind.cmd
 		if not ids[id] then
 			ids[id] = true
-			items[#items + 1] = {title = bind.cmd, hint = bind.key, value = bind.cmd}
+			items[#items + 1] = {title = bind.cmd, hint = keybind_to_human(bind.key) or bind.key, value = bind.cmd}
 		end
 	end
 

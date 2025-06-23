@@ -17,30 +17,22 @@ return {
 
         local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
         if ft == "cpp" then
-            cmd = "rm"
-            args = { "./" .. output }
+            cmd = "./" .. output
             components = {
                 {
                     "dependencies",
                     task_names = {
                         {
-                            cmd = "g++",
+                            cmd = "clang++",
                             args = {
                                 "-static-libstdc++",
                                 curr_file,
                                 "-o",
                                 output,
+                                "-g",
                             },
                             components = {
                                 { "on_complete_notify", statuses = { "FAILURE" } },
-                                "default",
-                            },
-                        },
-                        {
-                            cmd = "./" .. output,
-                            components = {
-                                { "on_complete_notify", statuses = { "FAILURE" } },
-                                { "open_output",        on_start = "never",      on_complete = "always" },
                                 "default",
                             },
                         },
@@ -48,6 +40,7 @@ return {
                     sequential = true,
                 },
                 { "on_complete_notify", statuses = { "FAILURE" } },
+                { "open_output",        on_start = "never",      on_complete = "always" },
                 "default",
             }
         elseif ft == "lua" then
@@ -101,7 +94,7 @@ return {
                 "default",
             }
             if vim.tbl_contains(require("utils.lsp").lsp_list, "texlab") then
-                vim.api.nvim_command("TexlabBuild")
+                vim.api.nvim_command("LspTexlabBuild")
             end
         end
 

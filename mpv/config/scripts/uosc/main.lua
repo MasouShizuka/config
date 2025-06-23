@@ -1,12 +1,12 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ 3375a5e0171e9633470cbfff7e6ebe56382843f5
+COMMIT_ b55134f50c0546ac368e3d5ae645c13551fba8e1
 文档_ https://github.com/hooke007/MPV_lazy/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
 ]]
 
-local uosc_version = '5.8.0'
+local uosc_version = '5.9.2'
 
 mp.commandv('script-message', 'uosc-version', uosc_version)
 
@@ -36,7 +36,7 @@ defaults = {
 	timeline_persistency = 'idle,audio',
 
 	controls =
-	'menu,ST-stats_tog,gap,play_pause,gap,subtitles,audio,<has_chapter>chapters,<has_many_edition>editions,<has_many_video>video,<stream>stream-quality,gap,space,speed,space,shuffle,loop-playlist,loop-file,gap,prev,items,next,gap,fullscreen',
+	'menu,ST-stats_tog,ST-thumb_tog,gap,play_pause,gap,subtitles,audio,<has_chapter>chapters,<has_many_edition>editions,<has_many_video>video,<stream>stream-quality,gap,space,speed,space,shuffle,loop-playlist,loop-file,gap,prev,items,next,gap,fullscreen',
 	controls_size = 32,
 	controls_margin = 8,
 	controls_spacing = 2,
@@ -81,8 +81,6 @@ defaults = {
 	opacity = '',
 	animation_duration = 100,
 	refine = 'text_width,sorting',
-	click_threshold = 0,
-	click_command = 'cycle pause; script-binding uosc/flash-pause-indicator',
 	flash_duration = 1000,
 	proximity_in = 40,
 	proximity_out = 120,
@@ -365,7 +363,7 @@ end
 
 --[[ STATE ]]
 
-display = {width = 1280, height = 720, initialized = false}
+display = {ax = 0, ay = 0, bx = 1280, by = 720, width = 1280, height = 720, initialized = false}
 cursor = require('lib/cursor')
 state = {
 	platform = (function()
@@ -388,10 +386,11 @@ state = {
 	speed = 1,
 	---@type number|nil
 	duration = nil, -- current media duration
+	max_seconds = nil, -- max seconds the time in timeline is expected to reach, accounted for speed
 	time_human = nil, -- current playback time in human format
 	destination_time_human = nil, -- depends on options.destination_time
 	pause = mp.get_property_native('pause'),
-	ime_active = mp.get_property_native("input-ime"),
+	ime_active = mp.get_property_native('input-ime'),
 	chapters = {},
 	---@type {index: number; title: string}|nil
 	current_chapter = nil,
@@ -403,8 +402,8 @@ state = {
 	fullormaxed = mp.get_property_native('fullscreen') or mp.get_property_native('window-maximized'),
 	render_timer = nil,
 	render_last_time = 0,
-	volume = nil,
-	volume_max = nil,
+	volume = mp.get_property_native('volume'),
+	volume_max = mp.get_property_native('volume-max'),
 	mute = nil,
 	type = nil, -- video,image,audio
 	is_idle = false,
@@ -479,7 +478,7 @@ function update_display_dimensions()
 	end
 
 	state.radius = round(options.border_radius * state.scale)
-	display.width, display.height = real_width, real_height
+	display.bx, display.width, display.by, display.height = real_width, real_width, real_height, real_height
 	display.initialized = true
 
 	-- Tell elements about this
@@ -507,20 +506,18 @@ end
 function update_human_times()
 	state.speed = state.speed or 1
 	if state.time then
-		local max_seconds = state.duration
 		if state.duration then
 			if options.destination_time == 'playtime-remaining' then
-				max_seconds = state.speed >= 1 and state.duration or state.duration / state.speed
-				state.destination_time_human = format_time((state.time - state.duration) / state.speed, max_seconds)
+				state.destination_time_human = format_time((state.time - state.duration) / state.speed, state.duration)
 			elseif options.destination_time == 'total' then
-				state.destination_time_human = format_time(state.duration, max_seconds)
+				state.destination_time_human = format_time(state.duration, state.duration)
 			else
-				state.destination_time_human = format_time(state.time - state.duration, max_seconds)
+				state.destination_time_human = format_time(state.time - state.duration, state.duration)
 			end
 		else
 			state.destination_time_human = nil
 		end
-		state.time_human = format_time(state.time, max_seconds)
+		state.time_human = format_time(state.time, state.duration or state.time)
 	else
 		state.time_human, state.destination_time_human = nil, nil
 	end
@@ -661,31 +658,6 @@ function select_current_chapter()
 end
 
 --[[ STATE HOOKS ]]
-
--- Click detection
-if options.click_threshold > 0 then
-	-- Executes custom command for clicks shorter than `options.click_threshold`
-	-- while filtering out double clicks.
-	local click_time = options.click_threshold / 1000
-	local doubleclick_time = mp.get_property_native('input-doubleclick-time') / 1000
-	local last_down, last_up = 0, 0
-	local click_timer = mp.add_timeout(math.max(click_time, doubleclick_time), function()
-		local delta = last_up - last_down
-		if delta > 0 and delta < click_time and delta > 0.02 then mp.command(options.click_command) end
-	end)
-	click_timer:kill()
-	local function handle_up() last_up = mp.get_time() end
-	local function handle_down()
-		last_down = mp.get_time()
-		if click_timer:is_enabled() then click_timer:kill() else click_timer:resume() end
-	end
-	-- If this function exists, it'll be called at the beginning of render().
-	function setup_click_detection()
-		local hitbox = {ax = 0, ay = 0, bx = display.width, by = display.height, window_drag = true}
-		cursor:zone('primary_down', hitbox, handle_down)
-		cursor:zone('primary_up', hitbox, handle_up)
-	end
-end
 
 mp.observe_property('osc', 'bool', function(name, value) if value == true then mp.set_property('osc', 'no') end end)
 mp.register_event('file-loaded', function()

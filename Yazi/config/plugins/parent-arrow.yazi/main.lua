@@ -33,7 +33,7 @@ return {
         end
         local target = parent.files[target_index]
         if target and target.cha.is_dir then
-            ya.mgr_emit("cd", { target.url })
+            ya.emit("cd", { target.url })
         end
     end,
 }

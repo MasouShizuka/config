@@ -8,6 +8,7 @@ local default_config = {
     pre_hook = function() end,
     post_hook = function() end,
 }
+local config = vim.fn.deepcopy(default_config)
 
 local function stop_hl()
     if vim.v.hlsearch == 0 then
@@ -17,7 +18,7 @@ local function stop_hl()
     local keycode = vim.api.nvim_replace_termcodes("<cmd>nohl<cr>", true, false, true)
     vim.api.nvim_feedkeys(keycode, "n", false)
 
-    default_config.post_hook()
+    config.post_hook()
 end
 
 local function start_hl()
@@ -25,7 +26,7 @@ local function start_hl()
         return
     end
 
-    default_config.pre_hook()
+    config.pre_hook()
 
     local reg = vim.fn.getreg("/")
     if reg:find([[%#]], 1, true) then
@@ -40,7 +41,7 @@ local function start_hl()
             return
         end
     end, {
-        timeout = default_config.delay,
+        timeout = config.delay,
         use_timer = true,
     })
 end
@@ -62,7 +63,7 @@ local function hs_event()
 end
 
 M.setup = function(opts)
-    default_config = vim.tbl_deep_extend("force", default_config, opts or {})
+    config = vim.tbl_deep_extend("force", config, opts or {})
 
     hs_event()
 end

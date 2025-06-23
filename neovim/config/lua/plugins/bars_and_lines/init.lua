@@ -22,8 +22,10 @@ return {
 
 
             local git_flexible = { flexible = 2 }
+
             local git_branch = require("plugins.bars_and_lines.heirline.git").git_branch
             local git_status = require("plugins.bars_and_lines.heirline.git").git_status
+
             git_flexible = bhu.insert_with_child_condition(
                 git_flexible,
                 bhu.insert_with_child_condition({}, git_branch, git_status),
@@ -45,7 +47,12 @@ return {
             if utils.is_available("nvim-lint") then
                 lsp_flexible = bhu.insert_with_child_condition(
                     lsp_flexible,
-                    bhu.insert_with_child_condition({}, lsp_info, bhu.padding_before(require("plugins.bars_and_lines.heirline.lint")), diagnostic)
+                    bhu.insert_with_child_condition(
+                        {},
+                        lsp_info,
+                        bhu.padding_before(require("plugins.bars_and_lines.heirline.lint")),
+                        diagnostic
+                    )
                 )
             end
 
@@ -160,21 +167,17 @@ return {
     {
         "SmiteshP/nvim-navic",
         enabled = not environment.is_vscode and environment.lsp_enable,
-        init = function()
-            vim.api.nvim_create_autocmd("LspAttach", {
-                callback = function(args)
-                    local client = vim.lsp.get_client_by_id(args.data.client_id)
-                    if client:supports_method("textDocument/documentSymbol") then
-                        require("nvim-navic").attach(client, args.buf)
-                    end
-                end,
-            })
-        end,
-        lazy = true,
+        event = {
+            "LspAttach",
+        },
         opts = function()
             return {
                 icons = require("utils.icons").kinds,
                 lazy_update_content = true,
+                lsp = {
+                    auto_attach = true,
+                    preference = require("utils.lsp").lsp_list,
+                },
             }
         end,
     },

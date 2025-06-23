@@ -29,16 +29,14 @@
     "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
     "backgroundCover.opacity": 0.1,
     "code-runner.executorMap": {
-        "c": "cd $dirWithoutTrailingSlash && gcc -static-libgcc $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
-        "cpp": "cd $dirWithoutTrailingSlash && g++ -static-libstdc++ $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt",
-        "java": "cd $dirWithoutTrailingSlash && javac -encoding utf-8 $fileName && java $fileNameWithoutExt",
+        "c": "cd $dirWithoutTrailingSlash && clang -static-libgcc $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
+        "cpp": "cd $dirWithoutTrailingSlash && clang++ -static-libstdc++ $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
         "rust": "cargo run # $fileName",
         "shellscript": "cd $dirWithoutTrailingSlash && sh $fileName"
     },
     "code-runner.runInTerminal": true,
     "debug.console.fontSize": 16,
     "debug.showBreakpointsInOverviewRuler": true,
-    "diffEditor.diffAlgorithm": "advanced",
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.accessibilitySupport": "off",
     "editor.cursorBlinking": "solid",
@@ -54,44 +52,20 @@
     "editor.lineNumbers": "relative",
     "editor.linkedEditing": true,
     "editor.minimap.enabled": false,
-    "editor.minimap.renderCharacters": false,
-    "editor.minimap.showSlider": "always",
-    "editor.minimap.size": "fill",
     "editor.renderLineHighlight": "all",
     "editor.renderWhitespace": "trailing",
     "editor.scrollbar.vertical": "visible",
     "editor.showFoldingControls": "always",
-    "editor.stickyScroll.enabled": true,
     "editor.suggest.preview": true,
     "editor.suggest.showStatusBar": true,
     "editor.wrappingStrategy": "advanced",
     "explorer.confirmDragAndDrop": false,
-    "explorer.fileNesting.patterns": {
-        "*.db": "${capture}.${extname}-*",
-        "*.db3": "${capture}.${extname}-*",
-        "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
-        "*.jsx": "${capture}.js",
-        "*.s3db": "${capture}.${extname}-*",
-        "*.sdb": "${capture}.${extname}-*",
-        "*.sqlite": "${capture}.${extname}-*",
-        "*.sqlite3": "${capture}.${extname}-*",
-        "*.ts": "${capture}.js",
-        "*.tsx": "${capture}.ts",
-        "Cargo.toml": "Cargo.lock",
-        "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb",
-        "tsconfig.json": "tsconfig.*.json"
-    },
     "extensions.experimental.affinity": {
         "asvetliakov.vscode-neovim": 1
-    },
-    "files.associations": {
-        "*.txt": "plaintext"
     },
     "files.autoGuessEncoding": true,
     "files.autoSave": "afterDelay",
     "git.blame.editorDecoration.enabled": true,
-    "git.blame.statusBarItem.enabled": true,
-    "hediet.vscode-drawio.appearance": "light",
     "hediet.vscode-drawio.codeLinkActivated": true,
     "json.format.keepLines": true,
     "jupyter.askForKernelRestart": false,
@@ -191,6 +165,7 @@
         "quote_style": "double",
         "trailing_table_separator": "smart"
     },
+    "Lua.hint.enable": true,
     "markdown.extension.list.indentationSize": "inherit",
     "markdown.marp.browser": "chrome",
     "markdown.marp.browserPath": "C:\\Users\\MasouShizuka\\scoop\\apps\\brave\\current\\brave.exe",
@@ -234,8 +209,7 @@
     },
     "mdtableeditor.isHighlighterEnabled": false,
     "notebook.cellToolbarLocation": {
-        "default": "left",
-        "jupyter-notebook": "left"
+        "default": "left"
     },
     "notebook.displayOrder": [
         "image/png",
@@ -244,11 +218,8 @@
     "notebook.inlineValues": "on",
     "notebook.output.scrolling": true,
     "notebook.stickyScroll.enabled": true,
-    "oneDarkPro.italic": false,
     "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
     "python.analysis.inlayHints.pytestParameters": true,
-    "python.defaultInterpreterPath": "C:\\Users\\MasouShizuka\\miniconda3\\python.exe",
-    "python.languageServer": "Pylance",
     "python.terminal.shellIntegration.enabled": true,
     "search.defaultViewMode": "tree",
     "search.followSymlinks": false,
@@ -260,16 +231,13 @@
     ],
     "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
-    "terminal.integrated.defaultProfile.windows": "Pwsh",
+    "terminal.integrated.defaultProfile.windows": "Bash",
     "terminal.integrated.fontLigatures.enabled": true,
     "terminal.integrated.fontSize": 16,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.profiles.windows": {
-        "Pwsh": {
-            "args": [
-                "-NoLogo"
-            ],
-            "path": "pwsh.exe"
+        "Bash": {
+            "path": "ucrt64.cmd"
         }
     },
     "terminal.integrated.stickyScroll.enabled": true,
@@ -420,8 +388,8 @@
     "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
-        "{hexdiff}:/**/*.*": "hexEditor.hexedit",
         "{git,git-graph}:/**/*.{md,csv,svg}": "default",
+        "{hexdiff}:/**/*.*": "hexEditor.hexedit",
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
@@ -430,6 +398,5 @@
     "workbench.iconTheme": "material-icon-theme",
     "workbench.localHistory.enabled": false,
     "workbench.panel.showLabels": false,
-    "workbench.startupEditor": "none",
-    "workbench.tree.enableStickyScroll": true
+    "workbench.startupEditor": "none"
 }

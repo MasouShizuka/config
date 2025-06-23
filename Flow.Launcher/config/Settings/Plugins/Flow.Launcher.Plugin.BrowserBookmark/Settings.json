@@ -1,6 +1,7 @@
 {
   "OpenInNewBrowserWindow": true,
   "BrowserPath": null,
+  "EnableFavicons": false,
   "LoadChromeBookmark": false,
   "LoadFirefoxBookmark": false,
   "LoadEdgeBookmark": false,

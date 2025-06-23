@@ -1,3 +1,4 @@
+local environment = require("utils.environment")
 local path = require("utils.path")
 
 local M = {}
@@ -12,7 +13,7 @@ local M = {}
 local lint_list = {
     ["markdownlint-cli2"] = {
         config = {
-            args = {
+            append_args = {
                 "--config", path.package_config_path .. "/.markdownlint.yaml",
             },
         },
@@ -21,15 +22,13 @@ local lint_list = {
         filetype = { "markdown" },
     },
     ruff = {
-        download = true,
-        enable = function() return vim.fn.executable("python") == 1 end,
+        download = environment.is_python_exist,
+        enable = environment.is_python_exist,
         filetype = { "python" },
     },
     shellcheck = {
         config = {
-            args = {
-                "--format", "json",
-                "-",
+            append_args = {
                 "-e", "SC2148",
             },
         },
@@ -39,11 +38,22 @@ local lint_list = {
     },
 }
 
-M.lint_config = {}
 M.lint_list = {}
+M.lint_config = {}
 M.linters_by_ft = {}
 M.lint_filetype_list = {}
 for lint, info in pairs(lint_list) do
+    local download = info.download
+    if download == nil then
+        download = true
+    end
+    if type(download) == "function" then
+        download = download()
+    end
+    if download then
+        M.lint_list[#M.lint_list + 1] = lint
+    end
+
     local enable = info.enable
     if enable == nil then
         enable = true
@@ -53,17 +63,6 @@ for lint, info in pairs(lint_list) do
     end
     if enable then
         M.lint_config[lint] = info.config or {}
-
-        local download = info.download
-        if download == nil then
-            download = true
-        end
-        if type(download) == "function" then
-            download = download()
-        end
-        if download then
-            M.lint_list[#M.lint_list + 1] = lint
-        end
 
         local filetype = info.filetype or {}
         if type(filetype) == "string" then

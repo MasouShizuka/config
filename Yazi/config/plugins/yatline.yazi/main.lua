@@ -1,3 +1,4 @@
+--- @since 25.5.31
 --- @diagnostic disable: undefined-global, undefined-field
 --- @alias Mode Mode Comes from Yazi.
 --- @alias Rect Rect Comes from Yazi.
@@ -424,12 +425,20 @@ function Yatline.string.get:hovered_mime()
 end
 
 --- Gets the hovered file's user and group ownership of the current active tab.
+--- Unix-like systems only.
 --- @return string ownership Current active tab's hovered file's user and group ownership.
 function Yatline.string.get:hovered_ownership()
 	local hovered = cx.active.current.hovered
 
 	if hovered then
-		return ya.user_name(hovered.cha.uid) .. ":" .. ya.group_name(hovered.cha.gid)
+		if not hovered.cha.uid or not hovered.cha.gid then
+			return ""
+		end
+
+		local username = ya.user_name(hovered.cha.uid) or tostring(hovered.cha.uid)
+		local groupname = ya.group_name(hovered.cha.gid) or tostring(hovered.cha.gid)
+
+		return username .. ":" .. groupname
 	else
 		return ""
 	end
@@ -713,6 +722,7 @@ function Yatline.coloreds.create(coloreds, component_type)
 end
 
 --- Gets the hovered file's permissions of the current active tab.
+--- Unix-like systems only.
 --- @return Coloreds coloreds Current active tab's hovered file's permissions
 function Yatline.coloreds.get:permissions()
 	local hovered = cx.active.current.hovered
@@ -990,8 +1000,10 @@ local function config_side(side)
 
 			if component_group then
 				if component.custom then
-					section_components[#section_components + 1] =
-						{ component_group.create(component.name, in_section), component_group.has_separator }
+					if component.name ~= nil and component.name ~= "" and #component.name ~= 0 then
+						section_components[#section_components + 1] =
+							{ component_group.create(component.name, in_section), component_group.has_separator }
+					end
 				else
 					local getter = component_group.get[component.name]
 
@@ -1075,8 +1087,64 @@ local function config_paragraph(area, line)
 end
 
 return {
-	setup = function(_, config)
+	setup = function(_, config, pre_theme)
 		config = config or {}
+
+		if config == 0 then
+			config = {
+				show_background = false,
+
+				header_line = {
+					left = {
+						section_a = {
+							{ type = "line", custom = false, name = "tabs", params = { "left" } },
+						},
+						section_b = {},
+						section_c = {},
+					},
+					right = {
+						section_a = {
+							{ type = "string", custom = false, name = "date", params = { "%A, %d %B %Y" } },
+						},
+						section_b = {
+							{ type = "string", custom = false, name = "date", params = { "%X" } },
+						},
+						section_c = {},
+					},
+				},
+
+				status_line = {
+					left = {
+						section_a = {
+							{ type = "string", custom = false, name = "tab_mode" },
+						},
+						section_b = {
+							{ type = "string", custom = false, name = "hovered_size" },
+						},
+						section_c = {
+							{ type = "string", custom = false, name = "hovered_path" },
+							{ type = "coloreds", custom = false, name = "count" },
+						},
+					},
+					right = {
+						section_a = {
+							{ type = "string", custom = false, name = "cursor_position" },
+						},
+						section_b = {
+							{ type = "string", custom = false, name = "cursor_percentage" },
+						},
+						section_c = {
+							{ type = "string", custom = false, name = "hovered_file_extension", params = { true } },
+							{ type = "coloreds", custom = false, name = "permissions" },
+						},
+					},
+				},
+			}
+		end
+
+		if pre_theme then
+			config.theme = pre_theme
+		end
 
 		tab_width = config.tab_width or 20
 
@@ -1249,7 +1317,7 @@ return {
 		Progress.partial_render = function(self)
 			local progress = cx.tasks.progress
 			if progress.total == 0 then
-				return { config_paragraph(self._area) }
+				return config_paragraph(self._area)
 			end
 
 			local gauge = ui.Gauge():area(self._area)
@@ -1265,11 +1333,9 @@ return {
 			end
 
 			local left = progress.total - progress.succ
-			return {
-				gauge
-					:percent(percent)
-					:label(ui.Span(string.format("%3d%%, %d left", percent, left)):style(th.status.progress_label)),
-			}
+			return gauge
+				:percent(percent)
+				:label(ui.Span(string.format("%3d%%, %d left", percent, left)):style(th.status.progress_label))
 		end
 
 		if display_header_line then
@@ -1280,7 +1346,7 @@ return {
 
 					return {
 						config_paragraph(self._area, left_line),
-						ui.Text(right_line):area(self._area):align(ui.Text.RIGHT),
+						right_line:area(self._area):align(ui.Align.RIGHT),
 					}
 				end
 
@@ -1306,8 +1372,8 @@ return {
 
 					return {
 						config_paragraph(self._area, left_line),
-						ui.Text(right_line):area(self._area):align(ui.Text.RIGHT),
-						table.unpack(Progress:new(self._area, right_width):redraw()),
+						right_line:area(self._area):align(ui.Align.RIGHT),
+						table.unpack(ui.redraw(Progress:new(self._area, right_width))),
 					}
 				end
 
@@ -1355,6 +1421,8 @@ return {
 					i = i + 1
 				end
 			end
+
+			table.insert(childrens, Modal:new(self._area))
 
 			self._children = childrens
 		end

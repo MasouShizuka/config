@@ -325,15 +325,34 @@ return {
             local nvim_lint = require("lint")
 
             for linter, config in pairs(lint.lint_config) do
-                if not config then
-                    goto continue
+                if nvim_lint.linters[linter].args == nil then
+                    nvim_lint.linters[linter].args = {}
+                end
+                local args = nvim_lint.linters[linter].args
+
+                local prepend_args = config.prepend_args
+                if prepend_args then
+                    if type(prepend_args) == "function" then
+                        prepend_args = prepend_args()
+                    end
+
+                    vim.list_extend(prepend_args, args)
+                    args = prepend_args
+                    nvim_lint.linters[linter].args = prepend_args
+                    config.prepend_args = nil
                 end
 
-                for key, value in pairs(config) do
-                    nvim_lint.linters[linter][key] = value
+                local append_args = config.append_args
+                if append_args then
+                    if type(append_args) == "function" then
+                        append_args = append_args()
+                    end
+
+                    vim.list_extend(args, append_args)
+                    config.append_args = nil
                 end
 
-                ::continue::
+                nvim_lint.linters[linter] = vim.tbl_deep_extend("force", nvim_lint.linters[linter], config)
             end
 
             nvim_lint.linters_by_ft = lint.linters_by_ft
@@ -387,6 +406,9 @@ return {
                 group = vim.api.nvim_create_augroup("nvim-lint", { clear = true }),
             })
         end,
+        dependencies = {
+            "williamboman/mason.nvim",
+        },
         enabled = not environment.is_vscode and environment.lint_enable,
         event = {
             "User LintFile",
@@ -396,18 +418,10 @@ return {
     {
         "neovim/nvim-lspconfig",
         config = function(_, opts)
-            -- Borders
-            local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-            function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-                opts = opts or {}
-                opts.border = opts.border or "rounded"
-                return orig_util_open_floating_preview(contents, syntax, opts, ...)
-            end
-
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     local buf = args.buf
-                    local client = vim.lsp.get_client_by_id(args.data.client_id)
+                    local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
 
                     local keymap = require("utils.keymap")
                     local utils = require("utils")
@@ -548,8 +562,8 @@ return {
                         end
                     end
 
-                    if not utils.is_available("snacks.nvim") then
-                        if client:supports_method("textDocument/documentHighlight") then
+                    if client:supports_method("textDocument/documentHighlight") then
+                        if utils.is_available("snacks.nvim") then
                             utils.set_setting_toggle("document_highlight", {
                                 default = true,
                                 init = function()
@@ -599,6 +613,41 @@ return {
                                 },
                             })
                         end
+                    else
+                        utils.set_setting_toggle("document_highlight", {
+                            default = true,
+                            g = {
+                                keymap = { buf = buf, keys = "<leader>lth", mode = "n" },
+                                opts = {
+                                    callback = function(enabled, prev_enabled, global_enabled)
+                                        if enabled then
+                                            require("snacks").words.enable()
+                                        else
+                                            require("snacks").words.disable()
+                                        end
+                                    end,
+                                },
+
+                            },
+                            b = {
+                                keymap = { buf = buf, keys = "<leader>ltH", mode = "n" },
+                                opts = {
+                                    callback = function(enabled, prev_enabled, global_enabled)
+                                        if enabled then
+                                            require("snacks").words.enable()
+                                        else
+                                            require("snacks").words.disable()
+                                        end
+                                    end,
+                                },
+
+                            },
+                        })
+                    end
+
+                    if client:supports_method("textDocument/foldingRange") then
+                        local win = vim.api.nvim_get_current_win()
+                        vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
                     end
 
                     if
@@ -612,6 +661,7 @@ return {
                             opts = vim.tbl_deep_extend("force", {
                                 timeout_ms = 5000,
                                 bufnr = buf,
+                                id = client.id,
                             }, opts)
 
                             vim.lsp.buf.format(opts)
@@ -765,7 +815,7 @@ return {
 
                     if client:supports_method("textDocument/signatureHelp") then
                         vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
-                        vim.keymap.set("i", "<c-k>", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
+                        vim.keymap.set({ "i", "s" }, "<c-k>", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
                     end
 
                     if not utils.is_available("snacks.nvim") then
@@ -846,26 +896,33 @@ return {
                         )
                     end
 
-                    local default_config = {
+                    vim.lsp.config("*", {
                         capabilities = capabilities,
-                    }
+                    })
 
-                    local handlers = {
-                        -- The first entry (without a key) will be the default handler
-                        -- and will be called for each installed server that doesn't have
-                        -- a dedicated handler.
-                        -- function(server_name)
-                        --     lspconfig[server_name].setup(default_config)
-                        -- end,
-                    }
-                    for lsp_server, setup in pairs(lsp.lsp_config) do
-                        handlers[lsp_server] = setup(require("lspconfig"), default_config)
+                    for lsp_server, config in pairs(lsp.lsp_config) do
+                        vim.lsp.config[lsp_server] = config
                     end
 
                     return {
-                        ensure_installed = lsp.lsp_list,
-                        automatic_installation = true,
-                        handlers = handlers,
+                        -- Whether installed servers should automatically be enabled via `:h vim.lsp.enable()`.
+                        --
+                        -- To exclude certain servers from being automatically enabled:
+                        -- ```lua
+                        --   automatic_enable = {
+                        --     exclude = { "rust_analyzer", "ts_ls" }
+                        --   }
+                        -- ```
+                        --
+                        -- To only enable certain servers to be automatically enabled:
+                        -- ```lua
+                        --   automatic_enable = {
+                        --     "lua_ls",
+                        --     "vimls"
+                        --   }
+                        -- ```
+                        ---@type boolean | string[] | { exclude: string[] }
+                        automatic_enable = lsp.lsp_list,
                     }
                 end,
             },
@@ -875,32 +932,41 @@ return {
             "User LspFile",
         },
         init = function()
-            local icons = require("utils.icons")
+            require("utils").create_once_autocmd("User", {
+                callback = function()
+                    local icons = require("utils.icons")
 
-            local virtual_text
-            if require("utils").is_available("tiny-inline-diagnostic.nvim") then
-                virtual_text = false
-            else
-                virtual_text = {
-                    source = "if_many",
-                    spacing = 4,
-                    prefix = icons.dap.Breakpoint,
-                }
-            end
+                    local virtual_text
+                    if require("utils").is_available("tiny-inline-diagnostic.nvim") then
+                        virtual_text = false
+                    else
+                        virtual_text = {
+                            source = "if_many",
+                            spacing = 4,
+                            prefix = icons.dap.Breakpoint,
+                        }
+                    end
 
-            -- Customizing how diagnostics are displayed
-            vim.diagnostic.config({
-                virtual_text = virtual_text,
-                signs = {
-                    text = {
-                        [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
-                        [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
-                        [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
-                        [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
-                    },
-                },
-                update_in_insert = true,
-                severity_sort = true,
+                    -- Customizing how diagnostics are displayed
+                    vim.diagnostic.config({
+                        virtual_text = virtual_text,
+                        signs = {
+                            text = {
+                                [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+                                [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+                                [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
+                                [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
+                            },
+                        },
+                        float = {
+                            border = "rounded",
+                        },
+                        update_in_insert = true,
+                        severity_sort = true,
+                    })
+                end,
+                desc = "Lspconfig init",
+                pattern = "IceLoad",
             })
         end,
     },
@@ -936,60 +1002,6 @@ return {
             "MasonUninstallAll",
             "MasonLog",
         },
-        config = function(_, opts)
-            require("mason").setup(opts)
-
-            local function mason_notify(msg, type)
-                vim.notify(msg, type, { title = "Mason" })
-            end
-
-            local registry_avail, registry = pcall(require, "mason-registry")
-            if not registry_avail then
-                vim.api.nvim_echo({ { "Unable to access mason registry" } }, true, { err = true })
-                return
-            end
-
-            -- 更新所有已经安装的 mason package
-            -- mason_notify("Checking for package updates...")
-            registry.update(vim.schedule_wrap(function(success, updated_registries)
-                if success then
-                    local installed_pkgs = registry.get_installed_packages()
-                    local running = #installed_pkgs
-                    local no_pkgs = running == 0
-
-                    if no_pkgs then
-                        -- mason_notify("No updates available")
-                    else
-                        local updated = false
-                        for _, pkg in ipairs(installed_pkgs) do
-                            pkg:check_new_version(function(update_available, version)
-                                if update_available then
-                                    updated = true
-                                    mason_notify(("Updating `%s` to %s"):format(pkg.name, version.latest_version))
-                                    pkg:install():on("closed", function()
-                                        running = running - 1
-                                        if running == 0 then
-                                            mason_notify("Update Complete")
-                                        end
-                                    end)
-                                else
-                                    running = running - 1
-                                    if running == 0 then
-                                        if updated then
-                                            mason_notify("Update Complete")
-                                        else
-                                            -- mason_notify("No updates available")
-                                        end
-                                    end
-                                end
-                            end)
-                        end
-                    end
-                    -- else
-                    --     mason_notify(("Failed to update registries: %s"):format(updated_registries), vim.log.levels.ERROR)
-                end
-            end))
-        end,
         dependencies = {
             {
                 "WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -1006,15 +1018,22 @@ return {
 
                     mason_tool_installer.run_on_start()
                 end,
-                dependencies = {
-                    "williamboman/mason.nvim",
-                },
-                enabled = not environment.is_vscode,
                 opts = function()
                     return {
                         -- a list of all tools you want to ensure are installed upon
                         -- start
-                        ensure_installed = require("utils").table_concat(require("utils.format").format_list, require("utils.lint").lint_list),
+                        ensure_installed = require("utils").table_concat(
+                            require("utils.lsp").lsp_list_for_mason,
+                            require("utils.dap").dap_list_for_mason,
+                            require("utils.format").format_list,
+                            require("utils.lint").lint_list
+                        ),
+
+                        -- if set to true this will check each tool for updates. If updates
+                        -- are available the tool will be updated. This setting does not
+                        -- affect :MasonToolsUpdate or :MasonToolsInstall.
+                        -- Default: false
+                        auto_update = true,
 
                         -- By default all integrations are enabled. If you turn on an integration
                         -- and you have the required module(s) installed this means you can use
@@ -1031,7 +1050,6 @@ return {
                     }
                 end,
             },
-
         },
         enabled = not environment.is_vscode and environment.mason_enable,
         keys = {

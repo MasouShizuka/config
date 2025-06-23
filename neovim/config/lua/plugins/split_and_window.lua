@@ -145,16 +145,14 @@ return {
                 },
             }
 
-            local right = {
-                {
-                    ft = "help",
-                    -- only show help buffers
-                    filter = function(buf)
-                        return vim.api.nvim_get_option_value("buftype", { buf = buf }) == "help"
-                    end,
+            local right = {}
+
+            if utils.is_available("config.user_commands.fencview") then
+                right[#right + 1] = {
+                    ft = "fencview",
                     size = { width = 0.5 },
-                },
-            }
+                }
+            end
 
             if utils.is_available("nvim-dap") then
                 bottom[#bottom + 1] = {

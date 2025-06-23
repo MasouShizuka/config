@@ -24,12 +24,11 @@ return {
                 pattern = "SessionLoadPost",
             })
 
-            local notify_augroup = vim.api.nvim_create_augroup("SessionManagerNotify", { clear = true })
             vim.api.nvim_create_autocmd("User", {
                 callback = function()
                     vim.notify("Session saved!", vim.log.levels.INFO, { title = "neovim-session-manager" })
                 end,
-                group = notify_augroup,
+                group = vim.api.nvim_create_augroup("SessionManagerNotify", { clear = true }),
                 pattern = "SessionSavePost",
             })
         end,
@@ -52,8 +51,8 @@ return {
             end
 
             -- 判断是否启动 neovim-session-manager
-            if vim.fn.argc(-1) == 0 then
-                require("lazy").load({ plugins = "neovim-session-manager" })
+            if vim.fn.argc(-1) == 0 or vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
+                require("session_manager").load_current_dir_session()
             end
         end,
         keys = {

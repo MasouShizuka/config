@@ -1,3 +1,4 @@
+local environment = require("utils.environment")
 local path = require("utils.path")
 
 local M = {}
@@ -43,18 +44,18 @@ local format_list = {
                 }
             end,
         },
-        download = true,
-        enable = function() return vim.fn.executable("gcc") == 1 end,
+        download = environment.is_gcc_exist or environment.is_clang_exist or environment.is_python_exist,
+        enable = environment.is_gcc_exist or environment.is_clang_exist or environment.is_python_exist,
         filetype = { "c", "cpp" },
     },
     ruff_format = {
         download = false,
-        enable = function() return vim.fn.executable("python") == 1 end,
+        enable = environment.is_python_exist,
         filetype = { "python" },
     },
     ruff_organize_imports = {
         download = false,
-        enable = function() return vim.fn.executable("python") == 1 end,
+        enable = environment.is_python_exist,
         filetype = { "python" },
     },
     ["markdownlint-cli2"] = {
@@ -79,13 +80,24 @@ local format_list = {
     },
 }
 
-M.format_config = {}
 M.format_list = {}
+M.format_config = {}
 M.formatters_by_ft = {
     markdown = { "autocorrect" },
 }
 M.format_filetype_list = {}
 for format, info in pairs(format_list) do
+    local download = info.download
+    if download == nil then
+        download = true
+    end
+    if type(download) == "function" then
+        download = download()
+    end
+    if download then
+        M.format_list[#M.format_list + 1] = format
+    end
+
     local enable = info.enable
     if enable == nil then
         enable = true
@@ -95,17 +107,6 @@ for format, info in pairs(format_list) do
     end
     if enable then
         M.format_config[format] = info.config or {}
-
-        local download = info.download
-        if download == nil then
-            download = true
-        end
-        if type(download) == "function" then
-            download = download()
-        end
-        if download then
-            M.format_list[#M.format_list + 1] = format
-        end
 
         local filetype = info.filetype or {}
         if type(filetype) == "string" then

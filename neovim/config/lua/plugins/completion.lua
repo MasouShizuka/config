@@ -265,7 +265,7 @@ return {
 
             -- lazyvim.util.cmp.auto_brackets
             cmp.event:on("confirm_done", function(event)
-                if vim.tbl_contains({ "lua", "python" }, vim.bo.filetype) then
+                if vim.tbl_contains({ "python" }, vim.bo.filetype) then
                     local entry = event.entry
                     local Kind = cmp.lsp.CompletionItemKind
                     local item = entry:get_completion_item()
