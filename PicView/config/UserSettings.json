@@ -1,5 +1,5 @@
 {
-  "Version": 1.3,
+  "Version": 1.6,
   "WindowProperties": {
     "Top": 0,
     "Left": 0,
@@ -9,7 +9,8 @@
     "TopMost": false,
     "Maximized": false,
     "Fullscreen": false,
-    "KeepCentered": false
+    "KeepCentered": false,
+    "Margin": 15
   },
   "UIProperties": {
     "UserLanguage": "zh-CN",
@@ -69,6 +70,14 @@
     "OpenLastFile": false,
     "OpenSpecificFile": false,
     "OpenSpecificString": "",
-    "LastFile": ""
+    "LastFile": "",
+    "StartUpDirectory": ""
+  },
+  "Navigation": {
+    "IsFileWatcherEnabled": true,
+    "PositiveIterations": 6,
+    "NegativeIterations": 4,
+    "IsNavigatingFileHistory": true,
+    "IsNavigatingBetweenDirectories": false
   }
 }

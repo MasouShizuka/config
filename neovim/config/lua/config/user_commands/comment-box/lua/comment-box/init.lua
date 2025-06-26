@@ -595,53 +595,38 @@ local function display_titled_line(lstart, lend)
 
     local symbols = set_lines()
 
-    local start_pad, end_pad = comment_box_utils.get_pad(
-        text[1],
-        style.justification,
-        final_width
-        - vim.fn.strdisplaywidth(symbols.line_start)
-        - vim.fn.strdisplaywidth(symbols.title_left)
-        - vim.fn.strdisplaywidth(symbols.title_right)
-        - vim.fn.strdisplaywidth(symbols.line_end),
-        config.padding
-    )
-
-    local padding = string.rep(" ", config.padding)
-
-    table.insert(
-        lines,
-        string.format(
-            "%s%s%s%s%s%s%s%s%s%s%s%s",
-            indent,
-            comment_string_int_row,
-            set_lead_space(config.line_width, comment_string_int_row),
-            symbols.line_start,
-            string.rep(symbols.line, start_pad - config.padding),
-            symbols.title_left,
-            padding,
-            text[1],
-            padding,
-            symbols.title_right,
-            string.rep(symbols.line, end_pad - config.padding),
-            symbols.line_end
+    for _, line in ipairs(text) do
+        local start_pad, end_pad = comment_box_utils.get_pad(
+            line,
+            style.justification,
+            final_width
+            - vim.fn.strdisplaywidth(symbols.line_start)
+            - vim.fn.strdisplaywidth(symbols.title_left)
+            - vim.fn.strdisplaywidth(symbols.title_right)
+            - vim.fn.strdisplaywidth(symbols.line_end),
+            config.padding
         )
-    )
 
-    if #text > 1 then
-        for i, value in ipairs(text) do
-            if i > 1 then
-                table.insert(
-                    lines,
-                    string.format(
-                        "%s%s%s%s",
-                        indent,
-                        comment_string_int_row,
-                        padding,
-                        value
-                    )
-                )
-            end
-        end
+        local padding = string.rep(" ", config.padding)
+
+        table.insert(
+            lines,
+            string.format(
+                "%s%s%s%s%s%s%s%s%s%s%s%s",
+                indent,
+                comment_string_int_row,
+                set_lead_space(config.line_width, comment_string_int_row),
+                symbols.line_start,
+                string.rep(symbols.line, start_pad - config.padding),
+                symbols.title_left,
+                padding,
+                line,
+                padding,
+                symbols.title_right,
+                string.rep(symbols.line, end_pad - config.padding),
+                symbols.line_end
+            )
+        )
     end
 
     if use_block then
