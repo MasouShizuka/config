@@ -11,5 +11,5 @@ CONFIG_DIR="$DIR/config"
 
 scoop install "$PARENT_DIR/Scoop/config/workspace/tablacus-explorer.json"
 
-target="$HOME/scoop/persist/tablacus-explorer/config"
+target="$HOME/scoop/persist/tablacus-explorer"
 install_to_target "$CONFIG_DIR" "$target"

@@ -1,10 +1,10 @@
 {
-    "version": "25.6.25",
+    "version": "25.7.1",
     "description": "A tabbed file manager with Add-on support",
     "homepage": "https://github.com/tablacus/TablacusExplorer",
     "license": "MIT",
-    "url": "https://github.com/tablacus/TablacusExplorer/releases/download/25.6.25/te250625.zip",
-    "hash": "bb8f51ba14591324a73f6c0eb89202c90b1c6d8a77a78edd4e1b27821b698cf5",
+    "url": "https://github.com/tablacus/TablacusExplorer/releases/download/25.7.1/te250701.zip",
+    "hash": "16e7c5474f24e4cff1359dead3fa271a76b8c5f006896875b30fe5e25c075a45",
     "architecture": {
         "64bit": {
             "bin": [

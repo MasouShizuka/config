@@ -78,8 +78,8 @@ prepend_keymap = [
 
     # Goto
     { on = [ "g", ";" ],       run = "cd --interactive",                                             desc = "Jump interactively" },
-    { on = [ "g", "d", "c" ],  run = "cd C:/",                                                       desc = "Go to C:",            for = "windows" },
-    { on = [ "g", "d", "d" ],  run = "cd D:/",                                                       desc = "Go to D:",            for = "windows" },
+    { on = [ "g", "D", "c" ],  run = "cd C:/",                                                       desc = "Go to C:",            for = "windows" },
+    { on = [ "g", "D", "d" ],  run = "cd D:/",                                                       desc = "Go to D:",            for = "windows" },
     { on = [ "g", "a" ],       run = "cd '%APPDATA%'",                                               desc = "Go to $APPDATA",      for = "windows" },
     { on = [ "g", "l" ],       run = "cd '%LOCALAPPDATA%'",                                          desc = "Go to $LOCALAPPDATA", for = "windows" },
     { on = [ "g", "s" ],       run = "cd '~/scoop'",                                                 desc = "Go to Scoop",         for = "windows" },

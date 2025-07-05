@@ -192,6 +192,40 @@
       }
     ]
   },
+  "ShareX": {
+    "tray_and_multi_window": [
+      {
+        "kind": "Exe",
+        "id": "ShareX.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Snow Shot": {
+    "ignore": [
+      {
+        "kind": "Title",
+        "id": "Snow Shot",
+        "matching_strategy": "Legacy"
+      }
+    ]
+  },
+  "Tablacus Explorer": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "TApplication",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "manage": [
+      {
+        "kind": "Class",
+        "id": "TablacusExplorer",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
   "WeChat": {
     "ignore": [
       {
@@ -241,31 +275,6 @@
       {
         "kind": "Class",
         "id": "WeChatMainWndForPC",
-        "matching_strategy": "Equals"
-      }
-    ]
-  },
-  "ShareX": {
-    "tray_and_multi_window": [
-      {
-        "kind": "Exe",
-        "id": "ShareX.exe",
-        "matching_strategy": "Equals"
-      }
-    ]
-  },
-  "Tablacus Explorer": {
-    "ignore": [
-      {
-        "kind": "Class",
-        "id": "TApplication",
-        "matching_strategy": "Equals"
-      }
-    ],
-    "manage": [
-      {
-        "kind": "Class",
-        "id": "TablacusExplorer",
         "matching_strategy": "Equals"
       }
     ]

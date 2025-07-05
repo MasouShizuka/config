@@ -1,0 +1,25 @@
+<TablacusExplorer>
+  <General>
+    <Version>1.39</Version>
+    <MinVersion>2022.1.12</MinVersion>
+    <pubDate>Sun, 16 Jan 2022 00:00:00 GMT</pubDate>
+    <Options>Default</Options>
+    <Level>2</Level>
+    <Creator>Gaku</Creator>
+    <URL>https://tablacus.github.io/TablacusExplorerAddons/</URL>
+    <License>MIT License</License>
+  </General>
+  <en>
+    <Name>Folder settings</Name>
+    <Description>Folder settings</Description>
+  </en>
+  <fr>
+    <Name>Paramètres d'affichage des dossiers</Name>
+  </fr>
+  <ja>
+    <Name>フォルダ設定</Name>
+  </ja>
+  <zh>
+    <Name>資料夾檢視規則</Name>
+  </zh>
+</TablacusExplorer>

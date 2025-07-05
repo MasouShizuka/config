@@ -1,4 +1,4 @@
-﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F,Ctrl+P" Type="Tools">Search</All><All Key="Ctrl+Shift+P" Type="Addon switcher">preview</All><All Key="$2034" Type="Add-ons">Switch hidden items</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Inner Filter Bar</List><List Key="A" Type="Background">.txt</List><List Key="Shift+A" Type="Background">NewFolder</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">copy</List><List Key="X" Type="Context">cut</List><List Key="P" Type="Background">paste</List><List Key="D" Type="Context">delete</List><List Key="S" Type="Context">undelete</List><List Key="E" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
+﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F,Ctrl+P" Type="Tools">Search</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Filter Bar</List><List Key="A" Type="Background">.txt</List><List Key="Shift+A" Type="Background">NewFolder</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">copy</List><List Key="X" Type="Context">cut</List><List Key="P" Type="Background">paste</List><List Key="D" Type="Context">delete</List><List Key="S" Type="Context">undelete</List><List Key="E" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
 const path = (FV.FocusedItem || FV.FolderItem).Path;
 if (api.PathIsDirectory(path)) {
     cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
@@ -10,7 +10,7 @@ api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">Op
 }</List><List Key="Shift+G" Type="JScript">let count = FV.ItemCount(SVGIO_ALLVIEW);
 if (count &gt; 0) {
     FV.SelectItem(count - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
-}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Context">open</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="JScript">let nIndex = FV.GetFocusedItem;
+}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Key">{Enter}</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
@@ -119,15 +119,7 @@ if (FV) {
         }
         api.DestroyMenu(hMenu);
     }
-}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">PeaZip.add2separate</List><List Key="Shift+Z" Type="Context">PeaZip.ext2smart</List><List Key="Shift+1" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
-    Addons.Split.Exec(1, 1);
-} else {
-    Addons.Split.Exec(2, 2);
-}</List><List Key="Shift+2" Type="JScript">if (te.Ctrls(CTRL_TC, true).Count &gt; 1) {
-    Addons.Split.Exec(1, 1);
-} else {
-    Addons.Split.Exec(2, 3);
-}</List><List Key="$33" Type="JScript">var TC = te.Ctrl(CTRL_TC);
+}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">PeaZip.add2separate</List><List Key="Shift+Z" Type="Context">PeaZip.ext2smart</List><List Key="$33" Type="JScript">var TC = te.Ctrl(CTRL_TC);
 if (TC &amp;&amp; TC.SelectedIndex &gt; 0) {
     TC.Move(TC.SelectedIndex, TC.SelectedIndex - 1);
     return S_OK;
@@ -137,10 +129,4 @@ if (TC &amp;&amp; TC.SelectedIndex &lt; TC.Count - 1) {
     TC.Move(TC.SelectedIndex, TC.SelectedIndex + 1);
     return S_OK;
 }
-return S_FALSE;</List><List Key="$1033" Type="JScript">var FV = GetFolderView(Ctrl, pt);
-var FV2 = Sync.SwitchPrevPane.Exec(Ctrl);
-FV.Parent.Move(FV.Parent.SelectedIndex, FV2.Parent.Count, FV2.Parent);
-FV2.Focus();</List><List Key="$1034" Type="JScript">var FV = GetFolderView(Ctrl, pt);
-var FV2 = Sync.SwitchPane.NextFV(Ctrl);
-FV.Parent.Move(FV.Parent.SelectedIndex, FV2.Parent.Count, FV2.Parent);
-FV2.Focus();</List></TablacusExplorer>
+return S_FALSE;</List></TablacusExplorer>

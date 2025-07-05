@@ -11,6 +11,7 @@ CONFIG_DIR="$DIR/config"
 
 scoop install flow-launcher
 
+scoop install mambaforge
 scoop install everything-alpha
 echo "NOTE: Set alpha_instance to false to made it possible for Everything 1.5a to work with the Flow.Launcher."
 

@@ -1,9 +1,11 @@
 # install scoop
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
 # install git and clone config repo
 scoop install git
+git config --global credential.helper manager
+git config --global core.editor nvim
+
 git clone https://github.com/MasouShizuka/config.git --depth 1
 
 # add buckets
@@ -15,10 +17,16 @@ scoop bucket add versions
 scoop install aria2
 scoop config aria2-warning-enabled false
 
+# install sfsu
+scoop install sfsu
+
+# install Microsoft Visual C++ Redistributables
+scoop install vcredist
+scoop uninstall vcredist2005 vcredist2008 vcredist2010 vcredist2012 vcredist2013 vcredist
+
 # install fonts
 scoop install Maple-Mono-NF-CN
 scoop install SarasaGothic-SC
-scoop install Source-Han-Sans-SC
 
 # install msys2
 scoop install msys2

@@ -1,6 +1,6 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "42f64c0"
+rev = "2ad42fa"
 hash = "b16b6e08085a3dfec72335415e4c83ed"
 
 [[plugin.deps]]
@@ -10,17 +10,17 @@ hash = "b90d742c9dc5c649404c6929d03b6f65"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:mime-ext"
-rev = "42f64c0"
+rev = "2ad42fa"
 hash = "4ef4a397532572dfbe4e3138c2d5a4b2"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "42f64c0"
+rev = "2ad42fa"
 hash = "c3f5c63722344045822f121efe2d2553"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "42f64c0"
+rev = "2ad42fa"
 hash = "337259992d918f0b6d68d1a1b80e219e"
 
 [[plugin.deps]]

@@ -224,6 +224,9 @@ PROMPT_COMMAND="precmd"
 
 if [[ -x "$(command -v mamba)" ]]; then
     if ((is_windows)); then
+        # https://github.com/zou-group/textgrad/issues/139
+        export PYTHONUTF8=1
+
         CONDA_EXE="$HOME/scoop/apps/mambaforge/current/Scripts/conda.exe"
         if [[ -f "$CONDA_EXE" ]]; then
             eval "$("$CONDA_EXE" "shell.bash" "hook")"
