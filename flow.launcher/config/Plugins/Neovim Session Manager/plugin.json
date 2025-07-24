@@ -1,0 +1,11 @@
+{
+    "ID": "edf72277-8b2b-3377-8975-3ccf4820078f",
+    "ActionKeyword": "[",
+    "Name": "Neovim Session Manager",
+    "Description": "Open a neovim session saved by the plugin neovim-session-manager",
+    "Author": "MasouShizuka",
+    "Version": "1.0.0",
+    "Language": "python",
+    "IcoPath": "neovim.png",
+    "ExecuteFileName": "main.py"
+}

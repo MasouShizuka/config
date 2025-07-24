@@ -1,0 +1,516 @@
+" ───────────────────────── Options ──────────────────────────
+
+set clipboard=unnamedplus
+set hlsearch
+set ignorecase
+set incsearch
+set iskeyword=@,48-57,_,192-255,-
+set smartcase
+set virtualedit=block
+
+" ╭───────────────────────────────────────────────────────╮
+" │ IdeaVim options mapped to IntelliJ-based IDE settings │
+" ╰───────────────────────────────────────────────────────╯
+
+set scrolloff=5
+set sidescrolloff=5
+
+" ╭─────────────────────────────────────────────────╮
+" │ IdeaVim options for IntelliJ-based IDE features │
+" ╰─────────────────────────────────────────────────╯
+
+set breakindent
+set list
+set relativenumber
+
+" ╭──────────────────────╮
+" │ IdeaVim only options │
+" ╰──────────────────────╯
+
+set ideajoin
+
+" ───────────────────────── Mappings ─────────────────────────
+
+" NOTE: 安装插件 VSCode Keymap
+" https://github.com/JetBrains/intellij-community/tree/master/platform/platform-resources/src/keymaps
+" https://plugins.jetbrains.com/plugin/12062-vscode-keymap
+
+let mapleader=" "
+
+" ╭──────────╮
+" │ 取消高亮 │
+" ╰──────────╯
+
+nnoremap <esc> :nohlsearch<cr>
+
+" ╭────────────────────╮
+" │ 不复制到 clipboard │
+" ╰────────────────────╯
+
+nnoremap C "_c
+xnoremap C "_c
+nnoremap D "_d
+xnoremap D "_d
+nnoremap X "_x
+xnoremap X "_x
+
+" ╭──────────────────────╮
+" │ 跳到行首行尾不带空格 │
+" ╰──────────────────────╯
+
+nnoremap H ^
+xnoremap H ^
+onoremap H ^
+nnoremap L g_
+xnoremap L ^_
+onoremap L ^_
+
+" ╭────────────────────╮
+" │ 折行时小步上下移动 │
+" ╰────────────────────╯
+
+nnoremap j gj
+xnoremap j gj
+nnoremap k gk
+xnoremap k gk
+
+" ╭──────────────────╮
+" │ 上下移动选中文本 │
+" ╰──────────────────╯
+
+xmap J <Action>(MoveLineDown)
+xmap K <Action>(MoveLineUp)
+
+" ╭──────╮
+" │ mark │
+" ╰──────╯
+
+nnoremap M m
+
+" ╭──────────╮
+" │ 跳转居中 │
+" ╰──────────╯
+
+nnoremap n nzz
+xnoremap n nzz
+nnoremap N Nzz
+xnoremap N Nzz
+nnoremap <c-d> <c-d>zz
+xnoremap <c-d> <c-d>zz
+nnoremap <c-u> <c-u>zz
+xnoremap <c-u> <c-u>zz
+nnoremap <c-i> <c-i>zz
+xnoremap <c-i> <c-i>zz
+nnoremap <c-o> <c-o>zz
+xnoremap <c-o> <c-o>zz
+
+" ╭──────╮
+" │ 转到 │
+" ╰──────╯
+
+nmap gd <Action>(GotoDeclaration)
+nmap gi <Action>(GotoImplementation)
+nmap gr <Action>(FindUsages)
+nmap gy <Action>(GotoTypeDeclaration)
+
+" ╭────────────────────╮
+" │ 选中上次粘贴的文本 │
+" ╰────────────────────╯
+
+nnoremap gp `[v`]
+
+" ╭────────────────────────────╮
+" │ 调整光标所在行到屏幕的位置 │
+" ╰────────────────────────────╯
+
+nnoremap zj zt
+xnoremap zj zt
+nnoremap zk zb
+xnoremap zk zb
+
+" ╭──────╮
+" │ 折叠 │
+" ╰──────╯
+
+nmap zc <Action>(CollapseRegion)
+nmap zC <Action>(CollapseRegionRecursively)
+nmap zo <Action>(ExpandRegion)
+nmap zO <Action>(ExpandRegionRecursively)
+nmap za <Action>(ExpandCollapseToggleAction)
+nmap zm <Action>(CollapseAllRegions)
+nmap zr <Action>(ExpandAllRegions)
+
+" ╭────────────╮
+" │ 搜索并替换 │
+" ╰────────────╯
+
+nmap <c-f> <Action>(Replace)
+nmap <leader><c-f> <Action>(ReplaceInPath)
+
+" ╭─────╮
+" │ tab │
+" ╰─────╯
+
+nmap <c-h> <Action>(PreviousTab)
+nmap <c-l> <Action>(NextTab)
+nnoremap <c-,> :tabmove -<cr>
+nnoremap <c-.> :tabmove +<cr>
+
+" ╭──────╮
+" │ 窗口 │
+" ╰──────╯
+
+nnoremap <c-j> <c-w>w
+nnoremap <c-k> <c-w>W
+nmap <c-s>j <Action>(SplitHorizontally)
+nmap <c-s>l <Action>(SplitVertically)
+nmap <c-s><c-j> <Action>(MoveTabDown)
+nmap <c-s><c-l> <Action>(MoveTabRight)
+nmap <c-s><c-m> <Action>(MaximizeEditorInSplit)
+nmap <c-s><c-u> <Action>(Unsplit)
+nmap <c-left> <Action>(StretchSplitToLeft)
+nmap <c-right> <Action>(StretchSplitToRight)
+nmap <c-up> <Action>(StretchSplitToTop)
+nmap <c-down> <Action>(StretchSplitToBottom)
+
+" ╭──────╮
+" │ diff │
+" ╰──────╯
+
+nmap <c-n> <Action>(NextDiff)
+nmap <c-s-n> <Action>(PreviousDiff)
+
+" ╭──────╮
+" │ 退出 │
+" ╰──────╯
+
+nmap <c-w> <Action>(CloseContent)
+nmap <leader><c-w> <Action>(Exit)
+nmap <c-s-t> <Action>(ReopenClosedTab)
+
+" ╭──────╮
+" │ 缩放 │
+" ╰──────╯
+
+nmap <c-=> <Action>(EditorIncreaseFontSizeGlobal)
+nmap <c--> <Action>(EditorDecreaseFontSizeGlobal)
+nmap <c-0> <Action>(EditorResetFontSizeGlobal)
+
+" ╭────────╮
+" │ 格式化 │
+" ╰────────╯
+
+nmap <leader>f <Action>(ReformatCode)
+xmap <leader>f <Action>(ReformatCode)
+
+" ╭──────╮
+" │ 运行 │
+" ╰──────╯
+
+nmap <leader>r <Action>(Run)
+nmap <leader>R <Action>(ChooseRunConfiguration)
+
+" ╭──────╮
+" │ 粘贴 │
+" ╰──────╯
+
+imap <c-s-v> <Action>($Paste)
+
+" ──────────────────── Pluings in neovim ─────────────────────
+
+" ╭────────────────╮
+" │ auto-save.nvim │
+" ╰────────────────╯
+
+" Settings -> Appearance & Behavior -> System Settings -> Autosave -> 1 sec
+
+" ╭───────────────╮
+" │ gitsigns.nvim │
+" ╰───────────────╯
+
+let g:WhichKeyDesc_git = "<leader>g git"
+
+nmap <leader>gg <Action>(ActivateCommitToolWindow)
+nmap <leader>gb <Action>(Annotate)
+nmap <leader>gf <Action>(Vcs.ShowTabbedFileHistory)
+nmap <leader>gl <Action>(Vcs.Show.Log)
+
+" ╭───────────╮
+" │ lazy.nvim │
+" ╰───────────╯
+
+nmap <leader>z <Action>(WelcomeScreen.Plugins)
+
+" ╭────────╮
+" │ neogen │
+" ╰────────╯
+
+nnoremap <leader>gca O/**
+
+" ╭──────────╮
+" │ nvim-dap │
+" ╰──────────╯
+
+let g:WhichKeyDesc_debug = "<leader>d debug"
+
+nmap <f5> <Action>(Resume)
+nmap <leader>dl <Action>(Debug)
+nmap <leader>dr <Action>(JShell.Console)
+nmap <leader>dB <Action>(AddConditionalBreakpoint)
+nmap <f9> <Action>(ToggleLineBreakpoint)
+nmap <f10> <Action>(StepOver)
+nmap <f11> <Action>(StepInto)
+nmap <s-f11> <Action>(StepOut)
+nmap <f6> <Action>(Pause)
+nmap <leader>dk <Action>(GotoPreviousError)
+nmap <leader>dj <Action>(GotoNextError)
+nmap <leader>dc <Action>(ForceRunToCursor)
+nmap <s-f5> <Action>(Stop)
+
+nmap <leader>dd <Action>(ActivateDebugToolWindow)
+nmap <leader>de <Action>(EvaluateExpression)
+xmap <leader>de <Action>(EvaluateExpression)
+
+nmap <leader>dp <Action>(ChooseDebugConfiguration)
+
+" ╭────────────────╮
+" │ nvim-lspconfig │
+" ╰────────────────╯
+
+nmap <c-;> <Action>(ShowIntentionActions)
+
+nmap K <Action>(QuickJavaDoc)
+nmap gh <Action>(com.huawei.ohos.infocenter.action.ShowDevelopDocumentAction)
+
+nmap <f2> <Action>(RenameElement)
+nmap <s-f2> <Action>(RenameFile)
+
+nmap gK <Action>(ParameterInfo)
+imap <c-k> <Action>(ParameterInfo)
+
+nmap gl <Action>(ShowErrorDescription)
+
+nmap <leader>lo <Action>(OptimizeImports)
+
+" ╭────────────────────╮
+" │ snacks.nvim picker │
+" ╰────────────────────╯
+
+let g:WhichKeyDesc_picker = "<leader>t picker"
+
+nmap <leader>tb <Action>(Switcher)
+nmap <leader>tc <Action>(QuickChangeScheme)
+nmap <leader>t: :history<cr>
+nmap <c-s-p> <Action>(GotoAction)
+nmap <leader>/ <Action>(FindInPath)
+nmap <leader>tw <Action>(FindWordAtCaret)
+xmap <leader>tw <Action>(FindWordAtCaret)
+nmap <leader>th <Action>(ContextHelp)
+nmap <leader>tH <Action>(HighlightUsagesInFile)
+nmap <leader>tj <Action>(RecentLocations)
+nmap <leader>tk :map<cr>
+nmap <leader>tm <Action>(ShowDocumentation)
+nmap <leader>ts <Action>(GotoSymbol)
+nmap <leader>t' :marks<cr>
+nmap <leader>tr <Action>(RecentFiles)
+nmap <leader>t" :registers<cr>
+nmap <C-p> <Action>(GotoFile)
+nmap <leader>to <Action>(ShowSettings)
+
+" ╭────────────────────╮
+" │ todo-comments.nvim │
+" ╰────────────────────╯
+
+" Editor -> TODO
+" \btodo\b.* italic foreground:#222436 background:#c3e88d
+" \bfix\b.* italic foreground:#222436 background:#ff757f
+" \bhack\b.* italic foreground:#222436 background:#ff966c
+" \bwarn\b.* italic foreground:#222436 background:#ffc777
+" \bperf\b.* italic foreground:#222436 background:#fca7ea
+" \btest\b.* italic foreground:#222436 background:#4fd6be
+nmap <leader>xt <Action>(ActivateTODOToolWindow)
+
+" ╭──────────────╮
+" │ trouble.nvim │
+" ╰──────────────╯
+
+let g:WhichKeyDesc_trouble = "<leader>x trouble"
+
+nmap <f8> <Action>(GotoNextError)
+nmap <s-f8> <Action>(GotoNextError)
+nmap [d <Action>(GotoPreviousError)
+nmap ]d <Action>(GotoNextError)
+nmap [d <Action>(GotoPreviousError)
+nmap ]w <Action>(GotoNextError)
+nmap [w <Action>(GotoPreviousError)
+
+nmap <leader>xl <Action>(ActivateCodeLinterToolWindow)
+nmap <leader>xo <Action>(ActivateLogToolWindow)
+nmap <leader>xn <Action>(ActivateNotificationsToolWindow)
+nmap <leader>xx <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>xs <Action>(ActivateStructureToolWindow)
+nmap <leader>xT <Action>(ActivateTerminalToolWindow)
+nmap <leader>xg <Action>(ActivateVersionControlToolWindow)
+
+nmap <leader>xp <Action>(ActivatePreviewerToolWindow)
+
+" ───────────────────────── Plugins ──────────────────────────
+
+" ╭────────────╮
+" │ argtextobj │
+" ╰────────────╯
+
+Plug 'vim-scripts/argtextobj.vim'
+
+" ╭────────────╮
+" │ commentary │
+" ╰────────────╯
+
+Plug 'tpope/vim-commentary'
+
+xmap gb <Action>(CommentByBlockComment)
+
+" ╭──────────╮
+" │ exchange │
+" ╰──────────╯
+
+Plug 'tommcdo/vim-exchange'
+
+let g:exchange_no_mappings = 1
+
+nmap sx <Plug>(Exchange)
+xmap sx <Plug>(Exchange)
+nmap sxc <Plug>(ExchangeClear)
+nmap sxx <Plug>(ExchangeLine)
+
+" ╭───────╮
+" │ flash │
+" ╰───────╯
+
+" NOTE: 安装插件 vim-flash
+" https://github.com/yelog/vim-flash
+" https://plugins.jetbrains.com/plugin/25101-vim-flash
+nmap m <Action>(flash.search)
+
+" ╭─────────────────╮
+" │ highlightedyank │
+" ╰─────────────────╯
+
+Plug 'machakann/vim-highlightedyank'
+
+let g:highlightedyank_highlight_duration = "500"
+let g:highlightedyank_highlight_color = "rgba(160, 160, 160, 155)"
+let g:highlightedyank_highlight_foreground_color = "rgba(0, 0, 0, 255)"
+
+" ╭───────────────╮
+" │ indent-object │
+" ╰───────────────╯
+
+Plug 'michaeljsmith/vim-indent-object'
+
+" ╭─────────────╮
+" │ matchit.vim │
+" ╰─────────────╯
+
+packadd matchit
+
+" ╭──────────╮
+" │ NERDTree │
+" ╰──────────╯
+
+Plug 'preservim/nerdtree'
+
+let g:NERDTreeMapActivateNode = "l"
+let g:NERDTreeMapPreview = "p"
+"let g:NERDTreeMapOpenInTab = "t"
+"let g:NERDTreeMapOpenInTabSilent = "T"
+let g:NERDTreeMapOpenSplit = "s"
+let g:NERDTreeMapPreviewSplit = "S"
+let g:NERDTreeMapOpenVSplit = "v"
+let g:NERDTreeMapPreviewVSplit = "V"
+let g:NERDTreeMapOpenRecursively = "L"
+let g:NERDTreeMapCloseDir = "<bs>"
+let g:NERDTreeMapCloseChildren = "zC"
+let g:NERDTreeMapJumpRoot = "H"
+let g:NERDTreeMapJumpParent = "h"
+let g:NERDTreeMapJumpFirstChild = "g"
+let g:NERDTreeMapJumpLastChild = "G"
+let g:NERDTreeMapJumpNextSibling = "J"
+let g:NERDTreeMapJumpPrevSibling = "K"
+"let g:NERDTreeMapRefresh = "r"
+"let g:NERDTreeMapRefreshRoot = "R"
+"let g:NERDTreeMapMenu = "m"
+"let g:NERDTreeMapQuit = "q"
+let g:NERDTreeMapToggleZoom = "P"
+"let g:NERDTreeMapDelete = "d"
+let g:NERDTreeMapNewFile = "a"
+let g:NERDTreeMapNewDir = "A"
+
+nnoremap <c-1> :NERDTreeToggle<cr>
+
+" ╭──────────╮
+" │ Peekaboo │
+" ╰──────────╯
+
+" NOTE: 安装插件 Vim Peekaboo
+" https://github.com/jphalip/ideavim-peekaboo
+" https://plugins.jetbrains.com/plugin/25776-vim-peekaboo
+set peekaboo
+
+" ╭─────────────────────╮
+" │ ReplaceWithRegister │
+" ╰─────────────────────╯
+
+Plug 'vim-scripts/ReplaceWithRegister'
+
+nmap ss <Plug>ReplaceWithRegisterOperator
+xmap ss <Plug>ReplaceWithRegisterVisual
+nmap sss <Plug>ReplaceWithRegisterLine
+
+" ╭──────────╮
+" │ surround │
+" ╰──────────╯
+
+Plug 'tpope/vim-surround'
+
+let g:surround_no_mappings = 1
+
+nmap sa <Plug>YSurround
+xmap sa <Plug>VSurround
+nmap sr <Plug>CSurround
+nmap sd <Plug>DSurround
+
+" ╭────────────────╮
+" │ textobj-entire │
+" ╰────────────────╯
+
+Plug 'kana/vim-textobj-entire'
+
+" ╭───────────────────╮
+" │ Tokyo Night Theme │
+" ╰───────────────────╯
+
+" NOTE: 安装插件 Tokyo Night Theme
+" https://github.com/zeekbyte/tokyonight-jetbrains
+" https://plugins.jetbrains.com/plugin/25317-tokyo-night-theme
+
+" ╭───────────╮
+" │ Which-Key │
+" ╰───────────╯
+
+" NOTE: 安装插件 Which-Key
+" https://github.com/TheBlob42/idea-which-key
+" https://plugins.jetbrains.com/plugin/15976-which-key
+set which-key
+
+" disable the timeout option
+set notimeout
+
+let g:WhichKey_ProcessUnknownMappings = "false"
+
+" set if the sorting should be case-sensitive or not
+let g:WhichKey_SortCaseSensitive = "false"
+
+let g:WhichKey_ShowVimActions = "true"
+let g:WhichKey_FontFamily = "Maple Mono NF CN"
+let g:WhichKey_FontSize = 22

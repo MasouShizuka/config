@@ -1,0 +1,206 @@
+{
+    "schemeVersion": 0,
+    "enabled": true,
+    "fetchNews": true,
+    "theme": {
+        "mode": 1,
+        "brightness": 100,
+        "contrast": 90,
+        "grayscale": 0,
+        "sepia": 0,
+        "useFont": false,
+        "fontFamily": "Segoe UI",
+        "textStroke": 0,
+        "engine": "dynamicTheme",
+        "stylesheet": "",
+        "darkSchemeBackgroundColor": "#181a1b",
+        "darkSchemeTextColor": "#e8e6e3",
+        "lightSchemeBackgroundColor": "#dcdad7",
+        "lightSchemeTextColor": "#181a1b",
+        "scrollbarColor": "",
+        "selectionColor": "auto",
+        "styleSystemControls": false,
+        "lightColorScheme": "Default",
+        "darkColorScheme": "Default",
+        "immediateModify": false
+    },
+    "presets": [],
+    "customThemes": [
+        {
+            "builtIn": true,
+            "theme": {
+                "mode": 1,
+                "brightness": 100,
+                "contrast": 100,
+                "grayscale": 0,
+                "sepia": 0,
+                "useFont": false,
+                "fontFamily": "Segoe UI",
+                "textStroke": 0,
+                "engine": "cssFilter",
+                "stylesheet": "",
+                "darkSchemeBackgroundColor": "#181a1b",
+                "darkSchemeTextColor": "#e8e6e3",
+                "lightSchemeBackgroundColor": "#dcdad7",
+                "lightSchemeTextColor": "#181a1b",
+                "scrollbarColor": "",
+                "selectionColor": "auto",
+                "styleSystemControls": false,
+                "lightColorScheme": "Default",
+                "darkColorScheme": "Default",
+                "immediateModify": false
+            },
+            "url": [
+                "*.officeapps.live.com"
+            ]
+        },
+        {
+            "builtIn": true,
+            "theme": {
+                "mode": 1,
+                "brightness": 100,
+                "contrast": 100,
+                "grayscale": 0,
+                "sepia": 0,
+                "useFont": false,
+                "fontFamily": "Segoe UI",
+                "textStroke": 0,
+                "engine": "cssFilter",
+                "stylesheet": "",
+                "darkSchemeBackgroundColor": "#181a1b",
+                "darkSchemeTextColor": "#e8e6e3",
+                "lightSchemeBackgroundColor": "#dcdad7",
+                "lightSchemeTextColor": "#181a1b",
+                "scrollbarColor": "",
+                "selectionColor": "auto",
+                "styleSystemControls": false,
+                "lightColorScheme": "Default",
+                "darkColorScheme": "Default",
+                "immediateModify": false
+            },
+            "url": [
+                "*.sharepoint.com"
+            ]
+        },
+        {
+            "builtIn": true,
+            "theme": {
+                "mode": 1,
+                "brightness": 100,
+                "contrast": 100,
+                "grayscale": 0,
+                "sepia": 0,
+                "useFont": false,
+                "fontFamily": "Segoe UI",
+                "textStroke": 0,
+                "engine": "cssFilter",
+                "stylesheet": "",
+                "darkSchemeBackgroundColor": "#181a1b",
+                "darkSchemeTextColor": "#e8e6e3",
+                "lightSchemeBackgroundColor": "#dcdad7",
+                "lightSchemeTextColor": "#181a1b",
+                "scrollbarColor": "",
+                "selectionColor": "auto",
+                "styleSystemControls": false,
+                "lightColorScheme": "Default",
+                "darkColorScheme": "Default",
+                "immediateModify": false
+            },
+            "url": [
+                "docs.google.com"
+            ]
+        },
+        {
+            "builtIn": true,
+            "theme": {
+                "mode": 1,
+                "brightness": 100,
+                "contrast": 100,
+                "grayscale": 0,
+                "sepia": 0,
+                "useFont": false,
+                "fontFamily": "Segoe UI",
+                "textStroke": 0,
+                "engine": "cssFilter",
+                "stylesheet": "",
+                "darkSchemeBackgroundColor": "#181a1b",
+                "darkSchemeTextColor": "#e8e6e3",
+                "lightSchemeBackgroundColor": "#dcdad7",
+                "lightSchemeTextColor": "#181a1b",
+                "scrollbarColor": "",
+                "selectionColor": "auto",
+                "styleSystemControls": false,
+                "lightColorScheme": "Default",
+                "darkColorScheme": "Default",
+                "immediateModify": false
+            },
+            "url": [
+                "onedrive.live.com"
+            ]
+        }
+    ],
+    "enabledByDefault": true,
+    "enabledFor": [],
+    "disabledFor": [],
+    "changeBrowserTheme": false,
+    "syncSettings": true,
+    "syncSitesFixes": true,
+    "automation": {
+        "behavior": "OnOff",
+        "enabled": false,
+        "mode": ""
+    },
+    "time": {
+        "activation": "18:00",
+        "deactivation": "9:00"
+    },
+    "location": {
+        "latitude": null,
+        "longitude": null
+    },
+    "previewNewDesign": true,
+    "previewNewestDesign": false,
+    "enableForPDF": true,
+    "enableForProtectedPages": false,
+    "enableContextMenus": false,
+    "detectDarkTheme": true,
+    "applyToListedOnly": false,
+    "displayedNews": [
+        "news-2023"
+    ],
+    "installation": {
+        "date": 1739147595675,
+        "reason": "install",
+        "version": "4.9.100"
+    },
+    "readNews": [
+        "news-2023",
+        "filter-mode",
+        "v5-survey",
+        "mobile",
+        "detect-dark-theme",
+        "no-war",
+        "chrome-favorites-2021",
+        "thanks-2021",
+        "5m-users",
+        "v4-9-16",
+        "v4-9",
+        "attention",
+        "dr-5-announcement",
+        "2m-users",
+        "automation",
+        "product-hunt-golden-kitty-2018",
+        "time-settings",
+        "safari",
+        "500k-users",
+        "stylish",
+        "product-hunt",
+        "custom-site-settings",
+        "thanks-for-contribution",
+        "dynamic-theme"
+    ],
+    "siteList": [],
+    "siteListEnabled": [
+        "blog.csdn.net"
+    ]
+}

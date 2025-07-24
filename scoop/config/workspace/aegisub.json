@@ -1,0 +1,39 @@
+{
+    "version": "12",
+    "description": "Cross-platform advanced subtitle editor, with new feature branches. Read the README on the feature branch.",
+    "homepage": "https://github.com/arch1t3cht/Aegisub",
+    "license": "GPLv2",
+    "url": "https://github.com/arch1t3cht/Aegisub/releases/download/feature_12/Windows.MSVC.Release.-.portable.zip",
+    "hash": "f85b4946ff21a2bce736411b9034431937cad828994b24301208475db769f2d0",
+    "pre_install": [
+        "if (Test-Path \"$persist_dir\\config.json\") {",
+        "    Copy-Item \"$persist_dir\\config.json\" \"$dir\"",
+        "} else {",
+        "    New-Item \"$dir\\config.json\" | Out-Null",
+        "}",
+        "if (Test-Path \"$persist_dir\\hotkey.json\") {",
+        "    Copy-Item \"$persist_dir\\hotkey.json\" \"$dir\"",
+        "} else {",
+        "    New-Item \"$dir\\hotkey.json\" | Out-Null",
+        "}"
+    ],
+    "installer": {
+        "script": "Expand-7zipArchive \"$dir\\aegisub-portable-64.zip\" \"$dir\" -ExtractDir 'aegisub-portable' -Removal | Out-Null"
+    },
+    "uninstaller": {
+        "script": [
+            "if (!(Test-Path \"$persist_dir\")) {",
+            "    New-Item -ItemType Directory -Path \"$persist_dir\" | Out-Null",
+            "}",
+            "Copy-Item \"$dir\\config.json\" \"$persist_dir\" -ErrorAction 'SilentlyContinue' -Force",
+            "Copy-Item \"$dir\\hotkey.json\" \"$persist_dir\" -ErrorAction 'SilentlyContinue' -Force"
+        ]
+    },
+    "checkver": {
+        "github": "https://github.com/arch1t3cht/Aegisub",
+        "regex": "feature_([\\d]+)"
+    },
+    "autoupdate": {
+        "url": "https://github.com/arch1t3cht/Aegisub/releases/download/feature_$version/Windows.MSVC.Release.-.portable.zip"
+    }
+}

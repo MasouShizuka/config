@@ -1,0 +1,25 @@
+<TablacusExplorer>
+  <General>
+    <Version>1.19</Version>
+    <MinVersion>2024.3.28</MinVersion>
+    <pubDate>Sun, 21 Apr 2024 00:00:00 GMT</pubDate>
+    <Options>Common:0:0</Options>
+    <Level>2</Level>
+    <Creator>Gaku</Creator>
+    <URL>https://tablacus.github.io/TablacusExplorerAddons/</URL>
+    <License>MIT License</License>
+  </General>
+  <en>
+    <Name>Dark mode</Name>
+    <Description>Dark mode</Description>
+  </en>
+  <fr>
+    <Name>Mode sombre</Name>
+  </fr>
+  <ja>
+    <Name>ダークモード</Name>
+  </ja>
+  <zh>
+    <Name>黑色面板</Name>
+  </zh>
+</TablacusExplorer>

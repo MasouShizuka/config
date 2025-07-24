@@ -1,0 +1,35 @@
+{
+    "version": "3.50.3",
+    "description": "A small, fast, self-contained, high-reliability and full-featured SQL database engine",
+    "homepage": "https://www.sqlite.org/",
+    "license": {
+        "url": "https://www.sqlite.org/src/file?name=LICENSE.md"
+    },
+    "architecture": {
+        "64bit": {
+            "url": [
+                "https://www.sqlite.org/2025/sqlite-tools-win-x64-3500300.zip",
+                "https://www.sqlite.org/2025/sqlite-dll-win-x64-3500300.zip"
+            ],
+            "hash": [
+                "10a23613436d5877280e42647a1e02d02261eb3235f5a4101966a7e4873a12d5",
+                "46754a93c17a7dfbc8a6ca7b1c74494ec4abc459e28049b4530634d06f2257d1"
+            ]
+        }
+    },
+    "env_add_path": ".",
+    "checkver": {
+        "url": "https://www.sqlite.org/download.html",
+        "regex": "(?sm)for SQLite version ([\\d.]+),.*?(?<year>\\d+)/sqlite-tools-win-x64-(?<clean>\\d+)"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": [
+                    "https://www.sqlite.org/$matchYear/sqlite-tools-win-x64-$matchClean.zip",
+                    "https://www.sqlite.org/$matchYear/sqlite-dll-win-x64-$matchClean.zip"
+                ]
+            }
+        }
+    }
+}

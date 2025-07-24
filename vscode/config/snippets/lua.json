@@ -1,0 +1,59 @@
+{
+    "M": {
+        "body": [
+            "local M = {}",
+            "${TM_SELECTED_TEXT}$0",
+            "return M"
+        ],
+        "prefix": "M"
+    },
+    "vim autocmd": {
+        "body": [
+            "vim.api.nvim_create_autocmd(\"${1:event}\", {",
+            "    callback = function()",
+            "        $0",
+            "    end,",
+            "    desc = \"${2:description}\",",
+            "    group = vim.api.nvim_create_augroup(\"${3:augroup}\", { clear = true }),",
+            "})"
+        ],
+        "prefix": "vim autocmd"
+    },
+    "vim keymap": {
+        "body": "vim.keymap.set(${1:\"n\"}, \"${2:key}\", ${3|function() end,\"\"|}, { desc = \"${4:description}\", silent = true })",
+        "prefix": "vim keymap"
+    },
+    "vim lazy keymap": {
+        "body": "{ \"${1:key}\", ${2|function() end,\"\"|}, desc = \"${4:description}\", mode = \"${5:n}\" },",
+        "prefix": "vim lazy keymap"
+    },
+    "vim plugin template": {
+        "body": [
+            "local M = {}",
+            "",
+            "M.setup = function(opts)",
+            "    ${TM_SELECTED_TEXT}$0",
+            "end",
+            "",
+            "return M"
+        ],
+        "prefix": "vim plugin template"
+    },
+    "vim plugin template with config": {
+        "body": [
+            "local M = {}",
+            "",
+            "local default_config = {}",
+            "local config = vim.fn.deepcopy(default_config)",
+            "",
+            "M.setup = function(opts)",
+            "    config = vim.tbl_deep_extend(\"force\", config, opts or {})",
+            "",
+            "    ${TM_SELECTED_TEXT}$0",
+            "end",
+            "",
+            "return M"
+        ],
+        "prefix": "vim plugin template with config"
+    }
+}

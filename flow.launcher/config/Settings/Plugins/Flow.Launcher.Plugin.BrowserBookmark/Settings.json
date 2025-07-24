@@ -1,0 +1,15 @@
+{
+  "OpenInNewBrowserWindow": true,
+  "BrowserPath": null,
+  "EnableFavicons": false,
+  "LoadChromeBookmark": false,
+  "LoadFirefoxBookmark": false,
+  "LoadEdgeBookmark": false,
+  "CustomChromiumBrowsers": [
+    {
+      "Name": "Brave",
+      "DataDirectoryPath": "C:\\Users\\MasouShizuka\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data",
+      "BrowserType": 0
+    }
+  ]
+}

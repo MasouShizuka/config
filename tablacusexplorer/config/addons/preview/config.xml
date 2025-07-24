@@ -1,0 +1,26 @@
+<TablacusExplorer>
+  <General>
+    <Version>1.48</Version>
+    <MinVersion>2024.2.27</MinVersion>
+    <pubDate>Fri, 22 Mar 2024 00:00:00 GMT</pubDate>
+    <Options>Common:0:0</Options>
+    <Level>2</Level>
+    <Creator>Gaku</Creator>
+    <URL>https://tablacus.github.io/TablacusExplorerAddons/</URL>
+    <License>MIT License</License>
+  </General>
+  <en>
+    <Name>Preview</Name>
+    <Description>Displays the contents of selected text, image and media files in a preview pane.</Description>
+  </en>
+  <fr>
+    <Name>Aperçu</Name>
+    <Description>Afficher le contenu des fichiers texte, image et média sélectionnés dans un panneau d&apos;aperçu.</Description>
+  </fr>
+  <ja>
+    <Name>プレビュー</Name>
+  </ja>
+  <zh>
+    <Name>預覽</Name>
+  </zh>
+</TablacusExplorer>

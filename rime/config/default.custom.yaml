@@ -1,0 +1,35 @@
+patch:
+  schema_list:
+    - schema: rime_ice
+    # - schema: t9
+    # - schema: double_pinyin
+    # - schema: double_pinyin_abc
+    # - schema: double_pinyin_mspy
+    # - schema: double_pinyin_sogou
+    - schema: double_pinyin_flypy
+    # - schema: double_pinyin_ziguang
+    - schema: melt_eng
+
+  menu:
+    page_size: 9
+
+  ascii_composer:
+    switch_key:
+      Caps_Lock: noop
+      Shift_L: commit_code
+      Shift_R: commit_text
+      Control_L: noop
+      Control_R: noop
+
+  key_binder:
+    select_first_character: "Control+j"
+    select_last_character: "Control+k"
+
+    bindings:
+      - { when: composing, accept: Left, send: Shift+Left }
+      - { when: composing, accept: Right, send: Shift+Right }
+      - { when: composing, accept: Shift+Left, send: Left }
+      - { when: composing, accept: Shift+Right, send: Right }
+
+      - { when: has_menu, accept: minus, send: Page_Up }
+      - { when: has_menu, accept: equal, send: Page_Down }

@@ -1,0 +1,15 @@
+{
+    "name": "vscode-snippets",
+    "contributes": {
+        "snippets": [
+            {
+                "language": "lua",
+                "path": "./lua.json"
+            },
+            {
+                "language": "markdown",
+                "path": "./markdown.json"
+            }
+        ]
+    }
+}

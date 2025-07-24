@@ -1,0 +1,103 @@
+{
+  "cross_monitor_move_behaviour": "Insert",
+  "app_specific_configuration_path": "applications.json",
+  "border_width": 6,
+  "border": true,
+  "border_colours": {
+    "single": "#82aaff",
+    "stack": "#c3e88d",
+    "monocle": "#ff757f",
+    "floating": "#4fd6be",
+    "unfocused": "#545c7e",
+    "unfocused_locked": "#ff007c"
+  },
+  "default_workspace_padding": 4,
+  "default_container_padding": 4,
+  "monitors": [
+    {
+      "workspaces": [
+        {
+          "name": "\uE47E",
+          "layout": "BSP"
+        },
+        {
+          "name": "\uE976",
+          "layout": "BSP"
+        },
+        {
+          "name": "\uE218",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "QQ.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "WeChat.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": "\uE342",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "cloudmusic.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "foobar2000.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": "\uE2F2",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "reminder.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "Thunder.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": "\uE28E",
+          "layout": "BSP",
+          "workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "clash-verge.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
+        },
+        {
+          "name": "\uE2A2",
+          "layout": "BSP"
+        }
+      ]
+    }
+  ],
+  "window_hiding_behaviour": "Cloak",
+  "animation": {
+    "enabled": true,
+    "duration": 100
+  },
+  "bar_configurations": [
+    "komorebi.bar.json",
+    "komorebi.bar2.json",
+    "komorebi.bar3.json"
+  ]
+}

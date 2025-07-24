@@ -1,0 +1,75 @@
+gui:
+  language: 'en'
+  expandFocusedSidePanel: true
+  timeFormat: "2006-01-02 15:04"
+  shortTimeFormat: '15:04'
+  nerdFontsVersion: '3'
+  # https://github.com/folke/tokyonight.nvim/blob/main/extras/lazygit/tokyonight_moon.yml
+  theme:
+    activeBorderColor:
+      - "#ff966c"
+      - "bold"
+    inactiveBorderColor:
+      - "#589ed7"
+    searchingActiveBorderColor:
+      - "#ff966c"
+      - "bold"
+    optionsTextColor:
+      - "#82aaff"
+    selectedLineBgColor:
+      - "#2d3f76"
+    cherryPickedCommitFgColor:
+      - "#82aaff"
+    cherryPickedCommitBgColor:
+      - "#c099ff"
+    markedBaseCommitFgColor:
+      - "#82aaff"
+    markedBaseCommitBgColor:
+      - "#ffc777"
+    unstagedChangesColor:
+      - "#c53b53"
+    defaultFgColor:
+      - "#c8d3f5"
+keybinding:
+  universal:
+    prevItem: 'k' # go one line up
+    nextItem: 'j' # go one line down
+    prevItem-alt: '<disabled>' # go one line up
+    nextItem-alt: '<disabled>' # go one line down
+    prevPage: '<c-u>' # go to next page in list
+    nextPage: '<c-d>' # go to previous page in list
+    gotoTop: 'g' # go to top of list
+    gotoBottom: 'G' # go to bottom of list
+    prevBlock: '<c-k>' # goto the previous block / panel
+    nextBlock: '<c-j>' # goto the next block / panel
+    prevBlock-alt: '<disabled>' # goto the previous block / panel
+    nextBlock-alt: '<disabled>' # goto the next block / panel
+    select: '<enter>'
+    goInto: 'l'
+    openRecentRepos: '<c-o>'
+    scrollUpMain: '<c-b>' # main panel scroll up
+    scrollDownMain: '<c-f>' # main panel scroll down
+    scrollUpMain-alt1: '<disabled>' # main panel scroll up
+    scrollDownMain-alt1: '<disabled>' # main panel scroll down
+    scrollUpMain-alt2: '<disabled>' # main panel scroll up
+    scrollDownMain-alt2: '<disabled>' # main panel scroll down
+    nextTab: '.'
+    prevTab: ','
+    nextScreenMode: '='
+    prevScreenMode: '-'
+    copyToClipboard: 'y'
+    rangeSelectUp: 'K'
+    rangeSelectDown: 'J'
+  files:
+    findBaseCommitForFixup: 'F'
+    openStatusFilter: 't'
+    copyFileInfoToClipboard: 'Y'
+  commits:
+    viewResetOptions: '<backspace>'
+    moveDownCommit: '>' # move commit down one
+    moveUpCommit: '<' # move commit up one
+    checkoutCommit: '<enter>'
+    resetCherryPick: '<c-r>'
+    copyCommitAttributeToClipboard: 'Y'
+  stash:
+    popStash: '<backspace>'

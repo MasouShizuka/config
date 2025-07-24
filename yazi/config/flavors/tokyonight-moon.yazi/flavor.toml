@@ -1,0 +1,241 @@
+# https://github.com/folke/tokyonight.nvim/blob/main/extras/yazi/tokyonight_moon.toml
+
+# : Manager {{{
+
+[mgr]
+cwd = { fg = "#828bb8", italic = true }
+
+# Hovered
+hovered         = { fg = "#222436", bg = "#82aaff" }
+preview_hovered = { fg = "#222436", bg = "#82aaff" }
+
+# Find
+find_keyword  = { fg = "#1e2030", bg = "#ff966c", bold = true }
+find_position = { fg = "#0db9d7", bg = "#203346", bold = true }
+
+# Symlink
+symlink_target = { italic = true }
+
+# Marker
+marker_copied   = { fg = "#4fd6be", bg = "#4fd6be" }
+marker_cut      = { fg = "#ff757f", bg = "#ff757f" }
+marker_marked   = { fg = "#c099ff", bg = "#c099ff" }
+marker_selected = { fg = "#82aaff", bg = "#82aaff" }
+
+# Count
+count_copied   = { fg = "#c8d3f5", bg = "#41a6b5" }
+count_cut      = { fg = "#c8d3f5", bg = "#c53b53" }
+count_selected = { fg = "#c8d3f5", bg = "#3e68d7" }
+
+# Border
+border_symbol = "│"
+border_style  = { fg = "#589ed7" }
+
+# Highlighting
+syntect_theme = ""
+
+# : }}}
+
+
+# : Tabs {{{
+
+[tabs]
+active   = { fg = "#c8d3f5", bg = "#2f334d" }
+inactive = { fg = "#3b4261", bg = "#222436" }
+
+# Separator
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
+# : }}}
+
+
+# : Mode {{{
+
+[mode]
+
+normal_main = { fg = "#1b1d2b", bg = "#82aaff", bold = true }
+normal_alt  = { fg = "#82aaff", bg = "#3b4261" }
+
+# Select mode
+select_main = { fg = "#1b1d2b", bg = "#c099ff", bold = true }
+select_alt  = { fg = "#c099ff", bg = "#3b4261" }
+
+# Unset mode
+unset_main  = { fg = "#1b1d2b", bg = "#fca7ea", bold = true }
+unset_alt   = { fg = "#fca7ea", bg = "#3b4261" }
+
+# : }}}
+
+
+# : Status bar {{{
+
+[status]
+overall   = {}
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
+# Progress
+progress_label  = { fg = "#828bb8", bold = true }
+progress_normal = { fg = "#222436" }
+progress_error  = { fg = "#ff757f" }
+
+# Permissions
+perm_sep   = { fg = "#444a73" }
+perm_type  = { fg = "#82aaff" }
+perm_read  = { fg = "#ffc777" }
+perm_write = { fg = "#ff757f" }
+perm_exec  = { fg = "#c3e88d" }
+
+
+# : }}}
+
+
+# : Which {{{
+
+[which]
+cols            = 3
+mask            = { bg = "#1e2030" }
+cand            = { fg = "#4fd6be" }
+rest            = { fg = "#82aaff" }
+desc            = { fg = "#c099ff" }
+separator       = " ➜ "
+separator_style = { fg = "#636da6" }
+
+# : }}}
+
+
+# : Confirmation {{{
+
+[confirm]
+border     = { fg = "#0db9d7" }
+title      = { fg = "#589ed7" }
+content    = {}
+list       = {}
+btn_yes    = { bg = "#2d3f76" }
+btn_no     = {}
+btn_labels = [ "  [Y]es  ", "  (N)o  " ]
+
+# : }}}
+
+
+# : Spotter {{{
+
+[spot]
+border  = { fg = "#589ed7" }
+title   = { fg = "#589ed7" }
+
+# Table
+tbl_col  = { fg = "#589ed7" }
+tbl_cell = { fg = "#ffc777", reversed = true }
+
+# : }}}
+
+
+# : Notification {{{
+
+[notify]
+title_info  = { fg = "#0db9d7" }
+title_warn  = { fg = "#ffc777" }
+title_error = { fg = "#c53b53" }
+
+# Icons
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
+
+# : }}}
+
+
+# : Picker {{{
+
+[pick]
+border   = { fg = "#589ed7" }
+active   = { fg = "#c8d3f5",  bg = "#2d3f76" }
+inactive = { fg = "#c8d3f5" }
+
+# : }}}
+
+
+# : Input {{{
+
+[input]
+border   = { fg = "#0db9d7" }
+title    = { fg = "#0db9d7" }
+value    = { fg = "#fca7ea" }
+selected = { bg = "#2d3f76" }
+
+# : }}}
+
+
+# : Completion {{{
+
+[cmp]
+border   = { fg = "#0db9d7" }
+active   = { fg = "#c8d3f5", bg = "#2d3f76" }
+inactive = { fg = "#c8d3f5" }
+
+# Icons
+icon_file    = ""
+icon_folder  = ""
+icon_command = ""
+
+# : }}}
+
+
+# : Task manager {{{
+
+[tasks]
+border  = { fg = "#589ed7" }
+title   = { fg = "#589ed7" }
+hovered = { fg = "#c8d3f5", bg="#2d3f76" }
+
+# : }}}
+
+
+# : Help menu {{{
+
+[help]
+on      = { fg = "#c3e88d" }
+run     = { fg = "#c099ff" }
+desc    = { fg = "#c8d3f5" }
+hovered = { bg = "#2f334d" }
+footer  = { fg = "#c8d3f5", bg = "#222436" }
+
+# : }}}
+
+
+# : File-specific styles {{{
+
+[filetype]
+
+rules = [
+    # Images
+    { mime = "image/*", fg = "#ffc777" },
+
+    # Media
+    { mime = "{audio,video}/*", fg = "#c099ff" },
+
+    # Archives
+    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "#fca7ea" },
+
+    # Documents
+    { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#86e1fc" },
+
+    # Empty files
+    # { mime = "inode/empty", fg = "#ff757f" },
+
+    # Special files
+    { name = "*", is = "orphan", bg = "#ff757f" },
+    { name = "*", is = "exec"  , fg = "#c3e88d" },
+
+    # Dummy files
+    { name = "*", is = "dummy", bg = "#ff757f" },
+    { name = "*/", is = "dummy", bg = "#ff757f" },
+
+    # Fallback
+    # { name = "*",  fg = "#c8d3f5" },
+    { name = "*/", fg = "#82aaff" }
+]
+
+# : }}}

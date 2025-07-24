@@ -1,0 +1,137 @@
+@charset "ISO-8859-1";
+
+:root {
+    color-scheme: dark;
+}
+
+body {
+	color: #fff;
+	background-color: #202020;
+}
+
+input[type="text"], input[type="number"], input[type="search"], select, textarea {
+	color: #fff;
+	background-color: #191919;
+	border: solid 1px #555;
+}
+
+.menu {
+	color: #fff;
+}
+
+.hoverbutton, .activebutton {
+	color: #fff;
+	background-color: #555;
+	border: solid 1px #777;
+}
+
+.hovermenu, .activemenu {
+	color: #fff;
+	background-color: #555;
+	border: 1px solid #555;
+}
+
+.tab, .tab2, .tab3 {
+	color: #fff;
+	background: #000;
+	border: 1px solid #555;
+}
+
+.tab:hover, .tab2:hover, .tab3:hover {
+	box-shadow: 0 0 0 9em rgba(134, 134, 134, 0.5) inset;
+	opacity: 1;
+	filter: alpha(style=0,opacity=100);
+}
+
+.activetab {
+	color: #fff;
+	background-color: #555;
+	border: 1px solid #555;
+}
+
+.treebutton, .treespace, .disabled {
+	color: #999;
+}
+.breadcrumb {
+	color: #fff;
+	background-color: #191919;
+}
+
+.separator {
+	color: #666;
+}
+
+.panel, .color, .block {
+	border: 1px solid #666;
+}
+
+.group {
+	border-left: 1px solid #666;
+	border-right: 1px solid #666;
+	border-bottom: 1px solid #666;
+}
+
+.oddline {
+	color: #fff;
+	background-color: #333;
+}
+
+.window {
+	color: #fff;
+	background-color: #202020;
+	border: 1px solid #666;
+}
+
+.window td {
+	border: 1px solid #666;
+}
+
+.text1 {
+	color: #fff;
+	background-color: #000;
+	border: 1px solid #666;
+}
+
+.pane {
+	color: #fff;
+	background-color: #202020;
+	border: 1px solid #666;
+}
+
+.link {
+	color: #29e;
+}
+
+.activecaption {
+	color: #fff;
+	background-color: #000;
+}
+
+@media all and (-ms-high-contrast: none) {
+	* {
+		scrollbar-base-color: #000;
+		scrollbar-face-color: #555;
+		scrollbar-track-color: #111;
+		scrollbar-arrow-color: #777;
+	}
+
+	button, input[type="button"], input[type="file"], input[type="submit"], input[type="reset"] {
+		color: #fff;
+		background-color: #191919;
+		border: solid 1px #555;
+	}
+
+	button:hover, input[type="button"]:hover, input[type="file"]:hover, input[type="submit"]:hover, input[type="reset"]:hover {
+		color: #fff;
+		background-color: #555;
+		border: solid 1px #777;
+	}
+
+	button:disabled, input[type="button"]:disabled {
+		color: #777;
+	}
+
+	input:-ms-input-placeholder {
+		color: #777;
+	}
+}

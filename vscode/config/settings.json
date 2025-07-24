@@ -1,0 +1,402 @@
+{
+    "[markdown]": {
+        "editor.quickSuggestions": {
+            "other": "on",
+            "strings": "on"
+        }
+    },
+    "[plaintext]": {
+        "editor.wordWrap": "on"
+    },
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "auto-run-command.rules": [
+        {
+            "command": [
+                "workbench.action.terminal.kill",
+                "workbench.action.closePanel",
+                "workbench.action.closeAuxiliaryBar"
+            ],
+            "condition": "always",
+            "message": "close widgets when startup"
+        }
+    ],
+    "backgroundCover.blur": 5,
+    "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
+    "backgroundCover.opacity": 0.1,
+    "code-runner.executorMap": {
+        "c": "cd $dirWithoutTrailingSlash && clang -static-libgcc $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
+        "cpp": "cd $dirWithoutTrailingSlash && clang++ -static-libstdc++ $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
+        "rust": "cargo run # $fileName",
+        "shellscript": "cd $dirWithoutTrailingSlash && sh $fileName"
+    },
+    "code-runner.runInTerminal": true,
+    "debug.console.fontSize": 16,
+    "debug.showBreakpointsInOverviewRuler": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.accessibilitySupport": "off",
+    "editor.cursorBlinking": "solid",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.cursorSurroundingLines": 5,
+    "editor.detectIndentation": false,
+    "editor.find.autoFindInSelection": "multiline",
+    "editor.find.seedSearchStringFromSelection": "selection",
+    "editor.fontFamily": "Maple Mono NF CN, Sarasa Mono SC",
+    "editor.fontLigatures": "'cv01', 'cv03', 'ss03'",
+    "editor.fontSize": 16,
+    "editor.guides.bracketPairs": true,
+    "editor.lineNumbers": "relative",
+    "editor.linkedEditing": true,
+    "editor.minimap.enabled": false,
+    "editor.renderLineHighlight": "all",
+    "editor.renderWhitespace": "trailing",
+    "editor.scrollbar.vertical": "visible",
+    "editor.showFoldingControls": "always",
+    "editor.suggest.preview": true,
+    "editor.suggest.showStatusBar": true,
+    "editor.wrappingStrategy": "advanced",
+    "explorer.confirmDragAndDrop": false,
+    "extensions.experimental.affinity": {
+        "asvetliakov.vscode-neovim": 1
+    },
+    "files.autoGuessEncoding": true,
+    "files.autoSave": "afterDelay",
+    "git.blame.editorDecoration.enabled": true,
+    "hediet.vscode-drawio.codeLinkActivated": true,
+    "json.format.keepLines": true,
+    "jupyter.askForKernelRestart": false,
+    "latex-workshop.latex.autoBuild.run": "never",
+    "latex-workshop.latex.recipe.default": "lastUsed",
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk",
+            "tools": [
+                "latexmk"
+            ]
+        },
+        {
+            "name": "latexmk (latexmkrc)",
+            "tools": [
+                "latexmk_rconly"
+            ]
+        },
+        {
+            "name": "latexmk (lualatex)",
+            "tools": [
+                "lualatexmk"
+            ]
+        },
+        {
+            "name": "latexmk (xelatex)",
+            "tools": [
+                "xelatexmk"
+            ]
+        },
+        {
+            "name": "latexmk (pdflatex)",
+            "tools": [
+                "pdflatex"
+            ]
+        },
+        {
+            "name": "latexmk (bibtex)",
+            "tools": [
+                "bibtex"
+            ]
+        },
+        {
+            "name": "xelatex -> bibtex -> xelatex * 2",
+            "tools": [
+                "xelatexmk",
+                "bibtex",
+                "xelatexmk",
+                "xelatexmk"
+            ]
+        },
+        {
+            "name": "pdflatex -> bibtex -> pdflatex * 2",
+            "tools": [
+                "pdflatex",
+                "bibtex",
+                "pdflatex",
+                "pdflatex"
+            ]
+        },
+        {
+            "name": "Compile Rnw files",
+            "tools": [
+                "rnw2tex",
+                "latexmk"
+            ]
+        },
+        {
+            "name": "Compile Jnw files",
+            "tools": [
+                "jnw2tex",
+                "latexmk"
+            ]
+        },
+        {
+            "name": "Compile Pnw files",
+            "tools": [
+                "pnw2tex",
+                "latexmk"
+            ]
+        },
+        {
+            "name": "tectonic",
+            "tools": [
+                "tectonic"
+            ]
+        }
+    ],
+    "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+    "Lua.diagnostics.globals": [
+        "mp",
+        "vim",
+        "ya"
+    ],
+    "Lua.format.defaultConfig": {
+        "max_line_length": "unset",
+        "quote_style": "double",
+        "trailing_table_separator": "smart"
+    },
+    "Lua.hint.enable": true,
+    "markdown.extension.list.indentationSize": "inherit",
+    "markdown.marp.browser": "chrome",
+    "markdown.marp.browserPath": "C:\\Users\\MasouShizuka\\scoop\\apps\\brave\\current\\brave.exe",
+    "markdown.occurrencesHighlight.enabled": true,
+    "markdown.preview.breaks": true,
+    "markdown.preview.fontSize": 16,
+    "markdown.preview.scrollEditorWithPreview": false,
+    "markdown.updateLinksOnFileMove.enabled": "always",
+    "markdownConverter.ChromiumExecutablePath": "brave.exe",
+    "markdownConverter.ConversionType": [
+        "PDF",
+        "HTML"
+    ],
+    "markdownConverter.Document.HeaderContent": {
+        "Center": "",
+        "Left": "",
+        "Right": ""
+    },
+    "mdtableeditor.commandViews": {
+        "context": [
+            "MdTableEditor.changeAlignCenter",
+            "MdTableEditor.changeAlignLeft",
+            "MdTableEditor.changeAlignRight",
+            "MdTableEditor.columnSelectEmpty",
+            "MdTableEditor.insertBottom",
+            "MdTableEditor.insertLeft",
+            "MdTableEditor.insertRight",
+            "MdTableEditor.insertTop",
+            "MdTableEditor.moveBottom",
+            "MdTableEditor.moveLeft",
+            "MdTableEditor.moveRight",
+            "MdTableEditor.moveTop",
+            "MdTableEditor.removeColumn",
+            "MdTableEditor.removeRow",
+            "MdTableEditor.sortNumberAsc",
+            "MdTableEditor.sortNumberDesc",
+            "MdTableEditor.sortTextAsc.ignore",
+            "MdTableEditor.sortTextDesc.ignore"
+        ],
+        "toolbar": []
+    },
+    "mdtableeditor.isHighlighterEnabled": false,
+    "notebook.cellToolbarLocation": {
+        "default": "left"
+    },
+    "notebook.displayOrder": [
+        "image/png",
+        "text/plain"
+    ],
+    "notebook.inlineValues": "on",
+    "notebook.output.scrolling": true,
+    "notebook.stickyScroll.enabled": true,
+    "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.terminal.shellIntegration.enabled": true,
+    "search.defaultViewMode": "tree",
+    "search.followSymlinks": false,
+    "search.showLineNumbers": true,
+    "search.smartCase": true,
+    "security.workspace.trust.enabled": false,
+    "shellcheck.exclude": [
+        "2148"
+    ],
+    "sshfs.configs": [],
+    "swapdiff.ClosePreviousDiff": true,
+    "terminal.integrated.defaultProfile.windows": "Bash",
+    "terminal.integrated.fontLigatures.enabled": true,
+    "terminal.integrated.fontSize": 16,
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.profiles.windows": {
+        "Bash": {
+            "path": "ucrt64.cmd"
+        }
+    },
+    "terminal.integrated.stickyScroll.enabled": true,
+    "terminal.integrated.tabs.location": "left",
+    "todo-tree.general.tagGroups": {
+        "FIX": [
+            "FIXME",
+            "FIXIT",
+            "FIX",
+            "BUG",
+            "ISSUE"
+        ],
+        "NOTE": [
+            "NOTE",
+            "INFO"
+        ],
+        "PREF": [
+            "PERFORMANCE",
+            "PERF",
+            "OPTIMIZE",
+            "OPTIM"
+        ],
+        "TEST": [
+            "TESTING",
+            "TEST",
+            "PASSED",
+            "FAILED"
+        ],
+        "WARN": [
+            "WARNING",
+            "WARN",
+            "XXX"
+        ]
+    },
+    "todo-tree.general.tags": [
+        "FIXME",
+        "FIXIT",
+        "FIX",
+        "BUG",
+        "ISSUE",
+        "TODO",
+        "HACK",
+        "WARNING",
+        "WARN",
+        "XXX",
+        "PERFORMANCE",
+        "PERF",
+        "OPTIMIZE",
+        "OPTIM",
+        "NOTE",
+        "INFO",
+        "TESTING",
+        "TEST",
+        "PASSED",
+        "FAILED",
+        "[ ]",
+        "[x]",
+    ],
+    "todo-tree.highlights.customHighlight": {
+        "[ ]": {
+            "icon": "issue-draft"
+        },
+        "[x]": {
+            "icon": "issue-closed"
+        },
+        "FIX": {
+            "background": "#ff757f",
+            "foreground": "#222436",
+            "icon": "bug"
+        },
+        "HACK": {
+            "background": "#ff966c",
+            "foreground": "#222436",
+            "icon": "flame"
+        },
+        "NOTE": {
+            "background": "#82aaff",
+            "foreground": "#222436",
+            "icon": "note"
+        },
+        "PREF": {
+            "background": "#fca7ea",
+            "foreground": "#222436",
+            "icon": "clock"
+        },
+        "TEST": {
+            "background": "#4fd6be",
+            "foreground": "#222436",
+            "icon": "beaker"
+        },
+        "TODO": {
+            "background": "#c3e88d",
+            "foreground": "#222436",
+            "icon": "check"
+        },
+        "WARN": {
+            "background": "#ffc777",
+            "foreground": "#222436",
+            "icon": "alert"
+        }
+    },
+    "vscode-neovim.ctrlKeysForNormalMode": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "h",
+        "j",
+        "k",
+        "l",
+        "q",
+        "r",
+        "t",
+        "u",
+        "v",
+        "x",
+        "y",
+        "z",
+        "/",
+        "]",
+        "right",
+        "left",
+        "up",
+        "down",
+        "backspace",
+        "delete"
+    ],
+    "window.density.editorTabHeight": "compact",
+    "window.dialogStyle": "custom",
+    "window.menuBarVisibility": "compact",
+    "window.zoomLevel": 2,
+    "wordcount_cjk.statusBarTextTemplate": "共 ${cjk} 字 ${en_words} 单词",
+    "wordcount_cjk.statusBarTooltipTemplate": "中文字数：\\t\\t${cjk}\\n英文单词数：\\t\\t${en_words}\\nASCII 字符数：\\t${ascii}\\n非 ASCII 字符数：\\t${total - ascii}\\n空白字符数：\\t\\t${whitespace}\\n非空白字符数：\\t${total - whitespace}\\n总字符数：\\t\\t${total}",
+    "workbench.colorCustomizations": {
+        "editor.lineHighlightBackground": "#1073cf2d",
+        "editor.lineHighlightBorder": "#9fced11f",
+        "editor.selectionHighlightBackground": "#ffffff10",
+        "editor.selectionHighlightBorder": "#dddddd",
+        "editorCursor.foreground": "#528bff",
+        "minimap.background": "#22243633",
+        "minimapSlider.background": "#9fced11f",
+        "notebook.cellEditorBackground": "#21252b",
+        "tab.activeBorder": "#ff966c",
+        "titleBar.inactiveBackground": "#222436"
+    },
+    "workbench.colorTheme": "Tokyo Night Storm",
+    "workbench.editor.focusRecentEditorAfterClose": false,
+    "workbench.editor.wrapTabs": true,
+    "workbench.editorAssociations": {
+        "{git,git-graph}:/**/*.{md,csv,svg}": "default",
+        "{hexdiff}:/**/*.*": "hexEditor.hexedit",
+        "*.drawio": "hediet.vscode-drawio-text",
+        "*.epub": "cweijan.epubViewer",
+        "*.gif": "cweijan.officeViewer",
+        "*.md": "default"
+    },
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.localHistory.enabled": false,
+    "workbench.panel.showLabels": false,
+    "workbench.startupEditor": "none"
+}

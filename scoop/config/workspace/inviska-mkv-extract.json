@@ -1,0 +1,58 @@
+{
+    "version": "11.0",
+    "description": "Inviska MKV Extract allows you to extract elements from MKV files, such as video, audio and subtitle tracks, attachments (fonts, images, etc), chapters, cuesheets, tags, cues and timecodes. Batch extract mode to easily extract the same element from multiple files. Displays track name and language for easy track identification.",
+    "homepage": "https://www.videohelp.com/software/Inviska-MKV-Extract",
+    "license": "FOSS",
+    "depends": "extras/mkvtoolnix",
+    "architecture": {
+        "64bit": {
+            "url": "https://www.videohelp.com/download/Inviska_MKV_Extract_11.0_x86-64_Portable.7z",
+            "hash": "167d64f9116d41e76b8e47744e10d1514019707fe78f213159b3b000990eb23a"
+        },
+        "32bit": {
+            "url": "https://www.videohelp.com/download/Inviska_MKV_Extract_11.0_x86_Portable.7z",
+            "hash": "14ff79ccda9eaac80d0f4da80d4d61aef3e183e340d863139d3d5ff1bb67a56a"
+        }
+    },
+    "pre_install": [
+        "if (Test-Path \"$persist_dir\\InviskaMKVExtract.ini\") {",
+        "    Copy-Item \"$persist_dir\\InviskaMKVExtract.ini\" \"$dir\"",
+        "} else {",
+        "    New-Item \"$dir\\InviskaMKVExtract.ini\" | Out-Null",
+        "}"
+    ],
+    "installer": {
+        "script": [
+            "Move-Item \"$dir\\Inviska MKV Extract\\InviskaMKVExtract.exe\" \"$dir\"",
+            "Remove-Item \"$dir\\Inviska MKV Extract\""
+        ]
+    },
+    "uninstaller": {
+        "script": [
+            "if (!(Test-Path \"$persist_dir\")) {",
+            "    New-Item -ItemType Directory -Path \"$persist_dir\" | Out-Null",
+            "}",
+            "Copy-Item \"$dir\\InviskaMKVExtract.ini\" \"$persist_dir\" -ErrorAction 'SilentlyContinue' -Force"
+        ]
+    },
+    "shortcuts": [
+        [
+            "InviskaMKVExtract.exe",
+            "Inviska MKV Extract"
+        ]
+    ],
+    "checkver": {
+        "url": "https://www.videohelp.com/software/Inviska-MKV-Extract",
+        "regex": "Download Inviska MKV Extract ([\\d.]+) Portable Windows"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://www.videohelp.com/download/Inviska_MKV_Extract_$version_x86-64_Portable.7z"
+            },
+            "32bit": {
+                "url": "https://www.videohelp.com/download/Inviska_MKV_Extract_$version_x86_Portable.7z"
+            }
+        }
+    }
+}

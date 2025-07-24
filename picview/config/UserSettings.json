@@ -1,0 +1,83 @@
+{
+  "Version": 1.6,
+  "WindowProperties": {
+    "Top": 0,
+    "Left": 0,
+    "Width": 0,
+    "Height": 0,
+    "AutoFit": false,
+    "TopMost": false,
+    "Maximized": false,
+    "Fullscreen": false,
+    "KeepCentered": false,
+    "Margin": 15
+  },
+  "UIProperties": {
+    "UserLanguage": "zh-CN",
+    "ShowInterface": false,
+    "ShowAltInterfaceButtons": true,
+    "ShowBottomNavBar": true,
+    "IsTaskbarProgressEnabled": true,
+    "NavSpeed": 0.3,
+    "Looping": true,
+    "BgColorChoice": 0,
+    "SlideShowTimer": 10,
+    "OpenInSameWindow": false,
+    "ShowConfirmationOnEsc": false,
+    "ShowRecycleConfirmation": false,
+    "ShowPermanentDeletionConfirmation": true,
+    "IsConstrainBackgroundColorEnabled": true
+  },
+  "Theme": {
+    "Dark": true,
+    "ColorTheme": 3,
+    "UseSystemTheme": false,
+    "GlassTheme": false
+  },
+  "Gallery": {
+    "IsBottomGalleryShown": false,
+    "ShowBottomGalleryInHiddenUI": false,
+    "BottomGalleryItemSize": 45,
+    "ExpandedGalleryItemSize": 45,
+    "FullGalleryStretchMode": "Uniform",
+    "BottomGalleryStretchMode": "Uniform"
+  },
+  "ImageScaling": {
+    "StretchImage": true,
+    "IsScalingSetToNearestNeighbor": false,
+    "ShowImageSideBySide": false
+  },
+  "Sorting": {
+    "Name": true,
+    "Size": false,
+    "CreationTime": false,
+    "LastAccessTime": false,
+    "LastWriteTime": false,
+    "Random": false,
+    "Ascending": true,
+    "SortPreference": 0,
+    "IncludeSubDirectories": false
+  },
+  "Zoom": {
+    "ZoomSpeed": 0.3,
+    "AvoidZoomingOut": false,
+    "CtrlZoom": false,
+    "HorizontalReverseScroll": true,
+    "ScrollEnabled": false,
+    "IsUsingTouchPad": false
+  },
+  "StartUp": {
+    "OpenLastFile": false,
+    "OpenSpecificFile": false,
+    "OpenSpecificString": "",
+    "LastFile": "",
+    "StartUpDirectory": ""
+  },
+  "Navigation": {
+    "IsFileWatcherEnabled": true,
+    "PositiveIterations": 6,
+    "NegativeIterations": 4,
+    "IsNavigatingFileHistory": true,
+    "IsNavigatingBetweenDirectories": false
+  }
+}

@@ -1,0 +1,16 @@
+﻿<TablacusExplorer Format="0" XP="0"><Item Filter="*" Type="JScript">FV.SetViewMode(4,16);
+FV.GroupBy='System.Null';
+FV.SortColumn='System.ItemTypeText';
+setTimeout(function() {
+    FV.Columns='"System.ItemNameDisplay" -2 "System.DateModified" -2 "System.Size" -2 "System.ItemTypeText" -2';
+}, 99);</Item><Item Filter="*Music*" Type="JScript">FV.SetViewMode(4,16);
+FV.GroupBy='System.Null';
+FV.SortColumn='名称';
+setTimeout(function() {
+    FV.Columns='"名称" -2 "参与创作的艺术家" -2 "唱片集" -2 "时长" -2 "比特率" -2 "大小" -2';
+}, 99);</Item><Item Filter="*Pictures*" Type="JScript">FV.SetViewMode(1,96);
+FV.GroupBy='System.Null';
+FV.SortColumn='名称';
+setTimeout(function() {
+    FV.Columns='"名称" -2 "分辨率" -2 "大小" -2 "类型" -2';
+}, 99);</Item></TablacusExplorer>

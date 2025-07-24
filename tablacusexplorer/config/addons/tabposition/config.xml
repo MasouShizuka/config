@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TablacusExplorer>
+  <General>
+    <Version>1.11</Version>
+    <MinVersion>2025.4.25</MinVersion>
+    <pubDate>Sat, 26 Apr 2025 00:00:00 GMT</pubDate>
+    <Options>Common:0:0</Options>
+    <Level>2</Level>
+    <Creator>Gaku</Creator>
+    <URL>https://tablacus.github.io/TablacusExplorerAddons/</URL>
+    <License>MIT License</License>
+  </General>
+  <en>
+    <Name>Tab position</Name>
+    <Description>Tab position of new tab and Active tab after tab closing.</Description>
+  </en>
+  <ja>
+    <Name>タブの位置</Name>
+    <Description>新しいタブやタブを閉じた際にアクティブにするタブを指定します。</Description>
+  </ja>
+  <zh>
+    <Name>分頁位置</Name>
+  </zh>
+</TablacusExplorer>

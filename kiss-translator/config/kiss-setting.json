@@ -1,0 +1,248 @@
+{
+  "darkMode": false,
+  "uiLang": "zh",
+  "minLength": 5,
+  "maxLength": 5000,
+  "newlineLength": 20,
+  "clearCache": false,
+  "injectRules": true,
+  "contextMenuType": 1,
+  "subrulesList": [
+    {
+      "url": "https://fishjar.github.io/kiss-rules/kiss-rules.json",
+      "selected": true
+    },
+    {
+      "url": "https://fishjar.github.io/kiss-rules/kiss-rules-on.json",
+      "selected": false
+    },
+    {
+      "url": "https://fishjar.github.io/kiss-rules/kiss-rules-off.json",
+      "selected": false
+    }
+  ],
+  "owSubrule": {
+    "translator": "-",
+    "fromLang": "-",
+    "toLang": "-",
+    "textStyle": "-",
+    "transOpen": "-",
+    "bgColor": "",
+    "textDiyStyle": "color: #666;\nbackground: linear-gradient(\n  45deg,\n  LightGreen 20%,\n  LightPink 20% 40%,\n  LightSalmon 40% 60%,\n  LightSeaGreen 60% 80%,\n  LightSkyBlue 80%\n);\n&:hover {\n  color: #333;\n};"
+  },
+  "transApis": {
+    "Google": {
+      "url": "https://translate.googleapis.com/translate_a/single",
+      "key": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Microsoft": {
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Baidu": {
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Tencent": {
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "DeepL": {
+      "url": "https://api-free.deepl.com/v2/translate",
+      "key": "",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "DeepLFree": {
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "DeepLX": {
+      "url": "http://localhost:1188/translate",
+      "key": "",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "NiuTrans": {
+      "url": "https://api.niutrans.com/NiuTransServer/translation",
+      "key": "",
+      "dictNo": "",
+      "memoryNo": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "OpenAI": {
+      "url": "https://api.openai.com/v1/chat/completions",
+      "key": "",
+      "model": "gpt-4",
+      "prompt": "You will be provided with a sentence in {{from}}, and your task is to translate it into {{to}}.",
+      "temperature": 0,
+      "maxTokens": 256,
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "OpenAI2": {
+      "url": "https://api.openai.com/v1/chat/completions",
+      "key": "",
+      "model": "gpt-4",
+      "prompt": "You will be provided with a sentence in {{from}}, and your task is to translate it into {{to}}.",
+      "temperature": 0,
+      "maxTokens": 256,
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "OpenAI3": {
+      "url": "https://api.openai.com/v1/chat/completions",
+      "key": "",
+      "model": "gpt-4",
+      "prompt": "You will be provided with a sentence in {{from}}, and your task is to translate it into {{to}}.",
+      "temperature": 0,
+      "maxTokens": 256,
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "Gemini": {
+      "url": "https://generativelanguage.googleapis.com/v1/models/{{model}}:generateContent?key={{key}}",
+      "key": "",
+      "model": "gemini-pro",
+      "prompt": "Translate the following text from {{from}} to {{to}}:\n\n{{text}}",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "CloudflareAI": {
+      "url": "https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/meta/m2m100-1.2b",
+      "key": "",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "Ollama": {
+      "url": "http://localhost:11434/api/generate",
+      "key": "",
+      "model": "llama3",
+      "prompt": "Translate the following text from {{from}} to {{to}}:\n\n{{text}}",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "Ollama2": {
+      "url": "http://localhost:11434/api/generate",
+      "key": "",
+      "model": "llama3",
+      "prompt": "Translate the following text from {{from}} to {{to}}:\n\n{{text}}",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "Ollama3": {
+      "url": "http://localhost:11434/api/generate",
+      "key": "",
+      "model": "llama3",
+      "prompt": "Translate the following text from {{from}} to {{to}}:\n\n{{text}}",
+      "fetchLimit": 1,
+      "fetchInterval": 500
+    },
+    "Custom": {
+      "url": "",
+      "key": "",
+      "customOption": "",
+      "reqHook": "",
+      "resHook": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Custom2": {
+      "url": "",
+      "key": "",
+      "customOption": "",
+      "reqHook": "",
+      "resHook": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Custom3": {
+      "url": "",
+      "key": "",
+      "customOption": "",
+      "reqHook": "",
+      "resHook": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Custom4": {
+      "url": "",
+      "key": "",
+      "customOption": "",
+      "reqHook": "",
+      "resHook": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    },
+    "Custom5": {
+      "url": "",
+      "key": "",
+      "customOption": "",
+      "reqHook": "",
+      "resHook": "",
+      "fetchLimit": 10,
+      "fetchInterval": 100
+    }
+  },
+  "shortcuts": {
+    "toggleTranslate": [
+      "AltLeft",
+      "KeyQ"
+    ],
+    "toggleStyle": [
+      "AltLeft",
+      "KeyC"
+    ],
+    "togglePopup": [
+      "AltLeft",
+      "KeyK"
+    ],
+    "openSetting": [
+      "AltLeft",
+      "KeyO"
+    ]
+  },
+  "inputRule": {
+    "transOpen": true,
+    "translator": "Microsoft",
+    "fromLang": "auto",
+    "toLang": "en",
+    "triggerShortcut": [
+      "AltLeft",
+      "KeyI"
+    ],
+    "triggerCount": 1,
+    "triggerTime": 200,
+    "transSign": "/"
+  },
+  "tranboxSetting": {
+    "transOpen": false,
+    "translator": "Microsoft",
+    "fromLang": "auto",
+    "toLang": "zh-CN",
+    "toLang2": "en",
+    "tranboxShortcut": [
+      "AltLeft",
+      "KeyS"
+    ],
+    "btnOffsetX": 10,
+    "btnOffsetY": 10,
+    "boxOffsetX": 0,
+    "boxOffsetY": 10,
+    "hideTranBtn": false,
+    "hideClickAway": false,
+    "simpleStyle": false,
+    "followSelection": false,
+    "triggerMode": "click",
+    "extStyles": "",
+    "enDict": "Baidu"
+  },
+  "touchTranslate": 2,
+  "blacklist": "https://fishjar.github.io/kiss-translator/options.html,\nhttps://translate.google.com,\nhttps://www.deepl.com/translator,\noapi.dingtalk.com,\nlogin.dingtalk.com",
+  "csplist": "https://github.com",
+  "transInterval": 500,
+  "langDetector": "Microsoft"
+}

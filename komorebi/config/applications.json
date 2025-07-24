@@ -1,0 +1,317 @@
+{
+  "ApplicationFrameHost": {
+    "tray_and_multi_window": [
+      {
+        "kind": "Exe",
+        "id": "ApplicationFrameHost.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "CopyQ": {
+    "ignore": [
+      {
+        "kind": "Exe",
+        "id": "copyq.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "DevEco Studio": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "SunAwtDialog",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "tray_and_multi_window": [
+      {
+        "kind": "Exe",
+        "id": "devecostudio64.exe",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "object_name_change": [
+      {
+        "kind": "Exe",
+        "id": "devecostudio64.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Everything": {
+    "tray_and_multi_window": [
+      {
+        "kind": "Class",
+        "id": "EVERYTHING",
+        "matching_strategy": "Legacy"
+      }
+    ]
+  },
+  "Everything1.5a": {
+    "manage": [
+      {
+        "kind": "Class",
+        "id": "EVERYTHING_(1.5a)",
+        "matching_strategy": "Legacy"
+      }
+    ],
+    "tray_and_multi_window": [
+      {
+        "kind": "Class",
+        "id": "EVERYTHING_(1.5a)",
+        "matching_strategy": "Legacy"
+      }
+    ]
+  },
+  "Flow Launcher": {
+    "ignore": [
+      {
+        "kind": "Exe",
+        "id": "copyq.exe",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Title",
+        "id": "Hotkey sink",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Microsoft Excel": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "_WwB",
+        "matching_strategy": "Legacy"
+      }
+    ],
+    "layered": [
+      {
+        "kind": "Exe",
+        "id": "EXCEL.EXE",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Microsoft PowerPoint": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "_WwB",
+        "matching_strategy": "Legacy"
+      }
+    ],
+    "layered": [
+      {
+        "kind": "Exe",
+        "id": "POWERPNT.EXE",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Microsoft Word": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "_WwB",
+        "matching_strategy": "Legacy"
+      }
+    ],
+    "layered": [
+      {
+        "kind": "Exe",
+        "id": "WINWORD.EXE",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "tray_and_multi_window": [
+      {
+        "kind": "Exe",
+        "id": "WINWORD.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "MyKeymap": {
+    "ignore": [
+      {
+        "kind": "Exe",
+        "id": "MyKeymap.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "PicView": {
+    "manage": [
+      {
+        "kind": "Exe",
+        "id": "PicView.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "QQ": {
+    "ignore": [
+      {
+        "kind": "Title",
+        "id": "图片查看器",
+        "matching_strategy": "Legacy"
+      },
+      {
+        "kind": "Title",
+        "id": "群聊的聊天记录",
+        "matching_strategy": "Legacy"
+      },
+      {
+        "kind": "Title",
+        "id": "语音通话",
+        "matching_strategy": "Legacy"
+      },
+      {
+        "kind": "Title",
+        "id": "QQEdit",
+        "matching_strategy": "Legacy"
+      }
+    ],
+    "tray_and_multi_window": [
+      {
+        "kind": "Exe",
+        "id": "QQ.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Reminder": {
+    "ignore": [
+      {
+        "kind": "Title",
+        "id": "Remind",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Snow Shot": {
+    "ignore": [
+      {
+        "kind": "Title",
+        "id": "Snow Shot",
+        "matching_strategy": "Legacy"
+      }
+    ]
+  },
+  "Tablacus Explorer": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "TApplication",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "manage": [
+      {
+        "kind": "Class",
+        "id": "TablacusExplorer",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "WeChat": {
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "FileListMgrWnd",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "CWebviewControlHostWnd",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "ChatWnd",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "EmotionTipWnd",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "ChatContactMenu",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Exe",
+        "id": "WeChatAppEx.exe",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "manage": [
+      {
+        "kind": "Class",
+        "id": "WeChatLoginWndForPC",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "WeChatMainWndForPC",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "tray_and_multi_window": [
+      {
+        "kind": "Class",
+        "id": "WeChatMainWndForPC",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "Windows Explorer": {
+    "tray_and_multi_window": [
+      {
+        "kind": "Exe",
+        "id": "explorer.exe",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "NativeHWNDHost",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "OperationStatusWindow",
+        "matching_strategy": "Legacy"
+      },
+      {
+        "kind": "Title",
+        "id": "Control Panel",
+        "matching_strategy": "Legacy"
+      }
+    ]
+  },
+  "Windows Installer": {
+    "ignore": [
+      {
+        "kind": "Exe",
+        "id": "msiexec.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  },
+  "WPS Office": {
+    "manage": [
+      {
+        "kind": "Exe",
+        "id": "wpsoffice.exe",
+        "matching_strategy": "Equals"
+      }
+    ]
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "SearchSources": [
+    {
+      "Title": "Google",
+      "ActionKeyword": "g",
+      "Icon": "google.png",
+      "CustomIcon": false,
+      "Url": "https://www.google.com/search?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Google Drive",
+      "ActionKeyword": "gd",
+      "Icon": "google_drive.png",
+      "CustomIcon": false,
+      "Url": "https://drive.google.com/?hl=en\u0026tab=bo#search/{q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Google Scholar",
+      "ActionKeyword": "gs",
+      "Icon": "google.png",
+      "CustomIcon": false,
+      "Url": "https://scholar.google.com/scholar?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Google Translate",
+      "ActionKeyword": "gt",
+      "Icon": "google_translate.png",
+      "CustomIcon": false,
+      "Url": "https://translate.google.com/#auto|en|{q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Gmail",
+      "ActionKeyword": "gmail",
+      "Icon": "gmail.png",
+      "CustomIcon": false,
+      "Url": "https://mail.google.com/mail/ca/u/0/#apps/{q}",
+      "Enabled": false
+    },
+    {
+      "Title": "Google Images",
+      "ActionKeyword": "image",
+      "Icon": "google.png",
+      "CustomIcon": false,
+      "Url": "https://www.google.com/search?q={q}\u0026tbm=isch",
+      "Enabled": false
+    },
+    {
+      "Title": "Google Maps",
+      "ActionKeyword": "maps",
+      "Icon": "google_maps.png",
+      "CustomIcon": false,
+      "Url": "https://maps.google.com/maps?q={q}",
+      "Enabled": false
+    },
+    {
+      "Title": "I\u0027m Feeling Lucky",
+      "ActionKeyword": "lucky",
+      "Icon": "google.png",
+      "CustomIcon": false,
+      "Url": "http://google.com/search?q={q}\u0026btnI=I",
+      "Enabled": false
+    },
+    {
+      "Title": "Bing",
+      "ActionKeyword": "bi",
+      "Icon": "bing.png",
+      "CustomIcon": false,
+      "Url": "https://www.bing.com/search?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Baidu",
+      "ActionKeyword": "bd",
+      "Icon": "baidu.png",
+      "CustomIcon": false,
+      "Url": "https://www.baidu.com/#ie=UTF-8\u0026wd={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Baidu Translate",
+      "ActionKeyword": "bt",
+      "Icon": "baidu.png",
+      "CustomIcon": false,
+      "Url": "https://fanyi.baidu.com/translate#auto/zh/{q}",
+      "Enabled": true
+    },
+    {
+      "Title": "DuckDuckGo",
+      "ActionKeyword": "dd",
+      "Icon": "duckduckgo.png",
+      "CustomIcon": false,
+      "Url": "https://duckduckgo.com/?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Yahoo",
+      "ActionKeyword": "ya",
+      "Icon": "yahoo.png",
+      "CustomIcon": false,
+      "Url": "https://www.search.yahoo.com/search?p={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "GitHub",
+      "ActionKeyword": "gh",
+      "Icon": "github.png",
+      "CustomIcon": false,
+      "Url": "https://github.com/search?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "GitHub Gist",
+      "ActionKeyword": "gg",
+      "Icon": "gist.png",
+      "CustomIcon": false,
+      "Url": "https://gist.github.com/search?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Netflix",
+      "ActionKeyword": "nf",
+      "Icon": "netflix.png",
+      "CustomIcon": false,
+      "Url": "https://www.netflix.com/search?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Stack Overflow",
+      "ActionKeyword": "so",
+      "Icon": "stackoverflow.png",
+      "CustomIcon": false,
+      "Url": "https://stackoverflow.com/search?q={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "Wikipedia",
+      "ActionKeyword": "wi",
+      "Icon": "wiki.png",
+      "CustomIcon": false,
+      "Url": "https://en.wikipedia.org/wiki/{q}",
+      "Enabled": true
+    },
+    {
+      "Title": "YouTube",
+      "ActionKeyword": "yt",
+      "Icon": "youtube.png",
+      "CustomIcon": false,
+      "Url": "https://www.youtube.com/results?search_query={q}",
+      "Enabled": true
+    },
+    {
+      "Title": "YouTube Music",
+      "ActionKeyword": "ytmusic",
+      "Icon": "youtubemusic.png",
+      "CustomIcon": false,
+      "Url": "https://music.youtube.com/search?q={q}",
+      "Enabled": false
+    },
+    {
+      "Title": "Facebook",
+      "ActionKeyword": "facebook",
+      "Icon": "facebook.png",
+      "CustomIcon": false,
+      "Url": "https://www.facebook.com/search/?q={q}",
+      "Enabled": false
+    },
+    {
+      "Title": "Twitter",
+      "ActionKeyword": "twitter",
+      "Icon": "twitter.png",
+      "CustomIcon": false,
+      "Url": "https://twitter.com/search?q={q}",
+      "Enabled": false
+    },
+    {
+      "Title": "WolframAlpha",
+      "ActionKeyword": "wolframalpha",
+      "Icon": "wolframalpha.png",
+      "CustomIcon": false,
+      "Url": "https://www.wolframalpha.com/input/?i={q}",
+      "Enabled": false
+    }
+  ],
+  "EnableSuggestion": false,
+  "Suggestion": "Google",
+  "BrowserPath": null,
+  "OpenInNewBrowser": true
+}

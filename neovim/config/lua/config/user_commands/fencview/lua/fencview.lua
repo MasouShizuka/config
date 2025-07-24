@@ -1,0 +1,960 @@
+-- fencview
+-- https://github.com/mbbill/fencview
+
+local M = {}
+
+local default_config = {
+    checklines = 10,
+    filetype = "fencview",
+    tellenc = "fencview",
+}
+local config = vim.fn.deepcopy(default_config)
+
+local FencWinName = "FencView_8795684"
+local disable_autodetection = 0
+local fencview_win = -1
+local main_win = -1
+
+local FencResCount = 0
+local FencRes = ""
+-- cp936
+local cp936 = {
+    bchar = "",
+    count = 0,
+    error = 0,
+    topChars = {
+        "\xb5\xc4", "\xd2\xbb", "\xb9\xfa", "\xd4\xda", "\xc8\xcb", "\xc1\xcb", "\xd3\xd0", "\xd6\xd0",
+        "\xca\xc7", "\xc4\xea", "\xba\xcd", "\xb4\xf3", "\xd2\xb5", "\xb2\xbb", "\xce\xaa", "\xb7\xa2",
+        "\xbb\xe1", "\xb9\xa4", "\xbe\xad", "\xc9\xcf", "\xb5\xd8", "\xca\xd0", "\xd2\xaa", "\xb8\xf6",
+        "\xb2\xfa", "\xd5\xe2", "\xb3\xf6", "\xd0\xd0", "\xd7\xf7", "\xc9\xfa", "\xbc\xd2", "\xd2\xd4",
+        "\xb3\xc9", "\xb5\xbd", "\xc8\xd5", "\xc3\xf1", "\xc0\xb4", "\xce\xd2", "\xb2\xbf", "\xb6\xd4",
+        "\xbd\xf8", "\xb6\xe0", "\xc8\xab", "\xbd\xa8", "\xcb\xfb", "\xb9\xab", "\xbf\xaa", "\xc3\xc7",
+        "\xb3\xa1", "\xd5\xb9", "\xca\xb1", "\xc0\xed", "\xd0\xc2", "\xb7\xbd", "\xd6\xf7", "\xc6\xf3",
+        "\xd7\xca", "\xca\xb5", "\xd1\xa7", "\xb1\xa8", "\xd6\xc6", "\xd5\xfe", "\xbc\xc3", "\xd3\xc3",
+        "\xcd\xac", "\xd3\xda", "\xb7\xa8", "\xb8\xdf", "\xb3\xa4", "\xcf\xd6", "\xb1\xbe", "\xd4\xc2",
+        "\xb6\xa8", "\xbb\xaf", "\xbc\xd3", "\xb6\xaf", "\xba\xcf", "\xc6\xb7", "\xd6\xd8", "\xb9\xd8",
+        "\xbb\xfa", "\xb7\xd6", "\xc1\xa6", "\xd7\xd4", "\xcd\xe2", "\xd5\xdf", "\xc7\xf8", "\xc4\xdc",
+        "\xc9\xe8", "\xba\xf3", "\xbe\xcd", "\xb5\xc8", "\xcc\xe5", "\xcf\xc2", "\xcd\xf2", "\xd4\xaa",
+        "\xc9\xe7", "\xb9\xfd", "\xc7\xb0", "\xc3\xe6", "\xc5\xa9", "\xd2\xb2", "\xb5\xc3", "\xd3\xeb",
+        "\xcb\xb5", "\xd6\xae", "\xd4\xb1", "\xb6\xf8", "\xce\xf1", "\xc0\xfb", "\xb5\xe7", "\xce\xc4",
+        "\xca\xc2", "\xbf\xc9", "\xd6\xd6", "\xd7\xdc", "\xb8\xc4", "\xc8\xfd", "\xb8\xf7", "\xba\xc3",
+        "\xbd\xf0", "\xb5\xda", "\xcb\xbe", "\xc6\xe4", "\xb4\xd3", "\xc6\xbd", "\xb4\xfa", "\xb5\xb1",
+        "\xcc\xec", "\xcb\xae", "\xca\xa1", "\xcc\xe1", "\xc9\xcc", "\xca\xae", "\xb9\xdc", "\xc4\xda",
+        "\xd0\xa1", "\xbc\xbc", "\xce\xbb", "\xc4\xbf", "\xc6\xf0", "\xba\xa3", "\xcb\xf9", "\xc1\xa2",
+        "\xd2\xd1", "\xcd\xa8", "\xc8\xeb", "\xc1\xbf", "\xd7\xd3", "\xce\xca", "\xb6\xc8", "\xb1\xb1",
+        "\xb1\xa3", "\xd0\xc4", "\xbb\xb9", "\xbf\xc6", "\xce\xaf", "\xb6\xbc", "\xca\xf5", "\xca\xb9",
+        "\xc3\xf7", "\xd7\xc5", "\xb4\xce", "\xbd\xab", "\xd4\xf6", "\xbb\xf9", "\xc3\xfb", "\xcf\xf2",
+        "\xc3\xc5", "\xd3\xa6", "\xc0\xef", "\xc3\xc0", "\xd3\xc9", "\xb9\xe6", "\xbd\xf1", "\xcc\xe2",
+        "\xbc\xc7", "\xb5\xe3", "\xbc\xc6", "\xc8\xa5", "\xc7\xbf", "\xc1\xbd", "\xd0\xa9", "\xb1\xed",
+        "\xcf\xb5", "\xb0\xec", "\xbd\xcc", "\xd5\xfd", "\xcc\xf5", "\xd7\xee", "\xb4\xef", "\xcc\xd8",
+        "\xb8\xef", "\xca\xd5", "\xb6\xfe", "\xc6\xda", "\xb2\xa2", "\xb3\xcc", "\xb3\xa7", "\xc8\xe7",
+        "\xb5\xc0", "\xbc\xca", "\xbc\xb0", "\xce\xf7", "\xbf\xda", "\xbe\xa9", "\xbb\xaa", "\xc8\xce",
+        "\xb5\xf7", "\xd0\xd4", "\xb5\xbc", "\xd7\xe9", "\xb6\xab", "\xc2\xb7", "\xbb\xee", "\xb9\xe3",
+        "\xd2\xe2", "\xb1\xc8", "\xcd\xb6", "\xbe\xf6", "\xbd\xbb", "\xcd\xb3", "\xb5\xb3", "\xc4\xcf",
+        "\xb0\xb2", "\xb4\xcb", "\xc1\xec", "\xbd\xe1", "\xd3\xaa", "\xcf\xee", "\xc7\xe9", "\xbd\xe2",
+        "\xd2\xe9", "\xd2\xe5", "\xc9\xbd", "\xcf\xc8", "\xb3\xb5", "\xc8\xbb", "\xbc\xdb", "\xb7\xc5",
+        "\xca\xc0", "\xbc\xe4", "\xd2\xf2", "\xb9\xb2", "\xd4\xba", "\xb2\xbd", "\xce\xef", "\xbd\xe7",
+        "\xbc\xaf", "\xb0\xd1", "\xb3\xd6", "\xce\xde", "\xb5\xab", "\xb3\xc7", "\xcf\xe0", "\xca\xe9",
+        "\xb4\xe5", "\xc7\xf3", "\xd6\xce", "\xc8\xa1", "\xd4\xad", "\xb4\xa6", "\xb8\xae", "\xd1\xd0",
+        "\xd6\xca", "\xd0\xc5", "\xcb\xc4", "\xd4\xcb", "\xcf\xd8", "\xbe\xfc", "\xbc\xfe", "\xd3\xfd",
+        "\xbe\xd6", "\xb8\xc9", "\xb6\xd3", "\xcd\xc5", "\xd3\xd6", "\xd4\xec", "\xd0\xce", "\xbc\xb6",
+        "\xb1\xea", "\xc1\xaa", "\xd7\xa8", "\xc9\xd9", "\xb7\xd1", "\xd0\xa7", "\xbe\xdd", "\xca\xd6",
+        "\xca\xa9", "\xc8\xa8", "\xbd\xad", "\xbd\xfc", "\xc9\xee", "\xb8\xfc", "\xc8\xcf", "\xb9\xfb",
+        "\xb8\xf1", "\xbc\xb8", "\xbf\xb4", "\xc3\xbb", "\xd6\xb0", "\xb7\xfe", "\xcc\xa8", "\xca\xbd",
+        "\xd2\xe6", "\xcf\xeb", "\xca\xfd", "\xb5\xa5", "\xd1\xf9", "\xd6\xbb", "\xb1\xbb", "\xd2\xda",
+        "\xc0\xcf", "\xca\xdc", "\xd3\xc5", "\xb3\xa3", "\xcf\xfa", "\xd6\xbe", "\xd5\xbd", "\xc1\xf7",
+        "\xba\xdc", "\xbd\xd3", "\xcf\xe7", "\xcd\xb7", "\xb8\xf8", "\xd6\xc1", "\xc4\xd1", "\xb9\xdb",
+        "\xd6\xb8", "\xb4\xb4", "\xd6\xa4", "\xd6\xaf", "\xc2\xdb", "\xb1\xf0", "\xce\xe5", "\xd0\xad",
+        "\xb1\xe4", "\xb7\xe7", "\xc5\xfa", "\xbc\xfb", "\xbe\xbf", "\xd6\xa7", "\xc4\xc7", "\xb2\xe9",
+        "\xd5\xc5", "\xbe\xab", "\xc3\xbf", "\xc1\xd6", "\xd7\xaa", "\xbb\xae", "\xd7\xbc", "\xd7\xf6",
+        "\xd0\xe8", "\xb4\xab", "\xd5\xf9", "\xcb\xb0", "\xb9\xb9", "\xbe\xdf", "\xb0\xd9", "\xbb\xf2",
+        "\xb2\xc5", "\xbb\xfd", "\xca\xc6", "\xbe\xd9", "\xb1\xd8", "\xd0\xcd", "\xd2\xd7", "\xca\xd3",
+        "\xbf\xec", "\xc0\xee", "\xb2\xce", "\xbb\xd8", "\xd2\xfd", "\xd5\xf2", "\xca\xd7", "\xcd\xc6",
+        "\xcb\xbc", "\xcd\xea", "\xcf\xfb", "\xd6\xb5", "\xb8\xc3", "\xd7\xdf", "\xd7\xb0", "\xd6\xda",
+        "\xd4\xf0", "\xb1\xb8", "\xd6\xdd", "\xb9\xa9", "\xb0\xfc", "\xb8\xb1", "\xbc\xab", "\xd5\xfb",
+        "\xc8\xb7", "\xd6\xaa", "\xc3\xb3", "\xbc\xba", "\xbb\xb7", "\xbb\xb0", "\xb7\xb4", "\xc9\xed",
+        "\xd1\xa1", "\xd1\xc7", "\xc3\xb4", "\xb4\xf8", "\xb2\xc9", "\xcd\xf5", "\xb2\xdf", "\xd5\xe6",
+        "\xc5\xae", "\xcc\xb8", "\xd1\xcf", "\xcb\xb9", "\xbf\xf6", "\xc9\xab", "\xb4\xf2", "\xb5\xc2",
+        "\xb8\xe6", "\xbd\xf6", "\xcb\xfc", "\xc6\xf8", "\xc1\xcf", "\xc9\xf1", "\xc2\xca", "\xca\xb6",
+        "\xc0\xcd", "\xbe\xb3", "\xd4\xb4", "\xc7\xe0", "\xbb\xa4", "\xc1\xd0", "\xd0\xcb", "\xd0\xed",
+        "\xbb\xa7", "\xc2\xed", "\xb8\xdb", "\xd4\xf2", "\xbd\xda", "\xbf\xee", "\xc0\xad", "\xd6\xb1",
+        "\xb0\xb8", "\xb9\xc9", "\xb9\xe2", "\xbd\xcf", "\xba\xd3", "\xbb\xa8", "\xb8\xf9", "\xb2\xbc",
+        "\xcf\xdf", "\xcd\xc1", "\xbf\xcb", "\xd4\xd9", "\xc8\xba", "\xd2\xbd", "\xc7\xe5", "\xcb\xd9",
+        "\xc2\xc9", "\xcb\xfd", "\xd7\xe5", "\xc0\xfa", "\xb7\xc7", "\xb8\xd0", "\xd5\xbc", "\xd0\xf8",
+        "\xca\xa6", "\xba\xce", "\xd3\xb0", "\xb9\xa6", "\xb8\xba", "\xd1\xe9", "\xcd\xfb", "\xb2\xc6",
+        "\xc0\xe0", "\xbb\xf5", "\xd4\xbc", "\xd2\xd5", "\xca\xdb", "\xc1\xac", "\xbc\xcd", "\xb0\xb4",
+        "\xd1\xb6", "\xca\xb7", "\xca\xbe", "\xcf\xf3", "\xd1\xf8", "\xbb\xf1", "\xca\xaf", "\xca\xb3",
+        "\xd7\xa5", "\xb8\xbb", "\xc4\xa3", "\xca\xbc", "\xd7\xa1", "\xc8\xfc", "\xbf\xcd", "\xd4\xbd",
+        "\xce\xc5", "\xd1\xeb", "\xcf\xaf", "\xbc\xe1" },
+}
+-- cp950
+local cp950 = {
+    bchar = "",
+    count = 0,
+    error = 0,
+    topChars = {
+        "\xaa\xba", "\xa4\x40", "\xb0\xea", "\xa6\x62", "\xa4\x48", "\xa4\x46", "\xa6\xb3", "\xa4\xa4",
+        "\xac\x4f", "\xa6\x7e", "\xa9\x4d", "\xa4\x6a", "\xb7\x7e", "\xa4\xa3", "\xac\xb0", "\xb5\x6f",
+        "\xb7\x7c", "\xa4\x75", "\xb8\x67", "\xa4\x57", "\xa6\x61", "\xa5\xab", "\xad\x6e", "\xad\xd3",
+        "\xb2\xa3", "\xb3\x6f", "\xa5\x58", "\xa6\xe6", "\xa7\x40", "\xa5\xcd", "\xae\x61", "\xa5\x48",
+        "\xa6\xa8", "\xa8\xec", "\xa4\xe9", "\xa5\xc1", "\xa8\xd3", "\xa7\xda", "\xb3\xa1", "\xb9\xef",
+        "\xb6\x69", "\xa6\x68", "\xa5\xfe", "\xab\xd8", "\xa5\x4c", "\xa4\xbd", "\xb6\x7d", "\xad\xcc",
+        "\xb3\xf5", "\xae\x69", "\xae\xc9", "\xb2\x7a", "\xb7\x73", "\xa4\xe8", "\xa5\x44", "\xa5\xf8",
+        "\xb8\xea", "\xb9\xea", "\xbe\xc7", "\xb3\xf8", "\xa8\xee", "\xac\x46", "\xc0\xd9", "\xa5\xce",
+        "\xa6\x50", "\xa4\x5f", "\xaa\x6b", "\xb0\xaa", "\xaa\xf8", "\xb2\x7b", "\xa5\xbb", "\xa4\xeb",
+        "\xa9\x77", "\xa4\xc6", "\xa5\x5b", "\xb0\xca", "\xa6\x58", "\xab\x7e", "\xad\xab", "\xc3\xf6",
+        "\xbe\xf7", "\xa4\xc0", "\xa4\x4f", "\xa6\xdb", "\xa5\x7e", "\xaa\xcc", "\xb0\xcf", "\xaf\xe0",
+        "\xb3\x5d", "\xab\xe1", "\xb4\x4e", "\xb5\xa5", "\xc5\xe9", "\xa4\x55", "\xb8\x55", "\xa4\xb8",
+        "\xaa\xc0", "\xb9\x4c", "\xab\x65", "\xad\xb1", "\xb9\x41", "\xa4\x5d", "\xb1\x6f", "\xbb\x50",
+        "\xbb\xa1", "\xa4\xa7", "\xad\xfb", "\xa6\xd3", "\xb0\xc8", "\xa7\x51", "\xb9\x71", "\xa4\xe5",
+        "\xa8\xc6", "\xa5\x69", "\xba\xd8", "\xc1\x60", "\xa7\xef", "\xa4\x54", "\xa6\x55", "\xa6\x6e",
+        "\xaa\xf7", "\xb2\xc4", "\xa5\x71", "\xa8\xe4", "\xb1\x71", "\xa5\xad", "\xa5\x4e", "\xb7\xed",
+        "\xa4\xd1", "\xa4\xf4", "\xac\xd9", "\xb4\xa3", "\xb0\xd3", "\xa4\x51", "\xba\xde", "\xa4\xba",
+        "\xa4\x70", "\xa7\xde", "\xa6\xec", "\xa5\xd8", "\xb0\x5f", "\xae\xfc", "\xa9\xd2", "\xa5\xdf",
+        "\xa4\x77", "\xb3\x71", "\xa4\x4a", "\xb6\x71", "\xa4\x6c", "\xb0\xdd", "\xab\xd7", "\xa5\x5f",
+        "\xab\x4f", "\xa4\xdf", "\xc1\xd9", "\xac\xec", "\xa9\x65", "\xb3\xa3", "\xb3\x4e", "\xa8\xcf",
+        "\xa9\xfa", "\xb5\xdb", "\xa6\xb8", "\xb1\x4e", "\xbc\x57", "\xb0\xf2", "\xa6\x57", "\xa6\x56",
+        "\xaa\xf9", "\xc0\xb3", "\xb8\xcc", "\xac\xfc", "\xa5\xd1", "\xb3\x57", "\xa4\xb5", "\xc3\x44",
+        "\xb0\x4f", "\xc2\x49", "\xad\x70", "\xa5\x68", "\xb1\x6a", "\xa8\xe2", "\xa8\xc7", "\xaa\xed",
+        "\xa8\x74", "\xbf\xec", "\xb1\xd0", "\xa5\xbf", "\xb1\xf8", "\xb3\xcc", "\xb9\x46", "\xaf\x53",
+        "\xad\xb2", "\xa6\xac", "\xa4\x47", "\xb4\xc1", "\xa8\xc3", "\xb5\x7b", "\xbc\x74", "\xa6\x70",
+        "\xb9\x44", "\xbb\xda", "\xa4\xce", "\xa6\xe8", "\xa4\x66", "\xa8\xca", "\xb5\xd8", "\xa5\xf4",
+        "\xbd\xd5", "\xa9\xca", "\xbe\xc9", "\xb2\xd5", "\xaa\x46", "\xb8\xf4", "\xac\xa1", "\xbc\x73",
+        "\xb7\x4e", "\xa4\xf1", "\xa7\xeb", "\xa8\x4d", "\xa5\xe6", "\xb2\xce", "\xc4\xd2", "\xab\x6e",
+        "\xa6\x77", "\xa6\xb9", "\xbb\xe2", "\xb5\xb2", "\xc0\xe7", "\xb6\xb5", "\xb1\xa1", "\xb8\xd1",
+        "\xc4\xb3", "\xb8\x71", "\xa4\x73", "\xa5\xfd", "\xa8\xae", "\xb5\x4d", "\xbb\xf9", "\xa9\xf1",
+        "\xa5\x40", "\xb6\xa1", "\xa6\x5d", "\xa6\x40", "\xb0\x7c", "\xa8\x42", "\xaa\xab", "\xac\xc9",
+        "\xb6\xb0", "\xa7\xe2", "\xab\xf9", "\xb5\x4c", "\xa6\xfd", "\xab\xb0", "\xac\xdb", "\xae\xd1",
+        "\xa7\xf8", "\xa8\x44", "\xaa\x76", "\xa8\xfa", "\xad\xec", "\xb3\x42", "\xa9\xb2", "\xac\xe3",
+        "\xbd\xe8", "\xab\x48", "\xa5\x7c", "\xb9\x42", "\xbf\xa4", "\xad\x78", "\xa5\xf3", "\xa8\x7c",
+        "\xa7\xbd", "\xb7\x46", "\xb6\xa4", "\xb9\xce", "\xa4\x53", "\xb3\x79", "\xa7\xce", "\xaf\xc5",
+        "\xbc\xd0", "\xc1\x70", "\xb1\x4d", "\xa4\xd6", "\xb6\x4f", "\xae\xc4", "\xbe\xda", "\xa4\xe2",
+        "\xac\x49", "\xc5\x76", "\xa6\xbf", "\xaa\xf1", "\xb2\x60", "\xa7\xf3", "\xbb\x7b", "\xaa\x47",
+        "\xae\xe6", "\xb4\x58", "\xac\xdd", "\xa8\x53", "\xc2\xbe", "\xaa\x41", "\xa5\x78", "\xa6\xa1",
+        "\xaf\x71", "\xb7\x51", "\xbc\xc6", "\xb3\xe6", "\xbc\xcb", "\xa5\x75", "\xb3\x51", "\xbb\xf5",
+        "\xa6\xd1", "\xa8\xfc", "\xc0\x75", "\xb1\x60", "\xbe\x50", "\xa7\xd3", "\xbe\xd4", "\xac\x79",
+        "\xab\xdc", "\xb1\xb5", "\xb6\x6d", "\xc0\x59", "\xb5\xb9", "\xa6\xdc", "\xc3\xf8", "\xc6\x5b",
+        "\xab\xfc", "\xb3\xd0", "\xb5\xfd", "\xc2\xb4", "\xbd\xd7", "\xa7\x4f", "\xa4\xad", "\xa8\xf3",
+        "\xc5\xdc", "\xad\xb7", "\xa7\xe5", "\xa8\xa3", "\xa8\x73", "\xa4\xe4", "\xa8\xba", "\xac\x64",
+        "\xb1\x69", "\xba\xeb", "\xa8\x43", "\xaa\x4c", "\xc2\xe0", "\xb9\xba", "\xb7\xc7", "\xb0\xb5",
+        "\xbb\xdd", "\xb6\xc7", "\xaa\xa7", "\xb5\x7c", "\xba\x63", "\xa8\xe3", "\xa6\xca", "\xa9\xce",
+        "\xa4\x7e", "\xbf\x6e", "\xb6\xd5", "\xc1\x7c", "\xa5\xb2", "\xab\xac", "\xa9\xf6", "\xb5\xf8",
+        "\xa7\xd6", "\xa7\xf5", "\xb0\xd1", "\xa6\x5e", "\xa4\xde", "\xc2\xed", "\xad\xba", "\xb1\xc0",
+        "\xab\xe4", "\xa7\xb9", "\xae\xf8", "\xad\xc8", "\xb8\xd3", "\xa8\xab", "\xb8\xcb", "\xb2\xb3",
+        "\xb3\x64", "\xb3\xc6", "\xa6\x7b", "\xa8\xd1", "\xa5\x5d", "\xb0\xc6", "\xb7\xa5", "\xbe\xe3",
+        "\xbd\x54", "\xaa\xbe", "\xb6\x54", "\xa4\x76", "\xc0\xf4", "\xb8\xdc", "\xa4\xcf", "\xa8\xad",
+        "\xbf\xef", "\xa8\xc8", "\xbb\xf2", "\xb1\x61", "\xb1\xc4", "\xa4\xfd", "\xb5\xa6", "\xaf\x75",
+        "\xa4\x6b", "\xbd\xcd", "\xc4\x59", "\xb4\xb5", "\xaa\x70", "\xa6\xe2", "\xa5\xb4", "\xbc\x77",
+        "\xa7\x69", "\xb6\xc8", "\xa5\xa6", "\xae\xf0", "\xae\xc6", "\xaf\xab", "\xb2\x76", "\xc3\xd1",
+        "\xb3\xd2", "\xb9\xd2", "\xb7\xbd", "\xab\x43", "\xc5\x40", "\xa6\x43", "\xbf\xb3", "\xb3\x5c",
+        "\xa4\xe1", "\xb0\xa8", "\xb4\xe4", "\xab\x68", "\xb8\x60", "\xb4\xda", "\xa9\xd4", "\xaa\xbd",
+        "\xae\xd7", "\xaa\xd1", "\xa5\xfa", "\xb8\xfb", "\xaa\x65", "\xaa\xe1", "\xae\xda", "\xa5\xac",
+        "\xbd\x75", "\xa4\x67", "\xa7\x4a", "\xa6\x41", "\xb8\x73", "\xc2\xe5", "\xb2\x4d", "\xb3\x74",
+        "\xab\xdf", "\xa6\x6f", "\xb1\xda", "\xbe\xfa", "\xab\x44", "\xb7\x50", "\xa6\xfb", "\xc4\xf2",
+        "\xae\x76", "\xa6\xf3", "\xbc\x76", "\xa5\x5c", "\xad\x74", "\xc5\xe7", "\xb1\xe6", "\xb0\x5d",
+        "\xc3\xfe", "\xb3\x66", "\xac\xf9", "\xc3\xc0", "\xb0\xe2", "\xb3\x73", "\xac\xf6", "\xab\xf6",
+        "\xb0\x54", "\xa5\x76", "\xa5\xdc", "\xb6\x48", "\xbe\x69", "\xc0\xf2", "\xa5\xdb", "\xad\xb9",
+        "\xa7\xec", "\xb4\x49", "\xbc\xd2", "\xa9\x6c", "\xa6\xed", "\xc1\xc9", "\xab\xc8", "\xb6\x56",
+        "\xbb\x44", "\xa5\xa1", "\xae\x75", "\xb0\xed" },
+}
+-- euc_tw
+local euc_tw = {
+    bchar = "",
+    count = 0,
+    error = 0,
+    topChars = {
+        "\xce\xfb", "\xc4\xa1", "\xd9\xcf", "\xc7\xe3", "\xc4\xa9", "\xc4\xa7", "\xc8\xb4", "\xc4\xe3",
+        "\xd1\xd2", "\xc8\xa1", "\xcc\xcf", "\xc4\xcb", "\xe4\xc6", "\xc4\xe2", "\xd2\xb3", "\xe0\xf5",
+        "\xe4\xc4", "\xc4\xd6", "\xe5\xee", "\xc4\xb8", "\xc7\xe2", "\xc6\xcb", "\xd3\xd1", "\xd4\xb6",
+        "\xdc\xa8", "\xdd\xd5", "\xc5\xf8", "\xc8\xe7", "\xc9\xa2", "\xc6\xed", "\xd5\xa5", "\xc5\xe8",
+        "\xc8\xa9", "\xcc\xaf", "\xc5\xca", "\xc6\xe1", "\xcb\xf4", "\xca\xbc", "\xdd\xe5", "\xe8\xd7",
+        "\xe2\xd0", "\xc7\xe9", "\xc7\xc0", "\xd0\xfa", "\xc5\xec", "\xc4\xfc", "\xe2\xe4", "\xd4\xaf",
+        "\xde\xdb", "\xd5\xad", "\xd5\xeb", "\xdc\xa1", "\xe4\xbb", "\xc5\xc9", "\xc5\xe4", "\xc7\xba",
+        "\xe6\xf1", "\xe8\xd2", "\xf0\xd0", "\xde\xde", "\xcc\xb1", "\xd1\xc9", "\xf4\xa4", "\xc6\xee",
+        "\xc7\xd1", "\xc4\xc0", "\xce\xce", "\xd8\xed", "\xcf\xdb", "\xdc\xa2", "\xc6\xdb", "\xc5\xcc",
+        "\xcc\xf9", "\xc5\xa7", "\xc5\xfb", "\xd9\xaf", "\xc7\xd9", "\xd0\xc2", "\xd3\xec", "\xf9\xc3",
+        "\xf1\xa2", "\xc5\xa1", "\xc4\xb0", "\xc8\xdc", "\xc6\xc0", "\xcf\xaf", "\xd9\xb4", "\xd7\xe4",
+        "\xdd\xc3", "\xd1\xa5", "\xde\xf3", "\xe1\xab", "\xfc\xd5", "\xc4\xb6", "\xe5\xdc", "\xc4\xf7",
+        "\xcf\xa3", "\xe7\xb4", "\xd0\xa9", "\xd3\xf2", "\xe7\xa9", "\xc4\xbe", "\xda\xb5", "\xea\xd8",
+        "\xeb\xa9", "\xc4\xe6", "\xd4\xde", "\xc8\xd4", "\xd9\xad", "\xc9\xb3", "\xe7\xd9", "\xc5\xc6",
+        "\xcb\xe7", "\xc6\xab", "\xea\xa1", "\xf4\xea", "\xca\xd1", "\xc4\xb5", "\xc7\xd6", "\xc7\xef",
+        "\xcf\xda", "\xdc\xc9", "\xc6\xb3", "\xcc\xa7", "\xda\xb7", "\xc6\xcd", "\xc5\xee", "\xe5\xb5",
+        "\xc5\xb2", "\xc5\xd5", "\xd2\xdc", "\xdf\xc8", "\xd9\xb8", "\xc4\xb2", "\xea\xa7", "\xc4\xf9",
+        "\xc4\xd1", "\xca\xc0", "\xc8\xed", "\xc6\xf8", "\xd8\xc4", "\xd6\xc0", "\xcd\xd4", "\xc7\xa1",
+        "\xc4\xd8", "\xdd\xd7", "\xc4\xab", "\xe2\xd8", "\xc4\xcd", "\xd9\xc2", "\xd0\xf9", "\xc6\xa1",
+        "\xcf\xf1", "\xc5\xc0", "\xf5\xe4", "\xd2\xef", "\xcc\xe7", "\xdd\xe7", "\xdd\xb4", "\xcb\xf0",
+        "\xcd\xfc", "\xe1\xe1", "\xc8\xb9", "\xd9\xf2", "\xec\xc1", "\xd9\xd7", "\xc7\xd8", "\xc7\xd7",
+        "\xcf\xdc", "\xf3\xdc", "\xe6\xd3", "\xd3\xa1", "\xc6\xf1", "\xdd\xbd", "\xc4\xf4", "\xf7\xee",
+        "\xd8\xb4", "\xf6\xb5", "\xd3\xd3", "\xc6\xaa", "\xda\xb0", "\xcc\xa5", "\xcb\xe8", "\xcf\xd0",
+        "\xcb\xb7", "\xf2\xd6", "\xda\xf4", "\xc6\xdf", "\xdb\xbe", "\xde\xb2", "\xe7\xae", "\xd6\xd6",
+        "\xd3\xf3", "\xc8\xad", "\xc4\xa8", "\xdf\xe6", "\xcb\xe4", "\xe1\xa3", "\xec\xde", "\xc7\xf1",
+        "\xe7\xac", "\xeb\xe3", "\xc5\xaf", "\xc8\xe9", "\xc4\xc7", "\xcb\xeb", "\xe1\xde", "\xc7\xb6",
+        "\xee\xfe", "\xcd\xcc", "\xf0\xd2", "\xdc\xda", "\xce\xa9", "\xe6\xfb", "\xd2\xa4", "\xec\xdd",
+        "\xe3\xf4", "\xc5\xd2", "\xca\xcd", "\xca\xee", "\xc7\xa8", "\xdc\xd3", "\xfa\xdd", "\xd0\xb2",
+        "\xc7\xf8", "\xc8\xba", "\xeb\xeb", "\xe1\xb8", "\xf4\xb2", "\xe2\xfa", "\xda\xc5", "\xe6\xd8",
+        "\xfa\xbe", "\xe5\xf8", "\xc4\xd4", "\xc7\xbf", "\xcb\xcf", "\xe0\xd3", "\xec\xa4", "\xcd\xf3",
+        "\xc5\xe0", "\xe2\xe6", "\xc7\xde", "\xc7\xc1", "\xd8\xe1", "\xca\xe3", "\xce\xec", "\xd2\xcc",
+        "\xe2\xf5", "\xca\xc4", "\xd1\xbd", "\xe0\xd2", "\xc8\xfe", "\xd0\xd2", "\xd2\xde", "\xd5\xf3",
+        "\xca\xda", "\xca\xe5", "\xce\xd9", "\xcc\xbd", "\xd4\xcf", "\xdd\xa8", "\xcd\xb4", "\xd2\xe6",
+        "\xef\xb3", "\xcf\xea", "\xc6\xbe", "\xe7\xaa", "\xf1\xec", "\xd3\xdb", "\xc7\xb5", "\xcb\xbf",
+        "\xc9\xfd", "\xe3\xec", "\xe2\xe9", "\xe8\xb6", "\xc4\xb4", "\xdd\xdf", "\xca\xb0", "\xd7\xc8",
+        "\xed\xba", "\xf4\xfa", "\xd9\xf1", "\xc5\xb7", "\xe2\xb6", "\xd5\xe6", "\xf0\xe3", "\xc5\xc3",
+        "\xd1\xcc", "\xfb\xe2", "\xc8\xc0", "\xcf\xd4", "\xdb\xe5", "\xca\xd5", "\xeb\xa5", "\xce\xaa",
+        "\xd6\xaa", "\xde\xfd", "\xd2\xe0", "\xca\xf4", "\xf7\xaa", "\xce\xa4", "\xc6\xba", "\xc8\xa2",
+        "\xd6\xf4", "\xe3\xf7", "\xed\xb0", "\xde\xcc", "\xed\xb5", "\xc6\xb7", "\xdd\xb7", "\xeb\xfe",
+        "\xc8\xd2", "\xcc\xbf", "\xf3\xc0", "\xda\xa6", "\xef\xda", "\xca\xb5", "\xf0\xdd", "\xd1\xfc",
+        "\xd0\xfe", "\xda\xd9", "\xe2\xd4", "\xf3\xa4", "\xe1\xbf", "\xc8\xdd", "\xf9\xc5", "\xfd\xa8",
+        "\xd1\xc0", "\xde\xb6", "\xe2\xa5", "\xf6\xfe", "\xef\xa2", "\xc9\xb1", "\xc4\xec", "\xcc\xb6",
+        "\xfc\xc8", "\xd3\xf8", "\xca\xc7", "\xcb\xc4", "\xcb\xb6", "\xc5\xc5", "\xcb\xdb", "\xd1\xe7",
+        "\xda\xaf", "\xea\xb4", "\xca\xe4", "\xce\xaf", "\xf7\xcb", "\xe8\xa2", "\xe4\xed", "\xd8\xf8",
+        "\xeb\xe6", "\xe3\xae", "\xce\xe8", "\xe1\xa4", "\xe9\xac", "\xcc\xa6", "\xc8\xcb", "\xcd\xd0",
+        "\xc4\xdf", "\xf1\xd8", "\xe3\xbc", "\xf5\xa8", "\xc6\xd2", "\xd0\xce", "\xcd\xf8", "\xe1\xfe",
+        "\xca\xb8", "\xca\xd7", "\xd9\xb6", "\xc7\xdf", "\xc5\xbf", "\xf7\xd8", "\xd3\xfb", "\xda\xe4",
+        "\xd1\xa8", "\xc9\xf9", "\xd6\xbc", "\xd4\xab", "\xe6\xda", "\xcb\xcc", "\xe6\xd2", "\xdc\xb8",
+        "\xdd\xca", "\xde\xac", "\xc7\xfc", "\xcb\xf2", "\xc5\xfd", "\xd9\xab", "\xe4\xcb", "\xf0\xec",
+        "\xed\xfd", "\xcf\xa1", "\xe2\xbb", "\xc4\xd7", "\xf4\xbf", "\xe6\xe3", "\xc5\xb0", "\xcb\xce",
+        "\xf2\xd9", "\xcb\xe9", "\xeb\xfb", "\xda\xa7", "\xda\xe8", "\xc5\xde", "\xe1\xac", "\xd6\xf8",
+        "\xc4\xcc", "\xee\xf6", "\xf9\xe4", "\xdf\xda", "\xce\xd3", "\xc8\xe3", "\xc6\xd4", "\xec\xe1",
+        "\xc9\xcb", "\xe3\xaf", "\xc6\xc6", "\xd6\xb4", "\xd5\xe8", "\xd7\xae", "\xdb\xfb", "\xf8\xfc",
+        "\xde\xb8", "\xe8\xba", "\xe4\xe3", "\xcf\xe5", "\xfb\xac", "\xc7\xc4", "\xf1\xfb", "\xdd\xc2",
+        "\xc5\xc2", "\xd8\xeb", "\xe0\xab", "\xd0\xac", "\xe5\xe7", "\xe0\xa1", "\xcd\xd6", "\xce\xfe",
+        "\xd5\xf9", "\xcf\xb4", "\xc7\xbc", "\xe7\xa4", "\xce\xc8", "\xcf\xc4", "\xd5\xfc", "\xc6\xcc",
+        "\xee\xc0", "\xc4\xc8", "\xc9\xac", "\xc7\xc2", "\xe5\xfa", "\xf7\xd0", "\xdb\xd2", "\xdd\xda",
+        "\xd1\xa3", "\xc7\xf0", "\xda\xfe", "\xf1\xa5", "\xcf\xe6", "\xe3\xf6", "\xc8\xfc", "\xfa\xfd",
+        "\xd5\xba", "\xc8\xf4", "\xec\xe0", "\xc5\xfc", "\xd3\xd7", "\xfc\xd3", "\xdb\xac", "\xd8\xc2",
+        "\xf9\xcb", "\xdd\xcc", "\xd2\xfc", "\xf8\xeb", "\xd9\xc7", "\xdd\xd9", "\xd2\xf9", "\xd1\xba",
+        "\xd8\xb9", "\xc6\xb8", "\xc6\xfc", "\xe2\xaf", "\xef\xf2", "\xf4\xbd", "\xc6\xfb", "\xd3\xfa",
+        "\xca\xce", "\xde\xee", "\xed\xbc", "\xcc\xee", "\xc8\xee", "\xf5\xd4", "\xd0\xea", "\xe2\xbd",
+        "\xea\xcc", "\xc6\xc1", "\xd5\xb9", "\xd9\xd2" },
+}
+-- cp932
+local cp932 = {
+    bchar = "",
+    count = 0,
+    error = 0,
+    topChars = {
+        "\x82\xb5", "\x82\xf0", "\x82\xcc", "\x82\xb7", "\x82\xdc", "\x82\xc9", "\x82\xe9", "\x81\x5b",
+        "\x82\xc6", "\x82\xcd", "\x83\x93", "\x83\x8b", "\x83\x43", "\x83\x76", "\x82\xc5", "\x82\xa4",
+        "\x82\xc4", "\x83\x5e", "\x83\x58", "\x82\xa2", "\x8d\x73", "\x82\xe5", "\x82\xb1", "\x82\xbd",
+        "\x82\xea", "\x83\x68", "\x82\xaa", "\x93\xae", "\x83\x62", "\x83\x4a", "\x82\xc8", "\x83\x8c",
+        "\x83\x7d", "\x83\x5c", "\x82\xe8", "\x88\xda", "\x82\xb3", "\x83\x52", "\x82\xe7", "\x82\xa9",
+        "\x83\x67", "\x83\x74", "\x95\xb6", "\x89\xba", "\x83\x65", "\x83\x40", "\x83\x4c", "\x82\xe0",
+        "\x89\x9f", "\x83\x82", "\x82\xab", "\x92\x75", "\x8e\x9a", "\x8f\x9c", "\x8d\xed", "\x82\xe6",
+        "\x82\xc1", "\x82\xad", "\x82\xc2", "\x8c\xea", "\x93\xfc", "\x82\xdd", "\x83\x56", "\x82\xbb",
+        "\x8e\xa6", "\x83\x49", "\x88\xc8", "\x82\xaf", "\x82\xa6", "\x92\x50", "\x8e\x67", "\x8d\x58",
+        "\x95\xcf", "\x83\x87", "\x82\xd6", "\x8d\xf5", "\x8e\x9f", "\x8c\x9f", "\x8d\xc5", "\x91\x53",
+        "\x91\x7d", "\x88\xca", "\x82\xa0", "\x82\xdf", "\x8a\xd4", "\x8a\xb7", "\x96\xbc", "\x88\xe1",
+        "\x8f\x49", "\x95\xfb", "\x8f\x89", "\x83\x8a", "\x83\x79", "\x8c\xe3", "\x95\xd4", "\x8c\x4a",
+        "\x89\xc1", "\x91\x4f", "\x83\x45", "\x83\x42", "\x82\xce", "\x97\x70", "\x8e\xc0", "\x82\xed",
+        "\x97\x76", "\x90\xb3", "\x90\x94", "\x88\xea", "\x83\x4e", "\x83\x41", "\x82\xf1", "\x82\xbe",
+        "\x95\x94", "\x92\xc7", "\x97\x6c", "\x96\x96", "\x91\xb6", "\x8e\xe6", "\x83\x66", "\x8d\x9e",
+        "\x8f\xc1", "\x97\xcd", "\x83\x85", "\x83\x60", "\x82\xb9", "\x95\x5c", "\x8a\x6d", "\x92\xe8",
+        "\x83\x77", "\x83\x6d", "\x93\xaa", "\x94\x46", "\x96\xda", "\x93\x78", "\x91\xe5", "\x8d\xec",
+        "\x8f\xe3", "\x82\xe2", "\x82\xb6", "\x93\xc7", "\x8a\xae", "\x8e\x6e", "\x91\xbd", "\x8f\xea",
+        "\x8b\xe5", "\x90\xe6", "\x95\xdb", "\x91\xcc", "\x97\xb9", "\x8a\x4a", "\x8b\x4e", "\x8c\xa9",
+        "\x96\xf1", "\x91\xce", "\x8d\x87", "\x92\x6c", "\x83\x57", "\x91\x49", "\x90\x69", "\x90\xdd",
+        "\x8f\x91", "\x8e\x9e", "\x8f\xac", "\x8c\xfc", "\x93\xaf", "\x89\xbd", "\x82\xc7", "\x96\x40",
+        "\x96\xdf", "\x89\xf1", "\x8f\x6f", "\x83\x8d", "\x82\xb8", "\x82\xa8", "\x8f\x57", "\x8d\xdb",
+        "\x8e\x8e", "\x95\xe2", "\x95\xd2", "\x94\xd4", "\x8c\xbb", "\x96\x7b", "\x91\xf0", "\x94\xf6",
+        "\x95\xaa", "\x8f\x43", "\x97\xe1", "\x83\x89", "\x96\xca", "\x97\x97", "\x8a\x6f", "\x91\xb1",
+        "\x89\xe6", "\x8a\xf9", "\x8f\x8a", "\x8b\xad", "\x8d\xc4", "\x83\x73", "\x83\x47", "\x83\x46",
+        "\x93\xc1", "\x96\xb3", "\x90\xac", "\x95\x4b", "\x8a\x77", "\x8a\x4f", "\x8d\xdd", "\x95\x74",
+        "\x91\xbc", "\x83\x6f", "\x82\xde", "\x82\x9f", "\x92\xb2", "\x90\xe0", "\x94\x5c", "\x8f\x4b",
+        "\x94\xcd", "\x92\x5b", "\x92\xbc", "\x8f\xf3", "\x94\xc5", "\x97\x88", "\x96\xbe", "\x8a\x87",
+        "\x91\xd4", "\x8c\xca", "\x8a\xdc", "\x8d\x86", "\x95\xca", "\x93\xe0", "\x90\x6c", "\x92\x86",
+        "\x97\x5e", "\x82\xe4", "\x82\xcb", "\x82\xbf", "\x8b\x74", "\x93\x5c", "\x89\xf0", "\x95\xa1",
+        "\x8e\xa9", "\x8b\xf3", "\x92\x6d", "\x94\x92", "\x97\x9d", "\x88\xd7", "\x92\x8d", "\x8e\x63",
+        "\x8b\xc6", "\x91\x80", "\x8e\x77", "\x94\xb2", "\x8a\xb5", "\x88\xd3", "\x8f\xee", "\x89\x9e",
+        "\x92\xa5", "\x8c\x60", "\x8e\xae", "\x8a\xf4", "\x95\xf1", "\x88\xcd", "\x89\x45", "\x89\xc2",
+        "\x8b\xe6", "\x95\x73", "\x83\x80", "\x83\x72", "\x83\x69", "\x82\xeb", "\x82\xd9", "\x82\xd7",
+        "\x82\xd1", "\x82\xc3", "\x97\xde", "\x91\xe8", "\x90\xc2", "\x8d\x7e", "\x95\xc2", "\x98\x41",
+        "\x92\xca", "\x91\xab", "\x90\xd4", "\x91\x45", "\x97\xfb", "\x91\x67", "\x94\x5b", "\x8a\xc8",
+        "\x91\xe6", "\x8f\xcd", "\x97\xa7", "\x8e\xd0", "\x94\x6a", "\x96\xee", "\x88\xd9", "\x8f\xc6",
+        "\x8c\x88", "\x8b\x43", "\x8a\xfc", "\x8a\x69", "\x90\x84", "\x8e\x9d", "\x96\x59", "\x90\x53",
+        "\x93\xbe", "\x96\xf0", "\x88\xf8", "\x8d\xb6", "\x8d\x44", "\x8e\x51", "\x88\xf3", "\x8c\xf8",
+        "\x8c\xb3", "\x93\xad", "\x90\x4d", "\x83\x83", "\x83\x7e", "\x83\x75", "\x83\x5b", "\x83\x59",
+        "\x83\x55", "\x83\x4f", "\x82\xd4", "\x82\xbc", "\x82\xb0", "\x82\xac", "\x97\xed", "\x95\x70",
+        "\x8f\x87", "\x8d\x80", "\x94\xf1", "\x8b\xf7", "\x8c\xaf", "\x92\xb7", "\x94\x7a", "\x98\x59",
+        "\x93\x4b", "\x92\x42", "\x91\xac", "\x93\x72", "\x8f\x71", "\x8d\xda", "\x8c\x79", "\x8e\xd4",
+        "\x90\x67", "\x93\xa5", "\x8b\x4d", "\x92\x4e", "\x8c\xeb", "\x8f\xda", "\x96\xf3", "\x8c\x76",
+        "\x8c\xbe", "\x90\x65", "\x8e\x8b", "\x90\xbb", "\x97\x8e", "\x90\x46", "\x97\xc7", "\x92\x76",
+        "\x8e\xd2", "\xe3\x59", "\x8d\xd7", "\x8e\x86", "\x8f\x83", "\x93\x9c", "\x89\xd3", "\x93\x99",
+        "\x95\x84", "\x92\xf6", "\x8e\x84", "\x8d\xbb", "\x92\x5a", "\x8a\xc4", "\x93\x49", "\x94\xad",
+        "\x97\xaa", "\x8a\xc3", "\x93\x5f", "\x91\xd7", "\x8b\x81", "\x92\x69", "\x8b\x40", "\x8d\x5c",
+        "\x8a\x54", "\x8a\x79", "\x8f\xbc", "\x91\xba", "\x8a\xfa", "\x93\xfa", "\x8b\xb3", "\x8a\xf6",
+        "\x8c\x66", "\x8b\x93", "\x91\xc5", "\x8e\xe8", "\x8a\xb4", "\x8c\x62", "\x8e\x76", "\x94\x4f",
+        "\x89\xf5", "\x8d\x4f", "\x8d\x4c", "\x8f\xed", "\x89\xaa", "\x97\x65", "\x8f\xa7", "\x91\xbe",
+        "\x8a\xee", "\x90\x7d", "\x92\x51", "\x96\xe2", "\x8c\xc4", "\x96\xa1", "\x8d\x90", "\x8c\xc3",
+        "\x8b\x79", "\x8f\x5c", "\x95\xd7", "\x8d\x8f", "\x97\x98", "\x94\xbb", "\x96\x60", "\x8b\xa4",
+        "\x8f\x5b", "\x94\xf5", "\x95\xd6", "\x88\xcb", "\x95\xb9", "\x8e\x97", "\x93\x60", "\x91\xe3",
+        "\x8e\x64", "\x8d\xa1", "\x97\xbc", "\x96\x9c", "\x83\x86", "\x83\x84", "\x83\x71", "\x83\x70",
+        "\x83\x6a", "\x83\x54", "\x82\xda", "\x82\xb2", "\x81\x58" },
+}
+-- euc_jp
+local euc_jp = {
+    bchar = "",
+    count = 0,
+    error = 0,
+    topChars = {
+        "\xa4\xb7", "\xa4\xf2", "\xa4\xce", "\xa4\xb9", "\xa4\xde", "\xa4\xcb", "\xa4\xeb", "\xa1\xbc",
+        "\xa4\xc8", "\xa4\xcf", "\xa5\xf3", "\xa5\xeb", "\xa5\xa4", "\xa5\xd7", "\xa4\xc7", "\xa4\xa6",
+        "\xa4\xc6", "\xa5\xbf", "\xa5\xb9", "\xa4\xa4", "\xb9\xd4", "\xa4\xe7", "\xa4\xb3", "\xa4\xbf",
+        "\xa4\xec", "\xa5\xc9", "\xa4\xac", "\xc6\xb0", "\xa5\xc3", "\xa5\xab", "\xa4\xca", "\xa5\xec",
+        "\xa5\xde", "\xa5\xbd", "\xa4\xea", "\xb0\xdc", "\xa4\xb5", "\xa5\xb3", "\xa4\xe9", "\xa4\xab",
+        "\xa5\xc8", "\xa5\xd5", "\xca\xb8", "\xb2\xbc", "\xa5\xc6", "\xa5\xa1", "\xa5\xad", "\xa4\xe2",
+        "\xb2\xa1", "\xa5\xe2", "\xa4\xad", "\xc3\xd6", "\xbb\xfa", "\xbd\xfc", "\xba\xef", "\xa4\xe8",
+        "\xa4\xc3", "\xa4\xaf", "\xa4\xc4", "\xb8\xec", "\xc6\xfe", "\xa4\xdf", "\xa5\xb7", "\xa4\xbd",
+        "\xbc\xa8", "\xa5\xaa", "\xb0\xca", "\xa4\xb1", "\xa4\xa8", "\xc3\xb1", "\xbb\xc8", "\xb9\xb9",
+        "\xca\xd1", "\xa5\xe7", "\xa4\xd8", "\xba\xf7", "\xbc\xa1", "\xb8\xa1", "\xba\xc7", "\xc1\xb4",
+        "\xc1\xde", "\xb0\xcc", "\xa4\xa2", "\xa4\xe1", "\xb4\xd6", "\xb4\xb9", "\xcc\xbe", "\xb0\xe3",
+        "\xbd\xaa", "\xca\xfd", "\xbd\xe9", "\xa5\xea", "\xa5\xda", "\xb8\xe5", "\xca\xd6", "\xb7\xab",
+        "\xb2\xc3", "\xc1\xb0", "\xa5\xa6", "\xa5\xa3", "\xa4\xd0", "\xcd\xd1", "\xbc\xc2", "\xa4\xef",
+        "\xcd\xd7", "\xc0\xb5", "\xbf\xf4", "\xb0\xec", "\xa5\xaf", "\xa5\xa2", "\xa4\xf3", "\xa4\xc0",
+        "\xc9\xf4", "\xc4\xc9", "\xcd\xcd", "\xcb\xf6", "\xc2\xb8", "\xbc\xe8", "\xa5\xc7", "\xb9\xfe",
+        "\xbe\xc3", "\xce\xcf", "\xa5\xe5", "\xa5\xc1", "\xa4\xbb", "\xc9\xbd", "\xb3\xce", "\xc4\xea",
+        "\xa5\xd8", "\xa5\xce", "\xc6\xac", "\xc7\xa7", "\xcc\xdc", "\xc5\xd9", "\xc2\xe7", "\xba\xee",
+        "\xbe\xe5", "\xa4\xe4", "\xa4\xb8", "\xc6\xc9", "\xb4\xb0", "\xbb\xcf", "\xc2\xbf", "\xbe\xec",
+        "\xb6\xe7", "\xc0\xe8", "\xca\xdd", "\xc2\xce", "\xce\xbb", "\xb3\xab", "\xb5\xaf", "\xb8\xab",
+        "\xcc\xf3", "\xc2\xd0", "\xb9\xe7", "\xc3\xcd", "\xa5\xb8", "\xc1\xaa", "\xbf\xca", "\xc0\xdf",
+        "\xbd\xf1", "\xbb\xfe", "\xbe\xae", "\xb8\xfe", "\xc6\xb1", "\xb2\xbf", "\xa4\xc9", "\xcb\xa1",
+        "\xcc\xe1", "\xb2\xf3", "\xbd\xd0", "\xa5\xed", "\xa4\xba", "\xa4\xaa", "\xbd\xb8", "\xba\xdd",
+        "\xbb\xee", "\xca\xe4", "\xca\xd4", "\xc8\xd6", "\xb8\xbd", "\xcb\xdc", "\xc2\xf2", "\xc8\xf8",
+        "\xca\xac", "\xbd\xa4", "\xce\xe3", "\xa5\xe9", "\xcc\xcc", "\xcd\xf7", "\xb3\xd0", "\xc2\xb3",
+        "\xb2\xe8", "\xb4\xfb", "\xbd\xea", "\xb6\xaf", "\xba\xc6", "\xa5\xd4", "\xa5\xa8", "\xa5\xa7",
+        "\xc6\xc3", "\xcc\xb5", "\xc0\xae", "\xc9\xac", "\xb3\xd8", "\xb3\xb0", "\xba\xdf", "\xc9\xd5",
+        "\xc2\xbe", "\xa5\xd0", "\xa4\xe0", "\xa4\xa1", "\xc4\xb4", "\xc0\xe2", "\xc7\xbd", "\xbd\xac",
+        "\xc8\xcf", "\xc3\xbc", "\xc4\xbe", "\xbe\xf5", "\xc8\xc7", "\xcd\xe8", "\xcc\xc0", "\xb3\xe7",
+        "\xc2\xd6", "\xb8\xcc", "\xb4\xde", "\xb9\xe6", "\xca\xcc", "\xc6\xe2", "\xbf\xcd", "\xc3\xe6",
+        "\xcd\xbf", "\xa4\xe6", "\xa4\xcd", "\xa4\xc1", "\xb5\xd5", "\xc5\xbd", "\xb2\xf2", "\xca\xa3",
+        "\xbc\xab", "\xb6\xf5", "\xc3\xce", "\xc7\xf2", "\xcd\xfd", "\xb0\xd9", "\xc3\xed", "\xbb\xc4",
+        "\xb6\xc8", "\xc1\xe0", "\xbb\xd8", "\xc8\xb4", "\xb4\xb7", "\xb0\xd5", "\xbe\xf0", "\xb1\xfe",
+        "\xc4\xa7", "\xb7\xc1", "\xbc\xb0", "\xb4\xf6", "\xca\xf3", "\xb0\xcf", "\xb1\xa6", "\xb2\xc4",
+        "\xb6\xe8", "\xc9\xd4", "\xa5\xe0", "\xa5\xd3", "\xa5\xca", "\xa4\xed", "\xa4\xdb", "\xa4\xd9",
+        "\xa4\xd3", "\xa4\xc5", "\xce\xe0", "\xc2\xea", "\xc0\xc4", "\xb9\xdf", "\xca\xc4", "\xcf\xa2",
+        "\xc4\xcc", "\xc2\xad", "\xc0\xd6", "\xc1\xa6", "\xce\xfd", "\xc1\xc8", "\xc7\xbc", "\xb4\xca",
+        "\xc2\xe8", "\xbe\xcf", "\xce\xa9", "\xbc\xd2", "\xc7\xcb", "\xcc\xf0", "\xb0\xdb", "\xbe\xc8",
+        "\xb7\xe8", "\xb5\xa4", "\xb4\xfe", "\xb3\xca", "\xbf\xe4", "\xbb\xfd", "\xcb\xba", "\xbf\xb4",
+        "\xc6\xc0", "\xcc\xf2", "\xb0\xfa", "\xba\xb8", "\xb9\xa5", "\xbb\xb2", "\xb0\xf5", "\xb8\xfa",
+        "\xb8\xb5", "\xc6\xaf", "\xbf\xae", "\xa5\xe3", "\xa5\xdf", "\xa5\xd6", "\xa5\xbc", "\xa5\xba",
+        "\xa5\xb6", "\xa5\xb0", "\xa4\xd6", "\xa4\xbe", "\xa4\xb2", "\xa4\xae", "\xce\xef", "\xc9\xd1",
+        "\xbd\xe7", "\xb9\xe0", "\xc8\xf3", "\xb6\xf9", "\xb8\xb1", "\xc4\xb9", "\xc7\xdb", "\xcf\xba",
+        "\xc5\xac", "\xc3\xa3", "\xc2\xae", "\xc5\xd3", "\xbd\xd2", "\xba\xdc", "\xb7\xda", "\xbc\xd6",
+        "\xbf\xc8", "\xc6\xa7", "\xb5\xae", "\xc3\xaf", "\xb8\xed", "\xbe\xdc", "\xcc\xf5", "\xb7\xd7",
+        "\xb8\xc0", "\xbf\xc6", "\xbb\xeb", "\xc0\xbd", "\xcd\xee", "\xbf\xa7", "\xce\xc9", "\xc3\xd7",
+        "\xbc\xd4", "\xe5\xba", "\xba\xd9", "\xbb\xe6", "\xbd\xe3", "\xc5\xfc", "\xb2\xd5", "\xc5\xf9",
+        "\xc9\xe4", "\xc4\xf8", "\xbb\xe4", "\xba\xbd", "\xc3\xbb", "\xb4\xc6", "\xc5\xaa", "\xc8\xaf",
+        "\xce\xac", "\xb4\xc5", "\xc5\xc0", "\xc2\xd9", "\xb5\xe1", "\xc3\xca", "\xb5\xa1", "\xb9\xbd",
+        "\xb3\xb5", "\xb3\xda", "\xbe\xbe", "\xc2\xbc", "\xb4\xfc", "\xc6\xfc", "\xb6\xb5", "\xb4\xf8",
+        "\xb7\xc7", "\xb5\xf3", "\xc2\xc7", "\xbc\xea", "\xb4\xb6", "\xb7\xc3", "\xbb\xd7", "\xc7\xb0",
+        "\xb2\xf7", "\xb9\xb0", "\xb9\xad", "\xbe\xef", "\xb2\xac", "\xcd\xc6", "\xbe\xa9", "\xc2\xc0",
+        "\xb4\xf0", "\xbf\xde", "\xc3\xb2", "\xcc\xe4", "\xb8\xc6", "\xcc\xa3", "\xb9\xf0", "\xb8\xc5",
+        "\xb5\xda", "\xbd\xbd", "\xca\xd9", "\xb9\xef", "\xcd\xf8", "\xc8\xbd", "\xcb\xc1", "\xb6\xa6",
+        "\xbd\xbc", "\xc8\xf7", "\xca\xd8", "\xb0\xcd", "\xca\xbb", "\xbb\xf7", "\xc5\xc1", "\xc2\xe5",
+        "\xbb\xc5", "\xba\xa3", "\xce\xbe", "\xcb\xfc", "\xa5\xe6", "\xa5\xe4", "\xa5\xd2", "\xa5\xd1",
+        "\xa5\xcb", "\xa5\xb5", "\xa4\xdc", "\xa4\xb4", "\xa1\xb9" },
+}
+-- cp949
+local cp949 = {
+    bchar = "",
+    count = 0,
+    error = 0,
+    topChars = {
+        "\xb0\xa1", "\xb0\xa3", "\xb0\xa9", "\xb0\xaa", "\xb0\xac", "\xb0\xad", "\xb0\xb0", "\xb0\xb3",
+        "\xb0\xc5", "\xb0\xc9", "\xb0\xcb", "\xb0\xcd", "\xb0\xd4", "\xb0\xdc", "\xb0\xdf", "\xb0\xe5",
+        "\xb0\xe6", "\xb0\xe8", "\xb0\xed", "\xb0\xf7", "\xb0\xf8", "\xb0\xfa", "\xb0\xfc", "\xb0\xfd",
+        "\xb1\xb3", "\xb1\xb8", "\xb1\xb9", "\xb1\xd7", "\xb1\xdb", "\xb1\xe2", "\xb1\xe4", "\xb1\xe6",
+        "\xb1\xe9", "\xb1\xeb", "\xb1\xee", "\xb2\xd9", "\xb2\xdb", "\xb2\xdc", "\xb2\xdf", "\xb2\xee",
+        "\xb2\xef", "\xb3\xa1", "\xb3\xa2", "\xb3\xa6", "\xb3\xaa", "\xb3\xb2", "\xb3\xb5", "\xb3\xbb",
+        "\xb3\xc0", "\xb3\xd0", "\xb3\xd1", "\xb3\xd6", "\xb3\xd7", "\xb3\xe4", "\xb3\xf5", "\xb4\xa9",
+        "\xb4\xad", "\xb4\xba", "\xb4\xc0", "\xb4\xc2", "\xb4\xc9", "\xb4\xcf", "\xb4\xd9", "\xb4\xdc",
+        "\xb4\xdd", "\xb4\xde", "\xb4\xe7", "\xb4\xeb", "\xb4\xf5", "\xb4\xf8", "\xb5\xa5", "\xb5\xb5",
+        "\xb5\xb9", "\xb5\xbf", "\xb5\xc7", "\xb5\xc8", "\xb5\xc9", "\xb5\xcb", "\xb5\xce", "\xb5\xd1",
+        "\xb5\xda", "\xb5\xe5", "\xb5\xe6", "\xb5\xe7", "\xb5\xe9", "\xb5\xec", "\xb5\xee", "\xb5\xf0",
+        "\xb5\xfb", "\xb6\xa7", "\xb6\xb2", "\xb6\xbc", "\xb6\xc7", "\xb6\xc8", "\xb6\xe6", "\xb6\xf3",
+        "\xb6\xf4", "\xb6\xf7", "\xb6\xf8", "\xb7\xa1", "\xb7\xa5", "\xb7\xa7", "\xb7\xab", "\xb7\xaf",
+        "\xb7\xb1", "\xb7\xb3", "\xb7\xb6", "\xb7\xb8", "\xb7\xba", "\xb7\xc1", "\xb7\xc2", "\xb7\xc9",
+        "\xb7\xce", "\xb7\xcf", "\xb7\xd2", "\xb7\xe1", "\xb7\xe7", "\xb7\xf9", "\xb8\xa3", "\xb8\xa5",
+        "\xb8\xa6", "\xb8\xa7", "\xb8\xa8", "\xb8\xae", "\xb8\xb0", "\xb8\xb1", "\xb8\xb2", "\xb8\xb3",
+        "\xb8\xb6", "\xb8\xb7", "\xb8\xb8", "\xb8\xb9", "\xb8\xbb", "\xb8\xc2", "\xb8\xc5", "\xb8\xd3",
+        "\xb8\xd5", "\xb8\xe7", "\xb8\xe9", "\xb8\xed", "\xb8\xee", "\xb8\xf0", "\xb8\xf1", "\xb8\xf8",
+        "\xb9\xab", "\xb9\xae", "\xb9\xcc", "\xb9\xd9", "\xb9\xdd", "\xb9\xde", "\xb9\xdf", "\xb9\xe6",
+        "\xb9\xe8", "\xb9\xe9", "\xb9\xf6", "\xb9\xf8", "\xb9\xfd", "\xba\xae", "\xba\xaf", "\xba\xb0",
+        "\xba\xb8", "\xba\xb9", "\xba\xbb", "\xba\xbc", "\xba\xbe", "\xba\xc1", "\xba\xce", "\xba\xd0",
+        "\xba\xd2", "\xba\xd9", "\xba\xf1", "\xba\xf6", "\xba\xfc", "\xbb\xd3", "\xbb\xe7", "\xbb\xe8",
+        "\xbb\xec", "\xbb\xef", "\xbb\xf0", "\xbb\xf3", "\xbb\xf5", "\xbb\xf6", "\xbb\xfd", "\xbc\xad",
+        "\xbc\xb1", "\xbc\xb3", "\xbc\xb8", "\xbc\xba", "\xbc\xbc", "\xbc\xbd", "\xbc\xc7", "\xbc\xd2",
+        "\xbc\xd3", "\xbc\xf6", "\xbc\xf7", "\xbc\xf8", "\xbd\xa9", "\xbd\xb1", "\xbd\xba", "\xbd\xc0",
+        "\xbd\xc3", "\xbd\xc4", "\xbd\xc5", "\xbd\xc7", "\xbd\xc9", "\xbd\xca", "\xbd\xcd", "\xbd\xe1",
+        "\xbd\xe8", "\xbe\xb2", "\xbe\xb5", "\xbe\xb9", "\xbe\xc0", "\xbe\xc6", "\xbe\xc8", "\xbe\xca",
+        "\xbe\xcb", "\xbe\xd6", "\xbe\xdf", "\xbe\xe0", "\xbe\xee", "\xbe\xef", "\xbe\xf0", "\xbe\xf2",
+        "\xbe\xf3", "\xbe\xf8", "\xbe\xfa", "\xbf\xa1", "\xbf\xa9", "\xbf\xaa", "\xbf\xac", "\xbf\xad",
+        "\xbf\xb4", "\xbf\xb5", "\xbf\xb9", "\xbf\xc0", "\xbf\xc2", "\xbf\xc3", "\xbf\xc5", "\xbf\xc9",
+        "\xbf\xcd", "\xbf\xcf", "\xbf\xdc", "\xbf\xde", "\xbf\xe4", "\xbf\xeb", "\xbf\xec", "\xbf\xee",
+        "\xbf\xef", "\xbf\xf2", "\xbf\xf3", "\xbf\xf6", "\xbf\xf8", "\xc0\xa7", "\xc0\xad", "\xc0\xaf",
+        "\xc0\xb8", "\xc0\xba", "\xc0\xbb", "\xc0\xbd", "\xc0\xc0", "\xc0\xc7", "\xc0\xcc", "\xc0\xcd",
+        "\xc0\xce", "\xc0\xcf", "\xc0\xd0", "\xc0\xd4", "\xc0\xd6", "\xc0\xd8", "\xc0\xda", "\xc0\xdb",
+        "\xc0\xdf", "\xc0\xe2", "\xc0\xe5", "\xc0\xe6", "\xc0\xe7", "\xc0\xfa", "\xc0\xfb", "\xc0\xfc",
+        "\xc1\xa1", "\xc1\xa2", "\xc1\xa4", "\xc1\xa6", "\xc1\xae", "\xc1\xb3", "\xc1\xb6", "\xc1\xb8",
+        "\xc1\xbb", "\xc1\xbe", "\xc1\xc1", "\xc1\xd6", "\xc1\xd8", "\xc1\xd9", "\xc1\xdf", "\xc1\xf6",
+        "\xc1\xf7", "\xc1\xf8", "\xc1\xfa", "\xc1\xfd", "\xc2\xa6", "\xc2\xb0", "\xc2\xca", "\xc2\xf7",
+        "\xc2\xf8", "\xc2\xf9", "\xc2\xfc", "\xc3\xa2", "\xc3\xa3", "\xc3\xa4", "\xc3\xa5", "\xc3\xb3",
+        "\xc3\xb5", "\xc3\xb9", "\xc3\xbc", "\xc3\xc4", "\xc3\xc6", "\xc3\xca", "\xc3\xdf", "\xc3\xe2",
+        "\xc3\xe6", "\xc3\xeb", "\xc4\xa1", "\xc4\xa3", "\xc4\xa8", "\xc4\xbf", "\xc4\xd1", "\xc5\xa9",
+        "\xc5\xad", "\xc5\xb0", "\xc5\xb8", "\xc5\xc2", "\xc5\xc3", "\xc5\xcd", "\xc5\xd8", "\xc5\xdb",
+        "\xc5\xe4", "\xc5\xeb", "\xc6\xae", "\xc6\xaf", "\xc6\xc4", "\xc6\xc7", "\xc6\xdb", "\xc6\xe4",
+        "\xc6\xec", "\xc6\xed", "\xc6\xf7", "\xc6\xf8", "\xc7\xa5", "\xc7\xc1", "\xc7\xc7", "\xc7\xca",
+        "\xc7\xcf", "\xc7\xd1", "\xc7\xd2", "\xc7\xd4", "\xc7\xd5", "\xc7\xd8", "\xc7\xdf", "\xc7\xe0",
+        "\xc7\xe2", "\xc7\xe8", "\xc7\xf4", "\xc7\xf6", "\xc7\xfc", "\xc8\xa3", "\xc8\xad", "\xc8\xae",
+        "\xc8\xaf", "\xc8\xbd", "\xc8\xc4", "\xc8\xce", "\xc8\xf7", "\xc8\xf9" },
+}
+-- UTF-8
+local UTF8_state = "start"
+local UTF8_waitNr = 0
+local UTF8_error = 0
+
+local function NormalizeEncodingName(enc)
+    if enc == "gbk" then
+        return "cp936"
+    elseif vim.fn.has("win32") or vim.fn.has("win32unix") or vim.fn.has("win64") or vim.fn.has("iconv") then
+        if enc == "gb2312" then
+            return "cp936"
+        elseif enc == "big5" then
+            return "cp950"
+        end
+    else -- Unix and w/o iconv
+        if enc == "gb2312" then
+            return "euc-cn"
+        end
+    end
+    return enc
+end
+
+local function ConvertHtmlEncoding(enc)
+    enc = enc:lower()
+    if enc:match("^gb2312") then
+        return "cp936"  -- GB2312 imprecisely means CP936 in HTML
+    elseif enc == "iso-8859-1" then
+        return "latin1" -- The canonical encoding name in Vim
+    elseif enc == "utf8" then
+        return "utf-8"  -- Other encoding aliases should follow here
+    else
+        return NormalizeEncodingName(enc)
+    end
+end
+
+local function DetectHtmlEncoding()
+    vim.cmd.normal("m`")
+    vim.cmd.normal("gg")
+
+    if vim.fn.search([[\c<meta http-equiv=\("\?\)Content-Type\1 content="text/html; charset=[-A-Za-z0-9_]\+">]]) == 0 then
+        return false
+    end
+
+    local charset = vim.fn.matchstr(vim.fn.getline("."), [[text/html; charset=\zs[-A-Za-z0-9_]\+]], vim.fn.col(".") - 1)
+    charset = ConvertHtmlEncoding(charset)
+    vim.cmd.normal("``")
+
+    local auto_encodings
+    local fileencodings = vim.api.nvim_get_option_value("fileencodings", { scope = "local" })
+    if fileencodings == "" then
+        local encoding = vim.api.nvim_get_option_value("encoding", { scope = "local" })
+        auto_encodings = encoding
+    else
+        auto_encodings = fileencodings
+    end
+
+    local fileencoding = vim.api.nvim_get_option_value("fileencoding", { scope = "local" })
+    if not charset == fileencoding:lower() and (auto_encodings:match(fileencoding) or fileencoding == "") then
+        disable_autodetection = 1
+        local Syn = vim.api.nvim_get_option_value("syntax", { scope = "local" })
+        vim.api.nvim_command(string.format("silent! edit ++enc=%s", charset))
+        if Syn ~= "" then
+            vim.api.nvim_set_option_value("syntax", Syn, { scope = "local" })
+        end
+        disable_autodetection = 0
+    end
+
+    return true
+end
+
+local function FencInitVar()
+    FencResCount = 0
+    FencRes = ""
+    -- cp936
+    cp936.bchar = ""
+    cp936.count = 0
+    cp936.error = 0
+    -- cp950
+    cp950.bchar = ""
+    cp950.count = 0
+    cp950.error = 0
+    -- euc_tw
+    euc_tw.bchar = ""
+    euc_tw.count = 0
+    euc_tw.error = 0
+    -- cp932
+    cp932.bchar = ""
+    cp932.count = 0
+    cp932.error = 0
+    -- euc_jp
+    euc_jp.bchar = ""
+    euc_jp.count = 0
+    euc_jp.error = 0
+    -- cp949
+    cp949.bchar = ""
+    cp949.count = 0
+    cp949.error = 0
+    -- UTF-8
+    UTF8_state = "start"
+    UTF8_waitNr = 0
+    UTF8_error = 0
+end
+
+local function FencProbeBOM(Firstline)
+    -- Vim can probe the file encoding by BOM correctly.
+    -- This function is used to prevent probing other
+    -- encodings by mistake.
+    local a1 = Firstline[1]
+    local a2 = Firstline[2]
+    local a3 = Firstline[3]
+    local a4 = Firstline[4]
+    FencRes = "BOM"
+    if a1 == "\xef" and a2 == "\xbb" and a3 == "\xbf" then                      -- utf-8
+        return true
+    elseif a1 == "\xfe" and a2 == "\xff" then                                   -- utf-16 (ucs-2)
+        return true
+    elseif a1 == "\xff" and a2 == "\xfe" then                                   -- utf-16le (ucs-2le)
+        return true
+    elseif a1 == "\x00" and a2 == "\x00" and a3 == "\xfe" and a4 == "\xff" then -- utf-32 (ucs-4)
+        return true
+    elseif a1 == "\xff" and a2 == "\xfe" and a3 == "\x00" and a4 == "\x00" then -- utf-32le (ucs-4le)
+        return true
+    end
+    FencRes = ""
+    return false
+end
+
+local function FencProbeUTF8(c)
+    -- still not full support here
+    -- U-00000000 - U-0000007F:  0xxxxxxx
+    -- U-00000080 - U-000007FF:  110xxxxx 10xxxxxx
+    -- U-00000800 - U-0000FFFF:  1110xxxx 10xxxxxx 10xxxxxx
+    -- U-00010000 - U-001FFFFF:  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+    -- U-00200000 - U-03FFFFFF:  111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+    -- U-04000000 - U-7FFFFFFF:  1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+
+    -- if error occurs, we do nothing more but return.
+    if UTF8_error > 0 then
+        return
+    end
+
+    if UTF8_state == "start" then
+        if c <= "\x7f" then -- still start state
+            return
+        end
+
+        if c >= "\xc2" and c <= "\xdf" then
+            UTF8_state = "wait"
+            UTF8_waitNr = 1
+        elseif c >= "\xe0" and c <= "\xef" then
+            UTF8_state = "wait"
+            UTF8_waitNr = 2
+        elseif c >= "\xf0" and c <= "\xf7" then
+            UTF8_state = "wait"
+            UTF8_waitNr = 3
+        elseif c >= "\xf8" and c <= "\xfb" then
+            UTF8_state = "wait"
+            UTF8_waitNr = 4
+        elseif c >= "\xf0" and c <= "\xfd" then
+            UTF8_state = "wait"
+            UTF8_waitNr = 5
+        else
+            UTF8_error = 1
+        end
+    else -- s:UTF8_state=="wait"
+        if c >= "\x80" and c <= "\xbf" then
+            UTF8_waitNr = UTF8_waitNr - 1
+            if UTF8_waitNr == 0 then
+                UTF8_state = "start"
+            end
+        else
+            UTF8_error = 1
+            UTF8_waitNr = 0
+            UTF8_state = "start"
+        end
+    end
+end
+
+local function FencProbeAsia(c, var)
+    if var.bchar <= "\x80" then
+        if c >= "\x80" then
+            var.bchar = c
+        end
+    else
+        if c < "\x40" then
+            var.error = var.error + 1
+            var.bchar = "\x00"
+        else
+            local wc = var.bchar .. c
+            var.bchar = "\x00"
+            if vim.fn.index(var.topChars, wc) ~= -1 then
+                var.count = var.count + 1
+            end
+        end
+    end
+end
+
+-- eol ??
+local function FencHandleData()
+    local filename = vim.fn.bufname("%")
+    local A_fbody = vim.fn.readfile(filename, "b")
+    if #A_fbody == 0 then
+        return
+    end
+
+    -- check first and last several lines
+    local fbody
+    if #A_fbody < config.checklines * 2 or config.checklines == 0 then
+        fbody = A_fbody
+    else
+        fbody = {}
+        for i = 1, config.checklines do
+            fbody[#fbody + 1] = A_fbody[i]
+        end
+        for i = 1, config.checklines do
+            fbody[#fbody + 1] = A_fbody[#A_fbody - config.checklines + i]
+        end
+    end
+
+    -- check BOM
+    if FencProbeBOM(fbody[1]) then
+        return
+    end
+
+    -- check header
+    local _firstline = fbody[1]
+    if _firstline:sub(1, 8) == "VimCrypt" then
+        FencRes = "VimCrypt"
+        return
+    end
+
+    for _, line in ipairs(fbody) do
+        if #line > 500 then
+            line = line:sub(1, 501)
+        end
+
+        local ci = 1
+        local c = "\x01"
+        while c ~= "" do
+            c = line:sub(ci, ci)
+            -- =============
+            FencProbeUTF8(c)
+            FencProbeAsia(c, cp936)
+            FencProbeAsia(c, cp950)
+            FencProbeAsia(c, euc_tw)
+            FencProbeAsia(c, cp932)
+            FencProbeAsia(c, euc_jp)
+            FencProbeAsia(c, cp949)
+            if FencRes ~= "" then
+                return
+            end
+            -- =============
+            ci = ci + 1
+        end
+    end
+end
+
+local function FencDetectFileEncoding()
+    FencInitVar()
+
+    FencHandleData()
+
+    -- VimCrypt
+    if FencRes == "VimCrypt" then
+        vim.notify("This is Vim encrypted file, decrypt it first!", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+
+    -- BOM
+    if FencRes == "BOM" then
+        local fileencodings = vim.api.nvim_get_option_value("fileencodings", { scope = "local" })
+        vim.api.nvim_set_option_value("fileencodings", "ucs-bom,utf-8,utf-16,latin1", { scope = "local" })
+        vim.cmd.edit()
+        vim.api.nvim_set_option_value("fileencodings", fileencodings, { scope = "local" })
+        return
+    end
+
+    if UTF8_error == 0 then
+        -- even if the file is strict utf-8 format, it is still
+        -- possible to be another encoding.
+        FencRes = "utf-8"
+        for key, value in pairs({
+            cp936 = cp936,
+            cp950 = cp950,
+            euc_tw = euc_tw,
+            cp932 = cp932,
+            euc_jp = euc_jp,
+            cp949 = cp949,
+        }) do
+            if value.error == 0 and FencResCount < value.count then
+                FencResCount = value.count
+                FencRes = key
+            end
+        end
+    else
+        for key, value in pairs({
+            cp936 = cp936,
+            cp950 = cp950,
+            euc_tw = euc_tw,
+            cp932 = cp932,
+            euc_jp = euc_jp,
+            cp949 = cp949,
+        }) do
+            if FencResCount < value.count - value.error then
+                FencResCount = value.count
+                FencRes = key
+            end
+        end
+
+        if FencResCount == 0 then
+            FencRes = "ascii"
+        end
+    end
+
+    disable_autodetection = 2
+    if FencRes == "ascii" then
+        vim.cmd.edit()
+    else
+        vim.api.nvim_command(string.format("edit ++enc=%s", FencRes))
+    end
+    local Syn = vim.api.nvim_get_option_value("syntax", { scope = "local" })
+    if Syn ~= "" then
+        vim.api.nvim_set_option_value("syntax", Syn, { scope = "local" })
+    end
+    disable_autodetection = 0
+end
+
+local function EditAutoEncoding()
+    local bt = vim.api.nvim_get_option_value("buftype", { scope = "local" })
+    if disable_autodetection > 0 or bt == "help" then
+        return
+    end
+
+    local bufname = vim.fn.bufname("%")
+    if bufname == FencWinName then
+        vim.notify("Current window is FencView", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+
+    local is_modified = vim.api.nvim_get_option_value("modified", { scope = "local" })
+    if is_modified then
+        vim.notify("File is modified!", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+
+    if not vim.fn.has("iconv") then
+        vim.notify("\"+iconv\" feature not found, see Tip #1 in fencview.vim", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+
+    local filename = vim.fn.expand("%:p")
+    local filename_e = ""
+
+    local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
+    if string.match(ft, "html") then
+        if DetectHtmlEncoding() then
+            return
+        end
+    end
+
+    if config.tellenc == "fencview" or vim.fn.executable(config.tellenc) == 0 then
+        FencDetectFileEncoding()
+        return
+    end
+
+    local shellslash_save = vim.api.nvim_get_option_value("shellslash", { scope = "local" })
+    vim.api.nvim_set_option_value("shellslash", false, { scope = "local" })
+    local result = vim.fn.system(string.format("%s %s", config.tellenc, vim.fn.shellescape(filename)))
+    vim.api.nvim_set_option_value("shellslash", shellslash_save, { scope = "local" })
+
+    result = vim.fn.substitute(result, "\n$", "", "")
+    if vim.v.shell_error ~= 0 then
+        local encoding = vim.api.nvim_get_option_value("encoding", { scope = "local" })
+        vim.notify(vim.fn.iconv(result, vim.g.legacy_encoding, encoding), vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+
+    result = NormalizeEncodingName(result)
+    local fileencoding = vim.api.nvim_get_option_value("fileencoding", { scope = "local" })
+    if result ~= fileencoding and not (result == "ascii" and fileencoding == "utf-8") then
+        if result == "binary" then
+            vim.notify("Binary file", vim.log.levels.INFO, { title = "FencView" })
+            vim.cmd.sleep(1)
+        elseif result == "unknown" then
+            vim.notify("Unknown encoding", vim.log.levels.INFO, { title = "FencView" })
+            vim.cmd.sleep(1)
+        else
+            disable_autodetection = 1
+            local Syn = vim.api.nvim_get_option_value("syntax", { scope = "local" })
+            vim.api.nvim_command(string.format("edit ++enc=%s%s", result, filename_e))
+            if Syn ~= "" then
+                vim.api.nvim_set_option_value("syntax", Syn, { scope = "local" })
+            end
+            disable_autodetection = 0
+        end
+    end
+end
+
+local Fenc8bit = {
+    "latin1    8-bit.characters (ISO 8859-1)",
+    "koi8-r    Russian",
+    "koi8-u    Ukrainian",
+    "macroman  MacRoman (Macintosh encoding)",
+    "cp437     similar to iso-8859-1",
+    "cp737     similar to iso-8859-7",
+    "cp775     Baltic",
+    "cp850     similar to iso-8859-4",
+    "cp852     similar to iso-8859-1",
+    "cp855     similar to iso-8859-2",
+    "cp857     similar to iso-8859-5",
+    "cp860     similar to iso-8859-9",
+    "cp861     similar to iso-8859-1",
+    "cp862     similar to iso-8859-1",
+    "cp863     similar to iso-8859-8",
+    "cp865     similar to iso-8859-1",
+    "cp866     similar to iso-8859-5",
+    "cp869     similar to iso-8859-7",
+    "cp874     Thai",
+    "cp1250    Czech, Polish, etc",
+    "cp1251    Cyrillic",
+    "cp1253    Greek",
+    "cp1254    Turkish",
+    "cp1255    Hebrew",
+    "cp1256    Arabic",
+    "cp1257    Baltic",
+    "cp1258    Vietnamese",
+}
+local Fenc16bit = {
+    "gb18030   Simplified Chinese",
+    "cp936     Simplified Chinese (Windows only)",
+    "euc-cn    Simplified Chinese (Unix only)",
+    "cp950     Traditional Chinese (on Unix alias for big5)",
+    "big5      Traditional Chinese (on Windows alias for cp950)",
+    "euc-tw    Traditional Chinese (Unix only)",
+    "cp932     Japanese (Windows only)",
+    "euc-jp    Japanese (Unix only)",
+    "sjis      Japanese (Unix only)",
+    "cp949     Korean (Unix and Windows)",
+    "euc-kr    Korean (Unix only)",
+}
+local FencUnicode = {
+    "utf-8     32 bit UTF-8 encoded Unicode (ISO/IEC 10646-1)",
+    "ucs-2     16 bit UCS-2 encoded Unicode (ISO/IEC 10646-1)",
+    "ucs-2le   like ucs-2, little endian",
+    "utf-16    ucs-2 extended with double-words for more characters",
+    "utf-16le  like utf-16, little endian",
+    "ucs-4     32 bit UCS-4 encoded Unicode (ISO/IEC 10646-1)",
+    "ucs-4le   like ucs-4, little endian",
+}
+
+local function FencSelect()
+    local _line = vim.fn.getline(vim.fn.line("."))
+    local _fenc = vim.fn.substitute(_line, [[\s.*$]], "", "g")
+    if _fenc == "" then
+        return
+    end
+
+    vim.api.nvim_command([[syn clear Search]])
+    vim.api.nvim_command(string.format([[syn match Search "%s"]], _line))
+
+    if not vim.api.nvim_win_is_valid(main_win) then
+        vim.notify("Main window not found!", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+    vim.api.nvim_set_current_win(main_win)
+
+    disable_autodetection = 2
+    vim.api.nvim_command(string.format("edit ++enc=%s", _fenc))
+    disable_autodetection = 0
+
+    if not vim.api.nvim_win_is_valid(fencview_win) then
+        vim.notify("FencView window not found!", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+    vim.api.nvim_set_current_win(fencview_win)
+end
+
+local function ToggleFencView()
+    local FencWinNr = vim.fn.bufwinid(FencWinName)
+    if FencWinNr ~= -1 then
+        vim.api.nvim_win_close(FencWinNr, false)
+        return
+    end
+
+    local is_modified = vim.api.nvim_get_option_value("modified", { scope = "local" })
+    if is_modified then
+        vim.notify("File is modified!", vim.log.levels.ERROR, { title = "FencView" })
+        return
+    end
+
+    main_win = vim.api.nvim_get_current_win()
+    local _tmpfenc = vim.api.nvim_get_option_value("fileencoding", { scope = "local" })
+
+    local splitLocation = "belowright "
+    local splitMode = "vertical "
+    local splitSize = 34
+    local cmd = string.format("silent! %s%s%s new %s", splitLocation, splitMode, splitSize, FencWinName)
+    vim.api.nvim_command(cmd)
+
+    fencview_win = vim.api.nvim_get_current_win()
+
+    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local" })
+    vim.api.nvim_set_option_value("swapfile", false, { scope = "local" })
+    vim.api.nvim_set_option_value("buftype", "nowrite", { scope = "local" })
+    vim.api.nvim_set_option_value("bufhidden", "delete", { scope = "local" })
+    vim.api.nvim_set_option_value("wrap", false, { scope = "local" })
+    vim.api.nvim_set_option_value("foldcolumn", "0", { scope = "local" })
+    vim.api.nvim_set_option_value("buflisted", false, { scope = "local" })
+    vim.api.nvim_set_option_value("spell", false, { scope = "local" })
+    vim.api.nvim_set_option_value("number", false, { scope = "local" })
+    vim.api.nvim_set_option_value("cursorline", true, { scope = "local" })
+
+    vim.api.nvim_set_option_value("filetype", config.filetype, { scope = "local" })
+
+    vim.fn.append(0, Fenc8bit)
+    vim.fn.append(0, Fenc16bit)
+    vim.fn.append(0, FencUnicode)
+    vim.api.nvim_buf_set_lines(0, -2, -1, true, {})
+
+    vim.api.nvim_set_option_value("readonly", true, { scope = "local" })
+    vim.api.nvim_set_option_value("modifiable", false, { scope = "local" })
+
+    vim.api.nvim_command([[syn match Type "^.\{-}\s"]])
+    vim.api.nvim_command([[syn match Comment "\s.*$"]])
+
+    if _tmpfenc ~= "" then
+        local s = vim.fn.search(_tmpfenc)
+        if s ~= 0 then
+            local _line = vim.fn.getline(vim.fn.line("."))
+            vim.api.nvim_command([[syn clear Search]])
+            vim.api.nvim_command(string.format([[syn match Search "%s"]], _line))
+        end
+    else
+        vim.cmd.normal("gg")
+    end
+
+    vim.keymap.set("n", "<cr>", FencSelect, { desc = "Select encoding", silent = true })
+    vim.keymap.set("n", "<2-leftmouse>", FencSelect, { desc = "Select encoding", silent = true })
+end
+
+M.setup = function(opts)
+    config = vim.tbl_deep_extend("force", config, opts or {})
+
+    M.autodetect = EditAutoEncoding
+    M.toggle_view = ToggleFencView
+
+    vim.api.nvim_create_user_command("FencAutoDetect", EditAutoEncoding, { desc = "Auto detect encoding" })
+    vim.api.nvim_create_user_command("FencView", ToggleFencView, { desc = "Toggle encoding" })
+end
+
+return M

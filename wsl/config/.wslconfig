@@ -1,0 +1,6 @@
+[wsl2]
+networkingMode=mirrored   # If the value is mirrored then this turns on mirrored networking mode. Default or unrecognized strings result in NAT networking.
+
+[experimental]
+autoMemoryReclaim=gradual # Automatically releases cached memory after detecting idle CPU usage. Set to gradual for slow release, and dropcache for instant release of cached memory.
+sparseVhd=true            # When set to true, any newly created VHD will be set to sparse automatically.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TablacusExplorer>
+  <General>
+    <Version>1.13</Version>
+    <MinVersion>2021.10.12</MinVersion>
+    <pubDate>Fri, 05 Nov 2021 00:00:00 GMT</pubDate>
+    <Options>Common:4:4</Options>
+    <DllVersion>1.1.0.0</DllVersion>
+    <Config>1</Config>
+    <Level>2</Level>
+    <Creator>Gaku</Creator>
+    <URL>https://tablacus.github.io/TablacusExplorerAddons/</URL>
+    <License>MIT License</License>
+  </General>
+  <en>
+    <Name>Shell execute hook</Name>
+    <Description>Open Instead of Explorer with shell execute hook. "Save settings to the registry."</Description>
+  </en>
+  <ja>
+    <Description>Shell execute hookを使ってエクスプローラの代わりに開きます。 ※レジストリ使用</Description>
+  </ja>
+</TablacusExplorer>

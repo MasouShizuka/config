@@ -1,0 +1,132 @@
+﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F,Ctrl+P" Type="Tools">Search</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Filter Bar</List><List Key="A" Type="Background">.txt</List><List Key="Shift+A" Type="Background">NewFolder</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">copy</List><List Key="X" Type="Context">cut</List><List Key="P" Type="Background">paste</List><List Key="D" Type="Context">delete</List><List Key="S" Type="Context">undelete</List><List Key="E" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
+const path = (FV.FocusedItem || FV.FolderItem).Path;
+if (api.PathIsDirectory(path)) {
+    cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
+} else {
+    cmd = "wezterm start --cwd \"" + current_dir + "\" -- nvim " + "\"" + path + "\"";
+}
+api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">Open with &amp;Code</List><List Key="G" Type="JScript">if (FV.ItemCount(SVGIO_ALLVIEW) &gt; 0) {
+    FV.SelectItem(0, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+}</List><List Key="Shift+G" Type="JScript">let count = FV.ItemCount(SVGIO_ALLVIEW);
+if (count &gt; 0) {
+    FV.SelectItem(count - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Key">{Enter}</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="JScript">let nIndex = FV.GetFocusedItem;
+if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
+    FV.SelectItem(nIndex, SVSI_SELECT);
+} else {
+    if (nIndex + 1 &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
+        FV.SelectItem(nIndex, SVSI_DESELECT);
+        FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+        // FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+    }
+}</List><List Key="Shift+J" Type="JScript">let nIndex = FV.GetFocusedItem;
+if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
+    FV.SelectItem(nIndex, SVSI_SELECT);
+} else {
+    nIndex = nIndex + 1;
+    if (nIndex &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
+        FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+    }
+}</List><List Key="K" Type="JScript">let nIndex = FV.GetFocusedItem;
+if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
+    FV.SelectItem(nIndex, SVSI_SELECT);
+} else {
+    if (nIndex - 1 &gt;= 0) {
+        FV.SelectItem(nIndex, SVSI_DESELECT);
+        FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+        // FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+    }
+}</List><List Key="Shift+K" Type="JScript">let nIndex = FV.GetFocusedItem;
+if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
+    FV.SelectItem(nIndex, SVSI_SELECT);
+} else {
+    nIndex = nIndex - 1;
+    if (nIndex &gt;= 0) {
+        FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+    }
+}</List><List Key="R" Type="Context">rename</List><List Key="Shift+R" Type="Open in new tab">回收站</List><List Key="Shift+S" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
+var cmd = "wezterm start --cwd \"" + current_dir + "\"";
+api.CreateProcess(cmd, current_dir);</List><List Key="T" Type="Tabs">New tab</List><List Key="Ctrl+T" Type="Add-ons">Undo close tab</List><List Key="V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
+if (FV) {
+    var hMenu = api.CreatePopupMenu(), hSubMenu;
+    var ContextMenu = FV.ViewMenu();
+    if (ContextMenu) {
+        ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7fff, CMF_DEFAULTONLY);
+        var mii = api.Memory("MENUITEMINFO");
+        mii.cbSize = mii.Size;
+        mii.fMask = MIIM_SUBMENU;
+        for (var i = 0; i &lt; api.GetMenuItemCount(hMenu); i++) {
+            api.GetMenuItemInfo(hMenu, i, true, mii);
+            if (mii.hSubMenu) {
+                hSubMenu = mii.hSubMenu;
+                mii.fMask = MIIM_FTYPE | MIIM_STATE;
+                for (var j = 0; j &lt; api.GetMenuItemCount(hSubMenu); j++) {
+                    api.GetMenuItemInfo(hSubMenu, j, true, mii);
+                    if (mii.fState &amp; MFS_CHECKED &amp;&amp; mii.fType &amp; MFT_RADIOCHECK) {
+                        mii.fMask = MIIM_ID;
+                        api.GetMenuItemInfo(hSubMenu, j + 1, true, mii);
+                        if (mii.wID &lt;= 0) {
+                            api.GetMenuItemInfo(hSubMenu, 0, true, mii);
+                        }
+                        ContextMenu.InvokeCommand(0, te.hwnd, mii.wID - 1, null, null, SW_SHOWNORMAL, 0, 0);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        api.DestroyMenu(hMenu);
+    }
+}</List><List Key="Shift+V" Type="JScript">var FV = GetFolderView(Ctrl, pt);
+if (FV) {
+    var hMenu = api.CreatePopupMenu(), hSubMenu;
+    var ContextMenu = FV.ViewMenu();
+    if (ContextMenu) {
+        ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7fff, CMF_DEFAULTONLY);
+        var mii = api.Memory("MENUITEMINFO");
+        mii.cbSize = mii.Size;
+        mii.fMask = MIIM_SUBMENU;
+        for (var i = 0; i &lt; api.GetMenuItemCount(hMenu); i++) {
+            api.GetMenuItemInfo(hMenu, i, true, mii);
+            if (mii.hSubMenu) {
+                hSubMenu = mii.hSubMenu;
+                mii.fMask = MIIM_FTYPE | MIIM_STATE;
+                for (var j = 0; j &lt; api.GetMenuItemCount(hSubMenu); j++) {
+                    api.GetMenuItemInfo(hSubMenu, j, true, mii);
+                    if (mii.fState &amp; MFS_CHECKED &amp;&amp; mii.fType &amp; MFT_RADIOCHECK) {
+                        mii.fMask = MIIM_ID;
+                        if (j) {
+                            api.GetMenuItemInfo(hSubMenu, j - 1, true, mii);
+                        } else {
+                            mii.fMask = MIIM_ID | MIIM_FTYPE;
+                            for (var k = 0; k &lt; api.GetMenuItemCount(hSubMenu); k++) {
+                                api.GetMenuItemInfo(hSubMenu, k, true, mii);
+                                if (mii.fType &amp; MFT_SEPARATOR) {
+                                    mii.wID = wID;
+                                    break;
+                                }
+                                wID = mii.wID;
+                            }
+                        }
+                        if (mii.wID &gt; 0) {
+                            ContextMenu.InvokeCommand(0, te.hwnd, mii.wID - 1, null, null, SW_SHOWNORMAL, 0, 0);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        api.DestroyMenu(hMenu);
+    }
+}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">PeaZip.add2separate</List><List Key="Shift+Z" Type="Context">PeaZip.ext2smart</List><List Key="$33" Type="JScript">var TC = te.Ctrl(CTRL_TC);
+if (TC &amp;&amp; TC.SelectedIndex &gt; 0) {
+    TC.Move(TC.SelectedIndex, TC.SelectedIndex - 1);
+    return S_OK;
+}
+return S_FALSE;</List><List Key="$34" Type="JScript">var TC = te.Ctrl(CTRL_TC);
+if (TC &amp;&amp; TC.SelectedIndex &lt; TC.Count - 1) {
+    TC.Move(TC.SelectedIndex, TC.SelectedIndex + 1);
+    return S_OK;
+}
+return S_FALSE;</List></TablacusExplorer>

@@ -1,0 +1,11 @@
+{
+  "Shell": 3,
+  "ReplaceWinR": false,
+  "CloseShellAfterPress": false,
+  "LeaveShellOpen": false,
+  "RunAsAdministrator": true,
+  "UseWindowsTerminal": false,
+  "ShowOnlyMostUsedCMDs": false,
+  "ShowOnlyMostUsedCMDsNumber": 5,
+  "CommandHistory": {}
+}

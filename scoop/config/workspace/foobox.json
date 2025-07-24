@@ -1,0 +1,40 @@
+{
+    "version": "8.4",
+    "description": "DUI 配置 for foobar2000",
+    "homepage": "https://github.com/dream7180/foobox-cn",
+    "license": "GPL-3.0",
+    "depends": "extras/foobar2000",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.4/foobox_x64.cn.v8.4-1.exe#/dl.7z_",
+            "hash": "03a881920c184b4cbb341a3c8294edc4a5695b48ee70f899a201b702a86afc50"
+        },
+        "32bit": {
+            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.4/foobox_x86.cn.v8.4-1.exe#/dl.7z_",
+            "hash": "953ff5a5fb8f4d8b62e636bb2dc721be037166e73efb8467da235d064e641d59"
+        }
+    },
+    "installer": {
+        "script": [
+            "$fb2k_app_path = \"$scoopdir\\apps\\foobar2000\\current\".Replace('\\', '\\\\')",
+            "$fb2k_profile_path = \"$scoopdir\\persist\\foobar2000\\profile\".Replace('\\', '\\\\')",
+            "Expand-7zipArchive \"$dir\\dl.7z_\" \"$dir\"",
+            "Copy-Item \"$dir\\`$_12_\\*\" \"$fb2k_profile_path\" -Recurse -Force",
+            "Copy-Item \"$dir\\icons\" \"$fb2k_app_path\" -Recurse -Force",
+            "Copy-Item \"$dir\\themes\" \"$fb2k_app_path\" -Recurse -Force",
+            "Copy-Item \"$dir\\lastfmhosts.bat\" \"$fb2k_app_path\" -Recurse -Force",
+            "Remove-Item \"$dir\\*\" -Recurse -Force"
+        ]
+    },
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/dream7180/foobox-cn/releases/download/$version/foobox_x64.cn.v$version-1.exe#/dl.7z_"
+            },
+            "32bit": {
+                "url": "https://github.com/dream7180/foobox-cn/releases/download/$version/foobox_x86.cn.v$version-1.exe#/dl.7z_"
+            }
+        }
+    }
+}
