@@ -11,6 +11,7 @@
     "unfocused": "#545c7e",
     "unfocused_locked": "#ff007c"
   },
+  "border_implementation": "Windows",
   "default_workspace_padding": 4,
   "default_container_padding": 4,
   "monitors": [
