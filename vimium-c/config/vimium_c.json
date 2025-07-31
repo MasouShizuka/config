@@ -1,11 +1,11 @@
 {
 	"name": "Vimium C",
-	"@time": "2025/4/26 08:43:47",
-	"time": 1745628227432,
+	"@time": "2025/7/28 17:48:25",
+	"time": 1753696105066,
 	"environment": {
 		"extension": "2.12.2",
 		"platform": "win",
-		"chromium": 135
+		"chromium": 138
 	},
 	"exclusionRules": [
 		{
@@ -92,6 +92,9 @@
 		"map <c-l> nextTab",
 		"unmap <a-c>",
 		"map <c-h> previousTab",
+		"",
+		"map gh firstTab",
+		"map gl lastTab",
 		"",
 		"map x removeTab goto=\"left\"",
 		"",
