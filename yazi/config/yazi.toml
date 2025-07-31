@@ -5,36 +5,47 @@ show_hidden = true
 
 [opener]
 
+7-zip = [
+    { run = '7zfm %*',                                                             desc = "打开压缩包 (7-zip)",      for = "windows" },
+    { run = '7zg a -ad temp.7z %*',                                                desc = "添加到压缩包... (7-zip)", for = "windows" },
+]
+
 edit = [
-    { run = 'nvim -p %*',                                           block = true,  desc = "nvim",           for = "windows" },
-    { run = 'wezterm start --cwd "%0" -- nvim -p %* -c "cd %:p:h"', orphan = true, desc = "nvim (wezterm)", for = "windows" },
-    { run = 'code %*',                                              orphan = true, desc = "code",           for = "windows" },
-    { run = 'code -w %*',                                           block = true,  desc = "code (block)",   for = "windows" },
-    { run = 'nvim -p "$@"',                                         block = true,  desc = "nvim",           for = "unix" },
-    { run = 'code "$@"',                                            orphan = true, desc = "code",           for = "unix" },
-    { run = 'code -w "$@"',                                         block = true,  desc = "code (block)",   for = "unix" },
+    { run = 'nvim -p %*',                                           block = true,  desc = "nvim",                    for = "windows" },
+    { run = 'wezterm start --cwd "%0" -- nvim -p %* -c "cd %:p:h"', orphan = true, desc = "nvim (wezterm)",          for = "windows" },
+    { run = 'code %*',                                              orphan = true, desc = "code",                    for = "windows" },
+    { run = 'code -w %*',                                           block = true,  desc = "code (block)",            for = "windows" },
+    { run = 'nvim -p "$@"',                                         block = true,  desc = "nvim",                    for = "unix" },
+    { run = 'code "$@"',                                            orphan = true, desc = "code",                    for = "unix" },
+    { run = 'code -w "$@"',                                         block = true,  desc = "code (block)",            for = "unix" },
+]
+
+locale-emulator = [
+    { run = 'leproc %*',                                                           desc = "Open (locale-emulator)",  for = "windows" },
 ]
 
 ouch = [
-    { run = 'ouch d -y %*',                desc = "Extract here with ouch", for = "windows" },
-    { run = 'ouch d -y "$@"',              desc = "Extract here with ouch", for = "unix" },
+    { run = 'ouch d -y %*',                                                        desc = "Extract here with ouch",  for = "windows" },
+    { run = 'ouch d -y "$@"',                                                      desc = "Extract here with ouch",  for = "unix" },
 ]
 
 [open]
 
 prepend_rules = [
     # Text
-    { mime = "application/tex",                                                                             use = [ "edit", "reveal" ] },
+    { mime = "application/tex",                                                                             use = [ "edit" ] },
     # Archive
-    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [ "ouch", "extract", "reveal" ] },
-    { mime = "application/iso9660-image",                                                                   use = [ "extract", "reveal" ] },
+    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [ "ouch", "7-zip" ] },
+    { mime = "application/iso9660-image",                                                                   use = [ "7-zip" ] },
     # Exe
-    { mime = "application/msdownload",                                                                      use = [ "open", "extract", "reveal" ] },
+    { mime = "application/msdownload",                                                                      use = [ "open", "locale-emulator", "7-zip" ] },
 ]
 
 append_rules = [
+    # Folder
+    { name = "*/",                                                                                          use = [ "edit", "open", "7-zip", "reveal" ] },
     # Fallback
-    { name = "*",                                                                                           use = [ "open", "edit", "reveal" ] },
+    { name = "*",                                                                                           use = [ "open", "edit", "7-zip", "reveal" ] },
 ]
 
 [plugin]
