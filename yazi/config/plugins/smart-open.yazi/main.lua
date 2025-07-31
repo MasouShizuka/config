@@ -16,7 +16,7 @@ return {
         end
 
         if path then
-            ya.emit("shell", { string.format([[cmd /c start "" "%s"]], path), confirm = true, orphan = true })
+            ya.emit("shell", { string.format([[start "" "%s"]], path), orphan = true })
         end
     end,
 }
