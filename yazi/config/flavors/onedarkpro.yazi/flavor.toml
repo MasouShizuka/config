@@ -73,17 +73,17 @@ overall   = {}
 sep_left  = { open = "", close = "" }
 sep_right = { open = "", close = "" }
 
-# Progress
-progress_label  = { bold = true }
-progress_normal = { fg = "#61afef", bg = "#5c6370" }
-progress_error  = { fg = "#e06c75", bg = "#5c6370" }
-
 # Permissions
 perm_sep = { fg = "#abb2bf" }
 perm_type = { fg = "#61afef" }
 perm_read = { fg = "#e5c07b" }
 perm_write = { fg = "#e06c75" }
 perm_exec = { fg = "#98c379" }
+
+# Progress
+progress_label  = { bold = true }
+progress_normal = { fg = "#61afef", bg = "#5c6370" }
+progress_error  = { fg = "#e06c75", bg = "#5c6370" }
 
 
 # : }}}
@@ -233,7 +233,9 @@ rules = [
 
     # Fallback
     # { name = "*",  fg = "#abb2bf" },
-    { name = "*/", fg = "#61afef" }
+    { name = "*/", fg = "#61afef" },
+
+    { name = "*.exe", fg = "#98c379" },
 ]
 
 # : }}}
