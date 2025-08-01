@@ -2,7 +2,8 @@ local M = {}
 
 local function diff_with_clipboard()
     vim.cmd.vnew()
-    vim.api.nvim_command("put!")
+    vim.api.nvim_command("put! +")
+    vim.api.nvim_buf_set_lines(0, -2, -1, true, {})
     require("utils").diffthis()
 end
 
