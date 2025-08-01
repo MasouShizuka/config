@@ -11,7 +11,7 @@ return {
                     ya.emit("enter", { hovered = true })
                     ya.emit("shell", { "nvim", block = true })
                 else
-                    ya.emit("shell", { string.format([[nvim "%s"]], tostring(h.url):gsub("\\", "/")), block = true })
+                    ya.emit("shell", { string.format([[nvim "%s"]], tostring(h.url)), block = true })
                 end
             end
         end
