@@ -232,7 +232,7 @@
     "btnOffsetY": 10,
     "boxOffsetX": 0,
     "boxOffsetY": 10,
-    "hideTranBtn": false,
+    "hideTranBtn": true,
     "hideClickAway": false,
     "simpleStyle": false,
     "followSelection": false,
