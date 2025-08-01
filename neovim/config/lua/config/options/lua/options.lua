@@ -14,7 +14,6 @@ function M.setup(opts)
     }) -- characters for displaying in list mode
 
     -- Clipboard
-    vim.opt.clipboard = "unnamedplus" -- use the clipboard as the unnamed register
     if environment.is_wsl then
         vim.g.clipboard = {
             name = "WslClipboard",

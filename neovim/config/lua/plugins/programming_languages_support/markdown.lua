@@ -6,9 +6,6 @@ return {
         cmd = {
             "PasteImage",
         },
-        keys = {
-            { "<leader>p", function() vim.api.nvim_command("PasteImage") end, desc = "Paste clipboard image" },
-        },
         opts = {
             default = {
                 -- file and directory options

@@ -156,6 +156,7 @@ return {
             { "<c-c>", desc = "Stop exchanging after the first step",  mode = { "n", "x" } },
             { "sm",    desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
             { "ss",    desc = "Replace text with register",            mode = { "n", "x" } },
+            { "SS",    '"+ss',                                         desc = "Replace text with register", mode = { "n", "x" }, remap = true },
             { "sS",    desc = "Sort text",                             mode = { "n", "x" } },
         },
         opts = {
@@ -339,9 +340,22 @@ return {
     {
         "gbprod/yanky.nvim",
         keys = {
-            { "y", "<plug>(YankyYank)",      desc = "Yank",                          mode = { "n", "x" } },
-            { "p", "<plug>(YankyPutAfter)",  desc = "Put yanked text after cursor",  mode = { "n", "x" } },
-            { "P", "<plug>(YankyPutBefore)", desc = "Put yanked text before cursor", mode = { "n", "x" } },
+            { "y",         "<plug>(YankyYank)",                      desc = "Yank",                                  mode = { "n", "x" } },
+            { "Y",         '"+<plug>(YankyYank)',                    desc = "Yank",                                  mode = { "n", "x" } },
+            { "p",         "<plug>(YankyPutAfter)",                  desc = "Put yanked text after cursor",          mode = { "n", "x" } },
+            { "P",         "<plug>(YankyPutBefore)",                 desc = "Put yanked text before cursor",         mode = { "n", "x" } },
+            { "<leader>p", '"+<plug>(YankyPutAfter)',                desc = "Put yanked text after cursor",          mode = { "n", "x" } },
+            { "<leader>P", '"+<plug>(YankyPutBefore)',               desc = "Put yanked text before cursor",         mode = { "n", "x" } },
+            { "]p",        "<Plug>(YankyPutIndentAfterLinewise)",    desc = "Put indented after cursor (linewise)",  mode = { "n", "x" } },
+            { "[p",        "<Plug>(YankyPutIndentAfterLinewise)",    desc = "Put indented after cursor (linewise)",  mode = { "n", "x" } },
+            { "]P",        "<Plug>(YankyPutIndentBeforeLinewise)",   desc = "Put indented before cursor (linewise)", mode = { "n", "x" } },
+            { "[P",        "<Plug>(YankyPutIndentBeforeLinewise)",   desc = "Put indented before cursor (linewise)", mode = { "n", "x" } },
+            { ">p",        "<Plug>(YankyPutIndentAfterShiftRight)",  desc = "Put and indent right",                  mode = { "n", "x" } },
+            { "<p",        "<Plug>(YankyPutIndentAfterShiftLeft)",   desc = "Put and indent left",                   mode = { "n", "x" } },
+            { ">P",        "<Plug>(YankyPutIndentBeforeShiftRight)", desc = "Put before and indent right",           mode = { "n", "x" } },
+            { "<P",        "<Plug>(YankyPutIndentBeforeShiftLeft)",  desc = "Put before and indent left",            mode = { "n", "x" } },
+            { "=p",        "<Plug>(YankyPutAfterFilter)",            desc = "Put after applying a filter",           mode = { "n", "x" } },
+            { "=P",        "<Plug>(YankyPutBeforeFilter)",           desc = "Put before applying a filter",          mode = { "n", "x" } },
         },
         opts = {
             ring = {
@@ -744,6 +758,7 @@ return {
                 default_command    = default_command,
 
                 -- Restore the default input method state when the following events are triggered
+                -- "VimEnter" and "FocusGained" were removed for causing problems, add it by your needs
                 set_default_events = { "InsertLeave" },
             }
         end,

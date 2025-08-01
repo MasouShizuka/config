@@ -22,10 +22,16 @@ function M.setup(opts)
     pcall(vim.keymap.del, "n", "gri")
     pcall(vim.keymap.del, "n", "grt")
 
-    -- 不复制到 clipboard
-    vim.keymap.set({ "n", "x" }, "C", '"_c', { silent = true })
-    vim.keymap.set({ "n", "x" }, "D", '"_d', { silent = true })
-    vim.keymap.set({ "n", "x" }, "X", '"_x', { silent = true })
+    -- 复制到 clipboard
+    vim.keymap.set({ "n", "x" }, "C", '"+c', { silent = true })
+    vim.keymap.set({ "n", "x" }, "D", '"+d', { silent = true })
+    vim.keymap.set({ "n", "x" }, "X", '"+x', { silent = true })
+    if not utils.is_available("yanky.nvim") then
+        vim.keymap.set({ "n", "x" }, "<leader>p", '"+p', { silent = true })
+        vim.keymap.set({ "n", "x" }, "<leader>P", '"+P', { silent = true })
+        vim.keymap.set({ "n", "x" }, "Y", '"+y', { silent = true })
+    end
+    vim.keymap.set({ "n", "x" }, "YY", "Yy", { remap = true, silent = true })
 
     -- 跳到行首行尾不带空格
     vim.keymap.set({ "n", "x", "o" }, "H", "^", { desc = "Start of line (non-blank)", silent = true })
