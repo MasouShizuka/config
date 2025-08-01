@@ -16,8 +16,8 @@ prepend_keymap = [
     { on = "K",                run = [ "toggle", "arrow prev" ],                                     desc = "Toggle the current selection state and up" },
 
     # Operation
-    { on = "o",                run = "plugin smart-open",                                            desc = "Open the directory in explorer, or open the file" },
-    { on = "O",                run = "plugin smart-open cwd",                                        desc = "Open the current directory in explorer" },
+    { on = "o",                run = "plugin smart-open",                                            desc = "Open the directory in explorer, or open the file", for = "windows" },
+    { on = "O",                run = "plugin smart-open cwd",                                        desc = "Open the current directory in explorer",           for = "windows" },
     { on = "<Enter>",          run = "open --interactive",                                           desc = "Open selected files interactively" },
     { on = "c",                run = "yank",                                                         desc = "Yank selected files (copy)" },
     { on = "C",                run = "unyank",                                                       desc = "Cancel the yank status" },
@@ -46,6 +46,7 @@ prepend_keymap = [
     { on = [ "y", "d" ],       run = "copy dirname",                                                 desc = "Copy the directory path" },
     { on = [ "y", "f" ],       run = "copy filename",                                                desc = "Copy the filename" },
     { on = [ "y", "w" ],       run = "copy name_without_ext",                                        desc = "Copy the filename without extension" },
+    { on = [ "y", "c" ],       run = "plugin copy-to-clipboard",                                     desc = "Copy the file to clipboard",                       for = "windows" },
 
     # Sorting
     { on = [ "T", "s", "m" ],  run = [ "sort mtime --reverse=no", "linemode mtime" ],                desc = "Sort by modified time" },
@@ -78,12 +79,12 @@ prepend_keymap = [
 
     # Goto
     { on = [ "g", ";" ],       run = "cd --interactive",                                             desc = "Jump interactively" },
-    { on = [ "g", "D", "c" ],  run = "cd C:/",                                                       desc = "Go to C:",            for = "windows" },
-    { on = [ "g", "D", "d" ],  run = "cd D:/",                                                       desc = "Go to D:",            for = "windows" },
-    { on = [ "g", "a" ],       run = "cd '%APPDATA%'",                                               desc = "Go to $APPDATA",      for = "windows" },
-    { on = [ "g", "l" ],       run = "cd '%LOCALAPPDATA%'",                                          desc = "Go to $LOCALAPPDATA", for = "windows" },
-    { on = [ "g", "s" ],       run = "cd '~/scoop'",                                                 desc = "Go to Scoop",         for = "windows" },
-    { on = [ "g", "S" ],       run = "cd '%APPDATA%/Microsoft/Windows/Start Menu/Programs/Startup'", desc = "Go to Startup",       for = "windows" },
+    { on = [ "g", "D", "c" ],  run = "cd C:/",                                                       desc = "Go to C:",                                         for = "windows" },
+    { on = [ "g", "D", "d" ],  run = "cd D:/",                                                       desc = "Go to D:",                                         for = "windows" },
+    { on = [ "g", "a" ],       run = "cd '%APPDATA%'",                                               desc = "Go to $APPDATA",                                   for = "windows" },
+    { on = [ "g", "l" ],       run = "cd '%LOCALAPPDATA%'",                                          desc = "Go to $LOCALAPPDATA",                              for = "windows" },
+    { on = [ "g", "s" ],       run = "cd '~/scoop'",                                                 desc = "Go to Scoop",                                      for = "windows" },
+    { on = [ "g", "S" ],       run = "cd '%APPDATA%/Microsoft/Windows/Start Menu/Programs/Startup'", desc = "Go to Startup",                                    for = "windows" },
 
     # Tabs
     { on = "<C-h>",            run = "tab_switch -1 --relative",                                     desc = "Switch to previous tab" },
