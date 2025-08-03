@@ -57,19 +57,13 @@ if ((is_windows)); then
 fi
 
 if ((is_windows)); then
-    sharex_path="$HOME/scoop/apps/sharex/current/ShareX.exe"
-    if check_and_cd "$sharex_path"; then
-        launch "$sharex_path" "true"
-    fi
-fi
-
-if ((is_windows)); then
     snow_shot_path="$HOME/scoop/apps/snow-shot/current/app.exe"
     if check_and_cd "$snow_shot_path"; then
         launch "$snow_shot_path" "true"
     fi
 fi
 
+# https://docs.github.com/zh/authentication/connecting-to-github-with-ssh/working-with-ssh-key-passphrases
 if ((is_windows)); then
     env=~/.ssh/agent.env
 
