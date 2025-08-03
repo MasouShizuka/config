@@ -7,7 +7,7 @@ show_hidden = true
 
 7-zip = [
     { run = '7zfm %*',                                                             desc = "打开压缩包 (7-zip)",      for = "windows" },
-    { run = '7zg a -ad temp.7z %*',                                                desc = "添加到压缩包... (7-zip)", for = "windows" },
+    { run = '7zg a -ad "%1".7z %*',                                                desc = "添加到压缩包... (7-zip)", for = "windows" },
 ]
 
 edit = [
