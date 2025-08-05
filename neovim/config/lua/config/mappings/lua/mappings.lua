@@ -31,7 +31,7 @@ function M.setup(opts)
         vim.keymap.set({ "n", "x" }, "<leader>P", '"+P', { silent = true })
         vim.keymap.set({ "n", "x" }, "Y", '"+y', { silent = true })
     end
-    vim.keymap.set({ "n", "x" }, "YY", "Yy", { remap = true, silent = true })
+    vim.keymap.set("n", "YY", "Yy", { remap = true, silent = true })
 
     -- 跳到行首行尾不带空格
     vim.keymap.set({ "n", "x", "o" }, "H", "^", { desc = "Start of line (non-blank)", silent = true })
