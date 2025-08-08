@@ -1,13 +1,13 @@
 {
-    "version": "0.1.3-beta-20250712",
+    "version": "0.2.0-beta-20250807",
     "description": "简单优雅的工具软件",
     "homepage": "https://github.com/mg-chao/snow-shot",
     "license": "GPL-3.0|Apache-2.0",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/mg-chao/snow-shot/releases/download/0.1.3-beta-20250712/Snow.Shot_0.1.3-beta-20250712_x64-setup.zip",
-            "hash": "0164836e0fcb86303f00dd6f596e1ff8dcda397aac0efc5990097b61aeeee546",
-            "extract_dir": "Snow Shot_0.1.3-beta-20250712_x64-setup"
+            "url": "https://github.com/mg-chao/snow-shot/releases/download/0.2.0-beta-20250807/Snow.Shot_0.2.0-beta-20250807_windows_portable.zip",
+            "hash": "80e8a6b92cd54eb5382c5897dbfb8096a3bf2765b1cd65a72c9ce127960c4daf",
+            "extract_dir": "Snow Shot_0.2.0-beta-20250807_windows_portable"
         }
     },
     "installer": {
@@ -42,8 +42,8 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/mg-chao/snow-shot/releases/download/$version/Snow.Shot_$matchVersion_x64-setup.zip",
-                "extract_dir": "Snow Shot_$matchVersion_x64-setup"
+                "url": "https://github.com/mg-chao/snow-shot/releases/download/$version/Snow.Shot_$matchVersion_windows_portable.zip",
+                "extract_dir": "Snow Shot_$matchVersion_windows_portable"
             }
         }
     }

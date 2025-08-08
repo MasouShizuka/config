@@ -1,17 +1,17 @@
 {
-    "version": "8.4",
+    "version": "8.5.1",
     "description": "DUI 配置 for foobar2000",
     "homepage": "https://github.com/dream7180/foobox-cn",
     "license": "GPL-3.0",
     "depends": "extras/foobar2000",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.4/foobox_x64.cn.v8.4-1.exe#/dl.7z_",
-            "hash": "03a881920c184b4cbb341a3c8294edc4a5695b48ee70f899a201b702a86afc50"
+            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.5.1/foobox_x64.cn.v8.5.1-1.exe#/dl.7z_",
+            "hash": "0b0a8e07a0fe92c4049ae7a613277e180fde1f220347be98e6ede5096942c045"
         },
         "32bit": {
-            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.4/foobox_x86.cn.v8.4-1.exe#/dl.7z_",
-            "hash": "953ff5a5fb8f4d8b62e636bb2dc721be037166e73efb8467da235d064e641d59"
+            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.5.1/foobox_x86.cn.v8.5.1-1.exe#/dl.7z_",
+            "hash": "018365ac78f586708f1c5befc32286712c80e36558ad1ec680d84923a833faa1"
         }
     },
     "installer": {
