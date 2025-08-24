@@ -1,3 +1,5 @@
+// 文档 https://github.com/hooke007/MPV_lazy/wiki/4_GLSL
+
 /* vi: ft=c
  *
  * Copyright (c) 2023 an3223 <ethanr2048@gmail.com>

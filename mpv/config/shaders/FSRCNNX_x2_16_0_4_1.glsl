@@ -1,3 +1,5 @@
+// 文档 https://github.com/hooke007/MPV_lazy/wiki/4_GLSL
+
 // Copyright (C) 2017-2021 igv
 //
 // This program is free software; you can redistribute it and/or

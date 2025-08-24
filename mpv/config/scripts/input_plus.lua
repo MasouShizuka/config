@@ -1,98 +1,7 @@
 --[[
-文档_ 无
+文档_ https://github.com/hooke007/MPV_lazy/discussions/615
 
 快捷指令增强
-
-可用的快捷键示例（在 input.conf 中写入）：
-
- <KEY>   script-binding input_plus/adevice_back        # 上一个音频输出设备
- <KEY>   script-binding input_plus/adevice_next        # 下...
- <KEY>   script-binding input_plus/adevice_all_back    # 上...（包括不属于当前 --ao 的设备）
- <KEY>   script-binding input_plus/adevice_all_next    # 下...
-
- <KEY>   script-binding input_plus/chap_skip_toggle    # 启用/禁用强制自动跳过章节（片头片尾）
-
- <KEY>   script-binding input_plus/chapter_back        # 上一个章节（自动跳过无章节到播放列表上一个文件）
- <KEY>   script-binding input_plus/chapter_back_nat    # 上...（自动跳过无章节到播放列表上一个文件的最后一个章节）
- <KEY>   script-binding input_plus/chapter_next        # 下...（自动跳过无章节到播放列表下一个文件）
- <KEY>   script-message-to input_plus chapter-useek 1   # 下一个章节（此功能需要 uosc 脚本：自动跳过无章节到播放列表或当前目录的下一个文件）
- <KEY>   script-message-to input_plus chapter-useek -1 nat
-
- <KEY>   script-binding input_plus/import_files        # 打开文件（唤起一个打开文件的窗口，下面三项同理 仅Windows可用）
- <KEY>   script-binding input_plus/import_url          # 打开地址（不可取消）
- <KEY>   script-binding input_plus/append_aid          # 追加其它音轨（不切换）
- <KEY>   script-binding input_plus/append_sid          # 追加其它字幕（切换）
-
- <KEY>   script-binding input_plus/info_toggle         # 启用/禁用仿Pot的OSD常驻显示简要信息
-
- <KEY>   script-binding input_plus/mark_aid_A          # 标记当前音轨为A
- <KEY>   script-binding input_plus/mark_aid_B          # 标记当前音轨为B
- <KEY>   script-binding input_plus/mark_aid_merge      # 合并AB音轨
- <KEY>   script-binding input_plus/mark_aid_reset      # 取消AB并轨和标记
- <KEY>   script-binding input_plus/mark_aid_fin        # （单键实现上述四项命令）
-
- <KEY>   script-binding input_plus/ostime_display      # 临时显示系统时间
- <KEY>   script-binding input_plus/ostime_toggle       # 启用/禁用显示系统时间
-
- <KEY>   script-message-to input_plus update-osd 1     # 开始强制刷新OSD的渲染
- <KEY>   script-message-to input_plus update-osd 0     # 暂停强制刷新OSD的渲染
- <KEY>   script-message-to input_plus update-osd 1 $FREQ   # 可选参数 $FREQ 表示指定刷新间隔，大于0且小于1
-
- <KEY>   script-binding input_plus/pip_dummy           # 画中画（伪）/小窗化
- <KEY>   script-message-to input_plus pip_dummy_pct 40   # ...（支持自定义数值）
-
- <KEY>   script-binding input_plus/playlist_order_0    # 播放列表的洗牌与撤销
- <KEY>   script-binding input_plus/playlist_order_0r   # ...（重定向至首个文件）
- <KEY>   script-binding input_plus/playlist_order_1    # 播放列表连续洗牌（可用上两项命令恢复）
- <KEY>   script-binding input_plus/playlist_order_1r   # ...
- <KEY>   script-binding input_plus/playlist_random     # 随机跳转到播放列表中的任一条目
- <KEY>   script-binding input_plus/playlist_tmp_save   # 保存当前播放列表为临时列表（位于主设置目录 playlist_temp.mpl ）
- <KEY>   script-binding input_plus/playlist_tmp_load   # 打开临时播放列表
-
- <KEY>   script-binding input_plus/quit_real           # 对执行退出命令前的确认（防止误触）
- <KEY>   script-binding input_plus/quit_wait           # 延后退出命令的执行（执行前再次触发可取消）
-
- <KEY>   script-binding input_plus/seek_acc            # [按住/松开] 非线性向前跳转（模拟流媒体平台的跳转方式）
- <KEY>   script-binding input_plus/seek_acc_back       # [按住/松开] ......向后...
- <KEY>   script-binding input_plus/seek_acc_alt        # [按住/松开] ...（防止关键帧异常的备用）
- <KEY>   script-binding input_plus/seek_acc_back_alt   # [按住/松开] ...
- <KEY>   script-message-to input_plus update-var seek_dur_step 2   # 修改自定义跳转步长增量，默认 1
-
- <KEY>   script-binding input_plus/sids_sec_swap       # 双字幕的主次交换
-
- <KEY>   script-binding input_plus/speed_auto          # [按住/松开] 两倍速/一倍速
- <KEY>   script-binding input_plus/speed_auto_bullet   # [按住/松开] 子弹时间/一倍速
- <KEY>   script-binding input_plus/speed_autox         # [按住/松开] 自定义目标速/一倍速
- <KEY>   script-message-to input_plus update-var spd_target 4   # 修改自定义目标速度，默认 3
- <KEY>   script-binding input_plus/speed_recover       # 仿Pot的速度重置与恢复
-
- <KEY>   script-binding input_plus/speed_sync_toggle   # 启用/禁用自适应速度偏移（补偿显示刷新率）
-
- <KEY>   script-message-to input_plus cycle-stats 1 2   # 循环浏览统计数据第1至2页（页数可自定义）
-
- <KEY>   script-binding input_plus/trackA_back         # 上一个音频轨道（自动跳过无轨道）
- <KEY>   script-binding input_plus/trackA_next         # 下...
- <KEY>   script-binding input_plus/trackS_back         # 上一个字幕轨道...
- <KEY>   script-binding input_plus/trackS_next         # 下...
- <KEY>   script-binding input_plus/trackV_back         # 上一个视频轨道...
- <KEY>   script-binding input_plus/trackV_next         # 下...
-
- <KEY>   script-binding input_plus/trackA_refresh      # 刷新当前轨道（音频）
- <KEY>   script-binding input_plus/trackS_refresh      # ............（字幕）
- <KEY>   script-binding input_plus/trackV_refresh      # ............（视频）
-
- <KEY>   script-binding input_plus/volume_db_dec       # 减少音量（以分贝为单位）
- <KEY>   script-binding input_plus/volume_db_inc       # 增加...
-
- <KEY>   script-binding input_plus/af_hold             # [按住/松开] 临时清空音频滤镜/恢复
- <KEY>   script-binding input_plus/vf_hold             # [...] 临时清空视频滤镜/...
- <KEY>   script-binding input_plus/glsl_hold           # [...] 临时清空着色器/...
-
- <KEY>   script-message-to input_plus glsl-param set $RTshader $Param $Val                  # 设置指定 $RT着色器 的指定 $参数 $值
- <KEY>   script-message-to input_plus glsl-param add $RTshader $Param $Val $Def $Min $Max   # 调节指定 $RT着色器 的指定 $参数 $步进值（可选：指定 $默认 $最小 $最大值）
-
- <KEY>   script-message-to input_plus cycle-cmds "cmd1" "cmd2"   # 循环触发命令
-
 ]]
 
 local mp = require "mp"
@@ -138,7 +47,7 @@ local function incompat_check(full_str, tar_major, tar_minor, tar_patch)
 	return false
 end
 if incompat_check(mpv_ver_curr, min_major, min_minor, min_patch) then
-	mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止缩略图功能。")
+	mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止脚本。")
 	return
 end
 
@@ -331,38 +240,66 @@ function cycle_cmds(...)
 end
 
 
-function import_files()
+function import_files(iso)
 	if plat ~= "windows" then
 		return
 	end
+
+	local actions = {
+		[0] = {
+			multiselect = "$true",
+			handler = function(filename, is_first)
+				local mode = is_first and "replace" or "append"
+				mp.commandv("loadfile", filename, mode)
+			end
+		},
+		[1] = { -- DVD ISO
+			multiselect = "$false",
+			handler = function(filename)
+				mp.commandv("set", "dvd-device", filename)
+				mp.commandv("loadfile", "dvd://", "replace")
+			end
+		},
+		[2] = { -- BD ISO
+			multiselect = "$false",
+			handler = function(filename)
+				mp.commandv("set", "bluray-device", filename)
+				mp.commandv("loadfile", "bd://", "replace")
+			end
+		}
+	}
+	local action = actions[iso]
+
 	local was_ontop = mp.get_property_native("ontop")
 	if was_ontop then mp.set_property_native("ontop", false) end
+
+	local ps_command = string.format([[& {
+		Trap { Write-Error -ErrorRecord $_; Exit 1 }
+		Add-Type -AssemblyName PresentationFramework
+		$u8 = [System.Text.Encoding]::UTF8
+		$out = [Console]::OpenStandardOutput()
+		$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
+		$ofd.Multiselect = %s
+		If ($ofd.ShowDialog() -eq $true) {
+			ForEach ($filename in $ofd.FileNames) {
+				$u8filename = $u8.GetBytes("$filename`n")
+				$out.Write($u8filename, 0, $u8filename.Length)
+			}
+		}
+	}]] , action.multiselect)
+
 	local res = mp.utils.subprocess({
-		args = {'powershell', '-NoProfile', '-Command', [[& {
-			Trap {
-				Write-Error -ErrorRecord $_
-				Exit 1
-			}
-			Add-Type -AssemblyName PresentationFramework
-			$u8 = [System.Text.Encoding]::UTF8
-			$out = [Console]::OpenStandardOutput()
-			$ofd = New-Object -TypeName Microsoft.Win32.OpenFileDialog
-			$ofd.Multiselect = $true
-			If ($ofd.ShowDialog() -eq $true) {
-				ForEach ($filename in $ofd.FileNames) {
-					$u8filename = $u8.GetBytes("$filename`n")
-					$out.Write($u8filename, 0, $u8filename.Length)
-				}
-			}
-		}]]},
+		args = {'powershell', '-NoProfile', '-Command', ps_command},
 		cancellable = false,
 	})
 	if was_ontop then mp.set_property_native("ontop", true) end
-	if (res.status ~= 0) then return end
-	local first_file = true
-	for filename in string.gmatch(res.stdout, '[^\n]+') do
-		mp.commandv("loadfile", filename, first_file and "replace" or "append")
-		first_file = false
+
+	if (res.status == 0 and res.stdout) then
+		local first_file = true
+		for filename in string.gmatch(res.stdout, '[^\r\n]+') do
+			action.handler(filename, first_file)
+			first_file = false
+		end
 	end
 end
 function import_url()
@@ -1087,7 +1024,9 @@ mp.add_key_binding(nil, "chapter_back_nat", function() chapter_seek_force(-1, tr
 mp.add_key_binding(nil, "chapter_next", function() chapter_seek_force(1) end)
 mp.register_script_message("chapter-useek", function(dir, nat) chapter_seek_force(dir, nat, true) end)
 
-mp.add_key_binding(nil, "import_files", import_files)
+mp.add_key_binding(nil, "import_files", function() import_files(0) end)
+mp.add_key_binding(nil, "import_iso_dvd", function() import_files(1) end)
+mp.add_key_binding(nil, "import_iso_bd", function() import_files(2) end)
 mp.add_key_binding(nil, "import_url", import_url)
 mp.add_key_binding(nil, "import_append_aid", import_append_aid)
 mp.add_key_binding(nil, "import_append_sid", import_append_sid)

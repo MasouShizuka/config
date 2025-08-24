@@ -60,7 +60,7 @@ local function incompat_check(full_str, tar_major, tar_minor, tar_patch)
 	return false
 end
 if incompat_check(mpv_ver_curr, min_major, min_minor, min_patch) then
-	mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止缩略图功能。")
+	mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止脚本。")
 	return
 end
 

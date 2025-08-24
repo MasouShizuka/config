@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/player/lua/stats.lua
-COMMIT_ bff0d59cbeea205f4a27f205b8e972b3238f3c36
+COMMIT_ 5b1df3c5d900298e433539c99e8e5ea60acfa068
 文档_ stats.conf
 
 mpv.conf的前置条件 --load-stats-overlay=no
@@ -163,7 +163,7 @@ local function incompat_check(full_str, tar_major, tar_minor, tar_patch)
     return false
 end
 if incompat_check(mpv_ver_curr, min_major, min_minor, min_patch) then
-    mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止缩略图功能。")
+    mp.msg.warn("当前mpv版本 (" .. (mpv_ver_curr or "未知") .. ") 低于 " .. min_major .. "." .. min_minor .. "." .. min_patch .. "，已终止脚本。")
     return
 end
 
@@ -377,9 +377,15 @@ end
 -- exclude: Optional table containing keys which are considered invalid values
 --          for this property. Specifying this will replace empty string as
 --          default invalid value (nil is always invalid).
-local function append_property(s, prop, attr, excluded)
+-- cached : If true, use get_property_cached instead of get_property_osd
+local function append_property(s, prop, attr, excluded, cached)
     excluded = excluded or {[""] = true}
-    local ret = mp.get_property_osd(prop)
+    local ret
+    if cached then
+        ret = get_property_cached(prop)
+    else
+        ret = mp.get_property_osd(prop)
+    end
     if not ret or excluded[ret] then
         if o.debug then
             print("No value for property: " .. prop)
@@ -961,7 +967,21 @@ local function append_img_params(s, r, ro)
 
     -- Group these together to save vertical space
     append(s, r["colormatrix"], {prefix="矩阵系数："})
-    append(s, r["primaries"], {prefix="色彩原色：", nl="", indent=indent})
+    if r["prim-red-x"] or r["prim-red-y"] or
+       r["prim-green-x"] or r["prim-green-y"] or
+       r["prim-blue-x"] or r["prim-blue-y"] or
+       r["prim-white-x"] or r["prim-white-y"] then
+        append(s, string.format("[%.3f %.3f, %.3f %.3f, %.3f %.3f, %.3f %.3f]",
+                                r["prim-red-x"] or 0, r["prim-red-y"] or 0,
+                                r["prim-green-x"] or 0, r["prim-green-y"] or 0,
+                                r["prim-blue-x"] or 0, r["prim-blue-y"] or 0,
+                                r["prim-white-x"] or 0, r["prim-white-y"] or 0),
+            {prefix="色彩原色：", nl="", indent=indent})
+        append(s, r["primaries"], {prefix="in", nl="", indent=" ", prefix_sep=" ",
+                                   no_prefix_markup=true})
+    else
+        append(s, r["primaries"], {prefix="色彩原色：", nl="", indent=indent})
+    end
     append(s, r["gamma"], {prefix="传输特性：", nl="", indent=indent})
 end
 
@@ -999,8 +1019,8 @@ local function add_video_out(s)
     append(s, "", {prefix="显示设备：", nl=o.nl .. o.nl, indent=""})
     append(s, vo, {prefix_sep="", nl="", indent=""})
 
-    append(s, get_property_cached("display-names"), {prefix_sep="", prefix="(", suffix=")",
-           no_prefix_markup=true, nl="", indent=" "})
+    append_property(s, "display-names", {prefix_sep="", prefix="(", suffix=")",
+                    no_prefix_markup=true, nl="", indent=" "}, nil, true)
     append(s, mp.get_property_native("current-gpu-context"),
            {prefix="GPU context：", nl="", indent=o.prefix_sep .. o.prefix_sep})
     append_property(s, "avsync", {prefix="A/V同步偏移："})
@@ -1065,9 +1085,9 @@ local function add_video(s)
             append(s, track["decoder"], {prefix="[", nl="", indent=" ", prefix_sep="",
                    no_prefix_markup=true, suffix="]"})
         end
-        append(s, get_property_cached("hwdec-current"), {prefix="硬解API：", nl="",
-               indent=o.prefix_sep .. o.prefix_sep,
-               no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
+        append_property(s, "hwdec-current", {prefix="硬解API：", nl="",
+                        indent=o.prefix_sep .. o.prefix_sep,
+                        no_prefix_markup=false, suffix=""}, {no=true, [""]=true}, true)
     end
     local has_prefix = false
     if o.show_frame_info then

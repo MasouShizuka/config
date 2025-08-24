@@ -1,3 +1,5 @@
+// 文档 https://github.com/hooke007/MPV_lazy/wiki/4_GLSL
+
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,12 +14,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//!DESC [nnedi3_nns128_win8x6] (double_y, nns128, win8x6)
+
 //!HOOK LUMA
 //!BIND HOOKED
-//!HEIGHT 2 HOOKED.h *
-//!OFFSET 0.000000 -0.500000
-//!WHEN OUTPUT.w LUMA.w 1.200 * >
+//!SAVE DY
+//!DESC [nnedi3_nns128_win8x6] (double_y, nns128, win8x6)
+//!OFFSET 0.000 -0.500
+//!HEIGHT HOOKED.h 2 *
+//!WHEN OUTPUT.w HOOKED.w 1.200 * > OUTPUT.h HOOKED.h 1.200 * > *
 //!COMPUTE 32 16 32 8
 
 #pragma optionNV(inline none)
@@ -231,12 +235,13 @@ imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(1, 2), ret0);
 imageStore(out_image, ivec2(gl_GlobalInvocationID) * ivec2(1, 2) + ivec2(0, 1), ret);
 }  // hook
 
-//!DESC [nnedi3_nns128_win8x6] (double_x, nns128, win8x6)
 //!HOOK LUMA
-//!BIND HOOKED
-//!WIDTH 2 HOOKED.w *
-//!OFFSET -0.500000 0.000000
-//!WHEN OUTPUT.w LUMA.w 1.200 * >
+//!BIND DY
+//!DESC [nnedi3_nns128_win8x6] (double_x, nns128, win8x6)
+//!OFFSET -0.500 -0.500
+//!WIDTH DY.w 2 *
+//!HEIGHT DY.h
+//!WHEN OUTPUT.w HOOKED.w 1.200 * > OUTPUT.h HOOKED.h 1.200 * > *
 //!COMPUTE 64 8 32 8
 
 #pragma optionNV(inline none)
@@ -390,7 +395,7 @@ ivec2 group_base = ivec2(gl_WorkGroupID) * ivec2(gl_WorkGroupSize);
 int local_pos = int(gl_LocalInvocationID.x) * 15 + int(gl_LocalInvocationID.y);
 for (int id = int(gl_LocalInvocationIndex); id < 555; id += int(gl_WorkGroupSize.x * gl_WorkGroupSize.y)) {
 int x = id / 15, y = id % 15;
-inp[id] = HOOKED_tex(HOOKED_pt * vec2(float(group_base.x+x-(2))+0.5,float(group_base.y+y-(3))+0.5)).x;
+inp[id] = DY_tex(DY_pt * vec2(float(group_base.x+x-(2))+0.5,float(group_base.y+y-(3))+0.5)).x;
 }
 barrier();
 vec4 ret = vec4(0.0);

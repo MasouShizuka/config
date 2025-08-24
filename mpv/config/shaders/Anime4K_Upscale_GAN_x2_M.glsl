@@ -1,3 +1,5 @@
+// 文档 https://github.com/hooke007/MPV_lazy/wiki/4_GLSL
+
 // MIT License
 
 // Copyright (c) 2019-2021 bloc97

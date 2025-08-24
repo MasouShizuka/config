@@ -1,3 +1,5 @@
+// 文档 https://github.com/hooke007/MPV_lazy/wiki/4_GLSL
+
 // MIT License
 
 // Copyright (c) 2023 João Chrisóstomo
@@ -20,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+
 //!PARAM chroma_offset_x
 //!TYPE float
 0.0
@@ -27,12 +30,6 @@
 //!PARAM chroma_offset_y
 //!TYPE float
 0.0
-
-//!PARAM SMTH
-//!TYPE int
-//!MINIMUM 0
-//!MAXIMUM 1
-1
 
 //!PARAM distance_coeff
 //!TYPE float
@@ -334,8 +331,8 @@ vec4 hook() {
 //!HOOK CHROMA
 //!BIND CHROMA
 //!BIND LUMA
+//!BIND LUMA_LR
 //!DESC [CfL_Prediction_RT] (Smoothing Chroma)
-//!WHEN SMTH 0 >
 
 float comp_w(vec2 spatial_distance, float intensity_distance) {
     return max(100.0 * exp(-distance_coeff * pow(length(spatial_distance), 2.0) - intensity_coeff * pow(intensity_distance, 2.0)), 1e-32);

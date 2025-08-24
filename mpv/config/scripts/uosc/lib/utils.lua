@@ -806,7 +806,7 @@ function find_active_keybindings(key)
 end
 
 do
-	local key_subs = {{'#', ''}, {anycase('sharp'), '#'}}
+	local key_subs = {{'^#$', ''}, {anycase('sharp'), '#'}}
 
 	-- Replaces stuff like `SHARP` -> `#`, `#` -> ``
 	---@param keybind string
@@ -890,6 +890,16 @@ end
 
 ---@return string|nil
 function get_clipboard()
+	local data, err = mp.get_property('clipboard/text')
+	if data then
+		return data
+	end
+	if err and err ~= 'property not found' and err ~= 'property unavailable' then
+		mp.commandv('show-text', 'get_clipboard ' .. ulang._error)
+		msg.error(err)
+		return nil
+	end
+
 	local err, data = call_ziggy({'get-clipboard'})
 	if err then
 		mp.commandv('show-text', 'get_clipboard ' .. ulang._error)
@@ -902,6 +912,17 @@ end
 ---@return string|nil payload String that was copied to clipboard.
 function set_clipboard(payload)
 	payload = tostring(payload)
+
+	local success, err = mp.set_property('clipboard/text', payload)
+	if success then
+		mp.commandv('show-text', ulang._clipboard_osd .. ': ' .. payload, 3000)
+		return payload
+	end
+	if err and err ~= 'property not found' and err ~= 'property unavailable' then
+		mp.commandv('show-text', 'set_clipboard ' .. ulang._error)
+		msg.error(err)
+	end
+
 	local err, data = call_ziggy({'set-clipboard', payload})
 	if err then
 		mp.commandv('show-text', 'set_clipboard ' .. ulang._error)
