@@ -44,7 +44,7 @@ local format_list = {
                 }
             end,
         },
-        download = environment.is_gcc_exist or environment.is_clang_exist or environment.is_python_exist,
+        download = not environment.is_clang_exist and (environment.is_gcc_exist or environment.is_python_exist),
         enable = environment.is_gcc_exist or environment.is_clang_exist or environment.is_python_exist,
         filetype = { "c", "cpp" },
     },
