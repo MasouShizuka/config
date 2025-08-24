@@ -1,0 +1,104 @@
+/* @theme academic */
+
+@import "gaia";
+
+:root {
+    --color-background: #ffffff;
+    --color-background-code: #dcdcdc;
+    --color-foreground: #333333;
+    --color-foreground-code: #000000;
+}
+
+section {
+    font-size: 24px;
+    font-family: "Source Han Sans SC", "Maple Mono NF CN";
+    padding-top: 90px;
+
+    &::after {
+        content: attr(data-marpit-pagination) "/" attr(data-marpit-pagination-total);
+        font-size: 24px;
+        font-weight: bold;
+    }
+}
+
+
+h1,
+section.lead h1 {
+    font-size: 60px;
+}
+
+h2,
+section.lead h2 {
+    font-size: 54px;
+}
+
+h3,
+section.lead h3 {
+    font-size: 48px;
+}
+
+h4,
+section.lead h4 {
+    font-size: 42px;
+}
+
+h5,
+section.lead h5 {
+    font-size: 36px;
+}
+
+h6,
+section.lead h6 {
+    font-size: 30px;
+}
+
+section.lead h6 {
+    text-align: right;
+}
+
+header {
+    background-image: url("./themes/images/logo.png");
+    background-position: right top;
+    background-repeat: no-repeat;
+    background-size: 200px;
+    color: var(--color-foreground);
+    font-size: 40px;
+    font-weight: bold;
+    height: auto;
+    left: 40px;
+    right: 40px;
+    top: 10px;
+}
+
+footer {
+    font-size: 16px;
+    height: auto;
+    left: 40px;
+    right: 40px;
+    bottom: 10px;
+    line-height: 1.35;
+    overflow: visible;
+}
+
+code {
+    font-family: "Maple Mono NF CN";
+}
+
+:not(pre)>code {
+    background: var(--color-background-code);
+    color: var(--color-foreground-code);
+    font-family: "Maple Mono NF CN";
+}
+
+img[alt~="left"] {
+    float: left;
+}
+
+img[alt~="right"] {
+    float: right;
+}
+
+img[alt~="center"] {
+    display: block;
+    margin: auto;
+}
