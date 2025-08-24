@@ -57,7 +57,7 @@ if ((is_windows)); then
 fi
 
 if ((is_windows)); then
-    snow_shot_path="$HOME/scoop/apps/snow-shot/current/app.exe"
+    snow_shot_path="$HOME/scoop/apps/snow-shot/current/Snow Shot.exe"
     if check_and_cd "$snow_shot_path"; then
         launch "$snow_shot_path" "true"
     fi
