@@ -1006,13 +1006,6 @@ footer: 初虹 # 设置页脚区域的内容，如果设定页眉的内容，则
 
 ###### 欢迎交流 ~
 
-<div class="icons">
-
-- <i class="fa-solid fa-envelope"></i>
-    - 邮箱：ch2099058972@163.com
-- <i class="fa-brands fa-weixin"></i>
-    - 微信：favourhong
-- <i class="fa-solid fa-house"></i>
-    - 公众号：虹鹄山庄
-
-<div>
+邮箱：ch2099058972@163.com
+微信：favourhong
+公众号：虹鹄山庄
