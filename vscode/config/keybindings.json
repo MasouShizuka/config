@@ -481,7 +481,7 @@
     {
         "key": "ctrl+k",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!sideBarFocus && !terminalFocus && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && neovim.mode != 'cmdline_normal'"
     },
     // 分屏到左侧
     {
@@ -592,12 +592,12 @@
     {
         "key": "alt+f5",
         "command": "-workbench.action.editor.nextChange",
-        "when": "editorTextFocus && !textCompareEditorActive"
+        "when": "editorTextFocus && !textCompareEditorActive && quickDiffDecorationCount != '0'"
     },
     {
         "key": "ctrl+n",
         "command": "workbench.action.editor.nextChange",
-        "when": "editorTextFocus && workbench.scm.repositories.active"
+        "when": "editorTextFocus && !textCompareEditorActive && quickDiffDecorationCount != '0'"
     },
     {
         "key": "alt+f5",
@@ -613,12 +613,12 @@
     {
         "key": "shift+alt+f5",
         "command": "-workbench.action.editor.previousChange",
-        "when": "editorTextFocus && !textCompareEditorActive"
+        "when": "editorTextFocus && !textCompareEditorActive && quickDiffDecorationCount != '0'"
     },
     {
         "key": "ctrl+shift+n",
         "command": "workbench.action.editor.previousChange",
-        "when": "editorTextFocus && workbench.scm.repositories.active"
+        "when": "editorTextFocus && !textCompareEditorActive && quickDiffDecorationCount != '0'"
     },
     {
         "key": "shift+alt+f5",
