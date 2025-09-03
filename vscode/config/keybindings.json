@@ -278,9 +278,9 @@
     // 侧边栏未打开时，则打开侧边栏并聚焦
     {
         "key": "ctrl+1",
-        "command": "extension.multiCommand.execute",
+        "command": "runCommands",
         "args": {
-            "sequence": [
+            "commands": [
                 "workbench.action.toggleSidebarVisibility",
                 "workbench.action.focusSideBar"
             ]
@@ -348,9 +348,9 @@
     // 在文件中替换
     {
         "key": "ctrl+shift+f",
-        "command": "extension.multiCommand.execute",
+        "command": "runCommands",
         "args": {
-            "sequence": [
+            "commands": [
                 "workbench.action.replaceInFiles",
                 "workbench.action.search.toggleQueryDetails",
                 "workbench.action.replaceInFiles"
@@ -413,9 +413,9 @@
     // 替换
     {
         "key": "ctrl+f",
-        "command": "extension.multiCommand.execute",
+        "command": "runCommands",
         "args": {
-            "sequence": [
+            "commands": [
                 "editor.action.startFindReplaceAction",
                 "actions.find"
             ]
@@ -638,9 +638,9 @@
     // 在新窗口打开当前文件
     {
         "key": "ctrl+t",
-        "command": "extension.multiCommand.execute",
+        "command": "runCommands",
         "args": {
-            "sequence": [
+            "commands": [
                 "workbench.action.files.showOpenedFileInNewWindow",
                 "workbench.action.closeActiveEditor"
             ]
@@ -696,9 +696,9 @@
     // 面板未打开时，则打开面板并聚焦
     {
         "key": "ctrl+3",
-        "command": "extension.multiCommand.execute",
+        "command": "runcommands",
         "args": {
-            "sequence": [
+            "commands": [
                 "workbench.action.togglePanel",
                 "workbench.action.focusPanel"
             ]
@@ -830,9 +830,9 @@
     // 辅助侧栏未打开时，则打开辅助侧栏并聚焦
     {
         "key": "ctrl+4",
-        "command": "extension.multiCommand.execute",
+        "command": "runcommands",
         "args": {
-            "sequence": [
+            "commands": [
                 "workbench.action.toggleAuxiliaryBar",
                 "workbench.action.focusActiveEditorGroup"
             ]
