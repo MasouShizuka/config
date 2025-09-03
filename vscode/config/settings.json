@@ -254,7 +254,7 @@
             "NOTE",
             "INFO"
         ],
-        "PREF": [
+        "PERF": [
             "PERFORMANCE",
             "PERF",
             "OPTIMIZE",
@@ -318,7 +318,7 @@
             "foreground": "#222436",
             "icon": "note"
         },
-        "PREF": {
+        "PERF": {
             "background": "#fca7ea",
             "foreground": "#222436",
             "icon": "clock"
