@@ -229,7 +229,6 @@
     "shellcheck.exclude": [
         "2148"
     ],
-    "sshfs.configs": [],
     "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.defaultProfile.windows": "Bash",
     "terminal.integrated.fontLigatures.enabled": true,
@@ -388,8 +387,6 @@
     "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
-        "{git,git-graph}:/**/*.{md,csv,svg}": "default",
-        "{hexdiff}:/**/*.*": "hexEditor.hexedit",
         "*.drawio": "hediet.vscode-drawio-text",
         "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
