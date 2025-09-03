@@ -609,6 +609,11 @@
         "command": "workbench.action.compareEditor.nextChange",
         "when": "textCompareEditorVisible"
     },
+    {
+        "key": "ctrl+n",
+        "command": "merge.goToNextUnhandledConflict",
+        "when": "hasConflicts"
+    },
     // 转到上一个更改
     {
         "key": "shift+alt+f5",
@@ -629,6 +634,11 @@
         "key": "ctrl+shift+n",
         "command": "workbench.action.compareEditor.previousChange",
         "when": "textCompareEditorVisible"
+    },
+    {
+        "key": "ctrl+shift+n",
+        "command": "merge.goToPreviousUnhandledConflict",
+        "when": "hasConflicts"
     },
 
     {
