@@ -196,7 +196,7 @@
     "ignore": [
       {
         "kind": "Exe",
-        "id": "Snow Shot.exe",
+        "id": "snowshot.exe",
         "matching_strategy": "Equals"
       }
     ]
