@@ -4,6 +4,8 @@ if [[ ! -x "$(command -v curl)" ]]; then
     exit 1
 fi
 
+[[ ! -x "$(command -v cargo)" ]] && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
 INSTALL_DIR="$HOME/.local/bin"
 [[ ! -d $INSTALL_DIR ]] && mkdir -p "$INSTALL_DIR"
 
@@ -43,7 +45,7 @@ fi
 # ╭─ lazygit ────────────────────────────────────────────────╮
 
 if [[ ! -x "$(command -v lazygit)" ]]; then
-    download_github_latest "jesseduffield" "lazygit" "$(uname -s)_$(uname -m).tar.gz" "lazygit.tar.gz"
+    download_github_latest "jesseduffield" "lazygit" "$(uname -s | tr "[:upper:]" "[:lower:]")_$(uname -m).tar.gz" "lazygit.tar.gz"
     mkdir -p "$DIR/lazygit/cache"
     tar -xvf "lazygit.tar.gz" -C "$DIR/lazygit/cache"
     mv "$DIR/lazygit/cache/lazygit" "$INSTALL_DIR"
@@ -55,7 +57,6 @@ src="$DIR/lazygit/config"
 des="$HOME/.config/lazygit"
 if [[ -d "$src" ]]; then
     install_to_target "$src" "$des"
-
 fi
 
 # ╰──────────────────────────────────────────────── lazygit ─╯
