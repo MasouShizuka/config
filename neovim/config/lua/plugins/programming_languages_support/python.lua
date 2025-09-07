@@ -5,7 +5,6 @@ return {
     -- NOTE: 需要安装 fd
     {
         "linux-cultist/venv-selector.nvim",
-        branch = "regexp",
         cmd = {
             "VenvSelect",
         },
@@ -37,9 +36,24 @@ return {
                 dependencies = {
                     "mfussenegger/nvim-dap",
                 },
+                init = function()
+                    local utils = require("utils")
+                    if utils.is_available("which-key.nvim") then
+                        utils.create_once_autocmd("User", {
+                            callback = function()
+                                require("which-key").add({
+                                    { "<leader>dl", group = "dap-python", mode = "n" },
+                                })
+                            end,
+                            desc = "Register which-key for dap-python",
+                            pattern = "IceLoad",
+                        })
+                    end
+                end,
                 keys = {
-                    { "<leader>dlm", function() require("dap-python").test_method() end, desc = "Debug Method", ft = "python", mode = "n" },
-                    { "<leader>dlc", function() require("dap-python").test_class() end,  desc = "Debug Class",  ft = "python", mode = "n" },
+                    { "<leader>dlm", function() require("dap-python").test_method() end,     desc = "Debug method",    ft = "python", mode = "n" },
+                    { "<leader>dlc", function() require("dap-python").test_class() end,      desc = "Debug class",     ft = "python", mode = "n" },
+                    { "<leader>dls", function() require("dap-python").debug_selection() end, desc = "Debug selection", ft = "python", mode = "x" },
                 },
             },
 
@@ -63,21 +77,19 @@ return {
         end,
         opts = function()
             local config = {
-                settings = {
-                    cache = {
-                        file = path.data_path .. "/venvs2.json",
-                    },
+                cache = {
+                    file = path.data_path .. "/venvs2.json",
                 },
             }
 
             if environment.is_windows then
-                config.settings.search = {
+                config.search = {
                     anaconda_envs = {
-                        command = string.format([[$FD python.exe$ %s --full-path -a -E Lib]], path.conda_path .. "/envs"),
+                        command = string.format([[$FD python.exe$ %s --no-ignore-vcs --full-path -a -E Lib]], path.conda_path .. "/envs"),
                         type = "anaconda",
                     },
                     anaconda_base = {
-                        command = string.format([[$FD python.exe$ %s --full-path -a --color never -d 1]], path.conda_path),
+                        command = string.format([[$FD python.exe$ %s --no-ignore-vcs --full-path -a --color never]], path.conda_path),
                         type = "anaconda",
                     },
                 }
