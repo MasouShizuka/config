@@ -126,7 +126,7 @@ pub struct WindowManager {
 }
 
 #[allow(clippy::struct_excessive_bools)]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct State {
     pub monitors: Ring<Monitor>,
@@ -337,6 +337,7 @@ impl From<&WindowManager> for State {
                             latest_layout: workspace.latest_layout.clone(),
                             resize_dimensions: workspace.resize_dimensions.clone(),
                             tile: workspace.tile,
+                            work_area_offset: workspace.work_area_offset,
                             apply_window_based_work_area_offset: workspace
                                 .apply_window_based_work_area_offset,
                             window_container_behaviour: workspace.window_container_behaviour,
@@ -4778,6 +4779,44 @@ mod tests {
     }
 
     #[test]
+    fn test_remove_nonexistent_window_from_container() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor1".to_string(),
+                "TestDevice1".to_string(),
+                "TestDeviceID1".to_string(),
+                Some("TestMonitorID1".to_string()),
+            );
+
+            // Create a container
+            let container = Container::default();
+
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 0);
+
+            // Add the container to a workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should receive an error when trying to remove a window from an empty container
+        let result = wm.remove_window_from_container();
+        assert!(
+            result.is_err(),
+            "Expected an error when trying to remove a window from an empty container"
+        );
+    }
+
+    #[test]
     fn cycle_container_window_in_direction() {
         let (mut wm, _context) = setup_window_manager();
 
@@ -4844,6 +4883,44 @@ mod tests {
             let container = workspace.focused_container_mut().unwrap();
             assert_eq!(container.focused_window_idx(), 1);
         }
+    }
+
+    #[test]
+    fn test_cycle_nonexistent_windows() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a first monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor1".to_string(),
+                "TestDevice1".to_string(),
+                "TestDeviceID1".to_string(),
+                Some("TestMonitorID1".to_string()),
+            );
+
+            // Create a container
+            let container = Container::default();
+
+            // Should have 3 windows in the container
+            assert_eq!(container.windows().len(), 0);
+
+            // Add the container to a workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should return an error when trying to cycle through windows in an empty container
+        let result = wm.cycle_container_window_in_direction(CycleDirection::Next);
+        assert!(
+            result.is_err(),
+            "Expected an error when cycling through windows in an empty container"
+        );
     }
 
     #[test]
@@ -5477,6 +5554,40 @@ mod tests {
     }
 
     #[test]
+    fn test_float_nonexistent_window() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Add another workspace
+            let new_workspace_index = m.new_workspace_idx();
+            m.focus_workspace(new_workspace_index).unwrap();
+
+            // Should have 2 workspaces
+            assert_eq!(m.workspaces().len(), 2);
+
+            // Add monitor to window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should return an error when trying to float a non-existent window
+        let result = wm.float_window();
+        assert!(
+            result.is_err(),
+            "Expected an error when trying to float a non-existent window"
+        );
+    }
+
+    #[test]
     fn test_maximize_and_unmaximize_window() {
         let (mut wm, _context) = setup_window_manager();
 
@@ -5623,6 +5734,41 @@ mod tests {
     }
 
     #[test]
+    fn test_toggle_maximize_nonexistent_window() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let mut m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Create a container
+            let container = Container::default();
+
+            // Add the container to the workspace
+            let workspace = m.focused_workspace_mut().unwrap();
+            workspace.add_container_to_back(container);
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should return an error when trying to toggle maximize on a non-existent window
+        let result = wm.toggle_maximize();
+        assert!(
+            result.is_err(),
+            "Expected an error when trying to toggle maximize on a non-existent window"
+        );
+    }
+
+    #[test]
     fn test_monocle_on_and_monocle_off() {
         let (mut wm, _context) = setup_window_manager();
 
@@ -5694,6 +5840,41 @@ mod tests {
     }
 
     #[test]
+    fn test_monocle_on_and_off_nonexistent_container() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should return an error when trying to move a non-existent container to monocle
+        let result = wm.monocle_on();
+        assert!(
+            result.is_err(),
+            "Expected an error when trying to move a non-existent container to monocle"
+        );
+
+        // Should return an error when trying to restore a non-existent container from monocle
+        let result = wm.monocle_off();
+        assert!(
+            result.is_err(),
+            "Expected an error when trying to restore a non-existent container from monocle"
+        );
+    }
+
+    #[test]
     fn test_toggle_monocle() {
         let (mut wm, _context) = setup_window_manager();
 
@@ -5762,6 +5943,34 @@ mod tests {
             let monocle_container = wm.focused_workspace().unwrap().monocle_container();
             assert_eq!(*monocle_container, None);
         }
+    }
+
+    #[test]
+    fn test_toggle_monocle_nonexistent_container() {
+        let (mut wm, _context) = setup_window_manager();
+
+        {
+            // Create a monitor
+            let m = monitor::new(
+                0,
+                Rect::default(),
+                Rect::default(),
+                "TestMonitor".to_string(),
+                "TestDevice".to_string(),
+                "TestDeviceID".to_string(),
+                Some("TestMonitorID".to_string()),
+            );
+
+            // Add monitor to the window manager
+            wm.monitors_mut().push_back(m);
+        }
+
+        // Should return an error when trying to toggle monocle on a non-existent container
+        let result = wm.toggle_monocle();
+        assert!(
+            result.is_err(),
+            "Expected an error when trying to toggle monocle on a non-existent container"
+        );
     }
 
     #[test]
