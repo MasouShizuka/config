@@ -29,6 +29,7 @@ scoop install SarasaGothic-SC
 
 # install msys2
 scoop install msys2
+scoop hold msys2
 # change home in msys2 to USERPROFILE in windows
 $nsswitch_path="$env:USERPROFILE\scoop\apps\msys2\current\etc\nsswitch.conf"
 (Get-Content "$nsswitch_path") -replace "db_home: cygwin desc", "db_home: windows" | Set-Content "$nsswitch_path"
