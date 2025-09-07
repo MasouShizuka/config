@@ -22,6 +22,10 @@ fi
 rm -rf "${CONFIG_DIR:?}"/*
 
 cp "$target/appFunction.json" "$CONFIG_DIR"
+json_format "$CONFIG_DIR/appFunction.json"
 cp "$target/functionFixedContent.json" "$CONFIG_DIR"
+json_format "$CONFIG_DIR/functionFixedContent.json"
 cp "$target/functionScreenshot.json" "$CONFIG_DIR"
+json_format "$CONFIG_DIR/functionScreenshot.json"
 cp "$target/KeyEvent.json" "$CONFIG_DIR"
+json_format "$CONFIG_DIR/KeyEvent.json"

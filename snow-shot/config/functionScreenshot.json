@@ -1,1 +1,12 @@
-{"findChildrenElements":true,"shortcutCanleTip":false,"autoSaveOnCopy":true,"fastSave":false,"saveFileDirectory":"C:\\Users\\MasouShizuka\\Pictures\\Snow Shot","saveFileFormat":"image/png","ocrAfterAction":"copyTextAndCloseWindow","ocrCopyText":false,"lockDrawTool":true,"focusedWindowCopyToClipboard":true}
+{
+    "findChildrenElements": true,
+    "shortcutCanleTip": false,
+    "autoSaveOnCopy": true,
+    "fastSave": false,
+    "saveFileDirectory": "C:\\Users\\MasouShizuka\\Pictures\\Snow Shot",
+    "saveFileFormat": "image/png",
+    "ocrAfterAction": "copyTextAndCloseWindow",
+    "ocrCopyText": false,
+    "lockDrawTool": true,
+    "focusedWindowCopyToClipboard": true
+}

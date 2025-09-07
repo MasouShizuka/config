@@ -1,1 +1,6 @@
-{"zoomWithMouse":false,"autoOcr":false,"initialPosition":"mousePosition"}
+{
+    "zoomWithMouse": false,
+    "autoOcr": false,
+    "autoCopyToClipboard": false,
+    "initialPosition": "mousePosition"
+}
