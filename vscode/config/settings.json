@@ -25,9 +25,6 @@
             "message": "close widgets when startup"
         }
     ],
-    "backgroundCover.blur": 5,
-    "backgroundCover.imagePath": "d:\\Pictures\\サクラ吹雪.png",
-    "backgroundCover.opacity": 0.1,
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && clang -static-libgcc $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
         "cpp": "cd $dirWithoutTrailingSlash && clang++ -static-libstdc++ $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
@@ -68,7 +65,6 @@
     "git.blame.editorDecoration.enabled": true,
     "hediet.vscode-drawio.codeLinkActivated": true,
     "json.format.keepLines": true,
-    "jupyter.askForKernelRestart": false,
     "latex-workshop.latex.autoBuild.run": "never",
     "latex-workshop.latex.recipe.default": "lastUsed",
     "latex-workshop.latex.recipes": [
@@ -229,7 +225,6 @@
     "shellcheck.exclude": [
         "2148"
     ],
-    "swapdiff.ClosePreviousDiff": true,
     "terminal.integrated.defaultProfile.windows": "Bash",
     "terminal.integrated.fontLigatures.enabled": true,
     "terminal.integrated.fontSize": 16,
@@ -372,18 +367,14 @@
     "wordcount_cjk.statusBarTextTemplate": "共 ${cjk} 字 ${en_words} 单词",
     "wordcount_cjk.statusBarTooltipTemplate": "中文字数：\\t\\t${cjk}\\n英文单词数：\\t\\t${en_words}\\nASCII 字符数：\\t${ascii}\\n非 ASCII 字符数：\\t${total - ascii}\\n空白字符数：\\t\\t${whitespace}\\n非空白字符数：\\t${total - whitespace}\\n总字符数：\\t\\t${total}",
     "workbench.colorCustomizations": {
-        "editor.lineHighlightBackground": "#1073cf2d",
-        "editor.lineHighlightBorder": "#9fced11f",
-        "editor.selectionHighlightBackground": "#ffffff10",
-        "editor.selectionHighlightBorder": "#dddddd",
-        "editorCursor.foreground": "#528bff",
-        "minimap.background": "#22243633",
-        "minimapSlider.background": "#9fced11f",
-        "notebook.cellEditorBackground": "#21252b",
-        "tab.activeBorder": "#ff966c",
-        "titleBar.inactiveBackground": "#222436"
+        "[Tokyo Night Moon NVim]": {
+            "editor.foreground": "#c8d3f5"
+        },
+        "editor.selectionHighlightBorder": "#c8d3f5",
+        "tab.activeBorder": "#fca7ea",
+        "titleBar.inactiveBackground": "#2f334d"
     },
-    "workbench.colorTheme": "Tokyo Night Storm",
+    "workbench.colorTheme": "Tokyo Night Moon NVim",
     "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {

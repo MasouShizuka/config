@@ -422,18 +422,28 @@
         },
         "when": "editorFocus || editorIsOpen"
     },
+    {
+        "key": "ctrl+f",
+        "command": "settings.action.search",
+        "when": "inSettingsEditor"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "keybindings.editor.searchKeybindings",
+        "when": "inKeybindings"
+    },
 
     // 面板不可见时，则切换上一个编辑器
     {
         "key": "ctrl+h",
         "command": "workbench.action.previousEditorInGroup",
-        "when": "!panelVisible || editorFocus || notebookEditorFocused"
+        "when": "!panelVisible || editorFocus || inSettingsEditor || inKeybindings || notebookEditorFocused"
     },
     // 面板不可见时，则切换下一个编辑器
     {
         "key": "ctrl+l",
         "command": "workbench.action.nextEditorInGroup",
-        "when": "!panelVisible || editorFocus || notebookEditorFocused"
+        "when": "!panelVisible || editorFocus || inSettingsEditor || inKeybindings || notebookEditorFocused"
     },
     // 移动编辑器到左边
     {
@@ -475,13 +485,13 @@
     {
         "key": "ctrl+j",
         "command": "workbench.action.focusNextGroup",
-        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && !suggestWidgetVisible && neovim.mode != 'cmdline_normal'"
     },
     // 侧边栏未聚焦且终端未聚焦且 neovim.mode != cmdline_normal 时，则切换焦点到上一个编辑器组
     {
         "key": "ctrl+k",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && !suggestWidgetVisible && neovim.mode != 'cmdline_normal'"
     },
     // 分屏到左侧
     {
@@ -538,11 +548,25 @@
         "key": "ctrl+shift+w",
         "command": "-workbench.action.closeWindow"
     },
+
+    // 关闭标签页并转到左边
+    {
+        "key": "ctrl+w",
+        "command": "runCommands",
+        "args": {
+            "commands": [
+                "workbench.action.closeActiveEditor",
+                "workbench.action.previousEditorInGroup",
+            ]
+        },
+        "when": "!activeEditorIsFirstInGroup && !activeEditorIsLastInGroup"
+    },
     // 关闭编辑器组
     {
         "key": "ctrl+shift+w",
         "command": "workbench.action.closeEditorsInGroup"
     },
+
     // 增加当前编辑器组宽度
     {
         "key": "ctrl+right",
@@ -564,12 +588,6 @@
         "command": "workbench.action.decreaseViewHeight"
     },
 
-    // 差异编辑器中，切换另一边
-    {
-        "key": "ctrl+j",
-        "command": "workbench.action.compareEditor.focusOtherSide",
-        "when": "inDiffEditor"
-    },
     {
         "key": "ctrl+e",
         "command": "-workbench.action.quickOpen"
@@ -577,7 +595,13 @@
     // 差异编辑器中，交换两边
     {
         "key": "ctrl+e",
-        "command": "swapdiff.swapdiff",
+        "command": "workbench.action.compareEditor.swapSides",
+        "when": "inDiffEditor"
+    },
+    // 差异编辑器中，切换另一边
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.compareEditor.focusOtherSide",
         "when": "inDiffEditor"
     },
 
@@ -706,7 +730,7 @@
     // 面板未打开时，则打开面板并聚焦
     {
         "key": "ctrl+3",
-        "command": "runcommands",
+        "command": "runCommands",
         "args": {
             "commands": [
                 "workbench.action.togglePanel",
@@ -744,13 +768,13 @@
     {
         "key": "ctrl+h",
         "command": "workbench.action.previousPanelView",
-        "when": "panelFocus || view.jupyterViewVariables.visible"
+        "when": "panelFocus || view.jupyterViewVariables.visible || view.workbench.panel.chat.view.copilot.visible"
     },
     // 面板聚焦时，则切换下一个面板视图
     {
         "key": "ctrl+l",
         "command": "workbench.action.nextPanelView",
-        "when": "panelFocus || view.jupyterViewVariables.visible"
+        "when": "panelFocus || view.jupyterViewVariables.visible || view.workbench.panel.chat.view.copilot.visible"
     },
 
     // 面板问题页面聚焦时，则聚焦 filter
@@ -840,7 +864,7 @@
     // 辅助侧栏未打开时，则打开辅助侧栏并聚焦
     {
         "key": "ctrl+4",
-        "command": "runcommands",
+        "command": "runCommands",
         "args": {
             "commands": [
                 "workbench.action.toggleAuxiliaryBar",
