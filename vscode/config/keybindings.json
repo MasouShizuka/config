@@ -324,6 +324,24 @@
         "command": "filesExplorer.copy",
         "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
     },
+    // 复制路径
+    {
+        "key": "y",
+        "command": "copyFilePath",
+        "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
+    },
+    // 复制相对路径
+    {
+        "key": "shift+y",
+        "command": "copyRelativeFilePath",
+        "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
+    },
+    // 在文件夹中查找
+    {
+        "key": "f",
+        "command": "filesExplorer.findInFolder",
+        "when": "explorerResourceIsFolder && filesExplorerFocus && foldersViewVisible && !inputFocus"
+    },
     // 聚焦资源管理视图时，则选择以进行比较
     {
         "key": "s",
@@ -355,7 +373,7 @@
                 "workbench.action.search.toggleQueryDetails",
                 "workbench.action.replaceInFiles"
             ]
-        }
+        },
     },
     // 搜索视图聚焦时，则切换到搜索列表
     {
@@ -367,19 +385,19 @@
     {
         "key": "r",
         "command": "search.action.replace",
-        "when": "matchFocus && replaceActive && searchViewletVisible"
+        "when": "isEditableItem && matchFocus && replaceActive && searchViewletVisible"
     },
     // 搜索列表聚焦且聚焦文件时，则替换
     {
         "key": "r",
         "command": "search.action.replaceAllInFile",
-        "when": "fileMatchFocus && replaceActive && searchViewletVisible"
+        "when": "fileMatchFocus && isEditableItem && replaceActive && searchViewletVisible"
     },
     // 搜索列表聚焦且聚焦文件夹时，则替换
     {
         "key": "r",
         "command": "search.action.replaceAllInFolder",
-        "when": "folderMatchFocus && replaceActive && searchViewletVisible"
+        "when": "folderMatchFocus && isEditableItem && replaceActive && searchViewletVisible"
     },
 
 
@@ -399,15 +417,9 @@
         "command": "workbench.action.focusActiveEditorGroup"
     },
 
-
     {
         "key": "ctrl+h",
         "command": "-editor.action.startFindReplaceAction",
-        "when": "editorFocus || editorIsOpen"
-    },
-    {
-        "key": "ctrl+f",
-        "command": "-actions.find",
         "when": "editorFocus || editorIsOpen"
     },
     // 替换
@@ -420,7 +432,7 @@
                 "actions.find"
             ]
         },
-        "when": "editorFocus || editorIsOpen"
+        "when": "editorTextFocus"
     },
     {
         "key": "ctrl+f",
@@ -458,23 +470,25 @@
 
     {
         "key": "alt+right",
-        "command": "-workbench.action.navigateForward"
+        "command": "-workbench.action.navigateForward",
+        "when": "canNavigateForward"
     },
     // 历史前进
     {
         "key": "ctrl+i",
         "command": "workbench.action.navigateForward",
-        "when": "!editorTextFocus || neovim.mode != insert"
+        "when": "canNavigateForward && (!editorTextFocus || neovim.mode != insert)"
     },
     {
         "key": "alt+left",
-        "command": "-workbench.action.navigateBack"
+        "command": "-workbench.action.navigateBack",
+        "when": "canNavigateBack"
     },
     // 历史后退
     {
         "key": "ctrl+o",
         "command": "workbench.action.navigateBack",
-        "when": "!editorTextFocus || neovim.mode != insert"
+        "when": "canNavigateBack && (!editorTextFocus || neovim.mode != insert)"
     },
 
     {
@@ -549,6 +563,16 @@
         "command": "-workbench.action.closeWindow"
     },
 
+    {
+        "key": "ctrl+w",
+        "command": "-workbench.action.closeActiveEditor"
+    },
+    // 关闭标签页
+    {
+        "key": "ctrl+w",
+        "command": "workbench.action.closeActiveEditor",
+        "when": "(activeEditorIsFirstInGroup || activeEditorIsLastInGroup) && neovim.mode != 'insert'"
+    },
     // 关闭标签页并转到左边
     {
         "key": "ctrl+w",
@@ -556,10 +580,10 @@
         "args": {
             "commands": [
                 "workbench.action.closeActiveEditor",
-                "workbench.action.previousEditorInGroup",
+                "workbench.action.previousEditorInGroup"
             ]
         },
-        "when": "!activeEditorIsFirstInGroup && !activeEditorIsLastInGroup"
+        "when": "!activeEditorIsFirstInGroup && !activeEditorIsLastInGroup && neovim.mode != 'insert'"
     },
     // 关闭编辑器组
     {
@@ -672,49 +696,43 @@
     // 在新窗口打开当前文件
     {
         "key": "ctrl+t",
-        "command": "runCommands",
-        "args": {
-            "commands": [
-                "workbench.action.files.showOpenedFileInNewWindow",
-                "workbench.action.closeActiveEditor"
-            ]
-        },
+        "command": "workbench.action.files.showOpenedFileInNewWindow",
         "when": "emptyWorkspaceSupport"
     },
 
     {
         "key": "ctrl+.",
         "command": "-editor.action.quickFix",
-        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+        "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
     },
     // Quickfix
     {
         "key": "ctrl+;",
         "command": "editor.action.quickFix",
-        "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+        "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
     },
 
     {
         "key": "tab",
         "command": "-jumpToNextSnippetPlaceholder",
-        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
+        "when": "hasNextTabstop && inSnippetMode && textInputFocus"
     },
     // 转到下一个 snippet placeholder
     {
         "key": "shift+right",
         "command": "jumpToNextSnippetPlaceholder",
-        "when": "editorTextFocus && hasNextTabstop && inSnippetMode"
+        "when": "hasNextTabstop && inSnippetMode && textInputFocus"
     },
     {
         "key": "shift+tab",
         "command": "-jumpToPrevSnippetPlaceholder",
-        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
+        "when": "hasPrevTabstop && inSnippetMode && textInputFocus"
     },
     // 转到上一个 snippet placeholder
     {
         "key": "shift+left",
         "command": "jumpToPrevSnippetPlaceholder",
-        "when": "editorTextFocus && hasPrevTabstop && inSnippetMode"
+        "when": "hasNextTabstop && inSnippetMode && textInputFocus"
     },
 
 
@@ -820,16 +838,6 @@
         "when": "terminalFocus"
     },
     // 面板终端中重定义命令，否则失效
-    {
-        "key": "ctrl+f",
-        "command": "-workbench.action.terminal.focusFind",
-        "when": "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
-    },
-    {
-        "key": "ctrl+f",
-        "command": "workbench.action.terminal.focusFind",
-        "when": "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
-    },
     {
         "key": "ctrl+up",
         "command": "-workbench.action.terminal.scrollToPreviousCommand",
