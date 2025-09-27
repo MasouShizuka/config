@@ -877,21 +877,6 @@ return {
                         )
                     end
 
-                    if utils.is_available("nvim-ufo") then
-                        capabilities = vim.tbl_deep_extend(
-                            "force",
-                            capabilities,
-                            {
-                                textDocument = {
-                                    foldingRange = {
-                                        dynamicRegistration = false,
-                                        lineFoldingOnly = true,
-                                    },
-                                },
-                            }
-                        )
-                    end
-
                     vim.lsp.config("*", {
                         capabilities = capabilities,
                     })

@@ -105,41 +105,6 @@ function M.setup(opts)
 
         vim.notify = vscode.notify
 
-        -- 注释
-        local function esc()
-            local key = vim.api.nvim_replace_termcodes("<esc>", true, true, true)
-            vim.api.nvim_feedkeys(key, "n", false)
-        end
-        local comment = vscode.to_op(function(ctx)
-            local cmd = "editor.action.commentLine"
-            local opts = { range = ctx.range, callback = esc }
-            if ctx.is_linewise and ctx.is_current_line then
-                opts.range = nil
-            end
-            vscode.action(cmd, opts)
-        end)
-        local comment_line = function()
-            return comment() .. "_"
-        end
-        local block_comment = vscode.to_op(function(ctx)
-            local cmd = "editor.action.blockComment"
-            local opts = { range = ctx.range, callback = esc }
-            vscode.action(cmd, opts)
-        end)
-        local block_comment_line = function()
-            return block_comment() .. "_"
-        end
-        vim.keymap.set({ "n", "x" }, "gc", comment, { expr = true, silent = true })
-        vim.keymap.set("n", "gcc", comment_line, { expr = true, silent = true })
-        vim.keymap.set({ "n", "x" }, "gb", block_comment, { expr = true, silent = true })
-        vim.keymap.set("n", "gbb", block_comment_line, { expr = true, silent = true })
-
-        -- 转到
-        vim.keymap.set("n", "gD", function() vscode.action("editor.action.revealDeclaration") end, { silent = true })
-        vim.keymap.set("n", "gi", function() vscode.action("editor.action.goToImplementation") end, { silent = true })
-        vim.keymap.set("n", "gr", function() vscode.action("editor.action.goToReferences") end, { silent = true })
-        vim.keymap.set("n", "gy", function() vscode.action("editor.action.goToTypeDefinition") end, { silent = true })
-
         -- 折叠
         vim.keymap.set("n", "zc", function() vscode.action("editor.fold") end, { silent = true })
         vim.keymap.set("n", "zC", function() vscode.action("editor.foldRecursively") end, { silent = true })
@@ -283,13 +248,36 @@ function M.setup(opts)
             end)
         end, { silent = true })
 
-        -- 调试
-        vim.keymap.set("n", "<leader>dr", function() vscode.action("workbench.action.debug.restart") end, { silent = true })
-        vim.keymap.set("n", "<leader>dk", function() vscode.action("workbench.action.debug.callStackUp") end, { silent = true })
-        vim.keymap.set("n", "<leader>dj", function() vscode.action("workbench.action.debug.callStackDown") end, { silent = true })
-        vim.keymap.set("n", "<leader>dh", function() vscode.action("editor.debug.action.showDebugHover") end, { silent = true })
+        -- Comment.nvim
+        local function esc()
+            local key = vim.api.nvim_replace_termcodes("<esc>", true, true, true)
+            vim.api.nvim_feedkeys(key, "n", false)
+        end
+        local comment = vscode.to_op(function(ctx)
+            local cmd = "editor.action.commentLine"
+            local opts = { range = ctx.range, callback = esc }
+            if ctx.is_linewise and ctx.is_current_line then
+                opts.range = nil
+            end
+            vscode.action(cmd, opts)
+        end)
+        local comment_line = function()
+            return comment() .. "_"
+        end
+        local block_comment = vscode.to_op(function(ctx)
+            local cmd = "editor.action.blockComment"
+            local opts = { range = ctx.range, callback = esc }
+            vscode.action(cmd, opts)
+        end)
+        local block_comment_line = function()
+            return block_comment() .. "_"
+        end
+        vim.keymap.set({ "n", "x" }, "gc", comment, { expr = true, silent = true })
+        vim.keymap.set("n", "gcc", comment_line, { expr = true, silent = true })
+        vim.keymap.set({ "n", "x" }, "gb", block_comment, { expr = true, silent = true })
+        vim.keymap.set("n", "gbb", block_comment_line, { expr = true, silent = true })
 
-        -- 格式化
+        -- conform.nvim
         vim.keymap.set("n", "<leader>f", function()
             if vim.startswith(vim.fn.expand("%:e"), "ipynb") then
                 vscode.action("notebook.formatCell")
@@ -298,7 +286,30 @@ function M.setup(opts)
             end
         end, { silent = true })
 
-        -- 运行
+        -- gitsigns.nvim
+        vim.keymap.set("n", "<leader>gs", function() vscode.action("git.diff.stageHunk") end, { silent = true })
+        vim.keymap.set("x", "<leader>gs", function() vscode.action("git.stageSelectedRanges") end, { silent = true })
+        vim.keymap.set("x", "<leader>gr", function() vscode.action("git.revertSelectedRanges") end, { silent = true })
+        vim.keymap.set("n", "<leader>gS", function() vscode.action("git.stageFile") end, { silent = true })
+        vim.keymap.set("n", "<leader>gp", function() vscode.action("editor.action.dirtydiff.next") end, { silent = true })
+        vim.keymap.set("n", "<leader>gd", function() vscode.action("git.openChange") end, { silent = true })
+        vim.keymap.set("n", "<leader>gtb", function() vscode.action("git.blame.toggleEditorDecoration") end, { silent = true })
+
+        -- nvim-dap
+        vim.keymap.set("n", "<leader>dl", function() vscode.action("testing.debugLastRun") end, { silent = true })
+        vim.keymap.set("n", "<leader>dr", function() vscode.action("workbench.action.debug.restart") end, { silent = true })
+        vim.keymap.set("n", "<leader>db", function() vscode.action("editor.debug.action.conditionalBreakpoint") end, { silent = true })
+        vim.keymap.set("n", "<leader>dk", function() vscode.action("workbench.action.debug.callStackUp") end, { silent = true })
+        vim.keymap.set("n", "<leader>dj", function() vscode.action("workbench.action.debug.callStackDown") end, { silent = true })
+        vim.keymap.set("n", "<leader>dc", function() vscode.action("editor.debug.action.runToCursor") end, { silent = true })
+        vim.keymap.set("n", "<leader>dh", function() vscode.action("editor.debug.action.showDebugHover") end, { silent = true })
+
+        -- nvim-lspconfig
+        vim.keymap.set("n", "gK", function() vscode.action("editor.action.triggerParameterHints") end, { silent = true })
+        vim.keymap.set("n", "<leader>ls", function() vscode.action("workbench.action.gotoSymbol") end, { silent = true })
+        vim.keymap.set("n", "<leader>lS", function() vscode.action("workbench.action.showAllSymbols") end, { silent = true })
+
+        -- overseer.nvim
         vim.keymap.set("n", "<leader>r", function()
             local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
             if ft == "html" or ft == "xhtml" then
@@ -312,8 +323,33 @@ function M.setup(opts)
             end
         end, { silent = true })
 
-        -- vscode 扩展
-        vim.keymap.set("n", "<leader>p", function() vscode.action("extension.pasteImage") end, { silent = true })
+        -- snacks.nvim picker
+        vim.keymap.set("n", "<leader>tb", function() vscode.action("workbench.action.showAllEditors") end, { silent = true })
+
+        -- snacks.nvim terminal
+        vim.keymap.set("n", "<leader>Tl", function()
+            vscode.action("workbench.action.createTerminalEditor")
+            vscode.action("workbench.action.terminal.sendSequence", {
+                args = {
+                    text = "lg\u{000D}",
+                },
+            })
+        end, { silent = true })
+        vim.keymap.set("n", "<leader>Ty", function()
+            vscode.action("workbench.action.createTerminalEditor")
+            vscode.action("workbench.action.terminal.sendSequence", {
+                args = {
+                    text = "y\u{000D}",
+                },
+            })
+        end, { silent = true })
+
+        -- trouble.nvim
+        vim.keymap.set("n", "<leader>xs", function() vscode.action("outline.focus") end, { silent = true })
+        vim.keymap.set("n", "gD", function() vscode.action("editor.action.revealDeclaration") end, { silent = true })
+        vim.keymap.set("n", "gi", function() vscode.action("editor.action.goToImplementation") end, { silent = true })
+        vim.keymap.set("n", "gr", function() vscode.action("editor.action.goToReferences") end, { silent = true })
+        vim.keymap.set("n", "gy", function() vscode.action("editor.action.goToTypeDefinition") end, { silent = true })
     else
         -- 命令行
         if not utils.is_available("nvim-cmp") and not utils.is_available("blink.cmp") then

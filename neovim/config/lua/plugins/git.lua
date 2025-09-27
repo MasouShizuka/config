@@ -85,7 +85,6 @@ return {
                     map("x", "<leader>gr", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Reset hunk", silent = true })
 
                     map("n", "<leader>gS", gitsigns.stage_buffer, { desc = "Stage buffer", silent = true })
-                    map("n", "<leader>gu", gitsigns.undo_stage_hunk, { desc = "Undo stage hunk", silent = true })
                     map("n", "<leader>gR", gitsigns.reset_buffer, { desc = "Reset hunk", silent = true })
                     map("n", "<leader>gp", gitsigns.preview_hunk, { desc = "Preview hunk", silent = true })
                     map("n", "<leader>gi", gitsigns.preview_hunk_inline, { desc = "Preview hunk inline", silent = true })

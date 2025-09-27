@@ -34,6 +34,9 @@ return {
             "CellWidthsDelete",
             "CellWidthsLoad",
             "CellWidthsRemove",
+            "CellWidthsOff",
+            "CellWidthsOn",
+            "CellWidthsToggle",
         },
         enabled = not environment.is_vscode,
         event = {
@@ -139,7 +142,15 @@ return {
                     _G.bt = function()
                         snacks.debug.backtrace()
                     end
-                    vim.print = _G.dd -- Override print to use snacks for `:=` command
+
+                    -- Override print to use snacks for `:=` command
+                    if vim.fn.has("nvim-0.11") == 1 then
+                        vim._print = function(_, ...)
+                            dd(...)
+                        end
+                    else
+                        vim.print = _G.dd
+                    end
 
                     local cli_opts = {
                         win = {
@@ -761,6 +772,8 @@ return {
                                 -- ["<Esc>"] = "cancel",
                                 -- ["q"] = "close",
                                 -- ["i"] = "focus_input",
+                                -- ["<ScrollWheelDown>"] = "list_scroll_wheel_down",
+                                -- ["<ScrollWheelUp>"] = "list_scroll_wheel_up",
                                 -- ["<a-w>"] = "cycle_win",
                             },
                         },
