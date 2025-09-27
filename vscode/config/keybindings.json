@@ -18,11 +18,6 @@
 
     // 去除 Neovim 的接收键位
     {
-        "key": "ctrl+w q",
-        "command": "-workbench.action.closeActiveEditor",
-        "when": "!editorTextFocus && !filesExplorerFocus && !searchViewletFocus && !terminalFocus && neovim.mode != 'cmdline'"
-    },
-    {
         "key": "ctrl+w ctrl+w",
         "command": "-workbench.action.focusNextGroup",
         "when": "!editorTextFocus && !filesExplorerFocus && !inSearchEditor && !replaceInputBoxFocus && !searchViewletFocus && !terminalFocus && neovim.mode != 'cmdline'"
@@ -499,13 +494,13 @@
     {
         "key": "ctrl+j",
         "command": "workbench.action.focusNextGroup",
-        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && !suggestWidgetVisible && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && !suggestWidgetVisible && !inQuickOpen && neovim.mode != 'cmdline_normal'"
     },
     // 侧边栏未聚焦且终端未聚焦且 neovim.mode != cmdline_normal 时，则切换焦点到上一个编辑器组
     {
         "key": "ctrl+k",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && !suggestWidgetVisible && neovim.mode != 'cmdline_normal'"
+        "when": "!sideBarFocus && !terminalFocus && !referenceSearchVisible && !suggestWidgetVisible && !inQuickOpen && neovim.mode != 'cmdline_normal'"
     },
     // 分屏到左侧
     {
@@ -558,11 +553,12 @@
         "key": "ctrl+s ctrl+k",
         "command": "workbench.action.moveEditorToAboveGroup"
     },
-    {
-        "key": "ctrl+shift+w",
-        "command": "-workbench.action.closeWindow"
-    },
 
+    {
+        "key": "ctrl+w",
+        "command": "-workbench.action.terminal.killEditor",
+        "when": "terminalEditorFocus && terminalFocus && terminalHasBeenCreated || terminalEditorFocus && terminalFocus && terminalProcessSupported"
+    },
     {
         "key": "ctrl+w",
         "command": "-workbench.action.closeActiveEditor"
@@ -571,7 +567,7 @@
     {
         "key": "ctrl+w",
         "command": "workbench.action.closeActiveEditor",
-        "when": "(activeEditorIsFirstInGroup || activeEditorIsLastInGroup) && neovim.mode != 'insert'"
+        "when": "(activeEditorIsFirstInGroup || activeEditorIsLastInGroup) && !terminalFocus && !terminalEditorFocus && neovim.mode != 'insert'"
     },
     // 关闭标签页并转到左边
     {
@@ -583,7 +579,11 @@
                 "workbench.action.previousEditorInGroup"
             ]
         },
-        "when": "!activeEditorIsFirstInGroup && !activeEditorIsLastInGroup && neovim.mode != 'insert'"
+        "when": "!activeEditorIsFirstInGroup && !activeEditorIsLastInGroup && !terminalFocus && !terminalEditorFocus && neovim.mode != 'insert'"
+    },
+    {
+        "key": "ctrl+shift+w",
+        "command": "-workbench.action.closeWindow"
     },
     // 关闭编辑器组
     {
@@ -795,6 +795,13 @@
         "when": "panelFocus || view.jupyterViewVariables.visible || view.workbench.panel.chat.view.copilot.visible"
     },
 
+    // 面板聚焦时，则切换最大化面板
+    {
+        "key": "ctrl+m",
+        "command": "workbench.action.toggleMaximizedPanel",
+        "when": "panelFocus"
+    },
+
     // 面板问题页面聚焦时，则聚焦 filter
     {
         "key": "/",
@@ -835,7 +842,7 @@
     {
         "key": "ctrl+w",
         "command": "workbench.action.terminal.kill",
-        "when": "terminalFocus"
+        "when": "terminalFocus && !terminalEditorFocus"
     },
     // 面板终端中重定义命令，否则失效
     {

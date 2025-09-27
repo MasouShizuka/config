@@ -374,6 +374,10 @@
             "editor.foreground": "#c8d3f5",
             "editor.selectionHighlightBorder": "#c8d3f5",
             "editor.wordHighlightBackground": "#828bb844",
+            "editorSuggestWidget.selectedBackground": "#2d3f76",
+            "list.activeSelectionBackground": "#2d3f76",
+            "list.focusBackground": "#2f334d",
+            "list.inactiveSelectionBackground": "#2d3f76",
             "tab.activeBorder": "#fca7ea",
             "titleBar.inactiveBackground": "#2f334d",
             "tree.indentGuidesStroke": "#c8d3f5"
