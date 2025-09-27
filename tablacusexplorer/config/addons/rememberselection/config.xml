@@ -1,0 +1,26 @@
+<TablacusExplorer>
+  <General>
+    <Version>1.04</Version>
+    <MinVersion>2022.1.25</MinVersion>
+    <pubDate>Tue, 25 Jan 2022 00:00:00 GMT</pubDate>
+    <Options>Common:0:0</Options>
+    <Level>2</Level>
+    <Creator>Gaku</Creator>
+    <URL>https://tablacus.github.io/TablacusExplorerAddons/</URL>
+    <License>MIT License</License>
+  </General>
+  <en>
+    <Name>Remember selection</Name>
+    <Description>Remember selected items (Not perfect)</Description>
+  </en>
+  <fr>
+    <Name>Mémoriser la sélection</Name>
+    <Description>Mémorise les éléments sélectionnés (Pas parfait).</Description>
+  </fr>
+  <ja>
+    <Name>選択項目を覚える</Name>
+  </ja>
+  <zh>
+    <Name>記住選擇</Name>
+  </zh>
+</TablacusExplorer>
