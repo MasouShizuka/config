@@ -340,20 +340,38 @@ return {
 
     {
         "gbprod/yanky.nvim",
-        keys = {
-            { "y",         "<plug>(YankyYank)",                      desc = "Yank",                                  mode = { "n", "x" } },
-            { "Y",         '"+<plug>(YankyYank)',                    desc = "Yank",                                  mode = { "n", "x" } },
-            { "p",         "<plug>(YankyPutAfter)",                  desc = "Put yanked text after cursor",          mode = { "n", "x" } },
-            { "P",         "<plug>(YankyPutBefore)",                 desc = "Put yanked text before cursor",         mode = { "n", "x" } },
-            { "<leader>p", '"+<plug>(YankyPutAfter)',                desc = "Put yanked text after cursor",          mode = { "n", "x" } },
-            { "<leader>P", '"+<plug>(YankyPutBefore)',               desc = "Put yanked text before cursor",         mode = { "n", "x" } },
-        },
-        opts = {
-            ring = {
-                history_length = 0,
-                storage = "memory",
-            },
-        },
+        keys = function()
+            local keys = {}
+
+            if not require("utils").is_available("undo-glow.nvim") then
+                keys = {
+                    { "y",         "<plug>(YankyYank)",        desc = "Yank",                          mode = { "n", "x" } },
+                    { "p",         "<plug>(YankyPutAfter)",    desc = "Put yanked text after cursor",  mode = { "n", "x" } },
+                    { "P",         "<plug>(YankyPutBefore)",   desc = "Put yanked text before cursor", mode = { "n", "x" } },
+                    { "<leader>p", '"+<plug>(YankyPutAfter)',  desc = "Put yanked text after cursor",  mode = { "n", "x" } },
+                    { "<leader>P", '"+<plug>(YankyPutBefore)', desc = "Put yanked text before cursor", mode = { "n", "x" } },
+                }
+            end
+
+            return keys
+        end,
+        opts = function()
+            local opts = {
+                ring = {
+                    history_length = 0,
+                    storage = "memory",
+                },
+            }
+
+            if require("utils").is_available("undo-glow.nvim") then
+                opts.highlight = {
+                    on_put = false,
+                    on_yank = false,
+                }
+            end
+
+            return opts
+        end,
     },
 
     {

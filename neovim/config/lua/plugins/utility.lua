@@ -953,14 +953,12 @@ return {
             local utils = require("utils")
             utils.create_once_autocmd("User", {
                 callback = function()
-                    if not utils.is_available("yanky.nvim") then
-                        vim.api.nvim_create_autocmd("TextYankPost", {
-                            callback = function()
-                                require("undo-glow").yank()
-                            end,
-                            desc = "Highlight when yanking (copying) text",
-                        })
-                    end
+                    vim.api.nvim_create_autocmd("TextYankPost", {
+                        callback = function()
+                            require("undo-glow").yank()
+                        end,
+                        desc = "Highlight when yanking (copying) text",
+                    })
 
                     -- This only handles neovim instance and do not highlight when switching panes in tmux
                     vim.api.nvim_create_autocmd("CursorMoved", {
@@ -972,30 +970,6 @@ return {
                             })
                         end,
                         desc = "Highlight when cursor moved significantly",
-                    })
-
-                    -- This will handle highlights when focus gained, including switching panes in tmux
-                    vim.api.nvim_create_autocmd("FocusGained", {
-                        callback = function()
-                            ---@type UndoGlow.CommandOpts
-                            local opts = {
-                                animation = {
-                                    animation_type = "slide",
-                                },
-                            }
-
-                            opts = require("undo-glow.utils").merge_command_opts("UgCursor", opts)
-                            local current_row = vim.api.nvim_win_get_cursor(0)[1]
-                            local cur_line = vim.api.nvim_get_current_line()
-                            require("undo-glow").highlight_region(vim.tbl_extend("force", opts, {
-                                s_row = current_row - 1,
-                                s_col = 0,
-                                e_row = current_row - 1,
-                                e_col = #cur_line,
-                                force_edge = opts.force_edge == nil and true or opts.force_edge,
-                            }))
-                        end,
-                        desc = "Highlight when focus gained",
                     })
 
                     vim.api.nvim_create_autocmd("CmdLineLeave", {
@@ -1014,10 +988,65 @@ return {
                 pattern = "IceLoad",
             })
         end,
-        keys = {
-            { "u",     function() require("undo-glow").undo() end, desc = "Undo with highlight", mode = "n" },
-            { "<c-r>", function() require("undo-glow").redo() end, desc = "Redo with highlight", mode = "n" },
-        },
+        keys = function()
+            local keys = {
+                { "u",     function() require("undo-glow").undo() end, desc = "Undo with highlight", mode = "n" },
+                { "<c-r>", function() require("undo-glow").redo() end, desc = "Redo with highlight", mode = "n" },
+            }
+
+            if require("utils").is_available("yanky.nvim") then
+                local yanky_keys = {
+                    {
+                        "y",
+                        function()
+                            return require("undo-glow").yanky_put("YankyYank")
+                        end,
+                        desc = "Yank",
+                        expr = true,
+                        mode = { "n", "x" },
+                    },
+                    {
+                        "p",
+                        function()
+                            return require("undo-glow").yanky_put("YankyPutAfter")
+                        end,
+                        desc = "Put yanked text after cursor",
+                        expr = true,
+                        mode = { "n", "x" },
+                    },
+                    {
+                        "P",
+                        function()
+                            return require("undo-glow").yanky_put("YankyPutBefore")
+                        end,
+                        desc = "Put yanked text before cursor",
+                        expr = true,
+                        mode = { "n", "x" },
+                    },
+                    {
+                        "<leader>p",
+                        function()
+                            return '"+' .. require("undo-glow").yanky_put("YankyPutAfter")
+                        end,
+                        desc = "Put yanked text after cursor",
+                        expr = true,
+                        mode = { "n", "x" },
+                    },
+                    {
+                        "<leader>P",
+                        function()
+                            return '"+' .. require("undo-glow").yanky_put("YankyPutBefore")
+                        end,
+                        desc = "Put yanked text before cursor",
+                        expr = true,
+                        mode = { "n", "x" },
+                    },
+                }
+                keys = require("utils").table_concat(keys, yanky_keys)
+            end
+
+            return keys
+        end,
         opts = {
             animation = {
                 enabled = true,       -- whether to turn on or off for animation

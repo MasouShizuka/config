@@ -38,7 +38,6 @@ local function start_hl()
         local ok, res = pcall(vim.fn.search, [[\%#\zs]] .. reg, "cnW")
         if ok and res == 0 then
             stop_hl()
-            return
         end
     end, {
         timeout = config.delay,

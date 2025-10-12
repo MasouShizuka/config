@@ -252,49 +252,13 @@ return {
                 end
             end
 
-            local function search()
-                -- It's possible that <cmd>nohlsearch<cr> was executed from a mapping, and
-                -- wouldn't be handled by the CmdlineLeave callback above. Use a CursorMoved
-                -- event to check if search signs are shown when they shouldn't be, and
-                -- update accordingly. Also handle the case where 'n', 'N', '*', '#', 'g*',
-                -- or 'g#' are pressed (although these won't be properly handled when there
-                -- is only one search result and the cursor is already on it, since the
-                -- cursor wouldn't move; creating scrollview refresh mappings for those keys
-                -- could handle that scenario). NOTE: If there are scenarios where search
-                -- signs become out of sync (i.e., shown when they shouldn't be), this same
-                -- approach could be used with a timer.
-                vim.api.nvim_create_autocmd("CursorMoved", {
-                    callback = function()
-                        -- Use defer_fn since vim.v.hlsearch may not have been properly set yet.
-                        vim.defer_fn(function()
-                            local refresh = false
-                            if vim.v.hlsearch ~= 0 then
-                                local searchcount_total = 0
-                                pcall(function()
-                                    -- searchcount() can return {} (e.g., when launching Neovim
-                                    -- with -i NONE).
-                                    searchcount_total = vim.fn.searchcount().total or 0
-                                end)
-                                if searchcount_total > 0 then
-                                    refresh = true
-                                end
-                            else
-                                refresh = true
-                            end
-
-                            if refresh then
-                                map.refresh({}, { lines = false, scrollbar = false })
-                            end
-                        end, 0)
-                    end,
-                    desc = "On 'search' update",
-                    group = vim.api.nvim_create_augroup("MiniMapSearch", { clear = true }),
-                })
-
-                local minimap_search = "MiniMapSearch"
-                utils.set_hl(0, minimap_search, function() return { fg = colors.get_color(colors.colors.orange) } end)
-                return map.gen_integration.builtin_search({ search = minimap_search })
-            end
+            local minimap_search = "MiniMapSearch"
+            utils.set_hl(0, minimap_search, function()
+                return {
+                    bg = colors.get_color(colors.colors.orange),
+                    fg = colors.get_color(colors.colors.orange),
+                }
+            end)
 
             local function spell()
                 vim.api.nvim_create_autocmd("OptionSet", {
@@ -306,6 +270,7 @@ return {
 
                 local minimap_spell = "MiniMapSpell"
                 utils.set_hl(0, minimap_spell, function() return { fg = colors.get_color(colors.colors.purple) } end)
+
                 return function()
                     local line_hl = {}
 
@@ -325,7 +290,9 @@ return {
 
             local integrations = {
                 cursor(),
-                search(),
+                map.gen_integration.builtin_search({
+                    search = "MiniMapSearch",
+                }),
                 map.gen_integration.diff({
                     add = "DiffAdd",
                     change = "DiffChange",

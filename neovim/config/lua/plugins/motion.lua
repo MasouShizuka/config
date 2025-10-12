@@ -62,7 +62,27 @@ return {
             },
         },
         keys = {
-            { "m", function() require("flash-zh").jump({ chinese_only = false }) end, desc = "Flash between Chinese", mode = { "n", "x", "o" } },
+            {
+                "m",
+                function()
+                    require("flash-zh").jump({ chinese_only = false })
+
+                    if require("utils").is_available("undo-glow.nvim") then
+                        vim.defer_fn(function()
+                            local region = require("undo-glow.utils").get_current_cursor_row()
+
+                            local undo_glow_opts =
+                                require("undo-glow.utils").merge_command_opts("UgSearch")
+
+                            require("undo-glow").highlight_region(
+                                vim.tbl_extend("force", undo_glow_opts, region)
+                            )
+                        end, 5)
+                    end
+                end,
+                desc = "Flash between Chinese",
+                mode = { "n", "x", "o" },
+            },
         },
         opts = {},
     },

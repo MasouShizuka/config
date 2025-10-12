@@ -29,8 +29,8 @@ function M.setup(opts)
     if not utils.is_available("yanky.nvim") then
         vim.keymap.set({ "n", "x" }, "<leader>p", '"+p', { silent = true })
         vim.keymap.set({ "n", "x" }, "<leader>P", '"+P', { silent = true })
-        vim.keymap.set({ "n", "x" }, "Y", '"+y', { silent = true })
     end
+    vim.keymap.set({ "n", "x" }, "Y", '"+y', { remap = true, silent = true })
     vim.keymap.set("n", "YY", "Yy", { remap = true, silent = true })
 
     -- 跳到行首行尾不带空格

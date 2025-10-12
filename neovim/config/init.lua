@@ -69,6 +69,9 @@ return require("lazy").setup({
     },
     -- lockfile generated after running update.
     lockfile = path.data_path .. "/lazy/lazy-lock.json",
+    rocks = {
+        enabled = false,
+    },
     install = {
         -- try to load one of these colorschemes when starting an installation during startup
         colorscheme = { "tokyonight" },
