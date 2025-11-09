@@ -54,6 +54,12 @@
     "editor.minimap.enabled": false,
     "editor.renderLineHighlight": "all",
     "editor.renderWhitespace": "trailing",
+    "editor.rulers": [
+        {
+            "color": "#ff757f",
+            "column": 120
+        }
+    ],
     "editor.scrollbar.vertical": "visible",
     "editor.showFoldingControls": "always",
     "editor.suggest.preview": true,

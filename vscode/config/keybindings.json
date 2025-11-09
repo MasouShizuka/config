@@ -795,6 +795,10 @@
         "when": "panelFocus || view.jupyterViewVariables.visible || view.workbench.panel.chat.view.copilot.visible"
     },
 
+    {
+        "key": "ctrl+m",
+        "command": "-editor.action.toggleTabFocusMode"
+    },
     // 面板聚焦时，则切换最大化面板
     {
         "key": "ctrl+m",
