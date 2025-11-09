@@ -73,3 +73,6 @@ keybinding:
     copyCommitAttributeToClipboard: 'Y'
   stash:
     popStash: '<backspace>'
+git:
+  pagers:
+    - externalDiffCommand: '$LOCALAPPDATA/lazygit/delta-diff.bat'
