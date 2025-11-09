@@ -113,6 +113,7 @@ M.setup = function(opts)
         end,
         desc = "Change settings for lsp file",
         func = function(args)
+            vim.api.nvim_set_option_value("colorcolumn", "120", { scope = "local" })
             vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
         end,
     })

@@ -296,7 +296,7 @@ function M.setup(opts)
         vim.keymap.set("n", "<leader>gtb", function() vscode.action("git.blame.toggleEditorDecoration") end, { silent = true })
 
         -- nvim-dap
-        vim.keymap.set("n", "<leader>dl", function() vscode.action("testing.debugLastRun") end, { silent = true })
+        vim.keymap.set("n", "<leader>dL", function() vscode.action("testing.debugLastRun") end, { silent = true })
         vim.keymap.set("n", "<leader>dr", function() vscode.action("workbench.action.debug.restart") end, { silent = true })
         vim.keymap.set("n", "<leader>db", function() vscode.action("editor.debug.action.conditionalBreakpoint") end, { silent = true })
         vim.keymap.set("n", "<leader>dk", function() vscode.action("workbench.action.debug.callStackUp") end, { silent = true })

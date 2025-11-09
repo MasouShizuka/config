@@ -154,7 +154,7 @@ return {
             { "se",    desc = "Evaluate text and replace with output", mode = { "n", "x" } },
             { "sx",    desc = "Exchange text regions",                 mode = { "n", "x" } },
             { "<c-c>", desc = "Stop exchanging after the first step",  mode = { "n", "x" } },
-            { "sm",    desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
+            { "sy",    desc = "Multiply (duplicate) text",             mode = { "n", "x" } },
             { "ss",    desc = "Replace text with register",            mode = { "n", "x" } },
             { "SS",    '"+ss',                                         desc = "Replace text with register", mode = { "n", "x" }, remap = true },
             { "SSS",   '"+sss',                                        desc = "Replace text with register", mode = "n",          remap = true },
@@ -176,7 +176,7 @@ return {
             -- Multiply (duplicate) text
             multiply = {
                 -- prefix = "gm",
-                prefix = "sm",
+                prefix = "sy",
             },
 
             -- Replace text with register

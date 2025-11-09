@@ -48,13 +48,13 @@ return {
                 -- create the highlight groups in the highlight setup hook, so they are reset
                 -- every time the colorscheme changes
                 hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterRed", { fg = colors.get_color("red") })
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterYellow", { fg = colors.get_color("yellow") })
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterBlue", { fg = colors.get_color("blue") })
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterOrange", { fg = colors.get_color("orange") })
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterGreen", { fg = colors.get_color("green") })
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterViolet", { fg = colors.get_color("purple") })
-                    vim.api.nvim_set_hl(0, "RainbowDelimiterCyan", { fg = colors.get_color("cyan") })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterRed", { fg = colors.get_color(colors.colors.red) })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterYellow", { fg = colors.get_color(colors.colors.yellow) })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterBlue", { fg = colors.get_color(colors.colors.red) })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterOrange", { fg = colors.get_color(colors.colors.orange) })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterGreen", { fg = colors.get_color(colors.colors.green) })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterViolet", { fg = colors.get_color(colors.colors.purple) })
+                    vim.api.nvim_set_hl(0, "RainbowDelimiterCyan", { fg = colors.get_color(colors.colors.cyan) })
                 end)
                 hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
             end
@@ -62,8 +62,7 @@ return {
         end,
         enabled = not environment.is_vscode,
         event = {
-            "BufNewFile",
-            "BufReadPost",
+            "User IceLoad",
         },
         main = "ibl",
         opts = function()

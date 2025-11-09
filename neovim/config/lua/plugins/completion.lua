@@ -207,10 +207,6 @@ return {
                     end
                 end
 
-                if ft == "markdown" and utils.is_available("render-markdown.nvim") then
-                    table.insert(sources, { name = "render-markdown" })
-                end
-
                 for source_plugin, source in pairs({
                     ["cmp-latex-symbols"] = {
                         name = "latex_symbols",
@@ -470,13 +466,6 @@ return {
     --             end
     --         end
     --
-    --         if utils.is_available("render-markdown.nvim") then
-    --             providers["markdown"] = {
-    --                 name = "RenderMarkdown",
-    --                 module = "render-markdown.integ.blink",
-    --             }
-    --         end
-    --
     --         return {
     --             keymap = {
     --                 -- set to 'none' to disable the 'default' preset
@@ -590,10 +579,6 @@ return {
     --                         sources[#sources + 1] = "buffer"
     --                     elseif vim.tbl_contains(filetype.tex_filetype_list, ft) then
     --                         vim.list_extend(sources, { "snippets", "lsp" })
-    --
-    --                         if ft == "markdown" and utils.is_available("render-markdown.nvim") then
-    --                             sources[#sources + 1] = "markdown"
-    --                         end
     --
     --                         if utils.is_available("cmp-latex-symbols") then
     --                             sources[#sources + 1] = "latex_symbols"

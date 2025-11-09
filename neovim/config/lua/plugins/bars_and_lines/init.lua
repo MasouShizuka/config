@@ -2,6 +2,30 @@ local environment = require("utils.environment")
 
 return {
     {
+        "Bekaboo/deadcolumn.nvim",
+        enabled = not environment.is_vscode and environment.lsp_enable,
+        event = {
+            "User IceLoad",
+        },
+        opts = function()
+            local colors = require("utils.colors")
+
+            return {
+                scope = "buffer",
+                modes = function(mode)
+                    return true
+                end,
+                blending = {
+                    colorcode = colors.get_color(colors.colors.gray),
+                },
+                warning = {
+                    colorcode = colors.get_color(colors.colors.red),
+                },
+            }
+        end,
+    },
+
+    {
         "rebelot/heirline.nvim",
         dependencies = {
             "nvim-tree/nvim-web-devicons",

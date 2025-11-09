@@ -39,18 +39,22 @@ return {
 
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    if require("utils").is_available("which-key.nvim") then
-                        require("which-key").add({
-                            { "<leader>ll", buffer = args.buf, group = "rust keymap", mode = "n" },
-                        })
+                    local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                    if ft ~= "rust" then
+                        return
                     end
 
+                    if require("utils").is_available("which-key.nvim") then
+                        require("which-key").add({
+                            { "<leader>ll", buffer = args.buf, group = "rust lsp", mode = "n" },
+                        })
+                    end
                     vim.keymap.set("n", "<leader>lld", function() vim.cmd.RustLsp("debuggables") end, { buffer = args.buf, desc = "Debugging", silent = true })
                     vim.keymap.set("n", "<leader>llr", function() vim.cmd.RustLsp("runnables") end, { buffer = args.buf, desc = "Runnables", silent = true })
                     vim.keymap.set("n", "<leader>llt", function() vim.cmd.RustLsp("testables") end, { buffer = args.buf, desc = "Testables", silent = true })
                 end,
-                desc = "Rust keymap",
-                group = vim.api.nvim_create_augroup("RustKeymap", { clear = true }),
+                desc = "Rust lsp keymap",
+                group = vim.api.nvim_create_augroup("RustLspKeymap", { clear = true }),
             })
         end,
         enabled = not environment.is_vscode and environment.lsp_enable,

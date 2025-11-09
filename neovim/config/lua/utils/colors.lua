@@ -82,7 +82,7 @@ M.colorscheme_list = {
 ---@param colorscheme string
 ---@param color_name string
 ---@return string
-M.get_color_name = function(colorscheme, color_name)
+M.get_color_name = function(color_name, colorscheme)
     local t = M.colorscheme_list[colorscheme]
     if t then
         local map = t.map or {}
@@ -114,7 +114,7 @@ M.get_color = function(color, colorscheme)
     if spec then
         local func = spec.func
         if func then
-            local color_value = func(M.get_color_name(colorscheme, color))
+            local color_value = func(M.get_color_name(color, colorscheme))
             if color_value then
                 return color_value
             end

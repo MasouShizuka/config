@@ -32,28 +32,29 @@ return {
                         adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
                     end
                     require("dap-python").setup(adapter_python_path)
+
+                    vim.api.nvim_create_autocmd("LspAttach", {
+                        callback = function(args)
+                            local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+                            if ft ~= "python" then
+                                return
+                            end
+
+                            if require("utils").is_available("which-key.nvim") then
+                                require("which-key").add({
+                                    { "<leader>dl", buffer = args.buf, group = "python dap", mode = "n" },
+                                })
+                            end
+                            vim.keymap.set("n", "<leader>dlm", function() require("dap-python").test_method() end, { buffer = args.buf, desc = "Debug method", silent = true })
+                            vim.keymap.set("n", "<leader>dlc", function() require("dap-python").test_class() end, { buffer = args.buf, desc = "Debug class", silent = true })
+                            vim.keymap.set("n", "<leader>dls", function() require("dap-python").debug_selection() end, { buffer = args.buf, desc = "Debug selection", silent = true })
+                        end,
+                        desc = "Python dap keymap",
+                        group = vim.api.nvim_create_augroup("PythonDapKeymap", { clear = true }),
+                    })
                 end,
                 dependencies = {
                     "mfussenegger/nvim-dap",
-                },
-                init = function()
-                    local utils = require("utils")
-                    if utils.is_available("which-key.nvim") then
-                        utils.create_once_autocmd("User", {
-                            callback = function()
-                                require("which-key").add({
-                                    { "<leader>dl", group = "dap-python", mode = "n" },
-                                })
-                            end,
-                            desc = "Register which-key for dap-python",
-                            pattern = "IceLoad",
-                        })
-                    end
-                end,
-                keys = {
-                    { "<leader>dlm", function() require("dap-python").test_method() end,     desc = "Debug method",    ft = "python", mode = "n" },
-                    { "<leader>dlc", function() require("dap-python").test_class() end,      desc = "Debug class",     ft = "python", mode = "n" },
-                    { "<leader>dls", function() require("dap-python").debug_selection() end, desc = "Debug selection", ft = "python", mode = "x" },
                 },
             },
 

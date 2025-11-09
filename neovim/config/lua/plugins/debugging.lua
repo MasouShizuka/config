@@ -109,7 +109,7 @@ return {
                 desc = "Continue",
                 mode = "n",
             },
-            { "<leader>dl", function() require("dap").run_last() end,                                             desc = "Run Last",             mode = "n" },
+            { "<leader>dL", function() require("dap").run_last() end,                                             desc = "Run Last",             mode = "n" },
             { "<leader>dr", function() require("dap").restart() end,                                              desc = "Restart",              mode = "n" },
             { "<leader>db", function() require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, desc = "Breakpoint Condition", mode = "n" },
             { "<f9>",       function() require("dap").toggle_breakpoint() end,                                    desc = "Toggle breakpoint",    mode = "n" },

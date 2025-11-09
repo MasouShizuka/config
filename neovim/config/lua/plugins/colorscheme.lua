@@ -13,9 +13,9 @@ return {
 
             local overrides = {
                 CursorLineNr = { bg = "none" },
-                LspReferenceRead = { bg = colors.get_color("gray", "gruvbox") },
-                LspReferenceText = { bg = colors.get_color("gray", "gruvbox") },
-                LspReferenceWrite = { bg = colors.get_color("gray", "gruvbox") },
+                LspReferenceRead = { bg = colors.get_color(colors.colors.gray, "gruvbox") },
+                LspReferenceText = { bg = colors.get_color(colors.colors.gray, "gruvbox") },
+                LspReferenceWrite = { bg = colors.get_color(colors.colors.gray, "gruvbox") },
                 TabLineFill = { bg = "none" },
                 WinBar = { bg = "none" },
                 WinBarNC = { bg = "none" },
@@ -35,7 +35,7 @@ return {
 
             if utils.is_available("flash.nvim") then
                 overrides.FlashBackdrop = { link = "Comment" }
-                overrides.FlashLabel = { bg = colors.get_color("red", "gruvbox"), bold = true }
+                overrides.FlashLabel = { bg = colors.get_color(colors.colors.red, "gruvbox"), bold = true }
             end
 
             if utils.is_available("gitsigns.nvim") then
@@ -44,7 +44,7 @@ return {
 
             if utils.is_available("nvim-treesitter-context") then
                 overrides.TreesitterContextBottom = { underline = true }
-                overrides.TreesitterContextLineNumber = { fg = colors.get_color("purple", "gruvbox") }
+                overrides.TreesitterContextLineNumber = { fg = colors.get_color(colors.colors.purple, "gruvbox") }
             end
 
             return {
@@ -76,14 +76,14 @@ return {
                 local colors = require("utils.colors")
                 local utils = require("utils")
 
-                hl.DiagnosticError = vim.tbl_deep_extend("force", hl.DiagnosticError or {}, { fg = c[colors.get_color_name("tokyonight", "red")] })
-                hl.DiagnosticInfo = vim.tbl_deep_extend("force", hl.DiagnosticInfo or {}, { fg = c[colors.get_color_name("tokyonight", "blue")] })
+                hl.DiagnosticError = vim.tbl_deep_extend("force", hl.DiagnosticError or {}, { fg = c[colors.get_color_name("red", "tokyonight")] })
+                hl.DiagnosticInfo = vim.tbl_deep_extend("force", hl.DiagnosticInfo or {}, { fg = c[colors.get_color_name("blue", "tokyonight")] })
                 hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
                 hl.DiffAdd = { link = "diffAdded" }
                 hl.DiffChange = { link = "diffChanged" }
                 hl.DiffDelete = { link = "diffRemoved" }
-                hl.LspKindFile = { fg = c[colors.get_color_name("tokyonight", "orange")] }
-                hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_color_name("tokyonight", "gray")] })
+                hl.LspKindFile = { fg = c[colors.get_color_name("orange", "tokyonight")] }
+                hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_color_name("gray", "tokyonight")] })
                 hl.StatusLine = vim.tbl_deep_extend("force", hl.StatusLine or {}, { bg = "none" })
                 hl.StatusLineNC = vim.tbl_deep_extend("force", hl.StatusLineNC or {}, { bg = "none" })
                 hl.TabLineFill = vim.tbl_deep_extend("force", hl.TabLineFill or {}, { bg = "none" })
@@ -100,16 +100,16 @@ return {
                 end
 
                 if utils.is_available("blink.cmp") then
-                    hl.BlinkCmpKindVariable = { fg = c[colors.get_color_name("tokyonight", "red")] }
+                    hl.BlinkCmpKindVariable = { fg = c[colors.get_color_name("red", "tokyonight")] }
                 end
 
                 if utils.is_available("nvim-cmp") then
-                    hl.CmpItemKindVariable = { fg = c[colors.get_color_name("tokyonight", "red")] }
+                    hl.CmpItemKindVariable = { fg = c[colors.get_color_name("red", "tokyonight")] }
                 end
 
                 if utils.is_available("nvim-treesitter-context") then
                     hl.TreesitterContextBottom = vim.tbl_deep_extend("force", hl.TreesitterContextBottom or {}, { underline = true })
-                    hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_color_name("tokyonight", "purple")] })
+                    hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_color_name("purple", "tokyonight")] })
                 end
             end,
         },
@@ -138,17 +138,17 @@ return {
             local utils = require("utils")
 
             local highlights = {
-                CursorLineNr = { fg = colors.get_color("purple", "onedark") },
-                DiagnosticUnderlineError = { sp = colors.get_color("red", "onedark"), undercurl = true },
-                DiagnosticUnderlineWarn = { sp = colors.get_color("yellow", "onedark"), undercurl = true },
-                DiagnosticUnderlineInfo = { sp = colors.get_color("blue", "onedark"), undercurl = true },
-                DiagnosticUnderlineHint = { sp = colors.get_color("cyan", "onedark"), undercurl = true },
-                MatchParen = { bg = colors.get_color("gray", "onedark") },
-                PmenuThumb = { bg = colors.get_color("gray", "onedark") },
-                SpellBad = { sp = colors.get_color("red", "onedark"), undercurl = true },
-                SpellCap = { sp = colors.get_color("yellow", "onedark"), undercurl = true },
-                SpellLocal = { sp = colors.get_color("blue", "onedark"), undercurl = true },
-                SpellRare = { sp = colors.get_color("green", "onedark"), undercurl = true },
+                CursorLineNr = { fg = colors.get_color(colors.colors.purple, "onedark") },
+                DiagnosticUnderlineError = { sp = colors.get_color(colors.colors.red, "onedark"), undercurl = true },
+                DiagnosticUnderlineWarn = { sp = colors.get_color(colors.colors.yellow, "onedark"), undercurl = true },
+                DiagnosticUnderlineInfo = { sp = colors.get_color(colors.colors.blue, "onedark"), undercurl = true },
+                DiagnosticUnderlineHint = { sp = colors.get_color(colors.colors.cyan, "onedark"), undercurl = true },
+                MatchParen = { bg = colors.get_color(colors.colors.gray, "onedark") },
+                PmenuThumb = { bg = colors.get_color(colors.colors.gray, "onedark") },
+                SpellBad = { sp = colors.get_color(colors.colors.red, "onedark"), undercurl = true },
+                SpellCap = { sp = colors.get_color(colors.colors.yellow, "onedark"), undercurl = true },
+                SpellLocal = { sp = colors.get_color(colors.colors.blue, "onedark"), undercurl = true },
+                SpellRare = { sp = colors.get_color(colors.colors.green, "onedark"), undercurl = true },
             }
 
             if not environment.is_undercurl_available then
@@ -166,7 +166,7 @@ return {
 
             if utils.is_available("nvim-treesitter-context") then
                 highlights.TreesitterContextBottom = { underline = true }
-                highlights.TreesitterContextLineNumber = { fg = colors.get_color("purple", "onedark") }
+                highlights.TreesitterContextLineNumber = { fg = colors.get_color(colors.colors.purple, "onedark") }
             end
 
             return {

@@ -7,20 +7,6 @@ return {
         event = {
             "User GitFile",
         },
-        init = function()
-            local utils = require("utils")
-            if utils.is_available("which-key.nvim") then
-                utils.create_once_autocmd("User", {
-                    callback = function()
-                        require("which-key").add({
-                            { "<leader>g", group = "gitsigns", mode = "n" },
-                        })
-                    end,
-                    desc = "Register which-key for gitsigns",
-                    pattern = "IceLoad",
-                })
-            end
-        end,
         opts = function()
             local icons = require("utils.icons")
 
@@ -53,6 +39,7 @@ return {
 
                     if require("utils").is_available("which-key.nvim") then
                         require("which-key").add(
+                            { "<leader>g", buffer = bufnr, group = "gitsigns", mode = "n" },
                             { "<leader>gt", buffer = bufnr, group = "gitsigns toggle", mode = "n" }
                         )
                     end
