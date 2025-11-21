@@ -32,7 +32,7 @@ return {
             "MarkdownPreviewStop",
             "MarkdownPreviewToggle",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User MarkdownFile",
         },
@@ -43,11 +43,11 @@ return {
         cmd = {
             "RenderMarkdown",
         },
+        cond = not environment.is_vscode and environment.treesitter_enable,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not environment.is_vscode and environment.treesitter_enable,
         event = {
             "User MarkdownFile",
         },
@@ -189,9 +189,20 @@ return {
                             vim.keymap.set("x", "sml", function() require("markdown-plus.links").selection_to_link() end, { buffer = args.buf, desc = "Convert selection to link", silent = true })
                             vim.keymap.set("n", "smu", function() require("markdown-plus.links").auto_link_url() end, { buffer = args.buf, desc = "auto_link_url", silent = true })
 
+                            -- Images
+                            vim.keymap.set("n", "smp", function() require("markdown-plus.images").insert_image() end, { buffer = args.buf, desc = "Insert markdown image", silent = true })
+                            vim.keymap.set("x", "smp", function() require("markdown-plus.images").selection_to_image() end, { buffer = args.buf, desc = "Convert selection to image", silent = true })
+
                             -- Quotes
                             vim.keymap.set("n", "smq", function() require("markdown-plus.quote").toggle_quote_line() end, { buffer = args.buf, desc = "Toggle blockquote", silent = true })
                             vim.keymap.set("x", "smq", function() require("markdown-plus.quote").toggle_quote() end, { buffer = args.buf, desc = "Toggle blockquote", silent = true })
+
+                            -- Callouts
+                            vim.keymap.set({ "n", "x" }, "smQ", function()
+                                local callouts = require("markdown-plus.callouts")
+                                callouts.insert_callout_prompt()
+                                callouts.wrap_selection_in_callout()
+                            end, { buffer = args.buf, desc = "Insert/wrap callout", silent = true })
 
                             -- Tables
                             if require("utils").is_available("which-key.nvim") then

@@ -231,9 +231,9 @@ M.panel_filetype_lists = {
 --- Get the ft's panel filetype info
 ---@param ft string
 ---@param panel_filetype_list? panel_filetype_list
----@return boolean, panel_filetype_info|nil
+---@return panel_filetype_info|nil
 M.get_panel_filetype_info = function(ft, panel_filetype_list)
-    local is_panel_filetype, info
+    local info
 
     local lists
     if panel_filetype_list then
@@ -245,12 +245,11 @@ M.get_panel_filetype_info = function(ft, panel_filetype_list)
     for _, list in pairs(lists) do
         info = list[ft]
         if info ~= nil then
-            is_panel_filetype = true
             break
         end
     end
 
-    return is_panel_filetype, info
+    return info
 end
 
 --- Check if the filetype is the panel filetype
@@ -258,30 +257,32 @@ end
 ---@param panel_filetype_list? panel_filetype_list
 ---@return boolean
 M.is_panel_filetype = function(filetype, panel_filetype_list)
-    local is_panel_filetype, _ = M.get_panel_filetype_info(filetype, panel_filetype_list)
-    return is_panel_filetype
+    local info = M.get_panel_filetype_info(filetype, panel_filetype_list)
+    return info ~= nil
 end
 
 --- Get the focused win's panel filetype info
 ---@param panel_filetype_list? panel_filetype_list
----@return boolean, panel_filetype_info|nil
+---@return panel_filetype_info|nil
 M.get_focused_panel_filetype_info = function(panel_filetype_list)
     local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
-    local ok, info = M.get_panel_filetype_info(ft, panel_filetype_list)
-    if ok and info then
-        local close = info.close
-        if type(close) ~= "function" then
-            info = vim.deepcopy(info)
-            if close then
-                local win = vim.api.nvim_get_current_win()
-                info.close = function() vim.api.nvim_win_close(win, true) end
-            else
-                info.close = function() end
-            end
+    local info = M.get_panel_filetype_info(ft, panel_filetype_list)
+    if info == nil then
+        return nil
+    end
+
+    local close = info.close
+    if type(close) == "boolean" then
+        info = vim.deepcopy(info)
+        if close then
+            local win = vim.api.nvim_get_current_win()
+            info.close = function() vim.api.nvim_win_close(win, true) end
+        else
+            info.close = function() end
         end
     end
 
-    return ok, info
+    return info
 end
 
 --- Get all opened wins of panel filetype in current tabpage
@@ -316,9 +317,9 @@ end
 M.toggle_panel = function(pos)
     local panel_filetype_list = M.panel_filetype_lists[pos]
 
-    local is_focused, info = M.get_focused_panel_filetype_info(panel_filetype_list)
-    if is_focused and info then
-        info.close()
+    local focused_info = M.get_focused_panel_filetype_info(panel_filetype_list)
+    if focused_info then
+        focused_info.close()
         return
     end
 

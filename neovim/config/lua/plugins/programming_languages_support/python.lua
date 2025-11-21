@@ -8,6 +8,7 @@ return {
         cmd = {
             "VenvSelect",
         },
+        cond = not environment.is_vscode and environment.lsp_enable,
         config = function(_, opts)
             require("venv-selector").setup(opts)
 
@@ -60,7 +61,6 @@ return {
 
             "neovim/nvim-lspconfig",
         },
-        enabled = not environment.is_vscode and environment.lsp_enable,
         init = function()
             -- 激活 venv-selector 并读取环境
             local id

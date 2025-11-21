@@ -18,8 +18,8 @@ M.close = function()
 
         local buf = vim.api.nvim_win_get_buf(win)
         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-        local is_panel_filetype, info = filetype.get_panel_filetype_info(ft)
-        if is_panel_filetype then
+        local info = filetype.get_panel_filetype_info(ft)
+        if info then
             panels[#panels + 1] = {
                 win = win,
                 func = info,
@@ -66,7 +66,6 @@ M.setup = function(opts)
             local utils = require("utils")
 
             utils.table_clear(opened_panels)
-
             for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 if not vim.api.nvim_win_is_valid(win) then
                     goto continue
@@ -74,8 +73,8 @@ M.setup = function(opts)
 
                 local buf = vim.api.nvim_win_get_buf(win)
                 local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                local is_panel_filetype, info = filetype.get_panel_filetype_info(ft)
-                if is_panel_filetype then
+                local info = filetype.get_panel_filetype_info(ft)
+                if info then
                     local close = info.close
                     if type(close) == "function" then
                         close()

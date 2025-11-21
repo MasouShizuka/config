@@ -8,6 +8,7 @@ return {
             "GrugFar",
             "GrugFarWithin",
         },
+        cond = not environment.is_vscode,
         config = function(_, opts)
             local grug_far = require("grug-far")
             grug_far.setup(opts)
@@ -53,7 +54,6 @@ return {
                 pattern = "grug-far",
             })
         end,
-        enabled = not environment.is_vscode,
         keys = {
             {
                 "<leader><c-f>",

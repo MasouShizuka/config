@@ -4,7 +4,7 @@ local path = require("utils.path")
 return {
     {
         "aznhe21/actions-preview.nvim",
-        enabled = not environment.is_vscode and environment.lsp_enable,
+        cond = not environment.is_vscode and environment.lsp_enable,
         lazy = true,
         opts = {},
     },
@@ -14,10 +14,10 @@ return {
         cmd = {
             "Trouble",
         },
+        cond = not environment.is_vscode,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then
@@ -43,17 +43,19 @@ return {
                 "gd",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_definitions" })
-                    view:wait(function()
-                        require("utils").defer_fn_with_condition(function()
-                            if view.win:valid() then
-                                view.win:focus()
-                            end
-                        end, {
-                            condition = function()
-                                return vim.api.nvim_get_current_win() == view.win.win
-                            end,
-                        })
-                    end)
+                    if view ~= nil then
+                        view:wait(function()
+                            require("utils").defer_fn_with_condition(function()
+                                if view.win:valid() then
+                                    view.win:focus()
+                                end
+                            end, {
+                                condition = function()
+                                    return vim.api.nvim_get_current_win() == view.win.win
+                                end,
+                            })
+                        end)
+                    end
                 end,
                 desc = "LSP Definitions (Trouble)",
                 mode = "n",
@@ -62,17 +64,19 @@ return {
                 "gD",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_declarations" })
-                    view:wait(function()
-                        require("utils").defer_fn_with_condition(function()
-                            if view.win:valid() then
-                                view.win:focus()
-                            end
-                        end, {
-                            condition = function()
-                                return vim.api.nvim_get_current_win() == view.win.win
-                            end,
-                        })
-                    end)
+                    if view ~= nil then
+                        view:wait(function()
+                            require("utils").defer_fn_with_condition(function()
+                                if view.win:valid() then
+                                    view.win:focus()
+                                end
+                            end, {
+                                condition = function()
+                                    return vim.api.nvim_get_current_win() == view.win.win
+                                end,
+                            })
+                        end)
+                    end
                 end,
                 desc = "LSP Declarations (Trouble)",
                 mode = "n",
@@ -81,17 +85,19 @@ return {
                 "gi",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_implementations" })
-                    view:wait(function()
-                        require("utils").defer_fn_with_condition(function()
-                            if view.win:valid() then
-                                view.win:focus()
-                            end
-                        end, {
-                            condition = function()
-                                return vim.api.nvim_get_current_win() == view.win.win
-                            end,
-                        })
-                    end)
+                    if view ~= nil then
+                        view:wait(function()
+                            require("utils").defer_fn_with_condition(function()
+                                if view.win:valid() then
+                                    view.win:focus()
+                                end
+                            end, {
+                                condition = function()
+                                    return vim.api.nvim_get_current_win() == view.win.win
+                                end,
+                            })
+                        end)
+                    end
                 end,
                 desc = "LSP Implementations (Trouble)",
                 mode = "n",
@@ -100,17 +106,19 @@ return {
                 "gr",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_references" })
-                    view:wait(function()
-                        require("utils").defer_fn_with_condition(function()
-                            if view.win:valid() then
-                                view.win:focus()
-                            end
-                        end, {
-                            condition = function()
-                                return vim.api.nvim_get_current_win() == view.win.win
-                            end,
-                        })
-                    end)
+                    if view ~= nil then
+                        view:wait(function()
+                            require("utils").defer_fn_with_condition(function()
+                                if view.win:valid() then
+                                    view.win:focus()
+                                end
+                            end, {
+                                condition = function()
+                                    return vim.api.nvim_get_current_win() == view.win.win
+                                end,
+                            })
+                        end)
+                    end
                 end,
                 desc = "LSP References (Trouble)",
                 mode = "n",
@@ -119,17 +127,19 @@ return {
                 "gy",
                 function()
                     local view = require("trouble").toggle({ mode = "lsp_type_definitions" })
-                    view:wait(function()
-                        require("utils").defer_fn_with_condition(function()
-                            if view.win:valid() then
-                                view.win:focus()
-                            end
-                        end, {
-                            condition = function()
-                                return vim.api.nvim_get_current_win() == view.win.win
-                            end,
-                        })
-                    end)
+                    if view ~= nil then
+                        view:wait(function()
+                            require("utils").defer_fn_with_condition(function()
+                                if view.win:valid() then
+                                    view.win:focus()
+                                end
+                            end, {
+                                condition = function()
+                                    return vim.api.nvim_get_current_win() == view.win.win
+                                end,
+                            })
+                        end)
+                    end
                 end,
                 desc = "LSP Type Definitions (Trouble)",
                 mode = "n",
@@ -319,6 +329,7 @@ return {
 
     {
         "mfussenegger/nvim-lint",
+        cond = not environment.is_vscode and environment.lint_enable,
         config = function(_, opts)
             local lint = require("utils.lint")
 
@@ -409,7 +420,6 @@ return {
         dependencies = {
             "williamboman/mason.nvim",
         },
-        enabled = not environment.is_vscode and environment.lint_enable,
         event = {
             "User LintFile",
         },
@@ -417,6 +427,7 @@ return {
 
     {
         "neovim/nvim-lspconfig",
+        cond = not environment.is_vscode and environment.lsp_enable,
         config = function(_, opts)
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
@@ -566,6 +577,36 @@ return {
                         if utils.is_available("snacks.nvim") then
                             utils.set_setting_toggle("document_highlight", {
                                 default = true,
+                                g = {
+                                    keymap = { buf = buf, keys = "<leader>lth", mode = "n" },
+                                    opts = {
+                                        callback = function(enabled, prev_enabled, global_enabled)
+                                            if enabled then
+                                                require("snacks").words.enable()
+                                            else
+                                                require("snacks").words.disable()
+                                            end
+                                        end,
+                                    },
+
+                                },
+                                b = {
+                                    keymap = { buf = buf, keys = "<leader>ltH", mode = "n" },
+                                    opts = {
+                                        callback = function(enabled, prev_enabled, global_enabled)
+                                            if enabled then
+                                                require("snacks").words.enable()
+                                            else
+                                                require("snacks").words.disable()
+                                            end
+                                        end,
+                                    },
+
+                                },
+                            })
+                        else
+                            utils.set_setting_toggle("document_highlight", {
+                                default = true,
                                 init = function()
                                     local augroup = vim.api.nvim_create_augroup(string.format("LspDocumentHighlight%s", buf), { clear = true })
                                     vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
@@ -613,36 +654,6 @@ return {
                                 },
                             })
                         end
-                    else
-                        utils.set_setting_toggle("document_highlight", {
-                            default = true,
-                            g = {
-                                keymap = { buf = buf, keys = "<leader>lth", mode = "n" },
-                                opts = {
-                                    callback = function(enabled, prev_enabled, global_enabled)
-                                        if enabled then
-                                            require("snacks").words.enable()
-                                        else
-                                            require("snacks").words.disable()
-                                        end
-                                    end,
-                                },
-
-                            },
-                            b = {
-                                keymap = { buf = buf, keys = "<leader>ltH", mode = "n" },
-                                opts = {
-                                    callback = function(enabled, prev_enabled, global_enabled)
-                                        if enabled then
-                                            require("snacks").words.enable()
-                                        else
-                                            require("snacks").words.disable()
-                                        end
-                                    end,
-                                },
-
-                            },
-                        })
                     end
 
                     if client:supports_method("textDocument/foldingRange") then
@@ -908,7 +919,6 @@ return {
                 end,
             },
         },
-        enabled = not environment.is_vscode and environment.lsp_enable,
         event = {
             "User LspFile",
         },
@@ -954,7 +964,7 @@ return {
 
     {
         "rachartier/tiny-inline-diagnostic.nvim",
-        enabled = not environment.is_vscode and environment.lsp_enable,
+        cond = not environment.is_vscode and environment.lsp_enable,
         event = {
             "LspAttach",
         },
@@ -983,6 +993,7 @@ return {
             "MasonUninstallAll",
             "MasonLog",
         },
+        cond = not environment.is_vscode and environment.mason_enable,
         dependencies = {
             {
                 "WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -1032,7 +1043,6 @@ return {
                 end,
             },
         },
-        enabled = not environment.is_vscode and environment.mason_enable,
         keys = {
             { "<leader>lm", function() vim.api.nvim_command("Mason") end, desc = "Mason information", mode = "n" },
         },

@@ -174,7 +174,7 @@ local function save_window_quit_history()
     undoquit_stack[#undoquit_stack + 1] = get_window_restore_data()
 end
 
-local function restore_window()
+M.restore_window = function()
     if vim.fn.empty(undoquit_stack) == 1 then
         vim.notify("No closed windows to undo")
         return
@@ -213,7 +213,7 @@ local function restore_window()
     end
 end
 
-local function restore_tab()
+M.restore_tab = function()
     if vim.fn.empty(undoquit_stack) == 1 then
         vim.notify("No closed tabs to undo")
         return
@@ -223,7 +223,7 @@ local function restore_tab()
     local last_tab = last_window.tabpagenr
 
     while last_window.tabpagenr == last_tab do
-        restore_window()
+        M.restore_window()
 
         if #undoquit_stack > 0 then
             last_window = undoquit_stack[#undoquit_stack]
@@ -238,11 +238,8 @@ local function restore_tab()
 end
 
 M.setup = function(opts)
-    M.restore_window = restore_window
-    M.restore_tab = restore_tab
-
-    vim.api.nvim_create_user_command("Undoquit", restore_window, { desc = "Undo quit" })
-    vim.api.nvim_create_user_command("UndoquitTab", restore_window, { desc = "Undo quit tab" })
+    vim.api.nvim_create_user_command("Undoquit", M.restore_window, { desc = "Undo quit" })
+    vim.api.nvim_create_user_command("UndoquitTab", M.restore_window, { desc = "Undo quit tab" })
 
     vim.api.nvim_create_autocmd("QuitPre", {
         callback = save_window_quit_history,

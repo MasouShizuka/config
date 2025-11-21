@@ -6,10 +6,10 @@ return {
         cmd = {
             "Neogen",
         },
+        cond = environment.treesitter_enable,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = environment.treesitter_enable,
         keys = {
             { "<leader>gca", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
         },
@@ -278,10 +278,10 @@ return {
             "TodoTrouble",
             "TodoTelescope",
         },
+        cond = not environment.is_vscode,
         dependencies = {
             "nvim-lua/plenary.nvim",
         },
-        enabled = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -376,13 +376,13 @@ return {
 
     {
         "HiPhish/rainbow-delimiters.nvim",
+        cond = not environment.is_vscode and environment.treesitter_enable,
         config = function(_, opts)
             require("rainbow-delimiters.setup").setup(opts)
         end,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not environment.is_vscode and environment.treesitter_enable,
         event = {
             "User TreesitterFile",
         },
@@ -480,13 +480,13 @@ return {
 
     {
         "numToStr/Comment.nvim",
+        cond = not environment.is_vscode,
         config = function(_, opts)
             require("Comment").setup(opts)
 
             local ft = require("Comment.ft")
             ft.python = { "#%s", [["""%s"""]] }
         end,
-        enabled = not environment.is_vscode,
         keys = {
             { "gc", desc = "Comment toggle linewise",  mode = { "n", "x" } },
             { "gb", desc = "Comment toggle blockwise", mode = { "n", "x" } },
@@ -551,6 +551,7 @@ return {
         cmd = {
             "ASToggle",
         },
+        cond = not environment.is_vscode,
         config = function(_, opts)
             require("auto-save").setup(opts)
 
@@ -629,7 +630,6 @@ return {
                 pattern = "AutoSaveWritePost",
             })
         end,
-        enabled = not environment.is_vscode,
         init = function()
             local utils = require("utils")
 
@@ -708,23 +708,6 @@ return {
             end,
             debounce_delay = 1, -- delay after which a pending save is executed
         },
-    },
-
-    {
-        "utilyre/sentiment.nvim",
-        cmd = {
-            "NoMatchParen",
-            "DoMatchParen",
-        },
-        enabled = not environment.is_vscode,
-        event = {
-            "User IceLoad",
-        },
-        init = function()
-            -- `matchparen.vim` needs to be disabled manually in case of lazy loading
-            vim.g.loaded_matchparen = 1
-        end,
-        opts = {},
     },
 
     -- NOTE: 需要安装 im-select

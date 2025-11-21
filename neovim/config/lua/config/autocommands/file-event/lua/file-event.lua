@@ -113,7 +113,6 @@ M.setup = function(opts)
         end,
         desc = "Change settings for lsp file",
         func = function(args)
-            vim.api.nvim_set_option_value("colorcolumn", "120", { scope = "local" })
             vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
         end,
     })
@@ -130,6 +129,20 @@ M.setup = function(opts)
         func = function(args)
             vim.api.nvim_set_option_value("spell", true, { scope = "local" })
             vim.api.nvim_set_option_value("wrap", true, { scope = "local" })
+        end,
+    })
+
+    -- 非文本文件切换部分设置
+    create_event({
+        condition = function(args)
+            local filetype = require("utils.filetype")
+            local filetype_list = require("utils").table_concat(filetype.tex_filetype_list, filetype.text_filetype_list)
+            local session_file = vim.b[args.buf].session_file or false
+            return not session_file and not vim.tbl_contains(filetype_list, vim.bo[args.buf].filetype)
+        end,
+        desc = "Change settings for non-text file",
+        func = function(args)
+            vim.api.nvim_set_option_value("colorcolumn", "120", { scope = "local" })
         end,
     })
 

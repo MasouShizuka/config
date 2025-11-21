@@ -29,6 +29,7 @@ return {
 
     {
         "lukas-reineke/indent-blankline.nvim",
+        cond = not environment.is_vscode,
         config = function(_, opts)
             if require("utils").is_available("rainbow-delimiters.nvim") then
                 local colors = require("utils.colors")
@@ -60,7 +61,6 @@ return {
             end
             require("ibl").setup(opts)
         end,
-        enabled = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -77,7 +77,7 @@ return {
 
     {
         "NMAC427/guess-indent.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -96,10 +96,10 @@ return {
         cmd = {
             "ConformInfo",
         },
+        cond = not environment.is_vscode and environment.format_enable,
         dependencies = {
             "williamboman/mason.nvim",
         },
-        enabled = not environment.is_vscode and environment.format_enable,
         init = function()
             local utils = require("utils")
             utils.create_once_autocmd("User", {

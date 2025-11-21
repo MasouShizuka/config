@@ -7,6 +7,7 @@ return {
         cmd = {
             "SessionManager",
         },
+        cond = not environment.is_vscode,
         config = function(_, opts)
             require("session_manager").setup(opts)
 
@@ -35,7 +36,6 @@ return {
         dependencies = {
             "nvim-lua/plenary.nvim",
         },
-        enabled = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then

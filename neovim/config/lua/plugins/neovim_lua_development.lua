@@ -6,8 +6,7 @@ return {
         cmd = {
             "LazyDev",
         },
-        enabled = not environment.is_vscode and environment.lsp_enable,
-        lazy = true,
+        cond = not environment.is_vscode and environment.lsp_enable,
         opts = {
             integrations = {
                 -- add the cmp source for completion of:

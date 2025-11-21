@@ -3,7 +3,7 @@ local environment = require("utils.environment")
 return {
     {
         "Bekaboo/deadcolumn.nvim",
-        enabled = not environment.is_vscode and environment.lsp_enable,
+        cond = not environment.is_vscode and environment.lsp_enable,
         event = {
             "User IceLoad",
         },
@@ -27,10 +27,10 @@ return {
 
     {
         "rebelot/heirline.nvim",
+        cond = not environment.is_vscode,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not environment.is_vscode,
         event = {
             "UIEnter",
         },
@@ -190,7 +190,7 @@ return {
 
     {
         "SmiteshP/nvim-navic",
-        enabled = not environment.is_vscode and environment.lsp_enable,
+        cond = not environment.is_vscode and environment.lsp_enable,
         event = {
             "LspAttach",
         },

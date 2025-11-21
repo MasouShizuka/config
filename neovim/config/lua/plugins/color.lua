@@ -10,7 +10,7 @@ return {
             "CccHighlighterDisable",
             "CccHighlighterToggle",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User IceLoad",
         },

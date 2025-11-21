@@ -4,6 +4,7 @@ local path = require("utils.path")
 return {
     {
         "hrsh7th/nvim-cmp",
+        cond = not environment.is_vscode,
         config = function()
             local filetype = require("utils.filetype")
             local utils = require("utils")
@@ -59,7 +60,7 @@ return {
                     ["<c-f>"] = cmp.mapping.scroll_docs(4),
                     ["<c-b>"] = cmp.mapping.scroll_docs(-4),
 
-                    ["<c-s>"] = cmp.mapping(function(fallback)
+                    ["<c-s>"] = cmp.mapping(function()
                         if cmp.visible() then
                             cmp.abort()
                         else
@@ -346,7 +347,6 @@ return {
                 },
             },
         },
-        enabled = not environment.is_vscode,
         event = {
             "CmdlineEnter",
             "InsertEnter",
@@ -355,6 +355,7 @@ return {
 
     -- {
     --     "saghen/blink.cmp",
+    --     cond = not environment.is_vscode,
     --     dependencies = {
     --         -- {
     --         --     "L3MON4D3/LuaSnip",
@@ -398,7 +399,6 @@ return {
     --             opts = {},
     --         },
     --     },
-    --     enabled = not environment.is_vscode,
     --     event = {
     --         "CmdlineEnter",
     --         "InsertEnter",

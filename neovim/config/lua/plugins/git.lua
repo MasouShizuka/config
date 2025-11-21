@@ -3,7 +3,7 @@ local environment = require("utils.environment")
 return {
     {
         "lewis6991/gitsigns.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User GitFile",
         },

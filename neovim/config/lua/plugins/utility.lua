@@ -4,7 +4,7 @@ local path = require("utils.path")
 return {
     {
         "Aasim-A/scrollEOF.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -38,7 +38,7 @@ return {
             "CellWidthsOn",
             "CellWidthsToggle",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -56,7 +56,7 @@ return {
         cmd = {
             "Noice",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "CmdlineEnter",
             "LspAttach",
@@ -116,7 +116,7 @@ return {
     -- NOTE: 需要安装 ripgrep
     {
         "folke/snacks.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             utils.create_once_autocmd("User", {
@@ -179,49 +179,6 @@ return {
                 desc = "Snacks init",
                 pattern = "IceLoad",
             })
-
-            -- 当直接打开一个大文件时，需要手动执行
-            if vim.fn.argc(-1) > 0 then
-                local function load_bigfile(args)
-                    local snacks = require("snacks")
-
-                    local opts = snacks.config.get("bigfile", { notify = true })
-                    if opts.notify then
-                        local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(args.buf), ":p:~:.")
-                        snacks.notify.warn({
-                            ("Big file detected `%s`."):format(path),
-                            "Some Neovim features have been **disabled**.",
-                        }, { title = "Big File" })
-                    end
-                    vim.api.nvim_buf_call(args.buf, function()
-                        opts.setup({
-                            buf = args.buf,
-                            ft = vim.filetype.match({ buf = args.buf }) or "",
-                        })
-                    end)
-                end
-
-                utils.create_once_autocmd("BufReadPre", {
-                    callback = function(ev)
-                        if not utils.is_bigfile(ev.buf) then
-                            return
-                        end
-
-                        load_bigfile(ev)
-                    end,
-                    desc = "Disable bigfile features when running nvim with file argument",
-                })
-                utils.create_once_autocmd("BufReadPost", {
-                    callback = function(ev)
-                        if not utils.is_longfile(ev.buf) then
-                            return
-                        end
-
-                        load_bigfile(ev)
-                    end,
-                    desc = "Disable bigfile features when running nvim with file argument",
-                })
-            end
         end,
         keys = {
             { "ii",         mode = { "x", "o" } },
@@ -360,7 +317,7 @@ return {
             if utils.is_available("edgy.nvim") then
                 explorer_layout = {
                     width = 1,
-                    col = 0,
+                    col = -1,
                     box = "vertical",
                     {
                         win = "input",
@@ -401,7 +358,6 @@ return {
             end
 
             return {
-                -- NOTE: 存在直接打开大文件无法检测的情况
                 bigfile = {
                     enabled = true,
                     -- Enable or disable features when big file detected
@@ -846,6 +802,7 @@ return {
             "TranslateInput",
             "TransToggle",
         },
+        cond = not environment.is_vscode,
         config = function(_, opts)
             local Trans = require("Trans")
             Trans.setup(opts)
@@ -916,7 +873,6 @@ return {
                 end,
             },
         },
-        enabled = not environment.is_vscode,
         opts = {
             debug = false,
             frontend = {
@@ -948,7 +904,7 @@ return {
 
     {
         "y3owk1n/undo-glow.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             utils.create_once_autocmd("User", {

@@ -3,7 +3,7 @@ local environment = require("utils.environment")
 return {
     {
         "ellisonleao/gruvbox.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User ColorschemePre",
         },
@@ -57,7 +57,7 @@ return {
 
     {
         "folke/tokyonight.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User ColorschemePre",
         },
@@ -76,14 +76,14 @@ return {
                 local colors = require("utils.colors")
                 local utils = require("utils")
 
-                hl.DiagnosticError = vim.tbl_deep_extend("force", hl.DiagnosticError or {}, { fg = c[colors.get_color_name("red", "tokyonight")] })
-                hl.DiagnosticInfo = vim.tbl_deep_extend("force", hl.DiagnosticInfo or {}, { fg = c[colors.get_color_name("blue", "tokyonight")] })
+                hl.DiagnosticError = vim.tbl_deep_extend("force", hl.DiagnosticError or {}, { fg = c[colors.get_color_name(colors.colors.red, "tokyonight")] })
+                hl.DiagnosticInfo = vim.tbl_deep_extend("force", hl.DiagnosticInfo or {}, { fg = c[colors.get_color_name(colors.colors.blue, "tokyonight")] })
                 hl.DiagnosticUnnecessary = vim.tbl_deep_extend("force", hl.DiagnosticUnnecessary or {}, { fg = c.fg_dark })
                 hl.DiffAdd = { link = "diffAdded" }
                 hl.DiffChange = { link = "diffChanged" }
                 hl.DiffDelete = { link = "diffRemoved" }
-                hl.LspKindFile = { fg = c[colors.get_color_name("orange", "tokyonight")] }
-                hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_color_name("gray", "tokyonight")] })
+                hl.LspKindFile = { fg = c[colors.get_color_name(colors.colors.orange, "tokyonight")] }
+                hl.MatchParen = vim.tbl_deep_extend("force", hl.MatchParen or {}, { bg = c[colors.get_color_name(colors.colors.gray, "tokyonight")] })
                 hl.StatusLine = vim.tbl_deep_extend("force", hl.StatusLine or {}, { bg = "none" })
                 hl.StatusLineNC = vim.tbl_deep_extend("force", hl.StatusLineNC or {}, { bg = "none" })
                 hl.TabLineFill = vim.tbl_deep_extend("force", hl.TabLineFill or {}, { bg = "none" })
@@ -100,16 +100,16 @@ return {
                 end
 
                 if utils.is_available("blink.cmp") then
-                    hl.BlinkCmpKindVariable = { fg = c[colors.get_color_name("red", "tokyonight")] }
+                    hl.BlinkCmpKindVariable = { fg = c[colors.get_color_name(colors.colors.red, "tokyonight")] }
                 end
 
                 if utils.is_available("nvim-cmp") then
-                    hl.CmpItemKindVariable = { fg = c[colors.get_color_name("red", "tokyonight")] }
+                    hl.CmpItemKindVariable = { fg = c[colors.get_color_name(colors.colors.red, "tokyonight")] }
                 end
 
                 if utils.is_available("nvim-treesitter-context") then
                     hl.TreesitterContextBottom = vim.tbl_deep_extend("force", hl.TreesitterContextBottom or {}, { underline = true })
-                    hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_color_name("purple", "tokyonight")] })
+                    hl.TreesitterContextLineNumber = vim.tbl_deep_extend("force", hl.TreesitterContextLineNumber or {}, { fg = c[colors.get_color_name(colors.colors.purple, "tokyonight")] })
                 end
             end,
         },
@@ -129,7 +129,7 @@ return {
             "OnedarkproExportToRio",
             "OnedarkproExportToZellij",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         event = {
             "User ColorschemePre",
         },

@@ -13,6 +13,7 @@ return {
         cmd = {
             "Leet",
         },
+        cond = not environment.is_vscode,
         config = function(_, opts)
             require("leetcode").setup(opts)
 
@@ -60,7 +61,6 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons",
         },
-        enabled = not environment.is_vscode,
         lazy = "leetcode" ~= vim.fn.argv()[1],
         opts = function()
             local directory = path.data_path .. "/leetcode"

@@ -113,6 +113,7 @@ return {
             "TSUpdate",
             "TSUpdateSync",
         },
+        cond = environment.treesitter_enable,
         config = function(_, opts)
             require("nvim-treesitter.configs").setup(opts)
 
@@ -141,7 +142,6 @@ return {
         dependencies = {
             "nvim-treesitter/nvim-treesitter-textobjects",
         },
-        enabled = environment.treesitter_enable,
         event = {
             "User TreesitterFile",
         },
@@ -241,10 +241,10 @@ return {
             "TSContextDisable",
             "TSContextToggle",
         },
+        cond = not environment.is_vscode and environment.treesitter_enable,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
         },
-        enabled = not environment.is_vscode and environment.treesitter_enable,
         event = {
             "User TreesitterFile",
         },

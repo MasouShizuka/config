@@ -14,6 +14,7 @@ return {
     --         "ScrollViewLast",
     --         "ScrollViewLegend",
     --     },
+    --     cond = not environment.is_vscode,
     --     config = function(_, opts)
     --         require("scrollview").setup(opts)
     --
@@ -28,7 +29,6 @@ return {
     --             })
     --         end
     --     end,
-    --     enabled = not environment.is_vscode,
     --     event = {
     --         "User IceLoad",
     --     },
@@ -63,6 +63,7 @@ return {
 
     {
         "echasnovski/mini.map",
+        cond = not environment.is_vscode,
         config = function(_, opts)
             local map = require("mini.map")
             map.setup(opts)
@@ -86,7 +87,6 @@ return {
                 group = vim.api.nvim_create_augroup("MiniMapAutoOpen", { clear = true }),
             })
         end,
-        enabled = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -345,7 +345,7 @@ return {
 
     {
         "karb94/neoscroll.nvim",
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         keys = {
             { "<c-u>", function() require("neoscroll").ctrl_u({ duration = 100 }) end,      desc = "Scroll half page up",   mode = { "n", "x" } },
             { "<c-d>", function() require("neoscroll").ctrl_d({ duration = 100 }) end,      desc = "Scroll half page down", mode = { "n", "x" } },
@@ -359,6 +359,78 @@ return {
             hide_cursor = false, -- Hide cursor while scrolling
             ignored_events = {   -- Events ignored while scrolling
                 "WinScrolled",
+            },
+        },
+    },
+
+    {
+        "niuiic/scroll.nvim",
+        cond = environment.is_vscode,
+        keys = {
+            {
+                "<c-d>",
+                function()
+                    local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+                    local target_lnum = vim.api.nvim_win_get_cursor(0)[1] + screen_h / 2
+                    local step = screen_h / 2 / 50
+                    step = step >= 1 and step or 1
+
+                    require("scroll").scroll(target_lnum, function(current_line, target_line)
+                        local fold_end = vim.fn.foldclosedend(current_line)
+
+                        -- if current_line is not in a fold
+                        if fold_end < 0 then
+                            return {
+                                -- cursor position in next step
+                                next_line = current_line + step,
+                                -- delay 10ms for next step
+                                delay = 10,
+                            }
+                        end
+
+                        local fold_start = vim.fn.foldclosed(current_line)
+
+                        return {
+                            next_line = fold_end + 1,
+                            delay = 10,
+                            -- when current_line is in a fold, you may want to regard it as one line, then you need to change the target_line
+                            target_line = target_line + fold_end - fold_start,
+                        }
+                    end)
+                end,
+                desc = "scroll down",
+                mode = { "n", "x" },
+            },
+            {
+                "<c-u>",
+                function()
+                    local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+                    local target_lnum = vim.api.nvim_win_get_cursor(0)[1] - screen_h / 2
+                    local step = screen_h / 2 / 50
+                    if step < 1 then
+                        step = 1
+                    end
+
+                    require("scroll").scroll(target_lnum, function(current_line, target_line)
+                        local fold_end = vim.fn.foldclosedend(current_line)
+                        if fold_end > 0 then
+                            local fold_start = vim.fn.foldclosed(current_line)
+
+                            return {
+                                next_line = fold_start - 1,
+                                delay = 10,
+                                target_line = target_line - fold_end + fold_start,
+                            }
+                        end
+
+                        return {
+                            next_line = current_line - step,
+                            delay = 10,
+                        }
+                    end)
+                end,
+                desc = "scroll up",
+                mode = { "n", "x" },
             },
         },
     },

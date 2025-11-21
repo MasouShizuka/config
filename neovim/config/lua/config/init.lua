@@ -19,8 +19,8 @@ return {
     },
 
     {
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/autocommands/colorscheme-persist",
-        enabled = not environment.is_vscode,
         event = {
             "UIEnter",
         },
@@ -43,8 +43,8 @@ return {
     },
 
     {
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/autocommands/file-event",
-        enabled = not environment.is_vscode,
         event = {
             "User IceLoad",
         },
@@ -53,8 +53,8 @@ return {
     },
 
     {
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/autocommands/focus-left-tab-after-closing",
-        enabled = not environment.is_vscode,
         event = {
             "QuitPre",
         },
@@ -75,8 +75,26 @@ return {
     },
 
     {
+        dir = path.config_path .. "/lua/config/autocommands/sentiment",
+        cmd = {
+            "NoMatchParen",
+            "DoMatchParen",
+        },
+        cond = not environment.is_vscode,
+        event = {
+            "User IceLoad",
+        },
+        init = function()
+            -- `matchparen.vim` needs to be disabled manually in case of lazy loading
+            vim.g.loaded_matchparen = 1
+        end,
+        name = "config.autocommands.sentiment",
+        opts = {},
+    },
+
+    {
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/autocommands/panel-synchronize",
-        enabled = not environment.is_vscode,
         event = {
             "QuitPre",
             "TabLeave",
@@ -177,8 +195,8 @@ return {
             "DiffWithNextTab",
             "DiffWithPrevTab",
         },
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/user_commands/diff",
-        enabled = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then
@@ -207,6 +225,8 @@ return {
             "FencAutoDetect",
             "FencView",
         },
+        cond = not environment.is_vscode,
+        dir = path.config_path .. "/lua/config/user_commands/fencview",
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then
@@ -225,8 +245,6 @@ return {
             { "<leader>cff", function() require("fencview").autodetect() end,  desc = "Auto detect encoding", mode = "n" },
             { "<leader>cfv", function() require("fencview").toggle_view() end, desc = "Toggle encoding",      mode = "n" },
         },
-        dir = path.config_path .. "/lua/config/user_commands/fencview",
-        enabled = not environment.is_vscode,
         name = "config.user_commands.fencview",
         opts = {},
     },
@@ -335,8 +353,8 @@ return {
             "Undoquit",
             "UndoquitTab",
         },
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/user_commands/undoquit",
-        enabled = not environment.is_vscode,
         event = {
             "QuitPre",
         },
@@ -360,8 +378,8 @@ return {
             "WindowsEqualize",
             "WindowsToggleAutowidth",
         },
+        cond = not environment.is_vscode,
         dir = path.config_path .. "/lua/config/user_commands/windows",
-        enabled = not environment.is_vscode,
         event = {
             "User IceLoad",
         },

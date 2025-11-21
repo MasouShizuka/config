@@ -7,6 +7,7 @@ return {
         cmd = {
             "RustLsp",
         },
+        cond = not environment.is_vscode and environment.lsp_enable,
         config = function(_, opts)
             vim.g.rustaceanvim = function()
                 local rust_analyzer_path = path.mason_install_root_path .. "/packages/rust-analyzer/rust-analyzer"
@@ -57,7 +58,6 @@ return {
                 group = vim.api.nvim_create_augroup("RustLspKeymap", { clear = true }),
             })
         end,
-        enabled = not environment.is_vscode and environment.lsp_enable,
         ft = {
             "rust",
         },

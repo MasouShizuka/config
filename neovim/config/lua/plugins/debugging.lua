@@ -3,6 +3,7 @@ local environment = require("utils.environment")
 return {
     {
         "mfussenegger/nvim-dap",
+        cond = not environment.is_vscode and environment.dap_enable,
         config = function(_, opts)
             local icons = require("utils.icons")
 
@@ -76,7 +77,6 @@ return {
                 opts = {},
             },
         },
-        enabled = not environment.is_vscode and environment.dap_enable,
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then
@@ -101,7 +101,7 @@ return {
                     -- nvim-dap-python 会优先使用 CONDA_PREFIX 而忽略 venv-selector 切换环境时设置的 resolve_python
                     -- 因此，每次执行 dap 时清除 CONDA_PREFIX
                     if ft == "python" and utils.is_available("nvim-dap-python") and utils.is_available("venv-selector.nvim") then
-                        vim.fn.setenv("CONDA_PREFIX", nil)
+                        vim.fn.setenv("CONDA_PREFIX", vim.v.null)
                     end
 
                     require("dap").continue()

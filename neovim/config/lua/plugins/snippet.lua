@@ -8,7 +8,7 @@ return {
             "ScissorsAddNewSnippet",
             "ScissorsEditSnippet",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then

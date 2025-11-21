@@ -7,18 +7,11 @@ return {
             "OverseerOpen",
             "OverseerClose",
             "OverseerToggle",
-            "OverseerSaveBundle",
-            "OverseerLoadBundle",
-            "OverseerDeleteBundle",
-            "OverseerRunCmd",
             "OverseerRun",
-            "OverseerInfo",
-            "OverseerBuild",
-            "OverseerQuickAction",
+            "OverseerShell",
             "OverseerTaskAction",
-            "OverseerClearCache",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         init = function()
             local utils = require("utils")
             if utils.is_available("which-key.nvim") then
@@ -26,7 +19,6 @@ return {
                     callback = function()
                         require("which-key").add({
                             { "<leader>o",  group = "overseer",        mode = "n" },
-                            { "<leader>oB", group = "overseer bundle", mode = "n" },
                         })
                     end,
                     desc = "Register which-key for overseer",
@@ -35,110 +27,55 @@ return {
             end
         end,
         keys = {
-            { "<leader>oo",  function() vim.api.nvim_command("OverseerToggle") end,             desc = "Toggle the overseer window. With ! cursor stays in current window",    mode = "n" },
-            { "<leader>oBs", function() vim.api.nvim_command("OverseerSaveBundle") end,         desc = "Serialize and save the current tasks to disk",                         mode = "n" },
-            { "<leader>oBl", function() vim.api.nvim_command("OverseerLoadBundle") end,         desc = "Load tasks that were saved to disk. With ! tasks will not be started", mode = "n" },
-            { "<leader>oBd", function() vim.api.nvim_command("OverseerDeleteBundle") end,       desc = "Delete a saved task bundle",                                           mode = "n" },
-            { "<leader>oc",  function() vim.api.nvim_command("OverseerRunCmd") end,             desc = "Run a raw shell command",                                              mode = "n" },
-            { "<leader>or",  function() vim.api.nvim_command("OverseerRun") end,                desc = "Run a task from a template",                                           mode = "n" },
-            { "<leader>oi",  function() vim.api.nvim_command("OverseerInfo") end,               desc = "Display diagnostic information about overseer",                        mode = "n" },
-            { "<leader>ob",  function() vim.api.nvim_command("OverseerBuild") end,              desc = "Open the task builder",                                                mode = "n" },
-            { "<leader>oq",  function() vim.api.nvim_command("OverseerQuickAction") end,        desc = "Run an action on the most recent task, or the task under the cursor",  mode = "n" },
-            { "<leader>ot",  function() vim.api.nvim_command("OverseerTaskAction") end,         desc = "Select a task to run an action on",                                    mode = "n" },
-            { "<leader>oC",  function() vim.api.nvim_command("OverseerClearCache") end,         desc = "Clear the task cache",                                                 mode = "n" },
-            { "<leader>r",   function() require("overseer").run_template({ name = "run" }) end, desc = "Run",                                                                  mode = "n" },
+            { "<leader>oo", function() vim.api.nvim_command("OverseerToggle") end,         desc = "Toggle the overseer window. With ! cursor stays in current window",                   mode = "n" },
+            { "<leader>or", function() vim.api.nvim_command("OverseerRun") end,            desc = "Run a task from a template",                                                          mode = "n" },
+            { "<leader>os", function() vim.api.nvim_command("OverseerShell") end,          desc = "Run a shell command as an overseer task. With ! the task is created but not started", mode = "n" },
+            { "<leader>ot", function() vim.api.nvim_command("OverseerTaskAction") end,     desc = "Select a task to run an action on",                                                   mode = "n" },
+            { "<leader>r",  function() require("overseer").run_task({ name = "run" }) end, desc = "Run",                                                                                 mode = "n" },
         },
         opts = {
-            -- Template modules to load
-            templates = {
-                "shell",
-                "vscode",
-                "user.cargo",
-                "user.latex",
-                "user.run",
-            },
             -- Configure the task list
             task_list = {
                 -- Default direction. Can be "left", "right", or "bottom"
                 direction = "right",
                 -- Set keymap to false to remove default behavior
                 -- You can add custom keymaps here as well (anything vim.keymap.set accepts)
-                bindings = {
-                    -- ["?"] = "ShowHelp",
-                    -- ["g?"] = "ShowHelp",
-                    -- ["<CR>"] = "RunAction",
+                keymaps = {
+                    -- ["?"] = "keymap.show_help",
+                    -- ["g?"] = "keymap.show_help",
+                    -- ["<CR>"] = "keymap.run_action",
+                    -- ["dd"] = { "keymap.run_action", opts = { action = "dispose" }, desc = "Dispose task" },
                     ["<c-e>"] = false,
-                    ["e"] = "Edit",
-                    -- ["o"] = "Open",
+                    ["e"] = { "keymap.run_action", opts = { action = "edit" }, desc = "Edit task" },
+                    -- ["o"] = "keymap.open",
                     ["<c-v>"] = false,
-                    ["v"] = "OpenVsplit",
+                    ["v"] = { "keymap.open", opts = { dir = "vsplit" }, desc = "Open task output in vsplit" },
                     ["<c-s>"] = false,
-                    ["V"] = "OpenSplit",
-                    -- ["<C-f>"] = "OpenFloat",
-                    ["f"] = "OpenFloat",
-                    -- ["<C-q>"] = "OpenQuickFix",
-                    -- ["p"] = "TogglePreview",
-                    ["<c-l>"] = false,
-                    ["J"] = "IncreaseDetail",
-                    ["<c-h>"] = false,
-                    ["K"] = "DecreaseDetail",
-                    -- ["L"] = "IncreaseAllDetail",
-                    -- ["H"] = "DecreaseAllDetail",
-                    -- ["["] = "DecreaseWidth",
-                    -- ["]"] = "IncreaseWidth",
-                    -- ["{"] = "PrevTask",
-                    -- ["}"] = "NextTask",
+                    ["V"] = { "keymap.open", opts = { dir = "split" }, desc = "Open task output in split" },
+                    ["<c-t>"] = false,
+                    ["t"] = { "keymap.open", opts = { dir = "tab" }, desc = "Open task output in tab" },
+                    -- ["<C-f>"] = { "keymap.open", opts = { dir = "float" }, desc = "Open task output in float" },
+                    ["f"] = { "keymap.open", opts = { dir = "float" }, desc = "Open task output in float" },
+                    -- ["<C-q>"] = {
+                    --     "keymap.run_action",
+                    --     opts = { action = "open output in quickfix" },
+                    --     desc = "Open task output in the quickfix",
+                    -- },
+                    -- ["p"] = "keymap.toggle_preview",
+                    -- ["{"] = "keymap.prev_task",
+                    -- ["}"] = "keymap.next_task",
                     ["<c-k>"] = false,
-                    ["<c-f>"] = "ScrollOutputDown",
+                    ["<c-f>"] = "keymap.scroll_output_up",
                     ["<c-j>"] = false,
-                    ["<c-b>"] = "ScrollOutputUp",
-                    -- ["q"] = "Close",
-                },
-            },
-            task_launcher = {
-                -- Set keymap to false to remove default behavior
-                -- You can add custom keymaps here as well (anything vim.keymap.set accepts)
-                bindings = {
-                    i = {
-                        -- ["<C-s>"] = "Submit",
-                        -- ["<C-c>"] = "Cancel",
-                    },
-                    n = {
-                        -- ["<CR>"] = "Submit",
-                        -- ["<C-s>"] = "Submit",
-                        -- ["q"] = "Cancel",
-                        -- ["?"] = "ShowHelp",
-                    },
-                },
-            },
-            task_editor = {
-                -- Set keymap to false to remove default behavior
-                -- You can add custom keymaps here as well (anything vim.keymap.set accepts)
-                bindings = {
-                    i = {
-                        -- ["<CR>"] = "NextOrSubmit",
-                        -- ["<C-s>"] = "Submit",
-                        -- ["<Tab>"] = "Next",
-                        -- ["<S-Tab>"] = "Prev",
-                        -- ["<C-c>"] = "Cancel",
-                    },
-                    n = {
-                        -- ["<CR>"] = "NextOrSubmit",
-                        ["<CR>"] = "Submit",
-                        -- ["<C-s>"] = "Submit",
-                        -- ["<Tab>"] = "Next",
-                        -- ["<S-Tab>"] = "Prev",
-                        -- ["q"] = "Cancel",
-                        -- ["?"] = "ShowHelp",
-                    },
+                    ["<c-b>"] = "keymap.scroll_output_down",
+                    -- ["g."] = "keymap.toggle_show_wrapped",
+                    -- ["q"] = { "<CMD>close<CR>", desc = "Close task list" },
                 },
             },
             -- Aliases for bundles of components. Redefine the builtins, or create your own.
             component_aliases = {
                 -- Most tasks are initialized with the default components
                 default = {
-                    { "display_duration",         detail_level = 2 },
-                    "on_output_summarize",
                     "on_exit_set_status",
                     "on_complete_notify",
                     { "on_complete_dispose",      require_view = { "SUCCESS", "FAILURE" } },

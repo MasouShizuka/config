@@ -3,6 +3,7 @@ local environment = require("utils.environment")
 return {
     {
         "folke/edgy.nvim",
+        cond = not environment.is_vscode,
         config = function(_, opts)
             local edgy = require("edgy")
             edgy.setup(opts)
@@ -33,7 +34,7 @@ return {
             local function toggle(pos)
                 local panel_filetype_list = filetype.panel_filetype_lists[pos]
 
-                local is_focused, _ = filetype.get_focused_panel_filetype_info(panel_filetype_list)
+                local is_focused = filetype.get_focused_panel_filetype_info(panel_filetype_list) ~= nil
                 if is_focused then
                     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                         if not vim.api.nvim_win_is_valid(win) then
@@ -42,8 +43,8 @@ return {
 
                         local buf = vim.api.nvim_win_get_buf(win)
                         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-                        local is_panel_filetype, info = filetype.get_panel_filetype_info(ft, panel_filetype_list)
-                        if is_panel_filetype then
+                        local info = filetype.get_panel_filetype_info(ft, panel_filetype_list)
+                        if info then
                             local close = info.close
                             if type(close) == "function" then
                                 close()
@@ -102,7 +103,6 @@ return {
             end, { desc = "Focus bottom panel", silent = true })
             vim.keymap.set("n", keymap["<c-4>"], function() toggle("right") end, { desc = "Focus right panel", silent = true })
         end,
-        enabled = not environment.is_vscode,
         init = function()
             -- edgy 自动激活
             local id
@@ -368,7 +368,7 @@ return {
         cmd = {
             "WinShift",
         },
-        enabled = not environment.is_vscode,
+        cond = not environment.is_vscode,
         keys = {
             { "<c-s><c-h>", function() vim.api.nvim_command("WinShift left") end,      desc = "Move window to left",                  mode = "n" },
             { "<c-s><c-l>", function() vim.api.nvim_command("WinShift right") end,     desc = "Move window to right",                 mode = "n" },
