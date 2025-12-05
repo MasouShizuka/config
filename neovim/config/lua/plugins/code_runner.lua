@@ -18,7 +18,7 @@ return {
                 utils.create_once_autocmd("User", {
                     callback = function()
                         require("which-key").add({
-                            { "<leader>o",  group = "overseer",        mode = "n" },
+                            { "<leader>o", group = "overseer", mode = "n" },
                         })
                     end,
                     desc = "Register which-key for overseer",
@@ -71,6 +71,15 @@ return {
                     -- ["g."] = "keymap.toggle_show_wrapped",
                     -- ["q"] = { "<CMD>close<CR>", desc = "Close task list" },
                 },
+            },
+            -- Configure the floating window used for task templates that require input
+            -- and the floating window used for editing tasks
+            form = {
+                border = "rounded",
+            },
+            -- Configuration for task floating output windows
+            task_win = {
+                border = "rounded",
             },
             -- Aliases for bundles of components. Redefine the builtins, or create your own.
             component_aliases = {

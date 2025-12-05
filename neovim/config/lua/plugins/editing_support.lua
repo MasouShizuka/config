@@ -400,36 +400,23 @@ return {
                         cyclic = true,
                     }),
 
-                    augend.constant.alias.en_weekday_full,
-                    augend.constant.new({
-                        elements = { "周一", "周二", "周三", "周四", "周五", "周六", "周日" },
-                        word = false,
-                        cyclic = true,
-                    }),
-                    augend.constant.new({
-                        elements = { "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天" },
-                        word = false,
-                        cyclic = true,
-                    }),
-                    augend.constant.new({
-                        elements = { "true", "false" },
-                        word = true,
-                        cyclic = true,
-                    }),
-                    augend.constant.new({
-                        elements = { "True", "False" },
-                        word = true,
-                        cyclic = true,
-                    }),
+                    augend.constant.alias.bool,
+                    augend.constant.alias.Bool,
                     augend.constant.new({
                         elements = { "and", "or" },
-                        word = true,   -- if false, "sand" is incremented into "sor", "doctor" into "doctand", etc.
-                        cyclic = true, -- "or" is incremented into "and".
                     }),
                     augend.constant.new({
                         elements = { "&&", "||" },
                         word = false,
-                        cyclic = true,
+                    }),
+                    augend.constant.alias.en_weekday_full,
+                    augend.constant.new({
+                        elements = { "周一", "周二", "周三", "周四", "周五", "周六", "周日" },
+                        word = false,
+                    }),
+                    augend.constant.new({
+                        elements = { "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天" },
+                        word = false,
                     }),
 
                     augend.date.new({
@@ -448,7 +435,6 @@ return {
 
                     augend.decimal_fraction.new({
                         signed = true,
-                        point_char = ".",
                     }),
 
                     augend.hexcolor.new({
