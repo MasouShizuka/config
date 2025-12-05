@@ -22,6 +22,7 @@ return {
     hide_tab_bar_if_only_one_tab = true,
     initial_cols = 120,
     initial_rows = 30,
+    scrollback_lines = 200000,
     tab_max_width = 100,
     use_fancy_tab_bar = false,
     warn_about_missing_glyphs = false,
