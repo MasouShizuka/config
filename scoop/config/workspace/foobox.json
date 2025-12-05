@@ -1,17 +1,17 @@
 {
-    "version": "8.5.1",
-    "description": "DUI 配置 for foobar2000",
-    "homepage": "https://github.com/dream7180/foobox-cn",
+    "version": "8.6",
+    "description": "DUI theme for foobar2000",
+    "homepage": "https://github.com/dream7180/foobox-en",
     "license": "GPL-3.0",
     "depends": "extras/foobar2000",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.5.1/foobox_x64.cn.v8.5.1-1.exe#/dl.7z_",
-            "hash": "0b0a8e07a0fe92c4049ae7a613277e180fde1f220347be98e6ede5096942c045"
+            "url": "https://github.com/dream7180/foobox-en/releases/download/8.6/foobox_x64.en.v8.6-1.exe#/dl.7z_",
+            "hash": "c5c3fca70c47415f73fadf7783e7294fee8837e03f718c04051a49192aab6432"
         },
         "32bit": {
-            "url": "https://github.com/dream7180/foobox-cn/releases/download/8.5.1/foobox_x86.cn.v8.5.1-1.exe#/dl.7z_",
-            "hash": "018365ac78f586708f1c5befc32286712c80e36558ad1ec680d84923a833faa1"
+            "url": "https://github.com/dream7180/foobox-en/releases/download/8.6/foobox_x86.en.v8.6-1.exe#/dl.7z_",
+            "hash": "690cb17e03d4abcf99d55cfe083098710415625a62ce249bfb3cd7139b1518f7"
         }
     },
     "installer": {
@@ -22,7 +22,6 @@
             "Copy-Item \"$dir\\`$_12_\\*\" \"$fb2k_profile_path\" -Recurse -Force",
             "Copy-Item \"$dir\\icons\" \"$fb2k_app_path\" -Recurse -Force",
             "Copy-Item \"$dir\\themes\" \"$fb2k_app_path\" -Recurse -Force",
-            "Copy-Item \"$dir\\lastfmhosts.bat\" \"$fb2k_app_path\" -Recurse -Force",
             "Remove-Item \"$dir\\*\" -Recurse -Force"
         ]
     },
@@ -30,10 +29,10 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/dream7180/foobox-cn/releases/download/$version/foobox_x64.cn.v$version-1.exe#/dl.7z_"
+                "url": "https://github.com/dream7180/foobox-en/releases/download/$version/foobox_x64.en.v$version-1.exe#/dl.7z_"
             },
             "32bit": {
-                "url": "https://github.com/dream7180/foobox-cn/releases/download/$version/foobox_x86.cn.v$version-1.exe#/dl.7z_"
+                "url": "https://github.com/dream7180/foobox-en/releases/download/$version/foobox_x86.en.v$version-1.exe#/dl.7z_"
             }
         }
     }
