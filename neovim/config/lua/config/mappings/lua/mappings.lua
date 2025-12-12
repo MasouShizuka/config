@@ -10,8 +10,8 @@ function M.setup(opts)
     -- 清除原有 keymap
     if utils.is_available("which-key.nvim") then
         local wk = require("which-key")
-        vim.keymap.set("n", "s", function() wk.show({ mode = "n", keys = "s" }) end, { desc = "Show s keymaps" })
-        vim.keymap.set("x", "s", function() wk.show({ mode = "x", keys = "s" }) end, { desc = "Show s keymaps" })
+        vim.keymap.set("n", "s", function() wk.show({ mode = "n", keys = "s" }) end, { desc = "Show s keymaps", silent = true })
+        vim.keymap.set("x", "s", function() wk.show({ mode = "x", keys = "s" }) end, { desc = "Show s keymaps", silent = true })
     else
         vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
         vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
@@ -382,32 +382,31 @@ function M.setup(opts)
                     output = output:gsub("\\", "/") .. ".exe"
                 end
 
+                local command
                 local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
                 if ft == "cpp" then
                     -- 若在使用 vector 等库时编译的程序无法运行，可能需要在编译时添加 -static-libstdc++
                     -- https://stackoverflow.com/questions/6404636/libstdc-6-dll-not-found/6405064#6405064
-                    local command = string.format([[clang++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output)
-                    vim.api.nvim_command(command)
+                    command = string.format([[clang++ -static-libstdc++ "%s" -o "%s" && ./"%s" && rm ./"%s"]], curr_file, output, output, output)
                 elseif ft == "lua" then
-                    local command = string.format([[luafile "%s"]], curr_file)
-                    vim.api.nvim_command(command)
+                    command = string.format([[luafile "%s"]], curr_file)
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
-                        vim.api.nvim_command("MarkdownPreviewToggle")
+                        command = "MarkdownPreviewToggle"
                     end
                 elseif ft == "python" then
-                    local command = string.format([[python -u "%s"]], curr_file)
-                    vim.api.nvim_command(command)
+                    command = string.format([[python -u "%s"]], curr_file)
                 elseif ft == "rust" then
-                    local command = "cargo run"
-                    vim.api.nvim_command(command)
+                    command = "cargo run"
                 elseif ft == "sh" then
-                    local command = string.format([[sh "%s"]], curr_file)
-                    vim.api.nvim_command(command)
+                    command = string.format([[sh "%s"]], curr_file)
                 elseif ft == "tex" then
                     if vim.tbl_contains(lsp.lsp_list, "texlab") then
-                        vim.api.nvim_command("TexlabBuild")
+                        command = "TexlabBuild"
                     end
+                end
+                if command then
+                    vim.api.nvim_command(command)
                 end
             end, { desc = "Run", silent = true })
         end

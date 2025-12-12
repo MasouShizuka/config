@@ -149,93 +149,89 @@ return {
                         callback = function(args)
                             if require("utils").is_available("which-key.nvim") then
                                 require("which-key").add({
-                                    { "sm", buffer = args.buf, group = "markdown", mode = { "n", "x" } },
+                                    { "sm",  buffer = args.buf, group = "markdown",          mode = { "n", "x" } },
+                                    { "smf", buffer = args.buf, group = "markdown footnote", mode = "n" },
+                                    { "smt", buffer = args.buf, group = "markdown table",    mode = { "n", "x" } },
                                 })
                             end
 
-                            -- List Management
-                            vim.keymap.set("i", "<cr>", function() require("markdown-plus.list.handlers").handle_enter() end, { buffer = args.buf, desc = "Auto-continue list or split content", silent = true })
-                            vim.keymap.set("i", "<c-t>", function() require("markdown-plus.list.handlers").handle_tab() end, { buffer = args.buf, desc = "Indent list item", silent = true })
-                            vim.keymap.set("i", "<c-d>", function() require("markdown-plus.list.handlers").handle_shift_tab() end, { buffer = args.buf, desc = "Outdent list item", silent = true })
-                            vim.keymap.set("i", "<bs>", function() require("markdown-plus.list.handlers").handle_backspace() end, { buffer = args.buf, desc = "Smart backspace (remove empty list)", silent = true })
-                            vim.keymap.set("n", "o", function() require("markdown-plus.list.handlers").handle_normal_o() end, { buffer = args.buf, desc = "New list item below", silent = true })
-                            vim.keymap.set("n", "O", function() require("markdown-plus.list.handlers").handle_normal_O() end, { buffer = args.buf, desc = "New list item above", silent = true })
-                            vim.keymap.set({ "n", "x" }, "<cr>", function()
-                                local checkbox = require("markdown-plus.list.checkbox")
-                                checkbox.toggle_checkbox_line()
-                                checkbox.toggle_checkbox_range()
-                                checkbox.toggle_checkbox_insert()
-                            end, { buffer = args.buf, desc = "Toggle checkbox", silent = true })
+                            local function map(mode, lhs, rhs, desc)
+                                vim.keymap.set(mode, lhs, function()
+                                    if not package.loaded["markdown-plus"] then
+                                        require("lazy").load({ plugins = "markdown-plus.nvim" })
+                                    end
+                                    return rhs
+                                end, { buffer = args.buf, desc = desc, expr = true, silent = true })
+                            end
 
                             -- Text Formatting
-                            vim.keymap.set("n", "smb", function() require("markdown-plus.format").toggle_format_word("bold") end, { buffer = args.buf, desc = "Toggle bold formatting", silent = true })
-                            vim.keymap.set("x", "smb", function() require("markdown-plus.format").toggle_format("bold") end, { buffer = args.buf, desc = "Toggle bold formatting", silent = true })
-                            vim.keymap.set("n", "smi", function() require("markdown-plus.format").toggle_format_word("italic") end, { buffer = args.buf, desc = "Toggle italic formatting", silent = true })
-                            vim.keymap.set("x", "smi", function() require("markdown-plus.format").toggle_format("italic") end, { buffer = args.buf, desc = "Toggle italic formatting", silent = true })
-                            vim.keymap.set("n", "sms", function() require("markdown-plus.format").toggle_format_word("strikethrough") end, { buffer = args.buf, desc = "Toggle strikethrough formatting", silent = true })
-                            vim.keymap.set("x", "sms", function() require("markdown-plus.format").toggle_format("strikethrough") end, { buffer = args.buf, desc = "Toggle strikethrough formatting", silent = true })
-                            vim.keymap.set("n", "smc", function() require("markdown-plus.format").toggle_format_word("code") end, { buffer = args.buf, desc = "Toggle inline code formatting", silent = true })
-                            vim.keymap.set("x", "smc", function() require("markdown-plus.format").toggle_format("code") end, { buffer = args.buf, desc = "Toggle inline code formatting", silent = true })
-                            vim.keymap.set("x", "smC", function() require("markdown-plus.format").convert_to_code_block() end, { buffer = args.buf, desc = "Convert selection to code block", silent = true })
-                            vim.keymap.set("n", "smx", function() require("markdown-plus.format").clear_formatting_word() end, { buffer = args.buf, desc = "Clear all formatting", silent = true })
-                            vim.keymap.set("x", "smx", function() require("markdown-plus.format").clear_formatting() end, { buffer = args.buf, desc = "Clear all formatting", silent = true })
+                            map({ "n", "x" }, "smb", "<Plug>(MarkdownPlusBold)", "Toggle bold formatting")
+                            map({ "n", "x" }, "smi", "<Plug>(MarkdownPlusItalic)", "Toggle bold formatting")
+                            map({ "n", "x" }, "sms", "<Plug>(MarkdownPlusStrikethrough)", "Toggle strikethrough formatting")
+                            map({ "n", "x" }, "smc", "<Plug>(MarkdownPlusCode)", "Toggle inline code formatting")
+                            map({ "n", "x" }, "smh", "<Plug>(MarkdownPlusHighlight)", "Toggle highlight formatting")
+                            map({ "n", "x" }, "smu", "<Plug>(MarkdownPlusUnderline)", "Toggle underline formatting")
+                            map("x", "smC", "<Plug>(MarkdownPlusCodeBlock)", "Convert selection to code block")
+                            map({ "n", "x" }, "smx", "<Plug>(MarkdownPlusClearFormatting)", "Clear all formatting")
 
                             -- Headers & TOC
-                            vim.keymap.set("n", "smtc", function() require("markdown-plus.headers.toc").generate_toc() end, { buffer = args.buf, desc = "Generate table of contents", silent = true })
-                            vim.keymap.set("n", "smtu", function() require("markdown-plus.headers.toc").update_toc() end, { buffer = args.buf, desc = "Update table of contents", silent = true })
+                            map("n", "smtc", "<Plug>(MarkdownPlusGenerateTOC)", "Generate table of contents")
+                            map("n", "smtu", "<Plug>(MarkdownPlusUpdateTOC)", "Update table of contents")
 
                             -- Links
-                            vim.keymap.set("n", "sml", function() require("markdown-plus.links").insert_link() end, { buffer = args.buf, desc = "Insert markdown link", silent = true })
-                            vim.keymap.set("x", "sml", function() require("markdown-plus.links").selection_to_link() end, { buffer = args.buf, desc = "Convert selection to link", silent = true })
-                            vim.keymap.set("n", "smu", function() require("markdown-plus.links").auto_link_url() end, { buffer = args.buf, desc = "auto_link_url", silent = true })
+                            map("n", "sml", "<Plug>(MarkdownPlusInsertLink)", "Insert markdown link")
+                            map("x", "sml", "<Plug>(MarkdownPlusSelectionToLink)", "Convert selection to link")
+                            map("n", "smU", "<Plug>(MarkdownPlusAutoLinkURL)", "Convert URL to markdown link")
 
                             -- Images
-                            vim.keymap.set("n", "smp", function() require("markdown-plus.images").insert_image() end, { buffer = args.buf, desc = "Insert markdown image", silent = true })
-                            vim.keymap.set("x", "smp", function() require("markdown-plus.images").selection_to_image() end, { buffer = args.buf, desc = "Convert selection to image", silent = true })
+                            map("n", "smp", "<Plug>(MarkdownPlusInsertImage)", "Insert markdown image")
+                            map("x", "smp", "<Plug>(MarkdownPlusSelectionToImage)", "Convert selection to image")
+
+                            -- List Management
+                            map("i", "<cr>", "<Plug>(MarkdownPlusListEnter)", "Auto-continue list or split content")
+                            map("i", "<tab>", "<Plug>(MarkdownPlusListIndent)", "Indent list item")
+                            map("i", "<s-tab>", "<Plug>(MarkdownPlusListOutdent)", "Outdent list item")
+                            map("i", "<bs>", "<Plug>(MarkdownPlusListBackspace)", "Smart backspace (remove empty list)")
+                            map("n", "o", "<Plug>(MarkdownPlusNewListItemBelow)", "New list item below")
+                            map("n", "O", "<Plug>(MarkdownPlusNewListItemAbove)", "New list item above")
+                            map({ "n", "x" }, "<cr>", "<Plug>(MarkdownPlusToggleCheckbox)", "Toggle checkbox")
 
                             -- Quotes
-                            vim.keymap.set("n", "smq", function() require("markdown-plus.quote").toggle_quote_line() end, { buffer = args.buf, desc = "Toggle blockquote", silent = true })
-                            vim.keymap.set("x", "smq", function() require("markdown-plus.quote").toggle_quote() end, { buffer = args.buf, desc = "Toggle blockquote", silent = true })
+                            map({ "n", "x" }, "smq", "<Plug>(MarkdownPlusToggleQuote)", "Toggle blockquote")
 
                             -- Callouts
-                            vim.keymap.set({ "n", "x" }, "smQ", function()
-                                local callouts = require("markdown-plus.callouts")
-                                callouts.insert_callout_prompt()
-                                callouts.wrap_selection_in_callout()
-                            end, { buffer = args.buf, desc = "Insert/wrap callout", silent = true })
+                            map({ "n", "x" }, "smQ", "<Plug>(MarkdownPlusInsertCallout)", "Insert/wrap callout")
+
+                            -- Footnotes
+                            map("n", "smff", "<Plug>(MarkdownPlusFootnoteInsert)", "Insert footnote")
+                            map("n", "smfd", "<Plug>(MarkdownPlusFootnoteDelete)", "Delete footnote")
 
                             -- Tables
-                            if require("utils").is_available("which-key.nvim") then
-                                require("which-key").add({
-                                    { "smt", buffer = args.buf, group = "markdown table", mode = { "n", "x" } },
-                                })
-                            end
-                            vim.keymap.set("n", "smtt", function() require("markdown-plus.table.creator").create_table_interactive() end, { buffer = args.buf, desc = "Create new table", silent = true })
-                            vim.keymap.set("n", "smtf", function() require("markdown-plus.table").format_table() end, { buffer = args.buf, desc = "Format table", silent = true })
-                            vim.keymap.set("n", "smtn", function() require("markdown-plus.table").normalize_table() end, { buffer = args.buf, desc = "Normalize table", silent = true })
-                            vim.keymap.set("n", "<s-down>", function() require("markdown-plus.table").insert_row_below() end, { buffer = args.buf, desc = "Insert row below", silent = true })
-                            vim.keymap.set("n", "<s-up>", function() require("markdown-plus.table").insert_row_above() end, { buffer = args.buf, desc = "Insert row above", silent = true })
-                            vim.keymap.set("n", "dr", function() require("markdown-plus.table").delete_row() end, { buffer = args.buf, desc = "Delete row", silent = true })
-                            vim.keymap.set("n", "yr", function() require("markdown-plus.table.manipulation").duplicate_row() end, { buffer = args.buf, desc = "Duplicate row", silent = true })
-                            vim.keymap.set("n", "<s-right>", function() require("markdown-plus.table").insert_column_right() end, { buffer = args.buf, desc = "Insert column right", silent = true })
-                            vim.keymap.set("n", "<s-left>", function() require("markdown-plus.table").insert_column_left() end, { buffer = args.buf, desc = "Insert column left", silent = true })
-                            vim.keymap.set("n", "dc", function() require("markdown-plus.table").delete_column() end, { buffer = args.buf, desc = "Delete column", silent = true })
-                            vim.keymap.set("n", "yc", function() require("markdown-plus.table.manipulation").duplicate_column() end, { buffer = args.buf, desc = "Duplicate column", silent = true })
-                            vim.keymap.set("n", "smta", function() require("markdown-plus.table").toggle_cell_alignment() end, { buffer = args.buf, desc = "Toggle cell alignment", silent = true })
-                            vim.keymap.set("n", "dC", function() require("markdown-plus.table").clear_cell() end, { buffer = args.buf, desc = "clear_cell", silent = true })
-                            vim.keymap.set("n", "<c-down>", function() require("markdown-plus.table").move_row_up() end, { buffer = args.buf, desc = "Move row up", silent = true })
-                            vim.keymap.set("n", "<c-up>", function() require("markdown-plus.table").move_row_down() end, { buffer = args.buf, desc = "Move row down", silent = true })
-                            vim.keymap.set("n", "<c-left>", function() require("markdown-plus.table").move_column_left() end, { buffer = args.buf, desc = "Move column left", silent = true })
-                            vim.keymap.set("n", "<c-right>", function() require("markdown-plus.table").move_column_right() end, { buffer = args.buf, desc = "Move column right", silent = true })
-                            vim.keymap.set("n", "smtT", function() require("markdown-plus.table").transpose_table() end, { buffer = args.buf, desc = "Transpose table", silent = true })
-                            vim.keymap.set("n", "smts", function() require("markdown-plus.table").sort_ascending() end, { buffer = args.buf, desc = "Sort table by column (ascending)", silent = true })
-                            vim.keymap.set("n", "smtS", function() require("markdown-plus.table").sort_descending() end, { buffer = args.buf, desc = "Sort table by column (descending)", silent = true })
-                            vim.keymap.set("n", "smtv", function() require("markdown-plus.table").table_to_csv() end, { buffer = args.buf, desc = "Convert table to CSV", silent = true })
-                            vim.keymap.set("n", "smtV", function() require("markdown-plus.table").csv_to_table() end, { buffer = args.buf, desc = "Convert CSV to table", silent = true })
-                            vim.keymap.set("n", "<left>", function() require("markdown-plus.table.navigation").move_left() end, { buffer = args.buf, desc = "Navigate table cell or fallback to left", silent = true })
-                            vim.keymap.set("n", "<right>", function() require("markdown-plus.table.navigation").move_right() end, { buffer = args.buf, desc = "Navigate table cell or fallback to right", silent = true })
-                            vim.keymap.set("n", "<down>", function() require("markdown-plus.table.navigation").move_down() end, { buffer = args.buf, desc = "Navigate table cell or fallback to down", silent = true })
-                            vim.keymap.set("n", "<up>", function() require("markdown-plus.table.navigation").move_up() end, { buffer = args.buf, desc = "Navigate table cell or fallback to up", silent = true })
+                            map("n", "smtt", "<Plug>(markdown-plus-table-create)", "Create new table")
+                            map("n", "smtf", "<Plug>(markdown-plus-table-format)", "Format table")
+                            map("n", "<s-down>", "<Plug>(markdown-plus-table-insert-row-below)", "Insert row below")
+                            map("n", "<s-up>", "<Plug>(markdown-plus-table-insert-row-above)", "Insert row above")
+                            map("n", "dr", "<Plug>(markdown-plus-table-delete-row)", "Delete row")
+                            map("n", "yr", "<Plug>(markdown-plus-table-duplicate-row)", "Duplicate row")
+                            map("n", "<s-right>", "<Plug>(markdown-plus-table-insert-column-right)", "Insert column right")
+                            map("n", "<s-left>", "<Plug>(markdown-plus-table-insert-column-left)", "Insert column left")
+                            map("n", "dc", "<Plug>(markdown-plus-table-delete-column)", "Delete column")
+                            map("n", "yc", "<Plug>(markdown-plus-table-duplicate-column)", "Duplicate column")
+                            map("n", "smta", "<Plug>(markdown-plus-table-toggle-cell-alignment)", "Toggle cell alignment")
+                            map("n", "dC", "<Plug>(markdown-plus-table-clear-cell)", "Clear cell content")
+                            map("n", "<c-up>", "<Plug>(markdown-plus-table-move-row-up)", "Move row up")
+                            map("n", "<c-down>", "<Plug>(markdown-plus-table-move-row-down)", "Move row down")
+                            map("n", "<c-left>", "<Plug>(markdown-plus-table-move-column-left)", "Move column left")
+                            map("n", "<c-right>", "<Plug>(markdown-plus-table-move-column-right)", "Move column right")
+                            map("n", "smtT", "<Plug>(markdown-plus-table-transpose)", "Transpose table")
+                            map("n", "smts", "<Plug>(markdown-plus-table-sort-ascending)", "Sort table by column (ascending)")
+                            map("n", "smtS", "<Plug>(markdown-plus-table-sort-descending)", "Sort table by column (descending)")
+                            map("n", "smtv", "<Plug>(markdown-plus-table-to-csv)", "Convert table to CSV")
+                            map("n", "smtV", "<Plug>(markdown-plus-table-from-csv)", "Convert CSV to table")
+                            map("n", "<left>", "<Plug>(markdown-plus-table-nav-left)", "Navigate to cell left or move cursor left")
+                            map("n", "<right>", "<Plug>(markdown-plus-table-nav-right)", "Navigate to cell right or move cursor right")
+                            map("n", "<up>", "<Plug>(markdown-plus-table-nav-up)", "Navigate to cell above or move cursor up")
+                            map("n", "<down>", "<Plug>(markdown-plus-table-nav-down)", "Navigate to cell below or move cursor down")
                         end,
                         desc = "markdown-plus keymap",
                         group = vim.api.nvim_create_augroup("MarkdownPlusKeymap", { clear = true }),

@@ -437,6 +437,10 @@ return {
                     local keymap = require("utils.keymap")
                     local utils = require("utils")
 
+                    local function map(mode, lhs, rhs, desc)
+                        vim.keymap.set(mode, lhs, rhs, { buffer = buf, desc = desc, silent = true })
+                    end
+
                     if utils.is_available("which-key.nvim") then
                         require("which-key").add({
                             {
@@ -506,15 +510,15 @@ return {
 
                     if client:supports_method("textDocument/codeAction") then
                         if utils.is_available("actions-preview.nvim") then
-                            vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() require("actions-preview").code_actions() end, { buffer = buf, desc = "LSP code action", silent = true })
+                            map({ "n", "x" }, keymap["<c-;>"], function() require("actions-preview").code_actions() end, "LSP code action")
                         else
-                            vim.keymap.set({ "n", "x" }, keymap["<c-;>"], function() vim.lsp.buf.code_action() end, { buffer = buf, desc = "LSP code action", silent = true })
+                            map({ "n", "x" }, keymap["<c-;>"], function() vim.lsp.buf.code_action() end, "LSP code action")
                         end
                     end
 
                     if client:supports_method("textDocument/codeLens") then
-                        vim.keymap.set("n", "<leader>lc", function() vim.lsp.codelens.refresh({ bufnr = buf }) end, { buffer = buf, desc = "LSP CodeLens refresh", silent = true })
-                        vim.keymap.set("n", "<leader>lC", function() vim.lsp.codelens.run() end, { buffer = buf, desc = "LSP CodeLens run", silent = true })
+                        map("n", "<leader>lc", function() vim.lsp.codelens.refresh({ bufnr = buf }) end, "LSP CodeLens refresh")
+                        map("n", "<leader>lC", function() vim.lsp.codelens.run() end, "LSP CodeLens run")
 
                         utils.set_setting_toggle("codelens", {
                             default = true,
@@ -557,19 +561,19 @@ return {
 
                     if not utils.is_available("trouble.nvim") then
                         if client:supports_method("textDocument/definition") then
-                            vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { buffer = buf, desc = "Show the definition of current symbol", silent = true })
+                            map("n", "gd", function() vim.lsp.buf.definition() end, "Show the definition of current symbol")
                         end
                         if client:supports_method("textDocument/declaration") then
-                            vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, { buffer = buf, desc = "Declaration of current symbol", silent = true })
+                            map("n", "gD", function() vim.lsp.buf.declaration() end, "Declaration of current symbol")
                         end
                         if client:supports_method("textDocument/implementation") then
-                            vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, { buffer = buf, desc = "Implementation of current symbol", silent = true })
+                            map("n", "gi", function() vim.lsp.buf.implementation() end, "Implementation of current symbol")
                         end
                         if client:supports_method("textDocument/typeDefinition") then
-                            vim.keymap.set("n", "gy", function() vim.lsp.buf.type_definition() end, { buffer = buf, desc = "Definition of current type", silent = true })
+                            map("n", "gy", function() vim.lsp.buf.type_definition() end, "Definition of current type")
                         end
                         if client:supports_method("textDocument/references") then
-                            vim.keymap.set("n", "gr", function() vim.lsp.buf.references() end, { buffer = buf, desc = "References of current symbol", silent = true })
+                            map("n", "gr", function() vim.lsp.buf.references() end, "References of current symbol")
                         end
                     end
 
@@ -678,7 +682,7 @@ return {
                             vim.lsp.buf.format(opts)
                         end
 
-                        vim.keymap.set({ "n", "x" }, "<leader>f", buf_format, { buffer = buf, desc = "Format buffer", silent = true })
+                        map({ "n", "x" }, "<leader>f", buf_format, "Format buffer")
 
                         local function format(setting, opts)
                             local is_modifiable = vim.api.nvim_get_option_value("modifiable", { buf = buf })
@@ -772,7 +776,7 @@ return {
                     end
 
                     if client:supports_method("textDocument/rename") then
-                        vim.keymap.set("n", "<f2>", function() vim.lsp.buf.rename() end, { buffer = buf, desc = "Rename current symbol", silent = true })
+                        map("n", "<f2>", function() vim.lsp.buf.rename() end, "Rename current symbol")
                     end
 
                     if client:supports_method("textDocument/semanticTokens/full") and vim.lsp.semantic_tokens then
@@ -821,23 +825,23 @@ return {
                     end
 
                     if client:supports_method("textDocument/signatureHelp") then
-                        vim.keymap.set("n", "gK", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
-                        vim.keymap.set({ "i", "s" }, "<c-k>", function() vim.lsp.buf.signature_help() end, { buffer = buf, desc = "Signature help", silent = true })
+                        map("n", "gK", function() vim.lsp.buf.signature_help() end, "Signature help")
+                        map({ "i", "s" }, "<c-k>", function() vim.lsp.buf.signature_help() end, "Signature help")
                     end
 
                     if not utils.is_available("snacks.nvim") then
                         if client:supports_method("workspace/symbol") then
-                            vim.keymap.set("n", "<leader>ls", function() vim.lsp.buf.document_symbol() end, { buffer = buf, desc = "Search symbols", silent = true })
-                            vim.keymap.set("n", "<leader>lS", function() vim.lsp.buf.workspace_symbol() end, { buffer = buf, desc = "Search workspace symbols", silent = true })
+                            map("n", "<leader>ls", function() vim.lsp.buf.document_symbol() end, "Search symbols")
+                            map("n", "<leader>lS", function() vim.lsp.buf.workspace_symbol() end, "Search workspace symbols")
                         end
                     end
 
-                    vim.keymap.set("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, { buffer = buf, desc = "LSP information", silent = true })
+                    map("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, "LSP information")
 
-                    vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, { buffer = buf, desc = "Hover diagnostics", silent = true })
+                    map("n", "gl", function() vim.diagnostic.open_float() end, "Hover diagnostics")
                     if not utils.is_available("trouble.nvim") then
-                        vim.keymap.set("n", "<s-f8>", function() vim.diagnostic.jump({ count = -1, float = true }) end, { buffer = buf, desc = "Previous diagnostic", silent = true })
-                        vim.keymap.set("n", "<f8>", function() vim.diagnostic.jump({ count = 1, float = true }) end, { buffer = buf, desc = "Next diagnostic", silent = true })
+                        map("n", "<s-f8>", function() vim.diagnostic.jump({ count = -1, float = true }) end, "Previous diagnostic")
+                        map("n", "<f8>", function() vim.diagnostic.jump({ count = 1, float = true }) end, "Next diagnostic")
                     end
                 end,
                 desc = "Lsp config",
