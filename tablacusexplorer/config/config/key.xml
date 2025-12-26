@@ -10,16 +10,7 @@ api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">Op
 }</List><List Key="Shift+G" Type="JScript">let count = FV.ItemCount(SVGIO_ALLVIEW);
 if (count &gt; 0) {
     FV.SelectItem(count - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
-}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Key">{Enter}</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="JScript">let nIndex = FV.GetFocusedItem;
-if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
-    FV.SelectItem(nIndex, SVSI_SELECT);
-} else {
-    if (nIndex + 1 &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
-        FV.SelectItem(nIndex, SVSI_DESELECT);
-        FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
-        // FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
-    }
-}</List><List Key="Shift+J" Type="JScript">let nIndex = FV.GetFocusedItem;
+}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Key">{Enter}</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="Key">{Down}</List><List Key="Shift+J" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
@@ -27,16 +18,7 @@ if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     if (nIndex &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
         FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
     }
-}</List><List Key="K" Type="JScript">let nIndex = FV.GetFocusedItem;
-if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
-    FV.SelectItem(nIndex, SVSI_SELECT);
-} else {
-    if (nIndex - 1 &gt;= 0) {
-        FV.SelectItem(nIndex, SVSI_DESELECT);
-        FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
-        // FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
-    }
-}</List><List Key="Shift+K" Type="JScript">let nIndex = FV.GetFocusedItem;
+}</List><List Key="K" Type="Key">{Up}</List><List Key="Shift+K" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
@@ -119,7 +101,7 @@ if (FV) {
         }
         api.DestroyMenu(hMenu);
     }
-}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">PeaZip.add2separate</List><List Key="Shift+Z" Type="Context">PeaZip.ext2smart</List><List Key="$33" Type="JScript">var TC = te.Ctrl(CTRL_TC);
+}</List><List Key="Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Name);</List><List Key="Shift+Y" Type="JScript">clipboardData.setData("text", (FV.FocusedItem || FV.FolderItem).Path.replace(/\\/g, "/"));</List><List Key="Ctrl+Y" Type="Tools">Copy full path</List><List Key="Z" Type="Context">SevenZipCompress</List><List Key="Shift+Z" Type="Context">PeaZip.ext2smart</List><List Key="$33" Type="JScript">var TC = te.Ctrl(CTRL_TC);
 if (TC &amp;&amp; TC.SelectedIndex &gt; 0) {
     TC.Move(TC.SelectedIndex, TC.SelectedIndex - 1);
     return S_OK;
