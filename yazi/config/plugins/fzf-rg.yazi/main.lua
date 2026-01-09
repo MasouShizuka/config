@@ -74,7 +74,7 @@ local function entry(_, job)
         cmd_args[#cmd_args + 1] = value
     end
 
-    local _permit = ya.hide()
+    local _permit = ui.hide()
     local cwd = state()
 
     local child, err =

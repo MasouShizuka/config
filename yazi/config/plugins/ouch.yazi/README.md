@@ -35,26 +35,35 @@ Make sure you have [ouch](https://github.com/ouch-org/ouch) installed and in you
 For archive preview, add this to your `yazi.toml`:
 
 ```toml
-[plugin]
-prepend_previewers = [
-	# Archive previewer
-	{ mime = "application/*zip",            run = "ouch" },
-	{ mime = "application/x-tar",           run = "ouch" },
-	{ mime = "application/x-bzip2",         run = "ouch" },
-	{ mime = "application/x-7z-compressed", run = "ouch" },
-	{ mime = "application/x-rar",           run = "ouch" },
-	{ mime = "application/vnd.rar",         run = "ouch" },
-	{ mime = "application/x-xz",            run = "ouch" },
-	{ mime = "application/xz",              run = "ouch" },
-	{ mime = "application/x-zstd",          run = "ouch" },
-	{ mime = "application/zstd",            run = "ouch" },
-	{ mime = "application/java-archive",    run = "ouch" },
-]
+[[plugin.prepend_previewers]]
+mime = "application/{*zip,tar,bzip2,7z*,rar,xz,zstd,java-archive}"
+run  = "ouch"
 ```
 
 Now go to an archive on Yazi, you should see the archive's content in the preview pane. You can use `J` and `K` to roll up and down the preview.
 
-If you want to change the icon or the style of text, you can modify the `peek` function in `init.lua` file (all of them are stored in the `lines` variable).
+#### Customization
+
+Previews can be customized by adding extra arguments in the `run` string:
+
+```toml
+[plugin]
+prepend_previewers = [
+	# Change the top-level archive icon
+	{ ..., run = "ouch --archive-icon='🗄️ '" },
+	# Or remove it by setting it to ''
+	{ ..., run = "ouch --archive-icon=''" },
+
+	# Enable file icons
+	{ ..., run = "ouch --show-file-icons" },
+
+	# Disable tree view
+	{ ..., run = "ouch --list-view" },
+
+	# These can be combined
+	{ ..., run = "ouch --archive-icon='🗄️ ' --show-file-icons --list-view" },
+]
+```
 
 ### Compression
 For compession, add this to your `keymap.toml`:

@@ -1,13 +1,17 @@
 # https://github.com/folke/tokyonight.nvim/blob/main/extras/yazi/tokyonight_moon.toml
 
+# : App {{{
+
+[app]
+overall = {}
+
+# : }}}
+
+
 # : Manager {{{
 
 [mgr]
 cwd = { fg = "#828bb8", italic = true }
-
-# Hovered
-hovered         = { fg = "#222436", bg = "#82aaff" }
-preview_hovered = { fg = "#222436", bg = "#82aaff" }
 
 # Find
 find_keyword  = { fg = "#1e2030", bg = "#ff966c", bold = true }
@@ -17,15 +21,15 @@ find_position = { fg = "#0db9d7", bg = "#203346", bold = true }
 symlink_target = { italic = true }
 
 # Marker
-marker_copied   = { fg = "#4fd6be", bg = "#4fd6be" }
+marker_copied   = { fg = "#c3e88d", bg = "#c3e88d" }
 marker_cut      = { fg = "#ff757f", bg = "#ff757f" }
 marker_marked   = { fg = "#c099ff", bg = "#c099ff" }
 marker_selected = { fg = "#82aaff", bg = "#82aaff" }
 
 # Count
-count_copied   = { fg = "#c8d3f5", bg = "#41a6b5" }
-count_cut      = { fg = "#c8d3f5", bg = "#c53b53" }
-count_selected = { fg = "#c8d3f5", bg = "#3e68d7" }
+count_copied   = { fg = "#1e2030", bg = "#c3e88d" }
+count_cut      = { fg = "#1e2030", bg = "#ff757f" }
+count_selected = { fg = "#1e2030", bg = "#82aaff" }
 
 # Border
 border_symbol = "│"
@@ -40,8 +44,8 @@ syntect_theme = ""
 # : Tabs {{{
 
 [tabs]
-active   = { fg = "#c8d3f5", bg = "#2f334d" }
-inactive = { fg = "#3b4261", bg = "#222436" }
+active   = { fg = "#1b1d2b", bg = "#82aaff" }
+inactive = { fg = "#82aaff", bg = "#3b4261" }
 
 # Separator
 sep_inner = { open = "", close = "" }
@@ -68,12 +72,23 @@ unset_alt   = { fg = "#fca7ea", bg = "#3b4261" }
 # : }}}
 
 
+# : Indicator of hovered file {{{
+
+[indicator]
+parent  = { fg = "#222436", bg = "#82aaff" }
+current = { fg = "#222436", bg = "#82aaff" }
+preview = { underline = true }
+padding = { open = "", close = "" }
+
+# : }}}
+
+
 # : Status bar {{{
 
 [status]
-overall   = {}
-sep_left  = { open = "", close = "" }
-sep_right = { open = "", close = "" }
+overall   = { fg = "#c8d3f5", bg = "#1e2030" }
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
 
 # Permissions
 perm_sep   = { fg = "#444a73" }
@@ -83,9 +98,9 @@ perm_write = { fg = "#ff757f" }
 perm_exec  = { fg = "#c3e88d" }
 
 # Progress
-progress_label  = { fg = "#828bb8", bold = true }
-progress_normal = { fg = "#222436" }
-progress_error  = { fg = "#ff757f" }
+progress_label  = { fg = "#c8d3f5", bold = true }
+progress_normal = { fg = "#3e68d7", bg = "#2f334d" }
+progress_error  = { fg = "#c53b53", bg = "#2f334d" }
 
 
 # : }}}
@@ -96,7 +111,7 @@ progress_error  = { fg = "#ff757f" }
 [which]
 cols            = 3
 mask            = { bg = "#1e2030" }
-cand            = { fg = "#4fd6be" }
+cand            = { fg = "#86e1fc" }
 rest            = { fg = "#82aaff" }
 desc            = { fg = "#c099ff" }
 separator       = " ➜ "
@@ -110,7 +125,7 @@ separator_style = { fg = "#636da6" }
 [confirm]
 border     = { fg = "#0db9d7" }
 title      = { fg = "#589ed7" }
-content    = {}
+body       = {}
 list       = {}
 btn_yes    = { bg = "#2d3f76" }
 btn_no     = {}
@@ -172,12 +187,12 @@ selected = { bg = "#2d3f76" }
 
 [cmp]
 border   = { fg = "#0db9d7" }
-active   = { fg = "#c8d3f5", bg = "#2d3f76" }
+active   = { fg = "#c8d3f5", bg = "#363c58" }
 inactive = { fg = "#c8d3f5" }
 
 # Icons
 icon_file    = ""
-icon_folder  = ""
+icon_folder  = ""
 icon_command = ""
 
 # : }}}
@@ -188,7 +203,7 @@ icon_command = ""
 [tasks]
 border  = { fg = "#589ed7" }
 title   = { fg = "#589ed7" }
-hovered = { fg = "#c8d3f5", bg="#2d3f76" }
+hovered = { fg = "#c8d3f5", bg = "#2d3f76" }
 
 # : }}}
 
@@ -198,7 +213,7 @@ hovered = { fg = "#c8d3f5", bg="#2d3f76" }
 [help]
 on      = { fg = "#c3e88d" }
 run     = { fg = "#c099ff" }
-desc    = { fg = "#c8d3f5" }
+desc    = { fg = "#86e1fc" }
 hovered = { bg = "#2f334d" }
 footer  = { fg = "#c8d3f5", bg = "#222436" }
 
@@ -210,31 +225,25 @@ footer  = { fg = "#c8d3f5", bg = "#222436" }
 [filetype]
 
 rules = [
-    # Images
+    # Folder
+    { url = "*/", fg = "#82aaff" },
+    # Image
     { mime = "image/*", fg = "#ffc777" },
-
     # Media
     { mime = "{audio,video}/*", fg = "#c099ff" },
-
-    # Archives
+    # Archive
     { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "#fca7ea" },
-
-    # Documents
+    # Document
     { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#86e1fc" },
-
-    # Empty files
-    # { mime = "inode/empty", fg = "#ff757f" },
-
-    # Special files
+    # Virtual file system
+    { mime = "vfs/{absent,stale}", fg = "#636da6" },
+    # Special file
     { name = "*", is = "orphan", bg = "#ff757f" },
     { name = "*", is = "exec"  , fg = "#c3e88d" },
-
-    # Dummy files
+    # Dummy file
     { name = "*", is = "dummy", bg = "#ff757f" },
     { name = "*/", is = "dummy", bg = "#ff757f" },
-
     # Fallback
-    # { name = "*",  fg = "#c8d3f5" },
     { name = "*/", fg = "#82aaff" },
 
     { name = "*.exe", fg = "#c3e88d" },

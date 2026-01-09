@@ -6,27 +6,27 @@ show_hidden = true
 [opener]
 
 7-zip = [
-    { run = '7zfm %*',                                                             desc = "打开压缩包 (7-zip)",      for = "windows" },
-    { run = '7zg a -ad "%1".7z %*',                                                desc = "添加到压缩包... (7-zip)", for = "windows" },
+    { run = '7zfm %s',                                                             desc = "打开压缩包 (7-zip)",      for = "windows" },
+    { run = '7zg a -ad "%1".7z %s',                                                desc = "添加到压缩包... (7-zip)", for = "windows" },
 ]
 
 edit = [
-    { run = 'nvim -p %*',                                           block = true,  desc = "nvim",                    for = "windows" },
-    { run = 'wezterm start --cwd "%0" -- nvim -p %* -c "cd %:p:h"', orphan = true, desc = "nvim (wezterm)",          for = "windows" },
-    { run = 'code %*',                                              orphan = true, desc = "code",                    for = "windows" },
-    { run = 'code -w %*',                                           block = true,  desc = "code (block)",            for = "windows" },
-    { run = 'nvim -p "$@"',                                         block = true,  desc = "nvim",                    for = "unix" },
-    { run = 'code "$@"',                                            orphan = true, desc = "code",                    for = "unix" },
-    { run = 'code -w "$@"',                                         block = true,  desc = "code (block)",            for = "unix" },
+    { run = 'nvim -p %s',                                           desc = "nvim",           for = "windows", block = true},
+    { run = 'wezterm start --cwd "%h" -- nvim -p %s -c "cd %:p:h"', desc = "nvim (wezterm)", for = "windows", orphan = true },
+    { run = 'code %s',                                              desc = "code",           for = "windows", orphan = true},
+    { run = 'code -w %s',                                           desc = "code (block)",   for = "windows", block = true },
+    { run = 'nvim -p "%s"',                                         desc = "nvim",           for = "unix",    block = true},
+    { run = 'code "%s"',                                            desc = "code",           for = "unix",    orphan = true },
+    { run = 'code -w "%s"',                                         desc = "code (block)",   for = "unix",    block = true},
 ]
 
 locale-emulator = [
-    { run = 'leproc %*',                                                           desc = "Open (locale-emulator)",  for = "windows" },
+    { run = 'leproc %s',                                                           desc = "Open (locale-emulator)",  for = "windows" },
 ]
 
 ouch = [
-    { run = 'ouch d -y %*',                                                        desc = "Extract here with ouch",  for = "windows" },
-    { run = 'ouch d -y "$@"',                                                      desc = "Extract here with ouch",  for = "unix" },
+    { run = 'ouch d -y %s',                                                        desc = "Extract here with ouch",  for = "windows" },
+    { run = 'ouch d -y "%s"',                                                      desc = "Extract here with ouch",  for = "unix" },
 ]
 
 [open]
@@ -43,17 +43,17 @@ prepend_rules = [
 
 append_rules = [
     # Folder
-    { name = "*/",                                                                                          use = [ "edit", "open", "7-zip", "reveal" ] },
+    { url = "*/",                                                                                           use = [ "edit", "open", "7-zip", "reveal" ] },
     # Fallback
-    { name = "*",                                                                                           use = [ "open", "edit", "7-zip", "reveal" ] },
+    { url = "*",                                                                                            use = [ "open", "edit", "7-zip", "reveal" ] },
 ]
 
 [plugin]
 
 prepend_fetchers = [
-    { id = "git",  name = "*",  run = "git" },
-    { id = "git",  name = "*/", run = "git" },
-    { id = "mime", name = "*",  run = "mime-ext", prio = "high" },
+    { id = "git",  url = "*",  run = "git" },
+    { id = "git",  url = "*/", run = "git" },
+    { id = "mime", url = "*",  run = "mime-ext", prio = "high" },
 ]
 
 prepend_previewers = [
