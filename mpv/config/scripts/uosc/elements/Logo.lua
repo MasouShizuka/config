@@ -1,5 +1,3 @@
--- 存在问题（也许不算）：无法实时自适应缩放
-
 local Element = require('elements/Element')
 
 --[[ Logo ]]
@@ -32,12 +30,18 @@ function Logo:render()
 	if Menu:is_open() then return end
 
 	local ass = assdraw.ass_new()
+	local scale = state.scale
+	local scale_percent = scale * 100
 
 	-- logo is rendered at 2^(5-1) = 16 times resolution with size 1800x1800
-	local logo_size, font_size, spacing = 1800 / 16, 40, 10
+	local logo_size = 112.5 * scale
+	local font_size = 40 * scale
+	local spacing = 10 * scale
 	local total_height = logo_size + font_size + spacing
-	local icon_x, icon_y = (display.width - logo_size) / 2, (display.height - total_height) / 2
-	local line_prefix = ('{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)}'):format(icon_x, icon_y)
+	local icon_x = (display.width - logo_size) / 2
+	local icon_y = (display.height - total_height) / 2
+	local scaled_icon_x = (display.width - logo_size) / 2
+	local line_prefix = ('{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)\\fscx%f\\fscy%f}'):format(scaled_icon_x, icon_y, scale_percent, scale_percent)
 
 	-- mpv logo
 	for _, line in ipairs(self.logo_lines) do

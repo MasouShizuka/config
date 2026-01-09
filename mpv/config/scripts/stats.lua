@@ -1,6 +1,6 @@
 --[[
 SOURCE_ https://github.com/mpv-player/mpv/blob/master/player/lua/stats.lua
-COMMIT_ 5b1df3c5d900298e433539c99e8e5ea60acfa068
+COMMIT_ d3ec15bca87536341f121a4f0f97954d00a6cfe5
 文档_ stats.conf
 
 mpv.conf的前置条件 --load-stats-overlay=no
@@ -889,30 +889,33 @@ local function append_hdr(s, hdr, video_out)
         return
     end
 
-    local function should_show(val)
-        return val and val ~= 203 and val > 0
+    local function has(val, target)
+        return val and math.abs(val - target) > 1e-4
     end
 
     -- If we are printing video out parameters it is just display, not mastering
     local display_prefix = video_out and "显示：" or "母版显示："
 
     local indent = ""
+    local has_dml = has(hdr["min-luma"], 0.203) or has(hdr["max-luma"], 203)
+    local has_cll = hdr["max-cll"] and hdr["max-cll"] > 0
+    local has_fall = hdr["max-fall"] and hdr["max-fall"] > 0
 
-    if should_show(hdr["max-cll"]) or should_show(hdr["max-luma"]) then
-        append(s, "", {prefix="HDR10:"})
-        if hdr["min-luma"] and should_show(hdr["max-luma"]) then
+    if has_dml or has_cll or has_fall then
+        append(s, "", {prefix=video_out and "" or "HDR10:", prefix_sep=video_out and "" or nil})
+        if has_dml then
             -- libplacebo uses close to zero values as "defined zero"
             hdr["min-luma"] = hdr["min-luma"] <= 1e-6 and 0 or hdr["min-luma"]
             append(s, format("%.2g / %.0f", hdr["min-luma"], hdr["max-luma"]),
                 {prefix=display_prefix, suffix=" cd/m²", nl="", indent=indent})
             indent = o.prefix_sep .. o.prefix_sep
         end
-        if should_show(hdr["max-cll"]) then
-            append(s, hdr["max-cll"], {prefix="MaxCLL:", suffix=" cd/m²", nl="",
-                                       indent=indent})
+        if has_cll then
+            append(s, string.format("%.0f", hdr["max-cll"]), {prefix="MaxCLL:",
+                                    suffix=" cd/m²", nl="", indent=indent})
             indent = o.prefix_sep .. o.prefix_sep
         end
-        if hdr["max-fall"] and hdr["max-fall"] > 0 then
+        if has_fall then
             append(s, hdr["max-fall"], {prefix="MaxFALL:", suffix=" cd/m²", nl="",
                                         indent=indent})
         end
@@ -1076,9 +1079,9 @@ local function add_video(s)
     end
 
     local track = mp.get_property_native("current-tracks/video")
-    if track then
-        append(s, "", {prefix=track.image and "图片：" or "视频轨：", nl=o.nl .. o.nl, indent=""})
-        append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""})
+    local track_type = (track and track.image) and "图片：" or "视频轨："
+    append(s, "", {prefix=track_type, nl=o.nl .. o.nl, indent=""})
+    if track and append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""}) then
         append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
                no_prefix_markup=true, suffix="]"})
         if track["codec"] ~= track["decoder"] then

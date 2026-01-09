@@ -1,4 +1,4 @@
-### https://github.com/hooke007/MPV_lazy/wiki/3_K7sfunc
+### https://github.com/hooke007/mpv_PlayKit/wiki/3_K7sfunc
 ### RIFE (v4+) 补帧，性能要求较高，DX12显卡专用
 
 import vapoursynth as vs

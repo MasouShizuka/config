@@ -1,12 +1,12 @@
 --[[
 SOURCE_ https://github.com/tomasklaen/uosc/tree/main/src/uosc
-COMMIT_ d42f82592aaed72c28649e8a19e9c71c5255f923
-文档_ https://github.com/hooke007/MPV_lazy/discussions/186
+COMMIT_ 0c8ca8b832270adee7684db6472c86f7aba2b170
+文档_ https://github.com/hooke007/mpv_PlayKit/discussions/186
 
 极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
 ]]
 
-local uosc_version = '5.10.0'
+local uosc_version = '5.12.0'
 
 mp.commandv('script-message', 'uosc-version', uosc_version)
 
@@ -33,6 +33,7 @@ defaults = {
 	timeline_border = 1,
 	timeline_step = '1',
 	timeline_cache = true,
+	timeline_heatmap = 'overlay',
 	timeline_persistency = 'idle,audio',
 
 	controls =
@@ -164,6 +165,7 @@ local config_defaults = {
 		success = serialize_rgba('a5e075').color,
 		error = serialize_rgba('ff616e').color,
 		match = serialize_rgba('69c5ff').color,
+		heatmap = serialize_rgba('00adee').color,
 	},
 	opacity = {
 		timeline = 0.5,
@@ -184,6 +186,7 @@ local config_defaults = {
 		audio_indicator = 0.5,
 		buffering_indicator = 0.3,
 		playlist_position = 0.8,
+		heatmap = 0.4,
 	},
 }
 config = {
@@ -339,7 +342,7 @@ function create_default_menu_items()
 			{title = ulang._cm_sid_list, value = 'script-binding uosc/subtitles'},
 			{title = ulang._cm_playlist_shuffle, value = 'playlist-shuffle'},
 		},},
-		{title = ulang._cm_ushot, value = 'script-binding uosc/shot'},
+		{title = ulang._cm_ushot, value = 'screenshot scaled+subtitles'},
 		{title = ulang._cm_video, items = {
 			{title = ulang._cm_decoding_api, value = 'cycle-values hwdec no auto auto-copy'},
 			{title = ulang._cm_deband_toggle, value = 'cycle deband'},
@@ -765,6 +768,7 @@ mp.observe_property('demuxer-cache-state', 'native', function(prop, cache_state)
 		set_state('cache_duration', not cache_state.eof and cache_state['cache-duration'] or nil)
 	else
 		cached_ranges = {}
+		set_state('cache_underrun', false)
 	end
 
 	if not (state.duration and (#cached_ranges > 0 or state.cache == 'yes' or
@@ -1104,28 +1108,6 @@ bind_command('open-config-directory', function()
 end)
 bind_command('update', function()
 	if not Elements:has('updater') then require('elements/Updater'):new() end
-end)
-
--- 菜单专用截屏
-mp.add_key_binding(nil, 'shot', function()
-	if Menu:is_open() then
-		local paused = mp.get_property_bool('pause')
-		local timeout = options.animation_duration/1000 + 0.2
-		if paused then
-			mp.add_timeout(timeout, function() -- 延迟过低可能产生闪烁
-				mp.command('screenshot window')
-			end)
-		else
-			options.pause_indicator = 'manual'
-			mp.set_property_bool('pause', true)
-			mp.add_timeout(timeout, function()
-				mp.command('screenshot window')
-				mp.set_property_bool('pause', false)
-			end)
-		end
-	else
-		mp.command('screenshot window')
-	end
 end)
 
 -- 空闲自动弹出上下文菜单
