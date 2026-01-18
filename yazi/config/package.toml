@@ -1,26 +1,26 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "68f7d48"
+rev = "de33976"
 hash = "b16b6e08085a3dfec72335415e4c83ed"
 
 [[plugin.deps]]
 use = "ndtoan96/ouch"
-rev = "cfb9140"
-hash = "153b2c1afc54355f68359713281dd99d"
+rev = "594b8a2"
+hash = "5a427ce6b5b26c2f51d649c88daad5f4"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:mime-ext"
-rev = "68f7d48"
-hash = "9ff41be933237a5ce5fc3c9b41aab03b"
+rev = "de33976"
+hash = "e72607671ad2a4d3f300c055da73e597"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "68f7d48"
+rev = "de33976"
 hash = "c3f5c63722344045822f121efe2d2553"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "68f7d48"
+rev = "de33976"
 hash = "5a87b143d719f768227a0ae0f8a42e08"
 
 [flavor]
