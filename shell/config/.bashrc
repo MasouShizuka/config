@@ -145,15 +145,17 @@ purple="\[\e[38;2;252;167;234m\]"
 bold="\[\e[1m\]"
 reset="\[\e[0m\]"
 
+os_icon=""
 if ((is_windows)); then
-    PS1="${blue}󰍲 "
+    os_icon="󰍲 "
 elif ((is_mac)); then
-    PS1="${blue} "
+    os_icon=" "
 else
-    PS1="${blue} "
+    os_icon=" "
 fi
-PS1="$PS1$bold$cyan\w ${reset}at $bold$purple\t$green\n $reset"
+PS1="$blue$os_icon$bold$cyan\w ${reset}at $bold$purple\t$green\n $reset"
 
+unset HISTTIMEFORMAT
 [[ -z "$HISTFILE" ]] && HISTFILE="$HOME/.bash_history"
 HISTSIZE=50000
 
@@ -177,7 +179,7 @@ function preexec() {
 trap "preexec" DEBUG
 
 # Don't record history to $HISTFILE when the window is closed
-trap "unset HISTFILE; exit" SIGHUP
+trap "unset HISTFILE; exit" EXIT
 
 # This will run after the execution of the previous full command line.  We don't
 # want it PostCommand to execute when first starting a bash session (i.e., at
