@@ -1,4 +1,58 @@
-﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><All Key="Ctrl+F,Ctrl+P" Type="Tools">Search</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Filter Bar</List><List Key="A" Type="Background">.txt</List><List Key="Shift+A" Type="Background">NewFolder</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">copy</List><List Key="X" Type="Context">cut</List><List Key="P" Type="Background">paste</List><List Key="D" Type="Context">delete</List><List Key="S" Type="Context">undelete</List><List Key="E" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
+﻿<TablacusExplorer><All Key="$3f,Ctrl+R" Type="Tabs">Refresh</All><All Key="$57" Type="JavaScript">ToggleFullscreen();</All><All Key="$200f,Ctrl+L" Type="Tabs">Next tab</All><All Key="$300f,Ctrl+H" Type="Tabs">Previous tab</All><List Key="$e" Type="Tabs">Up</List><List Key="Ctrl+W" Type="Tabs">Close tab</List><List Key="$2b" Type="JScript">Ctrl.SelectItem(null, SVSI_DESELECTOTHERS);</List><List Key="$35" Type="Add-ons">Filter Bar</List><List Key="A" Type="Background">.txt</List><List Key="Shift+A" Type="Background">NewFolder</List><List Key="Ctrl+Shift+A" Type="Edit">反向选择(&amp;I)</List><List Key="C" Type="Context">copy</List><List Key="X" Type="Context">cut</List><List Key="P" Type="Background">paste</List><List Key="D" Type="JScript">const Items = await FV.Items(SVGIO_SELECTION | SVGIO_FLAG_VIEWORDER);
+const Count = await Items.Count;
+if (Count) {
+    let nIndex = 0;
+    let selectedIndex = await api.SendMessage(FV.hwndList, LVM_GETNEXTITEM, -1, LVIS_SELECTED);
+    if (selectedIndex &gt; 0) {
+        nIndex = selectedIndex - 1;
+    } else {
+        nIndex = selectedIndex + 1;
+        while (true) {
+            selectedIndex = await api.SendMessage(FV.hwndList, LVM_GETNEXTITEM, selectedIndex, LVIS_SELECTED);
+            if (selectedIndex == -1 || nIndex &lt; selectedIndex) {
+                break;
+            }
+            nIndex = selectedIndex + 1;
+        }
+    }
+
+    const hMenu = await api.CreatePopupMenu();
+    const ContextMenu = await api.ContextMenu(Items, FV);
+    if (ContextMenu) {
+        await ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_DEFAULTONLY);
+        await ContextMenu.InvokeCommand(0, te.hwnd, CommandID_DELETE - 1, null, null, SW_SHOWNORMAL, 0, 0);
+    }
+    await api.DestroyMenu(hMenu);
+
+    FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+}</List><List Key="S" Type="JScript">const Items = await FV.Items(SVGIO_SELECTION | SVGIO_FLAG_VIEWORDER);
+const Count = await Items.Count;
+if (Count) {
+    let nIndex = 0;
+    let selectedIndex = await api.SendMessage(FV.hwndList, LVM_GETNEXTITEM, -1, LVIS_SELECTED);
+    if (selectedIndex &gt; 0) {
+        nIndex = selectedIndex - 1;
+    } else {
+        nIndex = selectedIndex + 1;
+        while (true) {
+            selectedIndex = await api.SendMessage(FV.hwndList, LVM_GETNEXTITEM, selectedIndex, LVIS_SELECTED);
+            if (selectedIndex == -1 || nIndex &lt; selectedIndex) {
+                break;
+            }
+            nIndex = selectedIndex + 1;
+        }
+    }
+
+    const hMenu = await api.CreatePopupMenu();
+    const ContextMenu = await api.ContextMenu(Items, FV);
+    if (ContextMenu) {
+        await ContextMenu.QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_DEFAULTONLY);
+        await ContextMenu.InvokeCommand(0, te.hwnd, "undelete", null, null, SW_SHOWNORMAL, 0, 0);
+    }
+    await api.DestroyMenu(hMenu);
+
+    FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+}</List><List Key="E" Type="JScript">const current_dir = api.GetDisplayNameOf(FV, SHGDN_FORPARSING);
 const path = (FV.FocusedItem || FV.FolderItem).Path;
 if (api.PathIsDirectory(path)) {
     cmd = "wezterm start --cwd " + "\"" + path + "\" -- nvim";
@@ -10,7 +64,16 @@ api.CreateProcess(cmd, current_dir);</List><List Key="Shift+E" Type="Context">Op
 }</List><List Key="Shift+G" Type="JScript">let count = FV.ItemCount(SVGIO_ALLVIEW);
 if (count &gt; 0) {
     FV.SelectItem(count - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
-}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Key">{Enter}</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="Key">{Down}</List><List Key="Shift+J" Type="JScript">let nIndex = FV.GetFocusedItem;
+}</List><List Key="H" Type="Tabs">Back</List><List Key="Shift+H" Type="Tabs">Up</List><List Key="L" Type="Key">{Enter}</List><List Key="Shift+L" Type="Tabs">Forward</List><List Key="J" Type="JScript">let nIndex = FV.GetFocusedItem;
+if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
+    FV.SelectItem(nIndex, SVSI_SELECT);
+} else {
+    if (nIndex + 1 &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
+        FV.SelectItem(nIndex, SVSI_DESELECT);
+        FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+        // FV.SelectItem(nIndex + 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+    }
+}</List><List Key="Shift+J" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
@@ -18,7 +81,16 @@ if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     if (nIndex &lt; FV.ItemCount(SVGIO_ALLVIEW)) {
         FV.SelectItem(nIndex, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
     }
-}</List><List Key="K" Type="Key">{Up}</List><List Key="Shift+K" Type="JScript">let nIndex = FV.GetFocusedItem;
+}</List><List Key="K" Type="JScript">let nIndex = FV.GetFocusedItem;
+if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
+    FV.SelectItem(nIndex, SVSI_SELECT);
+} else {
+    if (nIndex - 1 &gt;= 0) {
+        FV.SelectItem(nIndex, SVSI_DESELECT);
+        FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED);
+        // FV.SelectItem(nIndex - 1, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_FOCUSED | SVSI_DESELECTOTHERS);
+    }
+}</List><List Key="Shift+K" Type="JScript">let nIndex = FV.GetFocusedItem;
 if (!api.SendMessage(Ctrl.hwndList, LVM_GETITEMSTATE, nIndex, LVIS_SELECTED)) {
     FV.SelectItem(nIndex, SVSI_SELECT);
 } else {
