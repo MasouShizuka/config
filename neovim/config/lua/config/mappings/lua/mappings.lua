@@ -151,6 +151,7 @@ function M.setup(opts)
                 vscode.action("editor.action.formatDocument")
             end
         end, { silent = true })
+        vim.keymap.set("x", "<leader>f", function() vscode.action("editor.action.formatSelection") end, { silent = true })
 
         -- gitsigns.nvim
         vim.keymap.set("n", "<leader>gs", function() vscode.action("git.diff.stageHunk") end, { silent = true })
@@ -182,6 +183,8 @@ function M.setup(opts)
                 vscode.action("office.html.preview")
             elseif ft == "markdown" then
                 vscode.action("markdown.showPreviewToSide")
+            elseif ft == "mermaid" then
+                vscode.action("preview.mermaidChart.preview")
             elseif ft == "tex" then
                 vscode.action("latex-workshop.build")
             else
