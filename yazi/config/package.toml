@@ -4,11 +4,6 @@ rev = "de33976"
 hash = "b16b6e08085a3dfec72335415e4c83ed"
 
 [[plugin.deps]]
-use = "ndtoan96/ouch"
-rev = "594b8a2"
-hash = "5a427ce6b5b26c2f51d649c88daad5f4"
-
-[[plugin.deps]]
 use = "yazi-rs/plugins:mime-ext"
 rev = "de33976"
 hash = "e72607671ad2a4d3f300c055da73e597"
@@ -22,6 +17,11 @@ hash = "c3f5c63722344045822f121efe2d2553"
 use = "yazi-rs/plugins:git"
 rev = "de33976"
 hash = "5a87b143d719f768227a0ae0f8a42e08"
+
+[[plugin.deps]]
+use = "imsi32/yatline"
+rev = "3227a30"
+hash = "f0c2ff082505ffb8b3b1678971bf0474"
 
 [flavor]
 deps = []

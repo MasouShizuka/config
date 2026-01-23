@@ -9,7 +9,6 @@ if ((is_windows)); then
     scoop install bat
     scoop install fd
     scoop install fzf
-    scoop install ouch
     scoop install ripgrep
 
     target="$APPDATA/yazi/config"

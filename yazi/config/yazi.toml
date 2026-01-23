@@ -24,18 +24,13 @@ locale-emulator = [
     { run = 'leproc %s',                                                           desc = "Open (locale-emulator)",  for = "windows" },
 ]
 
-ouch = [
-    { run = 'ouch d -y %s',                                                        desc = "Extract here with ouch",  for = "windows" },
-    { run = 'ouch d -y "%s"',                                                      desc = "Extract here with ouch",  for = "unix" },
-]
-
 [open]
 
 prepend_rules = [
     # Text
     { mime = "application/tex",                                                                             use = [ "edit" ] },
     # Archive
-    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [ "ouch", "7-zip" ] },
+    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [ "extract", "7-zip" ] },
     { mime = "application/iso9660-image",                                                                   use = [ "7-zip" ] },
     # Exe
     { mime = "application/msdownload",                                                                      use = [ "open", "locale-emulator", "7-zip" ] },
@@ -62,6 +57,4 @@ prepend_previewers = [
     { mime = "application/{msdownload,tex}",                                                                run = "code" },
     # JSON
     { mime = "application/{json,ndjson}",                                                                   run = "code" },
-    # Archive
-    { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", run = "ouch" },
 ]

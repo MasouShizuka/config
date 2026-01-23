@@ -94,8 +94,6 @@ prepend_keymap = [
     { on = ".",                run = "tab_swap 1",                                                   desc = "Swap current tab with next tab" },
 
     # Plugin
-    { on = "b",                run = "plugin ouch zip",                                              desc = "Compress with ouch" },
-
     { on = "[",                run = "plugin parent-arrow prev",                                     desc = "Move cursor up" },
     { on = "]",                run = "plugin parent-arrow next",                                     desc = "Move cursor down" },
 
