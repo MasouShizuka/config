@@ -1,0 +1,113 @@
+diff --git a/komorebi-bar/src/widgets/media.rs b/komorebi-bar/src/widgets/media.rs
+index 2f218c61..9988bddd 100644
+--- a/komorebi-bar/src/widgets/media.rs
++++ b/komorebi-bar/src/widgets/media.rs
+@@ -14,6 +14,7 @@ use serde::Deserialize;
+ use serde::Serialize;
+ use std::sync::atomic::Ordering;
+ use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager;
++use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus;
+ 
+ #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+ #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+@@ -21,24 +22,38 @@ use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager;
+ pub struct MediaConfig {
+     /// Enable the Media widget
+     pub enable: bool,
++    /// Set the Media format
++    pub format: MediaFormat,
+ }
+ 
+ impl From<MediaConfig> for Media {
+     fn from(value: MediaConfig) -> Self {
+-        Self::new(value.enable)
++        Self::new(value)
+     }
+ }
+ 
++// NOTE: 增加 Media 的格式
++#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
++#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
++pub enum MediaFormat {
++    /// Artist - Title
++    ArtistFirst,
++    /// Title - Artist
++    TitleFirst,
++}
++
+ #[derive(Clone, Debug)]
+ pub struct Media {
+     pub enable: bool,
++    pub format: MediaFormat,
+     pub session_manager: GlobalSystemMediaTransportControlsSessionManager,
+ }
+ 
+ impl Media {
+-    pub fn new(enable: bool) -> Self {
++    pub fn new(value: MediaConfig) -> Self {
+         Self {
+-            enable,
++            enable: value.enable,
++            format: value.format,
+             session_manager: GlobalSystemMediaTransportControlsSessionManager::RequestAsync()
+                 .unwrap()
+                 .join()
+@@ -46,6 +61,26 @@ impl Media {
+         }
+     }
+ 
++    // NOTE: 判断是否在播放
++    pub fn is_playing(&self) -> bool {
++        if let Ok(session) = self.session_manager.GetCurrentSession() {
++            if let Ok(op) = session.GetPlaybackInfo() {
++                if let Ok(st) = op.PlaybackStatus() {
++                    match st {
++                        GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing => {
++                            return true;
++                        }
++                        _ => {
++                            return false;
++                        }
++                    }
++                }
++            }
++        }
++
++        false
++    }
++
+     pub fn toggle(&self) {
+         if let Ok(session) = self.session_manager.GetCurrentSession()
+             && let Ok(op) = session.TryTogglePlayPauseAsync()
+@@ -68,7 +103,14 @@ impl Media {
+                 return format!("{artist}");
+             }
+ 
+-            return format!("{artist} - {title}");
++            match self.format {
++                MediaFormat::ArtistFirst => {
++                    return format!("{artist} - {title}");
++                }
++                MediaFormat::TitleFirst => {
++                    return format!("{title} - {artist}");
++                }
++            }
+         }
+ 
+         String::new()
+@@ -80,8 +122,14 @@ impl BarWidget for Media {
+         if self.enable {
+             let output = self.output();
+             if !output.is_empty() {
++                let icon = if self.is_playing() {
++                    egui_phosphor::regular::PLAY.to_string()
++                } else {
++                    egui_phosphor::regular::PAUSE.to_string()
++                };
++
+                 let mut layout_job = LayoutJob::simple(
+-                    egui_phosphor::regular::HEADPHONES.to_string(),
++                    icon.to_string(),
+                     config.icon_font_id.clone(),
+                     ctx.style().visuals.selection.stroke.color,
+                     100.0,

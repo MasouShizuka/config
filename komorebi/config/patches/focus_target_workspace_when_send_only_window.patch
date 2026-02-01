@@ -1,0 +1,30 @@
+diff --git a/komorebi/src/monitor.rs b/komorebi/src/monitor.rs
+index 2f2bfb64..dbd37165 100644
+--- a/komorebi/src/monitor.rs
++++ b/komorebi/src/monitor.rs
+@@ -399,6 +399,10 @@ impl Monitor {
+             bail!("cannot move native maximized window to another monitor or workspace");
+         }
+ 
++        // NOTE: 若当前 workspace 仅剩 1 个 container，则 focus 目标 workspace
++        let is_empty = workspace.containers().len() == 1;
++        let follow = follow || is_empty;
++
+         let foreground_hwnd = WindowsApi::foreground_window()?;
+         let floating_window_index = workspace
+             .floating_windows()
+diff --git a/komorebi/src/window_manager.rs b/komorebi/src/window_manager.rs
+index abd7228c..eb4b726e 100644
+--- a/komorebi/src/window_manager.rs
++++ b/komorebi/src/window_manager.rs
+@@ -1625,6 +1625,10 @@ impl WindowManager {
+             bail!("cannot move native maximized window to another monitor or workspace");
+         }
+ 
++        // NOTE: 若当前 workspace 仅剩 1 个 container，则 focus 目标 monitor
++        let is_empty = workspace.containers().len() == 1;
++        let follow = follow || is_empty;
++
+         let foreground_hwnd = WindowsApi::foreground_window()?;
+         let floating_window_index = workspace
+             .floating_windows()

@@ -11,7 +11,7 @@
   "transparency_alpha": 0,
   "grouping": {
     "kind": "Widget",
-    "rounding": 12.0
+    "rounding": 12
   },
   "left_widgets": [
     {

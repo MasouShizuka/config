@@ -4,16 +4,16 @@
 Persistent
 OnExit((*) => komorebic_stop())
 
-; localappdata := EnvGet("LOCALAPPDATA")
+Komorebic(cmd) {
+    RunWait(format("komorebic.exe {}", cmd), , "Hide")
+}
 
 komorebic_stop() {
-    RunWait("komorebic.exe stop", , "Hide")
+    Komorebic("stop")
 
     While (ProcessExist("komorebi-bar.exe")) {
         ProcessClose("komorebi-bar.exe")
     }
-
-    ; DirDelete(localappdata . "/komorebi", true)
 }
 
 
@@ -21,8 +21,7 @@ komorebic_stop() {
 ; │ Start │
 ; ╰───────╯
 
-; DirCreate(localappdata . "/komorebi")
-RunWait("komorebic.exe start --config komorebi.json --await-configuration --bar", , "Hide")
+Komorebic("start --config komorebi.json --await-configuration --bar")
 
 
 ; ╭─────────╮
@@ -77,111 +76,111 @@ For key, value in workspace_key_value {
 ; │ Complete Configuration │
 ; ╰────────────────────────╯
 
-RunWait("komorebic.exe complete-configuration", , "Hide")
+Komorebic("complete-configuration")
 
 
 ; ╭────────────╮
 ; │ Keybinding │
 ; ╰────────────╯
 
-!left:: {
-    RunWait("komorebic.exe focus left", , "Hide")
-}
-
-!right:: {
-    RunWait("komorebic.exe focus right", , "Hide")
-}
-
-!up:: {
-    RunWait("komorebic.exe focus up", , "Hide")
-}
-
-!down:: {
-    RunWait("komorebic.exe focus down", , "Hide")
-}
-
-!+left:: {
-    RunWait("komorebic.exe move left", , "Hide")
-}
-
-!+right:: {
-    RunWait("komorebic.exe move right", , "Hide")
-}
-
-!+up:: {
-    RunWait("komorebic.exe move up", , "Hide")
-}
-
-!+down:: {
-    RunWait("komorebic.exe move down", , "Hide")
-}
-
 !d:: {
-    RunWait("komorebic.exe minimize", , "Hide")
+    Komorebic("minimize")
 }
 
 !q:: {
-    RunWait("komorebic.exe close", , "Hide")
-}
-
-!+q:: {
-    WinKill("A")
+    Komorebic("close")
 }
 
 !j:: {
-    RunWait("komorebic.exe cycle-focus next", , "Hide")
+    Komorebic("cycle-focus next")
 }
 
 !k:: {
-    RunWait("komorebic.exe cycle-focus previous", , "Hide")
+    Komorebic("cycle-focus previous")
 }
 
 !+j:: {
-    RunWait("komorebic.exe cycle-move next", , "Hide")
+    Komorebic("cycle-move next")
 }
 
 !+k:: {
-    RunWait("komorebic.exe cycle-move previous", , "Hide")
+    Komorebic("cycle-move previous")
 }
 
-!h:: {
-    RunWait("komorebic.exe resize-axis horizontal decrease", , "Hide")
+!left:: {
+    Komorebic("stack left")
+}
+
+!right:: {
+    Komorebic("stack right")
+}
+
+!up:: {
+    Komorebic("stack up")
+}
+
+!down:: {
+    Komorebic("stack down")
+}
+
+!;:: {
+    Komorebic("unstack")
 }
 
 !l:: {
-    RunWait("komorebic.exe resize-axis horizontal increase", , "Hide")
+    Komorebic("cycle-stack next")
 }
 
-!+h:: {
-    RunWait("komorebic.exe resize-axis vertical decrease", , "Hide")
+!h:: {
+    Komorebic("cycle-stack previous")
 }
 
 !+l:: {
-    RunWait("komorebic.exe resize-axis vertical increase", , "Hide")
+    Komorebic("cycle-stack-index next")
+}
+
+!+h:: {
+    Komorebic("cycle-stack-index previous")
+}
+
+!=:: {
+    Komorebic("resize-axis horizontal increase")
+}
+
+!-:: {
+    Komorebic("resize-axis horizontal decrease")
+}
+
+!+=:: {
+    Komorebic("resize-axis vertical increase")
+}
+
+!+-:: {
+    Komorebic("resize-axis vertical decrease")
 }
 
 send_to_monitor(ThisHotkey) {
     key := SubStr(ThisHotkey, StrLen(send_to_monitor_prefix) + 1)
     value := monitor_key_value[key]
-    RunWait(Format("komorebic.exe send-to-monitor {}", value), , "Hide")
+    Komorebic(Format("send-to-monitor {}", value))
 }
 
 send_to_monitor_workspace(ThisHotkey) {
     key := SubStr(ThisHotkey, StrLen(send_to_monitor_workspace_prefix) + 1)
     num := workspace_key_value[key]
-    RunWait(Format("komorebic.exe send-to-monitor-workspace {} {}", main_monitor, num), , "Hide")
+    Komorebic(Format("send-to-monitor-workspace {} {}", main_monitor, num))
 }
 
 focus_monitor(ThisHotkey) {
     key := SubStr(ThisHotkey, StrLen(focus_monitor_prefix) + 1)
     value := monitor_key_value[key]
-    RunWait(Format("komorebic.exe focus-monitor {}", value), , "Hide")
+    Komorebic(Format("focus-monitor {}", value))
 }
 
 focus_monitor_workspace(ThisHotkey) {
     key := SubStr(ThisHotkey, StrLen(focus_monitor_workspace_prefix) + 1)
     num := workspace_key_value[key]
-    RunWait(Format("komorebic.exe focus-monitor-workspace {} {}", main_monitor, num), , "Hide")
+    Komorebic(Format("focus-monitor-workspace {} {}", main_monitor, num))
 }
 
 ; +-------+-----+
@@ -190,7 +189,7 @@ focus_monitor_workspace(ThisHotkey) {
 ; |       |  |--|
 ; +-------+--+--+
 !b:: {
-    RunWait("komorebic.exe change-layout bsp", , "Hide")
+    Komorebic("change-layout bsp")
 }
 
 ; +--+--+--+--+
@@ -199,7 +198,7 @@ focus_monitor_workspace(ThisHotkey) {
 ; |  |  |  |  |
 ; +--+--+--+--+
 !c:: {
-    RunWait("komorebic.exe change-layout columns", , "Hide")
+    Komorebic("change-layout columns")
 }
 
 ; +-----------+
@@ -208,7 +207,7 @@ focus_monitor_workspace(ThisHotkey) {
 ; |-----------|
 ; +-----------+
 !r:: {
-    RunWait("komorebic.exe change-layout rows", , "Hide")
+    Komorebic("change-layout rows")
 }
 
 ; +-------+-----+
@@ -217,7 +216,7 @@ focus_monitor_workspace(ThisHotkey) {
 ; |       |     |
 ; +-------+-----+
 !+c:: {
-    RunWait("komorebic.exe change-layout vertical-stack", , "Hide")
+    Komorebic("change-layout vertical-stack")
 }
 
 ; +------+------+
@@ -226,7 +225,7 @@ focus_monitor_workspace(ThisHotkey) {
 ; |      |      |
 ; +------+------+
 !+r:: {
-    RunWait("komorebic.exe change-layout horizontal-stack", , "Hide")
+    Komorebic("change-layout horizontal-stack")
 }
 
 ; +-----+-----------+-----+
@@ -237,7 +236,7 @@ focus_monitor_workspace(ThisHotkey) {
 ; |     |           |     |
 ; +-----+-----------+-----+
 !+m:: {
-    RunWait("komorebic.exe change-layout ultrawide-vertical-stack", , "Hide")
+    Komorebic("change-layout ultrawide-vertical-stack")
 }
 
 ; +-----+-----+   +---+---+---+   +---+---+---+   +---+---+---+
@@ -249,71 +248,67 @@ focus_monitor_workspace(ThisHotkey) {
 ; +-----+-----+   +---+---+---+   +---+---+---+   +---+---+---+
 ;   4 windows       5 windows       6 windows       7 windows
 !g:: {
-    RunWait("komorebic.exe change-layout grid", , "Hide")
+    Komorebic("change-layout grid")
 }
 
 !+g:: {
-    RunWait("komorebic.exe change-layout scrolling", , "Hide")
+    Komorebic("change-layout scrolling")
 }
 
 !x:: {
-    RunWait("komorebic.exe flip-layout horizontal", , "Hide")
+    Komorebic("flip-layout horizontal")
 }
 
 !y:: {
-    RunWait("komorebic.exe flip-layout vertical", , "Hide")
+    Komorebic("flip-layout vertical")
 }
 
 !+e:: {
-    RunWait("komorebic.exe promote", , "Hide")
+    Komorebic("promote")
 }
 
 !e:: {
-    RunWait("komorebic.exe promote-focus", , "Hide")
+    Komorebic("promote-focus")
 }
 
 !n:: {
-    RunWait("komorebic.exe retile", , "Hide")
+    Komorebic("retile")
 }
 
 !+w:: {
-    RunWait("komorebic.exe toggle-workspace-layer", , "Hide")
+    Komorebic("toggle-workspace-layer")
 }
 
 !+Capslock::
 !+Esc:: {
-    RunWait("komorebic.exe toggle-pause", , "Hide")
+    Komorebic("toggle-pause")
 }
 
 !Capslock::
 !Esc:: {
-    RunWait("komorebic.exe toggle-tiling", , "Hide")
+    Komorebic("toggle-tiling")
 }
 
 !w:: {
-    RunWait("komorebic.exe toggle-float", , "Hide")
+    Komorebic("toggle-float")
 }
 
 !m:: {
-    RunWait("komorebic.exe toggle-monocle", , "Hide")
+    Komorebic("toggle-monocle")
 }
 
 !f:: {
-    RunWait("komorebic.exe toggle-maximize", , "Hide")
+    Komorebic("toggle-maximize")
 }
 
 !z:: {
-    RunWait("komorebic.exe toggle-lock", , "Hide")
+    Komorebic("toggle-lock")
 }
 
 !t:: {
-    RunWait("komorebic.exe manage", , "Hide")
+    Komorebic("manage")
 }
 
 !+t:: {
-    RunWait("komorebic.exe unmanage", , "Hide")
-}
-
-!Enter:: {
-    Run("wezterm.exe", , "Hide")
+    Komorebic("unmanage")
 }

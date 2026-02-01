@@ -1,0 +1,30 @@
+diff --git a/komorebi/src/process_command.rs b/komorebi/src/process_command.rs
+index 1d6905ed..37aee8b2 100644
+--- a/komorebi/src/process_command.rs
++++ b/komorebi/src/process_command.rs
+@@ -817,8 +817,8 @@ impl WindowManager {
+                 self.move_container_to_workspace(workspace_idx, false, None)?;
+             }
+             SocketMessage::SendContainerToMonitorNumber(monitor_idx) => {
+-                let direction = self.direction_from_monitor_idx(monitor_idx);
+-                self.move_container_to_monitor(monitor_idx, None, false, direction)?;
++                // NOTE: 默认将 container 移动到指定 monitor 的最后，不考虑 monitor 间的位置关系
++                self.move_container_to_monitor(monitor_idx, None, false, None)?;
+             }
+             SocketMessage::CycleSendContainerToMonitor(direction) => {
+                 let monitor_idx = direction.next_idx(
+@@ -831,12 +831,12 @@ impl WindowManager {
+                 self.move_container_to_monitor(monitor_idx, None, false, direction)?;
+             }
+             SocketMessage::SendContainerToMonitorWorkspaceNumber(monitor_idx, workspace_idx) => {
+-                let direction = self.direction_from_monitor_idx(monitor_idx);
++                // NOTE: 默认将 container 移动到指定 workspace 的最后，不考虑 monitor 间的位置关系
+                 self.move_container_to_monitor(
+                     monitor_idx,
+                     Option::from(workspace_idx),
+                     false,
+-                    direction,
++                    None,
+                 )?;
+             }
+             SocketMessage::MoveContainerToMonitorWorkspaceNumber(monitor_idx, workspace_idx) => {

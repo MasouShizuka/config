@@ -1,0 +1,61 @@
+diff --git a/komorebi-bar/src/widgets/komorebi.rs b/komorebi-bar/src/widgets/komorebi.rs
+index 9a964625..681bc5a6 100644
+--- a/komorebi-bar/src/widgets/komorebi.rs
++++ b/komorebi-bar/src/widgets/komorebi.rs
+@@ -324,21 +324,24 @@ impl Komorebi {
+             return;
+         };
+         let monitor_info = &*self.monitor_info.borrow();
+-        let Some(container) = monitor_info.focused_container() else {
++        let Some(workspace) = monitor_info.focused_workspace() else {
+             return;
+         };
++        // NOTE: 显示当前 workspace 的所有窗口
++        for (container_idx, container) in workspace.containers.iter().enumerate() {
+         config.apply_on_widget(false, ui, |ui| {
+             let (len, focused_idx) = (container.windows.len(), container.focused_window_idx);
+ 
+             for (idx, window) in container.windows.iter().enumerate() {
+                 let selected = idx == focused_idx && len != 1;
+-                let text_color = if selected {
++                let text_color = if workspace.focused_container_idx.is_some_and(|focused_container_idx| container_idx == focused_container_idx) && idx == focused_idx {
+                     ctx.style().visuals.selection.stroke.color
+                 } else {
+                     ui.style().visuals.text_color()
+                 };
+ 
+-                let response = SelectableFrame::new(selected).show(ui, |ui| {
++                // NOTE: SelectableFrame 用在窗口标题上不好看
++                let response = SelectableFrame::new(false).show(ui, |ui| {
+                     (bar.renderer)(bar, ctx, ui, window, text_color, idx == focused_idx)
+                 });
+ 
+@@ -347,6 +350,7 @@ impl Komorebi {
+                 }
+             }
+         });
++        }
+     }
+ 
+     /// Sends a message to Komorebi, temporarily disabling MouseFollowsFocus if it's enabled.
+@@ -489,6 +493,10 @@ impl WorkspacesBar {
+         if ws.is_selected {
+             let text = RichText::new(&ws.name).color(ctx.style().visuals.selection.stroke.color);
+             ui.add(Label::new(text).selectable(false))
++        } else if ws.containers.is_empty() {
++            // NOTE: 将 empty workspace 设置为灰色
++            let text = RichText::new(&ws.name).color(Color32::DARK_GRAY);
++            ui.add(Label::new(text).selectable(false))
+         } else {
+             ui.add(Label::new(&ws.name).selectable(false))
+         }
+@@ -851,7 +859,8 @@ impl MonitorInfo {
+     where
+         I: Iterator<Item = (usize, &'a Workspace)> + 'a,
+     {
+-        let fn_containers_from = if show_all_icons {
++        // NOTE: 默认显示所有 containers
++        let fn_containers_from = if true {
+             |ws| ContainerInfo::from_all_containers(ws)
+         } else {
+             |ws| {

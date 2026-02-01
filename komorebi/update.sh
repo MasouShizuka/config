@@ -21,30 +21,7 @@ if [[ ! -d "$CONFIG_DIR" ]]; then
 fi
 rm -rf "${CONFIG_DIR:?}"/*
 
-# shopt -s dotglob
-#
-# mkdir "$CONFIG_DIR/komorebi"
-# exclusion_list=(".git" ".github" ".gitignore" "target")
-# for f in "$target/komorebi"/{*,.[!.]*}; do
-#     [[ -e "$f" ]] || break
-#
-#     name=${f##*/}
-#     if [[ ! ${exclusion_list[*]} =~ $name ]]; then
-#         cp -r "$f" "$CONFIG_DIR/komorebi"
-#     fi
-# done
-
-mkdir -p "$CONFIG_DIR/komorebi/komorebi/src"
-cp "$target/komorebi/komorebi/src/focus_manager.rs" "$CONFIG_DIR/komorebi/komorebi/src"
-cp "$target/komorebi/komorebi/src/monitor.rs" "$CONFIG_DIR/komorebi/komorebi/src"
-cp "$target/komorebi/komorebi/src/process_command.rs" "$CONFIG_DIR/komorebi/komorebi/src"
-cp "$target/komorebi/komorebi/src/process_event.rs" "$CONFIG_DIR/komorebi/komorebi/src"
-cp "$target/komorebi/komorebi/src/window_manager.rs" "$CONFIG_DIR/komorebi/komorebi/src"
-
-mkdir -p "$CONFIG_DIR/komorebi/komorebi-bar/src/widgets"
-cp "$target/komorebi/komorebi-bar/src/widgets/komorebi.rs" "$CONFIG_DIR/komorebi/komorebi-bar/src/widgets"
-cp "$target/komorebi/komorebi-bar/src/widgets/media.rs" "$CONFIG_DIR/komorebi/komorebi-bar/src/widgets"
-cp "$target/komorebi/komorebi-bar/src/widgets/network.rs" "$CONFIG_DIR/komorebi/komorebi-bar/src/widgets"
+cp -r "$target/patches" "$CONFIG_DIR"
 
 cp "$target/komorebi.json" "$CONFIG_DIR"
 cp "$target/komorebi.bar.json" "$CONFIG_DIR"

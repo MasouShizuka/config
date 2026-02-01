@@ -1,0 +1,83 @@
+diff --git a/komorebi-bar/src/widgets/network.rs b/komorebi-bar/src/widgets/network.rs
+index a1870891..ccb95339 100644
+--- a/komorebi-bar/src/widgets/network.rs
++++ b/komorebi-bar/src/widgets/network.rs
+@@ -167,42 +167,48 @@ impl Network {
+             let mut activity = Vec::new();
+             let mut total_activity = Vec::new();
+ 
+-            if let Ok(interface) = netdev::get_default_interface()
+-                && let Some(friendly_name) = &interface.friendly_name
+-                && let Ok(mut networks) = networks_network_activity_arc.lock()
+-            {
++            // NOTE: 计算所有 interface 的总传输和
++            let mut received = 0;
++            let mut transmitted = 0;
++            let mut total_received = 0;
++            let mut total_transmitted = 0;
++            if let Ok(mut networks) = networks_network_activity_arc.lock() {
+                 networks.refresh(true);
+ 
+-                for (interface_name, data) in &*networks {
+-                    if friendly_name.eq(interface_name) {
+-                        if show_activity {
+-                            let received =
+-                                Network::to_pretty_bytes(data.received(), data_refresh_interval);
+-                            let transmitted =
+-                                Network::to_pretty_bytes(data.transmitted(), data_refresh_interval);
+-
+-                            activity.push(NetworkReading::new(
+-                                NetworkReadingFormat::Speed,
+-                                ReadingValue::from(received),
+-                                ReadingValue::from(transmitted),
+-                            ));
+-                        }
+-
+-                        if show_total_activity {
+-                            let total_received = Network::to_pretty_bytes(data.total_received(), 1);
+-                            let total_transmitted =
+-                                Network::to_pretty_bytes(data.total_transmitted(), 1);
+-
+-                            total_activity.push(NetworkReading::new(
+-                                NetworkReadingFormat::Total,
+-                                ReadingValue::from(total_received),
+-                                ReadingValue::from(total_transmitted),
+-                            ));
+-                        }
++                for (_, data) in &*networks {
++                    if show_activity {
++                        received += data.received();
++                        transmitted += data.transmitted();
++                    }
++                    if show_total_activity {
++                        total_received += data.total_received();
++                        total_transmitted += data.total_transmitted();
+                     }
+                 }
+             }
+ 
++            if show_activity {
++                activity.push(NetworkReading::new(
++                    NetworkReadingFormat::Speed,
++                    ReadingValue::from(Network::to_pretty_bytes(
++                        received,
++                        data_refresh_interval,
++                    )),
++                    ReadingValue::from(Network::to_pretty_bytes(
++                        transmitted,
++                        data_refresh_interval,
++                    )),
++                ));
++            }
++
++            if show_total_activity {
++                total_activity.push(NetworkReading::new(
++                    NetworkReadingFormat::Total,
++                    ReadingValue::from(Network::to_pretty_bytes(total_received, 1)),
++                    ReadingValue::from(Network::to_pretty_bytes(total_transmitted, 1)),
++                ))
++            }
++
+             // Only update if this is the latest request
+             if gen_ == gen_arc.load(Ordering::SeqCst) {
+                 if let Ok(mut act) = activity_arc.lock() {

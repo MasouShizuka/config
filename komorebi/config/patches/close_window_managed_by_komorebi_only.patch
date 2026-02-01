@@ -1,0 +1,19 @@
+diff --git a/komorebi/src/process_command.rs b/komorebi/src/process_command.rs
+index 1d6905ed..37aee8b2 100644
+--- a/komorebi/src/process_command.rs
++++ b/komorebi/src/process_command.rs
+@@ -377,8 +377,13 @@ impl WindowManager {
+                 WindowsApi::center_cursor_in_rect(&focused_window_rect)?;
+                 WindowsApi::left_click();
+             }
++            // NOTE: 关闭窗口只关闭 komorebi 管理到的窗口
+             SocketMessage::Close => {
+-                Window::from(WindowsApi::foreground_window()?).close()?;
++                let focused_window = self.focused_window()?;
++                let hwnd = focused_window.hwnd;
++                focused_window.close()?;
++                self.focused_workspace_mut()?.remove_window(hwnd)?;
++                self.update_focused_workspace(true, true)?;
+             }
+             SocketMessage::Minimize => {
+                 Window::from(WindowsApi::foreground_window()?).minimize();

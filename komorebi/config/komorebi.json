@@ -1,8 +1,6 @@
 {
   "cross_monitor_move_behaviour": "Insert",
   "app_specific_configuration_path": "applications.json",
-  "border_width": 6,
-  "border": true,
   "border_colours": {
     "single": "#82aaff",
     "stack": "#c3e88d",
@@ -91,11 +89,6 @@
       ]
     }
   ],
-  "window_hiding_behaviour": "Cloak",
-  "animation": {
-    "enabled": true,
-    "duration": 100
-  },
   "bar_configurations": [
     "komorebi.bar.json",
     "komorebi.bar2.json",

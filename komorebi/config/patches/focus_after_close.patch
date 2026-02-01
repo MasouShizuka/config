@@ -1,0 +1,34 @@
+diff --git a/komorebi/src/process_event.rs b/komorebi/src/process_event.rs
+index 9fd7e434..06de9531 100644
+--- a/komorebi/src/process_event.rs
++++ b/komorebi/src/process_event.rs
+@@ -258,7 +258,8 @@ impl WindowManager {
+             WindowManagerEvent::Destroy(_, window) | WindowManagerEvent::Unmanage(window) => {
+                 if self.focused_workspace()?.contains_window(window.hwnd) {
+                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
+-                    self.update_focused_workspace(false, false)?;
++                    // NOTE: 重新 focus 当前窗口
++                    self.update_focused_workspace(true, true)?;
+ 
+                     let mut already_moved_window_handles = self.already_moved_window_handles.lock();
+ 
+@@ -277,7 +278,8 @@ impl WindowManager {
+ 
+                 if hide {
+                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
+-                    self.update_focused_workspace(false, false)?;
++                    // NOTE: 重新 focus 当前窗口
++                    self.update_focused_workspace(true, true)?;
+                 }
+             }
+             WindowManagerEvent::Hide(_, window) => {
+@@ -318,7 +320,8 @@ impl WindowManager {
+ 
+                 if hide {
+                     self.focused_workspace_mut()?.remove_window(window.hwnd)?;
+-                    self.update_focused_workspace(false, false)?;
++                    // NOTE: 重新 focus 当前窗口
++                    self.update_focused_workspace(true, true)?;
+                 }
+ 
+                 let mut already_moved_window_handles = self.already_moved_window_handles.lock();

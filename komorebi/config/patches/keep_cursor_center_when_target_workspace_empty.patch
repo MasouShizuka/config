@@ -1,0 +1,17 @@
+diff --git a/komorebi/src/window_manager.rs b/komorebi/src/window_manager.rs
+index abd7228c..eb4b726e 100644
+--- a/komorebi/src/window_manager.rs
++++ b/komorebi/src/window_manager.rs
+@@ -3745,9 +3745,10 @@ impl WindowManager {
+             .ok_or_eyre("there is no workspace")?;
+ 
+         monitor.focus_workspace(idx)?;
+-        monitor.load_focused_workspace(mouse_follows_focus)?;
++        // NOTE: 保证目标 workspace 为空时，也能将鼠标移动到 monitor 中心
++        monitor.load_focused_workspace(false)?;
+ 
+-        self.update_focused_workspace(false, true)
++        self.update_focused_workspace(mouse_follows_focus, true)
+     }
+ 
+     #[tracing::instrument(skip(self))]

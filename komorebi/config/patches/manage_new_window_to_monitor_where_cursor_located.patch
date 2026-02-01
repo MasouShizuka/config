@@ -1,0 +1,18 @@
+diff --git a/komorebi/src/process_event.rs b/komorebi/src/process_event.rs
+index 9fd7e434..06de9531 100644
+--- a/komorebi/src/process_event.rs
++++ b/komorebi/src/process_event.rs
+@@ -450,6 +450,13 @@ impl WindowManager {
+                     }
+ 
+                     if proceed {
++                        // NOTE: 令新打开的 window 管理到 cursor 所在的 monitor
++                        if self.mouse_follows_focus {
++                            if let Some(monitor_idx) = self.monitor_idx_from_current_pos() {
++                                self.focus_monitor(monitor_idx).unwrap_or(());
++                            }
++                        }
++
+                         let behaviour = self.window_management_behaviour(
+                             focused_monitor_idx,
+                             focused_workspace_idx,
