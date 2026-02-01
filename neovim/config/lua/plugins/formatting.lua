@@ -206,7 +206,7 @@ return {
             })
         end,
         keys = {
-            { "<leader>f", function() require("conform").format() end, desc = "Buffer Diagnostics (Trouble)", mode = "n" },
+            { "<leader>f", function() require("conform").format() end, desc = "Buffer Diagnostics (Trouble)", mode = { "n", "x" } },
         },
         opts = function()
             local formatters = {}
