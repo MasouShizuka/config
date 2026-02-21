@@ -23,9 +23,8 @@
 - 操作
     - 新建
     - 操作：`启动程序`
-    - 程序或脚本：`C:\Users\<User>\scoop\apps\msys2\current\usr\bin\sh.exe`
-    - 添加参数：`startup.sh` 的路径
-    - 起始于：`startup.sh` 的目录的路径
+    - 程序或脚本：`powershell.exe`
+    - 添加参数：`-Command Start-Process "<sh.exe 的路径>" -ArgumentList "<startup.sh 的路径>" -WorkingDirectory "<startup.sh 的目录>" -WindowStyle Hidden`
 - 条件
     - 取消勾选`只有在计算机使用交流电源时才启动此任务`
 - 设置

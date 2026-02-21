@@ -10,6 +10,13 @@ if ((is_windows)); then
     clean "$HOME/scoop/apps/msys2/current/tmp"
 fi
 
+# ╭─────────────────────╮
+# │ qimgv 的 thumbnails │
+# ╰─────────────────────╯
+if ((is_windows)); then
+    clean "$HOME/scoop/persist/qimgv/thumbnails"
+fi
+
 # ╭──────╮
 # │ Temp │
 # ╰──────╯

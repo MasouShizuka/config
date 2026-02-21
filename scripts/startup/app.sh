@@ -5,7 +5,7 @@ source "$PARENT_DIR/lib.sh"
 
 aria2_path=$HOME/.config/aria2/aria2.sh
 if check_and_cd "$aria2_path"; then
-    sh "$aria2_path" "true"
+    sh "$aria2_path"
 fi
 
 if ((is_windows)); then
