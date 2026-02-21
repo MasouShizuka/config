@@ -1,17 +1,17 @@
 {
-    "version": "8.8",
+    "version": "8.9",
     "description": "DUI theme for foobar2000",
     "homepage": "https://github.com/dream7180/foobox-en",
     "license": "GPL-3.0",
     "depends": "extras/foobar2000",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/dream7180/foobox-en/releases/download/8.8/foobox_x64.en.v8.8-1.exe#/dl.7z_",
-            "hash": "2f3a31ba454732ae24d3df363949f476a2f55483f103a0764b4edc1f843b719d"
+            "url": "https://github.com/dream7180/foobox-en/releases/download/8.9/foobox_x64.en.v8.9-1.exe#/dl.7z_",
+            "hash": "4f7f9e95dd1145df6cdced9de3794b17ce7a200e06deef1c5216c5e0c23840cb"
         },
         "32bit": {
-            "url": "https://github.com/dream7180/foobox-en/releases/download/8.8/foobox_x86.en.v8.8-1.exe#/dl.7z_",
-            "hash": "e5904572ce5c6941279565b436ba1e075760b8e6c9751a1b8e11cec3365e5911"
+            "url": "https://github.com/dream7180/foobox-en/releases/download/8.9/foobox_x86.en.v8.9-1.exe#/dl.7z_",
+            "hash": "00666f6eea392bb609ab7da5cdfbce97cbb8675024fd389f001e15f74598729b"
         }
     },
     "installer": {
