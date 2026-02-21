@@ -137,10 +137,10 @@ shopt -s no_empty_cmd_completion
 # │ Setting │
 # ╰─────────╯
 
-blue="\[\e[38;2;130;170;255m\]"
-cyan="\[\e[38;2;79;214;190m\]"
-green="\[\e[38;2;195;232;141m\]"
-purple="\[\e[38;2;252;167;234m\]"
+blue="\[\e[38;2;138;173;244m\]"
+cyan="\[\e[38;2;139;213;202m\]"
+green="\[\e[38;2;166;218;149m\]"
+purple="\[\e[38;2;198;160;246m\]"
 
 bold="\[\e[1m\]"
 reset="\[\e[0m\]"
@@ -258,24 +258,14 @@ if [[ -x "$(command -v fzf)" ]]; then
         --bind=ctrl-i:accept,ctrl-d:page-down,ctrl-u:page-up,ctrl-f:preview-down,ctrl-b:preview-up
     "
 
-    # Tokyo Night Moon
-    # https://github.com/folke/tokyonight.nvim/blob/main/extras/fzf/tokyonight_moon.sh
+    # Catppuccin Macchiato
+    # https://github.com/catppuccin/fzf/blob/main/themes/catppuccin-fzf-macchiato.sh
     export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS
-        --color=border:#589ed7
-        --color=fg:#c8d3f5
-        --color=gutter:#1e2030
-        --color=header:#ff966c
-        --color=hl+:#65bcff
-        --color=hl:#65bcff
-        --color=info:#545c7e
-        --color=marker:#ff007c
-        --color=pointer:#ff007c
-        --color=prompt:#65bcff
-        --color=query:#c8d3f5:regular
-        --color=scrollbar:#589ed7
-        --color=separator:#ff966c
-        --color=spinner:#ff007c
-    "
+    --color=bg+:#363A4F,spinner:#F4DBD6,hl:#ED8796 \
+    --color=fg:#CAD3F5,header:#ED8796,info:#C6A0F6,pointer:#F4DBD6 \
+    --color=marker:#B7BDF8,fg+:#CAD3F5,prompt:#C6A0F6,hl+:#ED8796 \
+    --color=selected-bg:#494D64 \
+    --color=border:#6E738D,label:#CAD3F5"
 
     # Set up fzf key bindings and fuzzy completion
     eval "$(fzf --bash)"
