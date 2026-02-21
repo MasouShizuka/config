@@ -33,13 +33,13 @@
   "right_widgets": [
     {
       "Media": {
-        "enable": true,
-        "format": "TitleFirst"
+        "enable": true
       }
     },
     {
       "Keyboard": {
         "enable": true,
+        "data_refresh_interval": 1,
         "label_prefix": "Icon"
       }
     },

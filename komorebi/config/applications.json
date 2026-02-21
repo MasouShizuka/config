@@ -143,15 +143,6 @@
       }
     ]
   },
-  "PicView": {
-    "manage": [
-      {
-        "kind": "Exe",
-        "id": "PicView.exe",
-        "matching_strategy": "Equals"
-      }
-    ]
-  },
   "QQ": {
     "ignore": [
       {

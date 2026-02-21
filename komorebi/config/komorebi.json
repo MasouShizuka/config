@@ -2,12 +2,12 @@
   "cross_monitor_move_behaviour": "Insert",
   "app_specific_configuration_path": "applications.json",
   "border_colours": {
-    "single": "#82aaff",
-    "stack": "#c3e88d",
-    "monocle": "#ff757f",
-    "floating": "#4fd6be",
-    "unfocused": "#545c7e",
-    "unfocused_locked": "#ff007c"
+    "single": "#8aadf4",
+    "stack": "#a6da95",
+    "monocle": "#ed8796",
+    "floating": "#8bd5ca",
+    "unfocused": "#939ab7",
+    "unfocused_locked": "#f5a97f"
   },
   "border_implementation": "Windows",
   "default_workspace_padding": 4,
