@@ -1,4 +1,5 @@
 {
   "DecimalSeparator": 0,
-  "MaxDecimalPlaces": 10
+  "MaxDecimalPlaces": 10,
+  "ShowErrorMessage": false
 }

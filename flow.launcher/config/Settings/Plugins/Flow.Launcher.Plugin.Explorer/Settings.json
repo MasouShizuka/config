@@ -11,6 +11,7 @@
   "WindowsContextMenuIncludedItems": "",
   "WindowsContextMenuExcludedItems": "",
   "DefaultOpenFolderInFileManager": false,
+  "DisplayMoreInformationInToolTip": false,
   "SearchActionKeyword": "*",
   "SearchActionKeywordEnabled": true,
   "FileContentSearchActionKeyword": "doc:",

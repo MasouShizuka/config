@@ -6,6 +6,7 @@
       "Icon": "google.png",
       "CustomIcon": false,
       "Url": "https://www.google.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -14,6 +15,7 @@
       "Icon": "google_drive.png",
       "CustomIcon": false,
       "Url": "https://drive.google.com/?hl=en\u0026tab=bo#search/{q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -22,6 +24,7 @@
       "Icon": "google.png",
       "CustomIcon": false,
       "Url": "https://scholar.google.com/scholar?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -30,6 +33,7 @@
       "Icon": "google_translate.png",
       "CustomIcon": false,
       "Url": "https://translate.google.com/#auto|en|{q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -38,6 +42,7 @@
       "Icon": "gmail.png",
       "CustomIcon": false,
       "Url": "https://mail.google.com/mail/ca/u/0/#apps/{q}",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -46,6 +51,7 @@
       "Icon": "google.png",
       "CustomIcon": false,
       "Url": "https://www.google.com/search?q={q}\u0026tbm=isch",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -54,6 +60,7 @@
       "Icon": "google_maps.png",
       "CustomIcon": false,
       "Url": "https://maps.google.com/maps?q={q}",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -62,6 +69,7 @@
       "Icon": "google.png",
       "CustomIcon": false,
       "Url": "http://google.com/search?q={q}\u0026btnI=I",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -70,6 +78,7 @@
       "Icon": "bing.png",
       "CustomIcon": false,
       "Url": "https://www.bing.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -78,6 +87,7 @@
       "Icon": "baidu.png",
       "CustomIcon": false,
       "Url": "https://www.baidu.com/#ie=UTF-8\u0026wd={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -86,6 +96,7 @@
       "Icon": "baidu.png",
       "CustomIcon": false,
       "Url": "https://fanyi.baidu.com/translate#auto/zh/{q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -94,6 +105,7 @@
       "Icon": "duckduckgo.png",
       "CustomIcon": false,
       "Url": "https://duckduckgo.com/?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -102,6 +114,7 @@
       "Icon": "yahoo.png",
       "CustomIcon": false,
       "Url": "https://www.search.yahoo.com/search?p={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -110,6 +123,7 @@
       "Icon": "github.png",
       "CustomIcon": false,
       "Url": "https://github.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -118,6 +132,7 @@
       "Icon": "gist.png",
       "CustomIcon": false,
       "Url": "https://gist.github.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -126,6 +141,7 @@
       "Icon": "netflix.png",
       "CustomIcon": false,
       "Url": "https://www.netflix.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -134,6 +150,7 @@
       "Icon": "stackoverflow.png",
       "CustomIcon": false,
       "Url": "https://stackoverflow.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -142,6 +159,7 @@
       "Icon": "wiki.png",
       "CustomIcon": false,
       "Url": "https://en.wikipedia.org/wiki/{q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -150,6 +168,7 @@
       "Icon": "youtube.png",
       "CustomIcon": false,
       "Url": "https://www.youtube.com/results?search_query={q}",
+      "IsPrivateMode": false,
       "Enabled": true
     },
     {
@@ -158,6 +177,7 @@
       "Icon": "youtubemusic.png",
       "CustomIcon": false,
       "Url": "https://music.youtube.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -166,6 +186,7 @@
       "Icon": "facebook.png",
       "CustomIcon": false,
       "Url": "https://www.facebook.com/search/?q={q}",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -174,6 +195,7 @@
       "Icon": "twitter.png",
       "CustomIcon": false,
       "Url": "https://twitter.com/search?q={q}",
+      "IsPrivateMode": false,
       "Enabled": false
     },
     {
@@ -182,11 +204,10 @@
       "Icon": "wolframalpha.png",
       "CustomIcon": false,
       "Url": "https://www.wolframalpha.com/input/?i={q}",
+      "IsPrivateMode": false,
       "Enabled": false
     }
   ],
   "EnableSuggestion": false,
-  "Suggestion": "Google",
-  "BrowserPath": null,
-  "OpenInNewBrowser": true
+  "Suggestion": "Google"
 }
