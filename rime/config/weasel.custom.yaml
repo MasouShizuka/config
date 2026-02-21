@@ -10,10 +10,10 @@ patch:
       ascii_mode: true
 
   style:
-    color_scheme: win11dark
-    font_face: Sarasa Mono SC
-    label_font_face: Sarasa Mono SC
-    comment_font_face: Sarasa Mono SC
+    color_scheme: catppuccin_macchiato
+    font_face: Maple Mono NF CN
+    label_font_face: Maple Mono NF CN
+    comment_font_face: Maple Mono NF CN
     font_point: 20
     label_font_point: 20
     comment_font_point: 20
@@ -29,21 +29,19 @@ patch:
       round_corner: 8
       corner_radius: 8
 
-  preset_color_schemes/win11dark:
-    name: "Win11暗色 / Win11Dark"
-    border_color:                   0x0c202020
-    back_color:                     0x303030
-    hilited_back_color:             0x20202020
-    hilited_candidate_back_color:   0x7fd07c3a
-    hilited_candidate_border_color: 0xd07c3a
-    candidate_back_color:           0x07d07c3a
-    hilited_text_color:             0xf9f9f9
-    hilited_label_color:            0xf9f9f9
-    hilited_candidate_text_color:   0xf9f9f9
-    hilited_comment_text_color:     0xf9f9f9
-    # hilited_mark_color:             0x212fe6
-    text_color:                     0xc9c9c9
-    label_color:                    0xc9c9c9
-    candidate_text_color:           0xc9c9c9
-    comment_text_color:             0xc9c9c9
-    shadow_color:                   0x60000000
+  preset_color_schemes:
+    # https://github.com/catppuccin/squirrel/blob/main/theme/squirrel.custom.yaml
+    catppuccin_macchiato:
+      name: Catppuccin Macchiato
+
+      back_color: 0x261918                         # 候选条背景色 Crust
+      border_color: 0x30201E                       # 边框色 Mantle
+      text_color: 0xE0C0B8                         # 拼音行文字颜色 Subtext1
+      label_color: 0xCBADA5                        # 预选栏编号颜色 Subtext0
+      candidate_text_color: 0xF5D3CA               # 预选项文字颜色 Text
+      hilited_back_color: 0xF6A0C6                 # 第一候选项背景背景色 Mauve
+      hilited_candidate_text_color: 0x3A2724       # 第一候选项文字颜色 Base
+      hilited_candidate_label_color: 0x4F3A36      # 第一候选项编号颜色 Surface0
+      hilited_text_color: 0x70B558                 # 高亮拼音 (需要开启内嵌编码) Surface2
+      hilited_comment_text_color: 0x4F3A36         # 注解文字高亮 Surface2
+      comment_text_color: 0x70B558                 # 拼音等提示文字颜色 Surface0
