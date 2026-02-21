@@ -4,26 +4,23 @@ local path = require("utils.path")
 local M = {}
 
 ---@class lint_info
----@field config? table
----@field download? boolean|fun():boolean
+---@field config? lint.Linter|fun():lint.Linter
 ---@field enable? boolean|fun():boolean
 ---@field filetype? string|string[]
 
 ---@type table<string, lint_info>
-local lint_list = {
+local lint_infos = {
     ["markdownlint-cli2"] = {
         config = {
             append_args = {
                 "--config", path.package_config_path .. "/.markdownlint.yaml",
             },
         },
-        download = true,
-        enable = true,
+        enable = environment.is_markdownlint_cli2_exist,
         filetype = { "markdown" },
     },
     ruff = {
-        download = environment.is_python_exist,
-        enable = environment.is_python_exist,
+        enable = vim.fn.executable("ruff") == 1,
         filetype = { "python" },
     },
     shellcheck = {
@@ -32,8 +29,7 @@ local lint_list = {
                 "-e", "SC2148",
             },
         },
-        download = true,
-        enable = true,
+        enable = vim.fn.executable("shellcheck") == 1,
         filetype = { "sh" },
     },
 }
@@ -42,18 +38,7 @@ M.lint_list = {}
 M.lint_config = {}
 M.linters_by_ft = {}
 M.lint_filetype_list = {}
-for lint, info in pairs(lint_list) do
-    local download = info.download
-    if download == nil then
-        download = true
-    end
-    if type(download) == "function" then
-        download = download()
-    end
-    if download then
-        M.lint_list[#M.lint_list + 1] = lint
-    end
-
+for lint, info in pairs(lint_infos) do
     local enable = info.enable
     if enable == nil then
         enable = true
@@ -61,22 +46,34 @@ for lint, info in pairs(lint_list) do
     if type(enable) == "function" then
         enable = enable()
     end
-    if enable then
-        M.lint_config[lint] = info.config or {}
+    if not enable then
+        goto continue
+    end
 
-        local filetype = info.filetype or {}
-        if type(filetype) == "string" then
-            filetype = { filetype }
-        end
-        for _, ft in ipairs(filetype) do
-            if M.linters_by_ft[ft] == nil then
-                M.linters_by_ft[ft] = {}
-            end
-            M.linters_by_ft[ft][#M.linters_by_ft[ft] + 1] = lint
+    M.lint_list[#M.lint_list + 1] = lint
 
-            M.lint_filetype_list[#M.lint_filetype_list + 1] = ft
+    if info.config then
+        if type(info.config) == "function" then
+            M.lint_config[lint] = info.config()
+        else
+            M.lint_config[lint] = info.config
         end
     end
+
+    local filetype = info.filetype or {}
+    if type(filetype) == "string" then
+        filetype = { filetype }
+    end
+    for _, ft in ipairs(filetype) do
+        if M.linters_by_ft[ft] == nil then
+            M.linters_by_ft[ft] = {}
+        end
+        M.linters_by_ft[ft][#M.linters_by_ft[ft] + 1] = lint
+
+        M.lint_filetype_list[#M.lint_filetype_list + 1] = ft
+    end
+
+    ::continue::
 end
 
 return M

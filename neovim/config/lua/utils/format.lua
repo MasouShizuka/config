@@ -4,20 +4,16 @@ local path = require("utils.path")
 local M = {}
 
 ---@class format_info
----@field config? table
----@field download? boolean|fun():boolean
+---@field config? conform.JobFormatterConfig|fun():conform.JobFormatterConfig
 ---@field enable? boolean|fun():boolean
 ---@field filetype? string|string[]
 
 ---@type table<string, format_info>
-local format_list = {
-    -- NOTE: autocorrect 目前不在 mason 仓库中，只能手动安装
-    -- 当 mason 仓库收录后解除注释
-    -- autocorrect = {
-    --     download = true,
-    --     enable = true,
-    --     filetype = { "markdown" },
-    -- },
+local format_infos = {
+    autocorrect = {
+        enable = vim.fn.executable("autocorrect") == 1,
+        filetype = { "markdown" },
+    },
     ["clang-format"] = {
         config = {
             append_args = function(self, ctx)
@@ -44,18 +40,15 @@ local format_list = {
                 }
             end,
         },
-        download = not environment.is_clang_exist and (environment.is_gcc_exist or environment.is_python_exist),
-        enable = environment.is_gcc_exist or environment.is_clang_exist or environment.is_python_exist,
+        enable = vim.fn.executable("clang-format") == 1,
         filetype = { "c", "cpp" },
     },
     ruff_format = {
-        download = false,
-        enable = environment.is_python_exist,
+        enable = environment.is_ruff_exist,
         filetype = { "python" },
     },
     ruff_organize_imports = {
-        download = false,
-        enable = environment.is_python_exist,
+        enable = environment.is_ruff_exist,
         filetype = { "python" },
     },
     ["markdownlint-cli2"] = {
@@ -64,8 +57,7 @@ local format_list = {
                 "--config", path.package_config_path .. "/.markdownlint.yaml",
             },
         },
-        download = true,
-        enable = true,
+        enable = environment.is_markdownlint_cli2_exist,
         filetype = { "markdown" },
     },
     shfmt = {
@@ -74,8 +66,7 @@ local format_list = {
                 "--indent", "4",
             },
         },
-        download = true,
-        enable = true,
+        enable = vim.fn.executable("shfmt") == 1,
         filetype = { "sh" },
     },
 }
@@ -87,18 +78,7 @@ M.formatters_by_ft = {
     ["_"] = { "trim_newlines", "trim_whitespace" },
 }
 M.format_filetype_list = {}
-for format, info in pairs(format_list) do
-    local download = info.download
-    if download == nil then
-        download = true
-    end
-    if type(download) == "function" then
-        download = download()
-    end
-    if download then
-        M.format_list[#M.format_list + 1] = format
-    end
-
+for format, info in pairs(format_infos) do
     local enable = info.enable
     if enable == nil then
         enable = true
@@ -106,22 +86,34 @@ for format, info in pairs(format_list) do
     if type(enable) == "function" then
         enable = enable()
     end
-    if enable then
-        M.format_config[format] = info.config or {}
+    if not enable then
+        goto continue
+    end
 
-        local filetype = info.filetype or {}
-        if type(filetype) == "string" then
-            filetype = { filetype }
-        end
-        for _, ft in ipairs(filetype) do
-            if M.formatters_by_ft[ft] == nil then
-                M.formatters_by_ft[ft] = {}
-            end
-            M.formatters_by_ft[ft][#M.formatters_by_ft[ft] + 1] = format
+    M.format_list[#M.format_list + 1] = format
 
-            M.format_filetype_list[#M.format_filetype_list + 1] = ft
+    if info.config then
+        if type(info.config) == "function" then
+            M.format_config[format] = info.config()
+        else
+            M.format_config[format] = info.config
         end
     end
+
+    local filetype = info.filetype or {}
+    if type(filetype) == "string" then
+        filetype = { filetype }
+    end
+    for _, ft in ipairs(filetype) do
+        if M.formatters_by_ft[ft] == nil then
+            M.formatters_by_ft[ft] = {}
+        end
+        M.formatters_by_ft[ft][#M.formatters_by_ft[ft] + 1] = format
+
+        M.format_filetype_list[#M.format_filetype_list + 1] = ft
+    end
+
+    ::continue::
 end
 
 return M

@@ -60,7 +60,7 @@ return {
                 "default",
             }
             if require("utils").is_available("markdown-preview.nvim") then
-                vim.api.nvim_command("MarkdownPreviewToggle")
+                vim.api.nvim_command("MarkdownPreview")
             end
         elseif ft == "python" then
             cmd = "python"

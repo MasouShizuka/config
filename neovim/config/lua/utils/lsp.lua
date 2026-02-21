@@ -1,27 +1,17 @@
-local environment = require("utils.environment")
 local path = require("utils.path")
 
 local M = {}
 
--- wsl 下安装部分 lsp 后可能会存在路径错误
--- 这是因为 mason 调用了 windows 中的 npm
--- 需要安装 wsl 平台的 npm
--- https://github.com/williamboman/mason.nvim/issues/1315
-
 ---@class lsp_info
 ---@field config? vim.lsp.Config|fun():vim.lsp.Config
----@field download? boolean|fun():boolean
 ---@field enable? boolean|fun():boolean
 ---@field filetype? string|string[]
----@field mason? string|{ version?:string, auto_update?:boolean, condition?:fun():boolean }
 
 ---@type table<string, lsp_info>
-local lsp_list = {
+local lsp_infos = {
     bashls = {
-        download = true,
-        enable = true,
+        enable = vim.fn.executable("bash-language-server") == 1,
         filetype = { "sh" },
-        mason = "bash-language-server",
     },
     clangd = {
         config = function()
@@ -47,15 +37,12 @@ local lsp_list = {
                 },
             }
         end,
-        download = environment.is_gcc_exist or environment.is_clang_exist,
-        enable = environment.is_gcc_exist or environment.is_clang_exist,
+        enable = vim.fn.executable("clangd") == 1,
         filetype = { "c", "cpp" },
     },
     jsonls = {
-        download = true,
-        enable = true,
+        enable = vim.fn.executable("vscode-json-language-server") == 1,
         filetype = { "json" },
-        mason = "json-lsp",
     },
     lua_ls = {
         config = {
@@ -134,10 +121,8 @@ local lsp_list = {
                 },
             },
         },
-        download = true,
-        enable = true,
+        enable = vim.fn.executable("lua-language-server") == 1,
         filetype = { "lua" },
-        mason = "lua-language-server",
     },
     marksman = {
         config = {
@@ -146,17 +131,14 @@ local lsp_list = {
                 ["textDocument/publishDiagnostics"] = function() end,
             },
         },
-        download = true,
-        enable = true,
+        enable = vim.fn.executable("marksman") == 1,
         filetype = { "markdown" },
     },
     pyright = {
         config = function()
-            local pythonPath = path.python_path
             local python_envs_path = path.get_python_envs_path()
-            if python_envs_path then
-                pythonPath = python_envs_path
-                vim.notify(("Activated:\n%s"):format(pythonPath), vim.log.levels.INFO, { title = "pyright" })
+            if python_envs_path ~= path.python_path then
+                vim.notify(("Activated:\n%s"):format(python_envs_path), vim.log.levels.INFO, { title = "pyright" })
             end
 
             return {
@@ -166,20 +148,19 @@ local lsp_list = {
                         disableOrganizeImports = true,
                     },
                     python = {
-                        pythonPath = pythonPath,
+                        pythonPath = python_envs_path,
                     },
                 },
             }
         end,
-        download = environment.is_python_exist,
-        enable = environment.is_python_exist,
+        enable = vim.fn.executable("pyright") == 1,
         filetype = { "python" },
     },
     rust_analyzer = {
-        download = environment.is_rustc_exist,
-        enable = environment.is_rustc_exist,
+        enable = function()
+            return not require("utils").is_available("rustaceanvim") and vim.fn.executable("rust-analyzer") == 1
+        end,
         filetype = { "rust" },
-        mason = "rust-analyzer",
     },
     texlab = {
         config = function()
@@ -214,28 +195,15 @@ local lsp_list = {
                 },
             }
         end,
-        download = environment.is_latex_exist,
-        enable = environment.is_latex_exist,
+        enable = vim.fn.executable("texlab") == 1,
         filetype = { "bib", "tex" },
     },
 }
 
 M.lsp_list = {}
-M.lsp_list_for_mason = {}
 M.lsp_config = {}
 M.lsp_filetype_list = {}
-for lsp, info in pairs(lsp_list) do
-    local download = info.download
-    if download == nil then
-        download = true
-    end
-    if type(download) == "function" then
-        download = download()
-    end
-    if download then
-        M.lsp_list_for_mason[#M.lsp_list_for_mason + 1] = info.mason or lsp
-    end
-
+for lsp, info in pairs(lsp_infos) do
     local enable = info.enable
     if enable == nil then
         enable = true
@@ -243,25 +211,29 @@ for lsp, info in pairs(lsp_list) do
     if type(enable) == "function" then
         enable = enable()
     end
-    if enable then
-        M.lsp_list[#M.lsp_list + 1] = lsp
+    if not enable then
+        goto continue
+    end
 
-        if info.config then
-            if type(info.config) == "function" then
-                M.lsp_config[lsp] = info.config()
-            else
-                M.lsp_config[lsp] = info.config
-            end
-        end
+    M.lsp_list[#M.lsp_list + 1] = lsp
 
-        local filetype = info.filetype or {}
-        if type(filetype) == "string" then
-            filetype = { filetype }
-        end
-        for _, ft in ipairs(filetype) do
-            M.lsp_filetype_list[#M.lsp_filetype_list + 1] = ft
+    if info.config then
+        if type(info.config) == "function" then
+            M.lsp_config[lsp] = info.config()
+        else
+            M.lsp_config[lsp] = info.config
         end
     end
+
+    local filetype = info.filetype or {}
+    if type(filetype) == "string" then
+        filetype = { filetype }
+    end
+    for _, ft in ipairs(filetype) do
+        M.lsp_filetype_list[#M.lsp_filetype_list + 1] = ft
+    end
+
+    ::continue::
 end
 
 return M

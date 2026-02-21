@@ -1,5 +1,4 @@
 local environment = require("utils.environment")
-local path = require("utils.path")
 
 return {
     {
@@ -417,9 +416,6 @@ return {
                 group = vim.api.nvim_create_augroup("nvim-lint", { clear = true }),
             })
         end,
-        dependencies = {
-            "williamboman/mason.nvim",
-        },
         event = {
             "User LintFile",
         },
@@ -429,13 +425,40 @@ return {
         "neovim/nvim-lspconfig",
         cond = not environment.is_vscode and environment.lsp_enable,
         config = function(_, opts)
+            local lsp = require("utils.lsp")
+            local utils = require("utils")
+
+            local capabilities = vim.lsp.protocol.make_client_capabilities()
+            if utils.is_available("cmp-nvim-lsp") then
+                capabilities = vim.tbl_deep_extend(
+                    "force",
+                    capabilities,
+                    require("cmp_nvim_lsp").default_capabilities()
+                )
+            elseif utils.is_available("blink.cmp") then
+                capabilities = vim.tbl_deep_extend(
+                    "force",
+                    capabilities,
+                    require("blink.cmp").get_lsp_capabilities()
+                )
+            end
+            vim.lsp.config("*", { capabilities = capabilities })
+
+            for _, lsp_server in pairs(lsp.lsp_list) do
+                local config = lsp.lsp_config[lsp_server]
+                if config then
+                    vim.lsp.config[lsp_server] = config
+                end
+
+                vim.lsp.enable(lsp_server)
+            end
+
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
                     local buf = args.buf
                     local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
 
                     local keymap = require("utils.keymap")
-                    local utils = require("utils")
 
                     local function map(mode, lhs, rhs, desc)
                         vim.keymap.set(mode, lhs, rhs, { buffer = buf, desc = desc, silent = true })
@@ -862,77 +885,18 @@ return {
                     },
                 },
             },
-
-            {
-                "williamboman/mason-lspconfig.nvim",
-                cmd = {
-                    "LspInstall",
-                    "LspUninstall",
-                },
-                dependencies = {
-                    "williamboman/mason.nvim",
-                },
-                opts = function()
-                    local lsp = require("utils.lsp")
-                    local utils = require("utils")
-
-                    local capabilities = vim.lsp.protocol.make_client_capabilities()
-
-                    if utils.is_available("cmp-nvim-lsp") then
-                        capabilities = vim.tbl_deep_extend(
-                            "force",
-                            capabilities,
-                            require("cmp_nvim_lsp").default_capabilities()
-                        )
-                    elseif utils.is_available("blink.cmp") then
-                        capabilities = vim.tbl_deep_extend(
-                            "force",
-                            capabilities,
-                            require("blink.cmp").get_lsp_capabilities()
-                        )
-                    end
-
-                    vim.lsp.config("*", {
-                        capabilities = capabilities,
-                    })
-
-                    for lsp_server, config in pairs(lsp.lsp_config) do
-                        vim.lsp.config[lsp_server] = config
-                    end
-
-                    return {
-                        -- Whether installed servers should automatically be enabled via `:h vim.lsp.enable()`.
-                        --
-                        -- To exclude certain servers from being automatically enabled:
-                        -- ```lua
-                        --   automatic_enable = {
-                        --     exclude = { "rust_analyzer", "ts_ls" }
-                        --   }
-                        -- ```
-                        --
-                        -- To only enable certain servers to be automatically enabled:
-                        -- ```lua
-                        --   automatic_enable = {
-                        --     "lua_ls",
-                        --     "vimls"
-                        --   }
-                        -- ```
-                        ---@type boolean | string[] | { exclude: string[] }
-                        automatic_enable = lsp.lsp_list,
-                    }
-                end,
-            },
         },
         event = {
             "User LspFile",
         },
         init = function()
-            require("utils").create_once_autocmd("User", {
+            local utils = require("utils")
+            utils.create_once_autocmd("User", {
                 callback = function()
                     local icons = require("utils.icons")
 
                     local virtual_text
-                    if require("utils").is_available("tiny-inline-diagnostic.nvim") then
+                    if utils.is_available("tiny-inline-diagnostic.nvim") then
                         virtual_text = false
                     else
                         virtual_text = {
@@ -980,84 +944,6 @@ return {
 
                 -- Enable diagnostics on Insert mode. You should also se the `throttle` option to 0, as some artefacts may appear.
                 enable_on_insert = true,
-            },
-        },
-    },
-
-    {
-        "williamboman/mason.nvim",
-        build = {
-            ":MasonUpdate",
-        },
-        cmd = {
-            "Mason",
-            "MasonUpdate",
-            "MasonInstall",
-            "MasonUninstall",
-            "MasonUninstallAll",
-            "MasonLog",
-        },
-        cond = not environment.is_vscode and environment.mason_enable,
-        dependencies = {
-            {
-                "WhoIsSethDaniel/mason-tool-installer.nvim",
-                cmd = {
-                    "MasonToolsInstall",
-                    "MasonToolsInstallSync",
-                    "MasonToolsUpdate",
-                    "MasonToolsUpdateSync",
-                    "MasonToolsClean",
-                },
-                config = function(_, opts)
-                    local mason_tool_installer = require("mason-tool-installer")
-                    mason_tool_installer.setup(opts)
-
-                    mason_tool_installer.run_on_start()
-                end,
-                opts = function()
-                    return {
-                        -- a list of all tools you want to ensure are installed upon
-                        -- start
-                        ensure_installed = require("utils").table_concat(
-                            require("utils.lsp").lsp_list_for_mason,
-                            require("utils.dap").dap_list_for_mason,
-                            require("utils.format").format_list,
-                            require("utils.lint").lint_list
-                        ),
-
-                        -- if set to true this will check each tool for updates. If updates
-                        -- are available the tool will be updated. This setting does not
-                        -- affect :MasonToolsUpdate or :MasonToolsInstall.
-                        -- Default: false
-                        auto_update = true,
-
-                        -- By default all integrations are enabled. If you turn on an integration
-                        -- and you have the required module(s) installed this means you can use
-                        -- alternative names, supplied by the modules, for the thing that you want
-                        -- to install. If you turn off the integration (by setting it to false) you
-                        -- cannot use these alternative names. It also suppresses loading of those
-                        -- module(s) (assuming any are installed) which is sometimes wanted when
-                        -- doing lazy loading.
-                        integrations = {
-                            ["mason-lspconfig"] = false,
-                            ["mason-null-ls"] = false,
-                            ["mason-nvim-dap"] = false,
-                        },
-                    }
-                end,
-            },
-        },
-        keys = {
-            { "<leader>lm", function() vim.api.nvim_command("Mason") end, desc = "Mason information", mode = "n" },
-        },
-        opts = {
-            ---@since 1.0.0
-            -- The directory in which to install packages.
-            install_root_dir = path.mason_install_root_path,
-            ui = {
-                ---@since 1.0.0
-                -- The border to use for the UI window. Accepts same border values as |nvim_open_win()|.
-                border = "rounded",
             },
         },
     },

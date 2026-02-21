@@ -28,11 +28,7 @@ return {
             {
                 "mfussenegger/nvim-dap-python",
                 config = function(_, opts)
-                    local adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/bin/python"
-                    if environment.is_windows then
-                        adapter_python_path = path.mason_install_root_path .. "/packages/debugpy/venv/Scripts/python.exe"
-                    end
-                    require("dap-python").setup(adapter_python_path)
+                    require("dap-python").setup(path.get_python_envs_path())
 
                     vim.api.nvim_create_autocmd("LspAttach", {
                         callback = function(args)

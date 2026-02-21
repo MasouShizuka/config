@@ -97,9 +97,6 @@ return {
             "ConformInfo",
         },
         cond = not environment.is_vscode and environment.format_enable,
-        dependencies = {
-            "williamboman/mason.nvim",
-        },
         init = function()
             local utils = require("utils")
             utils.create_once_autocmd("User", {

@@ -43,6 +43,18 @@ M.color_highlight_map = {
 
 ---@type table<string, colorscheme_info>
 M.colorscheme_list = {
+    catppuccin = {
+        func = function(name) return require("catppuccin.palettes").get_palette()[name] end,
+        map = {
+            black  = "base",
+            cyan   = "teal",
+            gray   = "overlay2",
+            orange = "peach",
+            purple = "mauve",
+            white  = "text",
+        },
+        package_name = "catppuccin",
+    },
     gruvbox = {
         func = function(name) return require("gruvbox").palette[name] end,
         map = {

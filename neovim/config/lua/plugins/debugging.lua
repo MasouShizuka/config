@@ -5,6 +5,7 @@ return {
         "mfussenegger/nvim-dap",
         cond = not environment.is_vscode and environment.dap_enable,
         config = function(_, opts)
+            local dap = require("utils.dap")
             local icons = require("utils.icons")
 
             local signs = {
@@ -17,36 +18,15 @@ return {
             for name, sign in pairs(signs) do
                 vim.fn.sign_define(name, sign)
             end
+
+            for dap_server, adapter in ipairs(dap.dap_adapters) do
+                require("dap").adapters[dap_server] = adapter
+            end
+            for dap_server, configuration in ipairs(dap.dap_configurations) do
+                require("dap").configurations[dap_server] = configuration
+            end
         end,
         dependencies = {
-            {
-                "jay-babu/mason-nvim-dap.nvim",
-                cmd = {
-                    "DapInstall",
-                    "DapUninstall",
-                },
-                dependencies = {
-                    "williamboman/mason.nvim",
-                },
-                opts = function()
-                    local handlers = {
-                        -- function(config)
-                        --     -- all sources with no handler get passed here
-                        --
-                        --     -- Keep original functionality
-                        --     mason_nvim_dap.default_setup(config)
-                        -- end,
-                    }
-                    for dap_server, setup in pairs(require("utils.dap").dap_config) do
-                        handlers[dap_server] = setup(require("mason-nvim-dap"))
-                    end
-
-                    return {
-                        handlers = handlers,
-                    }
-                end,
-            },
-
             {
                 "rcarriga/nvim-dap-ui",
                 config = function(_, opts)

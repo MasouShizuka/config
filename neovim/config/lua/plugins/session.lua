@@ -64,9 +64,11 @@ return {
         opts = function()
             local Path = require("plenary.path")
 
-            local sessions_dir = path.data_path .. "/sessions"
+            local sessions_dir
             if environment.is_wsl then
                 sessions_dir = path.windows_data_path .. "/sessions_wsl"
+            else
+                sessions_dir = path.data_path .. "/sessions"
             end
 
             -- 选择 gsub 中不会转义的字符，否则需要添加 % 来防止转义

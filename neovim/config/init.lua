@@ -74,7 +74,7 @@ return require("lazy").setup({
     },
     install = {
         -- try to load one of these colorschemes when starting an installation during startup
-        colorscheme = { "tokyonight" },
+        colorscheme = { "catppuccin" },
     },
     ui = {
         -- The border to use for the UI window. Accepts same border values as |nvim_open_win()|.

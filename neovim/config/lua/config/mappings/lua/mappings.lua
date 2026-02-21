@@ -395,7 +395,7 @@ function M.setup(opts)
                     command = string.format([[luafile "%s"]], curr_file)
                 elseif ft == "markdown" then
                     if utils.is_available("markdown-preview.nvim") then
-                        command = "MarkdownPreviewToggle"
+                        command = "MarkdownPreview"
                     end
                 elseif ft == "python" then
                     command = string.format([[python -u "%s"]], curr_file)

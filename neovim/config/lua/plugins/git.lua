@@ -93,4 +93,61 @@ return {
             }
         end,
     },
+
+    {
+        "spacedentist/resolve.nvim",
+        cmd = {
+            "ResolveNext",
+            "ResolvePrev",
+            "ResolveOurs",
+            "ResolveTheirs",
+            "ResolveBoth",
+            "ResolveBothReverse",
+            "ResolveBase",
+            "ResolveNone",
+            "ResolveList",
+            "ResolveDetect",
+            "ResolveDiffOurs",
+            "ResolveDiffTheirs",
+            "ResolveDiffBoth",
+            "ResolveDiffOursTheirs",
+            "ResolveDiffTheirsOurs",
+        },
+        cond = not environment.is_vscode,
+        event = {
+            "User GitFile",
+        },
+        opts = {
+            -- Set to false to disable default keymaps
+            default_keymaps = false,
+            -- Callback function called when conflicts are detected
+            -- Receives: { bufnr = number, conflicts = table }
+            on_conflict_detected = function(info)
+                local function map(mode, lhs, rhs, desc)
+                    vim.keymap.set(mode, lhs, rhs, { buffer = info.bufnr, desc = desc, silent = true })
+                end
+
+                if require("utils").is_available("which-key.nvim") then
+                    require("which-key").add(
+                        { "<leader>gc", buffer = info.bufnr, group = "git conflicts", mode = "n" },
+                        { "<leader>gcd", buffer = info.bufnr, group = "git diff", mode = "n" }
+                    )
+                end
+                map("n", "]x", "<Plug>(resolve-next)", "Next conflict")
+                map("n", "[x", "<Plug>(resolve-prev)", "Previous conflict")
+                map("n", "<leader>gco", "<Plug>(resolve-ours)", "Choose ours")
+                map("n", "<leader>gct", "<Plug>(resolve-theirs)", "Choose theirs")
+                map("n", "<leader>gcb", "<Plug>(resolve-both)", "Choose both")
+                map("n", "<leader>gcB", "<Plug>(resolve-both-reverse)", "Choose both reverse")
+                map("n", "<leader>gcm", "<Plug>(resolve-base)", "Choose base")
+                map("n", "<leader>gcn", "<Plug>(resolve-none)", "Choose none")
+                map("n", "<leader>gcdo", "<Plug>(resolve-diff-ours)", "Diff ours")
+                map("n", "<leader>gcdt", "<Plug>(resolve-diff-theirs)", "Diff theirs")
+                map("n", "<leader>gcdb", "<Plug>(resolve-diff-both)", "Diff both")
+                map("n", "<leader>gcdv", "<Plug>(resolve-diff-vs)", "Diff ours → theirs")
+                map("n", "<leader>gcdV", "<Plug>(resolve-diff-vs-reverse)", "Diff theirs → ours")
+                map("n", "<leader>gcl", "<Plug>(resolve-list)", "List conflicts")
+            end,
+        },
+    },
 }

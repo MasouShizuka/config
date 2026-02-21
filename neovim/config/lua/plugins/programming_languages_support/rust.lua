@@ -10,30 +10,14 @@ return {
         cond = not environment.is_vscode and environment.lsp_enable,
         config = function(_, opts)
             vim.g.rustaceanvim = function()
-                local rust_analyzer_path = path.mason_install_root_path .. "/packages/rust-analyzer/rust-analyzer"
-                if environment.is_windows then
-                    rust_analyzer_path = rust_analyzer_path .. ".exe"
+                local adapter
+                if path.codelldb_extension_path then
+                    adapter = require("rustaceanvim.config").get_codelldb_adapter(path.codelldb_path, path.liblldb_path)
                 end
 
-                local package_path = path.mason_install_root_path .. "/packages/codelldb/extension"
-                local codelldb_path = package_path .. "/adapter/codelldb"
-                local liblldb_path = package_path .. "/lldb/lib/liblldb"
-                if environment.is_windows then
-                    codelldb_path = codelldb_path .. ".exe"
-                    liblldb_path = package_path .. "/lldb/bin/liblldb.dll"
-                elseif environment.is_mac then
-                    liblldb_path = liblldb_path .. ".dylib"
-                elseif environment.is_linux then
-                    liblldb_path = liblldb_path .. ".so"
-                end
-
-                local cfg = require("rustaceanvim.config")
                 return {
-                    server = {
-                        cmd = { rust_analyzer_path },
-                    },
                     dap = {
-                        adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
+                        adapter = adapter,
                     },
                 }
             end

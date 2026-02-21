@@ -21,7 +21,6 @@ M.skip_filetype_list = {
     "edgy",
     "fencview",
     "lazy",
-    "mason",
     "minimap",
     "noice",
     "OverseerForm",

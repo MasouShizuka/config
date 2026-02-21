@@ -27,10 +27,6 @@ if environment.is_wsl then
 end
 
 
-M.mason_install_root_path = M.data_path .. "/lazy/mason.nvim/mason"
-M.package_config_path = M.config_path .. "/package_config"
-
-
 if environment.is_windows then
     M.scoop_path = M.home_path .. "/scoop"
     M.scoop_app_path = M.scoop_path .. "/apps"
@@ -41,15 +37,18 @@ elseif environment.is_wsl then
     M.scoop_persist_path = M.scoop_path .. "/persist"
 end
 
+M.package_config_path = M.config_path .. "/package_config"
 
-M.sioyek_path = "sioyek"
 if environment.is_windows then
     M.sioyek_path = M.scoop_app_path .. "/sioyek/current/sioyek"
+else
+    M.sioyek_path = "sioyek"
 end
 
-M.sqlite_path = "sqlite3.dll"
 if environment.is_windows then
     M.sqlite_path = M.scoop_app_path .. "/sqlite-with-dll/current/sqlite3.dll"
+else
+    M.sqlite_path = "sqlite3.dll"
 end
 
 
@@ -65,30 +64,45 @@ elseif environment.is_linux then
 end
 M.vscode_snippet_path = M.vscode_user_data_path .. "/User/snippets"
 
+local paths = vim.fn.glob(M.vscode_extension_path .. "/vadimcn.vscode-lldb-*", 0, 1)
+if #paths ~= 0 then
+    M.codelldb_extension_path = paths[#paths]
+    M.codelldb_path = M.codelldb_extension_path .. "/adapter/codelldb"
+    M.liblldb_path = M.codelldb_extension_path .. "/lldb/lib/liblldb"
+    if environment.is_windows then
+        M.codelldb_path = M.codelldb_path .. ".exe"
+        M.liblldb_path = M.codelldb_extension_path .. "/lldb/bin/liblldb.dll"
+    elseif environment.is_mac then
+        M.liblldb_path = M.liblldb_path .. ".dylib"
+    elseif environment.is_linux then
+        M.liblldb_path = M.liblldb_path .. ".so"
+    end
+end
 
-M.conda_path = M.home_path .. "/mambaforge"
-M.python_path = M.conda_path .. "/bin/python"
 if environment.is_windows then
     M.conda_path = M.scoop_app_path .. "/mambaforge/current"
     M.python_path = M.conda_path .. "/python.exe"
+else
+    M.conda_path = M.home_path .. "/mambaforge"
+    M.python_path = M.conda_path .. "/bin/python"
 end
 M.get_python_envs_path = function()
-    if require("utils").is_available("venv-selector.nvim") then
-        return nil
-    end
-
     local python_envs_path
 
     local conda_envs_path = M.conda_path .. "/envs"
     local envs_path = conda_envs_path .. "/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
     if vim.fn.isdirectory(envs_path) ~= 0 then
-        python_envs_path = envs_path .. "/bin/python"
         if environment.is_windows then
             python_envs_path = envs_path .. "/python.exe"
+        else
+            python_envs_path = envs_path .. "/bin/python"
         end
     end
 
-    return python_envs_path
+    if python_envs_path then
+        return python_envs_path
+    end
+    return M.python_path
 end
 
 return M

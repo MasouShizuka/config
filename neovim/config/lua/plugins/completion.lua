@@ -260,52 +260,36 @@ return {
             })
 
 
-            -- lazyvim.util.cmp.auto_brackets
-            cmp.event:on("confirm_done", function(event)
-                if vim.tbl_contains({ "python" }, vim.bo.filetype) then
-                    local entry = event.entry
-                    local Kind = cmp.lsp.CompletionItemKind
-                    local item = entry:get_completion_item()
-                    if vim.tbl_contains({ Kind.Function, Kind.Method }, item.kind) then
-                        local cursor = vim.api.nvim_win_get_cursor(0)
-                        local prev_char = vim.api.nvim_buf_get_text(0, cursor[1] - 1, cursor[2], cursor[1] - 1, cursor[2] + 1, {})[1]
-                        if prev_char ~= "(" and prev_char ~= ")" then
-                            local keys = vim.api.nvim_replace_termcodes("()<left>", false, false, true)
-                            vim.api.nvim_feedkeys(keys, "i", true)
+            if utils.is_available("nvim-autopairs") then
+                -- If you want insert `(` after select function or method item
+                local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+                local cmp = require("cmp")
+                cmp.event:on(
+                    "confirm_done",
+                    cmp_autopairs.on_confirm_done()
+                )
+            else
+                -- lazyvim.util.cmp.auto_brackets
+                cmp.event:on("confirm_done", function(event)
+                    if vim.tbl_contains({ "python" }, vim.bo.filetype) then
+                        local entry = event.entry
+                        local Kind = cmp.lsp.CompletionItemKind
+                        local item = entry:get_completion_item()
+                        if vim.tbl_contains({ Kind.Function, Kind.Method }, item.kind) then
+                            local cursor = vim.api.nvim_win_get_cursor(0)
+                            local prev_char = vim.api.nvim_buf_get_text(0, cursor[1] - 1, cursor[2], cursor[1] - 1, cursor[2] + 1, {})[1]
+                            if prev_char ~= "(" and prev_char ~= ")" then
+                                local keys = vim.api.nvim_replace_termcodes("()<left>", false, false, true)
+                                vim.api.nvim_feedkeys(keys, "i", true)
+                            end
                         end
                     end
-                end
-            end)
+                end)
+            end
         end,
         dependencies = {
             "dmitmel/cmp-cmdline-history",
             "f3fora/cmp-spell",
-
-            -- {
-            --     "garymjr/nvim-snippets",
-            --     config = function(_, opts)
-            --         require("snippets").setup(opts)
-            --
-            --         for _, source in pairs(require("cmp").core.sources) do
-            --             if source.name == "snippets" then
-            --                 source.get_keyword_pattern = function()
-            --                     -- 添加 "." 的前缀匹配
-            --                     return "\\%([^[:alnum:][:blank:]]\\|\\.*\\w\\+\\)"
-            --                 end
-            --
-            --                 break
-            --             end
-            --         end
-            --     end,
-            --     dependencies = {
-            --         "rafamadriz/friendly-snippets",
-            --     },
-            --     opts = {
-            --         friendly_snippets = true,
-            --         search_paths = { path.vscode_snippet_path },
-            --     },
-            -- },
-
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-nvim-lsp",

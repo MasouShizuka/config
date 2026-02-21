@@ -2,55 +2,54 @@ local environment = require("utils.environment")
 
 return {
     {
-        "ellisonleao/gruvbox.nvim",
+        "catppuccin/nvim",
         cond = not environment.is_vscode,
         event = {
             "User ColorschemePre",
         },
+        name = "catppuccin",
         opts = function()
-            local colors = require("utils.colors")
-            local utils = require("utils")
-
-            local overrides = {
-                CursorLineNr = { bg = "none" },
-                LspReferenceRead = { bg = colors.get_color(colors.colors.gray, "gruvbox") },
-                LspReferenceText = { bg = colors.get_color(colors.colors.gray, "gruvbox") },
-                LspReferenceWrite = { bg = colors.get_color(colors.colors.gray, "gruvbox") },
-                TabLineFill = { bg = "none" },
-                WinBar = { bg = "none" },
-                WinBarNC = { bg = "none" },
-            }
-
-            if not environment.is_undercurl_available then
-                overrides = vim.tbl_deep_extend("force", overrides, {
-                    GruvboxRedUnderline = { undercurl = false, underline = true },
-                    GruvboxGreenUnderline = { undercurl = false, underline = true },
-                    GruvboxYellowUnderline = { undercurl = false, underline = true },
-                    GruvboxBlueUnderline = { undercurl = false, underline = true },
-                    GruvboxPurpleUnderline = { undercurl = false, underline = true },
-                    GruvboxAquaUnderline = { undercurl = false, underline = true },
-                    GruvboxOrangeUnderline = { undercurl = false, underline = true },
-                })
-            end
-
-            if utils.is_available("flash.nvim") then
-                overrides.FlashBackdrop = { link = "Comment" }
-                overrides.FlashLabel = { bg = colors.get_color(colors.colors.red, "gruvbox"), bold = true }
-            end
-
-            if utils.is_available("gitsigns.nvim") then
-                overrides.GitSignsChange = { link = "GruvboxBlue" }
-            end
-
-            if utils.is_available("nvim-treesitter-context") then
-                overrides.TreesitterContextBottom = { underline = true }
-                overrides.TreesitterContextLineNumber = { fg = colors.get_color(colors.colors.purple, "gruvbox") }
+            local underlines
+            if environment.is_undercurl_available then
+                underlines = {
+                    errors = { "undercurl" },
+                    hints = { "undercurl" },
+                    warnings = { "undercurl" },
+                    information = { "undercurl" },
+                    ok = { "undercurl" },
+                }
             end
 
             return {
-                undercurl = environment.is_undercurl_available,
-                overrides = overrides,
-                transparent_mode = true,
+                transparent_background = true, -- disables setting the background color.
+                float = {
+                    transparent = true,        -- enable transparent floating windows
+                },
+                lsp_styles = {                 -- Handles the style of specific lsp hl groups (see `:h lsp-highlight`).
+                    underlines = underlines,
+                },
+                highlight_overrides = {
+                    all = function(c)
+                        local colors = require("utils.colors")
+                        local utils = require("utils")
+
+                        local overrides = {}
+
+                        if utils.is_available("nvim-treesitter-context") then
+                            overrides.TreesitterContextBottom = { underline = true, sp = colors.get_color(colors.colors.white, "catppuccin") }
+                        end
+
+                        if utils.is_available("flash.nvim") then
+                            overrides.FlashLabel = {
+                                bg = colors.get_color(colors.colors.red, "catppuccin"),
+                                bold = true,
+                                fg = colors.get_color(colors.colors.black, "catppuccin"),
+                            }
+                        end
+
+                        return overrides
+                    end,
+                },
             }
         end,
     },

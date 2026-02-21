@@ -17,6 +17,49 @@ local function OverseerTasksForStatus(status)
     }
 end
 
+local function OverseerTasksForRunning()
+    local prev_is_running = false
+    local spinner_name = "overseer_running"
+    return {
+        condition = function(self)
+            local is_running = self.tasks["RUNNING"] ~= nil
+            if require("utils").is_available("spinner.nvim") then
+                if is_running ~= prev_is_running then
+                    prev_is_running = is_running
+                    if is_running then
+                        require("spinner").start(spinner_name)
+                    else
+                        require("spinner").stop(spinner_name)
+                    end
+                end
+            end
+            return is_running
+        end,
+        init = function(self)
+            if require("utils").is_available("spinner.nvim") then
+                require("spinner").config(spinner_name, {
+                    kind = "statusline",
+                    pattern = "dotsCircle",
+                })
+            end
+        end,
+        provider = function(self)
+            local symbol
+            if require("utils").is_available("spinner.nvim") then
+                symbol = require("spinner").render(spinner_name)
+            else
+                symbol = self.symbols["RUNNING"]
+            end
+            return string.format("%s%d", symbol, #self.tasks["RUNNING"])
+        end,
+        hl = function(self)
+            return {
+                fg = require("heirline.utils").get_highlight(string.format("Overseer%s", "RUNNING")).fg,
+            }
+        end,
+    }
+end
+
 return {
     condition = function()
         return package.loaded["overseer"]
@@ -36,7 +79,7 @@ return {
     },
 
     bhu.padding_after(OverseerTasksForStatus("CANCELED")),
-    bhu.padding_after(OverseerTasksForStatus("RUNNING")),
+    bhu.padding_after(OverseerTasksForRunning()),
     bhu.padding_after(OverseerTasksForStatus("SUCCESS")),
     bhu.padding_after(OverseerTasksForStatus("FAILURE")),
 }

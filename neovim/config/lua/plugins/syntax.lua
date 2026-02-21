@@ -234,22 +234,4 @@ return {
             return opts
         end,
     },
-    {
-        "nvim-treesitter/nvim-treesitter-context",
-        cmd = {
-            "TSContextEnable",
-            "TSContextDisable",
-            "TSContextToggle",
-        },
-        cond = not environment.is_vscode and environment.treesitter_enable,
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter",
-        },
-        event = {
-            "User TreesitterFile",
-        },
-        opts = {
-            multiline_threshold = 1, -- Maximum number of lines to show for a single context
-        },
-    },
 }
