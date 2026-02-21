@@ -107,7 +107,7 @@ json_format() {
     path=$1
 
     temp_path=${path}.bak
-    jq --indent 4 . "$path" > "$temp_path"
+    jq --indent 4 . "$path" >"$temp_path"
     mv "$temp_path" "$path"
 }
 
