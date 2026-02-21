@@ -21,7 +21,7 @@
     },
     "insert fenced code block": {
         "body": [
-            "```${1|autohotkey,bash,c,cpp,csharp,css,diff,go,html,java,javascript,json,lua,markdown,php,python,ruby,rust,sql,tex,text,typescript|}",
+            "```${1|autohotkey,bash,c,cpp,csharp,css,diff,go,html,java,javascript,json,lua,markdown,mermaid,php,python,ruby,rust,sql,tex,text,typescript|}",
             "${TM_SELECTED_TEXT}$0",
             "```"
         ],

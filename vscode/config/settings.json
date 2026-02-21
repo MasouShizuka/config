@@ -14,17 +14,6 @@
         },
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
-    "auto-run-command.rules": [
-        {
-            "command": [
-                "workbench.action.terminal.kill",
-                "workbench.action.closePanel",
-                "workbench.action.closeAuxiliaryBar"
-            ],
-            "condition": "always",
-            "message": "close widgets when startup"
-        }
-    ],
     "code-runner.executorMap": {
         "c": "cd $dirWithoutTrailingSlash && clang -static-libgcc $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
         "cpp": "cd $dirWithoutTrailingSlash && clang++ -static-libstdc++ $fileName -o $fileNameWithoutExt -g && ./$fileNameWithoutExt",
@@ -56,7 +45,7 @@
     "editor.renderWhitespace": "trailing",
     "editor.rulers": [
         {
-            "color": "#ff757f",
+            "color": "#e06c75",
             "column": 120
         }
     ],
@@ -72,7 +61,6 @@
     "files.autoGuessEncoding": true,
     "files.autoSave": "afterDelay",
     "git.blame.editorDecoration.enabled": true,
-    "hediet.vscode-drawio.codeLinkActivated": true,
     "json.format.keepLines": true,
     "latex-workshop.latex.autoBuild.run": "never",
     "latex-workshop.latex.recipe.default": "lastUsed",
@@ -189,30 +177,6 @@
         "Left": "",
         "Right": ""
     },
-    "mdtableeditor.commandViews": {
-        "context": [
-            "MdTableEditor.changeAlignCenter",
-            "MdTableEditor.changeAlignLeft",
-            "MdTableEditor.changeAlignRight",
-            "MdTableEditor.columnSelectEmpty",
-            "MdTableEditor.insertBottom",
-            "MdTableEditor.insertLeft",
-            "MdTableEditor.insertRight",
-            "MdTableEditor.insertTop",
-            "MdTableEditor.moveBottom",
-            "MdTableEditor.moveLeft",
-            "MdTableEditor.moveRight",
-            "MdTableEditor.moveTop",
-            "MdTableEditor.removeColumn",
-            "MdTableEditor.removeRow",
-            "MdTableEditor.sortNumberAsc",
-            "MdTableEditor.sortNumberDesc",
-            "MdTableEditor.sortTextAsc.ignore",
-            "MdTableEditor.sortTextDesc.ignore"
-        ],
-        "toolbar": []
-    },
-    "mdtableeditor.isHighlighterEnabled": false,
     "notebook.cellToolbarLocation": {
         "default": "left"
     },
@@ -224,7 +188,6 @@
     "notebook.output.scrolling": true,
     "notebook.stickyScroll.enabled": true,
     "pasteImage.path": "${currentFileDir}\\_images_${currentFileNameWithoutExt}",
-    "python.analysis.inlayHints.pytestParameters": true,
     "python.terminal.shellIntegration.enabled": true,
     "search.defaultViewMode": "tree",
     "search.followSymlinks": false,
@@ -243,6 +206,8 @@
             "path": "ucrt64.cmd"
         }
     },
+    "terminal.integrated.scrollback": 2000000,
+    "terminal.integrated.shellIntegration.enabled": false,
     "terminal.integrated.stickyScroll.enabled": true,
     "terminal.integrated.tabs.location": "left",
     "todo-tree.general.tagGroups": {
@@ -307,38 +272,38 @@
             "icon": "issue-closed"
         },
         "FIX": {
-            "background": "#ff757f",
-            "foreground": "#222436",
+            "background": "#e06c75",
+            "foreground": "#24273a",
             "icon": "bug"
         },
         "HACK": {
             "background": "#ff966c",
-            "foreground": "#222436",
+            "foreground": "#24273a",
             "icon": "flame"
         },
         "NOTE": {
-            "background": "#82aaff",
-            "foreground": "#222436",
+            "background": "#8aadf4",
+            "foreground": "#24273a",
             "icon": "note"
         },
         "PERF": {
-            "background": "#fca7ea",
-            "foreground": "#222436",
+            "background": "#c6a0f6",
+            "foreground": "#24273a",
             "icon": "clock"
         },
         "TEST": {
-            "background": "#4fd6be",
-            "foreground": "#222436",
+            "background": "#8bd5ca",
+            "foreground": "#24273a",
             "icon": "beaker"
         },
         "TODO": {
-            "background": "#c3e88d",
-            "foreground": "#222436",
+            "background": "#a6da95",
+            "foreground": "#24273a",
             "icon": "check"
         },
         "WARN": {
-            "background": "#ffc777",
-            "foreground": "#222436",
+            "background": "#eed49f",
+            "foreground": "#24273a",
             "icon": "alert"
         }
     },
@@ -373,32 +338,15 @@
     "window.dialogStyle": "custom",
     "window.menuBarVisibility": "compact",
     "window.zoomLevel": 2,
-    "workbench.colorCustomizations": {
-        "[Tokyo Night Moon NVim]": {
-            "editor.foreground": "#c8d3f5",
-            "editor.selectionBackground": "#2d3f76",
-            "editor.selectionHighlightBorder": "#c8d3f5",
-            "editor.wordHighlightBackground": "#828bb844",
-            "editorSuggestWidget.selectedBackground": "#2d3f76",
-            "list.activeSelectionBackground": "#2d3f76",
-            "list.focusBackground": "#2f334d",
-            "list.inactiveSelectionBackground": "#2d3f76",
-            "tab.activeBorder": "#fca7ea",
-            "titleBar.inactiveBackground": "#2f334d",
-            "tree.indentGuidesStroke": "#c8d3f5"
-        }
-    },
-    "workbench.colorTheme": "Tokyo Night Moon NVim",
+    "workbench.colorTheme": "Catppuccin Macchiato",
     "workbench.editor.focusRecentEditorAfterClose": false,
     "workbench.editor.navigationScope": "editorGroup",
     "workbench.editor.wrapTabs": true,
     "workbench.editorAssociations": {
-        "*.drawio": "hediet.vscode-drawio-text",
-        "*.epub": "cweijan.epubViewer",
         "*.gif": "cweijan.officeViewer",
         "*.md": "default"
     },
-    "workbench.iconTheme": "material-icon-theme",
+    "workbench.iconTheme": "catppuccin-macchiato",
     "workbench.localHistory.enabled": false,
     "workbench.panel.showLabels": false,
     "workbench.startupEditor": "none",
