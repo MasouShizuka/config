@@ -238,15 +238,15 @@ rules = [
     # Virtual file system
     { mime = "vfs/{absent,stale}", fg = "#636da6" },
     # Special file
-    { name = "*", is = "orphan", bg = "#ff757f" },
-    { name = "*", is = "exec"  , fg = "#c3e88d" },
+    { url = "*", is = "orphan", bg = "#ff757f" },
+    { url = "*", is = "exec"  , fg = "#c3e88d" },
     # Dummy file
-    { name = "*", is = "dummy", bg = "#ff757f" },
-    { name = "*/", is = "dummy", bg = "#ff757f" },
+    { url = "*", is = "dummy", bg = "#ff757f" },
+    { url = "*/", is = "dummy", bg = "#ff757f" },
     # Fallback
-    { name = "*/", fg = "#82aaff" },
+    { url = "*/", fg = "#82aaff" },
 
-    { name = "*.exe", fg = "#c3e88d" },
+    { url = "*.exe", fg = "#c3e88d" },
 ]
 
 # : }}}

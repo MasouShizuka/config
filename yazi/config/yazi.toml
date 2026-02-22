@@ -6,22 +6,22 @@ show_hidden = true
 [opener]
 
 7-zip = [
-    { run = '7zfm %s',                                                             desc = "打开压缩包 (7-zip)",      for = "windows" },
-    { run = '7zg a -ad "%1".7z %s',                                                desc = "添加到压缩包... (7-zip)", for = "windows" },
+    { run = '7zfm %s',                                              desc = "打开压缩包 (7-zip)",      for = "windows" },
+    { run = '7zg a -ad %s1.7z %s',                                  desc = "添加到压缩包... (7-zip)", for = "windows" },
 ]
 
 edit = [
-    { run = 'nvim -p %s',                                           desc = "nvim",           for = "windows", block = true},
-    { run = 'wezterm start --cwd "%h" -- nvim -p %s -c "cd %:p:h"', desc = "nvim (wezterm)", for = "windows", orphan = true },
-    { run = 'code %s',                                              desc = "code",           for = "windows", orphan = true},
-    { run = 'code -w %s',                                           desc = "code (block)",   for = "windows", block = true },
-    { run = 'nvim -p "%s"',                                         desc = "nvim",           for = "unix",    block = true},
-    { run = 'code "%s"',                                            desc = "code",           for = "unix",    orphan = true },
-    { run = 'code -w "%s"',                                         desc = "code (block)",   for = "unix",    block = true},
+    { run = 'nvim -p %s',                                           desc = "nvim",                    for = "windows", block = true},
+    { run = 'wezterm start --cwd "%h" -- nvim -p %s -c "cd %:p:h"', desc = "nvim (wezterm)",          for = "windows", orphan = true },
+    { run = 'code %s',                                              desc = "code",                    for = "windows", orphan = true},
+    { run = 'code -w %s',                                           desc = "code (block)",            for = "windows", block = true },
+    { run = 'nvim -p %s',                                           desc = "nvim",                    for = "unix",    block = true},
+    { run = 'code %s',                                              desc = "code",                    for = "unix",    orphan = true },
+    { run = 'code -w %s',                                           desc = "code (block)",            for = "unix",    block = true},
 ]
 
 locale-emulator = [
-    { run = 'leproc %s',                                                           desc = "Open (locale-emulator)",  for = "windows" },
+    { run = 'leproc %s',                                            desc = "Open (locale-emulator)",  for = "windows" },
 ]
 
 [open]

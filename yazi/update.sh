@@ -18,7 +18,7 @@ if [[ ! -d "$CONFIG_DIR" ]]; then
 fi
 rm -rf "${CONFIG_DIR:?}"/*
 
-exclusion_list=("plugins")
+exclusion_list=("flavors" "plugins" "package.toml")
 for f in "$target"/*; do
     [[ -e "$f" ]] || break
 
@@ -30,14 +30,29 @@ done
 
 shopt -s dotglob
 
+mkdir "$CONFIG_DIR/flavors"
+exclusion_flavor_list=("catppuccin-macchiato.yazi")
+for d in "$target/flavors"/*; do
+    [[ -e "$d" ]] || break
+
+    flavor_name=${d##*/}
+    if [[ ! ${exclusion_flavor_list[*]} =~ $flavor_name ]]; then
+        cp -r "$d" "$CONFIG_DIR/flavors"
+    fi
+done
+
 mkdir "$CONFIG_DIR/plugins"
+exclusion_plugin_list=("yatline.yazi" "close-and-restore-tab.yazi" "projects.yazi" "full-border.yazi" "git.yazi" "mime-ext.yazi" "smart-enter.yazi")
 exclusion_list=(".git" ".github" ".gitignore")
 for d in "$target/plugins"/*; do
     [[ -e "$d" ]] || break
 
     plugin_name=${d##*/}
-    mkdir "$CONFIG_DIR/plugins/$plugin_name"
+    if [[ ${exclusion_plugin_list[*]} =~ $plugin_name ]]; then
+        continue
+    fi
 
+    mkdir "$CONFIG_DIR/plugins/$plugin_name"
     for f in "$target/plugins/$plugin_name"/*; do
         [[ -e "$f" ]] || break
 

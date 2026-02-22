@@ -1,4 +1,16 @@
 local themes = {
+    ["catppuccin-macchiato"] = {
+        black = "#24273a",
+        blue = "#8aadf4",
+        cyan = "#8bd5ca",
+        gray = "#939ab7",
+        green = "#a6da95",
+        orange = "#f5a97f",
+        purple = "#c6a0f6",
+        red = "#ed8796",
+        white = "#cad3f5",
+        yellow = "#eed49f",
+    },
     ["onedarkpro"] = {
         black = "#282c34",
         blue = "#61afef",
@@ -25,7 +37,7 @@ local themes = {
     },
 }
 
-local theme = themes["tokyonight-moon"]
+local theme = themes["catppuccin-macchiato"]
 
 
 require("session"):setup({
@@ -160,6 +172,8 @@ require("full-border"):setup({
 
 -- ya pkg add yazi-rs/plugins:git
 require("git"):setup()
+
+-- ya pkg add yazi-rs/plugins:mime-ext
 
 -- ya pkg add yazi-rs/plugins:smart-enter
 require("smart-enter"):setup({

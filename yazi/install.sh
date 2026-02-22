@@ -11,6 +11,14 @@ if ((is_windows)); then
     scoop install fzf
     scoop install ripgrep
 
+    ya pkg add imsi32/yatline
+    ya pkg add MasouShizuka/close-and-restore-tab
+    ya pkg add MasouShizuka/projects
+    ya pkg add yazi-rs/flavors:catppuccin-macchiato
+    ya pkg add yazi-rs/plugins:full-border
+    ya pkg add yazi-rs/plugins:git
+    ya pkg add yazi-rs/plugins:smart-enter
+
     target="$APPDATA/yazi/config"
     install_to_target "$CONFIG_DIR" "$target"
 fi
