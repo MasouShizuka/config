@@ -1,10 +1,16 @@
 ﻿<TablacusExplorer Format="0" XP="0"><Item Filter="*" Type="JScript">FV.SetViewMode(4,16);
 FV.GroupBy='System.Null';
 FV.SortColumn='System.ItemTypeText';
-FV.Columns='"System.ItemNameDisplay" -2 "System.DateModified" -2 "System.Size" -2 "System.ItemTypeText" -2';</Item><Item Filter="*Music*" Type="JScript">FV.SetViewMode(4,16);
+setTimeout(function() {
+    FV.Columns='"System.ItemNameDisplay" -2 "System.DateModified" -2 "System.Size" -2 "System.ItemTypeText" -2';
+}, 500);</Item><Item Filter="*Music*" Type="JScript">FV.SetViewMode(4,16);
 FV.GroupBy='System.Null';
 FV.SortColumn='名称';
-FV.Columns='"System.ItemNameDisplay" -2 "System.Music.Artist" -2 "System.Music.AlbumTitle" -2 "System.Media.Duration" -2 "System.Audio.EncodingBitrate" -2 "System.Size" -2';</Item><Item Filter="*Pictures*" Type="JScript">FV.SetViewMode(1,96);
+setTimeout(function() {
+    FV.Columns='"System.ItemNameDisplay" -2 "System.Music.Artist" -2 "System.Music.AlbumTitle" -2 "System.Media.Duration" -2 "System.Audio.EncodingBitrate" -2 "System.Size" -2';
+}, 500);</Item><Item Filter="*Pictures*" Type="JScript">FV.SetViewMode(1,96);
 FV.GroupBy='System.Null';
 FV.SortColumn='名称';
-FV.Columns='"System.ItemNameDisplay" -2 "System.Image.Dimensions" -2 "System.Size" -2 "System.ItemTypeText" -2';</Item></TablacusExplorer>
+setTimeout(function() {
+    FV.Columns='"System.ItemNameDisplay" -2 "System.Image.Dimensions" -2 "System.Size" -2 "System.ItemTypeText" -2';
+}, 500);</Item></TablacusExplorer>

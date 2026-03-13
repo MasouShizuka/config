@@ -22,9 +22,4 @@ Addons.FilterBar.KeyUp = function (ev) {
             }
         })();
     }
-};
-
-// add event for foldersettings
-AddEvent("ContentsChanged", function (Ctrl) {
-    RunEvent1("NavigateComplete", Ctrl);
-});</startup><tabposition Enabled="3" Level="2" Set="1" Close="3"/></TablacusExplorer>
+};</startup><tabposition Enabled="3" Level="2" Set="1" Close="3"/></TablacusExplorer>
