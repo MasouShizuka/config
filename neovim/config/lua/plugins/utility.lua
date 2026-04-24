@@ -293,11 +293,7 @@ return {
                         if vim.fn.exists(":NoMatchParen") ~= 0 then
                             vim.cmd([[NoMatchParen]])
                         end
-                        snacks.util.wo(0, {
-                            foldmethod = "manual",
-                            statuscolumn = "",
-                            conceallevel = 0,
-                        })
+                        snacks.util.wo(0, { foldmethod = "manual", statuscolumn = "", conceallevel = 0 })
                         vim.schedule(function()
                             if vim.api.nvim_buf_is_valid(ctx.buf) then
                                 vim.bo[ctx.buf].syntax = ctx.ft
@@ -313,11 +309,7 @@ return {
                         vim.api.nvim_set_option_value("list", false, { scope = "local" })
 
                         vim.schedule(function()
-                            local ts_avail, parsers = pcall(require, "nvim-treesitter.parsers")
-                            local is_treesitter_available = ts_avail and parsers.has_parser()
-                            if is_treesitter_available then
-                                vim.treesitter.stop(ctx.buf)
-                            end
+                            vim.treesitter.stop(ctx.buf)
                             vim.api.nvim_set_option_value("syntax", "off", { scope = "local" })
                         end)
                     end,

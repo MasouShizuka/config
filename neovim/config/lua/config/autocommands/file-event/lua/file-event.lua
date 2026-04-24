@@ -106,6 +106,7 @@ M.setup = function(opts)
     })
 
     -- lsp 文件切换部分设置
+    local lsp_buf_is_not_first_var = "lsp_file_is_not_first"
     create_event({
         condition = function(args)
             local session_file = vim.b[args.buf].session_file or false
@@ -114,6 +115,12 @@ M.setup = function(opts)
         desc = "Change settings for lsp file",
         func = function(args)
             vim.api.nvim_set_option_value("signcolumn", "yes", { scope = "local" })
+
+            -- 第一次打开时刷新
+            if not vim.b[args.buf][lsp_buf_is_not_first_var] then
+                vim.b[args.buf][lsp_buf_is_not_first_var] = true
+                refresh_buf(args)
+            end
         end,
     })
 
@@ -148,27 +155,29 @@ M.setup = function(opts)
 
     -- 打开 help 时移动到右边
     -- https://github.com/anuvyklack/help-vsplit.nvim
-    vim.api.nvim_create_autocmd({ "BufEnter", "WinNew" }, {
+    vim.api.nvim_create_autocmd("BufWinEnter", {
         callback = function(args)
             local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
             if ft ~= "help" then
                 return
             end
+            if vim.w.already_vsplit then
+                return
+            end
+            vim.w.already_vsplit = true
 
             local origin_win = vim.fn.win_getid(vim.fn.winnr("#"))
-
-            local help_buf = vim.api.nvim_get_current_buf()
 
             local bufhidden = vim.api.nvim_get_option_value("bufhidden", { buf = args.buf })
             vim.api.nvim_set_option_value("bufhidden", "hide", { buf = args.buf })
 
             local old_help_win = vim.api.nvim_get_current_win()
             vim.api.nvim_set_current_win(origin_win)
-
             vim.api.nvim_win_close(old_help_win, false)
 
             vim.api.nvim_command("vsplit")
-            vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win(), help_buf)
+            vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win(), args.buf)
+
             vim.api.nvim_set_option_value("bufhidden", bufhidden, { buf = args.buf })
         end,
         desc = "Open help in a vertical split",

@@ -71,8 +71,11 @@ local format_infos = {
     },
 }
 
+---@type string[]
 M.format_list = {}
+---@type table<string,conform.JobFormatterConfig>
 M.format_config = {}
+---@type table<string,string[]>
 M.formatters_by_ft = {
     markdown = { "autocorrect" },
     ["_"] = { "trim_newlines", "trim_whitespace" },

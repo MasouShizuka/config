@@ -8,7 +8,7 @@ return {
         },
         cond = environment.treesitter_enable,
         dependencies = {
-            "nvim-treesitter/nvim-treesitter",
+            "romus204/tree-sitter-manager.nvim",
         },
         keys = {
             { "<leader>a", function() require("neogen").generate() end, desc = "Generate annotation", mode = { "n", "x" } },
@@ -319,7 +319,7 @@ return {
             require("rainbow-delimiters.setup").setup(opts)
         end,
         dependencies = {
-            "nvim-treesitter/nvim-treesitter",
+            "romus204/tree-sitter-manager.nvim",
         },
         event = {
             "User TreesitterFile",
@@ -473,13 +473,11 @@ return {
     {
         "nvim-treesitter/nvim-treesitter-context",
         cmd = {
-            "TSContextEnable",
-            "TSContextDisable",
-            "TSContextToggle",
+            "TSContext",
         },
         cond = not environment.is_vscode and environment.treesitter_enable,
         dependencies = {
-            "nvim-treesitter/nvim-treesitter",
+            "romus204/tree-sitter-manager.nvim",
         },
         event = {
             "User TreesitterFile",

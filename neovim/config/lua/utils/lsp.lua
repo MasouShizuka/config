@@ -98,6 +98,9 @@ local lsp_infos = {
             end,
             settings = {
                 Lua = {
+                    codeLens = {
+                        enable = false,
+                    },
                     completion = {
                         callSnippet = "Replace",
                     },
@@ -114,9 +117,6 @@ local lsp_infos = {
                             max_line_length = "unset",
                             trailing_table_separator = "smart",
                         },
-                    },
-                    hint = {
-                        enable = true,
                     },
                 },
             },
@@ -200,8 +200,11 @@ local lsp_infos = {
     },
 }
 
+---@type string[]
 M.lsp_list = {}
+---@type table<string,vim.lsp.Config>
 M.lsp_config = {}
+---@type string[]
 M.lsp_filetype_list = {}
 for lsp, info in pairs(lsp_infos) do
     local enable = info.enable

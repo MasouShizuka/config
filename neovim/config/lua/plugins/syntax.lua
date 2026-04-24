@@ -93,145 +93,22 @@ return {
 
     -- NOTE: 需要安装 C 编译器，例如 msys2 中的 mingw-w64-ucrt-x86_64-gcc 或 mingw-w64-ucrt-x86_64-clang
     -- msys2 中自带的 gcc 编译的 parser 会使得 neovim 闪退
+    -- 需要安装 tree-sitter，例如 msys2 中的 mingw-w64-ucrt-x86_64-tree-sitter
     {
-        "nvim-treesitter/nvim-treesitter",
-        build = {
-            ":TSUpdate",
-        },
+        "romus204/tree-sitter-manager.nvim",
         cmd = {
-            "TSBufDisable",
-            "TSBufEnable",
-            "TSBufToggle",
-            "TSDisable",
-            "TSEnable",
-            "TSToggle",
-            "TSInstall",
-            "TSInstallInfo",
-            "TSInstallSync",
-            "TSModuleInfo",
-            "TSUninstall",
-            "TSUpdate",
-            "TSUpdateSync",
+            "TSManager",
         },
         cond = environment.treesitter_enable,
-        config = function(_, opts)
-            require("nvim-treesitter.configs").setup(opts)
-
-            -- lazyvim.plugins.treesitter
-            -- When in diff mode, we want to use the default
-            -- vim text objects c & C instead of the treesitter ones.
-            local move = require("nvim-treesitter.textobjects.move") ---@type table<string,fun(...)>
-            local configs = require("nvim-treesitter.configs")
-            for name, fn in pairs(move) do
-                if name:find("goto") == 1 then
-                    move[name] = function(q, ...)
-                        if vim.wo.diff then
-                            local config = configs.get_module("textobjects.move")[name] ---@type table<string,string>
-                            for key, query in pairs(config or {}) do
-                                if q == query and key:find("[%]%[][cC]") then
-                                    vim.cmd("normal! " .. key)
-                                    return
-                                end
-                            end
-                        end
-                        return fn(q, ...)
-                    end
-                end
-            end
-        end,
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter-textobjects",
-        },
         event = {
             "User TreesitterFile",
         },
         opts = function()
-            local utils = require("utils")
-
-            local opts = {
-                -- A list of parser names, or "all"
-                ensure_installed = require("utils.treesitter").treesitter,
-
-                -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
-                highlight = {
-                    enable = not environment.is_vscode,
-                    disable = function(lang, buf)
-                        return utils.is_bigfile(buf) or utils.is_longfile(buf)
-                    end,
-                },
-
-                indent = {
-                    enable = true,
-                },
+            return {
+                -- Default Options
+                ensure_installed = require("utils.treesitter").treesitter, -- list of parsers to install at the start of a neovim session
+                border = "rounded", -- border style for the window (e.g. "rounded", "single"), if nil, use the default border style defined by 'vim.o.winborder'. See :h 'winborder' for more info.
             }
-
-            if utils.is_available("nvim-treesitter-textobjects") then
-                local textobjects = {}
-
-                if not utils.is_available("mini.ai") then
-                    textobjects["select"] = {
-                        enable = true,
-
-                        -- Automatically jump forward to textobj, similar to targets.vim
-                        lookahead = true,
-
-                        keymaps = {
-                            -- You can use the capture groups defined in textobjects.scm
-                            ["ao"] = { query = "@block.outer", desc = "Around block" },
-                            ["io"] = { query = "@block.inner", desc = "Inside block" },
-                            ["ac"] = { query = "@class.outer", desc = "Around class" },
-                            ["ic"] = { query = "@class.inner", desc = "Inside class" },
-                            ["af"] = { query = "@function.outer", desc = "Around function " },
-                            ["if"] = { query = "@function.inner", desc = "Inside function " },
-                            ["aa"] = { query = "@parameter.outer", desc = "Around argument" },
-                            ["ia"] = { query = "@parameter.inner", desc = "Inside argument" },
-                        },
-                    }
-                end
-
-                textobjects["swap"] = {
-                    enable = true,
-                    swap_next = {
-                        ["sXa"] = { query = "@parameter.inner", desc = "Swap next argument" },
-                    },
-                    swap_previous = {
-                        ["sXA"] = { query = "@parameter.inner", desc = "Swap previous argument" },
-                    },
-                }
-
-                textobjects["move"] = {
-                    enable = true,
-                    set_jumps = true, -- whether to set jumps in the jumplist
-                    goto_next_start = {
-                        ["]o"] = { query = "@block.outer", desc = "Next block start" },
-                        ["]c"] = { query = "@class.outer", desc = "Next class start" },
-                        ["]f"] = { query = "@function.outer", desc = "Next function start" },
-                        ["]a"] = { query = "@parameter.inner", desc = "Next argument start" },
-                    },
-                    goto_next_end = {
-                        ["]O"] = { query = "@block.outer", desc = "Next block end" },
-                        ["]C"] = { query = "@class.outer", desc = "Next class end" },
-                        ["]F"] = { query = "@function.outer", desc = "Next function end" },
-                        ["]A"] = { query = "@parameter.inner", desc = "Next argument end" },
-                    },
-                    goto_previous_start = {
-                        ["[o"] = { query = "@block.outer", desc = "Previous block start" },
-                        ["[c"] = { query = "@class.outer", desc = "Previous class start" },
-                        ["[f"] = { query = "@function.outer", desc = "Previous function start" },
-                        ["[a"] = { query = "@parameter.inner", desc = "Previous argument start" },
-                    },
-                    goto_previous_end = {
-                        ["[O"] = { query = "@block.outer", desc = "Previous block end" },
-                        ["[C"] = { query = "@class.outer", desc = "Previous class end" },
-                        ["[F"] = { query = "@function.outer", desc = "Previous function end" },
-                        ["[A"] = { query = "@parameter.inner", desc = "Previous argument end" },
-                    },
-                }
-
-                opts["textobjects"] = textobjects
-            end
-
-            return opts
         end,
     },
 }

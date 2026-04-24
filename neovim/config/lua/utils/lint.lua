@@ -34,9 +34,13 @@ local lint_infos = {
     },
 }
 
+---@type string[]
 M.lint_list = {}
+---@type table<string,lint.Linter>
 M.lint_config = {}
+---@type table<string,string[]>
 M.linters_by_ft = {}
+---@type string[]
 M.lint_filetype_list = {}
 for lint, info in pairs(lint_infos) do
     local enable = info.enable

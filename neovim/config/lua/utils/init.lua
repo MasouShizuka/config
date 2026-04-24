@@ -399,13 +399,13 @@ function M.set_setting_toggle(setting, opts)
                     return vim.b[buf][setting]
                 end,
                 set = function(state) M.toggle_buffer_setting(setting, vim.tbl_deep_extend("force", local_opts, { notify = false })) end,
-            }):map(local_keymap.keys, { buffer = local_keymap.buf, mode = local_keymap.mode or "n" })
+            }):map(local_keymap.keys, { buf = local_keymap.buf, mode = local_keymap.mode or "n" })
         else
             vim.keymap.set(
                 local_keymap.mode or "n",
                 local_keymap.keys,
                 function() M.toggle_buffer_setting(setting, local_opts) end,
-                { buffer = local_keymap.buf, desc = "Toggle " .. setting .. " (buffer)", silent = true }
+                { buf = local_keymap.buf, desc = "Toggle " .. setting .. " (buffer)", silent = true }
             )
         end
     end
@@ -420,13 +420,13 @@ function M.set_setting_toggle(setting, opts)
                 name = setting .. " (global)",
                 get = function() return vim.g[setting] end,
                 set = function(state) M.toggle_global_setting(setting, vim.tbl_deep_extend("force", global_opts, { notify = false })) end,
-            }):map(global_keymap.keys, { buffer = global_keymap.buf, mode = global_keymap.mode or "n" })
+            }):map(global_keymap.keys, { buf = global_keymap.buf, mode = global_keymap.mode or "n" })
         else
             vim.keymap.set(
                 global_keymap.mode or "n",
                 global_keymap.keys,
                 function() M.toggle_global_setting(setting, global_opts) end,
-                { buffer = global_keymap.buf, desc = "Toggle " .. setting, silent = true }
+                { buf = global_keymap.buf, desc = "Toggle " .. setting, silent = true }
             )
         end
     end

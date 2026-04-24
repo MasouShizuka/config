@@ -49,29 +49,60 @@ function M.setup(opts)
     vim.opt.swapfile = false    -- whether to use a swapfile for a buffer
 
     -- Fold
-    -- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/util/ui.lua
+    local support_fold_var = "support_name"
+    local augroup = vim.api.nvim_create_augroup("LspFoldexpr", { clear = true })
+    vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+            if vim.b[args.buf][support_fold_var] then
+                return
+            end
+
+            local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+            if client:supports_method("textDocument/foldingRange", args.buf) then
+                vim.b[args.buf][support_fold_var] = true
+            end
+        end,
+        desc = "Monitor attached LSP clients with fold providers",
+        group = augroup,
+    })
+    vim.api.nvim_create_autocmd("LspDetach", {
+        callback = function(args)
+            if not vim.api.nvim_buf_is_valid(args.buf) then
+                return
+            end
+            for _, client in pairs(vim.lsp.get_clients { bufnr = args.buf }) do
+                if client.id ~= args.data.client_id and client:supports_method("textDocument/foldingRange", args.buf) then
+                    return
+                end
+            end
+            vim.b[args.buf][support_fold_var] = nil
+        end,
+        desc = "Safely remove LSP folding providers when language servers detach",
+        group = augroup,
+    })
+
+    local treesitter_installed = {}
+    for _, lang in ipairs(require("utils.treesitter").treesitter) do
+        treesitter_installed[lang] = true
+    end
+
     -- https://github.com/AstroNvim/astroui/blob/main/lua/astroui/folding.lua
     function _G.custom_foldexpr(lnum)
         local bufnr = vim.api.nvim_get_current_buf()
-        for _, fold_method in ipairs({
-            function(lnum, bufnr)
-                if vim.b[bufnr].ts_folds == nil then
-                    -- as long as we don't have a filetype, don't bother
-                    -- checking if treesitter is available (it won't)
-                    if vim.bo[bufnr].filetype == "" then
-                        return "0"
-                    end
-                    if vim.bo[bufnr].filetype:find("dashboard") then
-                        vim.b[bufnr].ts_folds = false
-                    else
-                        vim.b[bufnr].ts_folds = pcall(vim.treesitter.get_parser, bufnr)
-                    end
+        for _, fold_method in pairs({
+            lsp = function(lnum, bufnr)
+                if vim.b[bufnr][support_fold_var] then
+                    return vim.lsp.foldexpr(lnum)
                 end
-                if vim.b[bufnr].ts_folds then
+            end,
+            treesitter = function(lnum, bufnr)
+                local filetype = vim.bo[bufnr].filetype
+                local lang = vim.treesitter.language.get_lang(filetype --[[ @as string ]])
+                if lang and treesitter_installed[lang] and vim.treesitter.query.get(lang, "folds") then
                     return vim.treesitter.foldexpr(lnum)
                 end
             end,
-            function(lnum, bufnr)
+            indent = function(lnum, bufnr)
                 if not lnum then
                     lnum = vim.v.lnum
                 end

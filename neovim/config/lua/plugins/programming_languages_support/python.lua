@@ -17,7 +17,7 @@ return {
                 callback = function(args)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
-                        vim.keymap.set("n", "<leader>lv", function() vim.api.nvim_command("VenvSelect") end, { buffer = args.buf, desc = "Open VenvSelector to pick a venv", silent = true })
+                        vim.keymap.set("n", "<leader>lv", function() vim.api.nvim_command("VenvSelect") end, { buf = args.buf, desc = "Open VenvSelector to pick a venv", silent = true })
                     end
                 end,
                 desc = "Venv selector keymap",
@@ -42,9 +42,9 @@ return {
                                     { "<leader>dl", buffer = args.buf, group = "python dap", mode = "n" },
                                 })
                             end
-                            vim.keymap.set("n", "<leader>dlm", function() require("dap-python").test_method() end, { buffer = args.buf, desc = "Debug method", silent = true })
-                            vim.keymap.set("n", "<leader>dlc", function() require("dap-python").test_class() end, { buffer = args.buf, desc = "Debug class", silent = true })
-                            vim.keymap.set("n", "<leader>dls", function() require("dap-python").debug_selection() end, { buffer = args.buf, desc = "Debug selection", silent = true })
+                            vim.keymap.set("n", "<leader>dlm", function() require("dap-python").test_method() end, { buf = args.buf, desc = "Debug method", silent = true })
+                            vim.keymap.set("n", "<leader>dlc", function() require("dap-python").test_class() end, { buf = args.buf, desc = "Debug class", silent = true })
+                            vim.keymap.set("n", "<leader>dls", function() require("dap-python").debug_selection() end, { buf = args.buf, desc = "Debug selection", silent = true })
                         end,
                         desc = "Python dap keymap",
                         group = vim.api.nvim_create_augroup("PythonDapKeymap", { clear = true }),

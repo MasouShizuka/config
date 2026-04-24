@@ -35,21 +35,21 @@ local treesitter_info = {
 }
 
 M.treesitter = {
-    -- the listed parsers MUST always be installed
-    "c",
-    "lua",
-    "vim",
-    "vimdoc",
-    "query",
-    "markdown",
-    "markdown_inline",
+    -- Nvim includes these parsers:
+    -- "c",
+    -- "lua",
+    -- "markdown",
+    -- "markdown_inline",
+    -- "vim",
+    -- "vimdoc",
+    -- "query",
 }
 M.treesitter_filetype_list = {
     "c",
-    "lua",
-    "vim",
-    "markdown",
     "help",
+    "lua",
+    "markdown",
+    "vim",
 }
 for treesitter, info in pairs(treesitter_info) do
     local enable = info.enable

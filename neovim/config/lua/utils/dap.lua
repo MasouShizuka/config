@@ -12,7 +12,7 @@ local M = {}
 ---@type table<string, dap_info>
 local dap_infos = {
     codelldb = {
-        adapters = {
+        adapter = {
             type = "executable",
             command = path.codelldb_path, -- or if not in $PATH: "/absolute/path/to/codelldb"
 
@@ -97,8 +97,12 @@ local dap_infos = {
         enable = vim.fn.executable("python") == 1,
     },
 }
+
+---@type string[]
 M.dap_list = {}
+---@type table<string,dap.Adapter|dap.AdapterFactory>
 M.dap_adapters = {}
+---@type table<string,dap.Configuration[]>
 M.dap_configurations = {}
 for dap, info in pairs(dap_infos) do
     local enable = info.enable
@@ -117,25 +121,19 @@ for dap, info in pairs(dap_infos) do
     if info.adapter then
         M.dap_adapters[dap] = info.adapter
     end
-    if info.configuration then
-        local configuration
-        if type(info.configuration) == "function" then
-            configuration = info.configuration()
-        else
-            configuration = info.configuration
-        end
 
+    if info.configuration then
         if info.filetypes then
             for ft, ft_enable in pairs(info.filetypes) do
                 if type(ft_enable) == "function" then
                     ft_enable = ft_enable()
                 end
                 if ft_enable then
-                    M.dap_configurations[ft] = configuration
+                    M.dap_configurations[ft] = info.configuration
                 end
             end
         else
-            M.dap_configurations[dap] = configuration
+            M.dap_configurations[dap] = info.configuration
         end
     end
 

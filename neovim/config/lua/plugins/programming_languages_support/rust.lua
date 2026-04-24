@@ -34,9 +34,9 @@ return {
                             { "<leader>ll", buffer = args.buf, group = "rust lsp", mode = "n" },
                         })
                     end
-                    vim.keymap.set("n", "<leader>lld", function() vim.cmd.RustLsp("debuggables") end, { buffer = args.buf, desc = "Debugging", silent = true })
-                    vim.keymap.set("n", "<leader>llr", function() vim.cmd.RustLsp("runnables") end, { buffer = args.buf, desc = "Runnables", silent = true })
-                    vim.keymap.set("n", "<leader>llt", function() vim.cmd.RustLsp("testables") end, { buffer = args.buf, desc = "Testables", silent = true })
+                    vim.keymap.set("n", "<leader>lld", function() vim.cmd.RustLsp("debuggables") end, { buf = args.buf, desc = "Debugging", silent = true })
+                    vim.keymap.set("n", "<leader>llr", function() vim.cmd.RustLsp("runnables") end, { buf = args.buf, desc = "Runnables", silent = true })
+                    vim.keymap.set("n", "<leader>llt", function() vim.cmd.RustLsp("testables") end, { buf = args.buf, desc = "Testables", silent = true })
                 end,
                 desc = "Rust lsp keymap",
                 group = vim.api.nvim_create_augroup("RustLspKeymap", { clear = true }),

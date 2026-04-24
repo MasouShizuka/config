@@ -296,6 +296,28 @@ return {
                             local snacks = require("snacks")
 
                             snacks.toggle.new({
+                                id = "diagnostic_global",
+                                name = "diagnostic (global)",
+                                get = function() return vim.diagnostic.is_enabled() end,
+                                set = function()
+                                    if not package.loaded["toggle"] then
+                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
+                                    end
+                                    require("toggle").nvim.toggle_diagnostic()
+                                end,
+                            }):map("<leader>ctd")
+                            snacks.toggle.new({
+                                id = "diagnostic_buffer",
+                                name = "diagnostic (buffer)",
+                                get = function() return vim.diagnostic.is_enabled({ bufnr = vim.api.nvim_get_current_buf() }) end,
+                                set = function()
+                                    if not package.loaded["toggle"] then
+                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
+                                    end
+                                    require("toggle").nvim.toggle_diagnostic({ bufnr = vim.api.nvim_get_current_buf() })
+                                end,
+                            }):map("<leader>ctD")
+                            snacks.toggle.new({
                                 id = "fileformat",
                                 name = "fileformat",
                                 get = function()
@@ -333,6 +355,8 @@ return {
                             snacks.toggle.option("spell"):map("<leader>cts")
                             snacks.toggle.option("wrap"):map("<leader>ctw")
                         else
+                            vim.keymap.set("n", "<leader>ctd", function() require("toggle").nvim.toggle_diagnostic() end, { desc = "Toggle diagnostic (global)", silent = true })
+                            vim.keymap.set("n", "<leader>ctD", function() require("toggle").nvim.toggle_diagnostic({ bufnr = vim.api.nvim_get_current_buf() }) end, { desc = "Toggle diagnostic (buffer)", silent = true })
                             vim.keymap.set("n", "<leader>ctf", function() require("toggle").nvim.toggle_fileformat() end, { desc = "Toggle fileformat", silent = true })
                             vim.keymap.set("n", "<leader>cts", function() require("toggle").nvim.toggle_spell() end, { desc = "Toggle spell", silent = true })
                             vim.keymap.set("n", "<leader>ctt", function() require("toggle").nvim.toggle_syntax() end, { desc = "Toggle syntax", silent = true })

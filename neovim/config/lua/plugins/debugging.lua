@@ -19,10 +19,10 @@ return {
                 vim.fn.sign_define(name, sign)
             end
 
-            for dap_server, adapter in ipairs(dap.dap_adapters) do
+            for dap_server, adapter in pairs(dap.dap_adapters) do
                 require("dap").adapters[dap_server] = adapter
             end
-            for dap_server, configuration in ipairs(dap.dap_configurations) do
+            for dap_server, configuration in pairs(dap.dap_configurations) do
                 require("dap").configurations[dap_server] = configuration
             end
         end,
@@ -52,7 +52,7 @@ return {
             {
                 "theHamsta/nvim-dap-virtual-text",
                 dependencies = {
-                    "nvim-treesitter/nvim-treesitter",
+                    "romus204/tree-sitter-manager.nvim",
                 },
                 opts = {},
             },

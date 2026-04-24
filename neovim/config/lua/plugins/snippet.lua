@@ -42,12 +42,9 @@ return {
                 },
             },
 
-            -- `none` writes as a minified json file using `vim.encode.json`.
-            -- `yq`/`jq` ensure formatted & sorted json files, which is relevant when
-            -- you version control your snippets. To use a custom formatter, set to a
-            -- list of strings, which will then be passed to `vim.system()`.
-            ---@type "yq"|"jq"|"none"|string[]
-            jsonFormatter = { "jq", "--sort-keys", "--monochrome-output", "--indent", 4, "-b" },
+            jsonFormatOpts = { -- formatting of snippet files, passed to `:h vim.json.encode()`
+                indent = "    ",
+            },
         },
     },
 }

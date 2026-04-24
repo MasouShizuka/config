@@ -8,6 +8,8 @@ if ((is_windows)); then
     scoop install nodejs
     scoop install "$PARENT_DIR/scoop/config/workspace/im-select.json"
 
+    pacman -S mingw-w64-ucrt-x86_64-tree-sitter
+
     npm install bash-language-server --global
     scoop install shellcheck
     scoop install shfmt

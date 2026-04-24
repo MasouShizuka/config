@@ -32,7 +32,7 @@ return {
                     local gitsigns = package.loaded.gitsigns
 
                     local function map(mode, lhs, rhs, desc)
-                        vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc, silent = true })
+                        vim.keymap.set(mode, lhs, rhs, { buf = bufnr, desc = desc, silent = true })
                     end
 
                     if require("utils").is_available("which-key.nvim") then
@@ -124,7 +124,7 @@ return {
             -- Receives: { bufnr = number, conflicts = table }
             on_conflict_detected = function(info)
                 local function map(mode, lhs, rhs, desc)
-                    vim.keymap.set(mode, lhs, rhs, { buffer = info.bufnr, desc = desc, silent = true })
+                    vim.keymap.set(mode, lhs, rhs, { buf = info.bufnr, desc = desc, silent = true })
                 end
 
                 if require("utils").is_available("which-key.nvim") then

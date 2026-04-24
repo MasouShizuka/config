@@ -24,7 +24,7 @@ return {
                     end
 
                     local function map(mode, lhs, rhs, desc)
-                        vim.keymap.set(mode, lhs, rhs, { buffer = args.buf, desc = desc, silent = true })
+                        vim.keymap.set(mode, lhs, rhs, { buf = args.buf, desc = desc, silent = true })
                     end
 
                     map("n", "<leader>tc", function()

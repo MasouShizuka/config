@@ -16,11 +16,12 @@ function M.setup(opts)
         vim.keymap.set({ "n", "x" }, "<space>", "<nop>", { silent = true })
         vim.keymap.set({ "n", "x" }, "s", "<nop>", { silent = true })
     end
-    pcall(vim.keymap.del, "n", "grn")
     pcall(vim.keymap.del, { "n", "x" }, "gra")
-    pcall(vim.keymap.del, "n", "grr")
+    pcall(vim.keymap.del, "n", "grn")
     pcall(vim.keymap.del, "n", "gri")
+    pcall(vim.keymap.del, "n", "grr")
     pcall(vim.keymap.del, "n", "grt")
+    pcall(vim.keymap.del, "n", "grx")
 
     -- 复制到 clipboard
     vim.keymap.set({ "n", "x" }, "C", '"+c', { silent = true })

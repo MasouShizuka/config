@@ -455,19 +455,19 @@ return {
 
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
+                    local keymap = require("utils.keymap")
+
                     local buf = args.buf
                     local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
 
-                    local keymap = require("utils.keymap")
-
                     local function map(mode, lhs, rhs, desc)
-                        vim.keymap.set(mode, lhs, rhs, { buffer = buf, desc = desc, silent = true })
+                        vim.keymap.set(mode, lhs, rhs, { buf = buf, desc = desc, silent = true })
                     end
 
                     if utils.is_available("which-key.nvim") then
                         require("which-key").add({
                             {
-                                buffer = args.buf,
+                                buffer = buf,
                                 mode = "n",
                                 { "<leader>l",  group = "lsp" },
                                 { "<leader>lt", group = "lsp toggle" },
@@ -508,7 +508,9 @@ return {
                             opts = {
                                 callback = function(enabled, prev_enabled, global_enabled)
                                     if not global_enabled then
-                                        vim.lsp.stop_client(vim.lsp.get_clients())
+                                        for _, client in ipairs(vim.lsp.get_clients()) do
+                                            client:stop()
+                                        end
                                     end
                                     if (not prev_enabled or not global_enabled) and enabled then
                                         utils.refresh_buf(buf)
@@ -540,8 +542,7 @@ return {
                     end
 
                     if client:supports_method("textDocument/codeLens") then
-                        map("n", "<leader>lc", function() vim.lsp.codelens.refresh({ bufnr = buf }) end, "LSP CodeLens refresh")
-                        map("n", "<leader>lC", function() vim.lsp.codelens.run() end, "LSP CodeLens run")
+                        map("n", "<leader>lc", function() vim.lsp.codelens.run() end, "LSP CodeLens run")
 
                         utils.set_setting_toggle("codelens", {
                             default = true,
@@ -549,9 +550,7 @@ return {
                                 vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
                                     buffer = buf,
                                     callback = function()
-                                        if utils.get_setting_condition("codelens", { buf = buf }) then
-                                            vim.lsp.codelens.refresh({ bufnr = buf })
-                                        end
+                                        vim.lsp.codelens.enable(utils.get_setting_condition("codelens", { buf = buf }), { bufnr = buf })
                                     end,
                                     desc = "Refresh codelens",
                                     group = vim.api.nvim_create_augroup(string.format("LspCodelensRefresh%s", buf), { clear = true }),
@@ -561,9 +560,7 @@ return {
                                 keymap = { buf = buf, keys = "<leader>ltc", mode = "n" },
                                 opts = {
                                     callback = function(enabled, prev_enabled, global_enabled)
-                                        if not enabled then
-                                            vim.lsp.codelens.clear(nil, buf)
-                                        end
+                                        vim.lsp.codelens.enable(enabled, { bufnr = buf })
                                     end,
                                 },
 
@@ -572,9 +569,7 @@ return {
                                 keymap = { buf = buf, keys = "<leader>ltC", mode = "n" },
                                 opts = {
                                     callback = function(enabled, prev_enabled, global_enabled)
-                                        if not enabled then
-                                            vim.lsp.codelens.clear(nil, buf)
-                                        end
+                                        vim.lsp.codelens.enable(enabled, { bufnr = buf })
                                     end,
                                 },
 
@@ -681,11 +676,6 @@ return {
                                 },
                             })
                         end
-                    end
-
-                    if client:supports_method("textDocument/foldingRange") then
-                        local win = vim.api.nvim_get_current_win()
-                        vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
                     end
 
                     if
@@ -807,7 +797,7 @@ return {
                             local enabled = utils.get_setting_condition("inlay_hints", { buf = buf })
                             for _, client in ipairs(vim.lsp.get_clients({ bufnr = buf })) do
                                 if client.server_capabilities.semanticTokensProvider then
-                                    vim.lsp.semantic_tokens[enabled and "start" or "stop"](buf, client.id)
+                                    vim.lsp.semantic_tokens.enable(enabled, { bufnr = buf })
                                     vim.lsp.semantic_tokens.force_refresh(buf)
                                 end
                             end
@@ -863,8 +853,8 @@ return {
 
                     map("n", "gl", function() vim.diagnostic.open_float() end, "Hover diagnostics")
                     if not utils.is_available("trouble.nvim") then
-                        map("n", "<s-f8>", function() vim.diagnostic.jump({ count = -1, float = true }) end, "Previous diagnostic")
-                        map("n", "<f8>", function() vim.diagnostic.jump({ count = 1, float = true }) end, "Next diagnostic")
+                        map("n", "<s-f8>", function() vim.diagnostic.jump({ count = -1, on_jump = vim.diagnostic.open_float }) end, "Previous diagnostic")
+                        map("n", "<f8>", function() vim.diagnostic.jump({ count = 1, on_jump = vim.diagnostic.open_float }) end, "Next diagnostic")
                     end
                 end,
                 desc = "Lsp config",

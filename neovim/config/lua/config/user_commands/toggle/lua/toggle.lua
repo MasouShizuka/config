@@ -6,6 +6,7 @@ local vscode = {
 }
 
 local nvim = {
+    toggle_diagnostic = function(opts) vim.diagnostic.enable(not vim.diagnostic.is_enabled(opts), opts) end,
     toggle_fileformat = function(opts)
         local utils = require("utils")
         utils.toggle_option("fileformat", vim.tbl_deep_extend("force", {
@@ -19,7 +20,6 @@ local nvim = {
     toggle_spell = function(opts) require("utils").toggle_option("spell", opts) end,
     toggle_syntax = function(opts)
         local global = opts.global or false
-
         local option_opts = { scope = global and "global" or "local" }
 
         local syntax = vim.api.nvim_get_option_value("syntax", option_opts)
@@ -29,20 +29,12 @@ local nvim = {
 
         require("utils").toggle_option("syntax", vim.tbl_deep_extend("force", {
             callback = function(enabled, prev_enabled)
-                local buf
-                if not global then
-                    buf = vim.api.nvim_get_current_buf()
+                if enabled == "on" then
+                    vim.treesitter.start()
+                else
+                    vim.treesitter.stop()
                 end
-                local ts_avail, parsers = pcall(require, "nvim-treesitter.parsers")
-                local is_treesitter_available = ts_avail and parsers.has_parser()
-                if is_treesitter_available then
-                    if enabled == "on" then
-                        vim.treesitter.start(buf)
-                    else
-                        vim.treesitter.stop(buf)
-                    end
-                    vim.api.nvim_set_option_value("syntax", enabled, option_opts)
-                end
+                vim.api.nvim_set_option_value("syntax", enabled, option_opts)
             end,
             list = { "on", "off" },
         }, opts))

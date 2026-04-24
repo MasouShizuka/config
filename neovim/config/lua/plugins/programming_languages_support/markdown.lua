@@ -9,7 +9,7 @@ return {
         cond = not environment.is_vscode and environment.treesitter_enable,
         dependencies = {
             "nvim-tree/nvim-web-devicons",
-            "nvim-treesitter/nvim-treesitter",
+            "romus204/tree-sitter-manager.nvim",
         },
         event = {
             "User MarkdownFile",
@@ -136,12 +136,12 @@ return {
                                         require("lazy").load({ plugins = "markdown-plus.nvim" })
                                     end
                                     return rhs
-                                end, { buffer = args.buf, desc = desc, expr = true, silent = true })
+                                end, { buf = args.buf, desc = desc, expr = true, silent = true })
                             end
 
                             -- Text Formatting
                             map({ "n", "x" }, "smb", "<Plug>(MarkdownPlusBold)", "Toggle bold formatting")
-                            map({ "n", "x" }, "smi", "<Plug>(MarkdownPlusItalic)", "Toggle bold formatting")
+                            map({ "n", "x" }, "smi", "<Plug>(MarkdownPlusItalic)", "Toggle italic formatting")
                             map({ "n", "x" }, "sms", "<Plug>(MarkdownPlusStrikethrough)", "Toggle strikethrough formatting")
                             map({ "n", "x" }, "smc", "<Plug>(MarkdownPlusCode)", "Toggle inline code formatting")
                             map({ "n", "x" }, "smh", "<Plug>(MarkdownPlusHighlight)", "Toggle highlight formatting")
