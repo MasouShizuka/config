@@ -144,6 +144,17 @@ SLOWMODE := false
 VERYSLOWMODE := false
 
 global MouseMovePrompt := InputTipWindow("🖱️")
+show_window(this) {
+    this.textCon.Value := this.data
+    GetPosRelativeScreen(&xpos, &ypos, "Mouse")
+    xpos += this.offsetX
+    ypos += this.offsetY
+    this.gui.Show("AutoSize Center NoActivate x" xpos " y" ypos)
+    If (WinExist("ahk_id " this.gui.Hwnd)) {
+        WinSetAlwaysOnTop(true, "ahk_id " this.gui.Hwnd)
+    }
+}
+MouseMovePrompt.DefineProp("ShowWindow", { Call: show_window })
 
 global fast_move_single := 60
 global fast_move_repeat := 60
