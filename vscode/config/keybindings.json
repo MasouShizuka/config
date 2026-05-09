@@ -836,12 +836,6 @@
         "command": "workbench.action.terminal.new",
         "when": "terminalFocus"
     },
-    // 搜索最近运行的命令
-    {
-        "key": "ctrl+r",
-        "command": "workbench.action.terminal.runRecentCommand",
-        "when": "terminalFocus && terminalHasBeenCreated && !accessibilityModeEnabled || terminalFocus && terminalProcessSupported && !accessibilityModeEnabled"
-    },
     // 面板终端页面且聚焦时，则终止终端
     {
         "key": "ctrl+w",
