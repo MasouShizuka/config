@@ -124,29 +124,69 @@ return {
                 desc = "Neovim colorschemes with live preview",
                 mode = "n",
             },
-            { "<leader>t:",  function() require("snacks").picker.command_history() end,       desc = "Neovim command history",                      mode = "n" },
-            { "<c-s-p>",     function() require("snacks").picker.commands() end,              desc = "Neovim commands",                             mode = "n" },
-            { "<leader>tD",  function() require("snacks").picker.diagnostics() end,           desc = "Diagnostics",                                 mode = "n" },
-            { "<leader>td",  function() require("snacks").picker.diagnostics_buffer() end,    desc = "Buffer Diagnostics",                          mode = "n" },
-            { "<leader>tgb", function() require("snacks").picker.git_branches() end,          desc = "Git Branches",                                mode = "n" },
-            { "<leader>tgd", function() require("snacks").picker.git_diff() end,              desc = "Git Diff (Hunks)",                            mode = "n" },
-            { "<leader>tgg", function() require("snacks").picker.git_files() end,             desc = "Find git files",                              mode = "n" },
-            { "<leader>tg/", function() require("snacks").picker.git_grep() end,              desc = "Grep in git files",                           mode = "n" },
-            { "<leader>tgo", function() require("snacks").picker.git_log() end,               desc = "Git log" },
-            { "<leader>tgf", function() require("snacks").picker.git_log_file() end,          desc = "Git log file",                                mode = "n" },
-            { "<leader>tgl", function() require("snacks").picker.git_log_line() end,          desc = "Git log line",                                mode = "n" },
-            { "<leader>tgS", function() require("snacks").picker.git_stash() end,             desc = "Git Stash",                                   mode = "n" },
-            { "<leader>tgs", function() require("snacks").picker.git_status() end,            desc = "Git Status",                                  mode = "n" },
-            { "<leader>/",   function() require("snacks").picker.grep() end,                  desc = "Grep",                                        mode = "n" },
-            { "<leader>tB",  function() require("snacks").picker.grep_buffers() end,          desc = "Grep Open Buffers",                           mode = "n" },
-            { "<leader>tw",  function() require("snacks").picker.grep_word() end,             desc = "Visual selection or word",                    mode = { "n", "x" } },
-            { "<leader>th",  function() require("snacks").picker.help() end,                  desc = "Neovim help tags",                            mode = "n" },
-            { "<leader>tH",  function() require("snacks").picker.highlights() end,            desc = "Highlights",                                  mode = "n" },
-            { "<leader>ti",  function() require("snacks").picker.icons() end,                 desc = "Icons",                                       mode = "n" },
-            { "<leader>tj",  function() require("snacks").picker.jumps() end,                 desc = "Jumps",                                       mode = "n" },
-            { "<leader>tk",  function() require("snacks").picker.keymaps() end,               desc = "Keymaps",                                     mode = "n" },
-            { "<leader>tz",  function() require("snacks").picker.lazy() end,                  desc = "Search for a lazy.nvim plugin spec",          mode = "n" },
-            { "<leader>tl",  function() require("snacks").picker.lines() end,                 desc = "Search lines in the current buffer",          mode = "n" },
+            { "<leader>t:",  function() require("snacks").picker.command_history() end,    desc = "Neovim command history", mode = "n" },
+            { "<c-s-p>",     function() require("snacks").picker.commands() end,           desc = "Neovim commands",        mode = "n" },
+            { "<leader>tD",  function() require("snacks").picker.diagnostics() end,        desc = "Diagnostics",            mode = "n" },
+            { "<leader>td",  function() require("snacks").picker.diagnostics_buffer() end, desc = "Buffer Diagnostics",     mode = "n" },
+            { "<leader>tgb", function() require("snacks").picker.git_branches() end,       desc = "Git Branches",           mode = "n" },
+            { "<leader>tgd", function() require("snacks").picker.git_diff() end,           desc = "Git Diff (Hunks)",       mode = "n" },
+            { "<leader>tgg", function() require("snacks").picker.git_files() end,          desc = "Find git files",         mode = "n" },
+            { "<leader>tg/", function() require("snacks").picker.git_grep() end,           desc = "Grep in git files",      mode = "n" },
+            { "<leader>tgo", function() require("snacks").picker.git_log() end,            desc = "Git log" },
+            { "<leader>tgf", function() require("snacks").picker.git_log_file() end,       desc = "Git log file",           mode = "n" },
+            { "<leader>tgl", function() require("snacks").picker.git_log_line() end,       desc = "Git log line",           mode = "n" },
+            { "<leader>tgS", function() require("snacks").picker.git_stash() end,          desc = "Git Stash",              mode = "n" },
+            { "<leader>tgs", function() require("snacks").picker.git_status() end,         desc = "Git Status",             mode = "n" },
+            {
+                "<leader>/",
+                function()
+                    require("snacks").picker.grep({
+                        layout = {
+                            -- preset = "vertical",
+                            layout = {
+                                backdrop = false,
+                                width = 0.95,
+                                min_width = 80,
+                                height = 0.95,
+                                min_height = 30,
+                                box = "vertical",
+                                border = true,
+                                title = "{title} {live} {flags}",
+                                title_pos = "center",
+                                { win = "input",   height = 1,          border = "bottom" },
+                                { win = "list",    border = "none" },
+                                { win = "preview", title = "{preview}", height = 0.6,     border = "top" },
+                            },
+                        },
+                    })
+                end,
+                desc = "Grep",
+                mode = "n",
+            },
+
+            { "<leader>tB", function() require("snacks").picker.grep_buffers() end, desc = "Grep Open Buffers",                  mode = "n" },
+            { "<leader>tw", function() require("snacks").picker.grep_word() end,    desc = "Visual selection or word",           mode = { "n", "x" } },
+            { "<leader>th", function() require("snacks").picker.help() end,         desc = "Neovim help tags",                   mode = "n" },
+            { "<leader>tH", function() require("snacks").picker.highlights() end,   desc = "Highlights",                         mode = "n" },
+            { "<leader>ti", function() require("snacks").picker.icons() end,        desc = "Icons",                              mode = "n" },
+            { "<leader>tj", function() require("snacks").picker.jumps() end,        desc = "Jumps",                              mode = "n" },
+            { "<leader>tk", function() require("snacks").picker.keymaps() end,      desc = "Keymaps",                            mode = "n" },
+            { "<leader>tz", function() require("snacks").picker.lazy() end,         desc = "Search for a lazy.nvim plugin spec", mode = "n" },
+            {
+                "<leader>tl",
+                function()
+                    require("snacks").picker.lines(
+                        {
+                            matcher = { fuzzy = false },
+                            layout = {
+                                layout = { border = true },
+                            },
+                        }
+                    )
+                end,
+                desc = "Search lines in the current buffer",
+                mode = "n",
+            },
             { "<leader>tL",  function() require("snacks").picker.loclist() end,               desc = "Loclist",                                     mode = "n" },
             { "<leader>lgD", function() require("snacks").picker.lsp_declarations() end,      desc = "LSP declarations",                            mode = "n" },
             { "<leader>lgd", function() require("snacks").picker.lsp_definitions() end,       desc = "LSP definitions",                             mode = "n" },
@@ -509,6 +549,12 @@ return {
                             },
                         },
                     },
+                    ---@class snacks.picker.previewers.Config
+                    previewers = {
+                        file = {
+                            max_size = 100 * 1024 * 1024,
+                        },
+                    },
                     win = {
                         -- input window
                         input = {
@@ -516,7 +562,7 @@ return {
                                 -- to close the picker on ESC instead of going to normal mode,
                                 -- add the following keymap to your config
                                 -- ["<Esc>"] = { "close", mode = { "n", "i" } },
-                                ["<c-q>"] = { "close", mode = { "n", "i" } },
+                                ["<c-q>"] = { "qflist", mode = { "n", "i" } },
                                 -- ["/"] = "toggle_focus",
                                 -- ["<C-Down>"] = { "history_forward", mode = { "i", "n" } },
                                 -- ["<C-Up>"] = { "history_back", mode = { "i", "n" } },

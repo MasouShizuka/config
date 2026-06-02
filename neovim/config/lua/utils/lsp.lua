@@ -92,8 +92,9 @@ local lsp_infos = {
                     },
                 })
 
-                if require("utils").is_available("lazydev.nvim") and not package.loaded["lazydev"] then
-                    require("lazy").load({ plugins = "lazydev.nvim" })
+                local utils = require("utils")
+                if utils.is_available("lazydev.nvim") and not package.loaded["lazydev"] then
+                    utils.load_plugin("lazydev.nvim")
                 end
             end,
             settings = {

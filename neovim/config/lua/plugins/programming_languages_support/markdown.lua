@@ -111,7 +111,9 @@ return {
             "MarkdownPreviewStop",
         },
         cond = not environment.is_vscode,
-        dependencies = { "selimacerbas/live-server.nvim" },
+        dependencies = {
+            "selimacerbas/live-server.nvim",
+        },
         opts = {},
     },
 
@@ -122,7 +124,9 @@ return {
                 callback = function()
                     vim.api.nvim_create_autocmd("FileType", {
                         callback = function(args)
-                            if require("utils").is_available("which-key.nvim") then
+                            local utils = require("utils")
+
+                            if utils.is_available("which-key.nvim") then
                                 require("which-key").add({
                                     { "sm",  buffer = args.buf, group = "markdown",          mode = { "n", "x" } },
                                     { "smf", buffer = args.buf, group = "markdown footnote", mode = "n" },
@@ -133,7 +137,7 @@ return {
                             local function map(mode, lhs, rhs, desc)
                                 vim.keymap.set(mode, lhs, function()
                                     if not package.loaded["markdown-plus"] then
-                                        require("lazy").load({ plugins = "markdown-plus.nvim" })
+                                        utils.load_plugin("markdown-plus.nvim")
                                     end
                                     return rhs
                                 end, { buf = args.buf, desc = desc, expr = true, silent = true })

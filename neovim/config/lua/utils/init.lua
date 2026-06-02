@@ -321,6 +321,12 @@ function M.json_write(file, data)
     return M.file_write(file, json)
 end
 
+--- Load specific plugin
+---@param plugin string
+function M.load_plugin(plugin)
+    require("lazy").load({ plugins = plugin })
+end
+
 --- Refresh a buf
 ---@param buf? integer
 ---@param opts? defer_fn_opts

@@ -132,6 +132,12 @@ return {
                         end
                     end
 
+                    local function load_conform()
+                        if not package.loaded["conform"] then
+                            utils.load_plugin("conform.nvim")
+                        end
+                    end
+
                     local augroup = vim.api.nvim_create_augroup("ConformAutoFormat", { clear = true })
                     utils.set_setting_toggle("autoformat_on_save", {
                         default = false,
@@ -147,21 +153,13 @@ return {
                         g = {
                             keymap = { keys = "<leader>ltfs", mode = "n" },
                             opts = {
-                                callback = function()
-                                    if not package.loaded["conform"] then
-                                        require("lazy").load({ plugins = "conform.nvim" })
-                                    end
-                                end,
+                                callback = load_conform,
                             },
                         },
                         b = {
                             keymap = { keys = "<leader>ltfS", mode = "n" },
                             opts = {
-                                callback = function()
-                                    if not package.loaded["conform"] then
-                                        require("lazy").load({ plugins = "conform.nvim" })
-                                    end
-                                end,
+                                callback = load_conform,
                             },
                         },
                     })
@@ -179,21 +177,13 @@ return {
                         g = {
                             keymap = { keys = "<leader>ltfq", mode = "n" },
                             opts = {
-                                callback = function()
-                                    if not package.loaded["conform"] then
-                                        require("lazy").load({ plugins = "conform.nvim" })
-                                    end
-                                end,
+                                callback = load_conform,
                             },
                         },
                         b = {
                             keymap = { keys = "<leader>ltfQ", mode = "n" },
                             opts = {
-                                callback = function()
-                                    if not package.loaded["conform"] then
-                                        require("lazy").load({ plugins = "conform.nvim" })
-                                    end
-                                end,
+                                callback = load_conform,
                             },
                         },
                     })

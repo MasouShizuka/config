@@ -55,22 +55,6 @@ M.colorscheme_list = {
         },
         package_name = "catppuccin",
     },
-    gruvbox = {
-        func = function(name) return require("gruvbox").palette[name] end,
-        map = {
-            black  = "dark0",
-            blue   = "bright_blue",
-            cyan   = "bright_aqua",
-            gray   = "dark2",
-            green  = "bright_green",
-            orange = "bright_orange",
-            purple = "bright_purple",
-            red    = "bright_red",
-            white  = "light0",
-            yellow = "bright_yellow",
-        },
-        package_name = "gruvbox.nvim",
-    },
     tokyonight = {
         func = function(name) return require("tokyonight.colors").setup()[name] end,
         map = {

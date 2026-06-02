@@ -849,8 +849,6 @@ return {
                         end
                     end
 
-                    map("n", "<leader>li", function() vim.api.nvim_command("LspInfo") end, "LSP information")
-
                     map("n", "gl", function() vim.diagnostic.open_float() end, "Hover diagnostics")
                     if not utils.is_available("trouble.nvim") then
                         map("n", "<s-f8>", function() vim.diagnostic.jump({ count = -1, on_jump = vim.diagnostic.open_float }) end, "Previous diagnostic")

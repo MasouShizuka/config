@@ -316,13 +316,13 @@ function M.setup(opts)
         -- 搜索并替换
         vim.keymap.set("n", "<c-f>", function()
             if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
-                require("lazy").load({ plugins = "config.autocommands.hlsearch" })
+                utils.load_plugin("config.autocommands.hlsearch")
             end
             return ":1,$s///gcI<left><left><left><left><left>"
         end, { desc = "Search and replace in file", expr = true })
         vim.keymap.set("x", "<c-f>", function()
             if utils.is_available("config.autocommands.hlsearch") and not package.loaded["hlsearch"] then
-                require("lazy").load({ plugins = "config.autocommands.hlsearch" })
+                utils.load_plugin("config.autocommands.hlsearch")
             end
             return ":s///gcI<left><left><left><left><left>"
         end, { desc = "Search and replace in file", expr = true })
@@ -366,7 +366,7 @@ function M.setup(opts)
         vim.keymap.set({ "n", "x" }, "<c-w>", function()
             if utils.is_available("config.autocommands.panel-synchronize") then
                 if not package.loaded["panel-synchronize"] then
-                    require("lazy").load({ plugins = "config.autocommands.panel-synchronize" })
+                    utils.load_plugin("config.autocommands.panel-synchronize")
                 end
                 require("panel-synchronize").close()
             else

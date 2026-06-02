@@ -64,8 +64,9 @@ return {
                 callback = function(args)
                     local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                     if ft == "python" then
-                        require("lazy").load({ plugins = "venv-selector.nvim" })
-                        require("utils").refresh_buf(args.buf, { timeout = 3000, use_timer = false })
+                        local utils = require("utils")
+                        utils.load_plugin("venv-selector.nvim")
+                        utils.refresh_buf(args.buf, { timeout = 3000, use_timer = false })
                         vim.api.nvim_del_autocmd(id)
                     end
                 end,

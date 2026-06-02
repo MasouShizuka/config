@@ -278,17 +278,19 @@ return {
                         },
                     })
 
+                    local function load_toggle()
+                        if not package.loaded["toggle"] then
+                            utils.load_plugin("config.user_commands.toggle")
+                        end
+                    end
+
                     if environment.is_vscode then
                         vim.keymap.set("n", "<leader>ctf", function()
-                            if not package.loaded["toggle"] then
-                                require("lazy").load({ plugins = "config.user_commands.toggle" })
-                            end
+                            load_toggle()
                             require("toggle").vscode.toggle_fileformat()
                         end, { desc = "Toggle fileformat", silent = true })
                         vim.keymap.set("n", "<leader>ctw", function()
-                            if not package.loaded["toggle"] then
-                                require("lazy").load({ plugins = "config.user_commands.toggle" })
-                            end
+                            load_toggle()
                             require("toggle").vscode.toggle_wrap()
                         end, { desc = "Toggle wrap", silent = true })
                     else
@@ -300,9 +302,7 @@ return {
                                 name = "diagnostic (global)",
                                 get = function() return vim.diagnostic.is_enabled() end,
                                 set = function()
-                                    if not package.loaded["toggle"] then
-                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
-                                    end
+                                    load_toggle()
                                     require("toggle").nvim.toggle_diagnostic()
                                 end,
                             }):map("<leader>ctd")
@@ -311,9 +311,7 @@ return {
                                 name = "diagnostic (buffer)",
                                 get = function() return vim.diagnostic.is_enabled({ bufnr = vim.api.nvim_get_current_buf() }) end,
                                 set = function()
-                                    if not package.loaded["toggle"] then
-                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
-                                    end
+                                    load_toggle()
                                     require("toggle").nvim.toggle_diagnostic({ bufnr = vim.api.nvim_get_current_buf() })
                                 end,
                             }):map("<leader>ctD")
@@ -328,9 +326,7 @@ return {
                                     return vim.api.nvim_get_option_value("fileformat", { scope = "local" }) == on
                                 end,
                                 set = function()
-                                    if not package.loaded["toggle"] then
-                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
-                                    end
+                                    load_toggle()
                                     require("toggle").nvim.toggle_fileformat({ notify = false })
                                 end,
                             }):map("<leader>ctf")
@@ -345,9 +341,7 @@ return {
                                     return syntax == "on"
                                 end,
                                 set = function()
-                                    if not package.loaded["toggle"] then
-                                        require("lazy").load({ plugins = "config.user_commands.toggle" })
-                                    end
+                                    load_toggle()
                                     require("toggle").nvim.toggle_syntax({ notify = false })
                                 end,
                             }):map("<leader>ctt")

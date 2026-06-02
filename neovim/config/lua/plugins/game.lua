@@ -7,9 +7,6 @@ return {
     -- 最好选择安装 mingw-w64-ucrt-x86_64-curl，并记得将环境变量中 msys64/ucrt64/bin 放在 msys64/usr/bin 之上
     {
         "kawre/leetcode.nvim",
-        build = {
-            ":TSUpdate html",
-        },
         cmd = {
             "Leet",
         },

@@ -9,14 +9,16 @@ local default_config = {
 local config = vim.fn.deepcopy(default_config)
 
 local function load_colorscheme()
-    local colorscheme = require("utils").file_read(config.colorscheme_file)
+    local utils = require("utils")
+
+    local colorscheme = utils.file_read(config.colorscheme_file)
     if colorscheme == nil then
         colorscheme = config.default_colorscheme
     end
 
     for installed_colorscheme, value in pairs(require("utils.colors").colorscheme_list) do
         if colorscheme:match(installed_colorscheme) then
-            require("lazy").load({ plugins = value.package_name })
+            utils.load_plugin(value.package_name)
             vim.cmd.colorscheme(colorscheme)
             -- 确保触发 heirline 等 UI 颜色的更新
             vim.api.nvim_exec_autocmds("ColorScheme", {})

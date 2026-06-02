@@ -588,7 +588,7 @@ return {
                     local is_modified = vim.api.nvim_get_option_value("modified", { buf = args.buf })
                     if not vim.tbl_contains(require("utils.buftype").skip_buftype_list, bt) and is_modifiable and is_modified then
                         pcall(vim.cmd.write)
-                        require("lazy").load({ plugins = "auto-save.nvim" })
+                        utils.load_plugin("auto-save.nvim")
                         vim.api.nvim_del_autocmd(id)
                     end
                 end,
@@ -597,26 +597,24 @@ return {
 
             utils.create_once_autocmd("User", {
                 callback = function()
+                    local function load_auto_save()
+                        if not package.loaded["auto-save"] then
+                            utils.load_plugin("auto-save.nvim")
+                        end
+                    end
+
                     utils.set_setting_toggle("autosave", {
                         default = true,
                         g = {
                             keymap = { keys = "<leader>cta", mode = "n" },
                             opts = {
-                                callback = function(enabled, prev_enabled, global_enabled)
-                                    if not package.loaded["auto-save"] then
-                                        require("lazy").load({ plugins = "auto-save.nvim" })
-                                    end
-                                end,
+                                callback = load_auto_save,
                             },
                         },
                         b = {
                             keymap = { keys = "<leader>ctA", mode = "n" },
                             opts = {
-                                callback = function(enabled, prev_enabled, global_enabled)
-                                    if not package.loaded["auto-save"] then
-                                        require("lazy").load({ plugins = "auto-save.nvim" })
-                                    end
-                                end,
+                                callback = load_auto_save,
                             },
                         },
                     })

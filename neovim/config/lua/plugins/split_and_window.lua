@@ -112,7 +112,7 @@ return {
                         if vim.api.nvim_buf_is_valid(args.buf) then
                             local ft = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
                             if require("utils.filetype").is_panel_filetype(ft) then
-                                require("lazy").load({ plugins = "edgy.nvim" })
+                                require("utils").load_plugin("edgy.nvim")
                                 pcall(vim.api.nvim_del_autocmd, id)
                             end
                         end
