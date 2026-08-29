@@ -79,6 +79,15 @@
       }
     ]
   },
+  "foobox": {
+    "manage": [
+      {
+        "kind": "Title",
+        "id": "foobar2000",
+        "matching_strategy": "Legacy"
+      }
+    ]
+  },
   "Microsoft Excel": {
     "ignore": [
       {
