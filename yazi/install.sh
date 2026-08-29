@@ -17,6 +17,7 @@ if ((is_windows)); then
     ya pkg add yazi-rs/flavors:catppuccin-macchiato
     ya pkg add yazi-rs/plugins:full-border
     ya pkg add yazi-rs/plugins:git
+    ya pkg add yazi-rs/plugins:mime-ext
     ya pkg add yazi-rs/plugins:smart-enter
 
     target="$APPDATA/yazi/config"

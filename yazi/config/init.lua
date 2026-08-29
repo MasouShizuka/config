@@ -45,6 +45,8 @@ require("session"):setup({
 })
 
 
+require("close-and-restore-tab"):setup()
+
 require("fzf-rg"):setup()
 
 require("projects"):setup({
@@ -171,7 +173,10 @@ require("full-border"):setup({
 })
 
 -- ya pkg add yazi-rs/plugins:git
-require("git"):setup()
+require("git"):setup({
+    -- Order of status signs showing in the linemode
+    order = 1500,
+})
 
 -- ya pkg add yazi-rs/plugins:mime-ext
 

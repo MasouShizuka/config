@@ -46,10 +46,10 @@ append_rules = [
 [plugin]
 
 prepend_fetchers = [
-    { id = "git",  url = "*",          run = "git" },
-    { id = "git",  url = "*/",         run = "git" },
-    { id = "mime", url = "local://*",  run = "mime-ext.local",  prio = "high" },
-    { id = "mime", url = "remote://*", run = "mime-ext.remote", prio = "high" },
+    { url = "*",          run = "git",                            group = "git" },
+    { url = "*/",         run = "git",                            group = "git" },
+    { url = "local://*",  run = "mime-ext.local",  prio = "high", group = "mime" },
+    { url = "remote://*", run = "mime-ext.remote", prio = "high", group = "mime"},
 ]
 
 prepend_previewers = [
