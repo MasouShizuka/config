@@ -445,12 +445,18 @@ return {
             vim.lsp.config("*", { capabilities = capabilities })
 
             for _, lsp_server in pairs(lsp.lsp_list) do
+                if lsp_server == "rust_analyzer" and utils.is_available("rustaceanvim") then
+                    goto continue
+                end
+
                 local config = lsp.lsp_config[lsp_server]
                 if config then
                     vim.lsp.config[lsp_server] = config
                 end
 
                 vim.lsp.enable(lsp_server)
+
+                ::continue::
             end
 
             vim.api.nvim_create_autocmd("LspAttach", {

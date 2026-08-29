@@ -134,7 +134,7 @@ return {
                                 })
                             end
 
-                            local function map(mode, lhs, rhs, desc)
+                            local function map_with_plug(mode, lhs, rhs, desc)
                                 vim.keymap.set(mode, lhs, function()
                                     if not package.loaded["markdown-plus"] then
                                         utils.load_plugin("markdown-plus.nvim")
@@ -143,74 +143,106 @@ return {
                                 end, { buf = args.buf, desc = desc, expr = true, silent = true })
                             end
 
+                            local function map_with_func(mode, lhs, rhs, desc)
+                                vim.keymap.set(mode, lhs, function()
+                                    if not package.loaded["markdown-plus"] then
+                                        utils.load_plugin("markdown-plus.nvim")
+                                    end
+                                    rhs()
+                                end, { buf = args.buf, desc = desc, silent = true })
+                            end
+
                             -- Text Formatting
-                            map({ "n", "x" }, "smb", "<Plug>(MarkdownPlusBold)", "Toggle bold formatting")
-                            map({ "n", "x" }, "smi", "<Plug>(MarkdownPlusItalic)", "Toggle italic formatting")
-                            map({ "n", "x" }, "sms", "<Plug>(MarkdownPlusStrikethrough)", "Toggle strikethrough formatting")
-                            map({ "n", "x" }, "smc", "<Plug>(MarkdownPlusCode)", "Toggle inline code formatting")
-                            map({ "n", "x" }, "smh", "<Plug>(MarkdownPlusHighlight)", "Toggle highlight formatting")
-                            map({ "n", "x" }, "smu", "<Plug>(MarkdownPlusUnderline)", "Toggle underline formatting")
-                            map("x", "smC", "<Plug>(MarkdownPlusCodeBlock)", "Convert selection to code block")
-                            map({ "n", "x" }, "smx", "<Plug>(MarkdownPlusClearFormatting)", "Clear all formatting")
+                            map_with_plug({ "n", "x" }, "smb", "<Plug>(MarkdownPlusBold)", "Toggle bold formatting")
+                            map_with_plug({ "n", "x" }, "smi", "<Plug>(MarkdownPlusItalic)", "Toggle italic formatting")
+                            map_with_plug({ "n", "x" }, "sms", "<Plug>(MarkdownPlusStrikethrough)", "Toggle strikethrough formatting")
+                            map_with_plug({ "n", "x" }, "smc", "<Plug>(MarkdownPlusCode)", "Toggle inline code formatting")
+                            map_with_plug({ "n", "x" }, "smh", "<Plug>(MarkdownPlusHighlight)", "Toggle highlight formatting")
+                            map_with_plug({ "n", "x" }, "smu", "<Plug>(MarkdownPlusUnderline)", "Toggle underline formatting")
+                            map_with_plug("x", "smC", "<Plug>(MarkdownPlusCodeBlock)", "Convert selection to code block")
+                            map_with_plug({ "n", "x" }, "smx", "<Plug>(MarkdownPlusClearFormatting)", "Clear all formatting")
 
                             -- Headers & TOC
-                            map("n", "smtc", "<Plug>(MarkdownPlusGenerateTOC)", "Generate table of contents")
-                            map("n", "smtu", "<Plug>(MarkdownPlusUpdateTOC)", "Update table of contents")
+                            map_with_plug("n", "smtc", "<Plug>(MarkdownPlusGenerateTOC)", "Generate table of contents")
+                            map_with_plug("n", "smtu", "<Plug>(MarkdownPlusUpdateTOC)", "Update table of contents")
 
                             -- Links
-                            map("n", "sml", "<Plug>(MarkdownPlusInsertLink)", "Insert markdown link")
-                            map("x", "sml", "<Plug>(MarkdownPlusSelectionToLink)", "Convert selection to link")
-                            map("n", "smU", "<Plug>(MarkdownPlusAutoLinkURL)", "Convert URL to markdown link")
+                            map_with_plug("n", "sml", "<Plug>(MarkdownPlusInsertLink)", "Insert markdown link")
+                            map_with_plug("x", "sml", "<Plug>(MarkdownPlusSelectionToLink)", "Convert selection to link")
+                            map_with_plug("n", "smU", "<Plug>(MarkdownPlusAutoLinkURL)", "Convert URL to markdown link")
 
                             -- Images
-                            map("n", "smp", "<Plug>(MarkdownPlusInsertImage)", "Insert markdown image")
-                            map("x", "smp", "<Plug>(MarkdownPlusSelectionToImage)", "Convert selection to image")
+                            map_with_plug("n", "smp", "<Plug>(MarkdownPlusInsertImage)", "Insert markdown image")
+                            map_with_plug("x", "smp", "<Plug>(MarkdownPlusSelectionToImage)", "Convert selection to image")
 
                             -- List Management
-                            map("i", "<cr>", "<Plug>(MarkdownPlusListEnter)", "Auto-continue list or split content")
-                            map("i", "<tab>", "<Plug>(MarkdownPlusListIndent)", "Indent list item")
-                            map("i", "<s-tab>", "<Plug>(MarkdownPlusListOutdent)", "Outdent list item")
-                            map("i", "<bs>", "<Plug>(MarkdownPlusListBackspace)", "Smart backspace (remove empty list)")
-                            map("n", "o", "<Plug>(MarkdownPlusNewListItemBelow)", "New list item below")
-                            map("n", "O", "<Plug>(MarkdownPlusNewListItemAbove)", "New list item above")
-                            map({ "n", "x" }, "<cr>", "<Plug>(MarkdownPlusToggleCheckbox)", "Toggle checkbox")
+                            map_with_func("i", "<cr>", function()
+                                local handlers = require("markdown-plus.list.handlers")
+                                handlers.skip_in_codeblock(handlers.handle_enter, "<CR>")()
+                            end, "Auto-continue list or split content")
+                            map_with_func("i", "<tab>", function()
+                                local handlers = require("markdown-plus.list.handlers")
+                                handlers.skip_in_codeblock(handlers.handle_tab, "<Tab>")()
+                            end, "Indent list item")
+                            map_with_func("i", "<s-tab>", function()
+                                local handlers = require("markdown-plus.list.handlers")
+                                handlers.skip_in_codeblock(handlers.handle_shift_tab, "<S-Tab>")()
+                            end, "Outdent list item")
+                            map_with_func("i", "<bs>", function()
+                                local handlers = require("markdown-plus.list.handlers")
+                                handlers.skip_in_codeblock(handlers.handle_backspace, "<BS>")()
+                            end, "Smart backspace (remove empty list)")
+                            map_with_func("n", "o", function()
+                                local handlers = require("markdown-plus.list.handlers")
+                                handlers.skip_in_codeblock(handlers.handle_normal_o, "o")()
+                            end, "New list item below")
+                            map_with_func("n", "O", function()
+                                local handlers = require("markdown-plus.list.handlers")
+                                handlers.skip_in_codeblock(handlers.handle_normal_O, "O")()
+                            end, "New list item above")
+                            map_with_func({ "n", "x" }, "<cr>", function()
+                                local checkbox = require("markdown-plus.list.checkbox")
+                                checkbox.toggle_checkbox_line()
+                                checkbox.toggle_checkbox_range()
+                                checkbox.toggle_checkbox_insert()
+                            end, "Toggle checkbox")
 
                             -- Quotes
-                            map({ "n", "x" }, "smq", "<Plug>(MarkdownPlusToggleQuote)", "Toggle blockquote")
+                            map_with_plug({ "n", "x" }, "smq", "<Plug>(MarkdownPlusToggleQuote)", "Toggle blockquote")
 
                             -- Callouts
-                            map({ "n", "x" }, "smQ", "<Plug>(MarkdownPlusInsertCallout)", "Insert/wrap callout")
+                            map_with_plug({ "n", "x" }, "smQ", "<Plug>(MarkdownPlusInsertCallout)", "Insert/wrap callout")
 
                             -- Footnotes
-                            map("n", "smff", "<Plug>(MarkdownPlusFootnoteInsert)", "Insert footnote")
-                            map("n", "smfd", "<Plug>(MarkdownPlusFootnoteDelete)", "Delete footnote")
+                            map_with_plug("n", "smff", "<Plug>(MarkdownPlusFootnoteInsert)", "Insert footnote")
+                            map_with_plug("n", "smfd", "<Plug>(MarkdownPlusFootnoteDelete)", "Delete footnote")
 
                             -- Tables
-                            map("n", "smtt", "<Plug>(markdown-plus-table-create)", "Create new table")
-                            map("n", "smtf", "<Plug>(markdown-plus-table-format)", "Format table")
-                            map("n", "<s-down>", "<Plug>(markdown-plus-table-insert-row-below)", "Insert row below")
-                            map("n", "<s-up>", "<Plug>(markdown-plus-table-insert-row-above)", "Insert row above")
-                            map("n", "dr", "<Plug>(markdown-plus-table-delete-row)", "Delete row")
-                            map("n", "yr", "<Plug>(markdown-plus-table-duplicate-row)", "Duplicate row")
-                            map("n", "<s-right>", "<Plug>(markdown-plus-table-insert-column-right)", "Insert column right")
-                            map("n", "<s-left>", "<Plug>(markdown-plus-table-insert-column-left)", "Insert column left")
-                            map("n", "dc", "<Plug>(markdown-plus-table-delete-column)", "Delete column")
-                            map("n", "yc", "<Plug>(markdown-plus-table-duplicate-column)", "Duplicate column")
-                            map("n", "smta", "<Plug>(markdown-plus-table-toggle-cell-alignment)", "Toggle cell alignment")
-                            map("n", "dC", "<Plug>(markdown-plus-table-clear-cell)", "Clear cell content")
-                            map("n", "<c-up>", "<Plug>(markdown-plus-table-move-row-up)", "Move row up")
-                            map("n", "<c-down>", "<Plug>(markdown-plus-table-move-row-down)", "Move row down")
-                            map("n", "<c-left>", "<Plug>(markdown-plus-table-move-column-left)", "Move column left")
-                            map("n", "<c-right>", "<Plug>(markdown-plus-table-move-column-right)", "Move column right")
-                            map("n", "smtT", "<Plug>(markdown-plus-table-transpose)", "Transpose table")
-                            map("n", "smts", "<Plug>(markdown-plus-table-sort-ascending)", "Sort table by column (ascending)")
-                            map("n", "smtS", "<Plug>(markdown-plus-table-sort-descending)", "Sort table by column (descending)")
-                            map("n", "smtv", "<Plug>(markdown-plus-table-to-csv)", "Convert table to CSV")
-                            map("n", "smtV", "<Plug>(markdown-plus-table-from-csv)", "Convert CSV to table")
-                            map("n", "<left>", "<Plug>(markdown-plus-table-nav-left)", "Navigate to cell left or move cursor left")
-                            map("n", "<right>", "<Plug>(markdown-plus-table-nav-right)", "Navigate to cell right or move cursor right")
-                            map("n", "<up>", "<Plug>(markdown-plus-table-nav-up)", "Navigate to cell above or move cursor up")
-                            map("n", "<down>", "<Plug>(markdown-plus-table-nav-down)", "Navigate to cell below or move cursor down")
+                            map_with_plug("n", "smtt", "<Plug>(markdown-plus-table-create)", "Create new table")
+                            map_with_plug("n", "smtf", "<Plug>(markdown-plus-table-format)", "Format table")
+                            map_with_plug("n", "<s-down>", "<Plug>(markdown-plus-table-insert-row-below)", "Insert row below")
+                            map_with_plug("n", "<s-up>", "<Plug>(markdown-plus-table-insert-row-above)", "Insert row above")
+                            map_with_plug("n", "dr", "<Plug>(markdown-plus-table-delete-row)", "Delete row")
+                            map_with_plug("n", "yr", "<Plug>(markdown-plus-table-duplicate-row)", "Duplicate row")
+                            map_with_plug("n", "<s-right>", "<Plug>(markdown-plus-table-insert-column-right)", "Insert column right")
+                            map_with_plug("n", "<s-left>", "<Plug>(markdown-plus-table-insert-column-left)", "Insert column left")
+                            map_with_plug("n", "dc", "<Plug>(markdown-plus-table-delete-column)", "Delete column")
+                            map_with_plug("n", "yc", "<Plug>(markdown-plus-table-duplicate-column)", "Duplicate column")
+                            map_with_plug("n", "smta", "<Plug>(markdown-plus-table-toggle-cell-alignment)", "Toggle cell alignment")
+                            map_with_plug("n", "dC", "<Plug>(markdown-plus-table-clear-cell)", "Clear cell content")
+                            map_with_plug("n", "<c-up>", "<Plug>(markdown-plus-table-move-row-up)", "Move row up")
+                            map_with_plug("n", "<c-down>", "<Plug>(markdown-plus-table-move-row-down)", "Move row down")
+                            map_with_plug("n", "<c-left>", "<Plug>(markdown-plus-table-move-column-left)", "Move column left")
+                            map_with_plug("n", "<c-right>", "<Plug>(markdown-plus-table-move-column-right)", "Move column right")
+                            map_with_plug("n", "smtT", "<Plug>(markdown-plus-table-transpose)", "Transpose table")
+                            map_with_plug("n", "smts", "<Plug>(markdown-plus-table-sort-ascending)", "Sort table by column (ascending)")
+                            map_with_plug("n", "smtS", "<Plug>(markdown-plus-table-sort-descending)", "Sort table by column (descending)")
+                            map_with_plug("n", "smtv", "<Plug>(markdown-plus-table-to-csv)", "Convert table to CSV")
+                            map_with_plug("n", "smtV", "<Plug>(markdown-plus-table-from-csv)", "Convert CSV to table")
+                            map_with_plug("n", "<left>", "<Plug>(markdown-plus-table-nav-left)", "Navigate to cell left or move cursor left")
+                            map_with_plug("n", "<right>", "<Plug>(markdown-plus-table-nav-right)", "Navigate to cell right or move cursor right")
+                            map_with_plug("n", "<up>", "<Plug>(markdown-plus-table-nav-up)", "Navigate to cell above or move cursor up")
+                            map_with_plug("n", "<down>", "<Plug>(markdown-plus-table-nav-down)", "Navigate to cell below or move cursor down")
                         end,
                         desc = "markdown-plus keymap",
                         group = vim.api.nvim_create_augroup("MarkdownPlusKeymap", { clear = true }),
@@ -222,6 +254,9 @@ return {
             })
         end,
         opts = {
+            features = {
+                list_management = false,
+            },
             -- Table configuration
             table = {
                 keymaps = {                         -- Table-specific keymaps (prefix based)

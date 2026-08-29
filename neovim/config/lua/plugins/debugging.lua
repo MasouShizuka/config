@@ -112,4 +112,16 @@ return {
             { "<leader>dh", function() require("dap.ui.widgets").hover() end, desc = "Hover", mode = "n" },
         },
     },
+
+    {
+        "stevearc/quicker.nvim",
+        cond = not environment.is_vscode,
+        ft = "qf",
+        ---@module "quicker"
+        ---@type quicker.SetupOptions
+        opts = {
+            -- How to trim the leading whitespace from results. Can be 'all', 'common', or false
+            trim_leading_whitespace = false,
+        },
+    },
 }

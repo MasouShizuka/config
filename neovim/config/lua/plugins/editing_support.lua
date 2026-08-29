@@ -2,6 +2,38 @@ local environment = require("utils.environment")
 
 return {
     {
+        "celeste3z/celeste_comment.nvim",
+        cond = not environment.is_vscode,
+        keys = {
+            { "gc", desc = "Comment toggle linewise",  mode = { "n", "x" } },
+            { "gb", desc = "Comment toggle blockwise", mode = { "n", "x" } },
+        },
+        opts = {
+            mappings = {
+                -- Block comment current line (n)
+                block_toggle_cur = "gbb",
+            },
+            hooks = {
+                ---@param ctx Celeste.Comment.Hooks.PreCommitEdits.Ctx
+                pre_commit_edits = function(ctx)
+                    local cmt = require("celeste_comment")
+                    if ctx.ctype ~= cmt.CMT.kBlock then return end
+                    if ctx.action == cmt.ACTION.kForceRemove then return end
+                    if ctx.motion ~= "line" then return end
+                    if ctx.edits[1] and ctx.edits[1].text[1] == ctx.csi.olcs then
+                        local indent = ctx.lines[1]:match("^(%s*)") or ""
+                        ctx.edits = {
+                            { range = { ctx.range[1], -1, ctx.range[1], -1 },         text = { indent .. ctx.csi.tlcs } },
+                            { range = { ctx.range[3] + 1, -1, ctx.range[3] + 1, -1 }, text = { indent .. ctx.csi.trcs } },
+                        }
+                        ctx.o_use_set_text = true
+                    end
+                end,
+            },
+        },
+    },
+
+    {
         "danymat/neogen",
         cmd = {
             "Neogen",
@@ -399,74 +431,6 @@ return {
             { "<c-x>",  function() require("dial.map").manipulate("decrement", "visual") end,  desc = "Decrease", mode = "x" },
             { "g<c-a>", function() require("dial.map").manipulate("increment", "gvisual") end, desc = "Increase", mode = "x" },
             { "g<c-x>", function() require("dial.map").manipulate("decrement", "gvisual") end, desc = "Decrease", mode = "x" },
-        },
-    },
-
-    {
-        "numToStr/Comment.nvim",
-        cond = not environment.is_vscode,
-        config = function(_, opts)
-            require("Comment").setup(opts)
-
-            local ft = require("Comment.ft")
-            ft.python = { "#%s", [["""%s"""]] }
-        end,
-        keys = {
-            { "gc", desc = "Comment toggle linewise",  mode = { "n", "x" } },
-            { "gb", desc = "Comment toggle blockwise", mode = { "n", "x" } },
-        },
-        opts = {
-            ---LHS of toggle mappings in NORMAL mode
-            toggler = {
-                ---Block-comment toggle keymap
-                -- block = "gbc",
-                block = "gbb",
-            },
-            ---Function to call before (un)comment
-            post_hook = function(ctx)
-                -- block-comment 换行
-
-                -- 跳过 line-comment
-                if ctx.ctype == 1 then
-                    return
-                end
-
-                if ctx.range.srow == -1 then
-                    return
-                end
-
-                local C = require("Comment.config")
-                local F = require("Comment.ft")
-                local U = require("Comment.utils")
-
-                local ft = vim.api.nvim_get_option_value("filetype", { scope = "local" })
-                local cstr = F.get(ft, ctx.ctype)
-                local lcs, rcs = U.unwrap_cstr(cstr)
-                lcs = vim.pesc(lcs)
-                rcs = vim.pesc(rcs)
-                local padding = U.get_pad(C:get().padding)
-
-                local lines = vim.api.nvim_buf_get_lines(0, ctx.range.srow - 1, ctx.range.erow, false)
-                if ctx.cmode == 1 then
-                    -- comment
-                    local str = lines[1]
-                    local i, j = string.find(str, lcs .. padding)
-                    lines[1] = string.sub(str, i, j - #padding)
-                    table.insert(lines, 2, string.sub(str, 0, i - 1) .. string.sub(str, j + #padding, #str))
-
-                    str = lines[#lines]
-                    i, j = string.find(str, rcs)
-                    lines[#lines] = string.sub(str, 0, i - #padding - 1)
-                    table.insert(lines, #lines + 1, string.sub(str, i, j))
-                elseif ctx.cmode == 2 then
-                    -- uncomment
-                    if #lines[1] == 0 and #lines[#lines] == 0 then
-                        table.remove(lines, 1)
-                        table.remove(lines, #lines)
-                    end
-                end
-                vim.api.nvim_buf_set_lines(0, ctx.range.srow - 1, ctx.range.erow, false, lines)
-            end,
         },
     },
 

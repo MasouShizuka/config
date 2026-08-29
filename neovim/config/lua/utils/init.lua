@@ -102,7 +102,7 @@ function M.defer_fn_with_condition(fn, opts)
     if type(condition) ~= "function" then
         condition = function() return false end
     end
-    local max_count = opts.max_count or 10
+    local max_count = opts.max_count or 5
     local timeout = opts.timeout or 50
 
     local count = 0

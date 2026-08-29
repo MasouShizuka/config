@@ -120,7 +120,13 @@ M.setup = function(opts)
                     for _, task in ipairs(open_tasks) do
                         task()
                     end
-                    utils.defer_fn_with_condition(function() filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1) end)
+                    utils.defer_fn(
+                        function() filetype.skip_filetype(filetype.skip_filetype_list_to_main, -1) end,
+                        {
+                            timeout = 50,
+                            use_timer = false,
+                        }
+                    )
                 end)
             end
         end,

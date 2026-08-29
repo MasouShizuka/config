@@ -158,9 +158,7 @@ local lsp_infos = {
         filetype = { "python" },
     },
     rust_analyzer = {
-        enable = function()
-            return not require("utils").is_available("rustaceanvim") and vim.fn.executable("rust-analyzer") == 1
-        end,
+        enable = vim.fn.executable("rust-analyzer") == 1,
         filetype = { "rust" },
     },
     texlab = {
