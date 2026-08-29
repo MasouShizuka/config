@@ -19,4 +19,3 @@ fi
 rm -rf "${CONFIG_DIR:?}"/*
 
 cp "$target/config.yml" "$CONFIG_DIR"
-cp "$target/delta-diff.bat" "$CONFIG_DIR"

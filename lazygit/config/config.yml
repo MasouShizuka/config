@@ -5,6 +5,7 @@ gui:
   shortTimeFormat: '15:04'
   nerdFontsVersion: '3'
   # https://github.com/catppuccin/lazygit/blob/main/themes/macchiato/blue.yml
+
   theme:
     activeBorderColor:
       - '#8aadf4'
@@ -25,7 +26,6 @@ gui:
       - '#cad3f5'
     searchingActiveBorderColor:
       - '#eed49f'
-
   authorColors:
     '*': '#b7bdf8'
 keybinding:
@@ -72,5 +72,5 @@ keybinding:
   stash:
     popStash: '<backspace>'
 git:
-  pagers:
-    - externalDiffCommand: '$LOCALAPPDATA/lazygit/delta-diff.bat'
+  diffRenderers:
+    - command: delta --dark --paging=never
