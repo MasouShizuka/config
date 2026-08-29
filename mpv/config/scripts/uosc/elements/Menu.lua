@@ -37,6 +37,18 @@ function Menu:open(data, callback, opts)
 		open_menu.is_being_replaced = true
 		open_menu:close(true)
 	end
+	-- 互斥1：关闭已打开的 mpv osd菜单
+	if mp.get_property_native('user-data/mpv/context-menu/open') then
+		for _ = 1, 5 do
+			mp.commandv('script-message-to', 'context_menu', '_context_menu_ESC')
+		end
+		--mp.commandv('script-message-to', 'context_menu', '_context_menu_MBTN_LEFT')
+	end
+	-- 互斥2：关闭已打开的 mpv console/select 菜单（只关闭 select 脚本发起的，不影响打开的控制台）
+	if mp.get_property_native('user-data/mpv/console/open') then
+		mp.commandv('script-message-to', 'console', 'disable',
+			utils.format_json({client_name = 'select'}))
+	end
 	return Menu:new(data, callback, opts)
 end
 
@@ -65,6 +77,7 @@ function Menu:close(immediate, callback)
 		end
 
 		local function close()
+			local current_id = menu.current and menu.current.id -- 增加层级记忆
 			local on_close = menu.root.on_close -- removed in menu:destroy()
 			Elements:remove('menu') -- calls menu:destroy() under the hood
 			Elements:update_proximities()
@@ -74,7 +87,7 @@ function Menu:close(immediate, callback)
 			if callback then callback() end
 
 			-- Call callbacks/events defined on menu config
-			local close_event = {type = 'close'}
+			local close_event = {type = 'close', menu_id = current_id} -- 增加层级记忆
 			if not on_close or menu:command_or_event(on_close, {}, close_event) ~= 'event' then
 				menu.callback(close_event)
 			end
@@ -144,9 +157,21 @@ function Menu:init(data, callback, opts)
 	for _, menu in ipairs(self.all) do self:scroll_to_index(menu.selected_index, menu.id) end
 	if self.mouse_nav then self.current.selected_index = nil end
 
+	-- 幽灵模式：菜单实例存在（保留互斥、Curtain联动、on_close回调等机制），但不渲染任何面板也不注册键盘绑定
+	self.phantom = data.phantom or false
 	self:tween_property('opacity', 0, 1)
-	self:enable_key_bindings()
-	Elements:maybe('curtain', 'register', self.id)
+	if not self.phantom then self:enable_key_bindings() end
+	if data.curtain ~= false then
+		Elements:maybe('curtain', 'register', self.id)
+	else
+		-- 替换了带 curtain 的菜单时，旧菜单因 is_being_replaced 跳过了 unregister
+		-- 需要在此处清空 curtain 的 dependents 使其正确消失
+		local curtain = Elements.curtain
+		if curtain and #curtain.dependents > 0 then
+			curtain.dependents = {}
+			curtain:tween_property('opacity', curtain.opacity, 0)
+		end
+	end
 
 	if data.search_submit then
 		-- We have to defer this so that menu callbacks don't fire before the menu
@@ -347,6 +372,9 @@ function Menu:update_dimensions()
 			self.scroll_step + self.separator_size + 1 or 0
 		local footnote_height = self.font_size * 1.5
 		local max_height = height_available - title_height - footnote_height
+		if menu.max_items and menu.max_items > 0 then -- 限制显示项数
+			max_height = math.min(max_height, self.scroll_step * menu.max_items - self.item_spacing)
+		end
 		local content_height = self.scroll_step * #menu.items
 		menu.height = math.min(content_height - self.item_spacing, max_height)
 		menu.top = clamp(
@@ -1380,6 +1408,7 @@ function Menu:command_or_event(command, params, event)
 end
 
 function Menu:render()
+	if self.phantom then return end -- 幽灵模式跳过所有渲染
 	for _, menu in ipairs(self.all) do
 		if menu.fling then
 			local time_delta = state.render_last_time - menu.fling.time
@@ -1690,7 +1719,7 @@ function Menu:render()
 				color = fg, border = state.scale, border_color = bg, opacity = opacity,
 			})
 			if text then
-				ass:txt(icon_x + self.font_size * 0.75, icon_y, 4, text, {
+				ass:txt(icon_x + self.font_size * 0.75, icon_y - self.font_size * 0.5, 7, ass_escape(text), {
 					size = self.font_size,
 					color = fg,
 					border = state.scale,

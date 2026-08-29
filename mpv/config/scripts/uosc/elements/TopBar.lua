@@ -249,7 +249,7 @@ function TopBar:render()
 			local button_fg = is_hover and (button.hover_fg or bg) or fg
 			local button_bg = is_hover and (button.hover_bg or fg) or bg
 
-			cursor:zone('primary_down', rect, button.command)
+			cursor:zone('primary_click', rect, button.command)
 
 			local bg_size = self.size - margin
 			local bg_ax, bg_ay = rect.ax + (is_left and margin or 0), rect.ay + margin

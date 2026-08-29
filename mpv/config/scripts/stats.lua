@@ -1549,7 +1549,7 @@ pages = {
     [o.key_page_3] = { idx = 3, f = cache_stats, desc = "缓存统计信息" },
     [o.key_page_4] = { idx = 4, f = keybinding_info, desc = "激活中的按键绑定信息", scroll = true },
     [o.key_page_5] = { idx = 5, f = track_info, desc = "所选的轨道信息", scroll = true },
-    [o.key_page_0] = { idx = 1, f = perf_stats, desc = "内部性能信息", scroll = true },
+    [o.key_page_0] = { idx = 0, f = perf_stats, desc = "内部性能信息", scroll = true },
 }
 
 
